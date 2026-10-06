@@ -234,7 +234,7 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
             info = classify_file(resolved_root, root_path=resolved_root.parent)
             if matches_filter(info, config):
                 yield info
-        elif resolved_root.is_dir():
+        else:
             yield from traverse_directory(
                 resolved_root,
                 config,

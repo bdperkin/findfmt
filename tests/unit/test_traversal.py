@@ -164,7 +164,7 @@ def test_find_files_single_file_and_missing_root(tmp_path: Path):
 def test_traverse_directory_and_gitignore(sample_repo: Path):
     config = TraversalConfig(root_paths=(sample_repo,))
     results = list(find_files(config))
-    rel_paths = [str(r.relative_path) for r in results]
+    rel_paths = [r.relative_path.as_posix() for r in results]
 
     # Expected included files
     assert "src/app.py" in rel_paths

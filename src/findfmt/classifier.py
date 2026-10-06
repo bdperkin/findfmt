@@ -123,6 +123,26 @@ def _mime_info(str_path: str) -> tuple[str | None, set[str]]:
     return mime_type, tags
 
 
+def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -> bool:
+    """Determine whether a file is executable across POSIX and Windows platforms.
+
+    Args:
+        path: File path to check.
+        exists: Flag indicating whether path exists on disk.
+        shebang: Optional shebang line string if detected.
+
+    Returns:
+        True if the file is considered executable on the host platform.
+    """
+    if not exists:
+        return False
+    if os.name == "nt":
+        pathext = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC").split(";")
+        has_pathext = any(path.name.upper().endswith(ext.upper()) for ext in pathext if ext)
+        return has_pathext or bool(shebang)
+    return os.access(path, os.X_OK)
+
+
 def classify_file(path: Path, root_path: Path | None = None) -> FileInfo:
     """Classify a given file path by inspection of name, content, and metadata.
 
@@ -152,12 +172,20 @@ def classify_file(path: Path, root_path: Path | None = None) -> FileInfo:
     except OSError:
         exists = False
 
-    is_executable = os.access(path, os.X_OK) if exists else False
     is_file = path.is_file() if exists else False
 
     tags = _identify_tags(path, str_path, exists=exists)
     shebang, shebang_tags = _shebang_info(path, str_path, is_file=is_file, is_symlink=is_symlink)
     tags.update(shebang_tags)
+
+    is_executable = _check_executable(path, exists=exists, shebang=shebang)
+    if os.name == "nt":
+        if is_executable:
+            tags.discard("non-executable")
+            tags.add("executable")
+        else:
+            tags.discard("executable")
+            tags.add("non-executable")
 
     mime_type, mime_tags = _mime_info(str_path)
     tags.update(mime_tags)
