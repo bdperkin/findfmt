@@ -146,3 +146,11 @@ def test_classify_file_windows_non_executable(tmp_path: Path, monkeypatch):
     assert not info.is_executable
     assert "non-executable" in info.tags
     assert "executable" not in info.tags
+
+
+def test_classify_file_posix_execution(tmp_path: Path, monkeypatch):
+    target = tmp_path / "script.sh"
+    target.write_text("#!/bin/sh\n", encoding="utf-8")
+    monkeypatch.setattr("os.name", "posix")
+    info = classify_file(target, root_path=tmp_path)
+    assert info.path.name == "script.sh"
