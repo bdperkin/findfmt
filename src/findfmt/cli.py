@@ -16,6 +16,8 @@ from findfmt.traversal import find_files
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from findfmt.models import FileInfo
+
 
 def get_version() -> str:
     """Retrieve package version or fallback string.
@@ -164,6 +166,39 @@ def parse_tag_arguments(tag_args: Sequence[str] | None) -> frozenset[str]:
     return frozenset(result)
 
 
+def _format_match(file_info: FileInfo, *, absolute: bool, show_tags: bool, delimiter: str) -> str:
+    """Format matching file information for stdout output.
+
+    Args:
+        file_info: Classified file information.
+        absolute: Whether to format using absolute path.
+        show_tags: Whether to append comma-separated tags.
+        delimiter: End of line delimiter string.
+
+    Returns:
+        Formatted string for output.
+    """
+    path_str = str(file_info.path if absolute else file_info.relative_path)
+    if show_tags:
+        tags_repr = ", ".join(sorted(file_info.tags))
+        return f"{path_str} [{tags_repr}]{delimiter}"
+    return f"{path_str}{delimiter}"
+
+
+def _write_summary(match_count: int, tag_counter: Counter[str]) -> None:
+    """Write execution summary to stderr.
+
+    Args:
+        match_count: Total number of files matched.
+        tag_counter: Frequency counter of tags matched.
+    """
+    sys.stderr.write(f"\n--- findfmt summary ---\nMatched files: {match_count}\n")
+    if tag_counter:
+        sys.stderr.write("Top tags:\n")
+        for tag, count in tag_counter.most_common(10):
+            sys.stderr.write(f"  {tag}: {count}\n")
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     """Main CLI entrypoint.
 
@@ -182,13 +217,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0
 
     root_paths = tuple(Path(p) for p in args.paths)
-    include_tags = parse_tag_arguments(args.tags)
-    exclude_tags = parse_tag_arguments(args.exclude_tags)
-
     config = TraversalConfig(
         root_paths=root_paths,
-        include_tags=include_tags,
-        exclude_tags=exclude_tags,
+        include_tags=parse_tag_arguments(args.tags),
+        exclude_tags=parse_tag_arguments(args.exclude_tags),
         all_tags=args.all_tags,
         shebang_filter=args.shebang,
         respect_gitignore=not args.no_ignore,
@@ -206,23 +238,19 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     for file_info in find_files(config):
         match_count += 1
-        path_str = str(file_info.path if args.absolute else file_info.relative_path)
-
         if config.show_summary:
             tag_counter.update(file_info.tags)
 
-        if config.show_tags:
-            tags_repr = ", ".join(sorted(file_info.tags))
-            sys.stdout.write(f"{path_str} [{tags_repr}]{delimiter}")
-        else:
-            sys.stdout.write(f"{path_str}{delimiter}")
+        formatted = _format_match(
+            file_info,
+            absolute=args.absolute,
+            show_tags=config.show_tags,
+            delimiter=delimiter,
+        )
+        sys.stdout.write(formatted)
 
     if config.show_summary:
-        sys.stderr.write(f"\n--- findfmt summary ---\nMatched files: {match_count}\n")
-        if tag_counter:
-            sys.stderr.write("Top tags:\n")
-            for tag, count in tag_counter.most_common(10):
-                sys.stderr.write(f"  {tag}: {count}\n")
+        _write_summary(match_count, tag_counter)
 
     return 0
 
