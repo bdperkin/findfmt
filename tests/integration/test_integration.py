@@ -15,7 +15,7 @@ def test_integration_cli_subprocess(sample_repo: Path):
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True, check=True)
     assert proc.returncode == 0
-    assert "src/app.py [file," in proc.stdout
+    assert f"{Path('src/app.py')} [file," in proc.stdout
     assert "python" in proc.stdout
 
 

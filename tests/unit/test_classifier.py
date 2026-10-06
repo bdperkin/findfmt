@@ -110,3 +110,39 @@ def test_classify_file_identify_raises_value_error(tmp_path: Path):
     with patch("identify.identify.tags_from_path", side_effect=ValueError("identify error")):
         info = classify_file(target, root_path=tmp_path)
         assert "python" in info.tags
+
+
+def test_classify_file_is_symlink_os_error(tmp_path: Path):
+    target = tmp_path / "target.txt"
+    target.write_text("hello", encoding="utf-8")
+    with patch.object(Path, "is_symlink", side_effect=OSError("Permission error")):
+        info = classify_file(target, root_path=tmp_path)
+        assert not info.is_symlink
+
+
+def test_classify_file_exists_os_error(tmp_path: Path):
+    target = tmp_path / "target.txt"
+    target.write_text("hello", encoding="utf-8")
+    with patch.object(Path, "exists", side_effect=OSError("Permission error")):
+        info = classify_file(target, root_path=tmp_path)
+        assert not info.is_executable
+
+
+def test_classify_file_windows_executable(tmp_path: Path, monkeypatch):
+    target = tmp_path / "script.bat"
+    target.write_text("@echo off\n", encoding="utf-8")
+    monkeypatch.setattr("os.name", "nt")
+    info = classify_file(target, root_path=tmp_path)
+    assert info.is_executable
+    assert "executable" in info.tags
+    assert "non-executable" not in info.tags
+
+
+def test_classify_file_windows_non_executable(tmp_path: Path, monkeypatch):
+    target = tmp_path / "doc.txt"
+    target.write_text("hello\n", encoding="utf-8")
+    monkeypatch.setattr("os.name", "nt")
+    info = classify_file(target, root_path=tmp_path)
+    assert not info.is_executable
+    assert "non-executable" in info.tags
+    assert "executable" not in info.tags
