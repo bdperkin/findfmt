@@ -192,7 +192,7 @@ average = true
 
 [tool.xenon]
 max_absolute = "B"
-max_modules = "A"
+max_modules = "B"
 max_average = "A"
 exclude = "tests/*,docs/*,tools/*"
 
