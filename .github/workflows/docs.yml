@@ -33,7 +33,7 @@ jobs:
       - name: Build All Sphinx Formats (Strict)
         run: make -C docs clean html epub man latex linkcheck
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
         if: github.ref == 'refs/heads/main' || github.event_name == 'release'
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
