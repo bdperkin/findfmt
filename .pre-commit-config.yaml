@@ -1,0 +1,148 @@
+---
+# Exhaustive pre-commit configuration for findfmt
+# See https://pre-commit.com for more information
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+repos:
+  # Meta pre-commit hooks
+  - repo: meta
+    hooks:
+      - id: check-useless-excludes
+
+  # Pre-commit standard hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: [--maxkb=500]
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-yaml
+        args: [--unsafe]
+      - id: debug-statements
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  # Astral Ruff (Linter & Formatter)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.9
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+
+  # Codespell for typo detection
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        additional_dependencies: [tomli]
+
+  # Pygrep hooks
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-mock-methods
+      - id: python-no-eval
+      - id: python-use-type-annotations
+      - id: text-unicode-replacement-char
+
+  # Validate pyproject.toml
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.23
+    hooks:
+      - id: validate-pyproject
+
+  # Format pyproject.toml
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.5.0
+    hooks:
+      - id: pyproject-fmt
+
+  # Yamllint
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [-c, .yamllint.yaml]
+
+  # Blocklint for non-inclusive language
+  - repo: https://github.com/PrincetonUniversity/blocklint
+    rev: v0.3.0
+    hooks:
+      - id: blocklint
+
+  # Markdown format
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.22
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-tables
+
+  # Yamlfix formatter
+  - repo: https://github.com/lyz-code/yamlfix
+    rev: 1.17.0
+    hooks:
+      - id: yamlfix
+
+  # Security: Detect secrets
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        exclude: package.lock.json|uv.lock
+
+  # Conventional Commits verification
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+
+  # Local workspace hooks for uv-managed tools (identical to CI)
+  - repo: local
+    hooks:
+      - id: ty-check
+        name: ty type checker
+        entry: uv run ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: interrogate
+        name: interrogate docstrings
+        entry: uv run interrogate src
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: deptry
+        name: deptry dependency checker
+        entry: uv run deptry .
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: vulture
+        name: vulture dead code checker
+        entry: uv run vulture src
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: xenon
+        name: xenon code complexity
+        entry: uv run xenon src
+        language: system
+        types: [python]
+        pass_filenames: false
+      - id: sync-pre-commit-deps
+        name: sync pre-commit dependencies
+        entry: uv run python tools/sync_pre_commit_deps.py
+        language: system
+        files: ^(\.pre-commit-config\.yaml|pyproject\.toml|uv\.lock)$
+        pass_filenames: false

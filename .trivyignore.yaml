@@ -1,0 +1,7 @@
+---
+# Trivy ignore configuration for findfmt
+# https://aquasecurity.github.io/trivy/latest/docs/configuration/filtering/
+vulnerabilities: []
+misconfigurations: []
+secrets: []
+licenses: []

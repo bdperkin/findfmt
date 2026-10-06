@@ -1,0 +1,9 @@
+/* Custom styling enhancements for findfmt Sphinx documentation */
+:root {
+  --color-brand-primary: #38bdf8;
+  --color-brand-content: #818cf8;
+}
+
+.sidebar-brand img {
+  max-height: 48px;
+}
