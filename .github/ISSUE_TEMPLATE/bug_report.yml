@@ -1,0 +1,37 @@
+---
+name: Bug Report
+description: File a bug report to help improve findfmt
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for reporting an issue!
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Run `findfmt ...`
+        2. Expected output ...
+        3. Actual output ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Info
+      description: OS version, Python version, findfmt version.
+      value: |
+        - OS:
+        - Python version:
+        - findfmt version:
+    validations:
+      required: true

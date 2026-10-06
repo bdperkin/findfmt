@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+    <linearGradient id="lensGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#818cf8" stop-opacity="0.05" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="800" height="240" rx="16" fill="url(#bgGrad)" stroke="#334155" stroke-width="2" />
+
+  <!-- Grid Pattern Overlay -->
+  <g stroke="#334155" stroke-width="0.5" opacity="0.3">
+    <line x1="40" y1="0" x2="40" y2="240" />
+    <line x1="80" y1="0" x2="80" y2="240" />
+    <line x1="120" y1="0" x2="120" y2="240" />
+    <line x1="160" y1="0" x2="160" y2="240" />
+    <line x1="200" y1="0" x2="200" y2="240" />
+    <line x1="0" y1="60" x2="240" y2="60" />
+    <line x1="0" y1="120" x2="240" y2="120" />
+    <line x1="0" y1="180" x2="240" y2="180" />
+  </g>
+
+  <!-- Icon Section (Left) -->
+  <g transform="translate(60, 40)">
+    <!-- File Stacks -->
+    <rect x="20" y="25" width="60" height="80" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2" />
+    <line x1="32" y1="45" x2="68" y2="45" stroke="#64748b" stroke-width="2" stroke-linecap="round" />
+    <line x1="32" y1="58" x2="60" y2="58" stroke="#64748b" stroke-width="2" stroke-linecap="round" />
+    <line x1="32" y1="71" x2="52" y2="71" stroke="#64748b" stroke-width="2" stroke-linecap="round" />
+
+    <!-- Magnifying Scanner Lens -->
+    <circle cx="85" cy="75" r="48" fill="url(#lensGrad)" stroke="url(#accentGrad)" stroke-width="4" filter="url(#glow)" />
+    <line x1="120" y1="110" x2="148" y2="138" stroke="url(#accentGrad)" stroke-width="6" stroke-linecap="round" />
+
+    <!-- Floating Format Badges Inside Lens -->
+    <!-- Python Badge -->
+    <rect x="58" y="48" width="28" height="16" rx="4" fill="#0284c7" fill-opacity="0.85" />
+    <text x="72" y="60" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" text-anchor="middle">.py</text>
+
+    <!-- Shebang Badge -->
+    <rect x="72" y="70" width="30" height="16" rx="4" fill="#7c3aed" fill-opacity="0.85" />
+    <text x="87" y="82" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="700" text-anchor="middle">#!/</text>
+
+    <!-- MIME Tag Badge -->
+    <rect x="52" y="90" width="34" height="16" rx="4" fill="#059669" fill-opacity="0.85" />
+    <text x="69" y="102" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="9" font-weight="700" text-anchor="middle">MIME</text>
+  </g>
+
+  <!-- Typography (Right) -->
+  <g transform="translate(260, 95)">
+    <!-- Main Title -->
+    <text x="0" y="20" fill="url(#accentGrad)" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="52" font-weight="800" letter-spacing="-1">findfmt</text>
+
+    <!-- Subtitle / Tagline -->
+    <text x="0" y="58" fill="#94a3b8" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="17" font-weight="500">
+      Content-Aware &amp; Git-Conscious File Classification Suite
+    </text>
+
+    <!-- Pipeline Pills -->
+    <g transform="translate(0, 80)">
+      <rect x="0" y="0" width="86" height="22" rx="11" fill="#1e293b" stroke="#38bdf8" stroke-width="1" />
+      <text x="43" y="15" fill="#38bdf8" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">.gitignore</text>
+
+      <rect x="96" y="0" width="82" height="22" rx="11" fill="#1e293b" stroke="#818cf8" stroke-width="1" />
+      <text x="137" y="15" fill="#818cf8" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">identify</text>
+
+      <rect x="188" y="0" width="84" height="22" rx="11" fill="#1e293b" stroke="#c084fc" stroke-width="1" />
+      <text x="230" y="15" fill="#c084fc" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">shebang</text>
+
+      <rect x="282" y="0" width="76" height="22" rx="11" fill="#1e293b" stroke="#34d399" stroke-width="1" />
+      <text x="320" y="15" fill="#34d399" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">MIME</text>
+
+      <rect x="368" y="0" width="60" height="22" rx="11" fill="#1e293b" stroke="#f472b6" stroke-width="1" />
+      <text x="398" y="15" fill="#f472b6" font-family="system-ui, sans-serif" font-size="11" font-weight="600" text-anchor="middle">CI/CD</text>
+    </g>
+  </g>
+</svg>
