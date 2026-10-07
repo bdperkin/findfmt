@@ -235,3 +235,14 @@ repos:
     rev: v0.0.5
     hooks:
       - id: sync-pre-commit-deps
+
+  # File Line Length Enforcement
+  - repo: local
+    hooks:
+      - id: file-line-length-check
+        name: File Line Length Check
+        entry: python tools/line_linter.py
+        language: python
+        types: [text]
+        additional_dependencies: [pathspec, identify, typer]
+        pass_filenames: true

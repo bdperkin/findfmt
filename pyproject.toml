@@ -233,3 +233,34 @@ enabled = false
 
 [tool.pymarkdown.plugins.MD041]
 enabled = false
+
+[tool.line-linter]
+include = [
+  "src/**/*.py",
+  "tools/**/*.py",
+  "tests/**/*.py",
+  "*.md",
+  "docs/**/*.md",
+  "*.yaml",
+  "*.yml",
+  ".github/**/*.yml",
+  ".github/**/*.yaml",
+]
+exclude = [
+  "dist/**",
+  "build/**",
+  ".venv/**",
+  ".git/**",
+  ".github/styles/**",
+  "docs/_build/**",
+  ".pytest_cache/**",
+  ".mypy_cache/**",
+  ".ruff_cache/**",
+  "__pycache__/**",
+  "*.lock",
+  "uv.lock",
+]
+
+[tool.line-linter.overrides]
+python = { warning = 300, error = 500 }
+yaml = { warning = 150, error = 300 }
