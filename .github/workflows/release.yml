@@ -14,9 +14,11 @@ permissions:
   id-token: write
   packages: write
 jobs:
-  build-and-publish:
-    name: Build Distributions & Publish to PyPI
+  build-distributions:
+    name: Build Distributions
     runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.git-cliff.outputs.content }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
@@ -38,27 +40,67 @@ jobs:
           config: cliff.toml
           args: --latest
         id: git-cliff
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload Distribution Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          body: ${{ steps.git-cliff.outputs.content }}
-          files: dist/*
-          draft: false
-          prerelease: false
+          name: dist
+          path: dist/*
+          if-no-files-found: error
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: build-distributions
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/findfmt/
+    steps:
+      - name: Download Distribution Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
       - name: Publish to TestPyPI (OIDC Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
-      - name: Clean TestPyPI Attestations
-        run: rm -f dist/*.publish.attestation dist/*.attestation
+  publish-pypi:
+    name: Publish to Production PyPI
+    needs: [build-distributions, publish-testpypi]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/findfmt/
+    steps:
+      - name: Download Distribution Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
       - name: Publish to PyPI (OIDC Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           skip-existing: true
+  create-github-release:
+    name: Create GitHub Release
+    needs: [build-distributions, publish-pypi]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Distribution Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ needs.build-distributions.outputs.release_body }}
+          files: dist/*
+          draft: false
+          prerelease: false
   containerize:
     name: Build & Publish Container to GHCR
-    needs: build-and-publish
+    needs: publish-pypi
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
