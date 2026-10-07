@@ -41,6 +41,7 @@ myst_heading_anchors = 3
 html_theme = "furo"
 html_title = "findfmt Documentation"
 html_logo = "_static/logo.svg"
+html_favicon = "_static/favicon.ico"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_theme_options = {

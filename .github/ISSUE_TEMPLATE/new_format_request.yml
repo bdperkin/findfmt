@@ -1,8 +1,9 @@
 ---
 name: New Format / Tag Request
-description: Propose support for a new file format, shebang pattern, or MIME classification tag
-title: "feat(classifier): add support for <format> format"
-labels: ["enhancement", "area:classifier"]
+description: Propose support for a new file format, shebang pattern, or MIME classification
+  tag
+title: 'feat(classifier): add support for <format> format'
+labels: [enhancement, area:classifier]
 body:
   - type: markdown
     attributes:
@@ -12,16 +13,18 @@ body:
     id: tag_name
     attributes:
       label: Proposed Tag Name(s)
-      description: What tag identifier(s) should findfmt use to represent this format? (e.g. `dockerfile`, `toml`, `lua`)
-      placeholder: "e.g. toml, dockerfile"
+      description: What tag identifier(s) should findfmt use to represent this format?
+        (e.g. `dockerfile`, `toml`, `lua`)
+      placeholder: e.g. toml, dockerfile
     validations:
       required: true
   - type: input
     id: extensions_filenames
     attributes:
       label: Typical File Extensions & Filenames
-      description: Standard extensions (e.g. `.toml`, `.tf`) and common extensionless filenames (e.g. `Dockerfile`, `Makefile`).
-      placeholder: "e.g. .toml, Cargo.lock"
+      description: Standard extensions (e.g. `.toml`, `.tf`) and common extensionless
+        filenames (e.g. `Dockerfile`, `Makefile`).
+      placeholder: e.g. .toml, Cargo.lock
     validations:
       required: true
   - type: textarea
@@ -29,24 +32,27 @@ body:
     attributes:
       label: Unix `file` Command Output
       description: Run `file -b --mime-type <sample_file>` and paste output.
-      placeholder: "e.g. application/toml or text/plain"
+      placeholder: e.g. application/toml or text/plain
     validations:
       required: true
   - type: textarea
     id: shebang
     attributes:
       label: Shebang Patterns (if applicable)
-      description: Any interpreter shebang lines commonly used by scripts of this format.
-      placeholder: "e.g. #!/usr/bin/env lua, #!/usr/bin/python3"
+      description: Any interpreter shebang lines commonly used by scripts of this
+        format.
+      placeholder: 'e.g. #!/usr/bin/env lua, #!/usr/bin/python3'
   - type: textarea
     id: sample_snippet
     attributes:
       label: Minimal Sample Snippet / Fixture
-      description: Provide a minimal, reproducible code snippet or file header suitable for adding to test fixtures.
+      description: Provide a minimal, reproducible code snippet or file header suitable
+        for adding to test fixtures.
     validations:
       required: true
   - type: textarea
     id: references
     attributes:
       label: Specifications & Reference Documentation
-      description: Links to official file format specifications, IANA media types, or grammar documentation.
+      description: Links to official file format specifications, IANA media types,
+        or grammar documentation.

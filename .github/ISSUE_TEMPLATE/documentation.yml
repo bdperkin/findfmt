@@ -1,8 +1,9 @@
 ---
 name: Documentation Improvement
-description: Suggest improvements, report typos, or request missing guides in findfmt documentation
-title: "docs: "
-labels: ["documentation"]
+description: Suggest improvements, report typos, or request missing guides in findfmt
+  documentation
+title: 'docs: '
+labels: [documentation]
 body:
   - type: markdown
     attributes:
@@ -12,8 +13,9 @@ body:
     id: page_location
     attributes:
       label: Documentation Page or Location
-      description: URL to hosted doc (https://bdperkin.github.io/findfmt/...), Sphinx source path (docs/source/...), README, or man page.
-      placeholder: "e.g. docs/source/guides/quickstart.md or README.md"
+      description: URL to hosted doc (https://bdperkin.github.io/findfmt/...), Sphinx
+        source path (docs/source/...), README, or man page.
+      placeholder: e.g. docs/source/guides/quickstart.md or README.md
     validations:
       required: true
   - type: textarea
