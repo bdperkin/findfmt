@@ -139,3 +139,48 @@ mitigations implemented in `findfmt`.
   history.
 - **Mitigation**: Every commit and pull request is verified against `detect-secrets`,
   `detect-private-key`, `GitGuardian` (`.gitguardian.yaml`), and GitHub CodeQL semantic analysis.
+
+### 3.6. Supply Chain Governance & OpenSSF Scorecard Posture
+
+#### 3.6.1. Branch Protection & Mandatory Code Review (CodeReviewID)
+
+- **Threat Vector**: Unreviewed, malicious, or erroneous commits pushed directly to primary release
+  branches bypass automated verification gates.
+- **Mitigation**: Direct pushes to `main` are strictly blocked using GitHub branch protection rules
+  enforced for all users including administrators (`enforce_admins: true`). Every change requires a
+  feature branch and a Pull Request. All CI matrix checks (multi-platform tests across Python
+  3.10–3.14 on Linux, macOS, and Windows, 100% statement and branch coverage, strict static typing,
+  and linters) must pass before a merge can occur. For solo maintainer development, changesets are
+  audited and verified via isolated feature branches and squash-merged to preserve linear history;
+  external contributions require mandatory maintainer code review and approval.
+
+#### 3.6.2. OpenSSF Best Practices Program (CIIBestPracticesID)
+
+- **Threat Vector**: Inconsistent open-source development and security practices.
+- **Mitigation**: The `findfmt` project is enrolled in the OpenSSF Best Practices Program
+  ([Project 15282](https://www.bestpractices.dev/projects/15282)). The project adheres to OpenSSF
+  criteria including open-source licensing, cryptographic release tags, automated static analysis,
+  vulnerability reporting procedures, and strict test coverage.
+
+#### 3.6.3. Continuous Fuzz Testing Evaluation & Roadmap (FuzzingID)
+
+- **Threat Vector**: Maliciously crafted inputs, corrupted file headers, truncated shebang
+  sequences, or nested cyclic filesystem structures triggering unhandled edge cases or unexpected
+  interpreter crashes.
+- **Mitigation**: Continuous fuzz testing is roadmapped targeting `findfmt`'s core parsing engines:
+  1. **Classification Engine Fuzzing**: Property-based fuzz testing using `Hypothesis` and `Atheris`
+     targeting `classify_file`, `extract_shebang`, and MIME signature heuristics with random byte
+     sequences and synthetic files.
+  2. **Traversal Engine Fuzzing**: Property-based generation of complex directory trees with
+     irregular permission bits, symlink hierarchies, and deep directory nestings to verify bounded
+     traversal invariants.
+  3. **OSS-Fuzz Integration**: Integration into the Google OSS-Fuzz continuous fuzzing pipeline for
+     automated regression detection.
+
+#### 3.6.4. Active Maintenance & Release Hygiene (MaintainedID)
+
+- **Threat Vector**: Abandoned dependencies or unmaintained libraries failing to address upstream
+  security advisories.
+- **Mitigation**: `findfmt` follows Semantic Versioning with automated multi-platform CI, scheduled
+  weekly dependency security audits (`uv audit`), automated CodeQL scanning, and automated changelog
+  generation via `git-cliff`.

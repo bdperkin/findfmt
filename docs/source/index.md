@@ -12,6 +12,7 @@
   <a href="https://github.com/bdperkin/findfmt/actions/workflows/docs.yml"><img src="https://github.com/bdperkin/findfmt/actions/workflows/docs.yml/badge.svg" alt="Documentation Status" /></a>
   <a href="https://results.pre-commit.ci/latest/github/bdperkin/findfmt/main"><img src="https://results.pre-commit.ci/badge/github/bdperkin/findfmt/main.svg" alt="pre-commit.ci status" /></a>
   <a href="https://codecov.io/gh/bdperkin/findfmt"><img src="https://codecov.io/gh/bdperkin/findfmt/branch/main/graph/badge.svg" alt="Coverage" /></a>
+  <a href="https://www.bestpractices.dev/projects/15282"><img src="https://www.bestpractices.dev/projects/15282/badge" alt="OpenSSF Best Practices" /></a>
 </p>
 
 <p align="center">

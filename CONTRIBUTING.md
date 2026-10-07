@@ -118,9 +118,25 @@ Please sign off on your commits:
 git commit -s -m "feat: add support for MIME categories"
 ```
 
-## 6. Pull Request Process
+## 6. Pull Request & Review Process
 
-1. Create a feature branch off `main`.
-2. Ensure all tests and quality checks pass locally.
-3. Open a Pull Request on GitHub. Direct pushes to `main` are disabled.
-4. Address any CI check feedback or code review comments.
+1. **Branch Protection**: Direct pushes to `main` are strictly disabled and blocked for all
+   collaborators (including administrators via `enforce_admins: true`). All modifications must be
+   submitted via a Pull Request.
+2. **Feature Branches**: Create a dedicated feature branch off the latest `main` (e.g.,
+   `feature/issue-number-short-description`).
+3. **Local Verification**: Ensure all tests, typing, and quality gates pass locally before opening a
+   PR:
+   ```bash
+   uv run pre-commit run --all-files
+   uv run python tools/verify_quality.py
+   ```
+4. **Code Review & Quality Gates**:
+   - Every PR triggers our full automated CI suite (Linux, macOS, Windows across Python 3.10–3.14,
+     100% test and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL, and
+     dependency review). All status checks must pass before merging.
+   - Community contributions require thorough code review and approval from repository maintainers.
+   - For solo maintainer development, changesets are tracked via individual feature branches and
+     validated through GitHub Actions CI prior to squash-merging.
+5. **Linear History**: All pull requests are merged using GitHub Squash & Merge to maintain a clean,
+   linear commit history.
