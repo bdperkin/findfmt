@@ -201,3 +201,15 @@ exclude = "tests/*,docs/*,tools/*"
 exclude = [ "tests", "docs", "tools" ]
 ignore_names = [ "relative_paths" ]
 min_confidence = 80
+
+[tool.pymarkdown.plugins.MD013]
+enabled = false
+
+[tool.pymarkdown.plugins.MD031]
+enabled = false
+
+[tool.pymarkdown.plugins.MD033]
+enabled = false
+
+[tool.pymarkdown.plugins.MD041]
+enabled = false
