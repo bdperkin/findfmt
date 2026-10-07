@@ -10,6 +10,8 @@
 - **Ruff Strictness**: Formatted and linted using `ruff` with `ALL` rules selected.
 - **Cyclomatic Complexity**: Monitored using `radon` and capped via `xenon`.
 - **Documentation Completeness**: Monitored via `interrogate` ensuring 100% docstring coverage.
+- **Prose & Style Linting**: Enforced on all Markdown documentation using Vale with Google and
+  Proselint style standards.
 
 ## 2. Traversal Complexity Optimization
 

@@ -1,0 +1,23 @@
+---
+name: Vale
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  vale:
+    name: Lint Prose (Vale)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - name: Run Vale Prose Linter
+        uses: errata-ai/vale-action@518a9136acc6e6668ce7c00d367051e0941e87ff  # v3.0.0
+        with:
+          files: all
+          fail_on_error: true
