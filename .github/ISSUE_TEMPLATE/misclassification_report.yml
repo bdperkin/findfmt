@@ -1,8 +1,9 @@
 ---
 name: Misclassification / Traversal Edge Case
-description: Report a file that was incorrectly identified, missed, or traversal rule that didn't apply correctly
-title: "fix(classifier): misclassification for <format/path>"
-labels: ["bug", "area:classifier"]
+description: Report a file that was incorrectly identified, missed, or traversal rule
+  that didn't apply correctly
+title: 'fix(classifier): misclassification for <format/path>'
+labels: [bug, area:classifier]
 body:
   - type: markdown
     attributes:
@@ -27,7 +28,8 @@ body:
     id: traversal_context
     attributes:
       label: Traversal Flags & Git Environment
-      description: Were `--no-ignore` or `--hidden` passed? Are there `.gitignore` or `.git/info/exclude` rules affecting this path?
+      description: Were `--no-ignore` or `--hidden` passed? Are there `.gitignore`
+        or `.git/info/exclude` rules affecting this path?
       value: |
         - Command flags:
         - Relevant .gitignore patterns:
@@ -39,7 +41,8 @@ body:
     id: file_sample
     attributes:
       label: File Header / Content Sample
-      description: Provide the first 1-10 lines or bytes of the file (or a sanitized reproduction sample).
+      description: Provide the first 1-10 lines or bytes of the file (or a sanitized
+        reproduction sample).
       render: shell
     validations:
       required: true
