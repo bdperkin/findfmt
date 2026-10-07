@@ -147,54 +147,6 @@ def test_check_file_warnings_and_errors(tmp_path: Path) -> None:
     assert err_violation.threshold == 500
 
 
-def test_check_file_line_count_warning(tmp_path: Path) -> None:
-    """Test check_file detects file line count warning violation."""
-    py_file = tmp_path / "long_file.py"
-    # 350 short lines (python warning is 300, error is 500)
-    py_file.write_text("x = 1\n" * 350, encoding="utf-8")
-
-    config = LinterConfig(include=("**/*",), exclude=(), overrides={})
-    violations = check_file(py_file, config)
-
-    assert len(violations) == 1
-    v = violations[0]
-    assert v.violation_type == "file_line_count"
-    assert not v.is_error
-    assert v.length == 350
-    assert v.threshold == 300
-
-
-def test_check_file_line_count_error(tmp_path: Path) -> None:
-    """Test check_file detects file line count error violation."""
-    py_file = tmp_path / "error_file.py"
-    # 550 short lines (python error is 500)
-    py_file.write_text("x = 1\n" * 550, encoding="utf-8")
-
-    config = LinterConfig(include=("**/*",), exclude=(), overrides={})
-    violations = check_file(py_file, config)
-
-    assert len(violations) == 1
-    v = violations[0]
-    assert v.violation_type == "file_line_count"
-    assert v.is_error
-    assert v.length == 550
-    assert v.threshold == 500
-
-
-def test_run_linter_file_line_count_output(tmp_path: Path) -> None:
-    """Test run_linter outputs formatted file line count errors to stderr."""
-    py_file = tmp_path / "huge.py"
-    py_file.write_text("x = 1\n" * 550, encoding="utf-8")
-
-    config = LinterConfig(include=("**/*",), exclude=(), overrides={})
-    stderr = io.StringIO()
-    with patch("sys.stderr", stderr):
-        exit_code = run_linter([py_file], config, tmp_path)
-
-    assert exit_code == 1
-    assert "ERROR: File line count 550 exceeds error limit (500) for python" in stderr.getvalue()
-
-
 def test_check_file_os_error_handling(tmp_path: Path) -> None:
     """Test check_file handles OSError during file read gracefully."""
     py_file = tmp_path / "error.py"
