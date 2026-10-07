@@ -163,7 +163,10 @@ def findfmt(
             "-f",
             case_sensitive=False,
             rich_help_panel="Output Formatting",
-            help="Output serialization format (text, json, jsonl, yaml, ipynb).",
+            help=(
+                "Output serialization format (text, json, jsonl, yaml, ipynb, csv, tsv, "
+                "markdown, rst)."
+            ),
         ),
     ] = OutputFormat.TEXT,
     absolute: Annotated[
@@ -251,9 +254,8 @@ def findfmt(
     ] = False,
 ) -> None:
     """Execute file discovery and classification matching."""
-    root_paths = tuple(paths) if paths else (Path(),)
     config = TraversalConfig(
-        root_paths=root_paths,
+        root_paths=tuple(paths) if paths else (Path(),),
         include_tags=parse_tag_arguments(tags),
         exclude_tags=parse_tag_arguments(exclude_tags),
         all_tags=all_tags,
@@ -270,13 +272,11 @@ def findfmt(
 
     tag_counter: Counter[str] = Counter()
     match_count = 0
-    delimiter = "\0" if config.null_delimited else "\n"
-
     formatter = get_formatter(
         output_format,
         absolute=absolute,
         show_tags=config.show_tags,
-        delimiter=delimiter,
+        delimiter="\0" if config.null_delimited else "\n",
     )
 
     def _matched_files() -> Iterable[FileInfo]:

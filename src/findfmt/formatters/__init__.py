@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+import csv
+
 from findfmt.formatters.base import Formatter, OutputFormat, UnsupportedFormatError
+from findfmt.formatters.delimited import CsvFormatter, TsvFormatter
+from findfmt.formatters.markup import MarkdownFormatter, RstFormatter
 from findfmt.formatters.structured import (
     IpynbFormatter,
     JsonFormatter,
@@ -12,12 +16,16 @@ from findfmt.formatters.structured import (
 from findfmt.formatters.text import TextFormatter
 
 __all__ = [
+    "CsvFormatter",
     "Formatter",
     "IpynbFormatter",
     "JsonFormatter",
     "JsonlFormatter",
+    "MarkdownFormatter",
     "OutputFormat",
+    "RstFormatter",
     "TextFormatter",
+    "TsvFormatter",
     "UnsupportedFormatError",
     "YamlFormatter",
     "get_formatter",
@@ -34,9 +42,14 @@ def _normalize_format_name(format_type: OutputFormat | str) -> str:
         Normalized lowercase format string.
     """
     if isinstance(format_type, OutputFormat):
-        return format_type.value
+        val = format_type.value
+    else:
+        val = str(format_type).lower().strip()
 
-    return str(format_type).lower().strip()
+    if val == OutputFormat.MD.value:
+        return OutputFormat.MARKDOWN.value
+
+    return val
 
 
 def _create_structured_formatter(
@@ -74,12 +87,80 @@ def _create_structured_formatter(
     return None
 
 
+def _create_delimited_formatter(
+    fmt_str: str,
+    *,
+    absolute: bool,
+    record_delimiter: str,
+    kwargs: dict[str, object],
+) -> Formatter | None:
+    r"""Instantiate delimited formatter if matched.
+
+    Args:
+        fmt_str: Normalized format string.
+        absolute: Whether to emit absolute paths.
+        record_delimiter: Record terminator string ('\n' or '\0').
+        kwargs: Configuration keyword arguments.
+
+    Returns:
+        Delimited formatter instance or None if not matched.
+    """
+    lineterminator = "\0" if record_delimiter == "\0" else "\n"
+
+    if fmt_str == OutputFormat.CSV.value:
+        csv_delim = kwargs.get("delimiter", ",")
+        if csv_delim in {"\n", "\0"}:
+            csv_delim = ","
+
+        delim_str = str(csv_delim)
+        quoting = kwargs.get("quoting", csv.QUOTE_MINIMAL)
+        quoting_int = int(quoting) if isinstance(quoting, int) else csv.QUOTE_MINIMAL
+        return CsvFormatter(
+            absolute=absolute,
+            delimiter=delim_str,
+            quoting=quoting_int,
+            lineterminator=lineterminator,
+        )
+
+    if fmt_str == OutputFormat.TSV.value:
+        return TsvFormatter(absolute=absolute, lineterminator=lineterminator)
+
+    return None
+
+
+def _create_markup_formatter(
+    fmt_str: str,
+    *,
+    absolute: bool,
+    kwargs: dict[str, object],
+) -> Formatter | None:
+    """Instantiate markup table formatter if matched.
+
+    Args:
+        fmt_str: Normalized format string.
+        absolute: Whether to emit absolute paths.
+        kwargs: Configuration keyword arguments.
+
+    Returns:
+        Markup formatter instance or None if not matched.
+    """
+    if fmt_str == OutputFormat.MARKDOWN.value:
+        return MarkdownFormatter(absolute=absolute)
+
+    if fmt_str == OutputFormat.RST.value:
+        style = kwargs.get("table_style", "grid")
+        style_str = str(style) if isinstance(style, str) else "grid"
+        return RstFormatter(absolute=absolute, table_style=style_str)
+
+    return None
+
+
 def get_formatter(
     format_type: OutputFormat | str,
     *,
     absolute: bool = False,
     show_tags: bool = False,
-    delimiter: str = "\n",
+    delimiter: str | None = None,
     **kwargs: object,
 ) -> Formatter:
     """Retrieve the appropriate formatter instance for the given format.
@@ -88,7 +169,7 @@ def get_formatter(
         format_type: Requested output format enum or string name.
         absolute: Whether to emit absolute paths.
         show_tags: Whether to display tags (for text format).
-        delimiter: Delimiter string (for text format).
+        delimiter: Optional delimiter string (for text/csv format).
         **kwargs: Extra formatter configuration arguments.
 
     Returns:
@@ -99,12 +180,29 @@ def get_formatter(
     """
     fmt_str = _normalize_format_name(format_type)
 
+    if delimiter is not None:
+        kwargs["delimiter"] = delimiter
+
     if fmt_str == OutputFormat.TEXT.value:
         return TextFormatter(
             absolute=absolute,
             show_tags=show_tags,
-            delimiter=delimiter,
+            delimiter=delimiter if delimiter is not None else "\n",
         )
+
+    record_delim = delimiter if delimiter is not None else "\n"
+    delimited = _create_delimited_formatter(
+        fmt_str,
+        absolute=absolute,
+        record_delimiter=record_delim,
+        kwargs=kwargs,
+    )
+    if delimited is not None:
+        return delimited
+
+    markup = _create_markup_formatter(fmt_str, absolute=absolute, kwargs=kwargs)
+    if markup is not None:
+        return markup
 
     structured = _create_structured_formatter(fmt_str, absolute=absolute, kwargs=kwargs)
     if structured is not None:

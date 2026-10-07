@@ -38,13 +38,19 @@ symbolic links during directory traversal. Use `--no-follow-symlinks` to disable
 ### 2.3. Output Controls
 
 `-f, --format FORMAT` : Choose the output serialization format (`text`, `json`, `jsonl`, `yaml`,
-`ipynb`). Defaults to `text`.
+`ipynb`, `csv`, `tsv`, `markdown`, `rst`). Defaults to `text`.
 
 - `text`: Standard line-oriented or NUL-delimited plain text paths.
 - `json`: Deterministic JSON array of file objects with full metadata attributes.
 - `jsonl`: Line-delimited JSON (NDJSON) records for streaming pipelines.
 - `yaml`: Clean, readable block-style YAML document.
 - `ipynb`: Jupyter Notebook (`.ipynb`) format pre-populated with data analysis code cells.
+- `csv`: RFC 4180 compliant comma-separated values with header row.
+- `tsv`: Tab-separated values optimized for Unix shell pipelines (`awk`, `cut`).
+- `markdown` (or `md`): GitHub Flavored Markdown (GFM) column-aligned table with alignment
+  indicators.
+- `rst`: reStructuredText grid or simple table format compatible with Sphinx `.. include::`
+  directives.
 
 `--absolute / --no-absolute` : Output absolute filesystem paths rather than relative paths.
 
