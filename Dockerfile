@@ -1,5 +1,5 @@
 # Multi-stage slim container build for findfmt using uv
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d56b733b357cea384185b3022bd09f05e002cd144ca AS builder
 
 WORKDIR /src
 COPY pyproject.toml README.md LICENSE ./
@@ -9,7 +9,7 @@ COPY src/ ./src/
 RUN uv pip install --no-cache --system .
 
 # Runtime Stage
-FROM python:3.13-slim-bookworm AS runtime
+FROM python:3.13-slim-bookworm@sha256:a1165e272e578941b84abc79e4ab38a0305cd12803a5c4247979ac7655f4d641 AS runtime
 
 LABEL org.opencontainers.image.title="findfmt" \
       org.opencontainers.image.description="A .gitignore-aware file discovery and classification suite" \
