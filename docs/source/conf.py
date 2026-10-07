@@ -132,3 +132,9 @@ napoleon_include_private_with_doc = False
 napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_use_ivar = True
+
+# Linkcheck options
+linkcheck_ignore = [
+    r"https://github\.com/.*/security/.*",
+    r"https://github\.com/.*/advisories/.*",
+]

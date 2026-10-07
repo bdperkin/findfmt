@@ -35,7 +35,7 @@ def load_gitignore_spec(directory: Path) -> PathSpecType | None:
                 lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
                 if lines:
                     return pathspec.PathSpec.from_lines("gitignore", lines)
-        except OSError:
+        except (OSError, ValueError):
             return None
 
     return None
@@ -57,7 +57,7 @@ def load_git_exclude_spec(root: Path) -> PathSpecType | None:
                 lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
                 if lines:
                     return pathspec.PathSpec.from_lines("gitignore", lines)
-        except OSError:
+        except (OSError, ValueError):
             return None
 
     return None

@@ -1,0 +1,43 @@
+---
+name: ClusterFuzzLite Batch Fuzzing
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: 0 0/6 * * *  # Every 6 hours
+  workflow_dispatch:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions: read-all
+jobs:
+  batch-fuzzing:
+    name: Batch Fuzzing (${{ matrix.sanitizer }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - name: Build Fuzzers (${{ matrix.sanitizer }})
+        id: build
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+        with:
+          language: python
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          sanitizer: ${{ matrix.sanitizer }}
+      - name: Run Fuzzers (${{ matrix.sanitizer }})
+        id: run
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1  # v1
+        with:
+          language: python
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fuzz-seconds: 300
+          mode: batch
+          sanitizer: ${{ matrix.sanitizer }}
+          output-sarif: true

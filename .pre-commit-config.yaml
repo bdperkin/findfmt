@@ -50,6 +50,7 @@ repos:
       - id: trailing-whitespace
       - id: name-tests-test
         args: [--pytest-test-first]
+        exclude: ^tests/fuzz/
 
   # UV dependency management
   - repo: https://github.com/astral-sh/uv-pre-commit

@@ -41,6 +41,11 @@ def test_load_gitignore_spec_os_error(tmp_path: Path):
         assert load_gitignore_spec(tmp_path) is None
 
 
+def test_load_gitignore_spec_invalid_pattern(tmp_path: Path):
+    (tmp_path / ".gitignore").write_text("\\\n", encoding="utf-8")
+    assert load_gitignore_spec(tmp_path) is None
+
+
 def test_load_git_exclude_spec_valid(tmp_path: Path):
     git_dir = tmp_path / ".git" / "info"
     git_dir.mkdir(parents=True)
@@ -67,6 +72,13 @@ def test_load_git_exclude_spec_os_error(tmp_path: Path):
     (git_dir / "exclude").write_text("*.custom", encoding="utf-8")
     with patch.object(Path, "open", side_effect=OSError("Error")):
         assert load_git_exclude_spec(tmp_path) is None
+
+
+def test_load_git_exclude_spec_invalid_pattern(tmp_path: Path):
+    git_dir = tmp_path / ".git" / "info"
+    git_dir.mkdir(parents=True)
+    (git_dir / "exclude").write_text("\\\n", encoding="utf-8")
+    assert load_git_exclude_spec(tmp_path) is None
 
 
 def test_should_skip_dir():

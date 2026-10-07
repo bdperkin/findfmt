@@ -162,20 +162,24 @@ mitigations implemented in `findfmt`.
   criteria including open-source licensing, cryptographic release tags, automated static analysis,
   vulnerability reporting procedures, and strict test coverage.
 
-#### 3.6.3. Continuous Fuzz Testing Evaluation & Roadmap (FuzzingID)
+#### 3.6.3. Continuous Fuzz Testing Architecture & ClusterFuzzLite (FuzzingID)
 
 - **Threat Vector**: Maliciously crafted inputs, corrupted file headers, truncated shebang
   sequences, or nested cyclic filesystem structures triggering unhandled edge cases or unexpected
   interpreter crashes.
-- **Mitigation**: Continuous fuzz testing is roadmapped targeting `findfmt`'s core parsing engines:
-  1. **Classification Engine Fuzzing**: Property-based fuzz testing using `Hypothesis` and `Atheris`
-     targeting `classify_file`, `extract_shebang`, and MIME signature heuristics with random byte
-     sequences and synthetic files.
-  2. **Traversal Engine Fuzzing**: Property-based generation of complex directory trees with
-     irregular permission bits, symlink hierarchies, and deep directory nestings to verify bounded
-     traversal invariants.
-  3. **OSS-Fuzz Integration**: Integration into the Google OSS-Fuzz continuous fuzzing pipeline for
-     automated regression detection.
+- **Mitigation**: Continuous fuzz testing is actively deployed using Google's **ClusterFuzzLite**
+  and **Atheris**:
+  1. **Classification Engine Fuzzing** (`tests/fuzz/fuzz_classifier.py`): Continuous coverage-guided
+     fuzz testing targeting `classify_file`, `extract_shebang`, and MIME signature heuristics with
+     random byte sequences, corrupted headers, and synthetic files.
+  2. **Traversal Engine Fuzzing** (`tests/fuzz/fuzz_traversal.py`): Automated fuzzing of complex
+     directory trees with irregular permission bits, symlink hierarchies, `.gitignore` pathspec
+     rules, and deep directory nestings to verify bounded traversal invariants.
+  3. **Continuous CI Integration**: Deployed via `.clusterfuzzlite/` configuration and automated
+     GitHub Actions workflows (`.github/workflows/cflite_pr.yml` for pull request smoke fuzzing,
+     `.github/workflows/cflite_batch.yml` for regular batch fuzzing), resolving OpenSSF Scorecard
+     `FuzzingID`
+     ([Code Scanning Alert #48](https://github.com/bdperkin/findfmt/security/code-scanning/48)).
 
 #### 3.6.4. Active Maintenance & Release Hygiene (MaintainedID)
 
