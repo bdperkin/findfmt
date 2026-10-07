@@ -14,6 +14,7 @@ ci:
     - vulture
     - xenon
     - sync-pre-commit-deps
+    - pyroma
   submodules: false
 default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
