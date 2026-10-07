@@ -1,16 +1,13 @@
 ---
-name: "Dependency Review"
-
+name: Dependency Review
 on:
   pull_request:
     branches: [main]
-
 permissions:
   contents: read
-
 jobs:
   dependency-review:
-    name: "Dependency Review"
+    name: Dependency Review
     runs-on: ubuntu-latest
     if: github.repository == 'bdperkin/findfmt'
     steps:
