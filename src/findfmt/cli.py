@@ -28,7 +28,7 @@ def get_version() -> str:
     try:
         return version("findfmt")
     except PackageNotFoundError:
-        return "0.1.0.dev0"
+        return "0.1.1.dev0"
 
 
 def build_parser() -> argparse.ArgumentParser:
