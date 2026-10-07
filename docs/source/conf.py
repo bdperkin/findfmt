@@ -63,6 +63,8 @@ man_pages = [
 
 # EPUB output
 epub_show_urls = "footnote"
+epub_exclude_files = ["_static/favicon.ico"]
+suppress_warnings = ["epub.unknown_project_files"]
 
 # LaTeX / PDF output
 latex_elements: dict[str, str] = {

@@ -1,19 +1,16 @@
 ---
-name: "OpenSSF Scorecard"
-
+name: OpenSSF Scorecard
 on:
   branch_protection_rule:
   schedule:
-    - cron: "30 4 * * 1"
+    - cron: 30 4 * * 1
   push:
     branches: [main]
   workflow_dispatch:
-
 permissions: read-all
-
 jobs:
   analysis:
-    name: "Scorecard Analysis"
+    name: Scorecard Analysis
     runs-on: ubuntu-latest
     permissions:
       security-events: write
@@ -25,14 +22,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-
       - name: Run Scorecard Analysis
         uses: ossf/scorecard-action@v2.4.1
         with:
           results_file: results.sarif
           results_format: sarif
           publish_results: true
-
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
         with:
