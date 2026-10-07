@@ -27,6 +27,31 @@ provided upfront:
 - **Security Inquiries**: For security vulnerabilities, follow our private reporting process via
   [GitHub Security Advisories](https://github.com/bdperkin/findfmt/security/advisories/new).
 
+## Issue & Pull Request Label Taxonomy
+
+We organize issues and pull requests using a structured, prefixed label taxonomy:
+
+- **`area:*` (Codebase Subsystems)**:
+  - `area:cli`: Command line interface, arguments, output formatters.
+  - `area:classifier`: File content inspection, MIME detection, shebang parsing.
+  - `area:traversal`: Directory walking, `.gitignore` rules, symlinks, filtering.
+  - `area:packaging`: PyPI packages, wheels, Docker images, dependencies.
+  - `area:docs`: Documentation guides, API reference, man pages, README.
+- **`os:*` (Operating Systems)**:
+  - `os:linux`, `os:macos`, `os:windows`: Platform-specific behaviors and tests.
+- **`status:*` (Triage & Review Workflow)**:
+  - `status:needs-info`: Awaiting author reproduction details or answers.
+  - `status:needs-reproduction`: Bug requires a confirmed minimal reproduction.
+  - `status:blocked`: Blocked on an external dependency or prerequisite PR.
+  - `status:in-review`: Actively under code review.
+  - `status:ready-to-merge`: Approved and queued for merge upon CI success.
+- **`priority:*` (Urgency & Severity)**:
+  - `priority:critical`, `priority:high`, `priority:medium`, `priority:low`.
+- **`format:*` (Classification Families)**:
+  - `format:python`, `format:shell`, `format:data`, `format:binary`, `format:markup`.
+- **`type:*` & Core Tags**:
+  - `type:chore`, `type:rfc`, `bug`, `enhancement`, `documentation`, `security`.
+
 ## Development Setup
 
 `findfmt` uses `uv` for package and dependency management.

@@ -27,7 +27,7 @@ class RenderError(AssetToolError):
     def __init__(self, svg_path: Path, output_png: Path, tool: str, stderr: str) -> None:
         """Initialize render error with command output details."""
         super().__init__(
-            f"Failed to render {svg_path} to {output_png} using {tool}:\n{stderr.strip()}"
+            f"Failed to render {svg_path} to {output_png} using {tool}:\n{stderr.strip()}",
         )
 
 
@@ -58,8 +58,10 @@ def find_converter() -> str:
     """
     if shutil.which("inkscape"):
         return "inkscape"
+
     if shutil.which("magick"):
         return "magick"
+
     raise ConverterNotFoundError
 
 
@@ -135,6 +137,7 @@ def optimize_png(png_path: Path, max_colors: int = 1024) -> None:
     magick = shutil.which("magick")
     if not magick:
         return
+
     cmd = [magick, str(png_path), "-colors", str(max_colors), str(png_path)]
     subprocess.run(cmd, capture_output=True, text=True, check=False)
 
@@ -225,7 +228,7 @@ def parse_arguments(argv: list[str] | None = None) -> argparse.Namespace:
         Parsed arguments namespace.
     """
     parser = argparse.ArgumentParser(
-        description="Generate social preview cards, favicons, and application icons from SVGs."
+        description="Generate social preview cards, favicons, and application icons from SVGs.",
     )
     parser.add_argument(
         "--assets-dir",
@@ -274,6 +277,7 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as exc:  # noqa: BLE001
         sys.stderr.write(f"Asset generation failed: {exc}\n")
         return 1
+
     return 0
 
 
