@@ -81,4 +81,6 @@ jobs:
           files: ./coverage.xml
           fail_ci_if_error: false
           token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unittests
+          name: ${{ matrix.os }}-py${{ matrix.python-version }}
         if: ${{ !matrix.experimental }}

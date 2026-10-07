@@ -3,11 +3,11 @@
 `findfmt` is committed to providing an accessible, inclusive experience for all users and
 contributors, regardless of ability or assistive technology.
 
-We strive to align our command-line tools, documentation, and community workflows with the [Web
-Content Accessibility Guidelines (WCAG) 2.1 Level AA](https://www.w3.org/WAI/standards-guidelines/wcag/)
+We strive to align our command-line tools, documentation, and community workflows with the
+[Web Content Accessibility Guidelines (WCAG) 2.1 Level AA](https://www.w3.org/WAI/standards-guidelines/wcag/)
 standards wherever applicable.
 
----
+______________________________________________________________________
 
 ## 1. Supported Environments & Assistive Technologies
 
@@ -19,7 +19,8 @@ assistive tooling:
 - **Screen Reader Compatibility**: Verified for predictable speech output on standard terminal
   emulators across Linux ([Orca](https://help.gnome.org/users/orca/stable/)), macOS
   ([VoiceOver](https://www.apple.com/accessibility/mac/vision/)), and Windows
-  ([NVDA](https://www.nvaccess.org/) and [JAWS](https://www.freedomscientific.com/products/software/jaws/)).
+  ([NVDA](https://www.nvaccess.org/) and
+  [JAWS](https://www.freedomscientific.com/products/software/jaws/)).
 - **Stream-Oriented Plain Text**: CLI output emits linear, deterministic text streams to `stdout`
   and error diagnostics to `stderr` without ANSI escape codes, cursor jumps, or animated spinners in
   standard execution modes.
@@ -46,7 +47,7 @@ AA standards:
 - **Descriptive Alt Text**: Graphical assets, diagrams, and illustrations provide clear, contextual
   alternative text.
 
----
+______________________________________________________________________
 
 ## 2. Known Limitations & Workarounds
 
@@ -57,10 +58,10 @@ constraints:
   profiles may impact ANSI code readability. **Workaround**: Set `export NO_COLOR=1` in your shell
   environment to force monochrome output.
 - **Wide Delimited Streams**: When inspecting verbose file lists with long absolute paths, terminal
-  word-wrapping can impact speech cadence on certain screen readers. **Workaround**: Use relative path
-  traversal (the default behavior) or pipe into a pager such as `less -R`.
+  word-wrapping can impact speech cadence on certain screen readers. **Workaround**: Use relative
+  path traversal (the default behavior) or pipe into a pager such as `less -R`.
 
----
+______________________________________________________________________
 
 ## 3. Reporting Accessibility Barriers & Feedback
 
