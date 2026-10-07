@@ -118,6 +118,7 @@ def main(argv: list[str] | None = None) -> int:
     except Exception as exc:  # noqa: BLE001
         sys.stderr.write(f"Label synchronization failed: {exc}\n")
         return 1
+
     return 0
 
 

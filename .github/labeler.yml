@@ -1,69 +1,45 @@
 ---
 # Configuration for actions/labeler
-
-"area:cli":
+area:cli:
+  - changed-files:
+      - any-glob-to-any-file: [src/findfmt/cli.py, src/findfmt/__main__.py]
+area:classifier:
+  - changed-files:
+      - any-glob-to-any-file: [src/findfmt/classifier.py]
+area:traversal:
+  - changed-files:
+      - any-glob-to-any-file: [src/findfmt/traversal.py]
+area:packaging:
   - changed-files:
       - any-glob-to-any-file:
-          - "src/findfmt/cli.py"
-          - "src/findfmt/__main__.py"
-
-"area:classifier":
+          - pyproject.toml
+          - uv.lock
+          - Dockerfile
+          - .dockerignore
+area:docs:
   - changed-files:
-      - any-glob-to-any-file:
-          - "src/findfmt/classifier.py"
-
-"area:traversal":
-  - changed-files:
-      - any-glob-to-any-file:
-          - "src/findfmt/traversal.py"
-
-"area:packaging":
-  - changed-files:
-      - any-glob-to-any-file:
-          - "pyproject.toml"
-          - "uv.lock"
-          - "Dockerfile"
-          - ".dockerignore"
-
-"area:docs":
-  - changed-files:
-      - any-glob-to-any-file:
-          - "docs/**"
-          - "*.md"
-
+      - any-glob-to-any-file: [docs/**, '*.md']
 documentation:
   - changed-files:
-      - any-glob-to-any-file:
-          - "docs/**"
-          - "*.md"
-
-"ci/cd":
+      - any-glob-to-any-file: [docs/**, '*.md']
+ci/cd:
   - changed-files:
-      - any-glob-to-any-file:
-          - ".github/workflows/**"
-
+      - any-glob-to-any-file: [.github/workflows/**]
 pre-commit:
   - changed-files:
       - any-glob-to-any-file:
-          - ".pre-commit-config.yaml"
-          - "tools/sync_pre_commit_deps.py"
-
+          - .pre-commit-config.yaml
+          - tools/sync_pre_commit_deps.py
 testing:
   - changed-files:
-      - any-glob-to-any-file:
-          - "tests/**"
-
+      - any-glob-to-any-file: [tests/**]
 security:
   - changed-files:
       - any-glob-to-any-file:
-          - "SECURITY.md"
-          - ".gitguardian.yaml"
-          - ".secrets.baseline"
-          - ".trivyignore.yaml"
-
-"type:chore":
+          - SECURITY.md
+          - .gitguardian.yaml
+          - .secrets.baseline
+          - .trivyignore.yaml
+type:chore:
   - changed-files:
-      - any-glob-to-any-file:
-          - ".gitignore"
-          - ".gitattributes"
-          - "cliff.toml"
+      - any-glob-to-any-file: [.gitignore, .gitattributes, cliff.toml]
