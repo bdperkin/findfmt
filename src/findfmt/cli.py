@@ -163,6 +163,7 @@ def parse_tag_arguments(tag_args: Sequence[str] | None) -> frozenset[str]:
             cleaned = tag.strip().lower()
             if cleaned:
                 result.add(cleaned)
+
     return frozenset(result)
 
 
@@ -182,6 +183,7 @@ def _format_match(file_info: FileInfo, *, absolute: bool, show_tags: bool, delim
     if show_tags:
         tags_repr = ", ".join(sorted(file_info.tags))
         return f"{path_str} [{tags_repr}]{delimiter}"
+
     return f"{path_str}{delimiter}"
 
 
@@ -214,6 +216,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.known_tags:
         for tag in sorted(get_known_tags()):
             sys.stdout.write(f"{tag}\n")
+
         return 0
 
     root_paths = tuple(Path(p) for p in args.paths)

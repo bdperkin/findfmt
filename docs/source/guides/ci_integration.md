@@ -24,4 +24,5 @@ jobs:
 
 ## Matrix Testing Strategy
 
-Using `findfmt` allows tests and static analysis to dynamically discover targets without maintaining redundant hard-coded file lists across configuration files.
+Using `findfmt` allows tests and static analysis to dynamically discover targets without maintaining
+redundant hard-coded file lists across configuration files.

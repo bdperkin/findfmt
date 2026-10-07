@@ -39,6 +39,7 @@ def extract_shebang(path: Path) -> str | None:
                 return first_line.decode("utf-8", errors="replace").strip()
     except (OSError, UnicodeDecodeError):
         return None
+
     return None
 
 
@@ -54,6 +55,7 @@ def _resolve_relative(path: Path, root_path: Path | None) -> Path:
     """
     if root_path is None:
         return path
+
     try:
         return path.resolve().relative_to(root_path.resolve())
     except ValueError:
@@ -74,13 +76,18 @@ def _identify_tags(path: Path, str_path: str, *, exists: bool) -> set[str]:
     try:
         if exists:
             return set(identify_engine.tags_from_path(str_path))
+
         return set(identify_engine.tags_from_filename(path.name))
     except (ValueError, OSError):
         return set(identify_engine.tags_from_filename(path.name))
 
 
 def _shebang_info(
-    path: Path, str_path: str, *, is_file: bool, is_symlink: bool
+    path: Path,
+    str_path: str,
+    *,
+    is_file: bool,
+    is_symlink: bool,
 ) -> tuple[str | None, set[str]]:
     """Extract shebang and interpreter tags if applicable.
 
@@ -102,6 +109,7 @@ def _shebang_info(
         parts = identify_engine.parse_shebang_from_file(str_path)
         for part in parts:
             tags.update(identify_engine.tags_from_interpreter(part))
+
     return shebang, tags
 
 
@@ -120,6 +128,7 @@ def _mime_info(str_path: str) -> tuple[str | None, set[str]]:
         tags.add(f"mime:{mime_type}")
         category = mime_type.split("/", 1)[0]
         tags.add(category)
+
     return mime_type, tags
 
 
@@ -136,10 +145,12 @@ def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -
     """
     if not exists:
         return False
+
     if os.name == "nt":
         pathext = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC").split(";")
         has_pathext = any(path.name.upper().endswith(ext.upper()) for ext in pathext if ext)
         return has_pathext or bool(shebang)
+
     return os.access(path, os.X_OK)
 
 

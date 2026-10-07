@@ -136,4 +136,5 @@ def test_main_module():
     with patch("sys.argv", ["findfmt", "--version"]):
         with pytest.raises(SystemExit) as exc_info:
             runpy.run_module("findfmt.__main__", run_name="__main__")
+
         assert exc_info.value.code == 0

@@ -52,7 +52,7 @@ man_pages = [
         "Content-aware file discovery and classification suite",
         ["Brandon Perkins"],
         1,
-    )
+    ),
 ]
 
 # EPUB output
@@ -70,7 +70,7 @@ latex_documents = [
         "findfmt Documentation",
         "Brandon Perkins",
         "manual",
-    )
+    ),
 ]
 
 # Napoleon settings for Google-style docstrings
