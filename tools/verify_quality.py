@@ -31,6 +31,7 @@ def main() -> int:
         ("Deptry Dependencies", ["uv", "run", "deptry", "."]),
         ("Vulture Dead Code", ["uv", "run", "vulture", "src"]),
         ("Codespell Spelling", ["uv", "run", "codespell"]),
+        ("UV Dependency Audit", ["uv", "audit", "--preview-features", "audit-command"]),
     ]
 
     for name, cmd in steps:
