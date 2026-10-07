@@ -42,6 +42,7 @@ dependencies = [
   "identify>=2.6",
   "pathspec>=0.12",
   "tomli>=2.0.1; python_version<'3.11'",
+  "typer>=0.12",
 ]
 
 urls.Changelog = "https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md"
@@ -49,7 +50,7 @@ urls.Documentation = "https://bdperkin.github.io/findfmt"
 urls.Homepage = "https://github.com/bdperkin/findfmt"
 urls.Issues = "https://github.com/bdperkin/findfmt/issues"
 urls.Repository = "https://github.com/bdperkin/findfmt"
-scripts.findfmt = "findfmt.cli:main"
+scripts.findfmt = "findfmt.cli:app"
 
 [dependency-groups]
 dev = [
@@ -69,6 +70,7 @@ docs = [
   "sphinx>=8",
   "sphinx-autobuild>=2024.10.3",
   "sphinx-copybutton>=0.5.2",
+  "sphinxcontrib-typer>=0.9.2",
 ]
 
 lint = [
@@ -116,6 +118,13 @@ lint.ignore = [
   "ISC001", # Single line implicit string concatenation (formatter conflict)
 ]
 lint.per-file-ignores."docs/**/*" = [ "A001", "INP001" ]
+lint.per-file-ignores."src/findfmt/cli.py" = [
+  "ARG001",
+  "FBT001",
+  "FBT002",
+  "PLR0913",
+  "PLR0917",
+]
 lint.per-file-ignores."tests/**/*" = [
   "ANN",
   "D",
@@ -199,7 +208,7 @@ exclude = "tests/*,docs/*,tools/*"
 
 [tool.vulture]
 exclude = [ "tests", "docs", "tools" ]
-ignore_names = [ "relative_paths" ]
+ignore_names = [ "known_tags", "relative_paths" ]
 min_confidence = 80
 
 [tool.pymarkdown.plugins.MD013]

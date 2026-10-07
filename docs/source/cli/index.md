@@ -5,8 +5,8 @@ output formatting.
 
 ## 1. Synopsis
 
-```text
-findfmt [OPTIONS] [PATHS...]
+```{typer} findfmt.cli:app
+:prog: findfmt
 ```
 
 ## 2. Options
