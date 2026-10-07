@@ -131,7 +131,25 @@ findfmt -l -t python
 findfmt -s
 ```
 
-### 3.5. Command Aliases & Entry Points
+### 3.5. Structured Data Serialization
+
+Export discovery results to machine-readable formats for pipelines, analysis, and notebooks:
+
+```bash
+# Export JSON array of file metadata
+findfmt -t python --format json
+
+# Stream NDJSON (one JSON record per line)
+findfmt -f jsonl
+
+# Generate clean YAML document
+findfmt -t yaml -f yaml
+
+# Generate Jupyter Notebook with pandas DataFrame ingestion
+findfmt -f ipynb > discovery.ipynb
+```
+
+### 3.6. Command Aliases & Entry Points
 
 `findfmt` installs dedicated executable wrappers for frequent operations:
 
@@ -157,6 +175,7 @@ ______________________________________________________________________
 | `--no-ignore` / `--ignore`                       | Toggle respecting `.gitignore` files                       |
 | `--hidden` / `--no-hidden`                       | Toggle inspecting hidden files and directories             |
 | `-L, --follow-symlinks` / `--no-follow-symlinks` | Toggle following filesystem symbolic links                 |
+| `-f, --format FORMAT`                            | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`)   |
 | `-0, --print0` / `--no-print0`                   | NUL-delimited output for `xargs -0`                        |
 | `-l, --list-tags` / `--no-list-tags`             | Toggle printing tags alongside file paths                  |
 | `-s, --summary` / `--no-summary`                 | Toggle summary frequency statistics to `stderr`            |

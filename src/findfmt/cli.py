@@ -16,11 +16,12 @@ from typing import TYPE_CHECKING, Annotated, Any
 import typer
 
 from findfmt.classifier import get_known_tags
+from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.models import TraversalConfig
 from findfmt.traversal import find_files
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Iterable, Sequence
 
     from findfmt.models import FileInfo
 
@@ -219,6 +220,8 @@ def get_help_all() -> str:
         "  --follow-symlinks, -L         Follow symbolic links [default: no-follow-symlinks].\n"
         "  --symlinks / --no-symlinks    Alias for --follow-symlinks / --no-follow-symlinks.\n\n"
         "Output Formatting:\n"
+        "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb)\n"
+        "                                [default: text].\n"
         "  --absolute / --no-absolute    Output absolute paths [default: no-absolute].\n"
         "  --print0, -0 / --no-print0    Delimit with NUL (\\0) byte [default: no-print0].\n"
         "  --list-tags, -l / --no-list-tags  Display identified tags [default: no-list-tags].\n"
@@ -252,6 +255,10 @@ def get_help_all() -> str:
         "  2                             Invalid command-line usage or invalid arguments.\n\n"
         "Workflow Examples:\n"
         "  $ findfmt -t python                     # Find Python files in current repository\n"
+        "  $ findfmt --format json                 # Output JSON array of file metadata\n"
+        "  $ findfmt -f jsonl                      # Stream line-delimited JSON (NDJSON)\n"
+        "  $ findfmt -f yaml                       # Output structured YAML document\n"
+        "  $ findfmt -f ipynb > report.ipynb       # Generate Jupyter notebook report\n"
         "  $ findfmt --shebang bash scripts/       # Find bash scripts in scripts/\n"
         "  $ findfmt -t python -t executable --all-tags  # Require BOTH tags\n"
         "  $ findfiles --no-hidden                 # Traverse files without hidden files\n"
@@ -312,26 +319,6 @@ def parse_tag_arguments(tag_args: Sequence[str] | None) -> frozenset[str]:
                 result.add(cleaned)
 
     return frozenset(result)
-
-
-def _format_match(file_info: FileInfo, *, absolute: bool, show_tags: bool, delimiter: str) -> str:
-    """Format matching file information for stdout output.
-
-    Args:
-        file_info: Classified file information.
-        absolute: Whether to format using absolute path.
-        show_tags: Whether to append comma-separated tags.
-        delimiter: End of line delimiter string.
-
-    Returns:
-        Formatted string for output.
-    """
-    path_str = str(file_info.path if absolute else file_info.relative_path)
-    if show_tags:
-        tags_repr = ", ".join(sorted(file_info.tags))
-        return f"{path_str} [{tags_repr}]{delimiter}"
-
-    return f"{path_str}{delimiter}"
 
 
 def _write_summary(match_count: int, tag_counter: Counter[str]) -> None:
@@ -446,6 +433,16 @@ def findfmt(
             help="Follow symbolic links during traversal.",
         ),
     ] = False,
+    output_format: Annotated[
+        OutputFormat,
+        typer.Option(
+            "--format",
+            "-f",
+            case_sensitive=False,
+            rich_help_panel="Output Formatting",
+            help="Output serialization format (text, json, jsonl, yaml, ipynb).",
+        ),
+    ] = OutputFormat.TEXT,
     absolute: Annotated[
         bool,
         typer.Option(
@@ -545,24 +542,31 @@ def findfmt(
         null_delimited=print0,
         show_tags=list_tags,
         show_summary=summary,
+        output_format=output_format.value,
     )
 
     tag_counter: Counter[str] = Counter()
     match_count = 0
     delimiter = "\0" if config.null_delimited else "\n"
 
-    for file_info in find_files(config):
-        match_count += 1
-        if config.show_summary:
-            tag_counter.update(file_info.tags)
+    formatter = get_formatter(
+        output_format,
+        absolute=absolute,
+        show_tags=config.show_tags,
+        delimiter=delimiter,
+    )
 
-        formatted = _format_match(
-            file_info,
-            absolute=absolute,
-            show_tags=config.show_tags,
-            delimiter=delimiter,
-        )
-        sys.stdout.write(formatted)
+    def _matched_files() -> Iterable[FileInfo]:
+        """Yield matched files while updating match statistics."""
+        nonlocal match_count
+        for file_info in find_files(config):
+            match_count += 1
+            if config.show_summary:
+                tag_counter.update(file_info.tags)
+
+            yield file_info
+
+    formatter.stream(_matched_files(), sys.stdout)
 
     if config.show_summary:
         _write_summary(match_count, tag_counter)
@@ -577,6 +581,8 @@ _OPTIONS_WITH_VALUE: frozenset[str] = frozenset(
         "--exclude",
         "--exclude-tag",
         "--shebang",
+        "-f",
+        "--format",
     },
 )
 

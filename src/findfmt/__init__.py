@@ -13,6 +13,7 @@ from findfmt.cli import (
     main_findshebang,
     main_findsummary,
 )
+from findfmt.formatters import Formatter, OutputFormat, get_formatter
 from findfmt.models import FileInfo, TraversalConfig
 from findfmt.traversal import find_files, traverse_directory
 
@@ -20,10 +21,13 @@ __version__ = get_version()
 
 __all__ = [
     "FileInfo",
+    "Formatter",
+    "OutputFormat",
     "TraversalConfig",
     "__version__",
     "classify_file",
     "find_files",
+    "get_formatter",
     "get_known_tags",
     "get_version",
     "main",

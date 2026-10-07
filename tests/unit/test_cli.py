@@ -1,3 +1,4 @@
+import json
 import runpy
 import subprocess
 from importlib.metadata import PackageNotFoundError
@@ -6,6 +7,7 @@ from unittest.mock import patch
 
 import pytest
 import typer
+import yaml
 from typer.testing import CliRunner
 
 from findfmt.cli import (
@@ -605,3 +607,73 @@ def test_posix_double_dash_hyphenated_dir(tmp_path: Path, monkeypatch: pytest.Mo
     assert main_findshebang(["--", "python", "-weird-dir"]) == 0
     assert main_findfmt0(["--", "-weird-dir"]) == 0
     assert main_findsummary(["--", "-weird-dir"]) == 0
+
+
+def test_cli_format_json(sample_repo: Path):
+    runner = CliRunner()
+    res = runner.invoke(app, ["--format", "json", str(sample_repo)])
+    assert res.exit_code == 0
+    data = json.loads(res.stdout)
+    assert isinstance(data, list)
+    assert len(data) > 0
+    paths = [item["path"] for item in data]
+    assert any("app.py" in p for p in paths)
+
+
+def test_cli_format_jsonl(sample_repo: Path):
+    runner = CliRunner()
+    res = runner.invoke(app, ["-f", "jsonl", str(sample_repo)])
+    assert res.exit_code == 0
+    lines = [line for line in res.stdout.strip().split("\n") if line]
+    assert len(lines) > 0
+    record = json.loads(lines[0])
+    assert "path" in record
+    assert "tags" in record
+
+
+def test_cli_format_yaml(sample_repo: Path):
+    runner = CliRunner()
+    res = runner.invoke(app, ["-f", "yaml", str(sample_repo)])
+    assert res.exit_code == 0
+    data = yaml.safe_load(res.stdout)
+    assert isinstance(data, list)
+    assert len(data) > 0
+    assert "path" in data[0]
+
+
+def test_cli_format_ipynb(sample_repo: Path):
+    runner = CliRunner()
+    res = runner.invoke(app, ["--format", "ipynb", str(sample_repo)])
+    assert res.exit_code == 0
+    nb = json.loads(res.stdout)
+    assert nb["nbformat"] == 4
+    assert len(nb["cells"]) >= 3
+
+
+def test_cli_format_text(sample_repo: Path):
+    runner = CliRunner()
+    res = runner.invoke(app, ["--format", "text", str(sample_repo)])
+    assert res.exit_code == 0
+    assert "app.py" in res.stdout
+
+
+def test_cli_format_invalid(sample_repo: Path):
+    runner = CliRunner()
+    res = runner.invoke(app, ["--format", "unsupported-fmt", str(sample_repo)])
+    assert res.exit_code != 0
+
+
+def test_cli_format_json_with_summary(sample_repo: Path):
+    runner = CliRunner()
+    res = runner.invoke(app, ["-f", "json", "--summary", str(sample_repo)])
+    assert res.exit_code == 0
+    data = json.loads(res.stdout)
+    assert isinstance(data, list)
+    assert "--- findfmt summary ---" in res.stderr
+    assert "Matched files:" in res.stderr
+
+
+def test_consume_option_format():
+    assert _consume_option("-f", "json") == 2
+    assert _consume_option("--format", "yaml") == 2
+    assert _consume_option("--format=json", None) == 1

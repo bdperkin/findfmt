@@ -37,6 +37,15 @@ symbolic links during directory traversal. Use `--no-follow-symlinks` to disable
 
 ### 2.3. Output Controls
 
+`-f, --format FORMAT` : Choose the output serialization format (`text`, `json`, `jsonl`, `yaml`,
+`ipynb`). Defaults to `text`.
+
+- `text`: Standard line-oriented or NUL-delimited plain text paths.
+- `json`: Deterministic JSON array of file objects with full metadata attributes.
+- `jsonl`: Line-delimited JSON (NDJSON) records for streaming pipelines.
+- `yaml`: Clean, readable block-style YAML document.
+- `ipynb`: Jupyter Notebook (`.ipynb`) format pre-populated with data analysis code cells.
+
 `--absolute / --no-absolute` : Output absolute filesystem paths rather than relative paths.
 
 `-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
