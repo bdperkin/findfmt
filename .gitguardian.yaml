@@ -3,9 +3,4 @@
 # See https://docs.gitguardian.com/internal-repositories-monitoring/ggshield-cli/reference/configuration
 version: 2
 secret:
-  ignored_paths:
-    - "tests/**"
-    - "docs/**"
-    - "tools/**"
-    - ".venv/**"
-    - "uv.lock"
+  ignored_paths: [tests/**, docs/**, tools/**, .venv/**, uv.lock]
