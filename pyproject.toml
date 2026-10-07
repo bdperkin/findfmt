@@ -205,6 +205,9 @@ min_confidence = 80
 [tool.pymarkdown.plugins.MD013]
 enabled = false
 
+[tool.pymarkdown.plugins.MD024]
+siblings_only = true
+
 [tool.pymarkdown.plugins.MD031]
 enabled = false
 

@@ -41,10 +41,11 @@ commit_parsers = [
     { message = "^refactor", group = "<!-- 4 -->Refactor" },
     { message = "^style", group = "<!-- 5 -->Styling" },
     { message = "^test", group = "<!-- 6 -->Testing" },
+    { message = "^sec", group = "<!-- 7 -->Security" },
     { message = "^chore\\(release\\)", skip = true },
-    { message = "^chore\\(deps\\)", group = "<!-- 7 -->Dependencies" },
-    { message = "^chore", group = "<!-- 8 -->Miscellaneous" },
-    { message = "^ci", group = "<!-- 9 -->CI/CD" },
+    { message = "^chore\\(deps\\)", group = "<!-- 8 -->Dependencies" },
+    { message = "^chore", group = "<!-- 9 -->Miscellaneous" },
+    { message = "^ci", group = "<!-- 10 -->CI/CD" },
 ]
 filter_commits = false
 tag_pattern = "v[0-9].*"
