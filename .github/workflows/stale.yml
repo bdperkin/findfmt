@@ -1,30 +1,31 @@
 ---
-name: "Stale Management"
-
+name: Stale Management
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: 0 0 * * *
   workflow_dispatch:
-
 permissions:
   issues: write
   pull-requests: write
-
 jobs:
   stale:
-    name: "Manage Inactive Issues & PRs"
+    name: Manage Inactive Issues & PRs
     runs-on: ubuntu-latest
     steps:
       - name: Stale Action
         uses: actions/stale@v9
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          stale-issue-message: "This issue has been automatically marked as stale due to 60 days of inactivity. It will be closed in 14 days if no further activity occurs."
-          stale-pr-message: "This pull request has been automatically marked as stale due to 30 days of inactivity. It will be closed in 14 days if no further activity occurs."
-          stale-issue-label: "status:needs-info"
-          stale-pr-label: "status:needs-info"
+          stale-issue-message: This issue has been automatically marked as stale due
+            to 60 days of inactivity. It will be closed in 14 days if no further activity
+            occurs.
+          stale-pr-message: This pull request has been automatically marked as stale
+            due to 30 days of inactivity. It will be closed in 14 days if no further
+            activity occurs.
+          stale-issue-label: status:needs-info
+          stale-pr-label: status:needs-info
           days-before-stale: 60
           days-before-pr-stale: 30
           days-before-close: 14
-          exempt-issue-labels: "pinned,security,epic"
-          exempt-pr-labels: "wip,status:blocked"
+          exempt-issue-labels: pinned,security,epic
+          exempt-pr-labels: wip,status:blocked
