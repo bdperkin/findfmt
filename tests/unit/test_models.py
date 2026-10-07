@@ -51,3 +51,26 @@ def test_traversal_config_defaults():
     assert not config.null_delimited
     assert not config.show_tags
     assert not config.show_summary
+    assert config.output_format == "text"
+
+
+def test_file_info_to_dict():
+    info = FileInfo(
+        path=Path("/tmp/dir/test.sh"),
+        relative_path=Path("test.sh"),
+        tags=frozenset({"shell", "text"}),
+        shebang="#!/bin/bash",
+        mime_type="text/x-shellscript",
+        is_executable=True,
+        is_symlink=False,
+        size_bytes=512,
+    )
+    d_rel = info.to_dict(absolute=False)
+    assert d_rel["path"] == "test.sh"
+    assert d_rel["relative_path"] == "test.sh"
+    assert d_rel["tags"] == ["shell", "text"]
+    assert d_rel["shebang"] == "#!/bin/bash"
+
+    d_abs = info.to_dict(absolute=True)
+    assert d_abs["path"] == str(info.path)
+    assert d_abs["relative_path"] == "test.sh"
