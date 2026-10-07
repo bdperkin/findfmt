@@ -1,0 +1,56 @@
+---
+name: Misclassification / Traversal Edge Case
+description: Report a file that was incorrectly identified, missed, or traversal rule that didn't apply correctly
+title: "fix(classifier): misclassification for <format/path>"
+labels: ["bug", "area:classifier"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Report files that are identified with incorrect tags, missed during classification, or affected by traversal filtering.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Description of Misclassification
+      description: Describe which file was misclassified or skipped unexpectedly.
+    validations:
+      required: true
+  - type: input
+    id: detected_vs_expected
+    attributes:
+      label: Detected vs Expected Tag(s)
+      description: What tags did `findfmt` assign, and what tags did you expect?
+      placeholder: "Detected: ['text', 'plain'] vs Expected: ['python']"
+    validations:
+      required: true
+  - type: textarea
+    id: traversal_context
+    attributes:
+      label: Traversal Flags & Git Environment
+      description: Were `--no-ignore` or `--hidden` passed? Are there `.gitignore` or `.git/info/exclude` rules affecting this path?
+      value: |
+        - Command flags:
+        - Relevant .gitignore patterns:
+        - Path is symlink: [Yes / No]
+        - File permissions: [e.g. executable mode 0755, regular mode 0644]
+    validations:
+      required: true
+  - type: textarea
+    id: file_sample
+    attributes:
+      label: File Header / Content Sample
+      description: Provide the first 1-10 lines or bytes of the file (or a sanitized reproduction sample).
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Info
+      description: Provide system and environment details.
+      value: |
+        - OS:
+        - Python version:
+        - findfmt version:
+    validations:
+      required: true

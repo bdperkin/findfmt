@@ -3,7 +3,10 @@ blank_issues_enabled: false
 contact_links:
   - name: Security Vulnerabilities
     url: https://github.com/bdperkin/findfmt/security/advisories/new
-    about: Please report security vulnerabilities privately.
-  - name: Documentation
+    about: Please report security vulnerabilities privately via GitHub Security Advisories.
+  - name: Online Documentation
     url: https://bdperkin.github.io/findfmt
-    about: Read our documentation and guides.
+    about: Explore tutorials, architecture guides, and API reference.
+  - name: GitHub Discussions & Questions
+    url: https://github.com/bdperkin/findfmt/discussions
+    about: Ask questions or discuss use cases with the community.

@@ -1,0 +1,38 @@
+---
+name: Documentation Improvement
+description: Suggest improvements, report typos, or request missing guides in findfmt documentation
+title: "docs: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us keep documentation clear, accurate, and up-to-date.
+  - type: input
+    id: page_location
+    attributes:
+      label: Documentation Page or Location
+      description: URL to hosted doc (https://bdperkin.github.io/findfmt/...), Sphinx source path (docs/source/...), README, or man page.
+      placeholder: "e.g. docs/source/guides/quickstart.md or README.md"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Issue Description
+      description: What is inaccurate, outdated, unclear, or missing?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_change
+    attributes:
+      label: Suggested Revision
+      description: Provide the proposed wording or updated content snippet.
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to submit a Pull Request with this fix.

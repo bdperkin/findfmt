@@ -1,37 +1,70 @@
 ---
 name: Bug Report
-description: File a bug report to help improve findfmt
-labels: [bug]
+description: Report unexpected behavior, incorrect error codes, or CLI crashes in
+  findfmt
+title: 'fix: '
+labels: [bug, triage]
 body:
   - type: markdown
     attributes:
-      value: Thank you for reporting an issue!
+      value: |
+        Thank you for reporting an issue! Please verify your issue hasn't already been reported by searching existing issues.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Pre-flight Checks
+      description: 'Please verify the following before submitting:'
+      options:
+        - label: I have tested with the latest release or main branch of `findfmt`.
+          required: true
+        - label: I have searched open and closed issues and found no duplicate.
+          required: true
   - type: textarea
-    id: description
+    id: summary
     attributes:
       label: Bug Description
       description: A clear and concise description of what the bug is.
+      placeholder: Describe the problem encountered...
     validations:
       required: true
   - type: textarea
-    id: reproduction
+    id: command
     attributes:
-      label: Reproduction Steps
-      description: Steps to reproduce the behavior.
-      placeholder: |
-        1. Run `findfmt ...`
-        2. Expected output ...
-        3. Actual output ...
+      label: Command Invocation
+      description: The exact command line invocation and flags used.
+      placeholder: findfmt -t python -0 .
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior & Output
+      description: What actually happened? Include full terminal output, traceback,
+        and exit codes.
+      render: shell
     validations:
       required: true
   - type: textarea
     id: environment
     attributes:
       label: Environment Info
-      description: OS version, Python version, findfmt version.
+      description: Provide system and environment details.
       value: |
-        - OS:
-        - Python version:
-        - findfmt version:
+        - OS: [e.g. Linux / macOS / Windows]
+        - Architecture: [e.g. x86_64 / arm64]
+        - Python version: [e.g. 3.12.2]
+        - findfmt version: [run `findfmt --version`]
     validations:
       required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context, filesystem details, or links to reproductions.

@@ -1,6 +1,8 @@
 ## Description
 
-Please provide a brief description of the changes introduced by this pull request.
+Please provide a clear and concise summary of the changes made and the motivation behind them.
+
+Closes #
 
 ## Type of Change
 
@@ -10,11 +12,14 @@ Please provide a brief description of the changes introduced by this pull reques
 - [ ] Code refactoring (`refactor:`)
 - [ ] Performance improvement (`perf:`)
 - [ ] CI/CD or build automation (`ci:`, `chore:`)
+- [ ] Testing additions or maintenance (`test:`)
 
 ## Quality Checklist
 
-- [ ] I have verified 100% test coverage locally (`uv run pytest`).
-- [ ] I have run all linting and type checks (`uv run ruff check && uv run ty check`).
-- [ ] I have executed the full verification suite (`uv run python tools/verify_quality.py`).
-- [ ] My commits follow [Conventional Commits](https://www.conventionalcommits.org/).
-- [ ] I have signed off on my commits (`git commit -s`).
+- [ ] All pre-commit hooks pass locally (`uv run pre-commit run --all-files`).
+- [ ] The full quality verification suite passes with 100% test coverage
+  (`uv run python tools/verify_quality.py`).
+- [ ] Sphinx documentation builds cleanly without warnings
+  (`uv run sphinx-build -M html docs/source docs/build -W`).
+- [ ] All commit messages follow [Conventional Commits](https://www.conventionalcommits.org/).
+- [ ] All commits include a Developer Certificate of Origin sign-off (`git commit -s`).
