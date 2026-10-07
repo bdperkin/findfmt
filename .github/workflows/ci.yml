@@ -129,3 +129,13 @@ jobs:
           flags: unittests
           name: ${{ matrix.os }}-py${{ matrix.python-version }}
         if: ${{ !matrix.experimental }}
+      - name: Upload Test Results to Codecov (Test Analytics)
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./junit.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          flags: unittests
+          name: ${{ matrix.os }}-py${{ matrix.python-version }}
+        if: ${{ !cancelled() && !matrix.experimental }}

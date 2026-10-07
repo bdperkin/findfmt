@@ -137,7 +137,7 @@ per_rule_ignores = { DEP002 = [ "tomli" ] }
 
 [tool.pytest.ini_options]
 minversion = "8.0"
-addopts = "-ra -q --strict-markers --strict-config --cov=findfmt --cov-report=term-missing --cov-report=xml --cov-fail-under=100"
+addopts = "-ra -q --strict-markers --strict-config --cov=findfmt --cov-report=term-missing --cov-report=xml --cov-fail-under=100 --junitxml=junit.xml -o junit_family=xunit2"
 testpaths = [ "tests" ]
 pythonpath = [ "src" ]
 
