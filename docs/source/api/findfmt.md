@@ -2,7 +2,7 @@
 
 Documentation for `findfmt` modules and types.
 
-## Models
+## 1. Models
 
 ```{eval-rst}
 .. automodule:: findfmt.models
@@ -11,7 +11,7 @@ Documentation for `findfmt` modules and types.
    :show-inheritance:
 ```
 
-## Classifier
+## 2. Classifier
 
 ```{eval-rst}
 .. automodule:: findfmt.classifier
@@ -20,7 +20,7 @@ Documentation for `findfmt` modules and types.
    :show-inheritance:
 ```
 
-## Traversal Engine
+## 3. Traversal Engine
 
 ```{eval-rst}
 .. automodule:: findfmt.traversal
@@ -29,7 +29,7 @@ Documentation for `findfmt` modules and types.
    :show-inheritance:
 ```
 
-## Command-Line Interface
+## 4. Command-Line Interface
 
 ```{eval-rst}
 .. automodule:: findfmt.cli

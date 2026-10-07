@@ -3,15 +3,15 @@
 `findfmt` provides a Unix-style command-line interface with options for tagging, filtering, and
 output formatting.
 
-## Synopsis
+## 1. Synopsis
 
 ```text
 findfmt [OPTIONS] [PATHS...]
 ```
 
-## Options
+## 2. Options
 
-### Tag Filtering
+### 2.1. Tag Filtering
 
 `-t, --type, --tag TAG` : Filter files by tag (e.g. `python`, `yaml`, `json`, `shell`,
 `executable`). Can be specified multiple times or comma-separated (`-t python,shell`).
@@ -24,7 +24,7 @@ one.
 `--shebang INTERPRETER` : Filter files whose shebang line contains the specified interpreter name or
 substring.
 
-### Traversal Controls
+### 2.2. Traversal Controls
 
 `--no-ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`.
 
@@ -32,7 +32,7 @@ substring.
 
 `-L, --follow-symlinks` : Follow symbolic links during directory traversal.
 
-### Output Controls
+### 2.3. Output Controls
 
 `--absolute` : Output absolute filesystem paths rather than relative paths.
 

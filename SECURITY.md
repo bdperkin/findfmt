@@ -1,6 +1,6 @@
 # Security Policy
 
-## Supported Versions
+## 1. Supported Versions
 
 Only the latest release of `findfmt` is actively supported with security updates.
 
@@ -9,7 +9,7 @@ Only the latest release of `findfmt` is actively supported with security updates
 | 0.1.x   | :white_check_mark: |
 | < 0.1.0 | :x:                |
 
-## Reporting a Vulnerability
+## 2. Reporting a Vulnerability
 
 We take the security of `findfmt` seriously. If you discover a security vulnerability:
 
@@ -29,14 +29,14 @@ release.
 
 ______________________________________________________________________
 
-## Security Threat Model & Audit Report
+## 3. Security Threat Model & Audit Report
 
 This section documents the formal security architecture, threat vectors analyzed, and defensive
 mitigations implemented in `findfmt`.
 
-### 1. Filesystem Traversal & Path Security
+### 3.1. Filesystem Traversal & Path Security
 
-#### Symlink Loops & Resource Exhaustion (DoS)
+#### 3.1.1. Symlink Loops & Resource Exhaustion (DoS)
 
 - **Threat Vector**: Malicious or accidental recursive symbolic directory structures (e.g.,
   `dir/loop -> dir`) can cause unbounded recursion, stack overflow (`RecursionError`), or heap
@@ -47,7 +47,7 @@ mitigations implemented in `findfmt`.
   visited, traversal immediately skips the entry, breaking cyclic graphs and avoiding duplicate
   processing.
 
-#### Arbitrary Path Traversal & Boundary Containment
+#### 3.1.2. Arbitrary Path Traversal & Boundary Containment
 
 - **Threat Vector**: Ingested paths or nested `.gitignore` files could attempt directory traversal
   outside intended directory boundaries (e.g., path traversal sequences `../../`).
@@ -55,7 +55,7 @@ mitigations implemented in `findfmt`.
   `entry_path.is_relative_to(base_dir)` and `_resolve_relative`. Path operations are scoped strictly
   within configured root paths.
 
-#### TOCTOU (Time-of-Check to Time-of-Use) Resiliency
+#### 3.1.3. TOCTOU (Time-of-Check to Time-of-Use) Resiliency
 
 - **Threat Vector**: Asynchronous filesystem modifications occurring between directory scanning and
   file inspection (e.g., a file is deleted, renamed, or unlinked) could raise uncaught filesystem
@@ -65,9 +65,9 @@ mitigations implemented in `findfmt`.
   vanished entries are safely skipped or fall back to metadata defaults without crashing the runtime
   engine.
 
-### 2. File Inspection & Content Engine Security
+### 3.2. File Inspection & Content Engine Security
 
-#### Bounded Content Reads
+#### 3.2.1. Bounded Content Reads
 
 - **Threat Vector**: Reading untrusted, multi-gigabyte or stream-backed files into memory to inspect
   shebangs or content signatures can trigger out-of-memory (OOM) denial-of-service conditions.
@@ -75,7 +75,7 @@ mitigations implemented in `findfmt`.
   shebang extraction strictly reads a bounded buffer chunk of at most 512 bytes (`f.readline(512)`).
   Filename identification heuristics bypass disk reads entirely for known file types.
 
-#### Special Files & Device Nodes
+#### 3.2.2. Special Files & Device Nodes
 
 - **Threat Vector**: Encountering named pipes (FIFOs), character devices (`/dev/random`,
   `/dev/zero`), UNIX domain sockets, or block devices could block execution indefinitely on read
@@ -86,16 +86,16 @@ mitigations implemented in `findfmt`.
   opening any file descriptor, guaranteeing that `findfmt` never blocks on unwritten FIFOs or
   unbounded device streams.
 
-#### Regular Expression & Pattern Safety (ReDoS)
+#### 3.2.3. Regular Expression & Pattern Safety (ReDoS)
 
 - **Threat Vector**: User-supplied glob patterns or complex `.gitignore` rules could induce
   exponential backtracking in regular expression engines.
 - **Mitigation**: `findfmt` utilizes `pathspec` to compile `.gitignore` rules into linear-time
   matching automata, mitigating catastrophic backtracking risks.
 
-### 3. Terminal Presentation & Injection Attacks (CWE-150)
+### 3.3. Terminal Presentation & Injection Attacks (CWE-150)
 
-#### ANSI Escape Sequence Injection
+#### 3.3.1. ANSI Escape Sequence Injection
 
 - **Threat Vector**: Files named with terminal control characters or ANSI escape sequences (e.g.,
   `\033[2J`, carriage returns, bell codes) can manipulate terminal state, clear history, or spoof
@@ -105,9 +105,9 @@ mitigations implemented in `findfmt`.
   expansion. Quoting and sanitization features (`-q` / `--quote`) are tracked on the roadmap (#20,
   #22).
 
-### 4. Supply Chain & Dependency Hygiene
+### 3.4. Supply Chain & Dependency Hygiene
 
-#### Automated Vulnerability Audits
+#### 3.4.1. Automated Vulnerability Audits
 
 - **Threat Vector**: Known Common Vulnerabilities and Exposures (CVEs) in transitive dependencies
   could introduce vulnerabilities into the toolchain.
@@ -115,7 +115,7 @@ mitigations implemented in `findfmt`.
   verification quality gate via `uv audit --preview-features audit-command`, cross-referencing all
   91 resolved dependencies against the Python Packaging Advisory Database.
 
-#### Absence of Dangerous Shell Executions
+#### 3.4.2. Absence of Dangerous Shell Executions
 
 - **Threat Vector**: Executing untrusted system commands or shells (`os.system`, `shell=True`) can
   lead to command injection.
@@ -123,9 +123,9 @@ mitigations implemented in `findfmt`.
   subprocesses. All path operations and traversals are conducted strictly via Python's standard `os`
   and `pathlib` primitives.
 
-### 5. GitHub Actions & CI/CD Hardening
+### 3.5. GitHub Actions & CI/CD Hardening
 
-#### Principle of Least Privilege
+#### 3.5.1. Principle of Least Privilege
 
 - **Threat Vector**: Over-permissioned GitHub Actions tokens can allow compromised dependencies or
   scripts to modify repositories, create tags, or access secrets.
@@ -133,7 +133,7 @@ mitigations implemented in `findfmt`.
   Elevated permissions (such as `id-token: write`) are strictly confined to release jobs utilizing
   ephemeral OpenID Connect (OIDC) tokens for PyPI Trusted Publishing.
 
-#### Multi-Tier Secret Scanning & Static Analysis
+#### 3.5.2. Multi-Tier Secret Scanning & Static Analysis
 
 - **Threat Vector**: Accidental inclusion of API keys, private certificates, or credentials in git
   history.
