@@ -1,6 +1,20 @@
 ---
 # Exhaustive pre-commit configuration for findfmt
 # See https://pre-commit.com for more information
+ci:
+  autofix_commit_msg: 'style(pre-commit): auto fixes from pre-commit hooks'
+  autofix_prs: true
+  autoupdate_branch: main
+  autoupdate_commit_msg: 'chore(deps): update pre-commit hooks'
+  autoupdate_schedule: weekly
+  skip:
+    - ty-check
+    - interrogate
+    - deptry
+    - vulture
+    - xenon
+    - sync-pre-commit-deps
+  submodules: false
 default_install_hook_types: [pre-commit, commit-msg]
 default_stages: [pre-commit]
 repos:
@@ -8,6 +22,12 @@ repos:
   - repo: meta
     hooks:
       - id: check-useless-excludes
+
+  # Pre-commit CI configuration validator
+  - repo: https://github.com/pre-commit-ci/pre-commit-ci-config
+    rev: v1.6.1
+    hooks:
+      - id: check-pre-commit-ci-config
 
   # Pre-commit standard hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
