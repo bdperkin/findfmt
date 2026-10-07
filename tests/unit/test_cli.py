@@ -6,7 +6,21 @@ from unittest.mock import patch
 import pytest
 from typer.testing import CliRunner
 
-from findfmt.cli import app, get_version, main, parse_tag_arguments
+from findfmt.cli import (
+    _consume_option,
+    _extract_first_positional,
+    _has_option,
+    app,
+    get_version,
+    main,
+    main_findfilefmt,
+    main_findfilemime,
+    main_findfiles,
+    main_findfmt0,
+    main_findshebang,
+    main_findsummary,
+    parse_tag_arguments,
+)
 
 
 def test_get_version():
@@ -177,3 +191,145 @@ def test_main_module():
             runpy.run_module("findfmt.__main__", run_name="__main__")
 
         assert exc_info.value.code == 0
+
+
+def test_has_option():
+    assert _has_option(["-t", "python"], {"-t", "--type", "--tag"})
+    assert _has_option(["--tag=python"], {"-t", "--type", "--tag"})
+    assert not _has_option(["--shebang", "bash"], {"-t", "--type", "--tag"})
+
+
+def test_consume_option():
+    assert _consume_option("-t", "python") == 2
+    assert _consume_option("-t", None) == 1
+    assert _consume_option("--hidden", "python") == 1
+    assert _consume_option("-t=python", "src/") == 1
+
+
+def test_extract_first_positional():
+    assert _extract_first_positional([]) == (None, [])
+    assert _extract_first_positional(["python"]) == ("python", [])
+    assert _extract_first_positional(["python", "src/"]) == ("python", ["src/"])
+    assert _extract_first_positional(["--hidden", "python", "src/"]) == (
+        "python",
+        ["--hidden", "src/"],
+    )
+    assert _extract_first_positional(["--exclude", "test", "python", "src/"]) == (
+        "python",
+        ["--exclude", "test", "src/"],
+    )
+    assert _extract_first_positional(["--", "python", "src/"]) == (
+        "python",
+        ["--", "src/"],
+    )
+    assert _extract_first_positional(["--", "--weird", "src/"]) == (
+        "--weird",
+        ["--", "src/"],
+    )
+
+
+def test_main_findfiles(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
+    exit_code = main_findfiles([str(sample_repo)])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert ".config/settings.yaml" in captured.out
+
+    help_code = main_findfiles(["--help"])
+    assert help_code == 0
+
+    with patch("sys.argv", ["findfiles", str(sample_repo)]):
+        assert main_findfiles() == 0
+
+
+def test_main_findfilemime(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
+    exit_code = main_findfilemime([str(sample_repo)])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert ".config/settings.yaml" in captured.out
+    assert "yaml" in captured.out
+
+    help_code = main_findfilemime(["--help"])
+    assert help_code == 0
+
+
+def test_main_findfilefmt(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
+    # Positional tag
+    exit_code = main_findfilefmt(["python", str(sample_repo)])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "src/app.py" in captured.out
+    assert ".config/settings.yaml" not in captured.out
+
+    # Explicit flag
+    exit_code = main_findfilefmt(["-t", "yaml", str(sample_repo)])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert ".config/settings.yaml" in captured.out
+
+    # No arguments (lists all in current directory)
+    with patch("sys.argv", ["findfilefmt"]):
+        assert main_findfilefmt([]) == 0
+
+    # sys.argv fallback
+    with patch("sys.argv", ["findfilefmt", "python", str(sample_repo)]):
+        assert main_findfilefmt() == 0
+
+    help_code = main_findfilefmt(["--help"])
+    assert help_code == 0
+
+
+def test_main_findshebang(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
+    # Positional interpreter
+    exit_code = main_findshebang(["bash", str(sample_repo)])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "scripts/runner.sh" in captured.out
+    assert "scripts/mytool" not in captured.out
+
+    # Explicit flag
+    exit_code = main_findshebang(["--shebang", "python", str(sample_repo)])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "scripts/mytool" in captured.out
+
+    # No positional interpreter
+    exit_code = main_findshebang([str(sample_repo)])
+    assert exit_code == 0
+
+    # sys.argv fallback
+    with patch("sys.argv", ["findshebang", "bash", str(sample_repo)]):
+        assert main_findshebang() == 0
+
+    help_code = main_findshebang(["--help"])
+    assert help_code == 0
+
+
+def test_main_findfmt0(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
+    exit_code = main_findfmt0([str(sample_repo)])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "\0" in captured.out
+    assert ".config/settings.yaml\0" in captured.out
+
+    help_code = main_findfmt0(["--help"])
+    assert help_code == 0
+
+
+def test_main_findsummary(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
+    exit_code = main_findsummary([str(sample_repo)])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "--- findfmt summary ---" in captured.err
+    assert "Matched files:" in captured.err
+
+    help_code = main_findsummary(["--help"])
+    assert help_code == 0
+
+
+def test_wrappers_error_exit_code():
+    assert main_findfiles(["--nonexistent-flag"]) != 0
+    assert main_findfilemime(["--nonexistent-flag"]) != 0
+    assert main_findfilefmt(["--nonexistent-flag"]) != 0
+    assert main_findshebang(["--nonexistent-flag"]) != 0
+    assert main_findfmt0(["--nonexistent-flag"]) != 0
+    assert main_findsummary(["--nonexistent-flag"]) != 0

@@ -60,6 +60,48 @@ man_pages = [
         ["Brandon Perkins"],
         1,
     ),
+    (
+        "cli/index",
+        "findfiles",
+        "Find all files and directories including hidden files respecting .gitignore",
+        ["Brandon Perkins"],
+        1,
+    ),
+    (
+        "cli/index",
+        "findfilemime",
+        "Find files and list detected format and MIME tags",
+        ["Brandon Perkins"],
+        1,
+    ),
+    (
+        "cli/index",
+        "findfilefmt",
+        "Find files by format tag, including hidden files",
+        ["Brandon Perkins"],
+        1,
+    ),
+    (
+        "cli/index",
+        "findshebang",
+        "Find files by shebang interpreter pattern, including hidden files",
+        ["Brandon Perkins"],
+        1,
+    ),
+    (
+        "cli/index",
+        "findfmt0",
+        "Find files and output NUL-delimited paths (--print0)",
+        ["Brandon Perkins"],
+        1,
+    ),
+    (
+        "cli/index",
+        "findsummary",
+        "Find files and print summary statistics to stderr",
+        ["Brandon Perkins"],
+        1,
+    ),
 ]
 
 # EPUB output

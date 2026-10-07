@@ -131,6 +131,19 @@ findfmt -l -t python
 findfmt -s
 ```
 
+### 3.5. Command Aliases & Entry Points
+
+`findfmt` installs dedicated executable wrappers for frequent operations:
+
+| Command                                | Equivalent To                              | Description                               |
+| -------------------------------------- | ------------------------------------------ | ----------------------------------------- |
+| `findfiles [PATHS...]`                 | `findfmt --hidden`                         | Traverse all files including hidden files |
+| `findfilemime [PATHS...]`              | `findfmt --hidden --list-tags`             | List files with MIME & format tags        |
+| `findfilefmt [TAG] [PATHS...]`         | `findfmt --hidden --tag [TAG]`             | Filter files by format tag                |
+| `findshebang [INTERPRETER] [PATHS...]` | `findfmt --hidden --shebang [INTERPRETER]` | Filter scripts by shebang pattern         |
+| `findfmt0 [PATHS...]`                  | `findfmt --hidden --print0`                | NUL-delimited output for `xargs -0`       |
+| `findsummary [PATHS...]`               | `findfmt --hidden --summary`               | Output summary statistics to `stderr`     |
+
 ______________________________________________________________________
 
 ## 4. CLI Options
