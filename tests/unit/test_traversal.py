@@ -14,6 +14,7 @@ from findfmt.traversal import (
     load_gitignore_spec,
     matches_filter,
     should_skip_dir,
+    traverse_directory,
 )
 
 
@@ -225,3 +226,68 @@ def test_find_files_fifo_root(tmp_path: Path):
     config = TraversalConfig(root_paths=(fifo_path,))
     results = list(find_files(config))
     assert results == []
+
+
+def test_traverse_directory_symlink_cycle(tmp_path: Path):
+    sub = tmp_path / "subdir"
+    sub.mkdir()
+    target_file = sub / "file.py"
+    target_file.write_text("print('cycle')", encoding="utf-8")
+
+    cycle_link = sub / "loop"
+    cycle_link.symlink_to(sub, target_is_directory=True)
+
+    config = TraversalConfig(root_paths=(tmp_path,), follow_symlinks=True)
+    results = list(find_files(config))
+    rel_names = [r.path.name for r in results]
+    assert rel_names == ["file.py"]
+
+
+def test_traverse_directory_follow_symlinks_tree(tmp_path: Path):
+    external_dir = tmp_path.parent / f"{tmp_path.name}_external"
+    external_dir.mkdir(exist_ok=True)
+    (external_dir / "nested.py").write_text("x = 1", encoding="utf-8")
+
+    link_dir = tmp_path / "link_dir"
+    link_dir.symlink_to(external_dir, target_is_directory=True)
+
+    config = TraversalConfig(root_paths=(tmp_path,), follow_symlinks=True)
+    results = list(find_files(config))
+    file_names = [r.path.name for r in results]
+    assert file_names == ["nested.py"]
+
+
+def test_traverse_directory_resolve_root_os_error(tmp_path: Path):
+    (tmp_path / "test.py").write_text("print(1)", encoding="utf-8")
+    config = TraversalConfig(follow_symlinks=True)
+
+    orig_resolve = Path.resolve
+
+    def mock_resolve(self: Path, *args, **kwargs):
+        if self == tmp_path:
+            raise OSError
+
+        return orig_resolve(self, *args, **kwargs)
+
+    with patch.object(Path, "resolve", autospec=True, side_effect=mock_resolve):
+        res = list(traverse_directory(tmp_path, config))
+        assert len(res) == 1
+
+
+def test_traverse_directory_resolve_subdir_os_error(tmp_path: Path):
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    (sub / "nested.py").write_text("print(1)", encoding="utf-8")
+    config = TraversalConfig(follow_symlinks=True)
+
+    orig_resolve = Path.resolve
+
+    def mock_resolve(self: Path, *args, **kwargs):
+        if self.name == "sub":
+            raise OSError
+
+        return orig_resolve(self, *args, **kwargs)
+
+    with patch.object(Path, "resolve", autospec=True, side_effect=mock_resolve):
+        res = list(traverse_directory(tmp_path, config))
+        assert res == []
