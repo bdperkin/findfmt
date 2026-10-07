@@ -35,6 +35,7 @@ env/
 .coverage.*
 htmlcov/
 coverage.xml
+junit.xml
 *.cover
 *.py,cover
 .hypothesis/

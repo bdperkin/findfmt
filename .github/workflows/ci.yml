@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -56,7 +56,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -104,7 +104,7 @@ jobs:
             experimental: true
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -129,3 +129,13 @@ jobs:
           flags: unittests
           name: ${{ matrix.os }}-py${{ matrix.python-version }}
         if: ${{ !matrix.experimental }}
+      - name: Upload Test Results to Codecov (Test Analytics)
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./junit.xml
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          flags: unittests
+          name: ${{ matrix.os }}-py${{ matrix.python-version }}
+        if: ${{ !cancelled() && !matrix.experimental }}

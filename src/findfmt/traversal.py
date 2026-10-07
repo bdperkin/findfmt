@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -184,11 +185,43 @@ def _scan_directory_entries(
     return subdirs, files
 
 
+def _should_skip_symlink_dir(
+    subdir: Path,
+    *,
+    follow_symlinks: bool,
+    visited: set[Path] | None,
+) -> bool:
+    """Determine whether a candidate directory should be skipped to break symlink loops.
+
+    Args:
+        subdir: Directory path candidate.
+        follow_symlinks: Traversal configuration flag for following symlinks.
+        visited: Set of canonical directory paths already visited.
+
+    Returns:
+        True if the directory should be skipped, False otherwise.
+    """
+    if not (follow_symlinks and visited is not None):
+        return False
+
+    try:
+        resolved = subdir.resolve()
+    except OSError:
+        return True
+
+    if resolved in visited:
+        return True
+
+    visited.add(resolved)
+    return False
+
+
 def traverse_directory(
     root: Path,
     config: TraversalConfig,
     active_specs: tuple[tuple[Path, PathSpecType], ...] = (),
     base_root: Path | None = None,
+    visited_dirs: set[Path] | None = None,
 ) -> Iterator[FileInfo]:
     """Recursively traverse a directory hierarchy honoring .gitignore and filters.
 
@@ -197,11 +230,18 @@ def traverse_directory(
         config: Traversal configuration options.
         active_specs: Inherited parent gitignore specs with their base paths.
         base_root: The top-level root directory used for relative paths.
+        visited_dirs: Tracked set of canonical directory paths visited to break cycles.
 
     Yields:
         FileInfo objects for matching files in deterministic sorted order.
     """
     effective_base = base_root if base_root is not None else root
+    active_visited = visited_dirs
+    if config.follow_symlinks and active_visited is None:
+        active_visited = set()
+        with contextlib.suppress(OSError):
+            active_visited.add(root.resolve())
+
     specs = _load_active_specs(
         root,
         active_specs,
@@ -215,11 +255,19 @@ def traverse_directory(
             yield info
 
     for subdir in subdirs:
+        if _should_skip_symlink_dir(
+            subdir,
+            follow_symlinks=config.follow_symlinks,
+            visited=active_visited,
+        ):
+            continue
+
         yield from traverse_directory(
             subdir,
             config,
             specs,
             base_root=effective_base,
+            visited_dirs=active_visited,
         )
 
 

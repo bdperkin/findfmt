@@ -33,6 +33,9 @@ def extract_shebang(path: Path) -> str | None:
         The raw shebang line string if present and readable, or None.
     """
     try:
+        if not path.is_file():
+            return None
+
         with path.open("rb") as f:
             first_line = f.readline(512)
             if first_line.startswith(b"#!"):
@@ -58,23 +61,30 @@ def _resolve_relative(path: Path, root_path: Path | None) -> Path:
 
     try:
         return path.resolve().relative_to(root_path.resolve())
-    except ValueError:
+    except (ValueError, OSError):
         return path
 
 
-def _identify_tags(path: Path, str_path: str, *, exists: bool) -> set[str]:
+def _identify_tags(
+    path: Path,
+    str_path: str,
+    *,
+    exists: bool,
+    is_regular_or_symlink: bool = True,
+) -> set[str]:
     """Extract identify tags with fallback handling.
 
     Args:
         path: Target file path.
         str_path: String representation of path.
         exists: Flag indicating whether path exists on disk.
+        is_regular_or_symlink: Flag indicating whether path is regular file or symlink.
 
     Returns:
         Set of tag strings identified for the file.
     """
     try:
-        if exists:
+        if exists and is_regular_or_symlink:
             return set(identify_engine.tags_from_path(str_path))
 
         return set(identify_engine.tags_from_filename(path.name))
@@ -154,6 +164,57 @@ def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -
     return os.access(path, os.X_OK)
 
 
+def _inspect_metadata(path: Path) -> tuple[bool, bool, bool, int]:
+    """Inspect filesystem metadata safely.
+
+    Args:
+        path: File path to inspect.
+
+    Returns:
+        Tuple of (is_symlink, exists, is_file, size_bytes).
+    """
+    try:
+        is_symlink = path.is_symlink()
+    except OSError:
+        is_symlink = False
+
+    try:
+        stat_result = path.lstat() if is_symlink else path.stat()
+        size_bytes = stat_result.st_size
+    except OSError:
+        size_bytes = 0
+
+    try:
+        exists = path.exists()
+    except OSError:
+        exists = False
+
+    try:
+        is_file = path.is_file() if exists else False
+    except OSError:
+        is_file = False
+
+    return is_symlink, exists, is_file, size_bytes
+
+
+def _adjust_nt_tags(tags: set[str], *, is_executable: bool) -> None:
+    """Adjust executable tags on Windows platform.
+
+    Args:
+        tags: Set of tags to modify in place.
+        is_executable: Flag indicating whether path is executable.
+    """
+    if os.name != "nt":
+        return
+
+    if is_executable:
+        tags.discard("non-executable")
+        tags.add("executable")
+    else:
+        tags.discard("executable")
+        tags.add("non-executable")
+
+
 def classify_file(path: Path, root_path: Path | None = None) -> FileInfo:
     """Classify a given file path by inspection of name, content, and metadata.
 
@@ -165,38 +226,19 @@ def classify_file(path: Path, root_path: Path | None = None) -> FileInfo:
         FileInfo containing metadata, identified tags, shebang, and MIME info.
     """
     str_path = str(path)
-    try:
-        is_symlink = path.is_symlink()
-    except OSError:
-        is_symlink = False
+    is_symlink, exists, is_file, size_bytes = _inspect_metadata(path)
 
-    stat_result: os.stat_result | None = None
-    try:
-        stat_result = path.lstat() if is_symlink else path.stat()
-    except OSError:
-        stat_result = None
-
-    size_bytes = stat_result.st_size if stat_result else 0
-
-    try:
-        exists = path.exists()
-    except OSError:
-        exists = False
-
-    is_file = path.is_file() if exists else False
-
-    tags = _identify_tags(path, str_path, exists=exists)
+    tags = _identify_tags(
+        path,
+        str_path,
+        exists=exists,
+        is_regular_or_symlink=is_file or is_symlink,
+    )
     shebang, shebang_tags = _shebang_info(path, str_path, is_file=is_file, is_symlink=is_symlink)
     tags.update(shebang_tags)
 
     is_executable = _check_executable(path, exists=exists, shebang=shebang)
-    if os.name == "nt":
-        if is_executable:
-            tags.discard("non-executable")
-            tags.add("executable")
-        else:
-            tags.discard("executable")
-            tags.add("non-executable")
+    _adjust_nt_tags(tags, is_executable=is_executable)
 
     mime_type, mime_tags = _mime_info(str_path)
     tags.update(mime_tags)
