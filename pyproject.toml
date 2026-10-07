@@ -136,6 +136,9 @@ lint.per-file-ignores."src/findfmt/cli.py" = [
   "PLR0913",
   "PLR0917",
 ]
+lint.per-file-ignores."src/findfmt/cli_help.py" = [ "FBT001", "FBT002" ]
+lint.per-file-ignores."src/findfmt/diagnostics.py" = [ "FBT001", "FBT002" ]
+lint.per-file-ignores."src/findfmt/entrypoints.py" = [ "PLC0415" ]
 lint.per-file-ignores."tests/**/*" = [
   "ANN",
   "D",
@@ -254,6 +257,7 @@ exclude = [
   "build/**",
   ".venv/**",
   ".git/**",
+  ".clusterfuzzlite/**",
   ".github/styles/**",
   "docs/_build/**",
   ".pytest_cache/**",

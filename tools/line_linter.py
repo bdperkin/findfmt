@@ -44,14 +44,15 @@ class LinterConfig:
 
 @dataclass(frozen=True)
 class Violation:
-    """Recorded line length violation."""
+    """Recorded line length or file line count violation."""
 
     file_path: Path
-    line_number: int
+    line_number: int | None
     length: int
     threshold: int
     is_error: bool
     format_name: str
+    violation_type: str = "line_length"
 
 
 DEFAULT_LIMITS: dict[str, Threshold] = {
@@ -77,6 +78,7 @@ DEFAULT_EXCLUDE: tuple[str, ...] = (
     "build/**",
     ".venv/**",
     ".git/**",
+    ".clusterfuzzlite/**",
     ".github/styles/**",
     "docs/_build/**",
     ".pytest_cache/**",
@@ -233,8 +235,10 @@ def check_file(path: Path, config: LinterConfig) -> list[Violation]:
 
     violations: list[Violation] = []
     try:
+        total_lines = 0
         with path.open("r", encoding="utf-8", errors="replace") as f:
             for line_no, raw_line in enumerate(f, 1):
+                total_lines = line_no
                 clean_line = raw_line.rstrip("\r\n")
                 line_len = len(clean_line)
                 if line_len > threshold.error:
@@ -246,6 +250,7 @@ def check_file(path: Path, config: LinterConfig) -> list[Violation]:
                             threshold=threshold.error,
                             is_error=True,
                             format_name=format_name,
+                            violation_type="line_length",
                         ),
                     )
                 elif line_len > threshold.warning:
@@ -257,8 +262,34 @@ def check_file(path: Path, config: LinterConfig) -> list[Violation]:
                             threshold=threshold.warning,
                             is_error=False,
                             format_name=format_name,
+                            violation_type="line_length",
                         ),
                     )
+
+        if total_lines > threshold.error:
+            violations.append(
+                Violation(
+                    file_path=path,
+                    line_number=total_lines,
+                    length=total_lines,
+                    threshold=threshold.error,
+                    is_error=True,
+                    format_name=format_name,
+                    violation_type="file_line_count",
+                ),
+            )
+        elif total_lines > threshold.warning:
+            violations.append(
+                Violation(
+                    file_path=path,
+                    line_number=total_lines,
+                    length=total_lines,
+                    threshold=threshold.warning,
+                    is_error=False,
+                    format_name=format_name,
+                    violation_type="file_line_count",
+                ),
+            )
     except OSError:
         return []
 
@@ -297,6 +328,80 @@ def discover_files(root: Path, config: LinterConfig) -> list[Path]:
     return filtered_files
 
 
+def _filter_explicit_files(
+    files: Sequence[Path],
+    config: LinterConfig,
+    root: Path,
+) -> list[Path]:
+    """Filter explicit file list against include and exclude patterns.
+
+    Args:
+        files: Explicit sequence of Path objects.
+        config: Loaded LinterConfig instance.
+        root: Root directory for relative path calculations.
+
+    Returns:
+        List of filtered Path objects.
+    """
+    include_spec = pathspec.PathSpec.from_lines("gitignore", config.include)
+    exclude_spec = pathspec.PathSpec.from_lines("gitignore", config.exclude)
+
+    target_files: list[Path] = []
+    for file_path in files:
+        p = file_path if file_path.is_absolute() else (root / file_path)
+        try:
+            rel_path = p.resolve().relative_to(root.resolve())
+            rel_str = str(rel_path).replace("\\", "/")
+        except ValueError:
+            rel_str = str(file_path).replace("\\", "/")
+
+        if not p.is_file():
+            continue
+
+        if exclude_spec.match_file(rel_str):
+            continue
+
+        if config.include != DEFAULT_INCLUDE and not include_spec.match_file(rel_str):
+            continue
+
+        target_files.append(p)
+
+    return target_files
+
+
+def _report_violations(all_violations: Sequence[Violation]) -> int:
+    """Format and print all violation notices to stderr.
+
+    Args:
+        all_violations: Sequence of recorded Violation instances.
+
+    Returns:
+        Count of recorded error violations.
+    """
+    error_count = sum(1 for v in all_violations if v.is_error)
+    warning_count = sum(1 for v in all_violations if not v.is_error)
+
+    for v in all_violations:
+        level = "ERROR" if v.is_error else "WARNING"
+        if v.violation_type == "file_line_count":
+            sys.stderr.write(
+                f"{v.file_path}: {level}: File line count {v.length} "
+                f"exceeds {level.lower()} limit ({v.threshold}) for {v.format_name}\n",
+            )
+        else:
+            sys.stderr.write(
+                f"{v.file_path}:{v.line_number}: {level}: Line length {v.length} "
+                f"exceeds {level.lower()} limit ({v.threshold}) for {v.format_name}\n",
+            )
+
+    if all_violations:
+        sys.stderr.write(
+            f"\nLine length check found {error_count} error(s) and {warning_count} warning(s).\n",
+        )
+
+    return error_count
+
+
 def run_linter(files: Sequence[Path] | None, config: LinterConfig, root: Path) -> int:
     """Execute line length enforcement and print notices to stderr.
 
@@ -308,51 +413,15 @@ def run_linter(files: Sequence[Path] | None, config: LinterConfig, root: Path) -
     Returns:
         Status code 0 on success/warnings, or 1 when any error threshold is breached.
     """
-    include_spec = pathspec.PathSpec.from_lines("gitignore", config.include)
-    exclude_spec = pathspec.PathSpec.from_lines("gitignore", config.exclude)
-
-    if files:
-        target_files: list[Path] = []
-        for file_path in files:
-            p = file_path if file_path.is_absolute() else (root / file_path)
-            try:
-                rel_path = p.resolve().relative_to(root.resolve())
-                rel_str = str(rel_path).replace("\\", "/")
-            except ValueError:
-                rel_str = str(file_path).replace("\\", "/")
-
-            if not p.is_file():
-                continue
-
-            if exclude_spec.match_file(rel_str):
-                continue
-
-            if config.include != DEFAULT_INCLUDE and not include_spec.match_file(rel_str):
-                continue
-
-            target_files.append(p)
-    else:
-        target_files = discover_files(root, config)
+    target_files = (
+        _filter_explicit_files(files, config, root) if files else discover_files(root, config)
+    )
 
     all_violations: list[Violation] = []
     for target in target_files:
         all_violations.extend(check_file(target, config))
 
-    error_count = sum(1 for v in all_violations if v.is_error)
-    warning_count = sum(1 for v in all_violations if not v.is_error)
-
-    for v in all_violations:
-        level = "ERROR" if v.is_error else "WARNING"
-        sys.stderr.write(
-            f"{v.file_path}:{v.line_number}: {level}: Line length {v.length} "
-            f"exceeds {level.lower()} limit ({v.threshold}) for {v.format_name}\n",
-        )
-
-    if all_violations:
-        sys.stderr.write(
-            f"\nLine length check found {error_count} error(s) and {warning_count} warning(s).\n",
-        )
-
+    error_count = _report_violations(all_violations)
     return 1 if error_count > 0 else 0
 
 

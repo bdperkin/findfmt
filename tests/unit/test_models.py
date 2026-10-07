@@ -72,5 +72,5 @@ def test_file_info_to_dict():
     assert d_rel["shebang"] == "#!/bin/bash"
 
     d_abs = info.to_dict(absolute=True)
-    assert d_abs["path"] == "/tmp/dir/test.sh"
+    assert d_abs["path"] == str(info.path)
     assert d_abs["relative_path"] == "test.sh"

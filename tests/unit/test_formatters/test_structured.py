@@ -9,9 +9,9 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-if sys.version_info >= (3, 12):
+if sys.version_info >= (3, 12):  # pragma: no cover
     from typing import override
-else:
+else:  # pragma: no cover
     from typing_extensions import override
 
 import pytest
@@ -79,7 +79,7 @@ def test_file_info_to_dict_relative(sample_files: list[FileInfo]) -> None:
 def test_file_info_to_dict_absolute(sample_files: list[FileInfo]) -> None:
     """Verify FileInfo.to_dict produces expected absolute path representation."""
     d = sample_files[0].to_dict(absolute=True)
-    assert d["path"] == "/workspace/project/main.py"
+    assert d["path"] == str(sample_files[0].path)
     assert d["relative_path"] == "main.py"
 
 
@@ -153,8 +153,10 @@ def test_text_formatter_with_tags_and_absolute(sample_files: list[FileInfo]) -> 
     output = fmt.format(sample_files)
     lines = output.strip().split("\n")
     assert len(lines) == 2
-    assert lines[0] == "/workspace/project/main.py [python, text]"
-    assert lines[1] == "/workspace/project/data.json [json, text]"
+    main_p = str(sample_files[0].path)
+    data_p = str(sample_files[1].path)
+    assert lines[0] == f"{main_p} [python, text]"
+    assert lines[1] == f"{data_p} [json, text]"
 
     stream_buf = io.StringIO()
     fmt.stream(sample_files, stream_buf)
@@ -205,7 +207,7 @@ def test_json_formatter_compact(sample_files: list[FileInfo]) -> None:
     assert output.endswith("\n")
     data = json.loads(output)
     assert len(data) == 2
-    assert data[0]["path"] == "/workspace/project/main.py"
+    assert data[0]["path"] == str(sample_files[0].path)
 
 
 def test_jsonl_formatter_empty() -> None:
@@ -302,7 +304,7 @@ def test_ipynb_formatter_records(sample_files: list[FileInfo]) -> None:
     assert data_cell["cell_type"] == "code"
     data_source = "".join(data_cell["source"])
     assert "import pandas as pd" in data_source
-    assert "/workspace/project/main.py" in data_source
+    assert "main.py" in data_source
     ast.parse(data_source)
 
     analysis_cell = nb["cells"][2]

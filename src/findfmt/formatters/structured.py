@@ -6,10 +6,10 @@ import json
 import sys
 from typing import TYPE_CHECKING, Any, TextIO
 
-if sys.version_info >= (3, 12):
+if sys.version_info >= (3, 12):  # pragma: no cover
     from typing import override
-else:
-    from typing_extensions import override  # pragma: no cover
+else:  # pragma: no cover
+    from typing_extensions import override
 
 import yaml
 
