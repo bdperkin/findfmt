@@ -232,7 +232,8 @@ def test_main_findfiles(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
     exit_code = main_findfiles([str(sample_repo)])
     assert exit_code == 0
     captured = capsys.readouterr()
-    assert ".config/settings.yaml" in captured.out
+    normalized = captured.out.replace("\\", "/")
+    assert ".config/settings.yaml" in normalized
 
     help_code = main_findfiles(["--help"])
     assert help_code == 0
@@ -245,8 +246,9 @@ def test_main_findfilemime(sample_repo: Path, capsys: pytest.CaptureFixture[str]
     exit_code = main_findfilemime([str(sample_repo)])
     assert exit_code == 0
     captured = capsys.readouterr()
-    assert ".config/settings.yaml" in captured.out
-    assert "yaml" in captured.out
+    normalized = captured.out.replace("\\", "/")
+    assert ".config/settings.yaml" in normalized
+    assert "yaml" in normalized
 
     help_code = main_findfilemime(["--help"])
     assert help_code == 0
@@ -257,14 +259,16 @@ def test_main_findfilefmt(sample_repo: Path, capsys: pytest.CaptureFixture[str])
     exit_code = main_findfilefmt(["python", str(sample_repo)])
     assert exit_code == 0
     captured = capsys.readouterr()
-    assert "src/app.py" in captured.out
-    assert ".config/settings.yaml" not in captured.out
+    normalized = captured.out.replace("\\", "/")
+    assert "src/app.py" in normalized
+    assert ".config/settings.yaml" not in normalized
 
     # Explicit flag
     exit_code = main_findfilefmt(["-t", "yaml", str(sample_repo)])
     assert exit_code == 0
     captured = capsys.readouterr()
-    assert ".config/settings.yaml" in captured.out
+    normalized = captured.out.replace("\\", "/")
+    assert ".config/settings.yaml" in normalized
 
     # No arguments (lists all in current directory)
     with patch("sys.argv", ["findfilefmt"]):
@@ -283,14 +287,16 @@ def test_main_findshebang(sample_repo: Path, capsys: pytest.CaptureFixture[str])
     exit_code = main_findshebang(["bash", str(sample_repo)])
     assert exit_code == 0
     captured = capsys.readouterr()
-    assert "scripts/runner.sh" in captured.out
-    assert "scripts/mytool" not in captured.out
+    normalized = captured.out.replace("\\", "/")
+    assert "scripts/runner.sh" in normalized
+    assert "scripts/mytool" not in normalized
 
     # Explicit flag
     exit_code = main_findshebang(["--shebang", "python", str(sample_repo)])
     assert exit_code == 0
     captured = capsys.readouterr()
-    assert "scripts/mytool" in captured.out
+    normalized = captured.out.replace("\\", "/")
+    assert "scripts/mytool" in normalized
 
     # No positional interpreter
     exit_code = main_findshebang([str(sample_repo)])
@@ -309,7 +315,8 @@ def test_main_findfmt0(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
     assert exit_code == 0
     captured = capsys.readouterr()
     assert "\0" in captured.out
-    assert ".config/settings.yaml\0" in captured.out
+    normalized = captured.out.replace("\\", "/")
+    assert ".config/settings.yaml\0" in normalized
 
     help_code = main_findfmt0(["--help"])
     assert help_code == 0
