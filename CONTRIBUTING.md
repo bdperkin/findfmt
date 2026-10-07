@@ -6,6 +6,27 @@ reports and documentation fixes to major features.
 For architecture guides, API reference, and user tutorials, consult our online documentation at
 [https://bdperkin.github.io/findfmt](https://bdperkin.github.io/findfmt).
 
+## Reporting Issues & Proposing Features
+
+We use structured GitHub Issue Forms to ensure essential reproduction details and context are
+provided upfront:
+
+- **[Bug Reports](https://github.com/bdperkin/findfmt/issues/new?template=bug_report.yml)**: Report
+  unexpected behavior, incorrect exit codes, or CLI crashes with command invocations and environment
+  details.
+- **[New Format / Tag Requests](https://github.com/bdperkin/findfmt/issues/new?template=new_format_request.yml)**:
+  Propose new classification tags, MIME types, or shebang patterns with a minimal snippet or
+  fixture.
+- **[Misclassification Reports](https://github.com/bdperkin/findfmt/issues/new?template=misclassification_report.yml)**:
+  Report misidentified files or directory traversal edge cases (`.gitignore`, `--hidden`,
+  `--no-ignore`).
+- **[Feature Requests](https://github.com/bdperkin/findfmt/issues/new?template=feature_request.yml)**:
+  Propose new CLI flags, output formatters, or Python API enhancements.
+- **[Documentation Improvements](https://github.com/bdperkin/findfmt/issues/new?template=documentation.yml)**:
+  Report typos, unclear phrasing, or missing documentation guides.
+- **Security Inquiries**: For security vulnerabilities, follow our private reporting process via
+  [GitHub Security Advisories](https://github.com/bdperkin/findfmt/security/advisories/new).
+
 ## Development Setup
 
 `findfmt` uses `uv` for package and dependency management.

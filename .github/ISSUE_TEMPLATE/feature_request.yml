@@ -1,27 +1,42 @@
 ---
 name: Feature Request
-description: Suggest an idea or enhancement for findfmt
+description: Propose a new feature, CLI flag, or API enhancement for findfmt
+title: 'feat: '
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
-      value: Thank you for suggesting a new feature!
+      value: |
+        Thank you for suggesting an improvement to findfmt!
   - type: textarea
     id: problem
     attributes:
-      label: Problem Description
-      description: Is your feature request related to a problem? Please describe.
+      label: Problem & Motivation
+      description: Is your feature request related to a specific limitation or use
+        case? Please describe.
+      placeholder: A clear description of the problem or limitation...
     validations:
       required: true
   - type: textarea
-    id: solution
+    id: proposed_solution
     attributes:
-      label: Proposed Solution
-      description: A clear and concise description of what you want to happen.
+      label: Proposed Solution & Interface
+      description: Describe the proposed CLI syntax (e.g. new flags, arguments, output
+        formats) or Python API interface.
+      placeholder: |
+        CLI syntax:
+        `findfmt --json ...`
     validations:
       required: true
   - type: textarea
     id: alternatives
     attributes:
       label: Alternatives Considered
-      description: Any alternative solutions or features you've considered.
+      description: Any alternative designs, workarounds, or existing tools you have
+        considered.
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I am willing to submit a Pull Request for this feature.
