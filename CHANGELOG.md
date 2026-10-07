@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [0.1.1] - 2026-10-07
 
 ### CI/CD
 
@@ -18,6 +18,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - *(deployments)* Configure GitHub Environments for deployments tracking (#99)
 - *(scorecard)* Enforce least-privilege token permissions across workflows (#100)
 - *(scorecard)* Pin GitHub Actions to commit SHAs and container images to digests (#101)
+- *(release)* Confirm and validate automated changelog generation with git-cliff (#102)
 
 ### Documentation
 
