@@ -1,0 +1,217 @@
+---
+# findfmt GitHub Label Taxonomy as Code
+# Used for automated synchronization and triage routing
+
+- name: accessibility
+  color: "f143ab"
+  description: Barrier affecting people with disabilities
+
+- name: bug
+  color: "d73a4a"
+  description: Something isn't working
+
+- name: documentation
+  color: "0075ca"
+  description: Improvements or additions to documentation
+
+- name: duplicate
+  color: "cfd3d7"
+  description: This issue or pull request already exists
+
+- name: enhancement
+  color: "a2eeef"
+  description: New feature or request
+
+- name: good first issue
+  color: "7057ff"
+  description: Good for newcomers
+
+- name: help wanted
+  color: "008672"
+  description: Extra attention is needed
+
+- name: invalid
+  color: "e4e669"
+  description: This doesn't seem right
+
+- name: question
+  color: "d876e3"
+  description: Further information is requested
+
+- name: wontfix
+  color: "ffffff"
+  description: This will not be worked on
+
+- name: dependencies
+  color: "0366d6"
+  description: Pull requests that update a dependency file
+
+- name: security
+  color: "b60205"
+  description: Security vulnerability or advisory
+
+- name: ci/cd
+  color: "fbca04"
+  description: GitHub Actions workflows and automation
+
+- name: performance
+  color: "d4c5f9"
+  description: Performance improvements and benchmarks
+
+- name: refactor
+  color: "e99695"
+  description: Code refactoring without behavioral changes
+
+- name: release
+  color: "0e8a16"
+  description: Release coordination and publishing
+
+- name: testing
+  color: "bfdadc"
+  description: Test additions, fixtures, and coverage improvements
+
+- name: breaking change
+  color: "d93f0b"
+  description: Changes that break backwards compatibility
+
+- name: triage
+  color: "c2e0c6"
+  description: Needs investigation or classification
+
+- name: wip
+  color: "ededed"
+  description: Work in progress
+
+- name: github_actions
+  color: "000000"
+  description: Pull requests that update GitHub Actions code
+
+- name: epic
+  color: "3b82f6"
+  description: Epic tracking issue containing subtasks
+
+- name: subtask
+  color: "94a3b8"
+  description: Sub-issue decomposed from a larger epic
+
+# Subsystem / Component (area:*)
+- name: "area:cli"
+  color: "1d76db"
+  description: Command line interface, Typer, flags, and options
+
+- name: "area:traversal"
+  color: "006b75"
+  description: Directory walking, gitignore, pattern matching, pruning
+
+- name: "area:classifier"
+  color: "5319e7"
+  description: File content inspection, MIME detection, shebang parsing
+
+- name: "area:format"
+  color: "0e8a16"
+  description: Output formatting, tables, trees, JSON, XML, HTML
+
+- name: "area:i18n"
+  color: "f9d0c4"
+  description: Internationalization and localization
+
+- name: "area:packaging"
+  color: "d93f0b"
+  description: PyPI, requires-python, wheels, build system, container
+
+- name: "area:docs"
+  color: "0284c7"
+  description: Sphinx documentation site, man pages, README, and guides
+
+- name: pre-commit
+  color: "f43f5e"
+  description: Pre-commit hook configuration, overrides, and upstream sync
+
+- name: sphinx
+  color: "0284c7"
+  description: Sphinx documentation builders, extensions, and formatting
+
+- name: benchmark
+  color: "8b5cf6"
+  description: Performance benchmarking, profiling, and throughput
+
+# Operating System (os:*)
+- name: "os:linux"
+  color: "fca5a5"
+  description: Linux-specific behaviors, POSIX modes, and system headers
+
+- name: "os:macos"
+  color: "fed7aa"
+  description: macOS-specific behaviors, APFS, and BSD tools
+
+- name: "os:windows"
+  color: "fde047"
+  description: Windows-specific behaviors, path separators, and executable resolution
+
+# Workflow & Triage State (status:*)
+- name: "status:needs-info"
+  color: "fbbf24"
+  description: Awaiting additional reproduction details or response from author
+
+- name: "status:needs-reproduction"
+  color: "f59e0b"
+  description: Reported bug needs a verified minimal reproduction snippet
+
+- name: "status:blocked"
+  color: "ef4444"
+  description: Blocked by an upstream bug, dependency, or prerequisite PR
+
+- name: "status:in-review"
+  color: "60a5fa"
+  description: Actively under code review
+
+- name: "status:ready-to-merge"
+  color: "34d399"
+  description: Approved and ready for merge once CI passes
+
+# Priority / Severity (priority:*)
+- name: "priority:critical"
+  color: "b91c1c"
+  description: Severe bug, regression on main, or security vulnerability
+
+- name: "priority:high"
+  color: "ea580c"
+  description: High priority bug or blocker for upcoming milestone
+
+- name: "priority:medium"
+  color: "ca8a04"
+  description: Standard enhancement or non-blocking bug
+
+- name: "priority:low"
+  color: "65a30d"
+  description: Minor improvement, polish, or cosmetic change
+
+# Format & Classification Family (format:*)
+- name: "format:python"
+  color: "38bdf8"
+  description: Python scripts, modules, byte-code, or packages
+
+- name: "format:shell"
+  color: "4ade80"
+  description: POSIX shell, bash, zsh, fish scripts
+
+- name: "format:data"
+  color: "a78bfa"
+  description: Data serialization formats (JSON, YAML, TOML, XML)
+
+- name: "format:binary"
+  color: "f472b6"
+  description: Compiled binaries, ELF, Mach-O, PE executables
+
+- name: "format:markup"
+  color: "fb923c"
+  description: Markup formats (Markdown, HTML, reStructuredText)
+
+# Type Enhancements (type:*)
+- name: "type:chore"
+  color: "94a3b8"
+  description: Routine maintenance, dependency updates, or tool configurations
+
+- name: "type:rfc"
+  color: "818cf8"
+  description: Request for Comments, architectural proposals, design discussions
