@@ -3,7 +3,16 @@
 from __future__ import annotations
 
 from findfmt.classifier import classify_file, get_known_tags
-from findfmt.cli import get_version, main
+from findfmt.cli import (
+    get_version,
+    main,
+    main_findfilefmt,
+    main_findfilemime,
+    main_findfiles,
+    main_findfmt0,
+    main_findshebang,
+    main_findsummary,
+)
 from findfmt.models import FileInfo, TraversalConfig
 from findfmt.traversal import find_files, traverse_directory
 
@@ -18,5 +27,11 @@ __all__ = [
     "get_known_tags",
     "get_version",
     "main",
+    "main_findfilefmt",
+    "main_findfilemime",
+    "main_findfiles",
+    "main_findfmt0",
+    "main_findshebang",
+    "main_findsummary",
     "traverse_directory",
 ]

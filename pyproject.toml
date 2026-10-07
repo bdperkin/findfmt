@@ -50,7 +50,13 @@ urls.Documentation = "https://bdperkin.github.io/findfmt"
 urls.Homepage = "https://github.com/bdperkin/findfmt"
 urls.Issues = "https://github.com/bdperkin/findfmt/issues"
 urls.Repository = "https://github.com/bdperkin/findfmt"
+scripts.findfilefmt = "findfmt.cli:main_findfilefmt"
+scripts.findfilemime = "findfmt.cli:main_findfilemime"
+scripts.findfiles = "findfmt.cli:main_findfiles"
 scripts.findfmt = "findfmt.cli:app"
+scripts.findfmt0 = "findfmt.cli:main_findfmt0"
+scripts.findshebang = "findfmt.cli:main_findshebang"
+scripts.findsummary = "findfmt.cli:main_findsummary"
 
 [dependency-groups]
 dev = [
