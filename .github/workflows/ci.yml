@@ -44,6 +44,51 @@ jobs:
         run: uv run vulture src
       - name: Run Codespell (Spelling)
         run: uv run codespell
+      - name: Verify Complete Quality Suite
+        run: uv run python tools/verify_quality.py
+  packaging-smoke-test:
+    name: Packaging Smoke Test (${{ matrix.os }})
+    needs: quality-gate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - name: Build Distribution Packages
+        run: uv build
+      - name: Create Clean Virtual Environment & Install Wheel (POSIX)
+        run: |
+          uv venv smoke_env
+          uv pip install --python smoke_env dist/*.whl
+        if: runner.os != 'Windows'
+      - name: Create Clean Virtual Environment & Install Wheel (Windows)
+        run: |
+          uv venv smoke_env
+          uv pip install --python smoke_env (Get-Item dist/*.whl).FullName
+        if: runner.os == 'Windows'
+      - name: Verify CLI Executable (POSIX)
+        run: |
+          ./smoke_env/bin/findfmt --version
+          ./smoke_env/bin/findfmt --help
+          ./smoke_env/bin/findfmt -t python -l src
+        if: runner.os != 'Windows'
+      - name: Verify CLI Executable (Windows)
+        run: |
+          .\smoke_env\Scripts\findfmt.exe --version
+          .\smoke_env\Scripts\findfmt.exe --help
+          .\smoke_env\Scripts\findfmt.exe -t python -l src
+        if: runner.os == 'Windows'
   test-matrix:
     name: Test (${{ matrix.os }} - Python ${{ matrix.python-version }})
     needs: quality-gate
