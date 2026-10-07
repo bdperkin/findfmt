@@ -96,6 +96,13 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   uv run python tools/verify_quality.py
   ```
+- **Prose and Documentation Linting**: All Markdown files (`.md`) are linted using
+  [Vale](https://vale.sh/) with style rules defined in `.vale.ini` and project vocabulary in
+  `.github/styles/`, automatically ignoring code blocks and URLs. Run Vale locally before submitting
+  changes:
+  ```bash
+  vale *.md docs/
+  ```
 
 ## 5. Commit Guidelines
 
@@ -130,11 +137,13 @@ git commit -s -m "feat: add support for MIME categories"
    ```bash
    uv run pre-commit run --all-files
    uv run python tools/verify_quality.py
+   vale *.md docs/
    ```
 4. **Code Review & Quality Gates**:
    - Every PR triggers our full automated CI suite (Linux, macOS, Windows across Python 3.10–3.14,
-     100% test and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL, and
-     dependency review). All status checks must pass before merging.
+     100% test and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL,
+     ClusterFuzzLite, Vale prose linting, and dependency review). All status checks must pass before
+     merging.
    - Community contributions require thorough code review and approval from repository maintainers.
    - For solo maintainer development, changesets are tracked via individual feature branches and
      validated through GitHub Actions CI prior to squash-merging.

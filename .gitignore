@@ -72,3 +72,7 @@ docs/source/api/generated/
 # Operating System files
 .DS_Store
 Thumbs.db
+
+# Vale synced packages
+.github/styles/Google/
+.github/styles/proselint/
