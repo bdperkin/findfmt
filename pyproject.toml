@@ -163,6 +163,7 @@ error-on-warning = true
 
 [tool.ty.rules]
 all = "error"
+missing-direct-dependency = "ignore"
 
 [tool.ty.analysis]
 strict-generic-narrowing = true

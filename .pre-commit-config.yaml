@@ -8,7 +8,7 @@ ci:
   autoupdate_commit_msg: 'chore(deps): update pre-commit hooks'
   autoupdate_schedule: weekly
   skip:
-    - ty-check
+    - ty
     - interrogate
     - deptry
     - vulture
@@ -127,42 +127,44 @@ repos:
       - id: conventional-pre-commit
         stages: [commit-msg]
 
-  # Local workspace hooks for uv-managed tools (identical to CI)
-  - repo: local
+  # Astral Ty type checker
+  - repo: https://github.com/astral-sh/ty-pre-commit
+    rev: v0.0.84
     hooks:
-      - id: ty-check
-        name: ty type checker
-        entry: uv run ty check
-        language: system
-        types: [python]
-        pass_filenames: false
+      - id: ty
+        args: [--group, lint]
+
+  # Interrogate docstring checker
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0
+    hooks:
       - id: interrogate
-        name: interrogate docstrings
-        entry: uv run interrogate src
-        language: system
-        types: [python]
+        args: [src]
         pass_filenames: false
+
+  # Deptry dependency checker
+  - repo: https://github.com/osprey-oss/deptry
+    rev: 0.25.1
+    hooks:
       - id: deptry
-        name: deptry dependency checker
-        entry: uv run deptry .
-        language: system
-        types: [python]
-        pass_filenames: false
+
+  # Vulture dead code checker
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.16
+    hooks:
       - id: vulture
-        name: vulture dead code checker
-        entry: uv run vulture src
-        language: system
-        types: [python]
-        pass_filenames: false
+        args: [src]
+
+  # Xenon complexity checker
+  - repo: https://github.com/rubik/xenon
+    rev: v0.9.3
+    hooks:
       - id: xenon
-        name: xenon code complexity
-        entry: uv run xenon src
-        language: system
-        types: [python]
+        args: [-b, B, -m, B, -a, A, src]
         pass_filenames: false
+
+  # Sync pre-commit dependencies
+  - repo: https://github.com/pre-commit/sync-pre-commit-deps
+    rev: v0.0.5
+    hooks:
       - id: sync-pre-commit-deps
-        name: sync pre-commit dependencies
-        entry: uv run python tools/sync_pre_commit_deps.py
-        language: system
-        files: ^(\.pre-commit-config\.yaml|pyproject\.toml|uv\.lock)$
-        pass_filenames: false
