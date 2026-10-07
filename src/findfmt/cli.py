@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import copy
+import inspect
+import platform
+import shutil
+import subprocess
 import sys
 from collections import Counter
 from importlib.metadata import PackageNotFoundError, version
@@ -22,6 +26,9 @@ if TYPE_CHECKING:
 
 __all__ = [
     "app",
+    "get_diagnostics",
+    "get_git_version",
+    "get_help_all",
     "get_version",
     "main",
     "main_findfilefmt",
@@ -45,17 +52,227 @@ def get_version() -> str:
         return "0.1.1.dev0"
 
 
-def version_callback(value: bool) -> None:
+def get_git_version() -> str | None:
+    """Retrieve git executable version string if git is available.
+
+    Returns:
+        Git version string or None if git is not detected.
+    """
+    git_path = shutil.which("git")
+    if not git_path:
+        return None
+
+    try:
+        proc = subprocess.run(  # noqa: S603
+            [git_path, "--version"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=2.0,
+        )
+        if proc.returncode == 0:
+            return proc.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+    return None
+
+
+def get_diagnostics() -> str:
+    """Compile runtime environment diagnostics.
+
+    Returns:
+        Formatted multi-line diagnostics string ending in a newline.
+    """
+    lines: list[str] = [f"findfmt {get_version()}"]
+    py_ver = sys.version.split()[0]
+    plat = platform.platform()
+    lines.append(f"Python: {py_ver} ({plat})")
+
+    try:
+        identify_ver = version("identify")
+    except PackageNotFoundError:
+        identify_ver = "not installed"
+
+    lines.append(f"identify: {identify_ver}")
+
+    git_ver = get_git_version()
+    lines.append(f"Git: {git_ver or 'not found'}")
+
+    return "\n".join(lines) + "\n"
+
+
+def _is_in_context(ctx: object) -> bool:
+    """Check if verbose output or diagnostics was requested in context.
+
+    Args:
+        ctx: Click/Typer context, if available.
+
+    Returns:
+        True if requested in context, False otherwise.
+    """
+    params = getattr(ctx, "params", {})
+    if params.get("verbose") or params.get("diagnostics"):
+        return True
+
+    ctx_obj = getattr(ctx, "obj", None)
+    if isinstance(ctx_obj, dict):
+        raw_argv = ctx_obj.get("argv", [])
+        return "--verbose" in raw_argv or "--diagnostics" in raw_argv
+
+    return False
+
+
+def _is_in_frames() -> bool:
+    """Check if verbose output or diagnostics was requested in caller frames.
+
+    Returns:
+        True if requested in caller frames, False otherwise.
+    """
+    frame = inspect.currentframe()
+    while frame:
+        opts = frame.f_locals.get("opts")
+        if isinstance(opts, dict) and (opts.get("verbose") or opts.get("diagnostics")):
+            return True
+
+        frame = frame.f_back
+
+    return False
+
+
+def _is_verbose_requested(ctx: object = None) -> bool:
+    """Check if verbose output or diagnostics was requested.
+
+    Args:
+        ctx: Click/Typer context, if available.
+
+    Returns:
+        True if verbose or diagnostics is requested, False otherwise.
+    """
+    if ctx is not None and _is_in_context(ctx):
+        return True
+
+    if _is_in_frames():
+        return True
+
+    return "--verbose" in sys.argv or "--diagnostics" in sys.argv
+
+
+def version_callback(
+    ctx: typer.Context | bool | None = None,
+    value: bool = False,
+) -> None:
     """Display the version of findfmt and exit.
 
     Args:
+        ctx: Typer context, if provided by Click callback.
         value: Boolean flag indicating if version flag was passed.
 
     Raises:
         typer.Exit: Upon printing version.
     """
+    if isinstance(ctx, bool):
+        value = ctx
+        ctx = None
+
     if value:
-        sys.stdout.write(f"findfmt {get_version()}\n")
+        if _is_verbose_requested(ctx):
+            sys.stdout.write(get_diagnostics())
+        else:
+            sys.stdout.write(f"findfmt {get_version()}\n")
+
+        raise typer.Exit(code=0)
+
+
+def diagnostics_callback(value: bool) -> None:
+    """Display runtime environment diagnostics and exit.
+
+    Args:
+        value: Boolean flag indicating if diagnostics flag was passed.
+
+    Raises:
+        typer.Exit: Upon printing diagnostics.
+    """
+    if value:
+        sys.stdout.write(get_diagnostics())
+        raise typer.Exit(code=0)
+
+
+def get_help_all() -> str:
+    """Compile comprehensive help reference manual.
+
+    Returns:
+        Formatted multi-line manual text string ending in a newline.
+    """
+    return (
+        f"findfmt {get_version()} - Comprehensive CLI Reference\n\n"
+        "Usage: findfmt [OPTIONS] [paths]...\n\n"
+        "Tag Filtering:\n"
+        "  --type, -t, --tag <str>       Tag or comma-separated tags to match.\n"
+        "  --exclude, -e, --exclude-tag  Tag or comma-separated tags to exclude.\n"
+        "  --all-tags / --no-all-tags    Require matching ALL specified tags\n"
+        "                                [default: no-all-tags].\n\n"
+        "Traversal Controls:\n"
+        "  --shebang <str>               Filter files by shebang pattern.\n"
+        "  --no-ignore / --ignore        Do not respect .gitignore rules [default: ignore].\n"
+        "  --hidden / --no-hidden        Include hidden files and dirs [default: no-hidden].\n"
+        "  --follow-symlinks, -L         Follow symbolic links [default: no-follow-symlinks].\n"
+        "  --symlinks / --no-symlinks    Alias for --follow-symlinks / --no-follow-symlinks.\n\n"
+        "Output Formatting:\n"
+        "  --absolute / --no-absolute    Output absolute paths [default: no-absolute].\n"
+        "  --print0, -0 / --no-print0    Delimit with NUL (\\0) byte [default: no-print0].\n"
+        "  --list-tags, -l / --no-list-tags  Display identified tags [default: no-list-tags].\n"
+        "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n\n"
+        "Help & Diagnostics:\n"
+        "  --known-tags                  List all known classification tags and exit.\n"
+        "  --version, -v, -V             Display version (use with --verbose for diagnostics).\n"
+        "  --verbose                     Enable verbose output or extended runtime diagnostics.\n"
+        "  --diagnostics                 Display runtime environment diagnostics and exit.\n"
+        "  --help-all                    Display this comprehensive reference and exit.\n"
+        "  --help, -h                    Display categorized help summary and exit.\n\n"
+        "Command Wrappers:\n"
+        "  findfiles [PATHS...]          Equivalent to findfmt --hidden\n"
+        "  findfilemime [PATHS...]       Equivalent to findfmt --hidden --list-tags\n"
+        "  findfilefmt [TAG] [PATHS...]  Equivalent to findfmt --hidden --tag TAG\n"
+        "  findshebang [INTERP]...       Equivalent to findfmt --hidden --shebang INTERPRETER\n"
+        "  findfmt0 [PATHS...]           Equivalent to findfmt --hidden --print0\n"
+        "  findsummary [PATHS...]        Equivalent to findfmt --hidden --summary\n\n"
+        "POSIX Double-Dash (--) Terminator:\n"
+        "  Arguments following '--' are treated strictly as positional paths:\n"
+        "  $ findfmt -- -hyphen-dir/\n"
+        "  $ findfilefmt python -- -weird-name/\n\n"
+        "Environment Variables:\n"
+        "  NO_COLOR                      When set, suppresses colored output (https://no-color.org).\n"
+        "  CLICOLOR                      When set to 0, suppresses ANSI colors; 1 enables colors.\n"
+        "  CLICOLOR_FORCE                When non-zero, forces color output even when piped.\n"
+        "  FINDFMT_CONFIG                Path to custom configuration file overriding defaults.\n\n"
+        "Exit Codes:\n"
+        "  0                             Success: matching files found, or help/version queried.\n"
+        "  1                             Runtime traversal or classification error.\n"
+        "  2                             Invalid command-line usage or invalid arguments.\n\n"
+        "Workflow Examples:\n"
+        "  $ findfmt -t python                     # Find Python files in current repository\n"
+        "  $ findfmt --shebang bash scripts/       # Find bash scripts in scripts/\n"
+        "  $ findfmt -t python -t executable --all-tags  # Require BOTH tags\n"
+        "  $ findfiles --no-hidden                 # Traverse files without hidden files\n"
+        "  $ findfilefmt json                      # Shortcut: find JSON files\n"
+        "  $ findshebang python                    # Shortcut: find Python shebang scripts\n"
+        "  $ findfmt0 -t python | xargs -0 flake8  # Pipe NUL-delimited paths safely\n"
+        "  $ findsummary                           # Print summary match statistics to stderr\n"
+    )
+
+
+def help_all_callback(value: bool) -> None:
+    """Display comprehensive help reference and exit.
+
+    Args:
+        value: Boolean flag indicating if help-all flag was passed.
+
+    Raises:
+        typer.Exit: Upon printing comprehensive help reference.
+    """
+    if value:
+        sys.stdout.write(get_help_all())
         raise typer.Exit(code=0)
 
 
@@ -149,6 +366,16 @@ app = typer.Typer(
         "A .gitignore-aware file discovery and classification suite that locates "
         "files by content format, shebang, and MIME tag."
     ),
+    epilog=(
+        "Common Examples:\n"
+        "  findfmt -t python                        # Find Python files\n"
+        "  findfmt --shebang bash scripts/          # Find bash scripts in scripts/\n"
+        "  findfmt -t python -t executable --all-tags # Files matching both tags\n"
+        "  findfiles --no-hidden                    # Wrapper: exclude hidden files\n"
+        "  findfmt -- -weird-name                   # Path starting with a dash\n\n"
+        "Run 'findfmt --help-all' for the comprehensive manual, environment variables, "
+        "and exit codes."
+    ),
 )
 def findfmt(
     paths: Annotated[
@@ -163,6 +390,7 @@ def findfmt(
             "--type",
             "-t",
             "--tag",
+            rich_help_panel="Tag Filtering",
             help="Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', 'executable').",
         ),
     ] = None,
@@ -172,13 +400,15 @@ def findfmt(
             "--exclude",
             "-e",
             "--exclude-tag",
+            rich_help_panel="Tag Filtering",
             help="Tag or comma-separated tags to exclude.",
         ),
     ] = None,
     all_tags: Annotated[
         bool,
         typer.Option(
-            "--all-tags",
+            "--all-tags/--no-all-tags",
+            rich_help_panel="Tag Filtering",
             help="Require matching files to have ALL specified tags rather than ANY tag.",
         ),
     ] = False,
@@ -186,59 +416,68 @@ def findfmt(
         str | None,
         typer.Option(
             "--shebang",
+            rich_help_panel="Traversal Controls",
             help="Filter files whose shebang contains this interpreter or pattern.",
         ),
     ] = None,
     no_ignore: Annotated[
         bool,
         typer.Option(
-            "--no-ignore",
+            "--no-ignore/--ignore",
+            rich_help_panel="Traversal Controls",
             help="Do not respect .gitignore rules during traversal.",
         ),
     ] = False,
     hidden: Annotated[
         bool,
         typer.Option(
-            "--hidden",
+            "--hidden/--no-hidden",
+            rich_help_panel="Traversal Controls",
             help="Include hidden files and directories.",
         ),
     ] = False,
     follow_symlinks: Annotated[
         bool,
         typer.Option(
-            "--follow-symlinks",
+            "--follow-symlinks/--no-follow-symlinks",
+            "--symlinks/--no-symlinks",
             "-L",
+            rich_help_panel="Traversal Controls",
             help="Follow symbolic links during traversal.",
         ),
     ] = False,
     absolute: Annotated[
         bool,
         typer.Option(
-            "--absolute",
+            "--absolute/--no-absolute",
+            rich_help_panel="Output Formatting",
             help="Output absolute paths rather than paths relative to the traversal root.",
         ),
     ] = False,
     print0: Annotated[
         bool,
         typer.Option(
-            "--print0",
+            "--print0/--no-print0",
             "-0",
+            rich_help_panel="Output Formatting",
             help=r"Delimit path outputs with a NUL (\0) character instead of a newline.",
         ),
     ] = False,
     list_tags: Annotated[
         bool,
         typer.Option(
-            "--list-tags",
+            "--list-tags/--no-list-tags",
             "-l",
+            rich_help_panel="Output Formatting",
             help="Display identified tags alongside each matched path.",
         ),
     ] = False,
     summary: Annotated[
         bool,
         typer.Option(
-            "--summary",
+            "--summary/--no-summary",
             "-s",
+            rich_help_panel="Output Formatting",
             help="Print summary match statistics to stderr.",
         ),
     ] = False,
@@ -251,16 +490,45 @@ def findfmt(
             help="List all known classification tags supported by the engine and exit.",
         ),
     ] = False,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            help="Enable verbose output or extended runtime diagnostics with --version.",
+        ),
+    ] = False,
+    diagnostics: Annotated[
+        bool,
+        typer.Option(
+            "--diagnostics",
+            is_eager=True,
+            callback=diagnostics_callback,
+            help="Display runtime environment diagnostics and exit.",
+        ),
+    ] = False,
     version: Annotated[
         bool | None,
         typer.Option(
             "--version",
             "-v",
+            "-V",
             is_eager=True,
             callback=version_callback,
             help="Display the version of findfmt and exit.",
         ),
     ] = None,
+    help_all: Annotated[
+        bool,
+        typer.Option(
+            "--help-all",
+            is_eager=True,
+            callback=help_all_callback,
+            help=(
+                "Display comprehensive help reference including environment variables, "
+                "exit codes, and examples."
+            ),
+        ),
+    ] = False,
 ) -> None:
     """Execute file discovery and classification matching."""
     root_paths = tuple(paths) if paths else (Path(),)
@@ -406,11 +674,13 @@ def _invoke_with_defaults(
         cmd = copy.copy(cmd)
         cmd.help = help_text
 
+    args_list = list(argv) if argv is not None else None
     try:
         cmd.main(
-            args=list(argv) if argv is not None else None,
+            args=args_list,
             prog_name=info_name,
             default_map=defaults,
+            obj={"argv": args_list if args_list is not None else list(sys.argv[1:])},
         )
     except SystemExit as exc:
         return exc.code if isinstance(exc.code, int) else 0
