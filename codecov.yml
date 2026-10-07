@@ -18,8 +18,6 @@ coverage:
       default:
         target: 100%
         threshold: 0%
-test_analytics:
-  status: true
 parsers:
   gcov:
     branch_detection:
@@ -28,11 +26,25 @@ parsers:
       method: false
       macro: false
 comment:
-  layout: reach, diff, flags, files
+  layout: reach, diff, flags, components, files
   behavior: default
   require_changes: false
   require_base: false
   require_head: true
+component_management:
+  individual_components:
+    - component_id: classifier
+      name: classifier
+      paths: [src/findfmt/classifier.py]
+    - component_id: traversal
+      name: traversal
+      paths: [src/findfmt/traversal.py]
+    - component_id: cli
+      name: cli
+      paths: [src/findfmt/cli.py, src/findfmt/__main__.py]
+    - component_id: models
+      name: models
+      paths: [src/findfmt/models.py]
 ignore: [tests/**/*, docs/**/*, tools/**/*]
 flags:
   unittests:
