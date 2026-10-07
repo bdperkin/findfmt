@@ -166,6 +166,12 @@ repos:
           - mdformat-gfm
           - mdformat-tables
 
+  # PyMarkdown linter
+  - repo: https://github.com/jackdewinter/pymarkdown
+    rev: v0.9.40
+    hooks:
+      - id: pymarkdown
+
   # Yamlfix formatter
   - repo: https://github.com/lyz-code/yamlfix
     rev: 1.17.0

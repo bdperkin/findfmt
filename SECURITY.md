@@ -102,8 +102,8 @@ mitigations implemented in `findfmt`.
   command output when rendered to an interactive terminal emulator.
 - **Mitigation**: `findfmt` provides `-0` / `--print0` to delimit paths with NUL (`\0`) bytes,
   ensuring safe ingestion by downstream tools such as `xargs -0` without word splitting or shell
-  expansion. Quoting and sanitization features (`-q` / `--quote`) are tracked on the roadmap (#20,
-  #22).
+  expansion. Quoting and sanitization features (`-q` / `--quote`) are tracked on the roadmap (#20
+  and #22).
 
 ### 3.4. Supply Chain & Dependency Hygiene
 
