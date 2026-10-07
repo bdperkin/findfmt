@@ -11,9 +11,9 @@
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/v/findfmt.svg?logo=pypi&logoColor=white" alt="PyPI Version" /></a>
-  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/pyversions/findfmt.svg?logo=python&logoColor=white" alt="Python Versions" /></a>
-  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/wheel/findfmt.svg" alt="PyPI Wheel" /></a>
+  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/v/findfmt?logo=pypi&logoColor=white" alt="PyPI Version" /></a>
+  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/pyversions/findfmt?logo=python&logoColor=white" alt="Python Versions" /></a>
+  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/wheel/findfmt?logo=pypi&logoColor=white" alt="PyPI Wheel" /></a>
   <a href="https://github.com/bdperkin/findfmt/pkgs/container/findfmt"><img src="https://img.shields.io/badge/GHCR-container-blue?logo=docker&logoColor=white" alt="GHCR Container" /></a>
   <a href="https://github.com/bdperkin/findfmt/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
 </p>
