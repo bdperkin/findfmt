@@ -50,6 +50,7 @@ dmypy.json
 
 # Sphinx documentation builds
 docs/_build/
+docs/build/
 docs/source/api/generated/
 
 # Environments and Secrets

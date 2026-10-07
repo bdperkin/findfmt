@@ -81,3 +81,16 @@ quality/index
 
 accessibility
 ```
+
+______________________________________________________________________
+
+## Community & Feedback
+
+- **Source Code**: [github.com/bdperkin/findfmt](https://github.com/bdperkin/findfmt)
+- **Issue Tracker**: Report bugs, request formats, or propose features on
+  [GitHub Issues](https://github.com/bdperkin/findfmt/issues).
+- **Contributing**: Review the
+  [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md) to get
+  started with local development.
+- **Accessibility**: See our [Accessibility Statement](accessibility.md) for supported assistive
+  technologies and barrier reporting.

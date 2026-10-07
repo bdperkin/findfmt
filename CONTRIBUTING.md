@@ -3,6 +3,9 @@
 Thank you for your interest in contributing to `findfmt`! We welcome contributions ranging from bug
 reports and documentation fixes to major features.
 
+For architecture guides, API reference, and user tutorials, consult our online documentation at
+[https://bdperkin.github.io/findfmt](https://bdperkin.github.io/findfmt).
+
 ## Development Setup
 
 `findfmt` uses `uv` for package and dependency management.

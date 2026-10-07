@@ -127,7 +127,7 @@ lint.per-file-ignores."tools/**/*" = [ "INP001", "S", "T201" ]
 lint.pydocstyle.convention = "google"
 
 [tool.codespell]
-skip = "./.git,./build,./dist,./.venv,./docs/_build,./assets"
+skip = "./.git,./build,./dist,./.venv,./docs/_build,./docs/build,./assets"
 quiet-level = 3
 
 [tool.deptry]
