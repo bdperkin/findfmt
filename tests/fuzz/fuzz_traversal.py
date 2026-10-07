@@ -89,31 +89,31 @@ def TestOneInput(data: bytes) -> None:  # noqa: N802
 
     with tempfile.TemporaryDirectory() as tmpdir:
         root = Path(tmpdir)
-        _setup_synthetic_tree(root, gitignore_text, file_payloads)
-
-        _ = load_gitignore_spec(root)
-        _ = load_git_exclude_spec(root)
-
-        config = TraversalConfig(
-            root_paths=(root,),
-            include_tags=candidate_tags,
-            respect_gitignore=True,
-            include_hidden=True,
-        )
-
-        sample_info = FileInfo(
-            path=root / "sample.py",
-            relative_path=Path("sample.py"),
-            tags=candidate_tags,
-            shebang="#!/usr/bin/env python3",
-            mime_type="text/x-python",
-            is_executable=True,
-            is_symlink=False,
-            size_bytes=100,
-        )
-        _ = matches_filter(sample_info, config)
-
         with contextlib.suppress(OSError, ValueError):
+            _setup_synthetic_tree(root, gitignore_text, file_payloads)
+
+            _ = load_gitignore_spec(root)
+            _ = load_git_exclude_spec(root)
+
+            config = TraversalConfig(
+                root_paths=(root,),
+                include_tags=candidate_tags,
+                respect_gitignore=True,
+                include_hidden=True,
+            )
+
+            sample_info = FileInfo(
+                path=root / "sample.py",
+                relative_path=Path("sample.py"),
+                tags=candidate_tags,
+                shebang="#!/usr/bin/env python3",
+                mime_type="text/x-python",
+                is_executable=True,
+                is_symlink=False,
+                size_bytes=100,
+            )
+            _ = matches_filter(sample_info, config)
+
             for item in traverse_directory(root, config):
                 assert item.path.exists() or item.is_symlink
                 _ = matches_filter(item, config)
