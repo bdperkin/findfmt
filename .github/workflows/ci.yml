@@ -9,6 +9,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+permissions: read-all
 jobs:
   quality-gate:
     name: Code Quality & Gatekeeping
