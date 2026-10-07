@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="findfmt Logo" width="600" />
+  <img src="https://raw.githubusercontent.com/bdperkin/findfmt/main/assets/logo.svg" alt="findfmt Logo" width="600" />
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@
   <a href="https://github.com/astral-sh/ty"><img src="https://img.shields.io/badge/type--checked-ty-blueviolet" alt="Type-checked: ty" /></a>
   <a href="https://interrogate.readthedocs.io/"><img src="https://img.shields.io/badge/interrogate-100%25-brightgreen" alt="Docstring Coverage: 100%" /></a>
   <a href="https://conventionalcommits.org"><img src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" alt="Conventional Commits" /></a>
-  <a href="ACCESSIBILITY.md"><img src="https://img.shields.io/badge/accessibility-WCAG%202.1%20AA-blue" alt="Accessibility WCAG 2.1 AA" /></a>
+  <a href="https://github.com/bdperkin/findfmt/blob/main/ACCESSIBILITY.md"><img src="https://img.shields.io/badge/accessibility-WCAG%202.1%20AA-blue" alt="Accessibility WCAG 2.1 AA" /></a>
 </p>
 
 ______________________________________________________________________
@@ -178,12 +178,12 @@ ______________________________________________________________________
 
 ## 6. Governance & Community
 
-- [Contributing Guidelines](CONTRIBUTING.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Security Policy](SECURITY.md)
-- [Support Information](SUPPORT.md)
-- [Accessibility Statement](ACCESSIBILITY.md)
+- [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)
+- [Code of Conduct](https://github.com/bdperkin/findfmt/blob/main/CODE_OF_CONDUCT.md)
+- [Security Policy](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)
+- [Support Information](https://github.com/bdperkin/findfmt/blob/main/SUPPORT.md)
+- [Accessibility Statement](https://github.com/bdperkin/findfmt/blob/main/ACCESSIBILITY.md)
 
 ## 7. License
 
-[MIT License](LICENSE) © 2026 Brandon Perkins.
+[MIT License](https://github.com/bdperkin/findfmt/blob/main/LICENSE) © 2026 Brandon Perkins.
