@@ -35,7 +35,7 @@
 locates files by content format, shebang, and MIME tag rather than relying strictly on file
 extensions.
 
-## Core Capabilities
+## 1. Core Capabilities
 
 - **Intelligent Classification**: Powered by the `identify` engine and content heuristics to
   identify file types (e.g. Python, Shell, YAML, JSON, Executable) even when filenames lack
@@ -85,7 +85,7 @@ security
 
 ______________________________________________________________________
 
-## Community & Feedback
+## 2. Community & Feedback
 
 - **Source Code**: [github.com/bdperkin/findfmt](https://github.com/bdperkin/findfmt)
 - **Issue Tracker**: Report bugs, request formats, or propose features on

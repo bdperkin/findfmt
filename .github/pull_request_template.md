@@ -1,10 +1,10 @@
-## Description
+## 1. Description
 
 Please provide a clear and concise summary of the changes made and the motivation behind them.
 
 Closes #
 
-## Type of Change
+## 2. Type of Change
 
 - [ ] Bug fix (`fix:`)
 - [ ] New feature (`feat:`)
@@ -14,7 +14,7 @@ Closes #
 - [ ] CI/CD or build automation (`ci:`, `chore:`)
 - [ ] Testing additions or maintenance (`test:`)
 
-## Quality Checklist
+## 3. Quality Checklist
 
 - [ ] All pre-commit hooks pass locally (`uv run pre-commit run --all-files`).
 - [ ] The full quality verification suite passes with 100% test coverage

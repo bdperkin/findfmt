@@ -6,7 +6,7 @@ reports and documentation fixes to major features.
 For architecture guides, API reference, and user tutorials, consult our online documentation at
 [https://bdperkin.github.io/findfmt](https://bdperkin.github.io/findfmt).
 
-## Reporting Issues & Proposing Features
+## 1. Reporting Issues & Proposing Features
 
 We use structured GitHub Issue Forms to ensure essential reproduction details and context are
 provided upfront:
@@ -27,7 +27,7 @@ provided upfront:
 - **Security Inquiries**: For security vulnerabilities, follow our private reporting process via
   [GitHub Security Advisories](https://github.com/bdperkin/findfmt/security/advisories/new).
 
-## Issue & Pull Request Label Taxonomy
+## 2. Issue & Pull Request Label Taxonomy
 
 We organize issues and pull requests using a structured, prefixed label taxonomy:
 
@@ -52,7 +52,7 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
 - **`type:*` & Core Tags**:
   - `type:chore`, `type:rfc`, `bug`, `enhancement`, `documentation`, `security`.
 
-## Development Setup
+## 3. Development Setup
 
 `findfmt` uses `uv` for package and dependency management.
 
@@ -75,7 +75,7 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
    uv run pre-commit install
    ```
 
-## Quality and Testing Standards
+## 4. Quality and Testing Standards
 
 All pull requests must satisfy our quality gate before merging:
 
@@ -97,7 +97,7 @@ All pull requests must satisfy our quality gate before merging:
   uv run python tools/verify_quality.py
   ```
 
-## Commit Guidelines
+## 5. Commit Guidelines
 
 We use [Conventional Commits](https://www.conventionalcommits.org/) to power our automated semantic
 release and changelog pipelines:
@@ -118,7 +118,7 @@ Please sign off on your commits:
 git commit -s -m "feat: add support for MIME categories"
 ```
 
-## Pull Request Process
+## 6. Pull Request Process
 
 1. Create a feature branch off `main`.
 2. Ensure all tests and quality checks pass locally.

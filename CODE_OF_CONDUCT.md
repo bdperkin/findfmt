@@ -1,6 +1,6 @@
 # Contributor Covenant Code of Conduct
 
-## Our Pledge
+## 1. Our Pledge
 
 We as members, contributors, and leaders pledge to make participation in our community a
 harassment-free experience for everyone, regardless of age, body size, visible or invisible
@@ -11,7 +11,7 @@ sexual identity and orientation.
 We pledge to act and interact in ways that contribute to an open, welcoming, diverse, inclusive, and
 healthy community.
 
-## Our Standards
+## 2. Our Standards
 
 Examples of behavior that contributes to a positive environment for our community include:
 
@@ -31,24 +31,24 @@ Examples of unacceptable behavior include:
   explicit permission
 - Other conduct which could reasonably be considered inappropriate in a professional setting
 
-## Enforcement Responsibilities
+## 3. Enforcement Responsibilities
 
 Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior
 and will take appropriate and fair corrective action in response to any behavior that they deem
 inappropriate, threatening, offensive, or harmful.
 
-## Scope
+## 4. Scope
 
 This Code of Conduct applies within all community spaces, and also applies when an individual is
 officially representing the community in public spaces.
 
-## Enforcement
+## 5. Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project
 maintainers at `bdperkin@gmail.com`. All complaints will be reviewed and investigated promptly and
 fairly.
 
-## Attribution
+## 6. Attribution
 
 This Code of Conduct is adapted from the
 [Contributor Covenant](https://www.contributor-covenant.org), version 2.1, available at

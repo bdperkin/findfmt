@@ -2,7 +2,7 @@
 
 `findfmt` can be installed in several ways depending on your environment.
 
-## Using `uv` (Recommended)
+## 1. Using `uv` (Recommended)
 
 To run `findfmt` as a standalone tool via `uvx`:
 
@@ -22,13 +22,13 @@ Or add it to a project virtual environment:
 uv add findfmt
 ```
 
-## Using `pip`
+## 2. Using `pip`
 
 ```bash
 pip install findfmt
 ```
 
-## Using Container Image
+## 3. Using Container Image
 
 Pre-built slim containers are published to GitHub Container Registry:
 

@@ -2,7 +2,7 @@
 
 `findfmt` is engineered under the strictest software quality standards.
 
-## Code Quality Standards
+## 1. Code Quality Standards
 
 - **100% Code Coverage**: Enforced through `pytest-cov` and Codecov CI checks.
 - **Strict Static Typing**: Verified with `ty` in pedantic mode (`all = "error"`) and
@@ -11,7 +11,7 @@
 - **Cyclomatic Complexity**: Monitored using `radon` and capped via `xenon`.
 - **Documentation Completeness**: Monitored via `interrogate` ensuring 100% docstring coverage.
 
-## Traversal Complexity Optimization
+## 2. Traversal Complexity Optimization
 
 Repository traversal performs early pruning of `.gitignore` hierarchies to prevent recursing into
 expansive unneeded directory trees such as `node_modules`, `.venv`, or compilation artifact
