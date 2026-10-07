@@ -10,9 +10,7 @@ on:
         required: true
         type: string
 permissions:
-  contents: write
-  id-token: write
-  packages: write
+  contents: read
 jobs:
   build-distributions:
     name: Build Distributions
@@ -53,6 +51,8 @@ jobs:
     environment:
       name: testpypi
       url: https://test.pypi.org/project/findfmt/
+    permissions:
+      id-token: write
     steps:
       - name: Download Distribution Artifacts
         uses: actions/download-artifact@v4
@@ -71,6 +71,8 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/project/findfmt/
+    permissions:
+      id-token: write
     steps:
       - name: Download Distribution Artifacts
         uses: actions/download-artifact@v4
@@ -85,6 +87,8 @@ jobs:
     name: Create GitHub Release
     needs: [build-distributions, publish-pypi]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Download Distribution Artifacts
         uses: actions/download-artifact@v4
@@ -102,6 +106,9 @@ jobs:
     name: Build & Publish Container to GHCR
     needs: publish-pypi
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
