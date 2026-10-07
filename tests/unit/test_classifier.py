@@ -1,3 +1,4 @@
+import os
 import stat
 from pathlib import Path
 from unittest.mock import patch
@@ -154,3 +155,28 @@ def test_classify_file_posix_execution(tmp_path: Path, monkeypatch):
     monkeypatch.setattr("os.name", "posix")
     info = classify_file(target, root_path=tmp_path)
     assert info.path.name == "script.sh"
+
+
+def test_extract_shebang_directory(tmp_path: Path):
+    sub = tmp_path / "subdir"
+    sub.mkdir()
+    assert extract_shebang(sub) is None
+
+
+def test_classify_file_is_file_os_error(tmp_path: Path):
+    target = tmp_path / "target.py"
+    target.write_text("print('test')", encoding="utf-8")
+    with patch.object(Path, "is_file", side_effect=OSError("Permission denied")):
+        info = classify_file(target, root_path=tmp_path)
+        assert "python" in info.tags
+
+
+def test_classify_file_fifo(tmp_path: Path):
+    fifo_path = tmp_path / "stream.pipe"
+    try:
+        os.mkfifo(fifo_path)
+    except (AttributeError, OSError):
+        return
+
+    info = classify_file(fifo_path, root_path=tmp_path)
+    assert info.shebang is None

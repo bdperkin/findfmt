@@ -80,6 +80,7 @@ quality/index
 :caption: Community & Governance
 
 accessibility
+security
 ```
 
 ______________________________________________________________________
@@ -94,3 +95,5 @@ ______________________________________________________________________
   started with local development.
 - **Accessibility**: See our [Accessibility Statement](accessibility.md) for supported assistive
   technologies and barrier reporting.
+- **Security Policy**: See our [Security Policy](security.md) for reporting vulnerabilities and
+  threat modeling details.
