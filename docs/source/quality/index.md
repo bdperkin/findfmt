@@ -16,3 +16,14 @@
 Repository traversal performs early pruning of `.gitignore` hierarchies to prevent recursing into
 expansive unneeded directory trees such as `node_modules`, `.venv`, or compilation artifact
 directories.
+
+## 3. Python Runtime Compatibility
+
+`findfmt` officially supports Python 3.10 through 3.15, with automated CI matrices testing Ubuntu,
+macOS, and Windows. See the complete analysis and version matrix:
+
+```{toctree}
+:maxdepth: 1
+
+compatibility
+```
