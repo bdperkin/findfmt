@@ -50,6 +50,8 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
+      - name: Clean TestPyPI Attestations
+        run: rm -f dist/*.publish.attestation dist/*.attestation
       - name: Publish to PyPI (OIDC Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
