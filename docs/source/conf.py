@@ -43,6 +43,11 @@ html_title = "findfmt Documentation"
 html_logo = "_static/logo.svg"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+html_theme_options = {
+    "source_repository": "https://github.com/bdperkin/findfmt",
+    "source_branch": "main",
+    "source_directory": "docs/source/",
+}
 
 # Man page output
 man_pages = [
