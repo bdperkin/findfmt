@@ -43,10 +43,8 @@ dynamic = [ "version" ]
 dependencies = [
   "identify>=2.6",
   "pathspec>=0.12",
-  "pyyaml>=6",
   "tomli>=2.0.1; python_version<'3.11'",
   "typer>=0.12",
-  "typing-extensions>=4; python_version<'3.12'",
 ]
 
 urls.Changelog = "https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md"
@@ -91,7 +89,6 @@ lint = [
   "radon>=6.0.1",
   "ruff>=0.8",
   "ty>=0.0.80",
-  "types-pyyaml>=6",
   "vulture>=2.11",
   "xenon>=0.9.1",
   "yamllint>=1.35",
@@ -136,9 +133,6 @@ lint.per-file-ignores."src/findfmt/cli.py" = [
   "PLR0913",
   "PLR0917",
 ]
-lint.per-file-ignores."src/findfmt/cli_help.py" = [ "FBT001", "FBT002" ]
-lint.per-file-ignores."src/findfmt/diagnostics.py" = [ "FBT001", "FBT002" ]
-lint.per-file-ignores."src/findfmt/entrypoints.py" = [ "PLC0415" ]
 lint.per-file-ignores."tests/**/*" = [
   "ANN",
   "D",
@@ -156,7 +150,7 @@ quiet-level = 3
 [tool.deptry]
 known_first_party = [ "findfmt" ]
 extend_exclude = [ "tests", "docs", "tools" ]
-per_rule_ignores = { DEP002 = [ "tomli", "typing-extensions" ] }
+per_rule_ignores = { DEP002 = [ "tomli" ] }
 
 [tool.pytest.ini_options]
 minversion = "8.0"
@@ -257,7 +251,6 @@ exclude = [
   "build/**",
   ".venv/**",
   ".git/**",
-  ".clusterfuzzlite/**",
   ".github/styles/**",
   "docs/_build/**",
   ".pytest_cache/**",

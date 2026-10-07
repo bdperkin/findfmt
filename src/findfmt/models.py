@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,26 +30,6 @@ class FileInfo:
     is_symlink: bool = False
     size_bytes: int = 0
 
-    def to_dict(self, *, absolute: bool = False) -> dict[str, Any]:
-        """Serialize file attributes to a dictionary representation.
-
-        Args:
-            absolute: Whether the 'path' entry contains the absolute path.
-
-        Returns:
-            Dictionary mapping attribute names to serialized values.
-        """
-        return {
-            "path": str(self.path if absolute else self.relative_path),
-            "relative_path": str(self.relative_path),
-            "tags": sorted(self.tags),
-            "shebang": self.shebang,
-            "mime_type": self.mime_type,
-            "is_executable": self.is_executable,
-            "is_symlink": self.is_symlink,
-            "size_bytes": self.size_bytes,
-        }
-
 
 @dataclass(frozen=True, slots=True)
 class TraversalConfig:
@@ -69,7 +48,6 @@ class TraversalConfig:
         null_delimited: Whether to delimit output paths with NUL bytes (\0).
         show_tags: Whether to print identified tags alongside file paths.
         show_summary: Whether to output summary statistics of matches.
-        output_format: Requested output serialization format.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -84,4 +62,3 @@ class TraversalConfig:
     null_delimited: bool = False
     show_tags: bool = False
     show_summary: bool = False
-    output_format: str = "text"
