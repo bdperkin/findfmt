@@ -214,7 +214,7 @@ exclude = "tests/*,docs/*,tools/*"
 
 [tool.vulture]
 exclude = [ "tests", "docs", "tools" ]
-ignore_names = [ "known_tags", "relative_paths" ]
+ignore_names = [ "diagnostics", "help_all", "known_tags", "relative_paths", "verbose" ]
 min_confidence = 80
 
 [tool.pymarkdown.plugins.MD013]

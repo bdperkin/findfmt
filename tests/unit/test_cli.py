@@ -1,17 +1,25 @@
 import runpy
+import subprocess
 from importlib.metadata import PackageNotFoundError
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+import typer
 from typer.testing import CliRunner
 
 from findfmt.cli import (
     _consume_option,
     _extract_first_positional,
     _has_option,
+    _is_verbose_requested,
     app,
+    diagnostics_callback,
+    get_diagnostics,
+    get_git_version,
+    get_help_all,
     get_version,
+    help_all_callback,
     main,
     main_findfilefmt,
     main_findfilemime,
@@ -20,6 +28,7 @@ from findfmt.cli import (
     main_findshebang,
     main_findsummary,
     parse_tag_arguments,
+    version_callback,
 )
 
 
@@ -340,3 +349,259 @@ def test_wrappers_error_exit_code():
     assert main_findshebang(["--nonexistent-flag"]) != 0
     assert main_findfmt0(["--nonexistent-flag"]) != 0
     assert main_findsummary(["--nonexistent-flag"]) != 0
+
+
+def test_get_git_version():
+    with patch("shutil.which", return_value=None):
+        assert get_git_version() is None
+
+    with (
+        patch("shutil.which", return_value="/usr/bin/git"),
+        patch(
+            "subprocess.run",
+            return_value=subprocess.CompletedProcess([], 0, "git version 2.50.0\n", ""),
+        ),
+    ):
+        assert get_git_version() == "git version 2.50.0"
+
+    with (
+        patch("shutil.which", return_value="/usr/bin/git"),
+        patch(
+            "subprocess.run",
+            return_value=subprocess.CompletedProcess([], 1, "", "error"),
+        ),
+    ):
+        assert get_git_version() is None
+
+    with (
+        patch("shutil.which", return_value="/usr/bin/git"),
+        patch("subprocess.run", side_effect=OSError("command failed")),
+    ):
+        assert get_git_version() is None
+
+
+def test_get_diagnostics():
+    diag = get_diagnostics()
+    assert "findfmt " in diag
+    assert "Python: " in diag
+    assert "identify: " in diag
+    assert "Git: " in diag
+
+    with patch("findfmt.cli.version", side_effect=PackageNotFoundError):
+        diag_no_identify = get_diagnostics()
+        assert "identify: not installed" in diag_no_identify
+
+    with patch("findfmt.cli.get_git_version", return_value=None):
+        diag_no_git = get_diagnostics()
+        assert "Git: not found" in diag_no_git
+
+
+def test_is_verbose_requested():
+    class DummyContext:
+        def __init__(self, params=None, obj=None):
+            self.params = params or {}
+            self.obj = obj
+
+    ctx_verbose = DummyContext(params={"verbose": True})
+    assert _is_verbose_requested(ctx_verbose) is True
+
+    ctx_diag = DummyContext(params={"diagnostics": True})
+    assert _is_verbose_requested(ctx_diag) is True
+
+    ctx_obj_verbose = DummyContext(obj={"argv": ["--verbose"]})
+    assert _is_verbose_requested(ctx_obj_verbose) is True
+
+    ctx_obj_diag = DummyContext(obj={"argv": ["--diagnostics"]})
+    assert _is_verbose_requested(ctx_obj_diag) is True
+
+    ctx_obj_other = DummyContext(obj={"argv": ["findfmt", "src/"]})
+    with patch("sys.argv", ["findfmt"]):
+        assert _is_verbose_requested(ctx_obj_other) is False
+
+    with patch("sys.argv", ["findfmt"]):
+        assert _is_verbose_requested(DummyContext()) is False
+
+    with patch("sys.argv", ["findfmt", "--verbose"]):
+        assert _is_verbose_requested(None) is True
+
+    with patch("sys.argv", ["findfmt", "--diagnostics"]):
+        assert _is_verbose_requested(None) is True
+
+    with patch("sys.argv", ["findfmt"]):
+        assert _is_verbose_requested(None) is False
+
+
+def test_version_callback_direct():
+    with pytest.raises(typer.Exit) as exc:
+        version_callback(ctx=True)
+
+    assert exc.value.exit_code == 0
+
+    version_callback(value=False)
+
+    with (
+        patch("findfmt.cli._is_verbose_requested", return_value=True),
+        pytest.raises(typer.Exit) as exc,
+    ):
+        version_callback(value=True)
+
+    assert exc.value.exit_code == 0
+
+
+def test_diagnostics_callback():
+    diagnostics_callback(value=False)
+    with pytest.raises(typer.Exit) as exc:
+        diagnostics_callback(value=True)
+
+    assert exc.value.exit_code == 0
+
+
+def test_help_all_callback_and_text():
+    help_text = get_help_all()
+    assert "findfmt " in help_text
+    assert "Comprehensive CLI Reference" in help_text
+    assert "Tag Filtering:" in help_text
+    assert "Traversal Controls:" in help_text
+    assert "Output Formatting:" in help_text
+    assert "Command Wrappers:" in help_text
+    assert "POSIX Double-Dash (--)" in help_text
+    assert "Environment Variables:" in help_text
+    assert "Exit Codes:" in help_text
+    assert "Workflow Examples:" in help_text
+
+    help_all_callback(value=False)
+    with pytest.raises(typer.Exit) as exc:
+        help_all_callback(value=True)
+
+    assert exc.value.exit_code == 0
+
+
+def test_cli_version_options():
+    runner = CliRunner()
+    res_cap_v = runner.invoke(app, ["-V"])
+    assert res_cap_v.exit_code == 0
+    assert "findfmt " in res_cap_v.stdout
+
+    res_verb = runner.invoke(app, ["--version", "--verbose"])
+    assert res_verb.exit_code == 0
+    assert "Python: " in res_verb.stdout
+
+    res_cap_verb = runner.invoke(app, ["-V", "--verbose"])
+    assert res_cap_verb.exit_code == 0
+    assert "Python: " in res_cap_verb.stdout
+
+    res_diag = runner.invoke(app, ["--diagnostics"])
+    assert res_diag.exit_code == 0
+    assert "Python: " in res_diag.stdout
+
+
+def test_cli_help_all():
+    runner = CliRunner()
+    res = runner.invoke(app, ["--help-all"])
+    assert res.exit_code == 0
+    assert "findfmt " in res.stdout
+    assert "Comprehensive CLI Reference" in res.stdout
+    assert "Command Wrappers:" in res.stdout
+    assert "POSIX Double-Dash" in res.stdout
+
+
+def test_cli_flag_negations(sample_repo: Path):
+    runner = CliRunner()
+
+    res = runner.invoke(
+        app,
+        [str(sample_repo), "-t", "python,executable", "--all-tags", "--no-all-tags"],
+    )
+    assert res.exit_code == 0
+    lines = res.stdout.strip().split("\n")
+    assert any("app.py" in line for line in lines)
+
+    res = runner.invoke(app, [str(sample_repo), "--hidden", "--no-hidden"])
+    assert res.exit_code == 0
+    assert ".config/settings.yaml" not in res.stdout
+
+    res = runner.invoke(app, [str(sample_repo), "--no-ignore", "--ignore"])
+    assert res.exit_code == 0
+    assert "debug.log" not in res.stdout
+
+    res = runner.invoke(app, [str(sample_repo), "--follow-symlinks", "--no-follow-symlinks"])
+    assert res.exit_code == 0
+
+    res = runner.invoke(app, [str(sample_repo), "--symlinks", "--no-symlinks"])
+    assert res.exit_code == 0
+
+    res = runner.invoke(app, [str(sample_repo), "-L", "--no-follow-symlinks"])
+    assert res.exit_code == 0
+
+    res = runner.invoke(app, [str(sample_repo), "--absolute", "--no-absolute"])
+    assert res.exit_code == 0
+    assert not any(line.startswith("/") for line in res.stdout.splitlines())
+
+    res = runner.invoke(app, [str(sample_repo), "--print0", "--no-print0"])
+    assert res.exit_code == 0
+    assert "\0" not in res.stdout
+
+    res = runner.invoke(app, [str(sample_repo), "-0", "--no-print0"])
+    assert res.exit_code == 0
+    assert "\0" not in res.stdout
+
+    res = runner.invoke(app, [str(sample_repo), "--list-tags", "--no-list-tags"])
+    assert res.exit_code == 0
+    assert "[" not in res.stdout
+
+    res = runner.invoke(app, [str(sample_repo), "-l", "--no-list-tags"])
+    assert res.exit_code == 0
+    assert "[" not in res.stdout
+
+    res = runner.invoke(app, [str(sample_repo), "--summary", "--no-summary"])
+    assert res.exit_code == 0
+    assert "--- findfmt summary ---" not in res.stderr
+
+    res = runner.invoke(app, [str(sample_repo), "-s", "--no-summary"])
+    assert res.exit_code == 0
+    assert "--- findfmt summary ---" not in res.stderr
+
+
+def test_wrapper_default_overrides(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
+    assert main_findfiles(["--no-hidden", str(sample_repo)]) == 0
+    captured = capsys.readouterr()
+    assert ".config/settings.yaml" not in captured.out
+
+    assert main_findsummary(["--no-summary", str(sample_repo)]) == 0
+    captured = capsys.readouterr()
+    assert "--- findfmt summary ---" not in captured.err
+
+    assert main_findfmt0(["--no-print0", str(sample_repo)]) == 0
+    captured = capsys.readouterr()
+    assert "\0" not in captured.out
+
+    assert main_findfilemime(["--no-list-tags", str(sample_repo)]) == 0
+    captured = capsys.readouterr()
+    assert "[" not in captured.out
+
+
+def test_posix_double_dash_hyphenated_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.chdir(tmp_path)
+    hyphen_dir = tmp_path / "-weird-dir"
+    hyphen_dir.mkdir()
+    (hyphen_dir / "script.py").write_text("#!/usr/bin/env python\nprint('posix')\n")
+
+    runner = CliRunner()
+
+    res_no_dash = runner.invoke(app, ["-weird-dir"])
+    assert res_no_dash.exit_code != 0
+
+    res_dash = runner.invoke(app, ["--", "-weird-dir"])
+    assert res_dash.exit_code == 0
+    assert "script.py" in res_dash.stdout
+
+    assert main_findfiles(["--", "-weird-dir"]) == 0
+    assert main_findfilemime(["--", "-weird-dir"]) == 0
+    assert main_findfilefmt(["python", "--", "-weird-dir"]) == 0
+    assert main_findfilefmt(["-t", "python", "--", "-weird-dir"]) == 0
+    assert main_findfilefmt(["--", "python", "-weird-dir"]) == 0
+    assert main_findshebang(["python", "--", "-weird-dir"]) == 0
+    assert main_findshebang(["--shebang", "python", "--", "-weird-dir"]) == 0
+    assert main_findshebang(["--", "python", "-weird-dir"]) == 0
+    assert main_findfmt0(["--", "-weird-dir"]) == 0
+    assert main_findsummary(["--", "-weird-dir"]) == 0
