@@ -1,6 +1,7 @@
 # Contributing to findfmt
 
-Thank you for your interest in contributing to `findfmt`! We welcome contributions ranging from bug reports and documentation fixes to major features.
+Thank you for your interest in contributing to `findfmt`! We welcome contributions ranging from bug
+reports and documentation fixes to major features.
 
 ## Development Setup
 
@@ -13,13 +14,13 @@ Thank you for your interest in contributing to `findfmt`! We welcome contributio
    cd findfmt
    ```
 
-1. **Sync Dependencies**:
+2. **Sync Dependencies**:
 
    ```bash
    uv sync --all-groups
    ```
 
-1. **Install Pre-Commit Hooks**:
+3. **Install Pre-Commit Hooks**:
 
    ```bash
    uv run pre-commit install
@@ -49,7 +50,8 @@ All pull requests must satisfy our quality gate before merging:
 
 ## Commit Guidelines
 
-We use [Conventional Commits](https://www.conventionalcommits.org/) to power our automated semantic release and changelog pipelines:
+We use [Conventional Commits](https://www.conventionalcommits.org/) to power our automated semantic
+release and changelog pipelines:
 
 - `feat:` A new feature (triggers minor release)
 - `fix:` A bug fix (triggers patch release)
@@ -70,6 +72,6 @@ git commit -s -m "feat: add support for MIME categories"
 ## Pull Request Process
 
 1. Create a feature branch off `main`.
-1. Ensure all tests and quality checks pass locally.
-1. Open a Pull Request on GitHub. Direct pushes to `main` are disabled.
-1. Address any CI check feedback or code review comments.
+2. Ensure all tests and quality checks pass locally.
+3. Open a Pull Request on GitHub. Direct pushes to `main` are disabled.
+4. Address any CI check feedback or code review comments.

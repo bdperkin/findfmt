@@ -2,14 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.1.0] - 2026-10-06
 
 ### Features
 
-- Initial release of `findfmt`: Content-aware and `.gitignore`-conscious file discovery and classification suite.
+- Initial release of `findfmt`: Content-aware and `.gitignore`-conscious file discovery and
+  classification suite.
 - Integrated `identify` engine for deep content and extension inspection.
 - Shebang-based interpreter detection and filtering (`--shebang`).
 - MIME tag association and filtering.

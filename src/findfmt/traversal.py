@@ -36,6 +36,7 @@ def load_gitignore_spec(directory: Path) -> PathSpecType | None:
                     return pathspec.PathSpec.from_lines("gitignore", lines)
         except OSError:
             return None
+
     return None
 
 
@@ -57,6 +58,7 @@ def load_git_exclude_spec(root: Path) -> PathSpecType | None:
                     return pathspec.PathSpec.from_lines("gitignore", lines)
         except OSError:
             return None
+
     return None
 
 
@@ -72,6 +74,7 @@ def should_skip_dir(dir_name: str, *, include_hidden: bool) -> bool:
     """
     if dir_name == ".git":
         return True
+
     return bool(not include_hidden and dir_name.startswith("."))
 
 
@@ -95,6 +98,7 @@ def matches_filter(file_info: FileInfo, config: TraversalConfig) -> bool:
     if config.include_tags:
         if config.all_tags and not config.include_tags.issubset(tags):
             return False
+
         if not config.all_tags and not (tags & config.include_tags):
             return False
 
@@ -138,10 +142,12 @@ def _is_path_ignored(
     for base_dir, spec in specs:
         if not entry_path.is_relative_to(base_dir):
             continue
+
         rel = entry_path.relative_to(base_dir)
         rel_str = str(rel) + ("/" if is_dir else "")
         if spec.match_file(rel_str):
             return True
+
     return False
 
 
@@ -230,6 +236,7 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
         resolved_root = root.resolve()
         if not resolved_root.exists():
             continue
+
         if resolved_root.is_file():
             info = classify_file(resolved_root, root_path=resolved_root.parent)
             if matches_filter(info, config):

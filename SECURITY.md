@@ -13,8 +13,10 @@ Only the latest release of `findfmt` is actively supported with security updates
 
 We take the security of `findfmt` seriously. If you discover a security vulnerability:
 
-1. **Private Vulnerability Reporting**: Please submit a report through [GitHub Private Vulnerability Reporting](https://github.com/bdperkin/findfmt/security/advisories/new).
-1. **Email**: If you are unable to use GitHub Advisories, email `bdperkin@gmail.com` with the subject `[SECURITY] findfmt vulnerability report`.
+1. **Private Vulnerability Reporting**: Please submit a report through
+   [GitHub Private Vulnerability Reporting](https://github.com/bdperkin/findfmt/security/advisories/new).
+2. **Email**: If you are unable to use GitHub Advisories, email `bdperkin@gmail.com` with the
+   subject `[SECURITY] findfmt vulnerability report`.
 
 Please include:
 
@@ -22,4 +24,5 @@ Please include:
 - Steps to reproduce or proof-of-concept code.
 - Any suggested fixes or mitigations.
 
-We will acknowledge receipt within 48 hours and work with you to coordinate a disclosure and patch release.
+We will acknowledge receipt within 48 hours and work with you to coordinate a disclosure and patch
+release.

@@ -221,6 +221,7 @@ def test_find_files_fifo_root(tmp_path: Path):
         os.mkfifo(fifo_path)
     except (AttributeError, OSError):
         return  # Non-posix fallback
+
     config = TraversalConfig(root_paths=(fifo_path,))
     results = list(find_files(config))
     assert results == []

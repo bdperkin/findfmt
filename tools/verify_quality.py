@@ -14,6 +14,7 @@ def run_step(name: str, cmd: list[str]) -> bool:
     if proc.returncode != 0:
         sys.stderr.write(f"[-] Step '{name}' failed with exit code {proc.returncode}\n")
         return False
+
     return True
 
 

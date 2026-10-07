@@ -13,21 +13,26 @@
 
 ______________________________________________________________________
 
-> **A `.gitignore`-aware file discovery and classification suite that locates files by content format, shebang, and MIME tag for automated linting, formatting, and CI pipelines.**
+> **A `.gitignore`-aware file discovery and classification suite that locates files by content
+> format, shebang, and MIME tag for automated linting, formatting, and CI pipelines.**
 
-## Why findfmt?
+## 1. Why findfmt?
 
 Unlike traditional `find` or globbing tools that rely strictly on file extensions, `findfmt`:
 
-- **Understands file content**: Identifies format by content, shebang (`#!/usr/bin/env python3`), and MIME types using the `identify` engine.
-- **Respects Git**: Traverses trees hierarchically while pruning `.gitignore` and `.git/info/exclude` paths early before descending into large directories (e.g. `node_modules/`, `.venv/`).
-- **Deterministic**: Always returns clean, relative, deterministically sorted paths optimized for subshells, xargs, and automation.
+- **Understands file content**: Identifies format by content, shebang (`#!/usr/bin/env python3`),
+  and MIME types using the `identify` engine.
+- **Respects Git**: Traverses trees hierarchically while pruning `.gitignore` and
+  `.git/info/exclude` paths early before descending into large directories (e.g. `node_modules/`,
+  `.venv/`).
+- **Deterministic**: Always returns clean, relative, deterministically sorted paths optimized for
+  subshells, xargs, and automation.
 
 ______________________________________________________________________
 
-## Installation
+## 2. Installation
 
-### With `uv` (Recommended)
+### 2.1. With `uv` (Recommended)
 
 Run directly with `uvx`:
 
@@ -47,13 +52,13 @@ Or add to your project:
 uv add findfmt
 ```
 
-### With `pip`
+### 2.2. With `pip`
 
 ```bash
 pip install findfmt
 ```
 
-### With Docker / Container
+### 2.3. With Docker / Container
 
 ```bash
 docker pull ghcr.io/bdperkin/findfmt:latest
@@ -62,9 +67,9 @@ docker run --rm -v "$(pwd)":/workspace -w /workspace ghcr.io/bdperkin/findfmt:la
 
 ______________________________________________________________________
 
-## Usage
+## 3. Usage
 
-### Locate Files by Tag / Format
+### 3.1. Locate Files by Tag / Format
 
 ```bash
 # Locate all Python files
@@ -77,7 +82,7 @@ findfmt -t yaml,json
 findfmt -t shell
 ```
 
-### Shebang Filtering
+### 3.2. Shebang Filtering
 
 ```bash
 # Locate files with bash shebang
@@ -87,7 +92,7 @@ findfmt --shebang bash
 findfmt --shebang python
 ```
 
-### Pipe Safely to Linters and Tools
+### 3.3. Pipe Safely to Linters and Tools
 
 Use `-0` for NUL-delimited output with `xargs -0`:
 
@@ -99,7 +104,7 @@ findfmt -t python -0 | xargs -0 ruff format
 findfmt -t shell -0 | xargs -r -0 shellcheck
 ```
 
-### Inspect Tags & Summaries
+### 3.4. Inspect Tags & Summaries
 
 ```bash
 # Print matched files and their classification tags
@@ -111,7 +116,7 @@ findfmt -s
 
 ______________________________________________________________________
 
-## CLI Options
+## 4. CLI Options
 
 | Flag                           | Description                                        |
 | ------------------------------ | -------------------------------------------------- |
@@ -130,7 +135,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## Development & Testing
+## 5. Development & Testing
 
 This project enforces 100% test coverage and strict type checking:
 
@@ -155,13 +160,13 @@ uv run python tools/verify_quality.py
 
 ______________________________________________________________________
 
-## Governance & Community
+## 6. Governance & Community
 
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
 - [Support Information](SUPPORT.md)
 
-## License
+## 7. License
 
 [MIT License](LICENSE) © 2026 Brandon Perkins.
