@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import argparse
 import sys
 from collections import Counter
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Annotated
+
+import typer
 
 from findfmt.classifier import get_known_tags
 from findfmt.models import TraversalConfig
@@ -31,118 +32,34 @@ def get_version() -> str:
         return "0.1.1.dev0"
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Construct command-line argument parser.
+def version_callback(value: bool) -> None:
+    """Display the version of findfmt and exit.
 
-    Returns:
-        Configured ArgumentParser instance.
+    Args:
+        value: Boolean flag indicating if version flag was passed.
+
+    Raises:
+        typer.Exit: Upon printing version.
     """
-    parser = argparse.ArgumentParser(
-        prog="findfmt",
-        description=(
-            "A .gitignore-aware file discovery and classification suite that locates "
-            "files by content format, shebang, and MIME tag."
-        ),
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
+    if value:
+        sys.stdout.write(f"findfmt {get_version()}\n")
+        raise typer.Exit(code=0)
 
-    parser.add_argument(
-        "paths",
-        nargs="*",
-        default=["."],
-        help="One or more directory or file paths to inspect (default: current directory).",
-    )
 
-    parser.add_argument(
-        "-t",
-        "--type",
-        "--tag",
-        dest="tags",
-        action="append",
-        help="Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', 'executable').",
-    )
+def known_tags_callback(value: bool) -> None:
+    """List all known classification tags supported by the engine and exit.
 
-    parser.add_argument(
-        "-e",
-        "--exclude",
-        "--exclude-tag",
-        dest="exclude_tags",
-        action="append",
-        help="Tag or comma-separated tags to exclude.",
-    )
+    Args:
+        value: Boolean flag indicating if known-tags flag was passed.
 
-    parser.add_argument(
-        "--all-tags",
-        action="store_true",
-        help="Require matching files to have ALL specified tags rather than ANY tag.",
-    )
+    Raises:
+        typer.Exit: Upon printing known tags.
+    """
+    if value:
+        for tag in sorted(get_known_tags()):
+            sys.stdout.write(f"{tag}\n")
 
-    parser.add_argument(
-        "--shebang",
-        dest="shebang",
-        help="Filter files whose shebang contains this interpreter or pattern.",
-    )
-
-    parser.add_argument(
-        "--no-ignore",
-        action="store_true",
-        help="Do not respect .gitignore rules during traversal.",
-    )
-
-    parser.add_argument(
-        "--hidden",
-        action="store_true",
-        help="Include hidden files and directories.",
-    )
-
-    parser.add_argument(
-        "-L",
-        "--follow-symlinks",
-        action="store_true",
-        help="Follow symbolic links during traversal.",
-    )
-
-    parser.add_argument(
-        "--absolute",
-        action="store_true",
-        help="Output absolute paths rather than paths relative to the traversal root.",
-    )
-
-    parser.add_argument(
-        "-0",
-        "--print0",
-        action="store_true",
-        help=r"Delimit path outputs with a NUL (\0) character instead of a newline.",
-    )
-
-    parser.add_argument(
-        "-l",
-        "--list-tags",
-        action="store_true",
-        help="Display identified tags alongside each matched path.",
-    )
-
-    parser.add_argument(
-        "-s",
-        "--summary",
-        action="store_true",
-        help="Print summary match statistics to stderr.",
-    )
-
-    parser.add_argument(
-        "--known-tags",
-        action="store_true",
-        help="List all known classification tags supported by the engine and exit.",
-    )
-
-    parser.add_argument(
-        "-v",
-        "--version",
-        action="version",
-        version=f"%(prog)s {get_version()}",
-    )
-
-    return parser
+        raise typer.Exit(code=0)
 
 
 def parse_tag_arguments(tag_args: Sequence[str] | None) -> frozenset[str]:
@@ -201,38 +118,152 @@ def _write_summary(match_count: int, tag_counter: Counter[str]) -> None:
             sys.stderr.write(f"  {tag}: {count}\n")
 
 
-def main(argv: Sequence[str] | None = None) -> int:
-    """Main CLI entrypoint.
+app = typer.Typer(
+    name="findfmt",
+    help=(
+        "A .gitignore-aware file discovery and classification suite that locates "
+        "files by content format, shebang, and MIME tag."
+    ),
+    add_completion=False,
+    no_args_is_help=False,
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
 
-    Args:
-        argv: Optional command-line arguments (defaults to sys.argv[1:]).
 
-    Returns:
-        Integer exit code (0 for success, 1 on error).
-    """
-    parser = build_parser()
-    args = parser.parse_args(argv)
-
-    if args.known_tags:
-        for tag in sorted(get_known_tags()):
-            sys.stdout.write(f"{tag}\n")
-
-        return 0
-
-    root_paths = tuple(Path(p) for p in args.paths)
+@app.command(
+    name="findfmt",
+    help=(
+        "A .gitignore-aware file discovery and classification suite that locates "
+        "files by content format, shebang, and MIME tag."
+    ),
+)
+def findfmt(
+    paths: Annotated[
+        list[Path] | None,
+        typer.Argument(
+            help="One or more directory or file paths to inspect (default: current directory).",
+        ),
+    ] = None,
+    tags: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--type",
+            "-t",
+            "--tag",
+            help="Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', 'executable').",
+        ),
+    ] = None,
+    exclude_tags: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--exclude",
+            "-e",
+            "--exclude-tag",
+            help="Tag or comma-separated tags to exclude.",
+        ),
+    ] = None,
+    all_tags: Annotated[
+        bool,
+        typer.Option(
+            "--all-tags",
+            help="Require matching files to have ALL specified tags rather than ANY tag.",
+        ),
+    ] = False,
+    shebang: Annotated[
+        str | None,
+        typer.Option(
+            "--shebang",
+            help="Filter files whose shebang contains this interpreter or pattern.",
+        ),
+    ] = None,
+    no_ignore: Annotated[
+        bool,
+        typer.Option(
+            "--no-ignore",
+            help="Do not respect .gitignore rules during traversal.",
+        ),
+    ] = False,
+    hidden: Annotated[
+        bool,
+        typer.Option(
+            "--hidden",
+            help="Include hidden files and directories.",
+        ),
+    ] = False,
+    follow_symlinks: Annotated[
+        bool,
+        typer.Option(
+            "--follow-symlinks",
+            "-L",
+            help="Follow symbolic links during traversal.",
+        ),
+    ] = False,
+    absolute: Annotated[
+        bool,
+        typer.Option(
+            "--absolute",
+            help="Output absolute paths rather than paths relative to the traversal root.",
+        ),
+    ] = False,
+    print0: Annotated[
+        bool,
+        typer.Option(
+            "--print0",
+            "-0",
+            help=r"Delimit path outputs with a NUL (\0) character instead of a newline.",
+        ),
+    ] = False,
+    list_tags: Annotated[
+        bool,
+        typer.Option(
+            "--list-tags",
+            "-l",
+            help="Display identified tags alongside each matched path.",
+        ),
+    ] = False,
+    summary: Annotated[
+        bool,
+        typer.Option(
+            "--summary",
+            "-s",
+            help="Print summary match statistics to stderr.",
+        ),
+    ] = False,
+    known_tags: Annotated[
+        bool,
+        typer.Option(
+            "--known-tags",
+            is_eager=True,
+            callback=known_tags_callback,
+            help="List all known classification tags supported by the engine and exit.",
+        ),
+    ] = False,
+    version: Annotated[
+        bool | None,
+        typer.Option(
+            "--version",
+            "-v",
+            is_eager=True,
+            callback=version_callback,
+            help="Display the version of findfmt and exit.",
+        ),
+    ] = None,
+) -> None:
+    """Execute file discovery and classification matching."""
+    root_paths = tuple(paths) if paths else (Path(),)
     config = TraversalConfig(
         root_paths=root_paths,
-        include_tags=parse_tag_arguments(args.tags),
-        exclude_tags=parse_tag_arguments(args.exclude_tags),
-        all_tags=args.all_tags,
-        shebang_filter=args.shebang,
-        respect_gitignore=not args.no_ignore,
-        include_hidden=args.hidden,
-        follow_symlinks=args.follow_symlinks,
-        relative_paths=not args.absolute,
-        null_delimited=args.print0,
-        show_tags=args.list_tags,
-        show_summary=args.summary,
+        include_tags=parse_tag_arguments(tags),
+        exclude_tags=parse_tag_arguments(exclude_tags),
+        all_tags=all_tags,
+        shebang_filter=shebang,
+        respect_gitignore=not no_ignore,
+        include_hidden=hidden,
+        follow_symlinks=follow_symlinks,
+        relative_paths=not absolute,
+        null_delimited=print0,
+        show_tags=list_tags,
+        show_summary=summary,
     )
 
     tag_counter: Counter[str] = Counter()
@@ -246,7 +277,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
         formatted = _format_match(
             file_info,
-            absolute=args.absolute,
+            absolute=absolute,
             show_tags=config.show_tags,
             delimiter=delimiter,
         )
@@ -255,8 +286,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     if config.show_summary:
         _write_summary(match_count, tag_counter)
 
-    return 0
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Main CLI entrypoint.
+
+    Args:
+        argv: Optional command-line arguments (defaults to sys.argv[1:]).
+
+    Returns:
+        Integer exit code (0 for success, non-zero on error).
+    """
+    try:
+        app(args=list(argv) if argv is not None else None, prog_name="findfmt")
+    except SystemExit as exc:
+        return exc.code if isinstance(exc.code, int) else 0
+
+    return 0  # pragma: no cover
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == "__main__":  # pragma: no cover
+    app()
