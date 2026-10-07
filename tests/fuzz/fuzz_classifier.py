@@ -36,7 +36,7 @@ def TestOneInput(data: bytes) -> None:  # noqa: N802
         fdp = atheris.FuzzedDataProvider(data)
         ext_len = fdp.ConsumeIntInRange(0, 10)
         ext = fdp.ConsumeUnicodeNoSurrogates(ext_len)
-        content = fdp.ConsumeRemainingBytes()
+        content = fdp.ConsumeBytes(fdp.remaining_bytes())
     else:
         ext = ".txt" if len(data) % 2 == 0 else ""
         content = data
@@ -54,7 +54,7 @@ def TestOneInput(data: bytes) -> None:  # noqa: N802
 
         with contextlib.suppress(OSError, ValueError, UnicodeDecodeError):
             info = classify_file(target_path)
-            assert info.path == target_path
+            assert info.path == target_path.resolve()
             assert isinstance(info.tags, frozenset)
             assert isinstance(info.is_executable, bool)
             assert isinstance(info.is_symlink, bool)
