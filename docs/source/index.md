@@ -49,3 +49,10 @@ api/index
 
 quality/index
 ```
+
+```{toctree}
+:maxdepth: 1
+:caption: Community & Governance
+
+accessibility
+```

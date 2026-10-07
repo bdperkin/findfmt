@@ -166,6 +166,7 @@ ______________________________________________________________________
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
 - [Support Information](SUPPORT.md)
+- [Accessibility Statement](ACCESSIBILITY.md)
 
 ## 7. License
 
