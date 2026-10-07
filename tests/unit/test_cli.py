@@ -47,14 +47,16 @@ def test_cli_version():
 
 
 def test_cli_help():
-    runner = CliRunner()
+    runner = CliRunner(env={"NO_COLOR": "1", "TERM": "dumb"})
     result = runner.invoke(app, ["--help"])
     assert result.exit_code == 0
-    assert "Usage: findfmt" in result.stdout
+    assert "Usage:" in result.stdout
+    assert "findfmt" in result.stdout
 
     result_short = runner.invoke(app, ["-h"])
     assert result_short.exit_code == 0
-    assert "Usage: findfmt" in result_short.stdout
+    assert "Usage:" in result_short.stdout
+    assert "findfmt" in result_short.stdout
 
 
 def test_cli_tag_filter(sample_repo: Path):
