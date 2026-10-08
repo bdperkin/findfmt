@@ -57,6 +57,16 @@ repos:
     rev: 0.9.30
     hooks:
       - id: uv-lock
+      - id: uv-export
+        name: uv-export (ClusterFuzzLite)
+        files: ^(uv\.lock|pyproject\.toml)$
+        args:
+          - --frozen
+          - --no-dev
+          - --no-emit-project
+          - --format=requirements-txt
+          - --hashes
+          - --output-file=.clusterfuzzlite/requirements.txt
 
   # PyPI packaging compliance
   - repo: https://github.com/regebro/pyroma
