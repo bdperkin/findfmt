@@ -34,13 +34,13 @@ def test_cli_tag_filter(sample_repo: Path):
     runner = CliRunner()
     result = runner.invoke(app, [str(sample_repo), "-t", "python"])
     assert result.exit_code == 0
-    assert "src/app.py" in result.stdout
+    assert "src/app.py" in result.stdout.replace("\\", "/")
     assert "README.md" not in result.stdout
 
     # Case insensitivity
     result_upper = runner.invoke(app, [str(sample_repo), "-t", "PYTHON"])
     assert result_upper.exit_code == 0
-    assert "src/app.py" in result_upper.stdout
+    assert "src/app.py" in result_upper.stdout.replace("\\", "/")
 
 
 def test_cli_exclude_tags(sample_repo: Path):
@@ -142,7 +142,7 @@ def test_cli_flag_negations(sample_repo: Path):
 
     res = runner.invoke(app, [str(sample_repo), "--no-all-tags", "-t", "python"])
     assert res.exit_code == 0
-    assert "src/app.py" in res.stdout
+    assert "src/app.py" in res.stdout.replace("\\", "/")
 
     res = runner.invoke(app, [str(sample_repo), "--ignore"])
     assert res.exit_code == 0
@@ -160,7 +160,7 @@ def test_cli_flag_negations(sample_repo: Path):
 
     res = runner.invoke(app, [str(sample_repo), "--no-absolute", "-t", "python"])
     assert res.exit_code == 0
-    assert "src/app.py" in res.stdout
+    assert "src/app.py" in res.stdout.replace("\\", "/")
     assert str(sample_repo / "src" / "app.py") not in res.stdout
 
     res = runner.invoke(app, [str(sample_repo), "--no-print0"])
