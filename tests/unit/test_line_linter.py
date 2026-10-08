@@ -266,3 +266,24 @@ def test_main_cli_execution(tmp_path: Path) -> None:
         exit_code = main(["--config", str(config_file), str(test_file)])
 
     assert exit_code == 0
+
+
+def test_file_line_count_warning_and_error(tmp_path: Path) -> None:
+    """Test total file line count enforcement for warning and error limits."""
+    warn_file = tmp_path / "warn_lines.py"
+    warn_file.write_text("x = 1\n" * 350, encoding="utf-8")
+    config = LinterConfig(include=("**/*",), exclude=(), overrides={})
+
+    stderr = io.StringIO()
+    with patch("sys.stderr", stderr):
+        assert run_linter([warn_file], config, tmp_path) == 0
+
+    assert "WARNING: File line count 350 exceeds warning limit (300)" in stderr.getvalue()
+
+    err_file = tmp_path / "err_lines.py"
+    err_file.write_text("x = 1\n" * 550, encoding="utf-8")
+    stderr_err = io.StringIO()
+    with patch("sys.stderr", stderr_err):
+        assert run_linter([err_file], config, tmp_path) == 1
+
+    assert "ERROR: File line count 550 exceeds error limit (500)" in stderr_err.getvalue()
