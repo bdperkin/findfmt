@@ -1,8 +1,6 @@
 ---
 name: Vale
 on:
-  push:
-    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -16,11 +14,20 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - name: Cache Vale Styles
+        id: cache-vale-styles
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57  # v4.2.0
+        with:
+          path: |
+            .github/styles/Google
+            .github/styles/proselint
+          key: vale-styles-${{ hashFiles('.vale.ini') }}
       - name: Run Vale Prose Linter
         uses: vale-cli/vale-action@518a9136acc6e6668ce7c00d367051e0941e87ff  # v3.0.0
         with:
           version: 3.20.0
           files: all
+          sync: ${{ steps.cache-vale-styles.outputs.cache-hit != 'true' }}
           fail_on_error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
