@@ -1,5 +1,5 @@
 ---
-name: ClusterFuzzLite Batch Fuzzing
+name: ClusterFuzzLite
 on:
   push:
     branches: [main]
@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 permissions: read-all
 jobs:
-  batch-fuzzing:
-    name: Batch Fuzzing (${{ matrix.sanitizer }})
+  fuzzing:
+    name: Fuzzing (${{ matrix.sanitizer }})
     runs-on: ubuntu-latest
     permissions:
       contents: read

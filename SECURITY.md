@@ -176,9 +176,8 @@ mitigations implemented in `findfmt`.
      directory trees with irregular permission bits, symlink hierarchies, `.gitignore` pathspec
      rules, and deep directory nestings to verify bounded traversal invariants.
   3. **Continuous CI Integration**: Deployed via `.clusterfuzzlite/` configuration and automated
-     GitHub Actions workflows (`.github/workflows/cflite_pr.yml` for pull request smoke fuzzing,
-     `.github/workflows/cflite_batch.yml` for regular batch fuzzing), resolving OpenSSF Scorecard
-     `FuzzingID`
+     GitHub Actions workflow (`.github/workflows/cflite.yml` for scheduled batch and main-branch
+     fuzzing), resolving OpenSSF Scorecard `FuzzingID`
      ([Code Scanning Alert #48](https://github.com/bdperkin/findfmt/security/code-scanning/48)).
 
 #### 3.6.4. Active Maintenance & Release Hygiene (MaintainedID)
