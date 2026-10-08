@@ -31,7 +31,7 @@ def test_get_version():
 
 def test_get_version_package_not_found():
     with patch("findfmt.diagnostics.version", side_effect=PackageNotFoundError):
-        assert get_version() == "0.1.1.dev0"
+        assert get_version() == "0.2.0.dev0"
 
 
 def test_cli_known_tags():
