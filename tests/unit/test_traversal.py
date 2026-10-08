@@ -110,18 +110,12 @@ def test_matches_filter_tags():
     assert not matches_filter(file_info, cfg_include_nomatch)
 
     # Include tags (all) match -> True
-    cfg_include_all = TraversalConfig(
-        include_tags=frozenset(["python", "text"]),
-        all_tags=True,
-    )
+    cfg_include_all = TraversalConfig(include_tags=frozenset(["python", "text"]), all_tags=True)
     assert matches_filter(file_info, cfg_include_all)
 
     # Include tags (all) partial match -> False
-    cfg_include_all_missing = TraversalConfig(
-        include_tags=frozenset(["python", "executable"]),
-        all_tags=True,
-    )
-    assert not matches_filter(file_info, cfg_include_all_missing)
+    cfg_all_miss = TraversalConfig(include_tags=frozenset(["python", "executable"]), all_tags=True)
+    assert not matches_filter(file_info, cfg_all_miss)
 
 
 def test_matches_filter_shebang():
@@ -291,7 +285,6 @@ def test_traverse_directory_resolve_subdir_os_error(tmp_path: Path):
     sub.mkdir()
     (sub / "nested.py").write_text("print(1)", encoding="utf-8")
     config = TraversalConfig(follow_symlinks=True)
-
     orig_resolve = Path.resolve
 
     def mock_resolve(self: Path, *args, **kwargs):

@@ -44,39 +44,41 @@ class LinterConfig:
 
 @dataclass(frozen=True)
 class Violation:
-    """Recorded line length violation."""
+    """Recorded line length or file line count violation."""
 
     file_path: Path
-    line_number: int
+    line_number: int | None
     length: int
     threshold: int
     is_error: bool
     format_name: str
+    violation_type: str = "line_length"
 
 
+_t = Threshold
 DEFAULT_LIMITS: dict[str, Threshold] = {
-    "python": Threshold(warning=300, error=500),
-    "markdown": Threshold(warning=300, error=600),
-    "yaml": Threshold(warning=150, error=300),
-    "json": Threshold(warning=100, error=250),
-    "shell": Threshold(warning=100, error=200),
-    "javascript": Threshold(warning=300, error=500),
-    "typescript": Threshold(warning=300, error=500),
-    "html": Threshold(warning=250, error=500),
-    "css": Threshold(warning=300, error=500),
-    "sql": Threshold(warning=150, error=300),
-    "config": Threshold(warning=80, error=150),
-    "dockerfile": Threshold(warning=80, error=150),
+    "python": _t(300, 500),
+    "markdown": _t(300, 600),
+    "yaml": _t(150, 300),
+    "json": _t(100, 250),
+    "shell": _t(100, 200),
+    "javascript": _t(300, 500),
+    "typescript": _t(300, 500),
+    "html": _t(250, 500),
+    "css": _t(300, 500),
+    "sql": _t(150, 300),
+    "config": _t(80, 150),
+    "dockerfile": _t(80, 150),
 }
 
 DEFAULT_FALLBACK_THRESHOLD = Threshold(warning=300, error=500)
-
 DEFAULT_INCLUDE: tuple[str, ...] = ("**/*",)
 DEFAULT_EXCLUDE: tuple[str, ...] = (
     "dist/**",
     "build/**",
     ".venv/**",
     ".git/**",
+    ".clusterfuzzlite/**",
     ".github/styles/**",
     "docs/_build/**",
     ".pytest_cache/**",
@@ -104,17 +106,8 @@ TAG_FORMAT_MAPPINGS: tuple[tuple[str, frozenset[str]], ...] = (
 
 
 def determine_format(path: Path) -> str:
-    """Determine format category for a file using findfmt classification.
-
-    Args:
-        path: Path to target file.
-
-    Returns:
-        Canonical format category name string.
-    """
-    info = classify_file(path)
-    tags = info.tags
-
+    """Determine format category for a file using findfmt classification."""
+    tags = classify_file(path).tags
     for fmt_name, tag_set in TAG_FORMAT_MAPPINGS:
         if tags & tag_set:
             return fmt_name
@@ -123,37 +116,13 @@ def determine_format(path: Path) -> str:
 
 
 def resolve_threshold(format_name: str, overrides: dict[str, Threshold]) -> Threshold:
-    """Resolve the warning and error thresholds for a given format.
-
-    Args:
-        format_name: Canonical format category name.
-        overrides: Format-specific threshold overrides.
-
-    Returns:
-        Effective Threshold with warning and error limits.
-    """
-    if format_name in overrides:
-        return overrides[format_name]
-
-    if format_name in DEFAULT_LIMITS:
-        return DEFAULT_LIMITS[format_name]
-
-    if "default" in overrides:
-        return overrides["default"]
-
-    return DEFAULT_FALLBACK_THRESHOLD
+    """Resolve warning and error thresholds for a given format."""
+    fallback = overrides.get("default", DEFAULT_FALLBACK_THRESHOLD)
+    return overrides.get(format_name, DEFAULT_LIMITS.get(format_name, fallback))
 
 
 def _parse_patterns(raw_val: object, default: tuple[str, ...]) -> tuple[str, ...]:
-    """Parse string list patterns from TOML config.
-
-    Args:
-        raw_val: Raw parsed TOML value.
-        default: Fallback default tuple of pattern strings.
-
-    Returns:
-        Tuple of pattern strings.
-    """
+    """Parse string list patterns from TOML config."""
     if isinstance(raw_val, list | tuple):
         return tuple(str(p) for p in raw_val)
 
@@ -161,31 +130,13 @@ def _parse_patterns(raw_val: object, default: tuple[str, ...]) -> tuple[str, ...
 
 
 def load_config(config_path: Path | None = None) -> LinterConfig:
-    """Load line linter configuration from pyproject.toml.
-
-    Args:
-        config_path: Optional explicit path to configuration TOML file.
-
-    Returns:
-        Parsed LinterConfig instance.
-    """
+    """Load line linter configuration from pyproject.toml."""
     resolved_path = config_path or Path("pyproject.toml")
-    if not resolved_path.is_file():
-        return LinterConfig(
-            include=DEFAULT_INCLUDE,
-            exclude=DEFAULT_EXCLUDE,
-            overrides={},
-        )
-
     try:
         with resolved_path.open("rb") as f:
             data = tomllib.load(f)
     except (OSError, tomllib.TOMLDecodeError):
-        return LinterConfig(
-            include=DEFAULT_INCLUDE,
-            exclude=DEFAULT_EXCLUDE,
-            overrides={},
-        )
+        return LinterConfig(include=DEFAULT_INCLUDE, exclude=DEFAULT_EXCLUDE, overrides={})
 
     tool_table = data.get("tool", {}).get("line-linter", {})
     include = _parse_patterns(tool_table.get("include"), DEFAULT_INCLUDE)
@@ -196,193 +147,146 @@ def load_config(config_path: Path | None = None) -> LinterConfig:
     if isinstance(raw_overrides, dict):
         for fmt, limits in raw_overrides.items():
             if isinstance(limits, dict):
-                warning_limit = limits.get("warning")
-                error_limit = limits.get("error")
-                if isinstance(warning_limit, int) and isinstance(error_limit, int):
-                    overrides[fmt.lower()] = Threshold(
-                        warning=warning_limit,
-                        error=error_limit,
-                    )
+                w, e = limits.get("warning"), limits.get("error")
+                if isinstance(w, int) and isinstance(e, int):
+                    overrides[fmt.lower()] = Threshold(warning=w, error=e)
 
-    return LinterConfig(
-        include=include,
-        exclude=exclude,
-        overrides=overrides,
-    )
+    return LinterConfig(include=include, exclude=exclude, overrides=overrides)
 
 
 def check_file(path: Path, config: LinterConfig) -> list[Violation]:
-    """Check line lengths for a single file.
-
-    Args:
-        path: Path to the target file.
-        config: Linter configuration containing threshold overrides.
-
-    Returns:
-        List of Violation instances discovered in the file.
-    """
-    if not path.is_file():
-        return []
-
-    info = classify_file(path)
-    if "binary" in info.tags:
+    """Check line lengths and total line count for a single file."""
+    if not path.is_file() or "binary" in classify_file(path).tags:
         return []
 
     format_name = determine_format(path)
     threshold = resolve_threshold(format_name, config.overrides)
-
     violations: list[Violation] = []
+
     try:
+        total_lines = 0
         with path.open("r", encoding="utf-8", errors="replace") as f:
             for line_no, raw_line in enumerate(f, 1):
-                clean_line = raw_line.rstrip("\r\n")
-                line_len = len(clean_line)
-                if line_len > threshold.error:
+                total_lines = line_no
+                line_len = len(raw_line.rstrip("\r\n"))
+                if line_len > threshold.error or line_len > threshold.warning:
+                    is_err = line_len > threshold.error
                     violations.append(
                         Violation(
                             file_path=path,
                             line_number=line_no,
                             length=line_len,
-                            threshold=threshold.error,
-                            is_error=True,
+                            threshold=threshold.error if is_err else threshold.warning,
+                            is_error=is_err,
                             format_name=format_name,
+                            violation_type="line_length",
                         ),
                     )
-                elif line_len > threshold.warning:
-                    violations.append(
-                        Violation(
-                            file_path=path,
-                            line_number=line_no,
-                            length=line_len,
-                            threshold=threshold.warning,
-                            is_error=False,
-                            format_name=format_name,
-                        ),
-                    )
+
+        if total_lines > threshold.error or total_lines > threshold.warning:
+            is_err = total_lines > threshold.error
+            violations.append(
+                Violation(
+                    file_path=path,
+                    line_number=total_lines,
+                    length=total_lines,
+                    threshold=threshold.error if is_err else threshold.warning,
+                    is_error=is_err,
+                    format_name=format_name,
+                    violation_type="file_line_count",
+                ),
+            )
     except OSError:
         return []
 
     return violations
 
 
+def _rel_str(path: Path, root: Path) -> str:
+    """Return path relative to root as a POSIX string."""
+    try:
+        return str(path.resolve().relative_to(root.resolve())).replace("\\", "/")
+    except ValueError:
+        return str(path).replace("\\", "/")
+
+
 def discover_files(root: Path, config: LinterConfig) -> list[Path]:
-    """Discover files to check based on include and exclude patterns.
-
-    Args:
-        root: Root repository or directory path.
-        config: Linter configuration with include and exclude patterns.
-
-    Returns:
-        Sorted list of candidate Path objects to lint.
-    """
+    """Discover files to check based on include and exclude patterns."""
     exclude_spec = pathspec.PathSpec.from_lines("gitignore", config.exclude)
-
     candidate_files: set[Path] = set()
     for pattern in config.include:
-        for path in root.glob(pattern):
-            if path.is_file():
-                candidate_files.add(path)
+        for p in root.glob(pattern):
+            if p.is_file():
+                candidate_files.add(p)
 
-    filtered_files: list[Path] = []
-    for path in sorted(candidate_files):
-        try:
-            rel_path = path.resolve().relative_to(root.resolve())
-            rel_str = str(rel_path).replace("\\", "/")
-        except ValueError:
-            rel_str = str(path).replace("\\", "/")
-
-        if not exclude_spec.match_file(rel_str):
-            filtered_files.append(path)
-
-    return filtered_files
+    return [p for p in sorted(candidate_files) if not exclude_spec.match_file(_rel_str(p, root))]
 
 
-def run_linter(files: Sequence[Path] | None, config: LinterConfig, root: Path) -> int:
-    """Execute line length enforcement and print notices to stderr.
-
-    Args:
-        files: Optional explicit list of files to check.
-        config: Loaded LinterConfig instance.
-        root: Root directory for relative path calculations and fallback search.
-
-    Returns:
-        Status code 0 on success/warnings, or 1 when any error threshold is breached.
-    """
+def _filter_explicit_files(
+    files: Sequence[Path],
+    config: LinterConfig,
+    root: Path,
+) -> list[Path]:
+    """Filter explicit files against include and exclude patterns."""
     include_spec = pathspec.PathSpec.from_lines("gitignore", config.include)
     exclude_spec = pathspec.PathSpec.from_lines("gitignore", config.exclude)
+    targets: list[Path] = []
+    for f in files:
+        p = f if f.is_absolute() else (root / f)
+        rel = _rel_str(p, root)
+        if not p.is_file() or exclude_spec.match_file(rel):
+            continue
 
-    if files:
-        target_files: list[Path] = []
-        for file_path in files:
-            p = file_path if file_path.is_absolute() else (root / file_path)
-            try:
-                rel_path = p.resolve().relative_to(root.resolve())
-                rel_str = str(rel_path).replace("\\", "/")
-            except ValueError:
-                rel_str = str(file_path).replace("\\", "/")
+        if config.include != DEFAULT_INCLUDE and not include_spec.match_file(rel):
+            continue
 
-            if not p.is_file():
-                continue
+        targets.append(p)
 
-            if exclude_spec.match_file(rel_str):
-                continue
+    return targets
 
-            if config.include != DEFAULT_INCLUDE and not include_spec.match_file(rel_str):
-                continue
 
-            target_files.append(p)
-    else:
-        target_files = discover_files(root, config)
-
-    all_violations: list[Violation] = []
-    for target in target_files:
-        all_violations.extend(check_file(target, config))
-
+def _report_violations(all_violations: Sequence[Violation]) -> int:
+    """Format and print all violation notices to stderr."""
     error_count = sum(1 for v in all_violations if v.is_error)
     warning_count = sum(1 for v in all_violations if not v.is_error)
-
     for v in all_violations:
         level = "ERROR" if v.is_error else "WARNING"
-        sys.stderr.write(
-            f"{v.file_path}:{v.line_number}: {level}: Line length {v.length} "
-            f"exceeds {level.lower()} limit ({v.threshold}) for {v.format_name}\n",
-        )
+        if v.violation_type == "file_line_count":
+            sys.stderr.write(
+                f"{v.file_path}: {level}: File line count {v.length} "
+                f"exceeds {level.lower()} limit ({v.threshold}) for {v.format_name}\n",
+            )
+        else:
+            sys.stderr.write(
+                f"{v.file_path}:{v.line_number}: {level}: Line length {v.length} "
+                f"exceeds {level.lower()} limit ({v.threshold}) for {v.format_name}\n",
+            )
 
     if all_violations:
         sys.stderr.write(
             f"\nLine length check found {error_count} error(s) and {warning_count} warning(s).\n",
         )
 
-    return 1 if error_count > 0 else 0
+    return error_count
+
+
+def run_linter(files: Sequence[Path] | None, config: LinterConfig, root: Path) -> int:
+    """Execute line length enforcement and print notices to stderr."""
+    targets = _filter_explicit_files(files, config, root) if files else discover_files(root, config)
+    all_violations: list[Violation] = []
+    for target in targets:
+        all_violations.extend(check_file(target, config))
+
+    return 1 if _report_violations(all_violations) > 0 else 0
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entry point for the line length enforcement tool.
-
-    Args:
-        argv: Command-line arguments sequence, or None for sys.argv[1:].
-
-    Returns:
-        Exit code 0 on clean/warnings, or 1 on error threshold violations.
-    """
+    """CLI entry point for the line length enforcement tool."""
     parser = argparse.ArgumentParser(description="Enforce format-specific file line length limits.")
-    parser.add_argument(
-        "--config",
-        type=Path,
-        default=None,
-        help="Path to pyproject.toml configuration file.",
-    )
-    parser.add_argument(
-        "files",
-        nargs="*",
-        type=Path,
-        help="Optional explicit files to check (e.g. passed by pre-commit).",
-    )
-
+    parser.add_argument("--config", type=Path, default=None, help="Path to config file.")
+    parser.add_argument("files", nargs="*", type=Path, help="Explicit files to check.")
     args = parser.parse_args(argv)
-    root = Path.cwd()
-    config = load_config(args.config)
-    return run_linter(args.files, config, root)
+    return run_linter(args.files, load_config(args.config), Path.cwd())
 
 
 if __name__ == "__main__":
