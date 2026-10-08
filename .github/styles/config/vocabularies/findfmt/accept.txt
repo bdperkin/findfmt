@@ -82,3 +82,5 @@
 (?i)repo
 (?i)proselint
 (?i)vale
+(?i)argparse
+(?i)docgen

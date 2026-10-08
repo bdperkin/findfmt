@@ -29,7 +29,7 @@ def get_version() -> str:
     try:
         return version("findfmt")
     except PackageNotFoundError:
-        return "0.1.1.dev0"
+        return "0.2.0.dev0"
 
 
 def get_git_version() -> str | None:

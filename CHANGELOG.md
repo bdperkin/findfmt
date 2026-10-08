@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-10-07
+
+### Features
+
+- *(cli)* Map multiple CLI entry points to thin Typer context wrappers (#106)
+- *(cli)* Investigate and implement miscellaneous options (toggling, usage, version, --) (#108)
+- *(packaging)* Document Python 3.6-3.15 compatibility matrix and add classifiers (#115)
+- *(tools)* Add file line length enforcement tool (tools/) (#118)
+
+### Bug Fixes
+
+- *(tools)* Enforce file line counts in line linter and modularize CLI (#125)
+- *(clusterfuzzlite)* Pin dependencies by hash to resolve OpenSSF Scorecard alert #79 (#127)
+
+### CI/CD
+
+- *(docs)* Integrate Vale prose linter for Markdown documentation (#117)
+- *(clusterfuzzlite)* Restrict fuzzing workflow to merges on main, scheduled runs, and manual
+  dispatch (#129)
+- *(vale)* Pin Vale binary version to 3.20.0 and provide GITHUB_TOKEN (#131)
+- *(vale)* Scope .vale.ini with negative glob to exclude internal directories (#133)
+- *(vale)* Resolve flaky Vale workflow with style caching, trigger scoping, and alert limits (#135)
+
+### Refactor
+
+- *(cli)* Migrate CLI parser from `argparse` to `Typer` with automated `docgen` (#105)
+
+### Testing
+
+- *(cli)* Normalize path separators in wrapper tests for Windows compatibility (#107)
+- *(fuzz)* Integrate ClusterFuzzLite continuous fuzzing and Atheris targets (#116)
+
 ## [0.1.1] - 2026-10-07
 
 ### CI/CD
