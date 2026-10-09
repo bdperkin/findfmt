@@ -84,3 +84,7 @@
 (?i)vale
 (?i)argparse
 (?i)docgen
+(?i)ipynb
+(?i)ndjson
+(?i)serializer
+(?i)serializers
