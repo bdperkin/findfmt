@@ -72,6 +72,10 @@ def execute_findfmt(  # noqa: PLR0913
     pager: bool | None = None,
     stream: TextIO | None = None,
     pager_controller: PagerController | None = None,
+    no_indent: bool = False,
+    ansi_lines: bool = False,
+    cp437: bool = False,
+    color: bool | None = None,
 ) -> None:
     """Execute file discovery, classification, formatting, and summary reporting.
 
@@ -95,6 +99,10 @@ def execute_findfmt(  # noqa: PLR0913
         pager: Optional interactive pager override flag.
         stream: Target output text stream (defaults to sys.stdout).
         pager_controller: Optional injected PagerController instance.
+        no_indent: Whether to suppress branch indentation and whitespace padding.
+        ansi_lines: Whether to use ANSI/VT100 alternate line drawing escapes.
+        cp437: Whether to use CP437 console graphics line drawing characters.
+        color: Explicit color enable override flag.
     """
     effective_format = OutputFormat.TREE if tree else output_format
 
@@ -120,13 +128,21 @@ def execute_findfmt(  # noqa: PLR0913
     delimiter = "\0" if config.null_delimited else "\n"
 
     target_stream = stream if stream is not None else sys.stdout
-    pager_ctrl = pager_controller or PagerController(pager=pager, stream=target_stream)
+    pager_ctrl = pager_controller or PagerController(
+        pager=pager,
+        stream=target_stream,
+        force_color=color,
+    )
 
-    formatter_kwargs: dict[str, object] = {}
+    formatter_kwargs: dict[str, object] = {
+        "no_indent": no_indent,
+        "ansi_lines": ansi_lines,
+        "cp437": cp437,
+    }
     if table_style is not None:
         formatter_kwargs["table_style"] = table_style
 
-    color_on = is_color_enabled(target_stream)
+    color_on = is_color_enabled(target_stream, force_color=color)
     if effective_format in (OutputFormat.TABLE, OutputFormat.TREE):
         formatter_kwargs["force_color"] = color_on
 
@@ -158,4 +174,4 @@ def execute_findfmt(  # noqa: PLR0913
     )
 
     if config.show_summary:
-        write_summary(match_count, tag_counter)
+        write_summary(match_count, tag_counter, force_color=color)

@@ -43,22 +43,28 @@ def is_color_enabled(
     stream: TextIO | None = None,
     *,
     env: Mapping[str, str] | None = None,
+    force_color: bool | None = None,
 ) -> bool:
     """Evaluate whether ANSI color sequences should be emitted.
 
     Precedence order:
-    1. If NO_COLOR is present and non-empty, color is disabled.
-    2. If CLICOLOR_FORCE is set and non-zero, color is forced.
-    3. If CLICOLOR is set to "0", color is disabled.
-    4. Otherwise, color is enabled only if stream is an interactive TTY.
+    1. If force_color is explicitly set, its boolean value is honored.
+    2. If NO_COLOR is present and non-empty, color is disabled.
+    3. If CLICOLOR_FORCE is set and non-zero, color is forced.
+    4. If CLICOLOR is set to "0", color is disabled.
+    5. Otherwise, color is enabled only if stream is an interactive TTY.
 
     Args:
         stream: Target output text stream (defaults to sys.stdout).
         env: Environment variable mapping override.
+        force_color: Explicit color enable override flag.
 
     Returns:
         True if colors should be emitted, False otherwise.
     """
+    if force_color is not None:
+        return force_color
+
     active_env = os.environ if env is None else env
     no_color_val = active_env.get("NO_COLOR")
     if no_color_val is not None and no_color_val != "":
@@ -186,6 +192,7 @@ class PagerController:
         console: Console | None = None,
         pager_impl: Pager | None = None,
         env: Mapping[str, str] | None = None,
+        force_color: bool | None = None,
     ) -> None:
         """Initialize PagerController.
 
@@ -196,13 +203,19 @@ class PagerController:
             console: Optional pre-configured Rich Console.
             pager_impl: Optional custom Rich Pager instance.
             env: Optional environment mapping for color resolution.
+            force_color: Explicit color enable override flag.
         """
         self.pager = pager
         self.stream = stream if stream is not None else sys.stdout
         self.term_height = term_height
         self.pager_impl = pager_impl
         self.env = env
-        self.console = console if console is not None else get_console(self.stream, env=env)
+        self.force_color = force_color
+        self.console = (
+            console
+            if console is not None
+            else get_console(self.stream, env=env, force_color=force_color)
+        )
 
     def should_page(self, line_count: int) -> bool:
         """Determine whether output with line_count should be routed through a pager.
@@ -226,7 +239,12 @@ class PagerController:
         Args:
             content: Formatted output string to display.
         """
-        out = content if is_color_enabled(self.stream, env=self.env) else strip_ansi(content)
+        color_active = is_color_enabled(
+            self.stream,
+            env=self.env,
+            force_color=self.force_color,
+        )
+        out = content if color_active else strip_ansi(content)
         lines = len(out.splitlines())
         if self.should_page(lines):
             with self.console.pager(pager=self.pager_impl, styles=True):

@@ -12,6 +12,31 @@ from findfmt.diagnostics import get_version
 __all__ = [
     "APP_HELP",
     "CLI_EPILOG",
+    "HELP_ABSOLUTE",
+    "HELP_ALL_TAGS",
+    "HELP_ANSI_LINES",
+    "HELP_COLOR",
+    "HELP_CP437",
+    "HELP_DIAGNOSTICS",
+    "HELP_EXCLUDE_TAGS",
+    "HELP_FOLLOW_SYMLINKS",
+    "HELP_FORMAT",
+    "HELP_HELP_ALL",
+    "HELP_HIDDEN",
+    "HELP_KNOWN_TAGS",
+    "HELP_LIST_TAGS",
+    "HELP_NO_IGNORE",
+    "HELP_NO_INDENT",
+    "HELP_PAGER",
+    "HELP_PATHS",
+    "HELP_PRINT0",
+    "HELP_SHEBANG",
+    "HELP_SUMMARY",
+    "HELP_TABLE_STYLE",
+    "HELP_TAGS",
+    "HELP_TREE",
+    "HELP_VERBOSE",
+    "HELP_VERSION",
     "get_help_all",
     "help_all_callback",
     "known_tags_callback",
@@ -31,6 +56,49 @@ CLI_EPILOG: str = (
     "  findfmt -- -weird-name                   # Path starting with a dash\n\n"
     "Run 'findfmt --help-all' for the comprehensive manual, environment variables, "
     "and exit codes."
+)
+
+
+HELP_PATHS = "One or more directory or file paths to inspect (default: current directory)."
+HELP_TAGS = "Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', 'executable')."
+HELP_EXCLUDE_TAGS = "Tag or comma-separated tags to exclude."
+HELP_ALL_TAGS = "Require matching files to have ALL specified tags rather than ANY tag."
+HELP_SHEBANG = "Filter files whose shebang contains this interpreter or pattern."
+HELP_NO_IGNORE = "Do not respect .gitignore rules during traversal."
+HELP_HIDDEN = "Include hidden files and directories."
+HELP_FOLLOW_SYMLINKS = "Follow symbolic links during traversal."
+HELP_FORMAT = (
+    "Output format (text, json, jsonl, yaml, ipynb, csv, tsv, markdown, md, rst, table, tree)."
+)
+HELP_TREE = "Render output in a hierarchical directory tree (equivalent to --format tree)."
+HELP_TABLE_STYLE = (
+    "Border style for table or rst output (e.g. rounded, simple, minimal, "
+    "double, heavy, markdown, ascii, cp437, square, grid)."
+)
+HELP_PAGER = "Enable or disable interactive paging (defaults to auto-paging on TTY)."
+HELP_NO_INDENT = (
+    "Do not print indentation lines in tree format and strip extraneous "
+    "whitespace in structured formats."
+)
+HELP_ANSI_LINES = (
+    "Use ANSI/VT100 alternate character set line drawing escapes for tree indentation lines."
+)
+HELP_CP437 = "Use CP437 (IBM-PC) console graphics characters for tree indentation lines."
+HELP_COLOR = (
+    "Force enable or disable ANSI color output "
+    "(defaults to auto-detection with NO_COLOR compliance)."
+)
+HELP_ABSOLUTE = "Output absolute paths rather than paths relative to the traversal root."
+HELP_PRINT0 = r"Delimit path outputs with a NUL (\0) character instead of a newline."
+HELP_LIST_TAGS = "Display identified tags alongside each matched path."
+HELP_SUMMARY = "Print summary match statistics to stderr."
+HELP_KNOWN_TAGS = "List all known classification tags supported by the engine and exit."
+HELP_VERBOSE = "Enable verbose output or extended runtime diagnostics with --version."
+HELP_DIAGNOSTICS = "Display runtime environment diagnostics and exit."
+HELP_VERSION = "Display the version of findfmt and exit."
+HELP_HELP_ALL = (
+    "Display comprehensive help reference including environment variables, "
+    "exit codes, and examples."
 )
 
 
@@ -56,8 +124,15 @@ def get_help_all() -> str:
         "  --symlinks / --no-symlinks    Alias for --follow-symlinks / --no-follow-symlinks.\n\n"
         "Output Formatting:\n"
         "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb,\n"
-        "                                csv, tsv, markdown, rst) [default: text].\n"
-        "  --absolute / --no-absolute    Output absolute paths [default: no-absolute].\n"
+        "                                csv, tsv, markdown, rst, table, tree) [default: text].\n"
+        "  --tree / --no-tree            Render output in hierarchical tree view.\n"
+        "  --table-style <style>         Border style (rounded, cp437, ascii, etc.).\n"
+        "  --pager, -P / --no-pager      Enable or disable interactive paging.\n"
+        "  --no-indent, -i / --indent    Omit indentation lines and strip extraneous whitespace.\n"
+        "  --ansi-lines, -A              Use ANSI/VT100 line drawing escapes.\n"
+        "  --cp437, -S                   Use CP437 console graphics line drawing characters.\n"
+        "  --color, -C / --no-color, -n  Force enable or disable ANSI color output.\n"
+        "  --absolute, --full-path       Output absolute paths rather than relative paths.\n"
         "  --print0, -0 / --no-print0    Delimit with NUL (\\0) byte [default: no-print0].\n"
         "  --list-tags, -l / --no-list-tags  Display identified tags [default: no-list-tags].\n"
         "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n\n"

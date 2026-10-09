@@ -29,15 +29,18 @@ class JsonFormatter(Formatter):
         *,
         absolute: bool = False,
         indent: int | None = 2,
+        no_indent: bool = False,
     ) -> None:
         """Initialize JsonFormatter.
 
         Args:
             absolute: Whether to emit absolute paths.
             indent: Indentation spaces for pretty-printing, or None for compact.
+            no_indent: Whether to suppress indentation and emit compact JSON.
         """
         super().__init__(absolute=absolute)
-        self.indent = indent
+        self.indent = None if no_indent else indent
+        self.no_indent = no_indent
 
     @override
     def format(self, files: Iterable[FileInfo]) -> str:
@@ -103,15 +106,23 @@ class JsonlFormatter(Formatter):
 class YamlFormatter(Formatter):
     """Block-style YAML document serializer using PyYAML."""
 
-    def __init__(self, *, absolute: bool = False, indent: int = 2) -> None:
+    def __init__(
+        self,
+        *,
+        absolute: bool = False,
+        indent: int = 2,
+        no_indent: bool = False,
+    ) -> None:
         """Initialize YamlFormatter.
 
         Args:
             absolute: Whether to emit absolute paths.
             indent: Indentation spaces for nested YAML structures.
+            no_indent: Whether to suppress indentation and emit compact YAML.
         """
         super().__init__(absolute=absolute)
-        self.indent = indent
+        self.indent = 0 if no_indent else indent
+        self.no_indent = no_indent
 
     @override
     def format(self, files: Iterable[FileInfo]) -> str:

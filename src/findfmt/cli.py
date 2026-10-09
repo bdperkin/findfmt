@@ -10,6 +10,31 @@ import typer
 from findfmt.cli_help import (
     APP_HELP,
     CLI_EPILOG,
+    HELP_ABSOLUTE,
+    HELP_ALL_TAGS,
+    HELP_ANSI_LINES,
+    HELP_COLOR,
+    HELP_CP437,
+    HELP_DIAGNOSTICS,
+    HELP_EXCLUDE_TAGS,
+    HELP_FOLLOW_SYMLINKS,
+    HELP_FORMAT,
+    HELP_HELP_ALL,
+    HELP_HIDDEN,
+    HELP_KNOWN_TAGS,
+    HELP_LIST_TAGS,
+    HELP_NO_IGNORE,
+    HELP_NO_INDENT,
+    HELP_PAGER,
+    HELP_PATHS,
+    HELP_PRINT0,
+    HELP_SHEBANG,
+    HELP_SUMMARY,
+    HELP_TABLE_STYLE,
+    HELP_TAGS,
+    HELP_TREE,
+    HELP_VERBOSE,
+    HELP_VERSION,
     get_help_all,
     help_all_callback,
     known_tags_callback,
@@ -59,6 +84,10 @@ __all__ = [
     "write_summary",
 ]
 
+_PANEL_TAGS = "Tag Filtering"
+_PANEL_TRAVERSAL = "Traversal Controls"
+_PANEL_OUTPUT = "Output Formatting"
+
 app = typer.Typer(
     name="findfmt",
     help=APP_HELP,
@@ -68,27 +97,12 @@ app = typer.Typer(
 )
 
 
-@app.command(
-    name="findfmt",
-    help=APP_HELP,
-    epilog=CLI_EPILOG,
-)
+@app.command(name="findfmt", help=APP_HELP, epilog=CLI_EPILOG)
 def findfmt(
-    paths: Annotated[
-        list[Path] | None,
-        typer.Argument(
-            help="One or more directory or file paths to inspect (default: current directory).",
-        ),
-    ] = None,
+    paths: Annotated[list[Path] | None, typer.Argument(help=HELP_PATHS)] = None,
     tags: Annotated[
         list[str] | None,
-        typer.Option(
-            "--type",
-            "-t",
-            "--tag",
-            rich_help_panel="Tag Filtering",
-            help="Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', 'executable').",
-        ),
+        typer.Option("--type", "-t", "--tag", rich_help_panel=_PANEL_TAGS, help=HELP_TAGS),
     ] = None,
     exclude_tags: Annotated[
         list[str] | None,
@@ -96,41 +110,25 @@ def findfmt(
             "--exclude",
             "-e",
             "--exclude-tag",
-            rich_help_panel="Tag Filtering",
-            help="Tag or comma-separated tags to exclude.",
+            rich_help_panel=_PANEL_TAGS,
+            help=HELP_EXCLUDE_TAGS,
         ),
     ] = None,
     all_tags: Annotated[
         bool,
-        typer.Option(
-            "--all-tags/--no-all-tags",
-            rich_help_panel="Tag Filtering",
-            help="Require matching files to have ALL specified tags rather than ANY tag.",
-        ),
+        typer.Option("--all-tags/--no-all-tags", rich_help_panel=_PANEL_TAGS, help=HELP_ALL_TAGS),
     ] = False,
     shebang: Annotated[
         str | None,
-        typer.Option(
-            "--shebang",
-            rich_help_panel="Traversal Controls",
-            help="Filter files whose shebang contains this interpreter or pattern.",
-        ),
+        typer.Option("--shebang", rich_help_panel=_PANEL_TRAVERSAL, help=HELP_SHEBANG),
     ] = None,
     no_ignore: Annotated[
         bool,
-        typer.Option(
-            "--no-ignore/--ignore",
-            rich_help_panel="Traversal Controls",
-            help="Do not respect .gitignore rules during traversal.",
-        ),
+        typer.Option("--no-ignore/--ignore", rich_help_panel=_PANEL_TRAVERSAL, help=HELP_NO_IGNORE),
     ] = False,
     hidden: Annotated[
         bool,
-        typer.Option(
-            "--hidden/--no-hidden",
-            rich_help_panel="Traversal Controls",
-            help="Include hidden files and directories.",
-        ),
+        typer.Option("--hidden/--no-hidden", rich_help_panel=_PANEL_TRAVERSAL, help=HELP_HIDDEN),
     ] = False,
     follow_symlinks: Annotated[
         bool,
@@ -138,8 +136,8 @@ def findfmt(
             "--follow-symlinks/--no-follow-symlinks",
             "--symlinks/--no-symlinks",
             "-L",
-            rich_help_panel="Traversal Controls",
-            help="Follow symbolic links during traversal.",
+            rich_help_panel=_PANEL_TRAVERSAL,
+            help=HELP_FOLLOW_SYMLINKS,
         ),
     ] = False,
     output_format: Annotated[
@@ -148,65 +146,68 @@ def findfmt(
             "--format",
             "-f",
             case_sensitive=False,
-            rich_help_panel="Output Formatting",
-            help=(
-                "Output format (text, json, jsonl, yaml, ipynb, csv, tsv, "
-                "markdown, md, rst, table, tree)."
-            ),
+            rich_help_panel=_PANEL_OUTPUT,
+            help=HELP_FORMAT,
         ),
     ] = OutputFormat.TEXT,
     tree: Annotated[
         bool,
-        typer.Option(
-            "--tree/--no-tree",
-            rich_help_panel="Output Formatting",
-            help="Render output in a hierarchical directory tree (equivalent to --format tree).",
-        ),
+        typer.Option("--tree/--no-tree", rich_help_panel=_PANEL_OUTPUT, help=HELP_TREE),
     ] = False,
     table_style: Annotated[
         str | None,
-        typer.Option(
-            "--table-style",
-            rich_help_panel="Output Formatting",
-            help=(
-                "Border style for table or rst output (e.g. rounded, simple, minimal, "
-                "double, heavy, markdown, ascii, square, grid)."
-            ),
-        ),
+        typer.Option("--table-style", rich_help_panel=_PANEL_OUTPUT, help=HELP_TABLE_STYLE),
     ] = None,
     pager: Annotated[
         bool | None,
+        typer.Option("--pager/--no-pager", "-P", rich_help_panel=_PANEL_OUTPUT, help=HELP_PAGER),
+    ] = None,
+    no_indent: Annotated[
+        bool,
         typer.Option(
-            "--pager/--no-pager",
-            "-P",
-            rich_help_panel="Output Formatting",
-            help="Enable or disable interactive paging (defaults to auto-paging on TTY).",
+            "--no-indent/--indent",
+            "-i",
+            rich_help_panel=_PANEL_OUTPUT,
+            help=HELP_NO_INDENT,
         ),
+    ] = False,
+    ansi_lines: Annotated[
+        bool,
+        typer.Option(
+            "--ansi-lines/--no-ansi-lines",
+            "-A",
+            rich_help_panel=_PANEL_OUTPUT,
+            help=HELP_ANSI_LINES,
+        ),
+    ] = False,
+    cp437: Annotated[
+        bool,
+        typer.Option("--cp437/--no-cp437", "-S", rich_help_panel=_PANEL_OUTPUT, help=HELP_CP437),
+    ] = False,
+    color: Annotated[
+        bool | None,
+        typer.Option("--color/--no-color", "-C/-n", rich_help_panel=_PANEL_OUTPUT, help=HELP_COLOR),
     ] = None,
     absolute: Annotated[
         bool,
         typer.Option(
             "--absolute/--no-absolute",
-            rich_help_panel="Output Formatting",
-            help="Output absolute paths rather than paths relative to the traversal root.",
+            "--full-path/--no-full-path",
+            rich_help_panel=_PANEL_OUTPUT,
+            help=HELP_ABSOLUTE,
         ),
     ] = False,
     print0: Annotated[
         bool,
-        typer.Option(
-            "--print0/--no-print0",
-            "-0",
-            rich_help_panel="Output Formatting",
-            help=r"Delimit path outputs with a NUL (\0) character instead of a newline.",
-        ),
+        typer.Option("--print0/--no-print0", "-0", rich_help_panel=_PANEL_OUTPUT, help=HELP_PRINT0),
     ] = False,
     list_tags: Annotated[
         bool,
         typer.Option(
             "--list-tags/--no-list-tags",
             "-l",
-            rich_help_panel="Output Formatting",
-            help="Display identified tags alongside each matched path.",
+            rich_help_panel=_PANEL_OUTPUT,
+            help=HELP_LIST_TAGS,
         ),
     ] = False,
     summary: Annotated[
@@ -214,8 +215,8 @@ def findfmt(
         typer.Option(
             "--summary/--no-summary",
             "-s",
-            rich_help_panel="Output Formatting",
-            help="Print summary match statistics to stderr.",
+            rich_help_panel=_PANEL_OUTPUT,
+            help=HELP_SUMMARY,
         ),
     ] = False,
     known_tags: Annotated[
@@ -224,23 +225,17 @@ def findfmt(
             "--known-tags",
             is_eager=True,
             callback=known_tags_callback,
-            help="List all known classification tags supported by the engine and exit.",
+            help=HELP_KNOWN_TAGS,
         ),
     ] = False,
-    verbose: Annotated[
-        bool,
-        typer.Option(
-            "--verbose",
-            help="Enable verbose output or extended runtime diagnostics with --version.",
-        ),
-    ] = False,
+    verbose: Annotated[bool, typer.Option("--verbose", help=HELP_VERBOSE)] = False,
     diagnostics: Annotated[
         bool,
         typer.Option(
             "--diagnostics",
             is_eager=True,
             callback=diagnostics_callback,
-            help="Display runtime environment diagnostics and exit.",
+            help=HELP_DIAGNOSTICS,
         ),
     ] = False,
     version: Annotated[
@@ -251,20 +246,12 @@ def findfmt(
             "-V",
             is_eager=True,
             callback=version_callback,
-            help="Display the version of findfmt and exit.",
+            help=HELP_VERSION,
         ),
     ] = None,
     help_all: Annotated[
         bool,
-        typer.Option(
-            "--help-all",
-            is_eager=True,
-            callback=help_all_callback,
-            help=(
-                "Display comprehensive help reference including environment variables, "
-                "exit codes, and examples."
-            ),
-        ),
+        typer.Option("--help-all", is_eager=True, callback=help_all_callback, help=HELP_HELP_ALL),
     ] = False,
 ) -> None:
     """Execute file discovery and classification matching."""
@@ -286,6 +273,10 @@ def findfmt(
         summary=summary,
         pager=pager,
         find_files_func=find_files,
+        no_indent=no_indent,
+        ansi_lines=ansi_lines,
+        cp437=cp437,
+        color=color,
     )
 
 

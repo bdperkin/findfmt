@@ -17,6 +17,7 @@ from rich.table import Table
 from rich.tree import Tree
 
 from findfmt.formatters.base import Formatter
+from findfmt.formatters.glyphs import CP437_BOX, resolve_tree_guides
 from findfmt.terminal import get_console
 
 if TYPE_CHECKING:
@@ -35,12 +36,11 @@ __all__ = [
     "format_tag_badge",
 ]
 
-_KIB = 1024
-_MIB = 1024 * 1024
-_GIB = 1024 * 1024 * 1024
+_KIB, _MIB, _GIB = 1024, 1024 * 1024, 1024 * 1024 * 1024
 
 RICH_BOX_STYLES: dict[str, box.Box] = {
     "ascii": box.ASCII,
+    "cp437": CP437_BOX,
     "double": box.DOUBLE,
     "grid": box.SQUARE,
     "heavy": box.HEAVY,
@@ -221,12 +221,15 @@ class RichTableFormatter(Formatter):
 class RichTreeFormatter(Formatter):
     """Hierarchical directory tree serializer using Rich."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         absolute: bool = False,
         console_width: int | None = None,
         force_color: bool | None = None,
+        no_indent: bool = False,
+        ansi_lines: bool = False,
+        cp437: bool = False,
     ) -> None:
         """Initialize RichTreeFormatter.
 
@@ -234,10 +237,16 @@ class RichTreeFormatter(Formatter):
             absolute: Whether to emit absolute paths.
             console_width: Optional terminal output column width override.
             force_color: Explicit color enable override flag.
+            no_indent: Whether to suppress branch indentation lines.
+            ansi_lines: Whether to use ANSI/VT100 escape sequences.
+            cp437: Whether to use CP437 console characters.
         """
         super().__init__(absolute=absolute)
         self.console_width = console_width
         self.force_color = force_color
+        self.no_indent = no_indent
+        self.ansi_lines = ansi_lines
+        self.cp437 = cp437
 
     def _build_tree(self, files: Iterable[FileInfo]) -> Tree:
         """Construct a nested Rich Tree populated with directory branches and files."""
@@ -248,6 +257,13 @@ class RichTreeFormatter(Formatter):
 
         root_label = "[bold]/[/]" if self.absolute else "[bold].[/]"
         tree = Tree(root_label)
+        guides = resolve_tree_guides(
+            no_indent=self.no_indent,
+            ansi_lines=self.ansi_lines,
+            cp437=self.cp437,
+        )
+        tree.TREE_GUIDES = [guides, guides, guides]
+        tree.ASCII_GUIDES = guides
         dir_nodes: dict[tuple[str, ...], Tree] = {}
 
         for file_info in sorted_files:
