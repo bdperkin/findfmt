@@ -44,6 +44,7 @@ dependencies = [
   "identify>=2.6",
   "pathspec>=0.12",
   "pyyaml>=6",
+  "rich>=13",
   "tomli>=2.0.1; python_version<'3.11'",
   "typer>=0.12",
   "typing-extensions>=4; python_version<'3.12'",

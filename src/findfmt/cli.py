@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import sys
-from collections import Counter
-from pathlib import Path
-from typing import TYPE_CHECKING, Annotated
+from pathlib import Path  # noqa: TC003
+from typing import Annotated
 
 import typer
 
 from findfmt.cli_help import get_help_all, help_all_callback, known_tags_callback
+from findfmt.cli_runner import execute_findfmt
 from findfmt.diagnostics import (
     diagnostics_callback,
     get_diagnostics,
@@ -26,19 +25,14 @@ from findfmt.entrypoints import (
     main_findshebang,
     main_findsummary,
 )
-from findfmt.formatters import OutputFormat, get_formatter
-from findfmt.models import TraversalConfig
+from findfmt.formatters import OutputFormat
 from findfmt.summary import parse_tag_arguments, write_summary
 from findfmt.traversal import find_files
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
-
-    from findfmt.models import FileInfo
 
 __all__ = [
     "app",
     "diagnostics_callback",
+    "find_files",
     "get_diagnostics",
     "get_git_version",
     "get_help_all",
@@ -162,9 +156,31 @@ def findfmt(
             "-f",
             case_sensitive=False,
             rich_help_panel="Output Formatting",
-            help="Output format (text, json, jsonl, yaml, ipynb, csv, tsv, markdown, md, rst).",
+            help=(
+                "Output format (text, json, jsonl, yaml, ipynb, csv, tsv, "
+                "markdown, md, rst, table, tree)."
+            ),
         ),
     ] = OutputFormat.TEXT,
+    tree: Annotated[
+        bool,
+        typer.Option(
+            "--tree/--no-tree",
+            rich_help_panel="Output Formatting",
+            help="Render output in a hierarchical directory tree (equivalent to --format tree).",
+        ),
+    ] = False,
+    table_style: Annotated[
+        str | None,
+        typer.Option(
+            "--table-style",
+            rich_help_panel="Output Formatting",
+            help=(
+                "Border style for table or rst output (e.g. rounded, simple, minimal, "
+                "double, heavy, markdown, ascii, square, grid)."
+            ),
+        ),
+    ] = None,
     absolute: Annotated[
         bool,
         typer.Option(
@@ -250,48 +266,24 @@ def findfmt(
     ] = False,
 ) -> None:
     """Execute file discovery and classification matching."""
-    root_paths = tuple(paths) if paths else (Path(),)
-    config = TraversalConfig(
-        root_paths=root_paths,
-        include_tags=parse_tag_arguments(tags),
-        exclude_tags=parse_tag_arguments(exclude_tags),
+    execute_findfmt(
+        paths=paths,
+        tags=tags,
+        exclude_tags=exclude_tags,
         all_tags=all_tags,
-        shebang_filter=shebang,
-        respect_gitignore=not no_ignore,
-        include_hidden=hidden,
+        shebang=shebang,
+        no_ignore=no_ignore,
+        hidden=hidden,
         follow_symlinks=follow_symlinks,
-        relative_paths=not absolute,
-        null_delimited=print0,
-        show_tags=list_tags,
-        show_summary=summary,
-        output_format=output_format.value,
-    )
-
-    tag_counter: Counter[str] = Counter()
-    match_count = 0
-    delimiter = "\0" if config.null_delimited else "\n"
-
-    formatter = get_formatter(
-        output_format,
+        output_format=output_format,
+        tree=tree,
+        table_style=table_style,
         absolute=absolute,
-        show_tags=config.show_tags,
-        delimiter=delimiter,
+        print0=print0,
+        list_tags=list_tags,
+        summary=summary,
+        find_files_func=find_files,
     )
-
-    def _matched_files() -> Iterable[FileInfo]:
-        """Yield matched files while updating match statistics."""
-        nonlocal match_count
-        for file_info in find_files(config):
-            match_count += 1
-            if config.show_summary:
-                tag_counter.update(file_info.tags)
-
-            yield file_info
-
-    formatter.stream(_matched_files(), sys.stdout)
-
-    if config.show_summary:
-        write_summary(match_count, tag_counter)
 
 
 if __name__ == "__main__":  # pragma: no cover
