@@ -20,6 +20,23 @@ class OutputFormat(str, enum.Enum):
     JSONL = "jsonl"
     YAML = "yaml"
     IPYNB = "ipynb"
+    CSV = "csv"
+    TSV = "tsv"
+    MARKDOWN = "markdown"
+    MD = "md"
+    RST = "rst"
+
+
+TABLE_FIELD_NAMES: tuple[str, ...] = (
+    "path",
+    "relative_path",
+    "tags",
+    "mime_type",
+    "shebang",
+    "is_executable",
+    "is_symlink",
+    "size_bytes",
+)
 
 
 class UnsupportedFormatError(ValueError):
