@@ -147,6 +147,12 @@ findfmt -t yaml -f yaml
 
 # Generate Jupyter Notebook with pandas DataFrame ingestion
 findfmt -f ipynb > discovery.ipynb
+
+# Export CSV with header row
+findfmt -f csv
+
+# Generate Markdown table
+findfmt -t python -f markdown
 ```
 
 ### 3.6. Command Aliases & Entry Points
@@ -166,25 +172,25 @@ ______________________________________________________________________
 
 ## 4. CLI Options
 
-| Flag                                             | Description                                                |
-| ------------------------------------------------ | ---------------------------------------------------------- |
-| `-t, --tag, --type TAG`                          | Match files containing specified tag(s)                    |
-| `-e, --exclude, --exclude-tag TAG`               | Exclude files containing specified tag(s)                  |
-| `--all-tags` / `--no-all-tags`                   | Require match against all include tags (AND logic)         |
-| `--shebang INTERPRETER`                          | Match shebang interpreter name or pattern                  |
-| `--no-ignore` / `--ignore`                       | Toggle respecting `.gitignore` files                       |
-| `--hidden` / `--no-hidden`                       | Toggle inspecting hidden files and directories             |
-| `-L, --follow-symlinks` / `--no-follow-symlinks` | Toggle following filesystem symbolic links                 |
-| `-f, --format FORMAT`                            | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`)   |
-| `-0, --print0` / `--no-print0`                   | NUL-delimited output for `xargs -0`                        |
-| `-l, --list-tags` / `--no-list-tags`             | Toggle printing tags alongside file paths                  |
-| `-s, --summary` / `--no-summary`                 | Toggle summary frequency statistics to `stderr`            |
-| `--absolute` / `--no-absolute`                   | Toggle absolute vs relative output paths                   |
-| `--known-tags`                                   | List all supported classification tags and exit            |
-| `-v, -V, --version`                              | Display version (`--verbose` adds runtime diagnostics)     |
-| `--diagnostics`                                  | Display runtime environment diagnostics and exit           |
-| `--help-all`                                     | Display comprehensive manual, env vars, and exit codes     |
-| `-- [PATHS...]`                                  | POSIX terminator: treat following tokens strictly as paths |
+| Flag                                             | Description                                                                               |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `-t, --tag, --type TAG`                          | Match files containing specified tag(s)                                                   |
+| `-e, --exclude, --exclude-tag TAG`               | Exclude files containing specified tag(s)                                                 |
+| `--all-tags` / `--no-all-tags`                   | Require match against all include tags (AND logic)                                        |
+| `--shebang INTERPRETER`                          | Match shebang interpreter name or pattern                                                 |
+| `--no-ignore` / `--ignore`                       | Toggle respecting `.gitignore` files                                                      |
+| `--hidden` / `--no-hidden`                       | Toggle inspecting hidden files and directories                                            |
+| `-L, --follow-symlinks` / `--no-follow-symlinks` | Toggle following filesystem symbolic links                                                |
+| `-f, --format FORMAT`                            | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `tsv`, `markdown`, `rst`) |
+| `-0, --print0` / `--no-print0`                   | NUL-delimited output for `xargs -0`                                                       |
+| `-l, --list-tags` / `--no-list-tags`             | Toggle printing tags alongside file paths                                                 |
+| `-s, --summary` / `--no-summary`                 | Toggle summary frequency statistics to `stderr`                                           |
+| `--absolute` / `--no-absolute`                   | Toggle absolute vs relative output paths                                                  |
+| `--known-tags`                                   | List all supported classification tags and exit                                           |
+| `-v, -V, --version`                              | Display version (`--verbose` adds runtime diagnostics)                                    |
+| `--diagnostics`                                  | Display runtime environment diagnostics and exit                                          |
+| `--help-all`                                     | Display comprehensive manual, env vars, and exit codes                                    |
+| `-- [PATHS...]`                                  | POSIX terminator: treat following tokens strictly as paths                                |
 
 ______________________________________________________________________
 

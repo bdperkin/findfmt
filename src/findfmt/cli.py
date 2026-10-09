@@ -162,7 +162,7 @@ def findfmt(
             "-f",
             case_sensitive=False,
             rich_help_panel="Output Formatting",
-            help="Output serialization format (text, json, jsonl, yaml, ipynb).",
+            help="Output format (text, json, jsonl, yaml, ipynb, csv, tsv, markdown, md, rst).",
         ),
     ] = OutputFormat.TEXT,
     absolute: Annotated[

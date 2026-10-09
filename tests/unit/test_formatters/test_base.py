@@ -15,12 +15,16 @@ else:  # pragma: no cover
 import pytest
 
 from findfmt.formatters import (
+    CsvFormatter,
     Formatter,
     IpynbFormatter,
     JsonFormatter,
     JsonlFormatter,
+    MarkdownFormatter,
     OutputFormat,
+    RstFormatter,
     TextFormatter,
+    TsvFormatter,
     UnsupportedFormatError,
     YamlFormatter,
     get_formatter,
@@ -65,12 +69,22 @@ def test_get_formatter_supported_types() -> None:
     assert isinstance(get_formatter(OutputFormat.JSONL), JsonlFormatter)
     assert isinstance(get_formatter(OutputFormat.YAML), YamlFormatter)
     assert isinstance(get_formatter(OutputFormat.IPYNB), IpynbFormatter)
+    assert isinstance(get_formatter(OutputFormat.CSV), CsvFormatter)
+    assert isinstance(get_formatter(OutputFormat.TSV), TsvFormatter)
+    assert isinstance(get_formatter(OutputFormat.MARKDOWN), MarkdownFormatter)
+    assert isinstance(get_formatter(OutputFormat.MD), MarkdownFormatter)
+    assert isinstance(get_formatter(OutputFormat.RST), RstFormatter)
 
     assert isinstance(get_formatter("text"), TextFormatter)
     assert isinstance(get_formatter("JSON"), JsonFormatter)
     assert isinstance(get_formatter("jsonl"), JsonlFormatter)
     assert isinstance(get_formatter("YAML"), YamlFormatter)
     assert isinstance(get_formatter("ipynb"), IpynbFormatter)
+    assert isinstance(get_formatter("csv"), CsvFormatter)
+    assert isinstance(get_formatter("TSV"), TsvFormatter)
+    assert isinstance(get_formatter("markdown"), MarkdownFormatter)
+    assert isinstance(get_formatter("md"), MarkdownFormatter)
+    assert isinstance(get_formatter("rst"), RstFormatter)
 
 
 def test_get_formatter_with_options() -> None:
