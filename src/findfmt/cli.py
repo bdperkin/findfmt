@@ -9,11 +9,7 @@ from typing import TYPE_CHECKING, Annotated
 
 import typer
 
-from findfmt.cli_help import (
-    get_help_all,
-    help_all_callback,
-    known_tags_callback,
-)
+from findfmt.cli_help import get_help_all, help_all_callback, known_tags_callback
 from findfmt.diagnostics import (
     diagnostics_callback,
     get_diagnostics,
@@ -30,11 +26,14 @@ from findfmt.entrypoints import (
     main_findshebang,
     main_findsummary,
 )
+from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.models import TraversalConfig
 from findfmt.summary import parse_tag_arguments, write_summary
 from findfmt.traversal import find_files
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from findfmt.models import FileInfo
 
 __all__ = [
@@ -68,23 +67,6 @@ app = typer.Typer(
     no_args_is_help=False,
     context_settings={"help_option_names": ["-h", "--help"]},
 )
-
-
-def _format_match(
-    file_info: FileInfo,
-    *,
-    absolute: bool,
-    show_tags: bool,
-    delimiter: str,
-) -> str:
-    """Format matching file information for stdout output."""
-    path_to_print = file_info.path if absolute else file_info.relative_path
-    path_str = str(path_to_print)
-    if show_tags:
-        tags_str = ", ".join(sorted(file_info.tags))
-        return f"{path_str} [{tags_str}]{delimiter}"
-
-    return f"{path_str}{delimiter}"
 
 
 @app.command(
@@ -173,6 +155,16 @@ def findfmt(
             help="Follow symbolic links during traversal.",
         ),
     ] = False,
+    output_format: Annotated[
+        OutputFormat,
+        typer.Option(
+            "--format",
+            "-f",
+            case_sensitive=False,
+            rich_help_panel="Output Formatting",
+            help="Output serialization format (text, json, jsonl, yaml, ipynb).",
+        ),
+    ] = OutputFormat.TEXT,
     absolute: Annotated[
         bool,
         typer.Option(
@@ -272,24 +264,31 @@ def findfmt(
         null_delimited=print0,
         show_tags=list_tags,
         show_summary=summary,
+        output_format=output_format.value,
     )
 
     tag_counter: Counter[str] = Counter()
     match_count = 0
     delimiter = "\0" if config.null_delimited else "\n"
 
-    for file_info in find_files(config):
-        match_count += 1
-        if config.show_summary:
-            tag_counter.update(file_info.tags)
+    formatter = get_formatter(
+        output_format,
+        absolute=absolute,
+        show_tags=config.show_tags,
+        delimiter=delimiter,
+    )
 
-        formatted = _format_match(
-            file_info,
-            absolute=absolute,
-            show_tags=config.show_tags,
-            delimiter=delimiter,
-        )
-        sys.stdout.write(formatted)
+    def _matched_files() -> Iterable[FileInfo]:
+        """Yield matched files while updating match statistics."""
+        nonlocal match_count
+        for file_info in find_files(config):
+            match_count += 1
+            if config.show_summary:
+                tag_counter.update(file_info.tags)
+
+            yield file_info
+
+    formatter.stream(_matched_files(), sys.stdout)
 
     if config.show_summary:
         write_summary(match_count, tag_counter)

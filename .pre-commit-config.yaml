@@ -254,5 +254,5 @@ repos:
         entry: python tools/line_linter.py
         language: python
         types: [text]
-        additional_dependencies: [pathspec, identify, typer]
+        additional_dependencies: [pathspec, identify, typer, pyyaml]
         pass_filenames: true
