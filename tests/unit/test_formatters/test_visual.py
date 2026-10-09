@@ -125,22 +125,22 @@ def test_rich_table_formatter_rendering(sample_files: list[FileInfo]) -> None:
     fmt = RichTableFormatter(absolute=False, table_style="rounded")
     output = fmt.format(sample_files)
     assert "findfmt Files" in output
-    assert "src/app.py" in output
-    assert "docs/guide.md" in output
+    assert str(sample_files[0].relative_path) in output
+    assert str(sample_files[1].relative_path) in output
     assert "README.md" in output
     assert "1.5 KB" in output
     assert "text/x-python" in output
 
     buf = io.StringIO()
     fmt.stream(sample_files, buf)
-    assert "src/app.py" in buf.getvalue()
+    assert str(sample_files[0].relative_path) in buf.getvalue()
 
 
 def test_rich_table_formatter_absolute(sample_files: list[FileInfo]) -> None:
     """Verify table format emits absolute paths when absolute=True."""
     fmt = RichTableFormatter(absolute=True, table_style="ascii")
     output = fmt.format(sample_files)
-    assert "/workspace/project/src/app.py" in output
+    assert str(sample_files[0].path) in output
     assert "+" in output
 
 
