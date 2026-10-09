@@ -38,7 +38,7 @@ symbolic links during directory traversal. Use `--no-follow-symlinks` to disable
 ### 2.3. Output Controls
 
 - `-f, --format FORMAT` : Choose the output serialization format (`text`, `json`, `jsonl`, `yaml`,
-  `ipynb`, `csv`, `tsv`, `markdown`, `rst`, `table`, `tree`). Defaults to `text`.
+  `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`). Defaults to `text`.
 
 - `text`: Standard line-oriented or NUL-delimited plain text paths.
 
@@ -46,11 +46,16 @@ symbolic links during directory traversal. Use `--no-follow-symlinks` to disable
 
 - `jsonl`: Line-delimited JSON (NDJSON) records for streaming pipelines.
 
+- `ndjson`: Alias for `jsonl` line-delimited JSON stream.
+
 - `yaml`: Clean, readable block-style YAML document.
 
 - `ipynb`: Jupyter Notebook (`.ipynb`) format pre-populated with data analysis code cells.
 
 - `csv`: RFC 4180 compliant comma-separated values with header row.
+
+- `csv-table`: Aligned ASCII or Unicode table constructed directly from CSV schema for terminal
+  review.
 
 - `tsv`: Tab-separated values optimized for Unix shell pipelines (`awk`, `cut`).
 
@@ -67,8 +72,9 @@ symbolic links during directory traversal. Use `--no-follow-symlinks` to disable
 `--tree / --no-tree` : Render output in a hierarchical directory tree (equivalent to
 `--format tree`).
 
-`--table-style STYLE` : Configure table border styles (`rounded`, `simple`, `minimal`, `double`,
-`heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`). Defaults to `rounded`.
+`--table-style STYLE` : Configure table border styles for `table`, `csv-table`, and `rst` formats
+(`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`).
+Defaults to `rounded`.
 
 `-P, --pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on
 interactive terminals when output line count exceeds terminal height. Bypassed automatically when
@@ -156,3 +162,56 @@ findfilefmt python -- -hyphenated-dir/
 - `0`: Success (files matched or help/version queried).
 - `1`: Runtime traversal or classification error.
 - `2`: Invalid command-line arguments or syntax error.
+
+## 7. Pipeline Integration Examples
+
+`findfmt` integrates smoothly with automated Unix pipelines, linters, data processing utilities, and
+documentation generators.
+
+### 7.1. Safe Command Execution with `xargs`
+
+Safely pipe matching file paths to linters or formatters using NUL delimiters (`-0` / `--print0`):
+
+```bash
+# Format discovered Python files
+findfmt -t python -0 | xargs -0 ruff format
+
+# Lint shell scripts safely
+findfmt -t shell -0 | xargs -r -0 shellcheck
+```
+
+### 7.2. JSON Filtering with `jq`
+
+Process deterministic metadata records using `jq`:
+
+```bash
+# Extract executable script paths
+findfmt -f json | jq -r '.[] | select(.is_executable == true) | .path'
+
+# Query files larger than 100 KB
+findfmt -f json | jq '.[] | select(.size_bytes > 102400) | {path, size: .size_bytes}'
+```
+
+### 7.3. Delimited Data Processing with `csvkit`
+
+Inspect and slice CSV records with `csvkit`:
+
+```bash
+# Select path, tags, and size columns
+findfmt -f csv | csvcut -c path,tags,size_bytes
+
+# Filter files by executable status
+findfmt -f csv | csvgrep -c is_executable -m true
+```
+
+### 7.4. Sphinx Documentation Inclusion
+
+Export tables directly into documentation build directories for Sphinx inclusion:
+
+```bash
+# Export reStructuredText table for Sphinx .. include::
+findfmt -f rst --table-style grid > docs/source/_generated_inventory.rst
+
+# Render aligned CSV table for terminal review
+findfmt -f csv-table --table-style rounded
+```

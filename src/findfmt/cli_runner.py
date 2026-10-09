@@ -143,7 +143,7 @@ def execute_findfmt(  # noqa: PLR0913
         formatter_kwargs["table_style"] = table_style
 
     color_on = is_color_enabled(target_stream, force_color=color)
-    if effective_format in (OutputFormat.TABLE, OutputFormat.TREE):
+    if effective_format in (OutputFormat.TABLE, OutputFormat.TREE, OutputFormat.CSV_TABLE):
         formatter_kwargs["force_color"] = color_on
 
     formatter = get_formatter(
