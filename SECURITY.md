@@ -6,8 +6,8 @@ Only the latest release of `findfmt` is actively supported with security updates
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
-| < 0.1.0 | :x:                |
+| 0.3.x   | :white_check_mark: |
+| < 0.3.0 | :x:                |
 
 ## 2. Reporting a Vulnerability
 
@@ -133,7 +133,17 @@ mitigations implemented in `findfmt`.
   Elevated permissions (such as `id-token: write`) are strictly confined to release jobs utilizing
   ephemeral OpenID Connect (OIDC) tokens for PyPI Trusted Publishing.
 
-#### 3.5.2. Multi-Tier Secret Scanning & Static Analysis
+#### 3.5.2. OIDC Trusted Publisher Environment Scoping
+
+- **Threat Vector**: Unconstrained OIDC trusted publishers allow workflows executing from arbitrary
+  environments or untrusted branches to mint PyPI and TestPyPI release tokens.
+- **Mitigation**: OpenID Connect (OIDC) trusted publishers on PyPI and TestPyPI are strictly
+  constrained to dedicated GitHub environments (`pypi` and `testpypi`). Only release workflows
+  explicitly associated with these environments in `.github/workflows/release.yml` can mint
+  short-lived publication tokens, eliminating ambient privilege and scoping credentials to verified
+  release jobs.
+
+#### 3.5.3. Multi-Tier Secret Scanning & Static Analysis
 
 - **Threat Vector**: Accidental inclusion of API keys, private certificates, or credentials in git
   history.
