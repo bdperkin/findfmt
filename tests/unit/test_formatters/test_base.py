@@ -22,6 +22,8 @@ from findfmt.formatters import (
     JsonlFormatter,
     MarkdownFormatter,
     OutputFormat,
+    RichTableFormatter,
+    RichTreeFormatter,
     RstFormatter,
     TextFormatter,
     TsvFormatter,
@@ -85,10 +87,19 @@ def test_get_formatter_supported_types() -> None:
     assert isinstance(get_formatter("markdown"), MarkdownFormatter)
     assert isinstance(get_formatter("md"), MarkdownFormatter)
     assert isinstance(get_formatter("rst"), RstFormatter)
+    assert isinstance(get_formatter("table"), RichTableFormatter)
+    assert isinstance(get_formatter("TABLE"), RichTableFormatter)
+    assert isinstance(get_formatter("tree"), RichTreeFormatter)
+    assert isinstance(get_formatter("TREE"), RichTreeFormatter)
 
 
 def test_get_formatter_with_options() -> None:
     """Verify get_formatter passes custom configuration parameters."""
+    table_fmt = get_formatter("table", table_style="minimal", absolute=True)
+    assert isinstance(table_fmt, RichTableFormatter)
+    assert table_fmt.absolute is True
+    assert table_fmt.table_style == "minimal"
+
     fmt = get_formatter("json", absolute=True, indent=4)
     assert isinstance(fmt, JsonFormatter)
     assert fmt.absolute is True

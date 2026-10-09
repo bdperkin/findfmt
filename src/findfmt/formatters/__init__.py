@@ -23,6 +23,10 @@ from findfmt.formatters.structured import (
     YamlFormatter,
 )
 from findfmt.formatters.text import TextFormatter
+from findfmt.formatters.visual import (
+    RichTableFormatter,
+    RichTreeFormatter,
+)
 
 __all__ = [
     "TABLE_FIELD_NAMES",
@@ -33,6 +37,8 @@ __all__ = [
     "JsonlFormatter",
     "MarkdownFormatter",
     "OutputFormat",
+    "RichTableFormatter",
+    "RichTreeFormatter",
     "RstFormatter",
     "TextFormatter",
     "TsvFormatter",
@@ -166,6 +172,33 @@ def _create_markup_formatter(
     return None
 
 
+def _create_visual_formatter(
+    fmt_str: str,
+    *,
+    absolute: bool,
+    kwargs: dict[str, object],
+) -> Formatter | None:
+    """Instantiate visual formatter if matched.
+
+    Args:
+        fmt_str: Normalized format string.
+        absolute: Whether to emit absolute paths.
+        kwargs: Configuration keyword arguments.
+
+    Returns:
+        Visual formatter instance or None if not matched.
+    """
+    if fmt_str == OutputFormat.TABLE.value:
+        style = kwargs.get("table_style", "rounded")
+        style_str = str(style) if isinstance(style, str) else "rounded"
+        return RichTableFormatter(absolute=absolute, table_style=style_str)
+
+    if fmt_str == OutputFormat.TREE.value:
+        return RichTreeFormatter(absolute=absolute)
+
+    return None
+
+
 def get_formatter(
     format_type: OutputFormat | str,
     *,
@@ -200,6 +233,10 @@ def get_formatter(
             show_tags=show_tags,
             delimiter=delimiter if delimiter is not None else "\n",
         )
+
+    visual = _create_visual_formatter(fmt_str, absolute=absolute, kwargs=kwargs)
+    if visual is not None:
+        return visual
 
     record_delim = delimiter if delimiter is not None else "\n"
     delimited = _create_delimited_formatter(

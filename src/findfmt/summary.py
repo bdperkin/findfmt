@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TextIO
+
+from rich.console import Console
+
+from findfmt.formatters.visual import format_summary_panel
 
 if TYPE_CHECKING:
     from collections import Counter
@@ -37,15 +41,20 @@ def parse_tag_arguments(tag_args: Sequence[str] | None) -> frozenset[str]:
     return frozenset(result)
 
 
-def write_summary(match_count: int, tag_counter: Counter[str]) -> None:
-    """Write execution summary to stderr.
+def write_summary(
+    match_count: int,
+    tag_counter: Counter[str],
+    *,
+    stream: TextIO | None = None,
+) -> None:
+    """Write Rich-formatted execution summary to stderr.
 
     Args:
         match_count: Total number of files matched.
         tag_counter: Frequency counter of tags matched.
+        stream: Optional target output stream (defaults to sys.stderr).
     """
-    sys.stderr.write(f"\n--- findfmt summary ---\nMatched files: {match_count}\n")
-    if tag_counter:
-        sys.stderr.write("Top tags:\n")
-        for tag, count in tag_counter.most_common(10):
-            sys.stderr.write(f"  {tag}: {count}\n")
+    target = stream if stream is not None else sys.stderr
+    panel = format_summary_panel(match_count, tag_counter)
+    console = Console(file=target, highlight=False)
+    console.print(panel)

@@ -25,6 +25,8 @@ class OutputFormat(str, enum.Enum):
     MARKDOWN = "markdown"
     MD = "md"
     RST = "rst"
+    TABLE = "table"
+    TREE = "tree"
 
 
 TABLE_FIELD_NAMES: tuple[str, ...] = (
