@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import sys
-
 import typer
 
 from findfmt.classifier import get_known_tags
+from findfmt.cli_pager import display_with_pager
 from findfmt.diagnostics import get_version
 
 __all__ = [
@@ -177,31 +176,46 @@ def get_help_all() -> str:
     )
 
 
-def help_all_callback(value: bool) -> None:
+def help_all_callback(
+    ctx: typer.Context | bool | None = None,
+    value: bool = False,
+) -> None:
     """Display comprehensive help reference and exit.
 
     Args:
+        ctx: Typer context, if provided by Click callback.
         value: Boolean flag indicating if help-all flag was passed.
 
     Raises:
         typer.Exit: Upon printing comprehensive help reference.
     """
+    if isinstance(ctx, bool):
+        value = ctx
+        ctx = None
+
     if value:
-        sys.stdout.write(get_help_all())
+        display_with_pager(get_help_all(), ctx=ctx)
         raise typer.Exit(code=0)
 
 
-def known_tags_callback(value: bool) -> None:
+def known_tags_callback(
+    ctx: typer.Context | bool | None = None,
+    value: bool = False,
+) -> None:
     """List all known classification tags supported by the engine and exit.
 
     Args:
+        ctx: Typer context, if provided by Click callback.
         value: Boolean flag indicating if known-tags flag was passed.
 
     Raises:
         typer.Exit: Upon printing known tags.
     """
-    if value:
-        for tag in sorted(get_known_tags()):
-            sys.stdout.write(f"{tag}\n")
+    if isinstance(ctx, bool):
+        value = ctx
+        ctx = None
 
+    if value:
+        content = "".join(f"{tag}\n" for tag in sorted(get_known_tags()))
+        display_with_pager(content, ctx=ctx)
         raise typer.Exit(code=0)

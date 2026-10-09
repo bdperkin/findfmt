@@ -39,6 +39,7 @@ from findfmt.cli_help import (
     help_all_callback,
     known_tags_callback,
 )
+from findfmt.cli_pager import FindfmtCommand
 from findfmt.cli_runner import execute_findfmt
 from findfmt.diagnostics import (
     diagnostics_callback,
@@ -62,6 +63,7 @@ from findfmt.terminal import PagerController
 from findfmt.traversal import find_files
 
 __all__ = [
+    "FindfmtCommand",
     "PagerController",
     "app",
     "diagnostics_callback",
@@ -97,7 +99,7 @@ app = typer.Typer(
 )
 
 
-@app.command(name="findfmt", help=APP_HELP, epilog=CLI_EPILOG)
+@app.command(name="findfmt", cls=FindfmtCommand, help=APP_HELP, epilog=CLI_EPILOG)
 def findfmt(
     paths: Annotated[list[Path] | None, typer.Argument(help=HELP_PATHS)] = None,
     tags: Annotated[
