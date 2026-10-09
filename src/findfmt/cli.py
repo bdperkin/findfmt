@@ -7,7 +7,13 @@ from typing import Annotated
 
 import typer
 
-from findfmt.cli_help import get_help_all, help_all_callback, known_tags_callback
+from findfmt.cli_help import (
+    APP_HELP,
+    CLI_EPILOG,
+    get_help_all,
+    help_all_callback,
+    known_tags_callback,
+)
 from findfmt.cli_runner import execute_findfmt
 from findfmt.diagnostics import (
     diagnostics_callback,
@@ -27,9 +33,11 @@ from findfmt.entrypoints import (
 )
 from findfmt.formatters import OutputFormat
 from findfmt.summary import parse_tag_arguments, write_summary
+from findfmt.terminal import PagerController
 from findfmt.traversal import find_files
 
 __all__ = [
+    "PagerController",
     "app",
     "diagnostics_callback",
     "find_files",
@@ -53,10 +61,7 @@ __all__ = [
 
 app = typer.Typer(
     name="findfmt",
-    help=(
-        "A .gitignore-aware file discovery and classification suite that locates "
-        "files by content format, shebang, and MIME tag."
-    ),
+    help=APP_HELP,
     add_completion=False,
     no_args_is_help=False,
     context_settings={"help_option_names": ["-h", "--help"]},
@@ -65,20 +70,8 @@ app = typer.Typer(
 
 @app.command(
     name="findfmt",
-    help=(
-        "A .gitignore-aware file discovery and classification suite that locates "
-        "files by content format, shebang, and MIME tag."
-    ),
-    epilog=(
-        "Common Examples:\n"
-        "  findfmt -t python                        # Find Python files\n"
-        "  findfmt --shebang bash scripts/          # Find bash scripts in scripts/\n"
-        "  findfmt -t python -t executable --all-tags # Files matching both tags\n"
-        "  findfiles --no-hidden                    # Wrapper: exclude hidden files\n"
-        "  findfmt -- -weird-name                   # Path starting with a dash\n\n"
-        "Run 'findfmt --help-all' for the comprehensive manual, environment variables, "
-        "and exit codes."
-    ),
+    help=APP_HELP,
+    epilog=CLI_EPILOG,
 )
 def findfmt(
     paths: Annotated[
@@ -179,6 +172,15 @@ def findfmt(
                 "Border style for table or rst output (e.g. rounded, simple, minimal, "
                 "double, heavy, markdown, ascii, square, grid)."
             ),
+        ),
+    ] = None,
+    pager: Annotated[
+        bool | None,
+        typer.Option(
+            "--pager/--no-pager",
+            "-P",
+            rich_help_panel="Output Formatting",
+            help="Enable or disable interactive paging (defaults to auto-paging on TTY).",
         ),
     ] = None,
     absolute: Annotated[
@@ -282,6 +284,7 @@ def findfmt(
         print0=print0,
         list_tags=list_tags,
         summary=summary,
+        pager=pager,
         find_files_func=find_files,
     )
 

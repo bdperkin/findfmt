@@ -10,10 +10,28 @@ from findfmt.classifier import get_known_tags
 from findfmt.diagnostics import get_version
 
 __all__ = [
+    "APP_HELP",
+    "CLI_EPILOG",
     "get_help_all",
     "help_all_callback",
     "known_tags_callback",
 ]
+
+APP_HELP: str = (
+    "A .gitignore-aware file discovery and classification suite that locates "
+    "files by content format, shebang, and MIME tag."
+)
+
+CLI_EPILOG: str = (
+    "Common Examples:\n"
+    "  findfmt -t python                        # Find Python files\n"
+    "  findfmt --shebang bash scripts/          # Find bash scripts in scripts/\n"
+    "  findfmt -t python -t executable --all-tags # Files matching both tags\n"
+    "  findfiles --no-hidden                    # Wrapper: exclude hidden files\n"
+    "  findfmt -- -weird-name                   # Path starting with a dash\n\n"
+    "Run 'findfmt --help-all' for the comprehensive manual, environment variables, "
+    "and exit codes."
+)
 
 
 def get_help_all() -> str:

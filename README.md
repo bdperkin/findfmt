@@ -184,6 +184,7 @@ ______________________________________________________________________
 | `-f, --format FORMAT`                            | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `tsv`, `markdown`, `rst`, `table`, `tree`) |
 | `--tree` / `--no-tree`                           | Toggle hierarchical directory tree view (equivalent to `--format tree`)                                    |
 | `--table-style STYLE`                            | Border style (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `square`, `grid`)    |
+| `-P, --pager` / `--no-pager`                     | Toggle interactive paging (auto-pages on TTY when lines exceed terminal height)                            |
 | `-0, --print0` / `--no-print0`                   | NUL-delimited output for `xargs -0`                                                                        |
 | `-l, --list-tags` / `--no-list-tags`             | Toggle printing tags alongside file paths                                                                  |
 | `-s, --summary` / `--no-summary`                 | Toggle summary frequency statistics to `stderr`                                                            |

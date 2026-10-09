@@ -12,12 +12,12 @@ else:  # pragma: no cover
     from typing_extensions import override
 
 from rich import box
-from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 from rich.tree import Tree
 
 from findfmt.formatters.base import Formatter
+from findfmt.terminal import get_console
 
 if TYPE_CHECKING:
     from collections import Counter
@@ -149,6 +149,7 @@ class RichTableFormatter(Formatter):
         absolute: bool = False,
         table_style: str = "rounded",
         console_width: int | None = None,
+        force_color: bool | None = None,
     ) -> None:
         """Initialize RichTableFormatter.
 
@@ -156,6 +157,7 @@ class RichTableFormatter(Formatter):
             absolute: Whether to emit absolute paths.
             table_style: Border style name mapping to rich.box styles.
             console_width: Optional terminal output column width override.
+            force_color: Explicit color enable override flag.
 
         Raises:
             UnsupportedBoxStyleError: If table_style is not recognized.
@@ -169,6 +171,7 @@ class RichTableFormatter(Formatter):
         self.table_style = normalized
         self.box_style = RICH_BOX_STYLES[normalized]
         self.console_width = console_width
+        self.force_color = force_color
 
     def _build_table(self, files: Iterable[FileInfo]) -> Table:
         """Construct a configured Rich Table populated with file rows."""
@@ -205,14 +208,14 @@ class RichTableFormatter(Formatter):
         table = self._build_table(files)
         buf = io.StringIO()
         width = self.console_width if self.console_width is not None else 120
-        Console(file=buf, width=width, highlight=False).print(table)
+        get_console(buf, width=width, force_color=self.force_color).print(table)
         return buf.getvalue()
 
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream formatted table directly to a text stream."""
         table = self._build_table(files)
-        Console(file=stream, width=self.console_width, highlight=False).print(table)
+        get_console(stream, width=self.console_width, force_color=self.force_color).print(table)
 
 
 class RichTreeFormatter(Formatter):
@@ -223,15 +226,18 @@ class RichTreeFormatter(Formatter):
         *,
         absolute: bool = False,
         console_width: int | None = None,
+        force_color: bool | None = None,
     ) -> None:
         """Initialize RichTreeFormatter.
 
         Args:
             absolute: Whether to emit absolute paths.
             console_width: Optional terminal output column width override.
+            force_color: Explicit color enable override flag.
         """
         super().__init__(absolute=absolute)
         self.console_width = console_width
+        self.force_color = force_color
 
     def _build_tree(self, files: Iterable[FileInfo]) -> Tree:
         """Construct a nested Rich Tree populated with directory branches and files."""
@@ -262,11 +268,11 @@ class RichTreeFormatter(Formatter):
         tree = self._build_tree(files)
         buf = io.StringIO()
         width = self.console_width if self.console_width is not None else 120
-        Console(file=buf, width=width, highlight=False).print(tree)
+        get_console(buf, width=width, force_color=self.force_color).print(tree)
         return buf.getvalue()
 
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream formatted tree directly to a text stream."""
         tree = self._build_tree(files)
-        Console(file=stream, width=self.console_width, highlight=False).print(tree)
+        get_console(stream, width=self.console_width, force_color=self.force_color).print(tree)

@@ -5,9 +5,8 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING, TextIO
 
-from rich.console import Console
-
 from findfmt.formatters.visual import format_summary_panel
+from findfmt.terminal import get_console
 
 if TYPE_CHECKING:
     from collections import Counter
@@ -56,5 +55,5 @@ def write_summary(
     """
     target = stream if stream is not None else sys.stderr
     panel = format_summary_panel(match_count, tag_counter)
-    console = Console(file=target, highlight=False)
+    console = get_console(target)
     console.print(panel)
