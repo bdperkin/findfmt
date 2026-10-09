@@ -2,22 +2,53 @@
 
 from __future__ import annotations
 
+import io
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TextIO
 
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.models import TraversalConfig
 from findfmt.summary import parse_tag_arguments, write_summary
+from findfmt.terminal import PagerController, is_color_enabled
 from findfmt.traversal import find_files
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
+    from findfmt.formatters.base import Formatter
     from findfmt.models import FileInfo
 
 __all__ = ["execute_findfmt"]
+
+
+def _deliver_output(  # noqa: PLR0913
+    formatter: Formatter,
+    files: Iterable[FileInfo],
+    pager_ctrl: PagerController,
+    target_stream: TextIO,
+    *,
+    pager: bool | None,
+    custom_controller: bool,
+) -> None:
+    """Deliver formatted output directly or via interactive pager controller.
+
+    Args:
+        formatter: Configured output formatter.
+        files: Iterable of matched file objects.
+        pager_ctrl: Active PagerController instance.
+        target_stream: Destination text stream.
+        pager: Explicit pager override flag.
+        custom_controller: Whether a custom controller was injected.
+    """
+    is_tty = bool(getattr(target_stream, "isatty", lambda: False)())
+    if custom_controller or (is_tty and pager is not False):
+        buf = io.StringIO()
+        formatter.stream(files, buf)
+        pager_ctrl.display(buf.getvalue())
+    else:
+        formatter.stream(files, target_stream)
 
 
 def execute_findfmt(  # noqa: PLR0913
@@ -38,6 +69,9 @@ def execute_findfmt(  # noqa: PLR0913
     list_tags: bool,
     summary: bool,
     find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]] = find_files,
+    pager: bool | None = None,
+    stream: TextIO | None = None,
+    pager_controller: PagerController | None = None,
 ) -> None:
     """Execute file discovery, classification, formatting, and summary reporting.
 
@@ -58,6 +92,9 @@ def execute_findfmt(  # noqa: PLR0913
         list_tags: Whether to display tags in output.
         summary: Whether to display execution summary.
         find_files_func: Traversal generator function to execute.
+        pager: Optional interactive pager override flag.
+        stream: Target output text stream (defaults to sys.stdout).
+        pager_controller: Optional injected PagerController instance.
     """
     effective_format = OutputFormat.TREE if tree else output_format
 
@@ -82,9 +119,16 @@ def execute_findfmt(  # noqa: PLR0913
     match_count = 0
     delimiter = "\0" if config.null_delimited else "\n"
 
+    target_stream = stream if stream is not None else sys.stdout
+    pager_ctrl = pager_controller or PagerController(pager=pager, stream=target_stream)
+
     formatter_kwargs: dict[str, object] = {}
     if table_style is not None:
         formatter_kwargs["table_style"] = table_style
+
+    color_on = is_color_enabled(target_stream)
+    if effective_format in (OutputFormat.TABLE, OutputFormat.TREE):
+        formatter_kwargs["force_color"] = color_on
 
     formatter = get_formatter(
         effective_format,
@@ -104,7 +148,14 @@ def execute_findfmt(  # noqa: PLR0913
 
             yield file_info
 
-    formatter.stream(_matched_files(), sys.stdout)
+    _deliver_output(
+        formatter,
+        _matched_files(),
+        pager_ctrl,
+        target_stream,
+        pager=pager,
+        custom_controller=pager_controller is not None,
+    )
 
     if config.show_summary:
         write_summary(match_count, tag_counter)

@@ -188,13 +188,23 @@ def _create_visual_formatter(
     Returns:
         Visual formatter instance or None if not matched.
     """
+    force_color_raw = kwargs.get("force_color")
+    force_color = force_color_raw if isinstance(force_color_raw, bool) else None
+
     if fmt_str == OutputFormat.TABLE.value:
         style = kwargs.get("table_style", "rounded")
         style_str = str(style) if isinstance(style, str) else "rounded"
-        return RichTableFormatter(absolute=absolute, table_style=style_str)
+        return RichTableFormatter(
+            absolute=absolute,
+            table_style=style_str,
+            force_color=force_color,
+        )
 
     if fmt_str == OutputFormat.TREE.value:
-        return RichTreeFormatter(absolute=absolute)
+        return RichTreeFormatter(
+            absolute=absolute,
+            force_color=force_color,
+        )
 
     return None
 

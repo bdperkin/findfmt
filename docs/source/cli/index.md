@@ -70,6 +70,10 @@ symbolic links during directory traversal. Use `--no-follow-symlinks` to disable
 `--table-style STYLE` : Configure table border styles (`rounded`, `simple`, `minimal`, `double`,
 `heavy`, `markdown`, `ascii`, `square`, `grid`). Defaults to `rounded`.
 
+`-P, --pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on
+interactive terminals when output line count exceeds terminal height. Bypassed automatically when
+piped or redirected.
+
 `--absolute / --no-absolute` : Output absolute filesystem paths rather than relative paths.
 
 `-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
