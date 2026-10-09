@@ -44,6 +44,8 @@ def test_load_gitignore_spec_os_error(tmp_path: Path):
 def test_load_gitignore_spec_invalid_pattern(tmp_path: Path):
     (tmp_path / ".gitignore").write_text("\\\n", encoding="utf-8")
     assert load_gitignore_spec(tmp_path) is None
+    (tmp_path / ".gitignore").write_text("[z-a]\n", encoding="utf-8")
+    assert load_gitignore_spec(tmp_path) is None
 
 
 def test_load_git_exclude_spec_valid(tmp_path: Path):
@@ -79,6 +81,8 @@ def test_load_git_exclude_spec_invalid_pattern(tmp_path: Path):
     git_dir.mkdir(parents=True)
     (git_dir / "exclude").write_text("\\\n", encoding="utf-8")
     assert load_git_exclude_spec(tmp_path) is None
+    (git_dir / "exclude").write_text("[z-a]\n", encoding="utf-8")
+    assert load_git_exclude_spec(tmp_path) is None
 
 
 def test_should_skip_dir():
@@ -96,26 +100,13 @@ def test_matches_filter_tags():
         tags=frozenset(["python", "text"]),
         shebang="#!/usr/bin/python3",
     )
-
-    # Exclude tags match -> False
-    cfg_exclude = TraversalConfig(exclude_tags=frozenset(["text"]))
-    assert not matches_filter(file_info, cfg_exclude)
-
-    # Include tags (any) match -> True
-    cfg_include_any = TraversalConfig(include_tags=frozenset(["python", "c"]))
-    assert matches_filter(file_info, cfg_include_any)
-
-    # Include tags (any) no match -> False
-    cfg_include_nomatch = TraversalConfig(include_tags=frozenset(["ruby"]))
-    assert not matches_filter(file_info, cfg_include_nomatch)
-
-    # Include tags (all) match -> True
-    cfg_include_all = TraversalConfig(include_tags=frozenset(["python", "text"]), all_tags=True)
-    assert matches_filter(file_info, cfg_include_all)
-
-    # Include tags (all) partial match -> False
-    cfg_all_miss = TraversalConfig(include_tags=frozenset(["python", "executable"]), all_tags=True)
-    assert not matches_filter(file_info, cfg_all_miss)
+    assert not matches_filter(file_info, TraversalConfig(exclude_tags=frozenset(["text"])))
+    assert matches_filter(file_info, TraversalConfig(include_tags=frozenset(["python", "c"])))
+    assert not matches_filter(file_info, TraversalConfig(include_tags=frozenset(["ruby"])))
+    cfg_all = TraversalConfig(include_tags=frozenset(["python", "text"]), all_tags=True)
+    assert matches_filter(file_info, cfg_all)
+    cfg_miss = TraversalConfig(include_tags=frozenset(["python", "exe"]), all_tags=True)
+    assert not matches_filter(file_info, cfg_miss)
 
 
 def test_matches_filter_shebang():
@@ -124,15 +115,10 @@ def test_matches_filter_shebang():
         relative_path=Path("script.sh"),
         shebang="#!/bin/bash",
     )
-
-    cfg_shebang_ok = TraversalConfig(shebang_filter="bash")
-    assert matches_filter(file_info, cfg_shebang_ok)
-
-    cfg_shebang_bad = TraversalConfig(shebang_filter="python")
-    assert not matches_filter(file_info, cfg_shebang_bad)
-
-    no_shebang_info = FileInfo(path=Path("file.txt"), relative_path=Path("file.txt"))
-    assert not matches_filter(no_shebang_info, cfg_shebang_ok)
+    assert matches_filter(file_info, TraversalConfig(shebang_filter="bash"))
+    assert not matches_filter(file_info, TraversalConfig(shebang_filter="python"))
+    no_shebang = FileInfo(path=Path("file.txt"), relative_path=Path("file.txt"))
+    assert not matches_filter(no_shebang, TraversalConfig(shebang_filter="bash"))
 
 
 def test_load_active_specs_no_gitignore(tmp_path: Path):
