@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-09
+
+### Features
+
+- *(format)* Implement structured data serializers (`json`, `jsonl`, `yaml`, `ipynb`) (#122)
+- *(format)* Implement tabular, delimited, and markup serializers (`csv`, `tsv`, `md`, `rst`) (#123)
+- *(format)* Implement Rich visual formatters (tables, border styles, tree view) (#49)
+- *(cli)* Implement interactive terminal pager integration and TTY/NO_COLOR handling (#50)
+- *(cli)* Implement graphics, indentation, and colorization options (-i, -A, -S, -n, -C) (#22)
+- *(format)* Complete multi-format output suite with `csv-table` and `ndjson` (#142)
+
+### Bug Fixes
+
+- *(traversal)* Handle `re.error` when compiling invalid gitignore patterns (#138)
+
 ## [0.2.0] - 2026-10-07
 
 ### Features
