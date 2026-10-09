@@ -214,3 +214,20 @@ def test_ipynb_formatter_records(sample_files: list[FileInfo]) -> None:
     buf = io.StringIO()
     fmt.stream(sample_files, buf)
     assert buf.getvalue() == output
+
+
+def test_json_formatter_no_indent(sample_files: list[FileInfo]) -> None:
+    """Verify JsonFormatter emits compact JSON without indentation when no_indent=True."""
+    fmt = JsonFormatter(no_indent=True)
+    output = fmt.format(sample_files)
+    assert "\n" not in output.strip()
+    assert json.loads(output) == [f.to_dict(absolute=False) for f in sample_files]
+
+
+def test_yaml_formatter_no_indent(sample_files: list[FileInfo]) -> None:
+    """Verify YamlFormatter emits compact YAML with zero indent when no_indent=True."""
+    fmt = YamlFormatter(no_indent=True)
+    output = fmt.format(sample_files)
+    parsed = yaml.safe_load(output)
+    assert len(parsed) == len(sample_files)
+    assert fmt.indent == 0

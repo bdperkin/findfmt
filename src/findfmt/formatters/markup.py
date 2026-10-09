@@ -105,13 +105,33 @@ def _render_markdown_row(cells: Sequence[str], col_widths: Sequence[int]) -> str
 class MarkdownFormatter(Formatter):
     """GitHub Flavored Markdown (GFM) column-aligned table serializer."""
 
+    def __init__(self, *, absolute: bool = False, no_indent: bool = False) -> None:
+        """Initialize MarkdownFormatter.
+
+        Args:
+            absolute: Whether to emit absolute paths.
+            no_indent: Whether to strip column whitespace padding.
+        """
+        super().__init__(absolute=absolute)
+        self.no_indent = no_indent
+
     @override
     def format(self, files: Iterable[FileInfo]) -> str:
-        """Format FileInfo objects into a column-aligned GFM table string."""
+        """Format FileInfo objects into a GFM table string."""
         rows = [
             [escape_markdown_cell(c) for c in file_to_record(f, absolute=self.absolute)]
             for f in files
         ]
+        if self.no_indent:
+            header_line = f"|{'|'.join(TABLE_FIELD_NAMES)}|"
+            seps = [
+                ":---:" if a == "center" else ("---:" if a == "right" else ":---")
+                for a in _MARKDOWN_ALIGNMENTS
+            ]
+            sep_line = f"|{'|'.join(seps)}|"
+            body_lines = [f"|{'|'.join(row)}|" for row in rows]
+            return "\n".join([header_line, sep_line, *body_lines]) + "\n"
+
         col_widths = _compute_markdown_col_widths(rows)
         header_line = _render_markdown_row(TABLE_FIELD_NAMES, col_widths)
         separators = [

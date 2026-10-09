@@ -45,6 +45,7 @@ def write_summary(
     tag_counter: Counter[str],
     *,
     stream: TextIO | None = None,
+    force_color: bool | None = None,
 ) -> None:
     """Write Rich-formatted execution summary to stderr.
 
@@ -52,8 +53,9 @@ def write_summary(
         match_count: Total number of files matched.
         tag_counter: Frequency counter of tags matched.
         stream: Optional target output stream (defaults to sys.stderr).
+        force_color: Explicit color enable override flag.
     """
     target = stream if stream is not None else sys.stderr
     panel = format_summary_panel(match_count, tag_counter)
-    console = get_console(target)
+    console = get_console(target, force_color=force_color)
     console.print(panel)

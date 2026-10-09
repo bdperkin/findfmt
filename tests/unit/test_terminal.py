@@ -200,3 +200,25 @@ def test_pager_controller_preserves_ansi_when_colored() -> None:
 
     controller.display("\x1b[32mSuccess\x1b[0m\n")
     assert stream.getvalue() == "\x1b[32mSuccess\x1b[0m\n"
+
+
+def test_is_color_enabled_force_color() -> None:
+    """Verify force_color explicitly overrides NO_COLOR and CLICOLOR_FORCE."""
+    pipe = io.StringIO()
+    tty = MockInteractiveStream()
+
+    assert is_color_enabled(pipe, force_color=True, env={"NO_COLOR": "1"}) is True
+    assert is_color_enabled(tty, force_color=False, env={"CLICOLOR_FORCE": "1"}) is False
+
+
+def test_pager_controller_force_color_overrides() -> None:
+    """Verify PagerController honors explicit force_color flag."""
+    pipe = io.StringIO()
+    c_on = PagerController(pager=False, stream=pipe, force_color=True)
+    c_on.display("\x1b[32mForced\x1b[0m\n")
+    assert pipe.getvalue() == "\x1b[32mForced\x1b[0m\n"
+
+    tty = MockInteractiveStream()
+    c_off = PagerController(pager=False, stream=tty, force_color=False)
+    c_off.display("\x1b[32mDisabled\x1b[0m\n")
+    assert tty.getvalue() == "Disabled\n"

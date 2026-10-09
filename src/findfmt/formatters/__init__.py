@@ -85,10 +85,11 @@ def _create_structured_formatter(
     Returns:
         Structured formatter instance or None if not a structured format.
     """
+    no_indent = bool(kwargs.get("no_indent", False))
     if fmt_str == OutputFormat.JSON.value:
         indent = kwargs.get("indent", 2)
         indent_val = indent if isinstance(indent, int) or indent is None else 2
-        return JsonFormatter(absolute=absolute, indent=indent_val)
+        return JsonFormatter(absolute=absolute, indent=indent_val, no_indent=no_indent)
 
     if fmt_str == OutputFormat.JSONL.value:
         return JsonlFormatter(absolute=absolute)
@@ -96,7 +97,7 @@ def _create_structured_formatter(
     if fmt_str == OutputFormat.YAML.value:
         indent = kwargs.get("indent", 2)
         indent_int = indent if isinstance(indent, int) else 2
-        return YamlFormatter(absolute=absolute, indent=indent_int)
+        return YamlFormatter(absolute=absolute, indent=indent_int, no_indent=no_indent)
 
     if fmt_str == OutputFormat.IPYNB.value:
         return IpynbFormatter(absolute=absolute)
@@ -162,7 +163,10 @@ def _create_markup_formatter(
         Markup formatter instance or None if not matched.
     """
     if fmt_str == OutputFormat.MARKDOWN.value:
-        return MarkdownFormatter(absolute=absolute)
+        return MarkdownFormatter(
+            absolute=absolute,
+            no_indent=bool(kwargs.get("no_indent", False)),
+        )
 
     if fmt_str == OutputFormat.RST.value:
         style = kwargs.get("table_style", "grid")
@@ -204,6 +208,9 @@ def _create_visual_formatter(
         return RichTreeFormatter(
             absolute=absolute,
             force_color=force_color,
+            no_indent=bool(kwargs.get("no_indent", False)),
+            ansi_lines=bool(kwargs.get("ansi_lines", False)),
+            cp437=bool(kwargs.get("cp437", False)),
         )
 
     return None

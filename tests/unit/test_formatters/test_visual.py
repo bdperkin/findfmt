@@ -185,3 +185,36 @@ def test_rich_tree_formatter_empty() -> None:
 
     fmt_abs = RichTreeFormatter(absolute=True)
     assert "/" in fmt_abs.format([])
+
+
+def test_rich_table_formatter_cp437(sample_files: list[FileInfo]) -> None:
+    """Verify table format renders correctly with cp437 hardware borders."""
+    fmt = RichTableFormatter(table_style="cp437")
+    output = fmt.format(sample_files)
+    assert "\xda" in output or "\xc4" in output
+    assert "app.py" in output
+
+
+def test_rich_tree_formatter_no_indent(sample_files: list[FileInfo]) -> None:
+    """Verify tree format omits branch guide characters when no_indent=True."""
+    fmt = RichTreeFormatter(no_indent=True)
+    output = fmt.format(sample_files)
+    assert "├──" not in output
+    assert "└──" not in output
+    assert "app.py" in output
+
+
+def test_rich_tree_formatter_ansi_lines(sample_files: list[FileInfo]) -> None:
+    """Verify tree format uses VT100 line drawing escapes when ansi_lines=True."""
+    fmt = RichTreeFormatter(ansi_lines=True)
+    output = fmt.format(sample_files)
+    assert "\x1b(0" in output
+    assert "app.py" in output
+
+
+def test_rich_tree_formatter_cp437(sample_files: list[FileInfo]) -> None:
+    """Verify tree format uses CP437 console graphics when cp437=True."""
+    fmt = RichTreeFormatter(cp437=True)
+    output = fmt.format(sample_files)
+    assert "\xc3\xc4\xc4" in output or "\xc0\xc4\xc4" in output
+    assert "app.py" in output
