@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import os
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -19,6 +20,27 @@ if TYPE_CHECKING:
 PathSpecType = pathspec.PathSpec[Any]
 
 
+def _load_spec_file(spec_file: Path) -> PathSpecType | None:
+    """Load and compile pathspec patterns from a specification file.
+
+    Args:
+        spec_file: Path to the pattern specification file.
+
+    Returns:
+        PathSpec instance if patterns exist and are valid, or None.
+    """
+    if spec_file.is_file():
+        try:
+            with spec_file.open("r", encoding="utf-8", errors="replace") as f:
+                lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+                if lines:
+                    return pathspec.PathSpec.from_lines("gitignore", lines)
+        except (OSError, ValueError, re.error):
+            return None
+
+    return None
+
+
 def load_gitignore_spec(directory: Path) -> PathSpecType | None:
     """Load gitignore patterns from a directory if a .gitignore file exists.
 
@@ -28,17 +50,7 @@ def load_gitignore_spec(directory: Path) -> PathSpecType | None:
     Returns:
         PathSpec instance if rules exist, or None.
     """
-    gitignore_file = directory / ".gitignore"
-    if gitignore_file.is_file():
-        try:
-            with gitignore_file.open("r", encoding="utf-8", errors="replace") as f:
-                lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-                if lines:
-                    return pathspec.PathSpec.from_lines("gitignore", lines)
-        except (OSError, ValueError):
-            return None
-
-    return None
+    return _load_spec_file(directory / ".gitignore")
 
 
 def load_git_exclude_spec(root: Path) -> PathSpecType | None:
@@ -50,17 +62,7 @@ def load_git_exclude_spec(root: Path) -> PathSpecType | None:
     Returns:
         PathSpec instance if exclude patterns exist, or None.
     """
-    exclude_file = root / ".git" / "info" / "exclude"
-    if exclude_file.is_file():
-        try:
-            with exclude_file.open("r", encoding="utf-8", errors="replace") as f:
-                lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-                if lines:
-                    return pathspec.PathSpec.from_lines("gitignore", lines)
-        except (OSError, ValueError):
-            return None
-
-    return None
+    return _load_spec_file(root / ".git" / "info" / "exclude")
 
 
 def should_skip_dir(dir_name: str, *, include_hidden: bool) -> bool:
@@ -242,11 +244,7 @@ def traverse_directory(
         with contextlib.suppress(OSError):
             active_visited.add(root.resolve())
 
-    specs = _load_active_specs(
-        root,
-        active_specs,
-        respect_gitignore=config.respect_gitignore,
-    )
+    specs = _load_active_specs(root, active_specs, respect_gitignore=config.respect_gitignore)
     subdirs, files = _scan_directory_entries(root, config, specs)
 
     for file_path in files:
@@ -290,8 +288,4 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
             if matches_filter(info, config):
                 yield info
         else:
-            yield from traverse_directory(
-                resolved_root,
-                config,
-                base_root=resolved_root,
-            )
+            yield from traverse_directory(resolved_root, config, base_root=resolved_root)
