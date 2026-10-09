@@ -68,12 +68,13 @@ HELP_NO_IGNORE = "Do not respect .gitignore rules during traversal."
 HELP_HIDDEN = "Include hidden files and directories."
 HELP_FOLLOW_SYMLINKS = "Follow symbolic links during traversal."
 HELP_FORMAT = (
-    "Output format (text, json, jsonl, yaml, ipynb, csv, tsv, markdown, md, rst, table, tree)."
+    "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
+    "markdown, md, rst, table, tree, ndjson)."
 )
 HELP_TREE = "Render output in a hierarchical directory tree (equivalent to --format tree)."
 HELP_TABLE_STYLE = (
-    "Border style for table or rst output (e.g. rounded, simple, minimal, "
-    "double, heavy, markdown, ascii, cp437, square, grid)."
+    "Border style for table, csv-table, or rst output (e.g. rounded, simple, "
+    "minimal, double, heavy, markdown, ascii, cp437, square, grid)."
 )
 HELP_PAGER = "Enable or disable interactive paging (defaults to auto-paging on TTY)."
 HELP_NO_INDENT = (
@@ -124,7 +125,8 @@ def get_help_all() -> str:
         "  --symlinks / --no-symlinks    Alias for --follow-symlinks / --no-follow-symlinks.\n\n"
         "Output Formatting:\n"
         "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb,\n"
-        "                                csv, tsv, markdown, rst, table, tree) [default: text].\n"
+        "                                csv, csv-table, tsv, markdown, rst, table, tree)\n"
+        "                                [default: text].\n"
         "  --tree / --no-tree            Render output in hierarchical tree view.\n"
         "  --table-style <style>         Border style (rounded, cp437, ascii, etc.).\n"
         "  --pager, -P / --no-pager      Enable or disable interactive paging.\n"

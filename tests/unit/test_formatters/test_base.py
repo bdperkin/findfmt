@@ -16,6 +16,7 @@ import pytest
 
 from findfmt.formatters import (
     CsvFormatter,
+    CsvTableFormatter,
     Formatter,
     IpynbFormatter,
     JsonFormatter,
@@ -76,6 +77,8 @@ def test_get_formatter_supported_types() -> None:
     assert isinstance(get_formatter(OutputFormat.MARKDOWN), MarkdownFormatter)
     assert isinstance(get_formatter(OutputFormat.MD), MarkdownFormatter)
     assert isinstance(get_formatter(OutputFormat.RST), RstFormatter)
+    assert isinstance(get_formatter(OutputFormat.CSV_TABLE), CsvTableFormatter)
+    assert isinstance(get_formatter(OutputFormat.NDJSON), JsonlFormatter)
 
     assert isinstance(get_formatter("text"), TextFormatter)
     assert isinstance(get_formatter("JSON"), JsonFormatter)
@@ -91,6 +94,10 @@ def test_get_formatter_supported_types() -> None:
     assert isinstance(get_formatter("TABLE"), RichTableFormatter)
     assert isinstance(get_formatter("tree"), RichTreeFormatter)
     assert isinstance(get_formatter("TREE"), RichTreeFormatter)
+    assert isinstance(get_formatter("csv-table"), CsvTableFormatter)
+    assert isinstance(get_formatter("CSV-TABLE"), CsvTableFormatter)
+    assert isinstance(get_formatter("ndjson"), JsonlFormatter)
+    assert isinstance(get_formatter("NDJSON"), JsonlFormatter)
 
 
 def test_get_formatter_with_options() -> None:

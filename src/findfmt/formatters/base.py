@@ -27,6 +27,8 @@ class OutputFormat(str, enum.Enum):
     RST = "rst"
     TABLE = "table"
     TREE = "tree"
+    CSV_TABLE = "csv-table"
+    NDJSON = "ndjson"
 
 
 TABLE_FIELD_NAMES: tuple[str, ...] = (

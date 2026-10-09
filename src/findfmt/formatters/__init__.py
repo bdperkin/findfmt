@@ -10,7 +10,11 @@ from findfmt.formatters.base import (
     OutputFormat,
     UnsupportedFormatError,
 )
-from findfmt.formatters.delimited import CsvFormatter, TsvFormatter
+from findfmt.formatters.delimited import (
+    CsvFormatter,
+    CsvTableFormatter,
+    TsvFormatter,
+)
 from findfmt.formatters.markup import (
     MarkdownFormatter,
     RstFormatter,
@@ -31,6 +35,7 @@ from findfmt.formatters.visual import (
 __all__ = [
     "TABLE_FIELD_NAMES",
     "CsvFormatter",
+    "CsvTableFormatter",
     "Formatter",
     "IpynbFormatter",
     "JsonFormatter",
@@ -65,6 +70,9 @@ def _normalize_format_name(format_type: OutputFormat | str) -> str:
 
     if val == OutputFormat.MD.value:
         return OutputFormat.MARKDOWN.value
+
+    if val == OutputFormat.NDJSON.value:
+        return OutputFormat.JSONL.value
 
     return val
 
@@ -142,6 +150,13 @@ def _create_delimited_formatter(
 
     if fmt_str == OutputFormat.TSV.value:
         return TsvFormatter(absolute=absolute, lineterminator=lineterminator)
+
+    if fmt_str == OutputFormat.CSV_TABLE.value:
+        style = kwargs.get("table_style", "rounded")
+        style_str = style if isinstance(style, str) else "rounded"
+        color_raw = kwargs.get("force_color")
+        color = color_raw if isinstance(color_raw, bool) else None
+        return CsvTableFormatter(absolute=absolute, table_style=style_str, force_color=color)
 
     return None
 
