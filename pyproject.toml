@@ -43,8 +43,10 @@ dynamic = [ "version" ]
 dependencies = [
   "identify>=2.6",
   "pathspec>=0.12",
+  "pyyaml>=6",
   "tomli>=2.0.1; python_version<'3.11'",
   "typer>=0.12",
+  "typing-extensions>=4; python_version<'3.12'",
 ]
 
 urls.Changelog = "https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md"
@@ -89,6 +91,7 @@ lint = [
   "radon>=6.0.1",
   "ruff>=0.8",
   "ty>=0.0.80",
+  "types-pyyaml>=6",
   "vulture>=2.11",
   "xenon>=0.9.1",
   "yamllint>=1.35",
@@ -153,7 +156,7 @@ quiet-level = 3
 [tool.deptry]
 known_first_party = [ "findfmt" ]
 extend_exclude = [ "tests", "docs", "tools" ]
-per_rule_ignores = { DEP002 = [ "tomli" ] }
+per_rule_ignores = { DEP002 = [ "tomli", "typing-extensions" ] }
 
 [tool.pytest.ini_options]
 minversion = "8.0"
