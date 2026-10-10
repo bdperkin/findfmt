@@ -165,3 +165,31 @@ def test_help_capture_empty_when_no_content() -> None:
         captured = _capture_help_output(cmd, ctx, formatter)
 
     assert captured == ""
+
+
+def test_help_pager_preserves_color_on_dumb_term_when_forced() -> None:
+    """Verify FindfmtCommand falls back to standard color system on dumb terminal."""
+    cmd = FindfmtCommand(name="findfmt", help="findfmt command help description")
+    ctx = typer.Context(cmd, info_name="findfmt")
+    ctx.args = ["--color"]
+    formatter = ctx.make_formatter()
+
+    tty_stream = MockInteractiveStream()
+    mock_pager = MockCapturePager()
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(sys, "stdout", tty_stream)
+        mp.setenv("TERM", "dumb")
+        original_init = PagerController.__init__
+
+        def custom_init(self: PagerController, *args: Any, **kwargs: Any) -> None:
+            kwargs["term_height"] = 5
+            kwargs["pager_impl"] = mock_pager
+            original_init(self, *args, **kwargs)
+
+        mp.setattr(PagerController, "__init__", custom_init)
+        cmd.format_help(ctx, formatter)
+
+    assert len(mock_pager.contents) == 1
+    assert "\x1b[" in mock_pager.contents[0]
+    assert "Usage: findfmt" in strip_ansi(mock_pager.contents[0])
