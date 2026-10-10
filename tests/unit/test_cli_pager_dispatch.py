@@ -26,7 +26,7 @@ from findfmt.cli_pager import (
     resolve_color_flag,
     resolve_pager_flag,
 )
-from findfmt.terminal import PagerController
+from findfmt.terminal import PagerController, strip_ansi
 
 
 class MockInteractiveStream(io.StringIO):
@@ -250,7 +250,7 @@ def test_findfmt_command_interactive_paging() -> None:
         cmd.format_help(ctx, formatter)
 
     assert len(mock_pager.contents) == 1
-    assert "Usage: findfmt" in mock_pager.contents[0]
+    assert "Usage: findfmt" in strip_ansi(mock_pager.contents[0])
 
 
 def test_cli_runner_help_and_diagnostics_paging() -> None:
