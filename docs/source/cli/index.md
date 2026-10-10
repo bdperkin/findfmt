@@ -77,8 +77,9 @@ symbolic links during directory traversal. Use `--no-follow-symlinks` to disable
 Defaults to `rounded`.
 
 `-P, --pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on
-interactive terminals when output line count exceeds terminal height. Bypassed automatically when
-piped or redirected.
+interactive terminals when output line count exceeds terminal height. Applies to formatted file
+listings, `--help`, `--help-all`, `--known-tags`, and tall `--diagnostics` outputs. Bypassed
+automatically when piped or redirected.
 
 `-i, --no-indent / --indent` : Omit branch indentation characters in tree format and strip
 extraneous whitespace and padding in structured formats.
@@ -105,18 +106,23 @@ path.
 
 ### 2.4. Information & Diagnostics
 
-`--known-tags` : List all tags supported by the classifier engine and exit immediately.
+`--known-tags` : List all tags supported by the classifier engine and exit immediately (routed
+through the interactive pager on TTY sessions exceeding terminal height).
 
 `-v, -V, --version` : Display the version of `findfmt` and exit. When combined with `--verbose`,
-prints runtime environment diagnostics (Python runtime, OS platform, identify engine, and Git).
+prints runtime environment diagnostics (Python runtime, OS platform, identify engine, and Git) via
+the interactive pager when exceeding terminal height.
 
 `--verbose` : Enable verbose diagnostic output when paired with `--version`.
 
-`--diagnostics` : Display runtime environment diagnostics and exit immediately.
+`--diagnostics` : Display runtime environment diagnostics and exit immediately (routed through the
+interactive pager on TTY sessions exceeding terminal height).
 
-`--help-all` : Display the comprehensive CLI manual, environment variables, and exit codes.
+`--help-all` : Display the comprehensive CLI manual, environment variables, and exit codes (routed
+through the interactive pager on TTY sessions exceeding terminal height).
 
-`-h, --help` : Show the categorized help message and exit.
+`-h, --help` : Show the categorized help message and exit (automatically routed through the
+interactive pager on TTY sessions exceeding terminal height).
 
 ## 3. Command Wrappers & Aliases
 

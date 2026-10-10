@@ -11,6 +11,8 @@ from importlib.metadata import PackageNotFoundError, version
 
 import typer
 
+from findfmt.cli_pager import display_with_pager
+
 __all__ = [
     "diagnostics_callback",
     "get_diagnostics",
@@ -157,22 +159,30 @@ def version_callback(
 
     if value:
         if _is_verbose_requested(ctx):
-            sys.stdout.write(get_diagnostics())
+            display_with_pager(get_diagnostics(), ctx=ctx)
         else:
             sys.stdout.write(f"findfmt {get_version()}\n")
 
         raise typer.Exit(code=0)
 
 
-def diagnostics_callback(value: bool) -> None:
+def diagnostics_callback(
+    ctx: typer.Context | bool | None = None,
+    value: bool = False,
+) -> None:
     """Display runtime environment diagnostics and exit.
 
     Args:
+        ctx: Typer context, if provided by Click callback.
         value: Boolean flag indicating if diagnostics flag was passed.
 
     Raises:
         typer.Exit: Upon printing diagnostics.
     """
+    if isinstance(ctx, bool):
+        value = ctx
+        ctx = None
+
     if value:
-        sys.stdout.write(get_diagnostics())
+        display_with_pager(get_diagnostics(), ctx=ctx)
         raise typer.Exit(code=0)

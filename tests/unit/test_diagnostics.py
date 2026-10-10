@@ -18,6 +18,7 @@ from findfmt.cli import (
     get_help_all,
     get_version,
     help_all_callback,
+    known_tags_callback,
     version_callback,
 )
 from findfmt.diagnostics import _is_verbose_requested
@@ -170,6 +171,11 @@ def test_diagnostics_callback():
 
     assert exc.value.exit_code == 0
 
+    with pytest.raises(typer.Exit) as exc2:
+        diagnostics_callback(ctx=True)
+
+    assert exc2.value.exit_code == 0
+
 
 def test_help_all_callback_and_text():
     help_text = get_help_all()
@@ -189,6 +195,24 @@ def test_help_all_callback_and_text():
         help_all_callback(value=True)
 
     assert exc.value.exit_code == 0
+
+    with pytest.raises(typer.Exit) as exc2:
+        help_all_callback(ctx=True)
+
+    assert exc2.value.exit_code == 0
+
+
+def test_known_tags_callback():
+    known_tags_callback(value=False)
+    with pytest.raises(typer.Exit) as exc:
+        known_tags_callback(value=True)
+
+    assert exc.value.exit_code == 0
+
+    with pytest.raises(typer.Exit) as exc2:
+        known_tags_callback(ctx=True)
+
+    assert exc2.value.exit_code == 0
 
 
 def test_cli_version_options():
