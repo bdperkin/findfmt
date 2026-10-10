@@ -6,7 +6,7 @@ import contextlib
 import inspect
 import io
 import sys
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING, Literal, TextIO, cast
 
 if sys.version_info >= (3, 12):  # pragma: no cover
     from typing import override
@@ -15,8 +15,9 @@ else:  # pragma: no cover
 
 import typer
 import typer.core
+from typer import rich_utils
 
-from findfmt.terminal import PagerController
+from findfmt.terminal import PagerController, get_console, is_color_enabled
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -33,27 +34,33 @@ __all__ = [
 ]
 
 
-def _extract_from_frame_ctx(frame: FrameType) -> list[str] | None:
-    """Extract argv from ctx in frame locals.
+def _extract_from_context(ctx: object | None) -> list[str] | None:
+    """Extract argv from Click/Typer context args or obj dictionary.
 
     Args:
-        frame: Call stack frame to inspect.
+        ctx: Click/Typer context instance, if available.
 
     Returns:
         List of argument strings, or None if not found.
     """
-    c = frame.f_locals.get("ctx")
-    c_obj = getattr(c, "obj", None)
-    if isinstance(c_obj, dict):
-        cand = c_obj.get("argv")
-        if isinstance(cand, list | tuple):
+    if ctx is None:
+        return None
+
+    args = getattr(ctx, "args", None)
+    if isinstance(args, list | tuple) and args:
+        return [str(x) for x in args]
+
+    obj = getattr(ctx, "obj", None)
+    if isinstance(obj, dict):
+        cand = obj.get("argv")
+        if isinstance(cand, list | tuple) and cand:
             return [str(x) for x in cand]
 
     return None
 
 
 def _extract_from_frame_args(frame: FrameType) -> list[str] | None:
-    """Extract argv from argv or args_list in frame locals.
+    """Extract argv from argv, args_list, or args in frame locals.
 
     Args:
         frame: Call stack frame to inspect.
@@ -61,9 +68,9 @@ def _extract_from_frame_args(frame: FrameType) -> list[str] | None:
     Returns:
         List of argument strings, or None if not found.
     """
-    for key in ("argv", "args_list"):
+    for key in ("argv", "args_list", "args"):
         cand = frame.f_locals.get(key)
-        if isinstance(cand, list | tuple) and all(isinstance(x, str) for x in cand):
+        if isinstance(cand, list | tuple) and cand and all(isinstance(x, str) for x in cand):
             return [str(x) for x in cand]
 
     return None
@@ -81,7 +88,7 @@ def _extract_from_frame(frame: FrameType | None) -> list[str] | None:
     if frame is None:
         return None
 
-    return _extract_from_frame_ctx(frame) or _extract_from_frame_args(frame)
+    return _extract_from_context(frame.f_locals.get("ctx")) or _extract_from_frame_args(frame)
 
 
 def _extract_from_stack() -> list[str] | None:
@@ -117,16 +124,9 @@ def _extract_raw_args(
     if args is not None:
         return list(args)
 
-    if ctx is not None:
-        ctx_obj = getattr(ctx, "obj", None)
-        if isinstance(ctx_obj, dict):
-            argv_cand = ctx_obj.get("argv")
-            if isinstance(argv_cand, list | tuple):
-                return [str(x) for x in argv_cand]
-
-    from_stack = _extract_from_stack()
-    if from_stack is not None:
-        return from_stack
+    cand = _extract_from_context(ctx) or _extract_from_stack()
+    if cand is not None:
+        return cand
 
     return list(sys.argv[1:])
 
@@ -223,6 +223,56 @@ def display_with_pager(  # noqa: PLR0913
     controller.display(content)
 
 
+def _capture_help_output(
+    cmd: typer.core.TyperCommand,
+    ctx: _click.Context,
+    formatter: _click.HelpFormatter,
+) -> str:
+    """Capture formatted command help while preserving terminal ANSI color sequences.
+
+    Args:
+        cmd: Typer command instance to format help for.
+        ctx: Active Click context.
+        formatter: Click help formatter.
+
+    Returns:
+        Rendered help string.
+    """
+    color_flag = resolve_color_flag(ctx)
+    color_on = is_color_enabled(sys.stdout, force_color=color_flag)
+
+    orig_force = getattr(rich_utils, "FORCE_TERMINAL", None)
+    orig_cs = getattr(rich_utils, "COLOR_SYSTEM", None)
+
+    try:
+        if color_on:
+            rich_utils.FORCE_TERMINAL = True
+            real_console = get_console(sys.stdout, force_color=color_flag)
+            cs = real_console.color_system
+            if cs in ("standard", "256", "truecolor", "windows"):
+                rich_utils.COLOR_SYSTEM = cast(
+                    "Literal['auto', 'standard', '256', 'truecolor', 'windows']",
+                    cs,
+                )
+            else:
+                rich_utils.COLOR_SYSTEM = "standard"
+        else:
+            rich_utils.FORCE_TERMINAL = False
+
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            typer.core.TyperCommand.format_help(cmd, ctx, formatter)
+    finally:
+        rich_utils.FORCE_TERMINAL = orig_force
+        rich_utils.COLOR_SYSTEM = orig_cs
+
+    content = buf.getvalue()
+    if not content and formatter.getvalue():
+        return formatter.getvalue()
+
+    return content
+
+
 class FindfmtCommand(typer.core.TyperCommand):
     """Custom TyperCommand routing help output through interactive pager on TTY."""
 
@@ -234,12 +284,6 @@ class FindfmtCommand(typer.core.TyperCommand):
             ctx: Active Click context.
             formatter: Click help formatter.
         """
-        buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
-            super().format_help(ctx, formatter)
-
-        content = buf.getvalue()
+        content = _capture_help_output(self, ctx, formatter)
         if content:
             display_with_pager(content, ctx=ctx)
-        elif formatter.getvalue():
-            display_with_pager(formatter.getvalue(), ctx=ctx)
