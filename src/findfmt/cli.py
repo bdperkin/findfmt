@@ -28,6 +28,7 @@ from findfmt.cli_help import (
     HELP_PAGER,
     HELP_PATHS,
     HELP_PRINT0,
+    HELP_RELATIVE,
     HELP_SHEBANG,
     HELP_SUMMARY,
     HELP_TABLE_STYLE,
@@ -199,6 +200,15 @@ def findfmt(
             help=HELP_ABSOLUTE,
         ),
     ] = False,
+    relative: Annotated[
+        bool,
+        typer.Option(
+            "--relative/--no-relative",
+            "--relative-path/--no-relative-path",
+            rich_help_panel=_PANEL_OUTPUT,
+            help=HELP_RELATIVE,
+        ),
+    ] = False,
     print0: Annotated[
         bool,
         typer.Option("--print0/--no-print0", "-0", rich_help_panel=_PANEL_OUTPUT, help=HELP_PRINT0),
@@ -270,6 +280,7 @@ def findfmt(
         tree=tree,
         table_style=table_style,
         absolute=absolute,
+        relative=relative,
         print0=print0,
         list_tags=list_tags,
         summary=summary,

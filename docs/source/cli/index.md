@@ -96,6 +96,9 @@ channels unconditionally.
 `--absolute, --full-path / --no-absolute, --no-full-path` : Output absolute filesystem paths rather
 than relative paths.
 
+`--relative, --relative-path / --no-relative, --no-relative-path` : Prepend input search path prefix
+to relative output paths rather than stripping the traversal root.
+
 `-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
 consumption by `xargs -0`.
 

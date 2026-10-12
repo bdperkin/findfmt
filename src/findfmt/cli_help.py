@@ -29,6 +29,7 @@ __all__ = [
     "HELP_PAGER",
     "HELP_PATHS",
     "HELP_PRINT0",
+    "HELP_RELATIVE",
     "HELP_SHEBANG",
     "HELP_SUMMARY",
     "HELP_TABLE_STYLE",
@@ -89,6 +90,9 @@ HELP_COLOR = (
     "(defaults to auto-detection with NO_COLOR compliance)."
 )
 HELP_ABSOLUTE = "Output absolute paths rather than paths relative to the traversal root."
+HELP_RELATIVE = (
+    "Prepend input search path prefix to relative output paths rather than stripping the root."
+)
 HELP_PRINT0 = r"Delimit path outputs with a NUL (\0) character instead of a newline."
 HELP_LIST_TAGS = "Display identified tags alongside each matched path."
 HELP_SUMMARY = "Print summary match statistics to stderr."
@@ -134,6 +138,7 @@ def get_help_all() -> str:
         "  --cp437, -S                   Use CP437 console graphics line drawing characters.\n"
         "  --color, -C / --no-color, -n  Force enable or disable ANSI color output.\n"
         "  --absolute, --full-path       Output absolute paths rather than relative paths.\n"
+        "  --relative, --relative-path   Prepend input search path prefix to relative paths.\n"
         "  --print0, -0 / --no-print0    Delimit with NUL (\\0) byte [default: no-print0].\n"
         "  --list-tags, -l / --no-list-tags  Display identified tags [default: no-list-tags].\n"
         "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n\n"

@@ -48,10 +48,14 @@ def test_traversal_config_defaults():
     assert not config.include_hidden
     assert not config.follow_symlinks
     assert config.relative_paths
+    assert not config.relative_prefix
     assert not config.null_delimited
     assert not config.show_tags
     assert not config.show_summary
     assert config.output_format == "text"
+
+    custom = TraversalConfig(relative_prefix=True)
+    assert custom.relative_prefix
 
 
 def test_file_info_to_dict():

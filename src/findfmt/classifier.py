@@ -4,14 +4,11 @@ from __future__ import annotations
 
 import mimetypes
 import os
-from typing import TYPE_CHECKING
+from pathlib import Path
 
 import identify.identify as identify_engine
 
 from findfmt.models import FileInfo
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 
 def get_known_tags() -> frozenset[str]:
@@ -46,12 +43,36 @@ def extract_shebang(path: Path) -> str | None:
     return None
 
 
-def _resolve_relative(path: Path, root_path: Path | None) -> Path:
+def compute_relative_prefix(root: Path) -> Path | None:
+    """Compute relative prefix from an input root path.
+
+    Args:
+        root: Target search root path.
+
+    Returns:
+        Relative Path prefix to prepend, or None if no prefix is needed.
+    """
+    if root.is_absolute():
+        try:
+            rel = root.resolve().relative_to(Path.cwd().resolve())
+            return rel if rel != Path() else None
+        except ValueError:
+            return root
+
+    return root if root != Path() else None
+
+
+def _resolve_relative(
+    path: Path,
+    root_path: Path | None,
+    prefix: Path | None = None,
+) -> Path:
     """Compute relative path from root_path if provided.
 
     Args:
         path: Target file path.
         root_path: Optional root directory path.
+        prefix: Optional prefix to prepend to relative path.
 
     Returns:
         Relative path if root_path is given and matches, otherwise original path.
@@ -60,9 +81,14 @@ def _resolve_relative(path: Path, root_path: Path | None) -> Path:
         return path
 
     try:
-        return path.resolve().relative_to(root_path.resolve())
+        rel = path.resolve().relative_to(root_path.resolve())
     except (ValueError, OSError):
         return path
+
+    if prefix is not None and prefix != Path():
+        return prefix / rel
+
+    return rel
 
 
 def _identify_tags(
@@ -215,12 +241,17 @@ def _adjust_nt_tags(tags: set[str], *, is_executable: bool) -> None:
         tags.add("non-executable")
 
 
-def classify_file(path: Path, root_path: Path | None = None) -> FileInfo:
+def classify_file(
+    path: Path,
+    root_path: Path | None = None,
+    prefix: Path | None = None,
+) -> FileInfo:
     """Classify a given file path by inspection of name, content, and metadata.
 
     Args:
         path: The path of the file to classify.
         root_path: Optional root directory used to compute relative_path.
+        prefix: Optional prefix to prepend to relative_path.
 
     Returns:
         FileInfo containing metadata, identified tags, shebang, and MIME info.
@@ -243,7 +274,7 @@ def classify_file(path: Path, root_path: Path | None = None) -> FileInfo:
     mime_type, mime_tags = _mime_info(str_path)
     tags.update(mime_tags)
 
-    relative_path = _resolve_relative(path, root_path)
+    relative_path = _resolve_relative(path, root_path, prefix=prefix)
     resolved_path = path.resolve() if exists else path
 
     return FileInfo(

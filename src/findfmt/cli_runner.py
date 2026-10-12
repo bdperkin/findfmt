@@ -65,6 +65,7 @@ def execute_findfmt(  # noqa: PLR0913
     tree: bool,
     table_style: str | None,
     absolute: bool,
+    relative: bool = False,
     print0: bool,
     list_tags: bool,
     summary: bool,
@@ -92,6 +93,7 @@ def execute_findfmt(  # noqa: PLR0913
         tree: Whether tree view was explicitly requested.
         table_style: Optional table border style name.
         absolute: Whether to emit absolute paths.
+        relative: Whether to prepend input search path prefix to relative paths.
         print0: Whether to delimit output with NUL characters.
         list_tags: Whether to display tags in output.
         summary: Whether to display execution summary.
@@ -117,6 +119,7 @@ def execute_findfmt(  # noqa: PLR0913
         include_hidden=hidden,
         follow_symlinks=follow_symlinks,
         relative_paths=not absolute,
+        relative_prefix=relative,
         null_delimited=print0,
         show_tags=list_tags,
         show_summary=summary,

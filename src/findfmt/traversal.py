@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 
 import pathspec
 
-from findfmt.classifier import classify_file
+from findfmt.classifier import classify_file, compute_relative_prefix
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -21,24 +21,16 @@ PathSpecType = pathspec.PathSpec[Any]
 
 
 def _load_spec_file(spec_file: Path) -> PathSpecType | None:
-    """Load and compile pathspec patterns from a specification file.
+    """Load and compile pathspec patterns from a specification file."""
+    if not spec_file.is_file():
+        return None
 
-    Args:
-        spec_file: Path to the pattern specification file.
-
-    Returns:
-        PathSpec instance if patterns exist and are valid, or None.
-    """
-    if spec_file.is_file():
-        try:
-            with spec_file.open("r", encoding="utf-8", errors="replace") as f:
-                lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-                if lines:
-                    return pathspec.PathSpec.from_lines("gitignore", lines)
-        except (OSError, ValueError, re.error):
-            return None
-
-    return None
+    try:
+        with spec_file.open("r", encoding="utf-8", errors="replace") as f:
+            lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+            return pathspec.PathSpec.from_lines("gitignore", lines) if lines else None
+    except (OSError, ValueError, re.error):
+        return None
 
 
 def load_gitignore_spec(directory: Path) -> PathSpecType | None:
@@ -218,12 +210,14 @@ def _should_skip_symlink_dir(
     return False
 
 
-def traverse_directory(
+def traverse_directory(  # noqa: PLR0913
     root: Path,
     config: TraversalConfig,
     active_specs: tuple[tuple[Path, PathSpecType], ...] = (),
+    *,
     base_root: Path | None = None,
     visited_dirs: set[Path] | None = None,
+    prefix: Path | None = None,
 ) -> Iterator[FileInfo]:
     """Recursively traverse a directory hierarchy honoring .gitignore and filters.
 
@@ -233,6 +227,7 @@ def traverse_directory(
         active_specs: Inherited parent gitignore specs with their base paths.
         base_root: The top-level root directory used for relative paths.
         visited_dirs: Tracked set of canonical directory paths visited to break cycles.
+        prefix: Optional search root path prefix prepended to relative paths.
 
     Yields:
         FileInfo objects for matching files in deterministic sorted order.
@@ -248,7 +243,7 @@ def traverse_directory(
     subdirs, files = _scan_directory_entries(root, config, specs)
 
     for file_path in files:
-        info = classify_file(file_path, root_path=effective_base)
+        info = classify_file(file_path, root_path=effective_base, prefix=prefix)
         if matches_filter(info, config):
             yield info
 
@@ -266,6 +261,7 @@ def traverse_directory(
             specs,
             base_root=effective_base,
             visited_dirs=active_visited,
+            prefix=prefix,
         )
 
 
@@ -284,8 +280,15 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
             continue
 
         if resolved_root.is_file():
-            info = classify_file(resolved_root, root_path=resolved_root.parent)
+            prefix = compute_relative_prefix(root.parent) if config.relative_prefix else None
+            info = classify_file(resolved_root, root_path=resolved_root.parent, prefix=prefix)
             if matches_filter(info, config):
                 yield info
         else:
-            yield from traverse_directory(resolved_root, config, base_root=resolved_root)
+            prefix = compute_relative_prefix(root) if config.relative_prefix else None
+            yield from traverse_directory(
+                resolved_root,
+                config,
+                base_root=resolved_root,
+                prefix=prefix,
+            )

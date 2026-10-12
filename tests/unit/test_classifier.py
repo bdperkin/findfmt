@@ -3,7 +3,12 @@ import stat
 from pathlib import Path
 from unittest.mock import patch
 
-from findfmt.classifier import classify_file, extract_shebang, get_known_tags
+from findfmt.classifier import (
+    classify_file,
+    compute_relative_prefix,
+    extract_shebang,
+    get_known_tags,
+)
 
 
 def test_get_known_tags():
@@ -180,3 +185,34 @@ def test_classify_file_fifo(tmp_path: Path):
 
     info = classify_file(fifo_path, root_path=tmp_path)
     assert info.shebang is None
+
+
+def test_compute_relative_prefix() -> None:
+    # Non-absolute relative root
+    assert compute_relative_prefix(Path("assets")) == Path("assets")
+    assert compute_relative_prefix(Path("./assets")) == Path("assets")
+    assert compute_relative_prefix(Path()) is None
+
+    # Absolute root inside cwd
+    cwd = Path.cwd()
+    inside_dir = cwd / "src"
+    assert compute_relative_prefix(inside_dir) == Path("src")
+    assert compute_relative_prefix(cwd) is None
+
+    # Absolute root outside cwd (unrelated)
+    unrelated = Path("/some/unrelated/directory/outside/cwd")
+    assert compute_relative_prefix(unrelated) == unrelated
+
+
+def test_classify_file_with_prefix(tmp_path: Path) -> None:
+    sub = tmp_path / "sub"
+    sub.mkdir()
+    f = sub / "doc.txt"
+    f.write_text("hello", encoding="utf-8")
+
+    info = classify_file(f, root_path=sub, prefix=Path("my_prefix"))
+    assert info.relative_path == Path("my_prefix/doc.txt")
+
+    # Prefix "." or empty returns un-prefixed relative path
+    info_dot = classify_file(f, root_path=sub, prefix=Path())
+    assert info_dot.relative_path == Path("doc.txt")

@@ -66,6 +66,7 @@ class TraversalConfig:
         include_hidden: Whether to inspect hidden files and directories.
         follow_symlinks: Whether to resolve and traverse symbolic links.
         relative_paths: Whether to output relative paths rather than absolute.
+        relative_prefix: Whether to prepend input search path prefix to relative paths.
         null_delimited: Whether to delimit output paths with NUL bytes (\0).
         show_tags: Whether to print identified tags alongside file paths.
         show_summary: Whether to output summary statistics of matches.
@@ -81,6 +82,7 @@ class TraversalConfig:
     include_hidden: bool = False
     follow_symlinks: bool = False
     relative_paths: bool = True
+    relative_prefix: bool = False
     null_delimited: bool = False
     show_tags: bool = False
     show_summary: bool = False

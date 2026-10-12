@@ -175,29 +175,30 @@ ______________________________________________________________________
 
 ## 4. CLI Options
 
-| Flag                                             | Description                                                                                                             |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `-t, --tag, --type TAG`                          | Match files containing specified tag(s)                                                                                 |
-| `-e, --exclude, --exclude-tag TAG`               | Exclude files containing specified tag(s)                                                                               |
-| `--all-tags` / `--no-all-tags`                   | Require match against all include tags (AND logic)                                                                      |
-| `--shebang INTERPRETER`                          | Match shebang interpreter name or pattern                                                                               |
-| `--no-ignore` / `--ignore`                       | Toggle respecting `.gitignore` files                                                                                    |
-| `--hidden` / `--no-hidden`                       | Toggle inspecting hidden files and directories                                                                          |
-| `-L, --follow-symlinks` / `--no-follow-symlinks` | Toggle following filesystem symbolic links                                                                              |
-| `-f, --format FORMAT`                            | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`) |
-| `--tree` / `--no-tree`                           | Toggle hierarchical directory tree view (equivalent to `--format tree`)                                                 |
-| `--table-style STYLE`                            | Border style (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`)        |
-| `-P, --pager` / `--no-pager`                     | Toggle interactive paging (auto-pages on TTY when lines exceed terminal height)                                         |
-| `-i, --no-indent` / `--indent`                   | Omit branch indentation in tree view and strip extraneous whitespace in structured formats                              |
-| `-A, --ansi-lines` / `--no-ansi-lines`           | Use ANSI/VT100 line drawing escapes for tree indentation lines                                                          |
-| `-S, --cp437` / `--no-cp437`                     | Use CP437 console graphics line drawing characters for tree indentation lines                                           |
-| `-C, --color` / `-n, --no-color`                 | Force enable or disable ANSI color output across all output channels                                                    |
-| `--absolute`, `--full-path` / `--no-absolute`    | Toggle absolute vs relative output paths                                                                                |
-| `--known-tags`                                   | List all supported classification tags and exit                                                                         |
-| `-v, -V, --version`                              | Display version (`--verbose` adds runtime diagnostics)                                                                  |
-| `--diagnostics`                                  | Display runtime environment diagnostics and exit                                                                        |
-| `--help-all`                                     | Display comprehensive manual, env vars, and exit codes                                                                  |
-| `-- [PATHS...]`                                  | POSIX terminator: treat following tokens strictly as paths                                                              |
+| Flag                                              | Description                                                                                                             |
+| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `-t, --tag, --type TAG`                           | Match files containing specified tag(s)                                                                                 |
+| `-e, --exclude, --exclude-tag TAG`                | Exclude files containing specified tag(s)                                                                               |
+| `--all-tags` / `--no-all-tags`                    | Require match against all include tags (AND logic)                                                                      |
+| `--shebang INTERPRETER`                           | Match shebang interpreter name or pattern                                                                               |
+| `--no-ignore` / `--ignore`                        | Toggle respecting `.gitignore` files                                                                                    |
+| `--hidden` / `--no-hidden`                        | Toggle inspecting hidden files and directories                                                                          |
+| `-L, --follow-symlinks` / `--no-follow-symlinks`  | Toggle following filesystem symbolic links                                                                              |
+| `-f, --format FORMAT`                             | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`) |
+| `--tree` / `--no-tree`                            | Toggle hierarchical directory tree view (equivalent to `--format tree`)                                                 |
+| `--table-style STYLE`                             | Border style (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`)        |
+| `-P, --pager` / `--no-pager`                      | Toggle interactive paging (auto-pages on TTY when lines exceed terminal height)                                         |
+| `-i, --no-indent` / `--indent`                    | Omit branch indentation in tree view and strip extraneous whitespace in structured formats                              |
+| `-A, --ansi-lines` / `--no-ansi-lines`            | Use ANSI/VT100 line drawing escapes for tree indentation lines                                                          |
+| `-S, --cp437` / `--no-cp437`                      | Use CP437 console graphics line drawing characters for tree indentation lines                                           |
+| `-C, --color` / `-n, --no-color`                  | Force enable or disable ANSI color output across all output channels                                                    |
+| `--absolute`, `--full-path` / `--no-absolute`     | Toggle absolute vs relative output paths                                                                                |
+| `--relative`, `--relative-path` / `--no-relative` | Prepend input search path prefix to relative output paths                                                               |
+| `--known-tags`                                    | List all supported classification tags and exit                                                                         |
+| `-v, -V, --version`                               | Display version (`--verbose` adds runtime diagnostics)                                                                  |
+| `--diagnostics`                                   | Display runtime environment diagnostics and exit                                                                        |
+| `--help-all`                                      | Display comprehensive manual, env vars, and exit codes                                                                  |
+| `-- [PATHS...]`                                   | POSIX terminator: treat following tokens strictly as paths                                                              |
 
 ______________________________________________________________________
 
