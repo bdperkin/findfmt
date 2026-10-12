@@ -32,7 +32,7 @@ repos:
 
   # Pre-commit standard hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-added-large-files
         args: [--maxkb=500]
@@ -54,7 +54,7 @@ repos:
 
   # UV dependency management
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.9.30
+    rev: 0.13.0
     hooks:
       - id: uv-lock
       - id: uv-export
@@ -70,7 +70,7 @@ repos:
 
   # PyPI packaging compliance
   - repo: https://github.com/regebro/pyroma
-    rev: 5.0.1
+    rev: 5.1b1
     hooks:
       - id: pyroma
         args: [-d, --min=10, .]
@@ -101,7 +101,7 @@ repos:
 
   # Astral Ruff (Linter & Formatter)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.9
+    rev: v0.17.0
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -109,7 +109,7 @@ repos:
 
   # Codespell for typo detection
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.3
     hooks:
       - id: codespell
         additional_dependencies: [tomli]
@@ -129,20 +129,20 @@ repos:
 
   # Validate pyproject.toml
   - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.23
+    rev: '0.26'
     hooks:
       - id: validate-pyproject
 
   # Format pyproject.toml
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.5.0
+    rev: v2.30.3
     hooks:
       - id: pyproject-fmt
         args: [--max-supported-python, '3.15']
 
   # Yamllint
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.35.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args: [-c, .yamllint.yaml]
@@ -169,7 +169,7 @@ repos:
 
   # Markdown format
   - repo: https://github.com/hukkin/mdformat
-    rev: 0.7.22
+    rev: 1.0.0
     hooks:
       - id: mdformat
         args: [--number, --wrap, '100', --end-of-line, lf]
@@ -186,7 +186,7 @@ repos:
 
   # Yamlfix formatter
   - repo: https://github.com/lyz-code/yamlfix
-    rev: 1.17.0
+    rev: 1.19.1
     hooks:
       - id: yamlfix
 
@@ -199,14 +199,14 @@ repos:
 
   # Conventional Commits verification
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.0.0
+    rev: v4.4.0
     hooks:
       - id: conventional-pre-commit
         stages: [commit-msg]
 
   # Astral Ty type checker
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.84
+    rev: v0.0.86
     hooks:
       - id: ty
         args: [--group, lint]
