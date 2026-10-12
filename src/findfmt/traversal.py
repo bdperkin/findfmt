@@ -4,13 +4,20 @@ from __future__ import annotations
 
 import contextlib
 import os
-import re
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pathspec
 
 from findfmt.classifier import classify_file, compute_relative_prefix
+from findfmt.ignore import (
+    is_path_ignored,
+    load_ancestor_specs,
+    load_child_specs,
+    load_git_exclude_spec,
+    load_gitignore_spec,
+    load_spec_file,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -18,43 +25,17 @@ if TYPE_CHECKING:
     from findfmt.models import FileInfo, TraversalConfig
 
 PathSpecType = pathspec.PathSpec[Any]
+_load_spec_file = load_spec_file
+_is_path_ignored = is_path_ignored
 
-
-def _load_spec_file(spec_file: Path) -> PathSpecType | None:
-    """Load and compile pathspec patterns from a specification file."""
-    if not spec_file.is_file():
-        return None
-
-    try:
-        with spec_file.open("r", encoding="utf-8", errors="replace") as f:
-            lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
-            return pathspec.PathSpec.from_lines("gitignore", lines) if lines else None
-    except (OSError, ValueError, re.error):
-        return None
-
-
-def load_gitignore_spec(directory: Path) -> PathSpecType | None:
-    """Load gitignore patterns from a directory if a .gitignore file exists.
-
-    Args:
-        directory: Directory to check for .gitignore.
-
-    Returns:
-        PathSpec instance if rules exist, or None.
-    """
-    return _load_spec_file(directory / ".gitignore")
-
-
-def load_git_exclude_spec(root: Path) -> PathSpecType | None:
-    """Load exclude patterns from .git/info/exclude if present.
-
-    Args:
-        root: Git repository root directory.
-
-    Returns:
-        PathSpec instance if exclude patterns exist, or None.
-    """
-    return _load_spec_file(root / ".git" / "info" / "exclude")
+__all__ = [
+    "find_files",
+    "load_git_exclude_spec",
+    "load_gitignore_spec",
+    "matches_filter",
+    "should_skip_dir",
+    "traverse_directory",
+]
 
 
 def should_skip_dir(dir_name: str, *, include_hidden: bool) -> bool:
@@ -114,36 +95,10 @@ def _load_active_specs(
     if not respect_gitignore:
         return ()
 
-    current_specs = list(active_specs)
     if not active_specs:
-        git_exclude = load_git_exclude_spec(root)
-        if git_exclude:
-            current_specs.append((root, git_exclude))
+        return load_ancestor_specs(root)
 
-    local_spec = load_gitignore_spec(root)
-    if local_spec:
-        current_specs.append((root, local_spec))
-
-    return tuple(current_specs)
-
-
-def _is_path_ignored(
-    entry_path: Path,
-    *,
-    is_dir: bool,
-    specs: tuple[tuple[Path, PathSpecType], ...],
-) -> bool:
-    """Check if an entry matches any active gitignore rule."""
-    for base_dir, spec in specs:
-        if not entry_path.is_relative_to(base_dir):
-            continue
-
-        rel = entry_path.relative_to(base_dir)
-        rel_str = str(rel) + ("/" if is_dir else "")
-        if spec.match_file(rel_str):
-            return True
-
-    return False
+    return load_child_specs(root, active_specs)
 
 
 def _scan_directory_entries(
@@ -167,7 +122,7 @@ def _scan_directory_entries(
         entry_path = Path(entry.path)
         is_dir = entry.is_dir(follow_symlinks=config.follow_symlinks)
 
-        if config.respect_gitignore and _is_path_ignored(entry_path, is_dir=is_dir, specs=specs):
+        if config.respect_gitignore and is_path_ignored(entry_path, is_dir=is_dir, specs=specs):
             continue
 
         if is_dir:
@@ -210,10 +165,43 @@ def _should_skip_symlink_dir(
     return False
 
 
+def _init_visited_dirs(
+    root: Path,
+    *,
+    follow_symlinks: bool,
+    visited: set[Path] | None,
+) -> set[Path] | None:
+    """Initialize or reuse the tracking set for visited directories."""
+    if not follow_symlinks or visited is not None:
+        return visited
+
+    active = set()
+    with contextlib.suppress(OSError):
+        active.add(root.resolve())
+
+    return active
+
+
+def _resolve_active_specs(
+    root: Path,
+    active_specs: tuple[tuple[Path, PathSpecType], ...] | None,
+    *,
+    respect_gitignore: bool,
+) -> tuple[tuple[Path, PathSpecType], ...]:
+    """Resolve active gitignore specifications for the current traversal frame."""
+    if not respect_gitignore:
+        return ()
+
+    if active_specs is None:
+        return load_ancestor_specs(root)
+
+    return active_specs
+
+
 def traverse_directory(  # noqa: PLR0913
     root: Path,
     config: TraversalConfig,
-    active_specs: tuple[tuple[Path, PathSpecType], ...] = (),
+    active_specs: tuple[tuple[Path, PathSpecType], ...] | None = None,
     *,
     base_root: Path | None = None,
     visited_dirs: set[Path] | None = None,
@@ -224,7 +212,7 @@ def traverse_directory(  # noqa: PLR0913
     Args:
         root: The current directory to traverse.
         config: Traversal configuration options.
-        active_specs: Inherited parent gitignore specs with their base paths.
+        active_specs: Inherited parent gitignore specs with their base paths, or None.
         base_root: The top-level root directory used for relative paths.
         visited_dirs: Tracked set of canonical directory paths visited to break cycles.
         prefix: Optional search root path prefix prepended to relative paths.
@@ -233,13 +221,17 @@ def traverse_directory(  # noqa: PLR0913
         FileInfo objects for matching files in deterministic sorted order.
     """
     effective_base = base_root if base_root is not None else root
-    active_visited = visited_dirs
-    if config.follow_symlinks and active_visited is None:
-        active_visited = set()
-        with contextlib.suppress(OSError):
-            active_visited.add(root.resolve())
+    active_visited = _init_visited_dirs(
+        root,
+        follow_symlinks=config.follow_symlinks,
+        visited=visited_dirs,
+    )
+    specs = _resolve_active_specs(
+        root,
+        active_specs,
+        respect_gitignore=config.respect_gitignore,
+    )
 
-    specs = _load_active_specs(root, active_specs, respect_gitignore=config.respect_gitignore)
     subdirs, files = _scan_directory_entries(root, config, specs)
 
     for file_path in files:
@@ -255,10 +247,11 @@ def traverse_directory(  # noqa: PLR0913
         ):
             continue
 
+        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else ()
         yield from traverse_directory(
             subdir,
             config,
-            specs,
+            active_specs=child_specs,
             base_root=effective_base,
             visited_dirs=active_visited,
             prefix=prefix,
