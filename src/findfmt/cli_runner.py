@@ -61,6 +61,11 @@ def execute_findfmt(  # noqa: PLR0913
     no_ignore: bool,
     hidden: bool,
     follow_symlinks: bool,
+    dirs_only: bool = False,
+    one_file_system: bool = False,
+    max_depth: int | None = None,
+    file_limit: int | None = None,
+    prune: bool = False,
     output_format: OutputFormat,
     tree: bool,
     table_style: str | None,
@@ -89,6 +94,11 @@ def execute_findfmt(  # noqa: PLR0913
         no_ignore: Whether to ignore gitignore rules.
         hidden: Whether to include hidden files.
         follow_symlinks: Whether to follow symbolic links.
+        dirs_only: Whether to list directories only and suppress files.
+        one_file_system: Whether to confine traversal to the root filesystem device.
+        max_depth: Maximum directory depth level.
+        file_limit: Entry count threshold to skip directories.
+        prune: Whether to omit directories with zero matching files.
         output_format: Configured output serialization format.
         tree: Whether tree view was explicitly requested.
         table_style: Optional table border style name.
@@ -118,6 +128,11 @@ def execute_findfmt(  # noqa: PLR0913
         respect_gitignore=not no_ignore,
         include_hidden=hidden,
         follow_symlinks=follow_symlinks,
+        dirs_only=dirs_only,
+        one_file_system=one_file_system,
+        max_depth=max_depth,
+        file_limit=file_limit,
+        prune_empty=prune,
         relative_paths=not absolute,
         relative_prefix=relative,
         null_delimited=print0,

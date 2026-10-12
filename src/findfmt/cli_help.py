@@ -17,18 +17,23 @@ __all__ = [
     "HELP_COLOR",
     "HELP_CP437",
     "HELP_DIAGNOSTICS",
+    "HELP_DIRS_ONLY",
     "HELP_EXCLUDE_TAGS",
+    "HELP_FILE_LIMIT",
     "HELP_FOLLOW_SYMLINKS",
     "HELP_FORMAT",
     "HELP_HELP_ALL",
     "HELP_HIDDEN",
     "HELP_KNOWN_TAGS",
     "HELP_LIST_TAGS",
+    "HELP_MAX_DEPTH",
     "HELP_NO_IGNORE",
     "HELP_NO_INDENT",
+    "HELP_ONE_FILE_SYSTEM",
     "HELP_PAGER",
     "HELP_PATHS",
     "HELP_PRINT0",
+    "HELP_PRUNE",
     "HELP_RELATIVE",
     "HELP_SHEBANG",
     "HELP_SUMMARY",
@@ -67,6 +72,11 @@ HELP_SHEBANG = "Filter files whose shebang contains this interpreter or pattern.
 HELP_NO_IGNORE = "Do not respect .gitignore rules during traversal."
 HELP_HIDDEN = "Include hidden files and directories."
 HELP_FOLLOW_SYMLINKS = "Follow symbolic links during traversal."
+HELP_DIRS_ONLY = "List directories only, suppressing regular file entries."
+HELP_ONE_FILE_SYSTEM = "Confine traversal to the root filesystem device."
+HELP_MAX_DEPTH = "Restrict descent to a maximum directory depth level."
+HELP_FILE_LIMIT = "Skip directories exceeding this entry count threshold."
+HELP_PRUNE = "Omit empty directories and directories with zero matching files."
 HELP_FORMAT = (
     "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
     "markdown, md, rst, table, tree, ndjson)."
@@ -122,10 +132,16 @@ def get_help_all() -> str:
         "                                [default: no-all-tags].\n\n"
         "Traversal Controls:\n"
         "  --shebang <str>               Filter files by shebang pattern.\n"
+        "  --dirs-only, -d               List directories only, suppressing regular files.\n"
+        "  --max-depth, -L <level>       Restrict descent to maximum depth level.\n"
+        "  --follow-links, --follow-symlinks, -l\n"
+        "                                Follow directory symlinks with loop detection.\n"
+        "  --symlinks / --no-symlinks    Alias for --follow-links / --no-follow-links.\n"
+        "  --one-file-system, -x         Confine traversal to root filesystem device.\n"
+        "  --filelimit <limit>           Skip directories exceeding entry count threshold.\n"
+        "  --prune                       Omit directories containing zero matching files.\n"
         "  --no-ignore / --ignore        Do not respect .gitignore rules [default: ignore].\n"
-        "  --hidden / --no-hidden        Include hidden files and dirs [default: no-hidden].\n"
-        "  --follow-symlinks, -L         Follow symbolic links [default: no-follow-symlinks].\n"
-        "  --symlinks / --no-symlinks    Alias for --follow-symlinks / --no-follow-symlinks.\n\n"
+        "  --hidden / --no-hidden        Include hidden files and dirs [default: no-hidden].\n\n"
         "Output Formatting:\n"
         "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb,\n"
         "                                csv, csv-table, tsv, markdown, rst, table, tree)\n"
@@ -140,7 +156,7 @@ def get_help_all() -> str:
         "  --absolute, --full-path       Output absolute paths rather than relative paths.\n"
         "  --relative, --relative-path   Prepend input search path prefix to relative paths.\n"
         "  --print0, -0 / --no-print0    Delimit with NUL (\\0) byte [default: no-print0].\n"
-        "  --list-tags, -l / --no-list-tags  Display identified tags [default: no-list-tags].\n"
+        "  --list-tags / --no-list-tags  Display identified tags [default: no-list-tags].\n"
         "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n\n"
         "Help & Diagnostics:\n"
         "  --known-tags                  List all known classification tags and exit.\n"

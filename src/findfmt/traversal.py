@@ -2,13 +2,25 @@
 
 from __future__ import annotations
 
-import contextlib
 import os
-from pathlib import Path
+from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, Any
 
 import pathspec
 
+from findfmt.boundaries import (
+    check_depth_limit,
+    check_file_limit,
+    filter_directory_entry,
+    has_matching_descendants,
+    init_visited_dirs,
+    matches_filter,
+    resolve_active_specs,
+    resolve_device,
+    should_skip_dir,
+    should_skip_symlink_dir,
+    yield_matching_items,
+)
 from findfmt.classifier import classify_file, compute_relative_prefix
 from findfmt.ignore import (
     is_path_ignored,
@@ -38,53 +50,6 @@ __all__ = [
 ]
 
 
-def should_skip_dir(dir_name: str, *, include_hidden: bool) -> bool:
-    """Determine if a directory should be skipped during descent.
-
-    Args:
-        dir_name: Basename of directory.
-        include_hidden: Whether hidden directories are included.
-
-    Returns:
-        True if the directory should be skipped, False otherwise.
-    """
-    if dir_name == ".git":
-        return True
-
-    return bool(not include_hidden and dir_name.startswith("."))
-
-
-def matches_filter(file_info: FileInfo, config: TraversalConfig) -> bool:
-    """Determine whether a classified file satisfies traversal filter criteria.
-
-    Args:
-        file_info: The classified FileInfo object.
-        config: The active TraversalConfig filter settings.
-
-    Returns:
-        True if the file satisfies all filters, False otherwise.
-    """
-    tags = file_info.tags
-
-    # Check exclude tags first
-    if config.exclude_tags and (tags & config.exclude_tags):
-        return False
-
-    # Check include tags
-    if config.include_tags:
-        if config.all_tags and not config.include_tags.issubset(tags):
-            return False
-
-        if not config.all_tags and not (tags & config.include_tags):
-            return False
-
-    # Check shebang filter
-    if config.shebang_filter:
-        return bool(file_info.shebang and config.shebang_filter in file_info.shebang)
-
-    return True
-
-
 def _load_active_specs(
     root: Path,
     active_specs: tuple[tuple[Path, PathSpecType], ...],
@@ -105,6 +70,8 @@ def _scan_directory_entries(
     root: Path,
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
+    *,
+    root_dev: int | None = None,
 ) -> tuple[list[Path], list[Path]]:
     """Scan and partition directory entries into subdirectories and files."""
     try:
@@ -112,19 +79,18 @@ def _scan_directory_entries(
     except OSError:
         return [], []
 
+    if not check_file_limit(len(entries), config.file_limit):
+        return [], []
+
     subdirs: list[Path] = []
     files: list[Path] = []
 
     for entry in entries:
-        if not config.include_hidden and entry.name.startswith("."):
+        filtered = filter_directory_entry(entry, config, specs, root_dev)
+        if filtered is None:
             continue
 
-        entry_path = Path(entry.path)
-        is_dir = entry.is_dir(follow_symlinks=config.follow_symlinks)
-
-        if config.respect_gitignore and is_path_ignored(entry_path, is_dir=is_dir, specs=specs):
-            continue
-
+        entry_path, is_dir = filtered
         if is_dir:
             if not should_skip_dir(entry.name, include_hidden=config.include_hidden):
                 subdirs.append(entry_path)
@@ -134,68 +100,9 @@ def _scan_directory_entries(
     return subdirs, files
 
 
-def _should_skip_symlink_dir(
-    subdir: Path,
-    *,
-    follow_symlinks: bool,
-    visited: set[Path] | None,
-) -> bool:
-    """Determine whether a candidate directory should be skipped to break symlink loops.
-
-    Args:
-        subdir: Directory path candidate.
-        follow_symlinks: Traversal configuration flag for following symlinks.
-        visited: Set of canonical directory paths already visited.
-
-    Returns:
-        True if the directory should be skipped, False otherwise.
-    """
-    if not (follow_symlinks and visited is not None):
-        return False
-
-    try:
-        resolved = subdir.resolve()
-    except OSError:
-        return True
-
-    if resolved in visited:
-        return True
-
-    visited.add(resolved)
-    return False
-
-
-def _init_visited_dirs(
-    root: Path,
-    *,
-    follow_symlinks: bool,
-    visited: set[Path] | None,
-) -> set[Path] | None:
-    """Initialize or reuse the tracking set for visited directories."""
-    if not follow_symlinks or visited is not None:
-        return visited
-
-    active = set()
-    with contextlib.suppress(OSError):
-        active.add(root.resolve())
-
-    return active
-
-
-def _resolve_active_specs(
-    root: Path,
-    active_specs: tuple[tuple[Path, PathSpecType], ...] | None,
-    *,
-    respect_gitignore: bool,
-) -> tuple[tuple[Path, PathSpecType], ...]:
-    """Resolve active gitignore specifications for the current traversal frame."""
-    if not respect_gitignore:
-        return ()
-
-    if active_specs is None:
-        return load_ancestor_specs(root)
-
-    return active_specs
+_should_skip_symlink_dir = should_skip_symlink_dir
+_init_visited_dirs = init_visited_dirs
+_resolve_active_specs = resolve_active_specs
 
 
 def traverse_directory(  # noqa: PLR0913
@@ -206,8 +113,10 @@ def traverse_directory(  # noqa: PLR0913
     base_root: Path | None = None,
     visited_dirs: set[Path] | None = None,
     prefix: Path | None = None,
+    root_dev: int | None = None,
+    current_depth: int = 1,
 ) -> Iterator[FileInfo]:
-    """Recursively traverse a directory hierarchy honoring .gitignore and filters.
+    """Recursively traverse a directory hierarchy honoring .gitignore, filters, and boundaries.
 
     Args:
         root: The current directory to traverse.
@@ -216,11 +125,18 @@ def traverse_directory(  # noqa: PLR0913
         base_root: The top-level root directory used for relative paths.
         visited_dirs: Tracked set of canonical directory paths visited to break cycles.
         prefix: Optional search root path prefix prepended to relative paths.
+        root_dev: Root filesystem device identifier for one_file_system boundary.
+        current_depth: Current directory depth level.
 
     Yields:
         FileInfo objects for matching files in deterministic sorted order.
     """
     effective_base = base_root if base_root is not None else root
+    effective_dev = resolve_device(
+        root,
+        one_file_system=config.one_file_system,
+        root_dev=root_dev,
+    )
     active_visited = _init_visited_dirs(
         root,
         follow_symlinks=config.follow_symlinks,
@@ -232,14 +148,38 @@ def traverse_directory(  # noqa: PLR0913
         respect_gitignore=config.respect_gitignore,
     )
 
-    subdirs, files = _scan_directory_entries(root, config, specs)
+    subdirs, files = _scan_directory_entries(
+        root,
+        config,
+        specs,
+        root_dev=effective_dev,
+    )
 
-    for file_path in files:
-        info = classify_file(file_path, root_path=effective_base, prefix=prefix)
-        if matches_filter(info, config):
-            yield info
+    targets = subdirs if config.dirs_only else files
+    yield from yield_matching_items(
+        targets,
+        config,
+        specs,
+        base_root=effective_base,
+        prefix=prefix,
+        root_dev=effective_dev,
+        current_depth=current_depth,
+    )
+
+    if not check_depth_limit(current_depth, config.max_depth):
+        return
 
     for subdir in subdirs:
+        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else ()
+        if config.prune_empty and not has_matching_descendants(
+            subdir,
+            config,
+            child_specs,
+            root_dev=effective_dev,
+            current_depth=current_depth + 1,
+        ):
+            continue
+
         if _should_skip_symlink_dir(
             subdir,
             follow_symlinks=config.follow_symlinks,
@@ -247,7 +187,6 @@ def traverse_directory(  # noqa: PLR0913
         ):
             continue
 
-        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else ()
         yield from traverse_directory(
             subdir,
             config,
@@ -255,6 +194,8 @@ def traverse_directory(  # noqa: PLR0913
             base_root=effective_base,
             visited_dirs=active_visited,
             prefix=prefix,
+            root_dev=effective_dev,
+            current_depth=current_depth + 1,
         )
 
 
@@ -273,6 +214,9 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
             continue
 
         if resolved_root.is_file():
+            if config.dirs_only:
+                continue
+
             prefix = compute_relative_prefix(root.parent) if config.relative_prefix else None
             info = classify_file(resolved_root, root_path=resolved_root.parent, prefix=prefix)
             if matches_filter(info, config):

@@ -11,7 +11,7 @@ def test_integration_cli_subprocess(sample_repo: Path):
         str(sample_repo),
         "-t",
         "python",
-        "-l",
+        "--list-tags",
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True, check=True)
     assert proc.returncode == 0

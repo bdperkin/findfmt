@@ -65,6 +65,11 @@ class TraversalConfig:
         respect_gitignore: Whether to ignore paths matched by gitignore rules.
         include_hidden: Whether to inspect hidden files and directories.
         follow_symlinks: Whether to resolve and traverse symbolic links.
+        dirs_only: Whether to list directories only, suppressing file entries.
+        one_file_system: Whether to confine traversal to the root filesystem device.
+        max_depth: Maximum directory descent depth, or None for unlimited.
+        file_limit: Maximum directory entries threshold before skipping descent, or None.
+        prune_empty: Whether to prune empty directories or directories with no matching files.
         relative_paths: Whether to output relative paths rather than absolute.
         relative_prefix: Whether to prepend input search path prefix to relative paths.
         null_delimited: Whether to delimit output paths with NUL bytes (\0).
@@ -81,6 +86,11 @@ class TraversalConfig:
     respect_gitignore: bool = True
     include_hidden: bool = False
     follow_symlinks: bool = False
+    dirs_only: bool = False
+    one_file_system: bool = False
+    max_depth: int | None = None
+    file_limit: int | None = None
+    prune_empty: bool = False
     relative_paths: bool = True
     relative_prefix: bool = False
     null_delimited: bool = False

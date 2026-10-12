@@ -183,7 +183,12 @@ ______________________________________________________________________
 | `--shebang INTERPRETER`                           | Match shebang interpreter name or pattern                                                                               |
 | `--no-ignore` / `--ignore`                        | Toggle respecting `.gitignore` files                                                                                    |
 | `--hidden` / `--no-hidden`                        | Toggle inspecting hidden files and directories                                                                          |
-| `-L, --follow-symlinks` / `--no-follow-symlinks`  | Toggle following filesystem symbolic links                                                                              |
+| `-d, --dirs-only`                                 | List directories only, suppressing regular file entries                                                                 |
+| `-l, --follow-links` / `--no-follow-links`        | Follow directory symlinks with loop detection                                                                           |
+| `-x, --one-file-system`                           | Confine traversal to starting directory's filesystem device                                                             |
+| `-L, --max-depth LEVEL`                           | Restrict directory traversal descent to maximum depth level                                                             |
+| `--filelimit LIMIT`                               | Skip directories exceeding child entry count threshold                                                                  |
+| `--prune`                                         | Omit empty directories and directories with zero matching files                                                         |
 | `-f, --format FORMAT`                             | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`) |
 | `--tree` / `--no-tree`                            | Toggle hierarchical directory tree view (equivalent to `--format tree`)                                                 |
 | `--table-style STYLE`                             | Border style (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`)        |

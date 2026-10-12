@@ -88,10 +88,10 @@ def test_cli_hidden(sample_repo: Path):
 
 def test_cli_follow_symlinks(sample_repo: Path):
     runner = CliRunner()
-    result = runner.invoke(app, [str(sample_repo), "-L"])
+    result = runner.invoke(app, [str(sample_repo), "-l"])
     assert result.exit_code == 0
 
-    result_long = runner.invoke(app, [str(sample_repo), "--follow-symlinks"])
+    result_long = runner.invoke(app, [str(sample_repo), "--follow-links"])
     assert result_long.exit_code == 0
 
 
@@ -105,7 +105,7 @@ def test_cli_print0(sample_repo: Path):
 
 def test_cli_list_tags(sample_repo: Path):
     runner = CliRunner()
-    result = runner.invoke(app, [str(sample_repo), "-t", "python", "-l"])
+    result = runner.invoke(app, [str(sample_repo), "-t", "python", "--list-tags"])
     assert result.exit_code == 0
     assert "[" in result.stdout
     assert "python" in result.stdout

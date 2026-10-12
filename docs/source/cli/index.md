@@ -26,14 +26,24 @@ substring.
 
 ### 2.2. Traversal Controls
 
+`-d, --dirs-only` : List directories only, suppressing regular file entries.
+
+`-l, --follow-links, --follow-symlinks / --no-follow-links, --no-follow-symlinks` (alias:
+`--symlinks / --no-symlinks`) : Follow directory symlinks with cycle and loop detection.
+
+`-x, --one-file-system` : Confine traversal to the filesystem device of the starting directory.
+
+`-L, --max-depth LEVEL` : Restrict directory traversal descent to a maximum depth level.
+
+`--filelimit LIMIT` : Skip directories whose immediate child entry count exceeds this threshold.
+
+`--prune` : Omit empty directories and directories containing zero matching files from output.
+
 `--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`. Use
 `--ignore` to restore `.gitignore` honoring.
 
 `--hidden / --no-hidden` : Traverse hidden files and directories (names starting with `.`). Use
 `--no-hidden` to exclude hidden paths.
-
-`-L, --follow-symlinks / --no-follow-symlinks` (alias: `--symlinks / --no-symlinks`) : Follow
-symbolic links during directory traversal. Use `--no-follow-symlinks` to disable.
 
 ### 2.3. Output Controls
 
@@ -102,7 +112,7 @@ to relative output paths rather than stripping the traversal root.
 `-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
 consumption by `xargs -0`.
 
-`-l, --list-tags / --no-list-tags` : Print identified format and content tags alongside each matched
+`--list-tags / --no-list-tags` : Print identified format and content tags alongside each matched
 path.
 
 `-s, --summary / --no-summary` : Print summary match statistics and top format tags to `stderr`.
