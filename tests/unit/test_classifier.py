@@ -200,8 +200,11 @@ def test_compute_relative_prefix() -> None:
     assert compute_relative_prefix(cwd) is None
 
     # Absolute root outside cwd (unrelated)
-    unrelated = Path("/some/unrelated/directory/outside/cwd")
+    unrelated = Path("/some/unrelated/directory/outside/cwd").resolve()
     assert compute_relative_prefix(unrelated) == unrelated
+
+    with patch.object(Path, "relative_to", side_effect=ValueError("outside cwd")):
+        assert compute_relative_prefix(cwd) == cwd
 
 
 def test_classify_file_with_prefix(tmp_path: Path) -> None:
