@@ -103,8 +103,8 @@ def test_integration_output_redirection_and_sorting(tmp_path: Path) -> None:
     data = json.loads(out_file.read_text(encoding="utf-8"))
     assert len(data) == 2
     # Largest file first under size sorting
-    assert "b_large.py" in data[0]["path"]
-    assert "a.py" in data[1]["path"]
+    assert "b_large.py" in data[0]["path"].replace("\\", "/")
+    assert "a.py" in data[1]["path"].replace("\\", "/")
 
 
 def test_integration_hidden_all_flag(tmp_path: Path) -> None:
@@ -119,8 +119,9 @@ def test_integration_hidden_all_flag(tmp_path: Path) -> None:
         text=True,
         check=True,
     )
-    assert ".secret.json" not in proc_def.stdout
-    assert "public.json" in proc_def.stdout
+    stdout_def = proc_def.stdout.replace("\\", "/")
+    assert ".secret.json" not in stdout_def
+    assert "public.json" in stdout_def
 
     # -a includes hidden
     proc_a = subprocess.run(
@@ -129,7 +130,7 @@ def test_integration_hidden_all_flag(tmp_path: Path) -> None:
         text=True,
         check=True,
     )
-    assert ".secret.json" in proc_a.stdout
+    assert ".secret.json" in proc_a.stdout.replace("\\", "/")
 
     # --all includes hidden
     proc_all = subprocess.run(
@@ -138,7 +139,7 @@ def test_integration_hidden_all_flag(tmp_path: Path) -> None:
         text=True,
         check=True,
     )
-    assert ".secret.json" in proc_all.stdout
+    assert ".secret.json" in proc_all.stdout.replace("\\", "/")
 
 
 def test_integration_from_file_and_offline(tmp_path: Path) -> None:
@@ -167,7 +168,7 @@ def test_integration_from_file_and_offline(tmp_path: Path) -> None:
     assert proc.returncode == 0
     data = json.loads(proc.stdout)
     assert len(data) == 3
-    paths = [item["relative_path"] for item in data]
+    paths = [item["relative_path"].replace("\\", "/") for item in data]
     assert "src/app.py" in paths
     assert "src/config.json" in paths
     assert "src/link.py" in paths
