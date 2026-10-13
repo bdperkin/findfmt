@@ -180,7 +180,7 @@ def get_help_all() -> str:
         "  --gitignore-file <path>       Apply custom ignore file across traversal scope.\n"
         "  --from-file, --fromfile <p>   Read paths from file or standard input ('-').\n"
         "  --offline                     Enforce offline filename identification.\n"
-        "  --hidden / --no-hidden        Include hidden files and dirs [default: no-hidden].\n"
+        "  --all, --hidden, -a           Include hidden files and dirs [default: no-hidden].\n"
         "  --sort <criteria>             Sort files (name, version, time, ctime, size, none)\n"
         "                                [default: name].\n"
         "  --reverse, -r                 Invert active sort order.\n"

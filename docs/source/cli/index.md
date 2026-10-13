@@ -64,8 +64,8 @@ analyzing remote manifests or containers without raising filesystem IO errors.
 `--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`. Use
 `--ignore` to restore `.gitignore` honoring.
 
-`--hidden / --no-hidden` : Traverse hidden files and directories (names starting with `.`). Use
-`--no-hidden` to exclude hidden paths.
+`-a, --all / --no-all` (alias: `--hidden / --no-hidden`) : Traverse hidden files and directories
+(names starting with `.`). Use `--no-all` or `--no-hidden` to exclude hidden paths.
 
 `--sort CRITERIA` : Sort entries by criteria: `name` (default), `version` (natural numbers), `time`
 (or `mtime`, newest first), `ctime` (status change, newest first), `size` (largest first), or `none`

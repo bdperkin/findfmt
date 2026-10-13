@@ -90,7 +90,13 @@ OptOffline = Annotated[
 ]
 OptHidden = Annotated[
     bool,
-    typer.Option("--hidden/--no-hidden", rich_help_panel=_PC, help=h.HELP_HIDDEN),
+    typer.Option(
+        "-a",
+        "--all/--no-all",
+        "--hidden/--no-hidden",
+        rich_help_panel=_PC,
+        help=h.HELP_HIDDEN,
+    ),
 ]
 OptFollowSymlinks = Annotated[
     bool,

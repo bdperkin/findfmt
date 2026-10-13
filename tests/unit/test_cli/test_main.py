@@ -85,6 +85,18 @@ def test_cli_hidden(sample_repo: Path):
     assert result.exit_code == 0
     assert "settings.yaml" in result.stdout
 
+    result_a = runner.invoke(app, [str(sample_repo), "-a"])
+    assert result_a.exit_code == 0
+    assert "settings.yaml" in result_a.stdout
+
+    result_all = runner.invoke(app, [str(sample_repo), "--all"])
+    assert result_all.exit_code == 0
+    assert "settings.yaml" in result_all.stdout
+
+    result_no_all = runner.invoke(app, [str(sample_repo), "--no-all"])
+    assert result_no_all.exit_code == 0
+    assert "settings.yaml" not in result_no_all.stdout
+
 
 def test_cli_follow_symlinks(sample_repo: Path):
     runner = CliRunner()
