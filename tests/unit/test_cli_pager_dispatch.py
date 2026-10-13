@@ -115,7 +115,7 @@ def test_resolve_pager_flag() -> None:
     assert resolve_pager_flag(MagicMock(params={"pager": False})) is False
     assert resolve_pager_flag(args=["--no-pager"]) is False
     assert resolve_pager_flag(args=["--pager"]) is True
-    assert resolve_pager_flag(args=["-P"]) is True
+    assert resolve_pager_flag(args=["-P"]) is None
     assert resolve_pager_flag(args=["--other-flag"]) is None
 
 

@@ -27,7 +27,10 @@ def main() -> int:
         ("Pytest & Coverage", ["uv", "run", "pytest"]),
         ("Interrogate Docstrings", ["uv", "run", "interrogate", "src"]),
         ("Radon Cyclomatic Complexity", ["uv", "run", "radon", "cc", "src", "-s", "-a"]),
-        ("Xenon Complexity Assertions", ["uv", "run", "xenon", "src"]),
+        (
+            "Xenon Complexity Assertions",
+            ["uv", "run", "xenon", "-b", "B", "-m", "B", "-a", "A", "src"],
+        ),
         ("Deptry Dependencies", ["uv", "run", "deptry", "."]),
         ("Vulture Dead Code", ["uv", "run", "vulture", "src"]),
         ("Codespell Spelling", ["uv", "run", "codespell"]),

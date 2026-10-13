@@ -51,6 +51,61 @@ def _deliver_output(  # noqa: PLR0913
         formatter.stream(files, target_stream)
 
 
+def _build_traversal_config(  # noqa: PLR0913
+    paths: list[Path] | None,
+    tags: list[str] | None,
+    exclude_tags: list[str] | None,
+    *,
+    all_tags: bool,
+    shebang: str | None,
+    no_ignore: bool,
+    hidden: bool,
+    follow_symlinks: bool,
+    dirs_only: bool,
+    one_file_system: bool,
+    max_depth: int | None,
+    file_limit: int | None,
+    prune: bool,
+    pattern: list[str] | None,
+    exclude_pattern: list[str] | None,
+    ignore_case: bool,
+    match_dirs: bool,
+    absolute: bool,
+    relative: bool,
+    print0: bool,
+    list_tags: bool,
+    summary: bool,
+    output_format: str,
+) -> TraversalConfig:
+    """Build a TraversalConfig instance from execution parameters."""
+    root_paths = tuple(paths) if paths else (Path(),)
+    return TraversalConfig(
+        root_paths=root_paths,
+        include_tags=parse_tag_arguments(tags),
+        exclude_tags=parse_tag_arguments(exclude_tags),
+        all_tags=all_tags,
+        shebang_filter=shebang,
+        respect_gitignore=not no_ignore,
+        include_hidden=hidden,
+        follow_symlinks=follow_symlinks,
+        dirs_only=dirs_only,
+        one_file_system=one_file_system,
+        max_depth=max_depth,
+        file_limit=file_limit,
+        prune_empty=prune,
+        include_patterns=tuple(pattern) if pattern else (),
+        exclude_patterns=tuple(exclude_pattern) if exclude_pattern else (),
+        ignore_case=ignore_case,
+        match_dirs=match_dirs,
+        relative_paths=not absolute,
+        relative_prefix=relative,
+        null_delimited=print0,
+        show_tags=list_tags,
+        show_summary=summary,
+        output_format=output_format,
+    )
+
+
 def execute_findfmt(  # noqa: PLR0913
     *,
     paths: list[Path] | None,
@@ -66,6 +121,10 @@ def execute_findfmt(  # noqa: PLR0913
     max_depth: int | None = None,
     file_limit: int | None = None,
     prune: bool = False,
+    pattern: list[str] | None = None,
+    exclude_pattern: list[str] | None = None,
+    ignore_case: bool = False,
+    match_dirs: bool = False,
     output_format: OutputFormat,
     tree: bool,
     table_style: str | None,
@@ -99,6 +158,10 @@ def execute_findfmt(  # noqa: PLR0913
         max_depth: Maximum directory depth level.
         file_limit: Entry count threshold to skip directories.
         prune: Whether to omit directories with zero matching files.
+        pattern: Include wildcard/glob pattern list.
+        exclude_pattern: Exclude wildcard/glob pattern list.
+        ignore_case: Whether pattern comparisons are case-insensitive.
+        match_dirs: Whether directory matches inherit to descendants.
         output_format: Configured output serialization format.
         tree: Whether tree view was explicitly requested.
         table_style: Optional table border style name.
@@ -118,26 +181,29 @@ def execute_findfmt(  # noqa: PLR0913
     """
     effective_format = OutputFormat.TREE if tree else output_format
 
-    root_paths = tuple(paths) if paths else (Path(),)
-    config = TraversalConfig(
-        root_paths=root_paths,
-        include_tags=parse_tag_arguments(tags),
-        exclude_tags=parse_tag_arguments(exclude_tags),
+    config = _build_traversal_config(
+        paths,
+        tags,
+        exclude_tags,
         all_tags=all_tags,
-        shebang_filter=shebang,
-        respect_gitignore=not no_ignore,
-        include_hidden=hidden,
+        shebang=shebang,
+        no_ignore=no_ignore,
+        hidden=hidden,
         follow_symlinks=follow_symlinks,
         dirs_only=dirs_only,
         one_file_system=one_file_system,
         max_depth=max_depth,
         file_limit=file_limit,
-        prune_empty=prune,
-        relative_paths=not absolute,
-        relative_prefix=relative,
-        null_delimited=print0,
-        show_tags=list_tags,
-        show_summary=summary,
+        prune=prune,
+        pattern=pattern,
+        exclude_pattern=exclude_pattern,
+        ignore_case=ignore_case,
+        match_dirs=match_dirs,
+        absolute=absolute,
+        relative=relative,
+        print0=print0,
+        list_tags=list_tags,
+        summary=summary,
         output_format=effective_format.value,
     )
 

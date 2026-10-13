@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 
 from findfmt.classifier import classify_file
 from findfmt.ignore import is_path_ignored, load_ancestor_specs, load_child_specs
+from findfmt.patterns import matches_pattern_criteria
+from findfmt.symlinks import init_visited_dirs, should_skip_symlink_dir
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -16,58 +18,26 @@ if TYPE_CHECKING:
     import pathspec
 
     from findfmt.models import FileInfo, TraversalConfig
+    from findfmt.patterns import PatternMatcher
 
     PathSpecType = pathspec.PathSpec[Any]
 else:
     PathSpecType = Any
 
-
-def init_visited_dirs(
-    root: Path,
-    *,
-    follow_symlinks: bool,
-    visited: set[Path] | None,
-) -> set[Path] | None:
-    """Initialize or reuse the tracking set for visited directories."""
-    if not follow_symlinks or visited is not None:
-        return visited
-
-    active = set()
-    with contextlib.suppress(OSError):
-        active.add(root.resolve())
-
-    return active
-
-
-def should_skip_symlink_dir(
-    subdir: Path,
-    *,
-    follow_symlinks: bool,
-    visited: set[Path] | None,
-) -> bool:
-    """Determine whether a candidate directory should be skipped to break symlink loops.
-
-    Args:
-        subdir: Directory path candidate.
-        follow_symlinks: Traversal configuration flag for following symlinks.
-        visited: Set of canonical directory paths already visited.
-
-    Returns:
-        True if the directory should be skipped, False otherwise.
-    """
-    if not (follow_symlinks and visited is not None):
-        return False
-
-    try:
-        resolved = subdir.resolve()
-    except OSError:
-        return True
-
-    if resolved in visited:
-        return True
-
-    visited.add(resolved)
-    return False
+__all__ = [
+    "check_depth_limit",
+    "check_device_boundary",
+    "check_file_limit",
+    "filter_directory_entry",
+    "has_matching_descendants",
+    "init_visited_dirs",
+    "matches_filter",
+    "resolve_active_specs",
+    "resolve_device",
+    "should_skip_dir",
+    "should_skip_symlink_dir",
+    "yield_matching_items",
+]
 
 
 def resolve_active_specs(
@@ -76,25 +46,19 @@ def resolve_active_specs(
     *,
     respect_gitignore: bool,
 ) -> tuple[tuple[Path, PathSpecType], ...]:
-    """Resolve active gitignore specifications for the current traversal frame."""
+    """Resolve active gitignore specifications for current traversal frame."""
     if not respect_gitignore:
         return ()
 
-    if active_specs is None:
-        return load_ancestor_specs(root)
-
-    return active_specs
+    return active_specs if active_specs is not None else load_ancestor_specs(root)
 
 
 def check_device_boundary(path: Path, root_dev: int | None) -> bool:
     """Check whether a path resides on the designated root filesystem device."""
-    if root_dev is None:
-        return True
+    with contextlib.suppress(OSError):
+        return root_dev is None or path.stat().st_dev == root_dev
 
-    try:
-        return path.stat().st_dev == root_dev
-    except OSError:
-        return False
+    return False
 
 
 def resolve_device(root: Path, *, one_file_system: bool, root_dev: int | None) -> int | None:
@@ -102,63 +66,77 @@ def resolve_device(root: Path, *, one_file_system: bool, root_dev: int | None) -
     if not one_file_system:
         return None
 
-    if root_dev is not None:
-        return root_dev
+    with contextlib.suppress(OSError):
+        return root_dev if root_dev is not None else root.stat().st_dev
 
-    try:
-        return root.stat().st_dev
-    except OSError:
-        return None
+    return None
 
 
 def check_file_limit(count: int, file_limit: int | None) -> bool:
-    """Verify whether a directory entry count does not exceed the filelimit threshold."""
-    if file_limit is None:
-        return True
-
-    return count <= file_limit
+    """Verify whether directory entry count does not exceed filelimit threshold."""
+    return file_limit is None or count <= file_limit
 
 
 def check_depth_limit(current_depth: int, max_depth: int | None) -> bool:
     """Determine whether traversal can descend further based on maximum depth."""
-    if max_depth is None:
-        return True
-
-    return current_depth < max_depth
+    return max_depth is None or current_depth < max_depth
 
 
 def should_skip_dir(dir_name: str, *, include_hidden: bool) -> bool:
     """Determine if a directory should be skipped during descent."""
-    if dir_name == ".git":
-        return True
-
-    return bool(not include_hidden and dir_name.startswith("."))
+    return dir_name == ".git" or bool(not include_hidden and dir_name.startswith("."))
 
 
-def matches_filter(file_info: FileInfo, config: TraversalConfig) -> bool:
-    """Determine whether a classified file satisfies traversal filter criteria."""
-    tags = file_info.tags
+def _matches_shebang(shebang: str | None, filter_str: str | None) -> bool:
+    """Check if file shebang satisfies the shebang filter criteria."""
+    return not filter_str or bool(shebang and filter_str in shebang)
+
+
+def _matches_tags(tags: frozenset[str], config: TraversalConfig) -> bool:
+    """Check if file tags satisfy inclusion and exclusion criteria."""
     if config.exclude_tags and (tags & config.exclude_tags):
         return False
 
-    if config.include_tags:
-        if config.all_tags and not config.include_tags.issubset(tags):
+    if not config.include_tags:
+        return True
+
+    if config.all_tags:
+        return config.include_tags.issubset(tags)
+
+    return bool(tags & config.include_tags)
+
+
+def matches_filter(
+    file_info: FileInfo,
+    config: TraversalConfig,
+    *,
+    matcher: PatternMatcher | None = None,
+    inherited_match: bool = False,
+) -> bool:
+    """Determine whether a classified file satisfies filter criteria."""
+    if not file_info.path.is_dir():
+        if not _matches_tags(file_info.tags, config):
             return False
 
-        if not config.all_tags and not (tags & config.include_tags):
+        if not _matches_shebang(file_info.shebang, config.shebang_filter):
             return False
 
-    if config.shebang_filter:
-        return bool(file_info.shebang and config.shebang_filter in file_info.shebang)
+    return matches_pattern_criteria(
+        file_info,
+        config,
+        matcher=matcher,
+        inherited_match=inherited_match,
+    )
 
-    return True
 
-
-def filter_directory_entry(
+def filter_directory_entry(  # noqa: PLR0913
     entry: os.DirEntry[str],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
     root_dev: int | None,
+    *,
+    matcher: PatternMatcher | None = None,
+    base_root: Path | None = None,
 ) -> tuple[Path, bool] | None:
     """Filter an entry based on hidden status, device boundary, and gitignore."""
     if not config.include_hidden and entry.name.startswith("."):
@@ -172,19 +150,33 @@ def filter_directory_entry(
     if config.respect_gitignore and is_path_ignored(entry_path, is_dir=is_dir, specs=specs):
         return None
 
+    if matcher and matcher.should_exclude(entry_path, is_dir=is_dir, base_root=base_root):
+        return None
+
     return entry_path, is_dir
 
 
-def _inspect_entries(
+def _inspect_entries(  # noqa: PLR0913
     entries: Sequence[os.DirEntry[str]],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
     root_dev: int | None,
+    *,
+    matcher: PatternMatcher | None = None,
+    inherited_match: bool = False,
+    base_root: Path | None = None,
 ) -> tuple[list[Path], bool]:
-    """Inspect directory entries and return discovered subdirs or immediate match flag."""
+    """Inspect directory entries and return discovered subdirs or match flag."""
     subdirs: list[Path] = []
     for entry in entries:
-        filtered = filter_directory_entry(entry, config, specs, root_dev)
+        filtered = filter_directory_entry(
+            entry,
+            config,
+            specs,
+            root_dev,
+            matcher=matcher,
+            base_root=base_root,
+        )
         if filtered is None:
             continue
 
@@ -194,52 +186,64 @@ def _inspect_entries(
                 subdirs.append(entry_path)
         elif entry.is_file(follow_symlinks=config.follow_symlinks):
             info = classify_file(entry_path)
-            if matches_filter(info, config):
+            if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
                 return [], True
 
     return subdirs, False
 
 
-def has_matching_descendants(
+def has_matching_descendants(  # noqa: PLR0913
     directory: Path,
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
     *,
     root_dev: int | None = None,
     current_depth: int = 1,
+    matcher: PatternMatcher | None = None,
+    inherited_match: bool = False,
+    base_root: Path | None = None,
 ) -> bool:
-    """Determine whether a directory or any of its subtrees contain matching files.
-
-    Args:
-        directory: Directory to inspect.
-        config: Traversal and filter configuration.
-        specs: Active gitignore specifications.
-        root_dev: Optional filesystem device identifier.
-        current_depth: Current depth level.
-
-    Returns:
-        True if at least one matching file exists in directory or subtrees.
-    """
+    """Determine whether a directory or any subtrees contain matching files."""
     try:
         entries = sorted(os.scandir(directory), key=lambda e: e.name)
     except OSError:
         return False
 
-    subdirs, found = _inspect_entries(entries, config, specs, root_dev)
+    subdirs, found = _inspect_entries(
+        entries,
+        config,
+        specs,
+        root_dev,
+        matcher=matcher,
+        inherited_match=inherited_match,
+        base_root=base_root,
+    )
     if found:
         return True
 
     if not check_depth_limit(current_depth, config.max_depth):
         return False
 
+    effective_root = base_root if base_root is not None else directory
     for subdir in subdirs:
         child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else ()
+        child_inherit = bool(
+            matcher
+            and matcher.should_inherit_match(
+                subdir,
+                base_root=effective_root,
+                parent_inherited=inherited_match,
+            ),
+        )
         if has_matching_descendants(
             subdir,
             config,
             child_specs,
             root_dev=root_dev,
             current_depth=current_depth + 1,
+            matcher=matcher,
+            inherited_match=child_inherit,
+            base_root=effective_root,
         ):
             return True
 
@@ -255,36 +259,25 @@ def yield_matching_items(  # noqa: PLR0913
     prefix: Path | None,
     root_dev: int | None,
     current_depth: int,
+    matcher: PatternMatcher | None = None,
+    inherited_match: bool = False,
 ) -> Iterator[FileInfo]:
-    """Yield FileInfo records for candidate paths that satisfy filters and pruning.
-
-    Args:
-        targets: Candidate file or directory paths to evaluate.
-        config: Traversal and filter settings.
-        specs: Active gitignore specifications.
-        base_root: Root directory used for relative paths.
-        prefix: Optional prefix for relative paths.
-        root_dev: Optional filesystem device number.
-        current_depth: Current traversal depth.
-
-    Yields:
-        Classified FileInfo instances that satisfy all filters.
-    """
+    """Yield FileInfo records for candidate paths that satisfy filters and pruning."""
     for path in targets:
-        if config.dirs_only:
-            if config.prune_empty:
-                child_specs = load_child_specs(path, specs) if config.respect_gitignore else ()
-                if not has_matching_descendants(
-                    path,
-                    config,
-                    child_specs,
-                    root_dev=root_dev,
-                    current_depth=current_depth + 1,
-                ):
-                    continue
+        if config.dirs_only and config.prune_empty:
+            child_specs = load_child_specs(path, specs) if config.respect_gitignore else ()
+            if not has_matching_descendants(
+                path,
+                config,
+                child_specs,
+                root_dev=root_dev,
+                current_depth=current_depth + 1,
+                matcher=matcher,
+                inherited_match=inherited_match,
+                base_root=base_root,
+            ):
+                continue
 
-            yield classify_file(path, root_path=base_root, prefix=prefix)
-        else:
-            info = classify_file(path, root_path=base_root, prefix=prefix)
-            if matches_filter(info, config):
-                yield info
+        info = classify_file(path, root_path=base_root, prefix=prefix)
+        if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
+            yield info

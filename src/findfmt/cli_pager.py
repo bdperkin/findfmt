@@ -155,7 +155,7 @@ def resolve_pager_flag(
         if arg == "--no-pager":
             return False
 
-        if arg in ("--pager", "-P"):
+        if arg == "--pager":
             return True
 
     return None

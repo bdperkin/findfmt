@@ -1,12 +1,10 @@
-"""Git-conscious directory traversal and filtering engine."""
+"""Core directory traversal routines with .gitignore and boundaries integration."""
 
 from __future__ import annotations
 
 import os
 from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, Any
-
-import pathspec
 
 from findfmt.boundaries import (
     check_depth_limit,
@@ -30,13 +28,20 @@ from findfmt.ignore import (
     load_gitignore_spec,
     load_spec_file,
 )
+from findfmt.patterns import create_pattern_matcher
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from findfmt.models import FileInfo, TraversalConfig
+    import pathspec
 
-PathSpecType = pathspec.PathSpec[Any]
+    from findfmt.models import FileInfo, TraversalConfig
+    from findfmt.patterns import PatternMatcher
+
+    PathSpecType = pathspec.PathSpec[Any]
+else:
+    PathSpecType = Any
+
 _load_spec_file = load_spec_file
 _is_path_ignored = is_path_ignored
 
@@ -52,11 +57,11 @@ __all__ = [
 
 def _load_active_specs(
     root: Path,
-    active_specs: tuple[tuple[Path, PathSpecType], ...],
+    active_specs: tuple[tuple[Path, PathSpecType], ...] | None,
     *,
     respect_gitignore: bool,
 ) -> tuple[tuple[Path, PathSpecType], ...]:
-    """Assemble active gitignore specifications for a given directory."""
+    """Load active gitignore specs for a directory from parent or ancestors."""
     if not respect_gitignore:
         return ()
 
@@ -66,12 +71,14 @@ def _load_active_specs(
     return load_child_specs(root, active_specs)
 
 
-def _scan_directory_entries(
+def _scan_directory_entries(  # noqa: PLR0913
     root: Path,
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
     *,
     root_dev: int | None = None,
+    matcher: PatternMatcher | None = None,
+    base_root: Path | None = None,
 ) -> tuple[list[Path], list[Path]]:
     """Scan and partition directory entries into subdirectories and files."""
     try:
@@ -86,7 +93,14 @@ def _scan_directory_entries(
     files: list[Path] = []
 
     for entry in entries:
-        filtered = filter_directory_entry(entry, config, specs, root_dev)
+        filtered = filter_directory_entry(
+            entry,
+            config,
+            specs,
+            root_dev,
+            matcher=matcher,
+            base_root=base_root,
+        )
         if filtered is None:
             continue
 
@@ -115,23 +129,12 @@ def traverse_directory(  # noqa: PLR0913
     prefix: Path | None = None,
     root_dev: int | None = None,
     current_depth: int = 1,
+    matcher: PatternMatcher | None = None,
+    inherited_match: bool = False,
 ) -> Iterator[FileInfo]:
-    """Recursively traverse a directory hierarchy honoring .gitignore, filters, and boundaries.
-
-    Args:
-        root: The current directory to traverse.
-        config: Traversal configuration options.
-        active_specs: Inherited parent gitignore specs with their base paths, or None.
-        base_root: The top-level root directory used for relative paths.
-        visited_dirs: Tracked set of canonical directory paths visited to break cycles.
-        prefix: Optional search root path prefix prepended to relative paths.
-        root_dev: Root filesystem device identifier for one_file_system boundary.
-        current_depth: Current directory depth level.
-
-    Yields:
-        FileInfo objects for matching files in deterministic sorted order.
-    """
+    """Recursively traverse a directory hierarchy honoring .gitignore, filters, and boundaries."""
     effective_base = base_root if base_root is not None else root
+    active_matcher = matcher if matcher is not None else create_pattern_matcher(config)
     effective_dev = resolve_device(
         root,
         one_file_system=config.one_file_system,
@@ -153,6 +156,8 @@ def traverse_directory(  # noqa: PLR0913
         config,
         specs,
         root_dev=effective_dev,
+        matcher=active_matcher,
+        base_root=effective_base,
     )
 
     targets = subdirs if config.dirs_only else files
@@ -164,6 +169,8 @@ def traverse_directory(  # noqa: PLR0913
         prefix=prefix,
         root_dev=effective_dev,
         current_depth=current_depth,
+        matcher=active_matcher,
+        inherited_match=inherited_match,
     )
 
     if not check_depth_limit(current_depth, config.max_depth):
@@ -171,12 +178,20 @@ def traverse_directory(  # noqa: PLR0913
 
     for subdir in subdirs:
         child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else ()
+        child_inherit = active_matcher.should_inherit_match(
+            subdir,
+            base_root=effective_base,
+            parent_inherited=inherited_match,
+        )
         if config.prune_empty and not has_matching_descendants(
             subdir,
             config,
             child_specs,
             root_dev=effective_dev,
             current_depth=current_depth + 1,
+            matcher=active_matcher,
+            inherited_match=child_inherit,
+            base_root=effective_base,
         ):
             continue
 
@@ -196,18 +211,14 @@ def traverse_directory(  # noqa: PLR0913
             prefix=prefix,
             root_dev=effective_dev,
             current_depth=current_depth + 1,
+            matcher=active_matcher,
+            inherited_match=child_inherit,
         )
 
 
 def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
-    """Discover and classify files across all configured root paths.
-
-    Args:
-        config: Traversal and filtering configuration.
-
-    Yields:
-        FileInfo objects matching the criteria.
-    """
+    """Discover and classify files across all configured root paths."""
+    matcher = create_pattern_matcher(config)
     for root in sorted(config.root_paths):
         resolved_root = root.resolve()
         if not resolved_root.exists():
@@ -219,7 +230,7 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
 
             prefix = compute_relative_prefix(root.parent) if config.relative_prefix else None
             info = classify_file(resolved_root, root_path=resolved_root.parent, prefix=prefix)
-            if matches_filter(info, config):
+            if matches_filter(info, config, matcher=matcher):
                 yield info
         else:
             prefix = compute_relative_prefix(root) if config.relative_prefix else None
@@ -228,4 +239,5 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
                 config,
                 base_root=resolved_root,
                 prefix=prefix,
+                matcher=matcher,
             )

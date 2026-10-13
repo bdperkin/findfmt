@@ -18,20 +18,24 @@ __all__ = [
     "HELP_CP437",
     "HELP_DIAGNOSTICS",
     "HELP_DIRS_ONLY",
+    "HELP_EXCLUDE_PATTERN",
     "HELP_EXCLUDE_TAGS",
     "HELP_FILE_LIMIT",
     "HELP_FOLLOW_SYMLINKS",
     "HELP_FORMAT",
     "HELP_HELP_ALL",
     "HELP_HIDDEN",
+    "HELP_IGNORE_CASE",
     "HELP_KNOWN_TAGS",
     "HELP_LIST_TAGS",
+    "HELP_MATCH_DIRS",
     "HELP_MAX_DEPTH",
     "HELP_NO_IGNORE",
     "HELP_NO_INDENT",
     "HELP_ONE_FILE_SYSTEM",
     "HELP_PAGER",
     "HELP_PATHS",
+    "HELP_PATTERN",
     "HELP_PRINT0",
     "HELP_PRUNE",
     "HELP_RELATIVE",
@@ -77,6 +81,12 @@ HELP_ONE_FILE_SYSTEM = "Confine traversal to the root filesystem device."
 HELP_MAX_DEPTH = "Restrict descent to a maximum directory depth level."
 HELP_FILE_LIMIT = "Skip directories exceeding this entry count threshold."
 HELP_PRUNE = "Omit empty directories and directories with zero matching files."
+HELP_PATTERN = "Include files matching wildcard or glob pattern (supports multiple -P and '|')."
+HELP_EXCLUDE_PATTERN = (
+    "Exclude files matching wildcard or glob pattern (supports multiple -I and '|')."
+)
+HELP_IGNORE_CASE = "Apply case-insensitive matching across -P and -I patterns."
+HELP_MATCH_DIRS = "Match directory names against patterns; matched dirs inherit to children."
 HELP_FORMAT = (
     "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
     "markdown, md, rst, table, tree, ndjson)."
@@ -131,6 +141,10 @@ def get_help_all() -> str:
         "  --all-tags / --no-all-tags    Require matching ALL specified tags\n"
         "                                [default: no-all-tags].\n\n"
         "Traversal Controls:\n"
+        "  --pattern, -P <pattern>       Include files matching wildcard or glob pattern.\n"
+        "  --exclude-pattern, -I <pat>   Exclude files matching wildcard or glob pattern.\n"
+        "  --ignore-case                 Case-insensitive pattern matching across -P and -I.\n"
+        "  --match-dirs, --matchdirs     Match directory names; matched dirs inherit to children.\n"
         "  --shebang <str>               Filter files by shebang pattern.\n"
         "  --dirs-only, -d               List directories only, suppressing regular files.\n"
         "  --max-depth, -L <level>       Restrict descent to maximum depth level.\n"
@@ -148,7 +162,7 @@ def get_help_all() -> str:
         "                                [default: text].\n"
         "  --tree / --no-tree            Render output in hierarchical tree view.\n"
         "  --table-style <style>         Border style (rounded, cp437, ascii, etc.).\n"
-        "  --pager, -P / --no-pager      Enable or disable interactive paging.\n"
+        "  --pager / --no-pager          Enable or disable interactive paging.\n"
         "  --no-indent, -i / --indent    Omit indentation lines and strip extraneous whitespace.\n"
         "  --ansi-lines, -A              Use ANSI/VT100 line drawing escapes.\n"
         "  --cp437, -S                   Use CP437 console graphics line drawing characters.\n"

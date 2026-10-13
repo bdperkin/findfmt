@@ -70,6 +70,10 @@ class TraversalConfig:
         max_depth: Maximum directory descent depth, or None for unlimited.
         file_limit: Maximum directory entries threshold before skipping descent, or None.
         prune_empty: Whether to prune empty directories or directories with no matching files.
+        include_patterns: Wildcard/glob patterns for including files (-P).
+        exclude_patterns: Wildcard/glob patterns for excluding files (-I).
+        ignore_case: Whether pattern comparisons are case-insensitive.
+        match_dirs: Whether directory names are matched against patterns and inherit.
         relative_paths: Whether to output relative paths rather than absolute.
         relative_prefix: Whether to prepend input search path prefix to relative paths.
         null_delimited: Whether to delimit output paths with NUL bytes (\0).
@@ -91,6 +95,10 @@ class TraversalConfig:
     max_depth: int | None = None
     file_limit: int | None = None
     prune_empty: bool = False
+    include_patterns: tuple[str, ...] = ()
+    exclude_patterns: tuple[str, ...] = ()
+    ignore_case: bool = False
+    match_dirs: bool = False
     relative_paths: bool = True
     relative_prefix: bool = False
     null_delimited: bool = False

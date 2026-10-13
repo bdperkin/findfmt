@@ -189,10 +189,14 @@ ______________________________________________________________________
 | `-L, --max-depth LEVEL`                           | Restrict directory traversal descent to maximum depth level                                                             |
 | `--filelimit LIMIT`                               | Skip directories exceeding child entry count threshold                                                                  |
 | `--prune`                                         | Omit empty directories and directories with zero matching files                                                         |
+| `-P, --pattern PATTERN`                           | Match files against wildcard or glob pattern (supports multiple `-P` and `\|`)                                          |
+| `-I, --exclude-pattern PATTERN`                   | Exclude files against wildcard or glob pattern (supports multiple `-I` and `\|`)                                        |
+| `--ignore-case` / `--no-ignore-case`              | Apply case-insensitive pattern matching across `-P` and `-I`                                                            |
+| `--match-dirs` / `--no-match-dirs`                | Match directories against patterns; matched directories inherit to child files                                          |
 | `-f, --format FORMAT`                             | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`) |
 | `--tree` / `--no-tree`                            | Toggle hierarchical directory tree view (equivalent to `--format tree`)                                                 |
 | `--table-style STYLE`                             | Border style (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`)        |
-| `-P, --pager` / `--no-pager`                      | Toggle interactive paging (auto-pages on TTY when lines exceed terminal height)                                         |
+| `--pager` / `--no-pager`                          | Toggle interactive paging (auto-pages on TTY when lines exceed terminal height)                                         |
 | `-i, --no-indent` / `--indent`                    | Omit branch indentation in tree view and strip extraneous whitespace in structured formats                              |
 | `-A, --ansi-lines` / `--no-ansi-lines`            | Use ANSI/VT100 line drawing escapes for tree indentation lines                                                          |
 | `-S, --cp437` / `--no-cp437`                      | Use CP437 console graphics line drawing characters for tree indentation lines                                           |

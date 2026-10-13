@@ -61,14 +61,11 @@ def _generate_test_files(count: int) -> list[FileInfo]:
 
 
 def test_cli_pager_options(sample_repo: Path) -> None:
-    """Verify --pager, -P, and --no-pager CLI invocation flags."""
+    """Verify --pager and --no-pager CLI invocation flags."""
     runner = CliRunner()
 
     res_long = runner.invoke(app, ["--pager", str(sample_repo)])
     assert res_long.exit_code == 0
-
-    res_short = runner.invoke(app, ["-P", str(sample_repo)])
-    assert res_short.exit_code == 0
 
     res_none = runner.invoke(app, ["--no-pager", str(sample_repo)])
     assert res_none.exit_code == 0

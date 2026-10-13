@@ -42,9 +42,10 @@ __all__ = [
     "version_callback",
 ]
 
-_PANEL_TAGS = "Tag Filtering"
-_PANEL_TRAVERSAL = "Traversal Controls"
-_PANEL_OUTPUT = "Output Formatting"
+_PT = "Tag Filtering"
+_PC = "Traversal Controls"
+_PO = "Output Formatting"
+_PANEL_TAGS, _PANEL_TRAVERSAL, _PANEL_OUTPUT = _PT, _PC, _PO
 
 app = typer.Typer(
     name="findfmt",
@@ -60,7 +61,7 @@ def findfmt(
     paths: Annotated[list[Path] | None, typer.Argument(help=h.HELP_PATHS)] = None,
     tags: Annotated[
         list[str] | None,
-        typer.Option("-t", "--type", "--tag", rich_help_panel=_PANEL_TAGS, help=h.HELP_TAGS),
+        typer.Option("-t", "--type", "--tag", rich_help_panel=_PT, help=h.HELP_TAGS),
     ] = None,
     exclude_tags: Annotated[
         list[str] | None,
@@ -68,29 +69,56 @@ def findfmt(
             "-e",
             "--exclude",
             "--exclude-tag",
-            rich_help_panel=_PANEL_TAGS,
+            rich_help_panel=_PT,
             help=h.HELP_EXCLUDE_TAGS,
         ),
     ] = None,
     all_tags: Annotated[
         bool,
-        typer.Option("--all-tags/--no-all-tags", rich_help_panel=_PANEL_TAGS, help=h.HELP_ALL_TAGS),
+        typer.Option("--all-tags/--no-all-tags", rich_help_panel=_PT, help=h.HELP_ALL_TAGS),
+    ] = False,
+    pattern: Annotated[
+        list[str] | None,
+        typer.Option(
+            "-P",
+            "--pattern",
+            "--include-pattern",
+            rich_help_panel=_PC,
+            help=h.HELP_PATTERN,
+        ),
+    ] = None,
+    exclude_pattern: Annotated[
+        list[str] | None,
+        typer.Option("-I", "--exclude-pattern", rich_help_panel=_PC, help=h.HELP_EXCLUDE_PATTERN),
+    ] = None,
+    ignore_case: Annotated[
+        bool,
+        typer.Option(
+            "--ignore-case/--no-ignore-case",
+            rich_help_panel=_PC,
+            help=h.HELP_IGNORE_CASE,
+        ),
+    ] = False,
+    match_dirs: Annotated[
+        bool,
+        typer.Option(
+            "--match-dirs/--no-match-dirs",
+            "--matchdirs/--no-matchdirs",
+            rich_help_panel=_PC,
+            help=h.HELP_MATCH_DIRS,
+        ),
     ] = False,
     shebang: Annotated[
         str | None,
-        typer.Option("--shebang", rich_help_panel=_PANEL_TRAVERSAL, help=h.HELP_SHEBANG),
+        typer.Option("--shebang", rich_help_panel=_PC, help=h.HELP_SHEBANG),
     ] = None,
     no_ignore: Annotated[
         bool,
-        typer.Option(
-            "--no-ignore/--ignore",
-            rich_help_panel=_PANEL_TRAVERSAL,
-            help=h.HELP_NO_IGNORE,
-        ),
+        typer.Option("--no-ignore/--ignore", rich_help_panel=_PC, help=h.HELP_NO_IGNORE),
     ] = False,
     hidden: Annotated[
         bool,
-        typer.Option("--hidden/--no-hidden", rich_help_panel=_PANEL_TRAVERSAL, help=h.HELP_HIDDEN),
+        typer.Option("--hidden/--no-hidden", rich_help_panel=_PC, help=h.HELP_HIDDEN),
     ] = False,
     follow_symlinks: Annotated[
         bool,
@@ -99,34 +127,29 @@ def findfmt(
             "--follow-links/--no-follow-links",
             "--follow-symlinks/--no-follow-symlinks",
             "--symlinks/--no-symlinks",
-            rich_help_panel=_PANEL_TRAVERSAL,
+            rich_help_panel=_PC,
             help=h.HELP_FOLLOW_SYMLINKS,
         ),
     ] = False,
     dirs_only: Annotated[
         bool,
-        typer.Option("-d", "--dirs-only", rich_help_panel=_PANEL_TRAVERSAL, help=h.HELP_DIRS_ONLY),
+        typer.Option("-d", "--dirs-only", rich_help_panel=_PC, help=h.HELP_DIRS_ONLY),
     ] = False,
     one_file_system: Annotated[
         bool,
-        typer.Option(
-            "-x",
-            "--one-file-system",
-            rich_help_panel=_PANEL_TRAVERSAL,
-            help=h.HELP_ONE_FILE_SYSTEM,
-        ),
+        typer.Option("-x", "--one-file-system", rich_help_panel=_PC, help=h.HELP_ONE_FILE_SYSTEM),
     ] = False,
     max_depth: Annotated[
         int | None,
-        typer.Option("-L", "--max-depth", rich_help_panel=_PANEL_TRAVERSAL, help=h.HELP_MAX_DEPTH),
+        typer.Option("-L", "--max-depth", rich_help_panel=_PC, help=h.HELP_MAX_DEPTH),
     ] = None,
     file_limit: Annotated[
         int | None,
-        typer.Option("--filelimit", rich_help_panel=_PANEL_TRAVERSAL, help=h.HELP_FILE_LIMIT),
+        typer.Option("--filelimit", rich_help_panel=_PC, help=h.HELP_FILE_LIMIT),
     ] = None,
     prune: Annotated[
         bool,
-        typer.Option("--prune", rich_help_panel=_PANEL_TRAVERSAL, help=h.HELP_PRUNE),
+        typer.Option("--prune", rich_help_panel=_PC, help=h.HELP_PRUNE),
     ] = False,
     output_format: Annotated[
         OutputFormat,
@@ -134,59 +157,49 @@ def findfmt(
             "-f",
             "--format",
             case_sensitive=False,
-            rich_help_panel=_PANEL_OUTPUT,
+            rich_help_panel=_PO,
             help=h.HELP_FORMAT,
         ),
     ] = OutputFormat.TEXT,
     tree: Annotated[
         bool,
-        typer.Option("--tree/--no-tree", rich_help_panel=_PANEL_OUTPUT, help=h.HELP_TREE),
+        typer.Option("--tree/--no-tree", rich_help_panel=_PO, help=h.HELP_TREE),
     ] = False,
     table_style: Annotated[
         str | None,
-        typer.Option("--table-style", rich_help_panel=_PANEL_OUTPUT, help=h.HELP_TABLE_STYLE),
+        typer.Option("--table-style", rich_help_panel=_PO, help=h.HELP_TABLE_STYLE),
     ] = None,
     pager: Annotated[
         bool | None,
-        typer.Option("-P", "--pager/--no-pager", rich_help_panel=_PANEL_OUTPUT, help=h.HELP_PAGER),
+        typer.Option("--pager/--no-pager", rich_help_panel=_PO, help=h.HELP_PAGER),
     ] = None,
     no_indent: Annotated[
         bool,
-        typer.Option(
-            "-i",
-            "--no-indent/--indent",
-            rich_help_panel=_PANEL_OUTPUT,
-            help=h.HELP_NO_INDENT,
-        ),
+        typer.Option("-i", "--no-indent/--indent", rich_help_panel=_PO, help=h.HELP_NO_INDENT),
     ] = False,
     ansi_lines: Annotated[
         bool,
         typer.Option(
             "-A",
             "--ansi-lines/--no-ansi-lines",
-            rich_help_panel=_PANEL_OUTPUT,
+            rich_help_panel=_PO,
             help=h.HELP_ANSI_LINES,
         ),
     ] = False,
     cp437: Annotated[
         bool,
-        typer.Option("-S", "--cp437/--no-cp437", rich_help_panel=_PANEL_OUTPUT, help=h.HELP_CP437),
+        typer.Option("-S", "--cp437/--no-cp437", rich_help_panel=_PO, help=h.HELP_CP437),
     ] = False,
     color: Annotated[
         bool | None,
-        typer.Option(
-            "-C/-n",
-            "--color/--no-color",
-            rich_help_panel=_PANEL_OUTPUT,
-            help=h.HELP_COLOR,
-        ),
+        typer.Option("-C/-n", "--color/--no-color", rich_help_panel=_PO, help=h.HELP_COLOR),
     ] = None,
     absolute: Annotated[
         bool,
         typer.Option(
             "--absolute/--no-absolute",
             "--full-path/--no-full-path",
-            rich_help_panel=_PANEL_OUTPUT,
+            rich_help_panel=_PO,
             help=h.HELP_ABSOLUTE,
         ),
     ] = False,
@@ -195,35 +208,21 @@ def findfmt(
         typer.Option(
             "--relative/--no-relative",
             "--relative-path/--no-relative-path",
-            rich_help_panel=_PANEL_OUTPUT,
+            rich_help_panel=_PO,
             help=h.HELP_RELATIVE,
         ),
     ] = False,
     print0: Annotated[
         bool,
-        typer.Option(
-            "-0",
-            "--print0/--no-print0",
-            rich_help_panel=_PANEL_OUTPUT,
-            help=h.HELP_PRINT0,
-        ),
+        typer.Option("-0", "--print0/--no-print0", rich_help_panel=_PO, help=h.HELP_PRINT0),
     ] = False,
     list_tags: Annotated[
         bool,
-        typer.Option(
-            "--list-tags/--no-list-tags",
-            rich_help_panel=_PANEL_OUTPUT,
-            help=h.HELP_LIST_TAGS,
-        ),
+        typer.Option("--list-tags/--no-list-tags", rich_help_panel=_PO, help=h.HELP_LIST_TAGS),
     ] = False,
     summary: Annotated[
         bool,
-        typer.Option(
-            "-s",
-            "--summary/--no-summary",
-            rich_help_panel=_PANEL_OUTPUT,
-            help=h.HELP_SUMMARY,
-        ),
+        typer.Option("-s", "--summary/--no-summary", rich_help_panel=_PO, help=h.HELP_SUMMARY),
     ] = False,
     known_tags: Annotated[
         bool,
@@ -261,35 +260,12 @@ def findfmt(
     ] = False,
 ) -> None:
     """Execute file discovery and classification matching."""
-    execute_findfmt(
-        paths=paths,
-        tags=tags,
-        exclude_tags=exclude_tags,
-        all_tags=all_tags,
-        shebang=shebang,
-        no_ignore=no_ignore,
-        hidden=hidden,
-        follow_symlinks=follow_symlinks,
-        dirs_only=dirs_only,
-        one_file_system=one_file_system,
-        max_depth=max_depth,
-        file_limit=file_limit,
-        prune=prune,
-        output_format=output_format,
-        tree=tree,
-        table_style=table_style,
-        absolute=absolute,
-        relative=relative,
-        print0=print0,
-        list_tags=list_tags,
-        summary=summary,
-        pager=pager,
-        find_files_func=find_files,
-        no_indent=no_indent,
-        ansi_lines=ansi_lines,
-        cp437=cp437,
-        color=color,
-    )
+    params = {
+        k: v
+        for k, v in locals().items()
+        if k not in {"known_tags", "verbose", "diagnostics", "version", "help_all"}
+    }
+    execute_findfmt(**params)
 
 
 if __name__ == "__main__":  # pragma: no cover

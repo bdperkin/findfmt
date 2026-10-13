@@ -28,7 +28,7 @@ substring.
 
 `-d, --dirs-only` : List directories only, suppressing regular file entries.
 
-`-l, --follow-links, --follow-symlinks / --no-follow-links, --no-follow-symlinks` (alias:
+`-l, --follow-links, --follow-symlinks / --no-follow-links, --no-follow-links` (alias:
 `--symlinks / --no-symlinks`) : Follow directory symlinks with cycle and loop detection.
 
 `-x, --one-file-system` : Confine traversal to the filesystem device of the starting directory.
@@ -38,6 +38,17 @@ substring.
 `--filelimit LIMIT` : Skip directories whose immediate child entry count exceeds this threshold.
 
 `--prune` : Omit empty directories and directories containing zero matching files from output.
+
+`-P, --pattern, --include-pattern PATTERN` : List only files matching the wildcard or glob
+expression. Supports multiple `-P` flags and `|` alternation (e.g. `*.py|*.md`).
+
+`-I, --exclude-pattern PATTERN` : Omit files and directories matching the wildcard or glob
+expression. Supports multiple `-I` flags and `|` alternation (e.g. `*.tmp|*.bak`).
+
+`--ignore-case / --no-ignore-case` : Apply case-insensitive matching across `-P` and `-I` patterns.
+
+`--match-dirs, --matchdirs / --no-match-dirs, --no-matchdirs` : Match directory names against
+patterns. If a directory matches, pattern restrictions are disabled for its children.
 
 `--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`. Use
 `--ignore` to restore `.gitignore` honoring.
@@ -86,10 +97,10 @@ substring.
 (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`).
 Defaults to `rounded`.
 
-`-P, --pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on
-interactive terminals when output line count exceeds terminal height. Applies to formatted file
-listings, `--help`, `--help-all`, `--known-tags`, and tall `--diagnostics` outputs. Bypassed
-automatically when piped or redirected.
+`--pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on interactive
+terminals when output line count exceeds terminal height. Applies to formatted file listings,
+`--help`, `--help-all`, `--known-tags`, and tall `--diagnostics` outputs. Bypassed automatically
+when piped or redirected.
 
 `-i, --no-indent / --indent` : Omit branch indentation characters in tree format and strip
 extraneous whitespace and padding in structured formats.
