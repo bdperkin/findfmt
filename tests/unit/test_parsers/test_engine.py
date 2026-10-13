@@ -49,17 +49,19 @@ def test_classify_file_offline_posix_and_symlink() -> None:
 
 def test_classify_file_offline_windows_executable() -> None:
     """Verify offline classification under Windows executable rules."""
+    exe_path = Path("app.exe")
+    txt_path = Path("notes.txt")
     with patch("os.name", "nt"), patch.dict("os.environ", {"PATHEXT": ".EXE;.BAT"}):
         exe_info = classify_file_offline(
-            Path("C:/test/app.exe"),
-            relative_path=Path("app.exe"),
+            exe_path,
+            relative_path=exe_path,
         )
         assert exe_info.is_executable is True
         assert "executable" in exe_info.tags
 
         txt_info = classify_file_offline(
-            Path("C:/test/notes.txt"),
-            relative_path=Path("notes.txt"),
+            txt_path,
+            relative_path=txt_path,
         )
         assert txt_info.is_executable is False
         assert "non-executable" in txt_info.tags
