@@ -24,8 +24,10 @@ from findfmt.traversal.ignore import (
     is_path_ignored,
     load_ancestor_specs,
     load_child_specs,
+    load_custom_gitignore_spec,
     load_git_exclude_spec,
     load_gitignore_spec,
+    load_global_gitignore_spec,
     load_spec_file,
 )
 from findfmt.traversal.patterns import create_pattern_matcher
@@ -47,8 +49,10 @@ _is_path_ignored = is_path_ignored
 
 __all__ = [
     "find_files",
+    "load_custom_gitignore_spec",
     "load_git_exclude_spec",
     "load_gitignore_spec",
+    "load_global_gitignore_spec",
     "matches_filter",
     "should_skip_dir",
     "traverse_directory",
@@ -149,6 +153,7 @@ def traverse_directory(  # noqa: PLR0913
         root,
         active_specs,
         respect_gitignore=config.respect_gitignore,
+        gitignore_file=config.gitignore_file,
     )
 
     subdirs, files = _scan_directory_entries(
@@ -177,7 +182,7 @@ def traverse_directory(  # noqa: PLR0913
         return
 
     for subdir in subdirs:
-        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else ()
+        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else specs
         child_inherit = active_matcher.should_inherit_match(
             subdir,
             base_root=effective_base,

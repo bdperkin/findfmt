@@ -63,6 +63,7 @@ class TraversalConfig:
         all_tags: If True, file must match all include_tags; if False, any tag.
         shebang_filter: Substring or interpreter name required in shebang.
         respect_gitignore: Whether to ignore paths matched by gitignore rules.
+        gitignore_file: External gitignore file path to apply across traversal scope.
         include_hidden: Whether to inspect hidden files and directories.
         follow_symlinks: Whether to resolve and traverse symbolic links.
         dirs_only: Whether to list directories only, suppressing file entries.
@@ -88,6 +89,7 @@ class TraversalConfig:
     all_tags: bool = False
     shebang_filter: str | None = None
     respect_gitignore: bool = True
+    gitignore_file: Path | None = None
     include_hidden: bool = False
     follow_symlinks: bool = False
     dirs_only: bool = False

@@ -50,6 +50,8 @@ expression. Supports multiple `-I` flags and `|` alternation (e.g. `*.tmp|*.bak`
 `--match-dirs, --matchdirs / --no-match-dirs, --no-matchdirs` : Match directory names against
 patterns. If a directory matches, pattern restrictions are disabled for its children.
 
+`--gitignore-file PATH` : Apply a specific external ignore file across the traversal scope.
+
 `--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`. Use
 `--ignore` to restore `.gitignore` honoring.
 
@@ -92,6 +94,8 @@ patterns. If a directory matches, pattern restrictions are disabled for its chil
 
 `--tree / --no-tree` : Render output in a hierarchical directory tree (equivalent to
 `--format tree`).
+
+`-o, --output PATH` : Send command output directly to a file rather than standard output.
 
 `--table-style STYLE` : Configure table border styles for `table`, `csv-table`, and `rst` formats
 (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`).

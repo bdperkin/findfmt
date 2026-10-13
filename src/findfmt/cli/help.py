@@ -23,6 +23,7 @@ __all__ = [
     "HELP_FILE_LIMIT",
     "HELP_FOLLOW_SYMLINKS",
     "HELP_FORMAT",
+    "HELP_GITIGNORE_FILE",
     "HELP_HELP_ALL",
     "HELP_HIDDEN",
     "HELP_IGNORE_CASE",
@@ -33,6 +34,7 @@ __all__ = [
     "HELP_NO_IGNORE",
     "HELP_NO_INDENT",
     "HELP_ONE_FILE_SYSTEM",
+    "HELP_OUTPUT",
     "HELP_PAGER",
     "HELP_PATHS",
     "HELP_PATTERN",
@@ -74,6 +76,7 @@ HELP_EXCLUDE_TAGS = "Tag or comma-separated tags to exclude."
 HELP_ALL_TAGS = "Require matching files to have ALL specified tags rather than ANY tag."
 HELP_SHEBANG = "Filter files whose shebang contains this interpreter or pattern."
 HELP_NO_IGNORE = "Do not respect .gitignore rules during traversal."
+HELP_GITIGNORE_FILE = "Load and enforce an external gitignore file across the traversal scope."
 HELP_HIDDEN = "Include hidden files and directories."
 HELP_FOLLOW_SYMLINKS = "Follow symbolic links during traversal."
 HELP_DIRS_ONLY = "List directories only, suppressing regular file entries."
@@ -91,6 +94,7 @@ HELP_FORMAT = (
     "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
     "markdown, md, rst, table, tree, ndjson)."
 )
+HELP_OUTPUT = "Send command output directly to a file rather than standard output."
 HELP_TREE = "Render output in a hierarchical directory tree (equivalent to --format tree)."
 HELP_TABLE_STYLE = (
     "Border style for table, csv-table, or rst output (e.g. rounded, simple, "
@@ -155,11 +159,13 @@ def get_help_all() -> str:
         "  --filelimit <limit>           Skip directories exceeding entry count threshold.\n"
         "  --prune                       Omit directories containing zero matching files.\n"
         "  --no-ignore / --ignore        Do not respect .gitignore rules [default: ignore].\n"
+        "  --gitignore-file <path>       Apply custom ignore file across traversal scope.\n"
         "  --hidden / --no-hidden        Include hidden files and dirs [default: no-hidden].\n\n"
         "Output Formatting:\n"
         "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb,\n"
         "                                csv, csv-table, tsv, markdown, rst, table, tree)\n"
         "                                [default: text].\n"
+        "  --output, -o <path>           Send command output directly to a file.\n"
         "  --tree / --no-tree            Render output in hierarchical tree view.\n"
         "  --table-style <style>         Border style (rounded, cp437, ascii, etc.).\n"
         "  --pager / --no-pager          Enable or disable interactive paging.\n"

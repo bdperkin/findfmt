@@ -6,7 +6,9 @@ import io
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import TYPE_CHECKING, TextIO
+from typing import TYPE_CHECKING, TextIO, cast
+
+import typer
 
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.models import TraversalConfig
@@ -51,6 +53,24 @@ def _deliver_output(  # noqa: PLR0913
         formatter.stream(files, target_stream)
 
 
+def _open_output_sink(
+    output: Path | None,
+    fallback: TextIO | None,
+) -> tuple[TextIO, TextIO | None]:
+    """Open destination output file if specified or return fallback stream."""
+    if output is None:
+        target = fallback if fallback is not None else cast("TextIO", sys.stdout)
+        return target, None
+
+    try:
+        out_file = output.open("w", encoding="utf-8")
+    except OSError as e:
+        typer.echo(f"Error opening output file '{output}': {e}", err=True)
+        raise typer.Exit(code=1) from e
+    else:
+        return out_file, out_file
+
+
 def _build_traversal_config(  # noqa: PLR0913
     paths: list[Path] | None,
     tags: list[str] | None,
@@ -59,6 +79,7 @@ def _build_traversal_config(  # noqa: PLR0913
     all_tags: bool,
     shebang: str | None,
     no_ignore: bool,
+    gitignore_file: Path | None = None,
     hidden: bool,
     follow_symlinks: bool,
     dirs_only: bool,
@@ -86,6 +107,7 @@ def _build_traversal_config(  # noqa: PLR0913
         all_tags=all_tags,
         shebang_filter=shebang,
         respect_gitignore=not no_ignore,
+        gitignore_file=gitignore_file,
         include_hidden=hidden,
         follow_symlinks=follow_symlinks,
         dirs_only=dirs_only,
@@ -114,6 +136,7 @@ def execute_findfmt(  # noqa: PLR0913
     all_tags: bool,
     shebang: str | None,
     no_ignore: bool,
+    gitignore_file: Path | None = None,
     hidden: bool,
     follow_symlinks: bool,
     dirs_only: bool = False,
@@ -126,6 +149,7 @@ def execute_findfmt(  # noqa: PLR0913
     ignore_case: bool = False,
     match_dirs: bool = False,
     output_format: OutputFormat,
+    output: Path | None = None,
     tree: bool,
     table_style: str | None,
     absolute: bool,
@@ -151,6 +175,7 @@ def execute_findfmt(  # noqa: PLR0913
         all_tags: Whether all tags must match.
         shebang: Shebang filter pattern.
         no_ignore: Whether to ignore gitignore rules.
+        gitignore_file: External gitignore file to apply across traversal scope.
         hidden: Whether to include hidden files.
         follow_symlinks: Whether to follow symbolic links.
         dirs_only: Whether to list directories only and suppress files.
@@ -163,6 +188,7 @@ def execute_findfmt(  # noqa: PLR0913
         ignore_case: Whether pattern comparisons are case-insensitive.
         match_dirs: Whether directory matches inherit to descendants.
         output_format: Configured output serialization format.
+        output: Destination file path for redirected output.
         tree: Whether tree view was explicitly requested.
         table_style: Optional table border style name.
         absolute: Whether to emit absolute paths.
@@ -179,6 +205,10 @@ def execute_findfmt(  # noqa: PLR0913
         cp437: Whether to use CP437 console graphics line drawing characters.
         color: Explicit color enable override flag.
     """
+    if gitignore_file is not None and not gitignore_file.is_file():
+        typer.echo(f"Error: Gitignore file '{gitignore_file}' not found.", err=True)
+        raise typer.Exit(code=2)
+
     effective_format = OutputFormat.TREE if tree else output_format
 
     config = _build_traversal_config(
@@ -188,6 +218,7 @@ def execute_findfmt(  # noqa: PLR0913
         all_tags=all_tags,
         shebang=shebang,
         no_ignore=no_ignore,
+        gitignore_file=gitignore_file,
         hidden=hidden,
         follow_symlinks=follow_symlinks,
         dirs_only=dirs_only,
@@ -211,7 +242,7 @@ def execute_findfmt(  # noqa: PLR0913
     match_count = 0
     delimiter = "\0" if config.null_delimited else "\n"
 
-    target_stream = stream if stream is not None else sys.stdout
+    target_stream, out_file = _open_output_sink(output, stream)
     pager_ctrl = pager_controller or PagerController(
         pager=pager,
         stream=target_stream,
@@ -248,14 +279,18 @@ def execute_findfmt(  # noqa: PLR0913
 
             yield file_info
 
-    _deliver_output(
-        formatter,
-        _matched_files(),
-        pager_ctrl,
-        target_stream,
-        pager=pager,
-        custom_controller=pager_controller is not None,
-    )
+    try:
+        _deliver_output(
+            formatter,
+            _matched_files(),
+            pager_ctrl,
+            target_stream,
+            pager=pager,
+            custom_controller=pager_controller is not None,
+        )
+    finally:
+        if out_file is not None:
+            out_file.close()
 
     if config.show_summary:
         write_summary(match_count, tag_counter, force_color=color)

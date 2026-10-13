@@ -2,17 +2,34 @@
 
 from __future__ import annotations
 
+import contextlib
+import os
 import re
+import shutil
+import subprocess
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pathspec
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     PathSpecType = pathspec.PathSpec[Any]
 else:
     PathSpecType = Any
+
+__all__ = [
+    "PathSpecType",
+    "find_git_repo_root",
+    "find_global_gitignore_path",
+    "is_path_ignored",
+    "load_ancestor_specs",
+    "load_child_specs",
+    "load_custom_gitignore_spec",
+    "load_git_exclude_spec",
+    "load_gitignore_spec",
+    "load_global_gitignore_spec",
+    "load_spec_file",
+]
 
 
 def load_spec_file(spec_file: Path) -> PathSpecType | None:
@@ -26,6 +43,69 @@ def load_spec_file(spec_file: Path) -> PathSpecType | None:
             return pathspec.PathSpec.from_lines("gitignore", lines) if lines else None
     except (OSError, ValueError, re.error):
         return None
+
+
+def _find_git_config_excludes_file() -> Path | None:
+    """Find core.excludesFile from git config if available and existing."""
+    git_path = shutil.which("git")
+    if not git_path:
+        return None
+
+    try:
+        proc = subprocess.run(  # noqa: S603
+            [git_path, "config", "--get", "core.excludesFile"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=2.0,
+        )
+        if proc.returncode == 0 and proc.stdout.strip():
+            configured = Path(proc.stdout.strip()).expanduser()
+            return configured if configured.is_file() else None
+    except (OSError, subprocess.SubprocessError):
+        pass
+
+    return None
+
+
+def _find_standard_global_gitignore() -> Path | None:
+    """Find global gitignore from standard XDG or home directory paths."""
+    xdg_env = os.environ.get("XDG_CONFIG_HOME")
+    if xdg_env:
+        xdg_path = Path(xdg_env) / "git" / "ignore"
+        if xdg_path.is_file():
+            return xdg_path
+    else:
+        with contextlib.suppress(OSError, RuntimeError):
+            xdg_path = Path.home() / ".config" / "git" / "ignore"
+            if xdg_path.is_file():
+                return xdg_path
+
+    with contextlib.suppress(OSError, RuntimeError):
+        legacy_path = Path.home() / ".gitignore"
+        if legacy_path.is_file():
+            return legacy_path
+
+    return None
+
+
+def find_global_gitignore_path() -> Path | None:
+    """Find path to user's global gitignore file from git config or standard paths."""
+    return _find_git_config_excludes_file() or _find_standard_global_gitignore()
+
+
+def load_global_gitignore_spec(spec_file: Path | None = None) -> PathSpecType | None:
+    """Load global gitignore patterns from git config or standard user paths."""
+    path = spec_file if spec_file is not None else find_global_gitignore_path()
+    return load_spec_file(path) if path is not None else None
+
+
+def load_custom_gitignore_spec(path: Path | str | None) -> PathSpecType | None:
+    """Load custom gitignore patterns from an external specification file."""
+    if path is None:
+        return None
+
+    return load_spec_file(Path(path).expanduser())
 
 
 def load_gitignore_spec(directory: Path) -> PathSpecType | None:
@@ -53,7 +133,7 @@ def load_git_exclude_spec(root: Path) -> PathSpecType | None:
         PathSpec instance if exclude patterns exist, or None.
     """
     git_path = root / ".git"
-    try:
+    with contextlib.suppress(OSError):
         if git_path.is_dir():
             return load_spec_file(git_path / "info" / "exclude")
 
@@ -61,10 +141,7 @@ def load_git_exclude_spec(root: Path) -> PathSpecType | None:
             content = git_path.read_text(encoding="utf-8", errors="replace").strip()
             if content.startswith("gitdir:"):
                 gitdir_str = content.split(":", 1)[1].strip()
-                gitdir = (root / gitdir_str).resolve()
-                return load_spec_file(gitdir / "info" / "exclude")
-    except OSError:
-        return None
+                return load_spec_file((root / gitdir_str).resolve() / "info" / "exclude")
 
     return None
 
@@ -87,14 +164,23 @@ def find_git_repo_root(start_dir: Path) -> Path | None:
         resolved = start_dir
 
     for directory in (resolved, *resolved.parents):
-        git_marker = directory / ".git"
-        try:
-            if git_marker.exists():
+        with contextlib.suppress(OSError):
+            if (directory / ".git").exists():
                 return directory
-        except OSError:
-            continue
 
     return None
+
+
+def _collect_ancestor_dirs(resolved: Path, git_root: Path | None) -> list[Path]:
+    """Collect ancestor directories from resolved path up to git root."""
+    ancestors = [resolved]
+    for parent in resolved.parents:
+        ancestors.append(parent)
+        if git_root is not None and parent == git_root:
+            break
+
+    ancestors.reverse()
+    return ancestors
 
 
 def load_ancestor_specs(root: Path) -> tuple[tuple[Path, PathSpecType], ...]:
@@ -115,16 +201,14 @@ def load_ancestor_specs(root: Path) -> tuple[tuple[Path, PathSpecType], ...]:
         resolved = root
 
     git_root = find_git_repo_root(resolved)
-
-    ancestors = [resolved]
-    for parent in resolved.parents:
-        ancestors.append(parent)
-        if git_root is not None and parent == git_root:
-            break
-
-    ancestors.reverse()
+    ancestors = _collect_ancestor_dirs(resolved, git_root)
 
     specs: list[tuple[Path, PathSpecType]] = []
+    global_spec = load_global_gitignore_spec()
+    if global_spec:
+        base_dir = git_root if git_root is not None else resolved
+        specs.append((base_dir, global_spec))
+
     if git_root is not None:
         git_exclude = load_git_exclude_spec(git_root)
         if git_exclude:

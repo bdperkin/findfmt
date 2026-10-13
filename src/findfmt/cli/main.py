@@ -116,6 +116,10 @@ def findfmt(
         bool,
         typer.Option("--no-ignore/--ignore", rich_help_panel=_PC, help=h.HELP_NO_IGNORE),
     ] = False,
+    gitignore_file: Annotated[
+        Path | None,
+        typer.Option("--gitignore-file", rich_help_panel=_PC, help=h.HELP_GITIGNORE_FILE),
+    ] = None,
     hidden: Annotated[
         bool,
         typer.Option("--hidden/--no-hidden", rich_help_panel=_PC, help=h.HELP_HIDDEN),
@@ -161,6 +165,10 @@ def findfmt(
             help=h.HELP_FORMAT,
         ),
     ] = OutputFormat.TEXT,
+    output: Annotated[
+        Path | None,
+        typer.Option("-o", "--output", rich_help_panel=_PO, help=h.HELP_OUTPUT),
+    ] = None,
     tree: Annotated[
         bool,
         typer.Option("--tree/--no-tree", rich_help_panel=_PO, help=h.HELP_TREE),

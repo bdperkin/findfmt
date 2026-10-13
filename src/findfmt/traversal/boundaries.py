@@ -12,6 +12,7 @@ from findfmt.traversal.ignore import (
     is_path_ignored,
     load_ancestor_specs,
     load_child_specs,
+    load_custom_gitignore_spec,
 )
 from findfmt.traversal.patterns import matches_pattern_criteria
 from findfmt.traversal.symlinks import init_visited_dirs, should_skip_symlink_dir
@@ -49,12 +50,20 @@ def resolve_active_specs(
     active_specs: tuple[tuple[Path, PathSpecType], ...] | None,
     *,
     respect_gitignore: bool,
+    gitignore_file: Path | None = None,
 ) -> tuple[tuple[Path, PathSpecType], ...]:
     """Resolve active gitignore specifications for current traversal frame."""
-    if not respect_gitignore:
-        return ()
+    if active_specs is not None:
+        return active_specs
 
-    return active_specs if active_specs is not None else load_ancestor_specs(root)
+    specs: list[tuple[Path, PathSpecType]] = []
+    if respect_gitignore:
+        specs.extend(load_ancestor_specs(root))
+
+    if gitignore_file is not None and (custom_spec := load_custom_gitignore_spec(gitignore_file)):
+        specs.append((root, custom_spec))
+
+    return tuple(specs)
 
 
 def check_device_boundary(path: Path, root_dev: int | None) -> bool:
@@ -67,11 +76,9 @@ def check_device_boundary(path: Path, root_dev: int | None) -> bool:
 
 def resolve_device(root: Path, *, one_file_system: bool, root_dev: int | None) -> int | None:
     """Resolve the active filesystem device identifier for traversal."""
-    if not one_file_system:
-        return None
-
-    with contextlib.suppress(OSError):
-        return root_dev if root_dev is not None else root.stat().st_dev
+    if one_file_system:
+        with contextlib.suppress(OSError):
+            return root_dev if root_dev is not None else root.stat().st_dev
 
     return None
 
@@ -104,10 +111,9 @@ def _matches_tags(tags: frozenset[str], config: TraversalConfig) -> bool:
     if not config.include_tags:
         return True
 
-    if config.all_tags:
-        return config.include_tags.issubset(tags)
-
-    return bool(tags & config.include_tags)
+    return (
+        config.include_tags.issubset(tags) if config.all_tags else bool(tags & config.include_tags)
+    )
 
 
 def matches_filter(
@@ -118,12 +124,11 @@ def matches_filter(
     inherited_match: bool = False,
 ) -> bool:
     """Determine whether a classified file satisfies filter criteria."""
-    if not file_info.path.is_dir():
-        if not _matches_tags(file_info.tags, config):
-            return False
-
-        if not _matches_shebang(file_info.shebang, config.shebang_filter):
-            return False
+    if not file_info.path.is_dir() and (
+        not _matches_tags(file_info.tags, config)
+        or not _matches_shebang(file_info.shebang, config.shebang_filter)
+    ):
+        return False
 
     return matches_pattern_criteria(
         file_info,
@@ -151,7 +156,11 @@ def filter_directory_entry(  # noqa: PLR0913
         return None
 
     is_dir = entry.is_dir(follow_symlinks=config.follow_symlinks)
-    if config.respect_gitignore and is_path_ignored(entry_path, is_dir=is_dir, specs=specs):
+    if (config.respect_gitignore or specs) and is_path_ignored(
+        entry_path,
+        is_dir=is_dir,
+        specs=specs,
+    ):
         return None
 
     if matcher and matcher.should_exclude(entry_path, is_dir=is_dir, base_root=base_root):
@@ -230,7 +239,7 @@ def has_matching_descendants(  # noqa: PLR0913
 
     effective_root = base_root if base_root is not None else directory
     for subdir in subdirs:
-        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else ()
+        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else specs
         child_inherit = bool(
             matcher
             and matcher.should_inherit_match(
@@ -269,7 +278,7 @@ def yield_matching_items(  # noqa: PLR0913
     """Yield FileInfo records for candidate paths that satisfy filters and pruning."""
     for path in targets:
         if config.dirs_only and config.prune_empty:
-            child_specs = load_child_specs(path, specs) if config.respect_gitignore else ()
+            child_specs = load_child_specs(path, specs) if config.respect_gitignore else specs
             if not has_matching_descendants(
                 path,
                 config,
