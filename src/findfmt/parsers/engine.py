@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 import identify.identify as identify_engine
 
-from findfmt.classifier import classify_file
+from findfmt.classifier import _adjust_nt_tags, classify_file
 from findfmt.models import FileInfo, SortKey
 from findfmt.parsers.flat_parser import parse_flat_listing
 from findfmt.parsers.tab_parser import parse_tab_outline
@@ -86,12 +86,7 @@ def classify_file_offline(
         pathext = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC").split(";")
         is_executable = any(path.name.upper().endswith(ext.upper()) for ext in pathext if ext)
 
-    if is_executable:
-        tags.discard("non-executable")
-        tags.add("executable")
-    elif os.name == "nt":
-        tags.discard("executable")
-        tags.add("non-executable")
+    _adjust_nt_tags(tags, is_executable=is_executable)
 
     return FileInfo(
         path=path,

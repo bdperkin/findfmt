@@ -6,6 +6,8 @@ import io
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from findfmt.models import FileInfo, SortKey, TraversalConfig
 from findfmt.parsers.engine import (
     _read_lines,
@@ -47,24 +49,37 @@ def test_classify_file_offline_posix_and_symlink() -> None:
     assert info.size_bytes == 0
 
 
-def test_classify_file_offline_windows_executable() -> None:
+def test_classify_file_offline_windows_executable(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify offline classification under Windows executable rules."""
     exe_path = Path("app.exe")
     txt_path = Path("notes.txt")
-    with patch("os.name", "nt"), patch.dict("os.environ", {"PATHEXT": ".EXE;.BAT"}):
-        exe_info = classify_file_offline(
-            exe_path,
-            relative_path=exe_path,
-        )
-        assert exe_info.is_executable is True
-        assert "executable" in exe_info.tags
+    monkeypatch.setattr("os.name", "nt")
+    monkeypatch.setenv("PATHEXT", ".EXE;.BAT")
+    exe_info = classify_file_offline(
+        exe_path,
+        relative_path=exe_path,
+    )
+    assert exe_info.is_executable is True
+    assert "executable" in exe_info.tags
 
-        txt_info = classify_file_offline(
-            txt_path,
-            relative_path=txt_path,
-        )
-        assert txt_info.is_executable is False
-        assert "non-executable" in txt_info.tags
+    txt_info = classify_file_offline(
+        txt_path,
+        relative_path=txt_path,
+    )
+    assert txt_info.is_executable is False
+    assert "non-executable" in txt_info.tags
+
+
+def test_classify_file_offline_posix(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify offline classification under POSIX rules."""
+    script_path = Path("script.sh")
+    monkeypatch.setattr("os.name", "posix")
+    info = classify_file_offline(
+        script_path,
+        relative_path=script_path,
+    )
+    assert info.is_executable is False
+    assert "executable" not in info.tags
 
 
 def test_resolve_and_classify_online_vs_offline(tmp_path: Path) -> None:
