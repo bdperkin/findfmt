@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1] - 2026-10-13
+
+### Features
+
+- *(cli)* Implement input options (`--from-file`, tab-indented parsing, symlink processing) (#24)
+  (#164)
+- *(traversal)* Add `-a`/`--all` alias and comprehensive traversal integration tests (#19) (#165)
+- *(traversal)* Implement ignore engine extensions and file output redirection (#53) (#162)
+- *(traversal)* Implement Unix-inspired sorting options (#21) (#163)
+
+### Refactoring
+
+- *(cli)* Modularize flat CLI modules into dedicated `cli` package (#159)
+- *(traversal)* Modularize flat traversal modules into dedicated `traversal` package (#161)
+
 ## [0.4.0] - 2026-10-12
 
 ### Features
