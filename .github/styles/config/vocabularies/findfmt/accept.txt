@@ -88,3 +88,4 @@
 (?i)ndjson
 (?i)serializer
 (?i)serializers
+(?i)subtrees

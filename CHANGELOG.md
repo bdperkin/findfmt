@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-12
+
+### Features
+
+- *(cli)* Add interactive pager for `--help`, `--help-all`, and tall TTY diagnostic outputs (#149)
+- *(cli)* Add relative path prefix option to preserve target path in listings (#145) (#154)
+- *(traversal)* Expand `.gitignore` and `.git/info/exclude` discovery across ancestor hierarchy and
+  nested subtrees (#146) (#155)
+- *(traversal)* Implement traversal boundaries, depth limits, and pruning (#156)
+- *(traversal)* Implement wildcard and glob pattern matching (-P, -I, --ignore-case, --match-dirs)
+  (#157)
+
+### Bug Fixes
+
+- *(cli)* Preserve ANSI colorization when paging `--help` output (#151) (#152)
+
+### Documentation
+
+- *(security)* Document constrained PyPI and TestPyPI environment scoping (#148)
+
+### Dependencies
+
+- *(deps)* Update pre-commit hooks (#153)
+
 ## [0.3.0] - 2026-10-09
 
 ### Features
