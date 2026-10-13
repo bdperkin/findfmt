@@ -80,6 +80,14 @@ OptGitignoreFile = Annotated[
     Path | None,
     typer.Option("--gitignore-file", rich_help_panel=_PC, help=h.HELP_GITIGNORE_FILE),
 ]
+OptFromFile = Annotated[
+    str | None,
+    typer.Option("--from-file", "--fromfile", rich_help_panel=_PC, help=h.HELP_FROM_FILE),
+]
+OptOffline = Annotated[
+    bool,
+    typer.Option("--offline", rich_help_panel=_PC, help=h.HELP_OFFLINE),
+]
 OptHidden = Annotated[
     bool,
     typer.Option("--hidden/--no-hidden", rich_help_panel=_PC, help=h.HELP_HIDDEN),

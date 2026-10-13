@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from findfmt.classifier import classify_file, compute_relative_prefix
 from findfmt.models import SortKey
+from findfmt.parsers import ingest_from_file
 from findfmt.traversal.boundaries import (
     check_depth_limit,
     filter_directory_entry,
@@ -247,7 +248,11 @@ def traverse_directory(  # noqa: PLR0913
 
 
 def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
-    """Discover and classify files across all configured root paths."""
+    """Discover and classify files across all configured root paths or external listings."""
+    if config.from_file is not None:
+        yield from ingest_from_file(config)
+        return
+
     matcher = create_pattern_matcher(config)
     roots = config.root_paths if config.sort_by == SortKey.NONE else sorted(config.root_paths)
     for root in roots:

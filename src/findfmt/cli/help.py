@@ -25,6 +25,7 @@ __all__ = [
     "HELP_FILE_LIMIT",
     "HELP_FOLLOW_SYMLINKS",
     "HELP_FORMAT",
+    "HELP_FROM_FILE",
     "HELP_GITIGNORE_FILE",
     "HELP_HELP_ALL",
     "HELP_HIDDEN",
@@ -35,6 +36,7 @@ __all__ = [
     "HELP_MAX_DEPTH",
     "HELP_NO_IGNORE",
     "HELP_NO_INDENT",
+    "HELP_OFFLINE",
     "HELP_ONE_FILE_SYSTEM",
     "HELP_OUTPUT",
     "HELP_PAGER",
@@ -82,6 +84,10 @@ HELP_ALL_TAGS = "Require matching files to have ALL specified tags rather than A
 HELP_SHEBANG = "Filter files whose shebang contains this interpreter or pattern."
 HELP_NO_IGNORE = "Do not respect .gitignore rules during traversal."
 HELP_GITIGNORE_FILE = "Load and enforce an external gitignore file across the traversal scope."
+HELP_FROM_FILE = (
+    "Read directory listing from a file or standard input ('-') instead of scanning filesystem."
+)
+HELP_OFFLINE = "Enforce offline extension- and filename-only identification without disk IO."
 HELP_HIDDEN = "Include hidden files and directories."
 HELP_FOLLOW_SYMLINKS = "Follow symbolic links during traversal."
 HELP_DIRS_ONLY = "List directories only, suppressing regular file entries."
@@ -172,6 +178,8 @@ def get_help_all() -> str:
         "  --prune                       Omit directories containing zero matching files.\n"
         "  --no-ignore / --ignore        Do not respect .gitignore rules [default: ignore].\n"
         "  --gitignore-file <path>       Apply custom ignore file across traversal scope.\n"
+        "  --from-file, --fromfile <p>   Read paths from file or standard input ('-').\n"
+        "  --offline                     Enforce offline filename identification.\n"
         "  --hidden / --no-hidden        Include hidden files and dirs [default: no-hidden].\n"
         "  --sort <criteria>             Sort files (name, version, time, ctime, size, none)\n"
         "                                [default: name].\n"

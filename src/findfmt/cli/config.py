@@ -17,13 +17,14 @@ if TYPE_CHECKING:
 __all__ = ["build_traversal_config", "validate_cli_options"]
 
 
-def validate_cli_options(
+def validate_cli_options(  # noqa: PLR0913
     *,
     gitignore_file: Path | None,
     sort: str | None,
     unsorted: bool,
     dirs_first: bool,
     files_first: bool,
+    from_file: str | None = None,
 ) -> SortKey:
     """Validate CLI flag combinations and return resolved canonical SortKey.
 
@@ -33,6 +34,7 @@ def validate_cli_options(
         unsorted: Whether raw unsorted mode flag is set.
         dirs_first: Whether directories first grouping is requested.
         files_first: Whether files first grouping is requested.
+        from_file: Optional input file path or '-' for stdin.
 
     Returns:
         Resolved canonical SortKey enum value.
@@ -43,6 +45,12 @@ def validate_cli_options(
     if gitignore_file is not None and not gitignore_file.is_file():
         typer.echo(f"Error: Gitignore file '{gitignore_file}' not found.", err=True)
         raise typer.Exit(code=2)
+
+    if from_file is not None and from_file != "-":
+        from_file_path = Path(from_file)
+        if not from_file_path.is_file():
+            typer.echo(f"Error: Input file '{from_file}' not found.", err=True)
+            raise typer.Exit(code=2)
 
     if dirs_first and files_first:
         typer.echo("Error: Cannot specify both --dirsfirst and --filesfirst.", err=True)
@@ -86,6 +94,8 @@ def build_traversal_config(  # noqa: PLR0913
     unsorted: bool = False,
     dirs_first: bool = False,
     files_first: bool = False,
+    from_file: str | None = None,
+    offline: bool = False,
 ) -> TraversalConfig:
     """Build and validate TraversalConfig from CLI options.
 
@@ -119,6 +129,8 @@ def build_traversal_config(  # noqa: PLR0913
         unsorted: Whether to disable sorting.
         dirs_first: Whether directories precede files.
         files_first: Whether files precede directories.
+        from_file: Input file or '-' for stdin.
+        offline: Whether to enforce offline classification.
 
     Returns:
         Configured TraversalConfig instance.
@@ -129,6 +141,7 @@ def build_traversal_config(  # noqa: PLR0913
         unsorted=unsorted,
         dirs_first=dirs_first,
         files_first=files_first,
+        from_file=from_file,
     )
 
     root_paths = tuple(paths) if paths else (Path(),)
@@ -165,4 +178,6 @@ def build_traversal_config(  # noqa: PLR0913
         reverse_sort=reverse,
         dirs_first=dirs_first,
         files_first=files_first,
+        from_file=from_file,
+        offline=offline,
     )

@@ -52,6 +52,15 @@ patterns. If a directory matches, pattern restrictions are disabled for its chil
 
 `--gitignore-file PATH` : Apply a specific external ignore file across the traversal scope.
 
+`--from-file, --fromfile PATH` : Ingest directory listings and path structures from an external file
+or standard input (`-`) instead of scanning the local filesystem. Supports both flat
+newline-delimited paths (e.g. from `find` or `git ls-files`) and tab- or space-indented outlines
+with automatic hierarchy and symlink (`link -> target`) detection.
+
+`--offline` : Enforce offline classification without inspecting the local filesystem. Identifies
+file formats and types strictly via extension and filename heuristics, operating gracefully when
+analyzing remote manifests or containers without raising filesystem IO errors.
+
 `--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`. Use
 `--ignore` to restore `.gitignore` honoring.
 

@@ -34,6 +34,7 @@ class FileInfo:
         mime_type: Detected MIME type if available, otherwise None.
         is_executable: Whether the file has executable permissions.
         is_symlink: Whether the path is a symbolic link.
+        symlink_target: Target path if the file is a symbolic link, otherwise None.
         size_bytes: File size in bytes.
     """
 
@@ -44,6 +45,7 @@ class FileInfo:
     mime_type: str | None = None
     is_executable: bool = False
     is_symlink: bool = False
+    symlink_target: str | None = None
     size_bytes: int = 0
 
     def to_dict(self, *, absolute: bool = False) -> dict[str, Any]:
@@ -55,7 +57,7 @@ class FileInfo:
         Returns:
             Dictionary mapping attribute names to serialized values.
         """
-        return {
+        result: dict[str, Any] = {
             "path": str(self.path if absolute else self.relative_path),
             "relative_path": str(self.relative_path),
             "tags": sorted(self.tags),
@@ -65,6 +67,10 @@ class FileInfo:
             "is_symlink": self.is_symlink,
             "size_bytes": self.size_bytes,
         }
+        if self.symlink_target is not None:
+            result["symlink_target"] = self.symlink_target
+
+        return result
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +106,8 @@ class TraversalConfig:
         reverse_sort: Whether to invert the active sort order.
         dirs_first: Whether to list directories before files within directory levels.
         files_first: Whether to list files before directories within directory levels.
+        from_file: Input file path or '-' for stdin to ingest directory structure from.
+        offline: Whether to enforce extension-only classification without disk access.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -130,3 +138,5 @@ class TraversalConfig:
     reverse_sort: bool = False
     dirs_first: bool = False
     files_first: bool = False
+    from_file: str | None = None
+    offline: bool = False

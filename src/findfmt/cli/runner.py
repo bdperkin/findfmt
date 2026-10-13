@@ -105,6 +105,8 @@ def execute_findfmt(  # noqa: PLR0913
     unsorted: bool = False,
     dirs_first: bool = False,
     files_first: bool = False,
+    from_file: str | None = None,
+    offline: bool = False,
     find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]] = find_files,
     pager: bool | None = None,
     stream: TextIO | None = None,
@@ -149,6 +151,8 @@ def execute_findfmt(  # noqa: PLR0913
         unsorted: Whether to disable sorting.
         dirs_first: Whether to group directories first.
         files_first: Whether to group files first.
+        from_file: Optional input file or '-' for stdin to ingest directory structure.
+        offline: Whether to enforce offline classification without disk access.
         find_files_func: Traversal generator function to execute.
         pager: Optional interactive pager override flag.
         stream: Target output text stream (defaults to sys.stdout).
@@ -190,6 +194,8 @@ def execute_findfmt(  # noqa: PLR0913
         unsorted=unsorted,
         dirs_first=dirs_first,
         files_first=files_first,
+        from_file=from_file,
+        offline=offline,
     )
 
     tag_counter: Counter[str] = Counter()

@@ -68,18 +68,24 @@ def test_traversal_config_defaults():
     assert not config.reverse_sort
     assert not config.dirs_first
     assert not config.files_first
+    assert config.from_file is None
+    assert not config.offline
 
     custom = TraversalConfig(
         relative_prefix=True,
         sort_by=SortKey.SIZE,
         reverse_sort=True,
         dirs_first=True,
+        from_file="dump.txt",
+        offline=True,
     )
     assert custom.relative_prefix
     assert custom.sort_by == SortKey.SIZE
     assert custom.reverse_sort
     assert custom.dirs_first
     assert not custom.files_first
+    assert custom.from_file == "dump.txt"
+    assert custom.offline
 
 
 def test_file_info_to_dict():
@@ -98,7 +104,19 @@ def test_file_info_to_dict():
     assert d_rel["relative_path"] == "test.sh"
     assert d_rel["tags"] == ["shell", "text"]
     assert d_rel["shebang"] == "#!/bin/bash"
+    assert "symlink_target" not in d_rel
 
     d_abs = info.to_dict(absolute=True)
     assert d_abs["path"] == str(info.path)
     assert d_abs["relative_path"] == "test.sh"
+
+    # Test symlink_target present
+    info_symlink = FileInfo(
+        path=Path("/tmp/dir/link"),
+        relative_path=Path("link"),
+        is_symlink=True,
+        symlink_target="/tmp/dir/target",
+    )
+    d_sym = info_symlink.to_dict()
+    assert d_sym["is_symlink"] is True
+    assert d_sym["symlink_target"] == "/tmp/dir/target"
