@@ -21,16 +21,18 @@ def test_cli_include_pattern_single_and_multiple(sample_repo: Path) -> None:
     # Single pattern
     res_py = runner.invoke(app, [str(sample_repo), "-P", "*.py"])
     assert res_py.exit_code == 0
-    assert "src/app.py" in res_py.stdout
-    assert "README.md" not in res_py.stdout
-    assert "src/config.json" not in res_py.stdout
+    stdout_py = res_py.stdout.replace("\\", "/")
+    assert "src/app.py" in stdout_py
+    assert "README.md" not in stdout_py
+    assert "src/config.json" not in stdout_py
 
     # Multiple -P patterns
     res_multi = runner.invoke(app, [str(sample_repo), "-P", "*.py", "-P", "*.md"])
     assert res_multi.exit_code == 0
-    assert "src/app.py" in res_multi.stdout
-    assert "README.md" in res_multi.stdout
-    assert "src/config.json" not in res_multi.stdout
+    stdout_multi = res_multi.stdout.replace("\\", "/")
+    assert "src/app.py" in stdout_multi
+    assert "README.md" in stdout_multi
+    assert "src/config.json" not in stdout_multi
 
 
 def test_cli_include_pattern_pipe_alternation(sample_repo: Path) -> None:
@@ -38,9 +40,10 @@ def test_cli_include_pattern_pipe_alternation(sample_repo: Path) -> None:
     runner = CliRunner()
     res = runner.invoke(app, [str(sample_repo), "-P", "*.py|*.json"])
     assert res.exit_code == 0
-    assert "src/app.py" in res.stdout
-    assert "src/config.json" in res.stdout
-    assert "README.md" not in res.stdout
+    stdout = res.stdout.replace("\\", "/")
+    assert "src/app.py" in stdout
+    assert "src/config.json" in stdout
+    assert "README.md" not in stdout
 
 
 def test_cli_exclude_pattern_single_and_multiple(sample_repo: Path) -> None:
@@ -50,16 +53,18 @@ def test_cli_exclude_pattern_single_and_multiple(sample_repo: Path) -> None:
     # Single exclusion
     res = runner.invoke(app, [str(sample_repo), "-I", "*.py"])
     assert res.exit_code == 0
-    assert "src/app.py" not in res.stdout
-    assert "README.md" in res.stdout
-    assert "src/config.json" in res.stdout
+    stdout = res.stdout.replace("\\", "/")
+    assert "src/app.py" not in stdout
+    assert "README.md" in stdout
+    assert "src/config.json" in stdout
 
     # Multiple exclusions
     res_multi = runner.invoke(app, [str(sample_repo), "-I", "*.py", "-I", "*.md"])
     assert res_multi.exit_code == 0
-    assert "src/app.py" not in res_multi.stdout
-    assert "README.md" not in res_multi.stdout
-    assert "src/config.json" in res_multi.stdout
+    stdout_multi = res_multi.stdout.replace("\\", "/")
+    assert "src/app.py" not in stdout_multi
+    assert "README.md" not in stdout_multi
+    assert "src/config.json" in stdout_multi
 
 
 def test_cli_pattern_case_insensitivity(tmp_path: Path) -> None:
