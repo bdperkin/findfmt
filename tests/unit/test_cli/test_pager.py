@@ -15,7 +15,7 @@ from rich.pager import Pager
 from typer.testing import CliRunner
 
 from findfmt.cli import app
-from findfmt.cli_runner import execute_findfmt
+from findfmt.cli.runner import execute_findfmt
 from findfmt.formatters import OutputFormat
 from findfmt.models import FileInfo
 from findfmt.terminal import PagerController

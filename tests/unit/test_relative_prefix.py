@@ -9,7 +9,7 @@ import pytest
 from typer.testing import CliRunner
 
 from findfmt.cli import app
-from findfmt.cli_help import get_help_all
+from findfmt.cli.help import get_help_all
 from findfmt.models import TraversalConfig
 from findfmt.traversal import find_files
 

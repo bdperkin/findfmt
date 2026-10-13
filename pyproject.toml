@@ -125,14 +125,14 @@ lint.ignore = [
   "ISC001", # Single line implicit string concatenation (formatter conflict)
 ]
 lint.per-file-ignores."docs/**/*" = [ "A001", "INP001" ]
-lint.per-file-ignores."src/findfmt/cli.py" = [
+lint.per-file-ignores."src/findfmt/cli/help.py" = [ "FBT001", "FBT002" ]
+lint.per-file-ignores."src/findfmt/cli/main.py" = [
   "ARG001",
   "FBT001",
   "FBT002",
   "PLR0913",
   "PLR0917",
 ]
-lint.per-file-ignores."src/findfmt/cli_help.py" = [ "FBT001", "FBT002" ]
 lint.per-file-ignores."src/findfmt/diagnostics.py" = [ "FBT001", "FBT002" ]
 lint.per-file-ignores."src/findfmt/entrypoints.py" = [ "PLC0415" ]
 lint.per-file-ignores."tests/**/*" = [

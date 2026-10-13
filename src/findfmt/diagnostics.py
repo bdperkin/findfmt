@@ -11,7 +11,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 import typer
 
-from findfmt.cli_pager import display_with_pager
+from findfmt.cli.pager import display_with_pager
 
 __all__ = [
     "diagnostics_callback",

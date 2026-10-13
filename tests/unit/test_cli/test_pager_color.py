@@ -16,7 +16,7 @@ import typer
 import typer.core
 from rich.pager import Pager
 
-from findfmt.cli_pager import (
+from findfmt.cli.pager import (
     FindfmtCommand,
     _capture_help_output,
     _extract_raw_args,

@@ -5,7 +5,7 @@ from __future__ import annotations
 import typer
 
 from findfmt.classifier import get_known_tags
-from findfmt.cli_pager import display_with_pager
+from findfmt.cli.pager import display_with_pager
 from findfmt.diagnostics import get_version
 
 __all__ = [

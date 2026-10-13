@@ -18,7 +18,7 @@ from rich.pager import Pager
 from typer.testing import CliRunner
 
 from findfmt.cli import app
-from findfmt.cli_pager import (
+from findfmt.cli.pager import (
     FindfmtCommand,
     _extract_from_frame,
     _extract_raw_args,

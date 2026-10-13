@@ -41,7 +41,7 @@ component_management:
       paths: [src/findfmt/traversal.py]
     - component_id: cli
       name: cli
-      paths: [src/findfmt/cli.py, src/findfmt/__main__.py]
+      paths: [src/findfmt/cli/**, src/findfmt/__main__.py]
     - component_id: models
       name: models
       paths: [src/findfmt/models.py]

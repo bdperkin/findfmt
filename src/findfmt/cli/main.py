@@ -7,9 +7,9 @@ from typing import Annotated
 
 import typer
 
-from findfmt import cli_help as h
-from findfmt.cli_pager import FindfmtCommand
-from findfmt.cli_runner import execute_findfmt
+from findfmt.cli import help as h
+from findfmt.cli.pager import FindfmtCommand
+from findfmt.cli.runner import execute_findfmt
 from findfmt.diagnostics import (
     diagnostics_callback,
     get_diagnostics,

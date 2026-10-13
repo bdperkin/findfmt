@@ -207,7 +207,7 @@ def test_posix_double_dash_hyphenated_dir(tmp_path: Path, monkeypatch: pytest.Mo
 
 def test_cli_default_path():
     runner = CliRunner()
-    with patch("findfmt.cli.find_files", return_value=[]):
+    with patch("findfmt.cli.runner.find_files", return_value=[]):
         result = runner.invoke(app, [])
         assert result.exit_code == 0
 

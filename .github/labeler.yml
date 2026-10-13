@@ -2,7 +2,7 @@
 # Configuration for actions/labeler
 area:cli:
   - changed-files:
-      - any-glob-to-any-file: [src/findfmt/cli.py, src/findfmt/__main__.py]
+      - any-glob-to-any-file: [src/findfmt/cli/**, src/findfmt/__main__.py]
 area:classifier:
   - changed-files:
       - any-glob-to-any-file: [src/findfmt/classifier.py]
