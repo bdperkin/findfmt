@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from findfmt.cli.config import build_traversal_config, validate_cli_options
 from findfmt.cli.help import (
     get_help_all,
     help_all_callback,
@@ -32,6 +33,7 @@ __all__ = [
     "FindfmtCommand",
     "PagerController",
     "app",
+    "build_traversal_config",
     "diagnostics_callback",
     "display_with_pager",
     "execute_findfmt",
@@ -49,5 +51,6 @@ __all__ = [
     "main_findfmt0",
     "main_findshebang",
     "main_findsummary",
+    "validate_cli_options",
     "version_callback",
 ]

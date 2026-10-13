@@ -17,9 +17,11 @@ __all__ = [
     "HELP_COLOR",
     "HELP_CP437",
     "HELP_DIAGNOSTICS",
+    "HELP_DIRS_FIRST",
     "HELP_DIRS_ONLY",
     "HELP_EXCLUDE_PATTERN",
     "HELP_EXCLUDE_TAGS",
+    "HELP_FILES_FIRST",
     "HELP_FILE_LIMIT",
     "HELP_FOLLOW_SYMLINKS",
     "HELP_FORMAT",
@@ -41,11 +43,14 @@ __all__ = [
     "HELP_PRINT0",
     "HELP_PRUNE",
     "HELP_RELATIVE",
+    "HELP_REVERSE",
     "HELP_SHEBANG",
+    "HELP_SORT",
     "HELP_SUMMARY",
     "HELP_TABLE_STYLE",
     "HELP_TAGS",
     "HELP_TREE",
+    "HELP_UNSORTED",
     "HELP_VERBOSE",
     "HELP_VERSION",
     "get_help_all",
@@ -90,6 +95,13 @@ HELP_EXCLUDE_PATTERN = (
 )
 HELP_IGNORE_CASE = "Apply case-insensitive matching across -P and -I patterns."
 HELP_MATCH_DIRS = "Match directory names against patterns; matched dirs inherit to children."
+HELP_SORT = "Sort files by criteria: name, version, time (mtime), ctime, size, none."
+HELP_REVERSE = "Invert the active sort order."
+HELP_UNSORTED = (
+    "Do not sort entries; yield files in raw filesystem order (equivalent to --sort=none)."
+)
+HELP_DIRS_FIRST = "List directories before files within each directory level."
+HELP_FILES_FIRST = "List files before directories within each directory level."
 HELP_FORMAT = (
     "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
     "markdown, md, rst, table, tree, ndjson)."
@@ -160,7 +172,13 @@ def get_help_all() -> str:
         "  --prune                       Omit directories containing zero matching files.\n"
         "  --no-ignore / --ignore        Do not respect .gitignore rules [default: ignore].\n"
         "  --gitignore-file <path>       Apply custom ignore file across traversal scope.\n"
-        "  --hidden / --no-hidden        Include hidden files and dirs [default: no-hidden].\n\n"
+        "  --hidden / --no-hidden        Include hidden files and dirs [default: no-hidden].\n"
+        "  --sort <criteria>             Sort files (name, version, time, ctime, size, none)\n"
+        "                                [default: name].\n"
+        "  --reverse, -r                 Invert active sort order.\n"
+        "  --unsorted, -U                Raw directory order without sorting.\n"
+        "  --dirsfirst                   List directories before files within directory levels.\n"
+        "  --filesfirst                  List files before directories within directory levels.\n\n"
         "Output Formatting:\n"
         "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb,\n"
         "                                csv, csv-table, tsv, markdown, rst, table, tree)\n"

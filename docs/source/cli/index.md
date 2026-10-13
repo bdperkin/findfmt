@@ -58,6 +58,21 @@ patterns. If a directory matches, pattern restrictions are disabled for its chil
 `--hidden / --no-hidden` : Traverse hidden files and directories (names starting with `.`). Use
 `--no-hidden` to exclude hidden paths.
 
+`--sort CRITERIA` : Sort entries by criteria: `name` (default), `version` (natural numbers), `time`
+(or `mtime`, newest first), `ctime` (status change, newest first), `size` (largest first), or `none`
+(unsorted).
+
+`-r, --reverse` : Invert active sort order (e.g. oldest first for time, smallest first for size,
+reverse alphabetical for name).
+
+`-U, --unsorted` : Do not sort entries; yield files in raw filesystem order (equivalent to
+`--sort=none`). Bypasses sorting overhead and memory buffering for massive trees.
+
+`--dirsfirst, --group-directories-first` : Group all directories before files within each directory
+level, sorting each group by active criteria.
+
+`--filesfirst` : Group all regular files before directories within each directory level.
+
 ### 2.3. Output Controls
 
 - `-f, --format FORMAT` : Choose the output serialization format (`text`, `json`, `jsonl`, `yaml`,

@@ -13,7 +13,7 @@ from findfmt.entrypoints import (
     main_findsummary,
 )
 from findfmt.formatters import Formatter, OutputFormat, get_formatter
-from findfmt.models import FileInfo, TraversalConfig
+from findfmt.models import FileInfo, SortKey, TraversalConfig
 from findfmt.traversal import find_files, traverse_directory
 
 __version__ = get_version()
@@ -22,6 +22,7 @@ __all__ = [
     "FileInfo",
     "Formatter",
     "OutputFormat",
+    "SortKey",
     "TraversalConfig",
     "__version__",
     "classify_file",

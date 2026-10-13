@@ -12,6 +12,11 @@ from findfmt.traversal.ignore import (
     load_global_gitignore_spec,
 )
 from findfmt.traversal.patterns import PatternMatcher, create_pattern_matcher
+from findfmt.traversal.sorting import (
+    natural_sort_key,
+    resolve_sort_key,
+    sort_directory_entries,
+)
 
 __all__ = [
     "PatternMatcher",
@@ -23,6 +28,9 @@ __all__ = [
     "load_gitignore_spec",
     "load_global_gitignore_spec",
     "matches_filter",
+    "natural_sort_key",
+    "resolve_sort_key",
     "should_skip_dir",
+    "sort_directory_entries",
     "traverse_directory",
 ]

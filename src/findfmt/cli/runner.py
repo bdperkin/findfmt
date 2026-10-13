@@ -5,14 +5,14 @@ from __future__ import annotations
 import io
 import sys
 from collections import Counter
-from pathlib import Path
+from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, TextIO, cast
 
 import typer
 
+from findfmt.cli.config import build_traversal_config
 from findfmt.formatters import OutputFormat, get_formatter
-from findfmt.models import TraversalConfig
-from findfmt.summary import parse_tag_arguments, write_summary
+from findfmt.summary import write_summary
 from findfmt.terminal import PagerController, is_color_enabled
 from findfmt.traversal import find_files
 
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 
     from findfmt.formatters.base import Formatter
-    from findfmt.models import FileInfo
+    from findfmt.models import FileInfo, TraversalConfig
 
 __all__ = ["execute_findfmt"]
 
@@ -71,63 +71,6 @@ def _open_output_sink(
         return out_file, out_file
 
 
-def _build_traversal_config(  # noqa: PLR0913
-    paths: list[Path] | None,
-    tags: list[str] | None,
-    exclude_tags: list[str] | None,
-    *,
-    all_tags: bool,
-    shebang: str | None,
-    no_ignore: bool,
-    gitignore_file: Path | None = None,
-    hidden: bool,
-    follow_symlinks: bool,
-    dirs_only: bool,
-    one_file_system: bool,
-    max_depth: int | None,
-    file_limit: int | None,
-    prune: bool,
-    pattern: list[str] | None,
-    exclude_pattern: list[str] | None,
-    ignore_case: bool,
-    match_dirs: bool,
-    absolute: bool,
-    relative: bool,
-    print0: bool,
-    list_tags: bool,
-    summary: bool,
-    output_format: str,
-) -> TraversalConfig:
-    """Build a TraversalConfig instance from execution parameters."""
-    root_paths = tuple(paths) if paths else (Path(),)
-    return TraversalConfig(
-        root_paths=root_paths,
-        include_tags=parse_tag_arguments(tags),
-        exclude_tags=parse_tag_arguments(exclude_tags),
-        all_tags=all_tags,
-        shebang_filter=shebang,
-        respect_gitignore=not no_ignore,
-        gitignore_file=gitignore_file,
-        include_hidden=hidden,
-        follow_symlinks=follow_symlinks,
-        dirs_only=dirs_only,
-        one_file_system=one_file_system,
-        max_depth=max_depth,
-        file_limit=file_limit,
-        prune_empty=prune,
-        include_patterns=tuple(pattern) if pattern else (),
-        exclude_patterns=tuple(exclude_pattern) if exclude_pattern else (),
-        ignore_case=ignore_case,
-        match_dirs=match_dirs,
-        relative_paths=not absolute,
-        relative_prefix=relative,
-        null_delimited=print0,
-        show_tags=list_tags,
-        show_summary=summary,
-        output_format=output_format,
-    )
-
-
 def execute_findfmt(  # noqa: PLR0913
     *,
     paths: list[Path] | None,
@@ -157,6 +100,11 @@ def execute_findfmt(  # noqa: PLR0913
     print0: bool,
     list_tags: bool,
     summary: bool,
+    sort: str | None = None,
+    reverse: bool = False,
+    unsorted: bool = False,
+    dirs_first: bool = False,
+    files_first: bool = False,
     find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]] = find_files,
     pager: bool | None = None,
     stream: TextIO | None = None,
@@ -196,6 +144,11 @@ def execute_findfmt(  # noqa: PLR0913
         print0: Whether to delimit output with NUL characters.
         list_tags: Whether to display tags in output.
         summary: Whether to display execution summary.
+        sort: Sort criteria identifier.
+        reverse: Whether to reverse sort order.
+        unsorted: Whether to disable sorting.
+        dirs_first: Whether to group directories first.
+        files_first: Whether to group files first.
         find_files_func: Traversal generator function to execute.
         pager: Optional interactive pager override flag.
         stream: Target output text stream (defaults to sys.stdout).
@@ -205,13 +158,9 @@ def execute_findfmt(  # noqa: PLR0913
         cp437: Whether to use CP437 console graphics line drawing characters.
         color: Explicit color enable override flag.
     """
-    if gitignore_file is not None and not gitignore_file.is_file():
-        typer.echo(f"Error: Gitignore file '{gitignore_file}' not found.", err=True)
-        raise typer.Exit(code=2)
-
     effective_format = OutputFormat.TREE if tree else output_format
 
-    config = _build_traversal_config(
+    config = build_traversal_config(
         paths,
         tags,
         exclude_tags,
@@ -235,7 +184,12 @@ def execute_findfmt(  # noqa: PLR0913
         print0=print0,
         list_tags=list_tags,
         summary=summary,
-        output_format=effective_format.value,
+        output_format=effective_format,
+        sort=sort,
+        reverse=reverse,
+        unsorted=unsorted,
+        dirs_first=dirs_first,
+        files_first=files_first,
     )
 
     tag_counter: Counter[str] = Counter()

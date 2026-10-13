@@ -1,6 +1,17 @@
 from pathlib import Path
 
-from findfmt.models import FileInfo, TraversalConfig
+from findfmt.models import FileInfo, SortKey, TraversalConfig
+
+
+def test_sort_key_enum() -> None:
+    """Verify SortKey enum members and string values."""
+    assert SortKey.NAME.value == "name"
+    assert SortKey.VERSION.value == "version"
+    assert SortKey.TIME.value == "time"
+    assert SortKey.MTIME.value == "mtime"
+    assert SortKey.CTIME.value == "ctime"
+    assert SortKey.SIZE.value == "size"
+    assert SortKey.NONE.value == "none"
 
 
 def test_file_info_defaults():
@@ -53,9 +64,22 @@ def test_traversal_config_defaults():
     assert not config.show_tags
     assert not config.show_summary
     assert config.output_format == "text"
+    assert config.sort_by == SortKey.NAME
+    assert not config.reverse_sort
+    assert not config.dirs_first
+    assert not config.files_first
 
-    custom = TraversalConfig(relative_prefix=True)
+    custom = TraversalConfig(
+        relative_prefix=True,
+        sort_by=SortKey.SIZE,
+        reverse_sort=True,
+        dirs_first=True,
+    )
     assert custom.relative_prefix
+    assert custom.sort_by == SortKey.SIZE
+    assert custom.reverse_sort
+    assert custom.dirs_first
+    assert not custom.files_first
 
 
 def test_file_info_to_dict():

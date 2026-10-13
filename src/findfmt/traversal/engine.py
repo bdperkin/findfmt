@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, Any
 
 from findfmt.classifier import classify_file, compute_relative_prefix
+from findfmt.models import SortKey
 from findfmt.traversal.boundaries import (
     check_depth_limit,
-    check_file_limit,
     filter_directory_entry,
     has_matching_descendants,
     init_visited_dirs,
@@ -31,6 +30,7 @@ from findfmt.traversal.ignore import (
     load_spec_file,
 )
 from findfmt.traversal.patterns import create_pattern_matcher
+from findfmt.traversal.sorting import collect_directory_entries
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -85,12 +85,8 @@ def _scan_directory_entries(  # noqa: PLR0913
     base_root: Path | None = None,
 ) -> tuple[list[Path], list[Path]]:
     """Scan and partition directory entries into subdirectories and files."""
-    try:
-        entries = sorted(os.scandir(root), key=lambda e: e.name)
-    except OSError:
-        return [], []
-
-    if not check_file_limit(len(entries), config.file_limit):
+    entries = collect_directory_entries(root, config)
+    if entries is None:
         return [], []
 
     subdirs: list[Path] = []
@@ -118,9 +114,61 @@ def _scan_directory_entries(  # noqa: PLR0913
     return subdirs, files
 
 
-_should_skip_symlink_dir = should_skip_symlink_dir
-_init_visited_dirs = init_visited_dirs
-_resolve_active_specs = resolve_active_specs
+def _traverse_subdirs(  # noqa: PLR0913
+    subdirs: list[Path],
+    config: TraversalConfig,
+    specs: tuple[tuple[Path, PathSpecType], ...],
+    *,
+    base_root: Path,
+    visited: set[Path] | None,
+    prefix: Path | None,
+    root_dev: int | None,
+    current_depth: int,
+    matcher: PatternMatcher,
+    inherited_match: bool,
+) -> Iterator[FileInfo]:
+    """Descend and traverse discovered subdirectories."""
+    if not check_depth_limit(current_depth, config.max_depth):
+        return
+
+    for subdir in subdirs:
+        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else specs
+        child_inherit = matcher.should_inherit_match(
+            subdir,
+            base_root=base_root,
+            parent_inherited=inherited_match,
+        )
+        if config.prune_empty and not has_matching_descendants(
+            subdir,
+            config,
+            child_specs,
+            root_dev=root_dev,
+            current_depth=current_depth + 1,
+            matcher=matcher,
+            inherited_match=child_inherit,
+            base_root=base_root,
+        ):
+            continue
+
+        if should_skip_symlink_dir(
+            subdir,
+            follow_symlinks=config.follow_symlinks,
+            visited=visited,
+        ):
+            continue
+
+        yield from traverse_directory(
+            subdir,
+            config,
+            active_specs=child_specs,
+            base_root=base_root,
+            visited_dirs=visited,
+            prefix=prefix,
+            root_dev=root_dev,
+            current_depth=current_depth + 1,
+            matcher=matcher,
+            inherited_match=child_inherit,
+        )
 
 
 def traverse_directory(  # noqa: PLR0913
@@ -144,12 +192,12 @@ def traverse_directory(  # noqa: PLR0913
         one_file_system=config.one_file_system,
         root_dev=root_dev,
     )
-    active_visited = _init_visited_dirs(
+    active_visited = init_visited_dirs(
         root,
         follow_symlinks=config.follow_symlinks,
         visited=visited_dirs,
     )
-    specs = _resolve_active_specs(
+    specs = resolve_active_specs(
         root,
         active_specs,
         respect_gitignore=config.respect_gitignore,
@@ -166,7 +214,7 @@ def traverse_directory(  # noqa: PLR0913
     )
 
     targets = subdirs if config.dirs_only else files
-    yield from yield_matching_items(
+    current_items = yield_matching_items(
         targets,
         config,
         specs,
@@ -177,54 +225,32 @@ def traverse_directory(  # noqa: PLR0913
         matcher=active_matcher,
         inherited_match=inherited_match,
     )
+    descendants = _traverse_subdirs(
+        subdirs,
+        config,
+        specs,
+        base_root=effective_base,
+        visited=active_visited,
+        prefix=prefix,
+        root_dev=effective_dev,
+        current_depth=current_depth,
+        matcher=active_matcher,
+        inherited_match=inherited_match,
+    )
 
-    if not check_depth_limit(current_depth, config.max_depth):
-        return
-
-    for subdir in subdirs:
-        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else specs
-        child_inherit = active_matcher.should_inherit_match(
-            subdir,
-            base_root=effective_base,
-            parent_inherited=inherited_match,
-        )
-        if config.prune_empty and not has_matching_descendants(
-            subdir,
-            config,
-            child_specs,
-            root_dev=effective_dev,
-            current_depth=current_depth + 1,
-            matcher=active_matcher,
-            inherited_match=child_inherit,
-            base_root=effective_base,
-        ):
-            continue
-
-        if _should_skip_symlink_dir(
-            subdir,
-            follow_symlinks=config.follow_symlinks,
-            visited=active_visited,
-        ):
-            continue
-
-        yield from traverse_directory(
-            subdir,
-            config,
-            active_specs=child_specs,
-            base_root=effective_base,
-            visited_dirs=active_visited,
-            prefix=prefix,
-            root_dev=effective_dev,
-            current_depth=current_depth + 1,
-            matcher=active_matcher,
-            inherited_match=child_inherit,
-        )
+    if config.dirs_first:
+        yield from descendants
+        yield from current_items
+    else:
+        yield from current_items
+        yield from descendants
 
 
 def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
     """Discover and classify files across all configured root paths."""
     matcher = create_pattern_matcher(config)
-    for root in sorted(config.root_paths):
+    roots = config.root_paths if config.sort_by == SortKey.NONE else sorted(config.root_paths)
+    for root in roots:
         resolved_root = root.resolve()
         if not resolved_root.exists():
             continue

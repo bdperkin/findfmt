@@ -3,8 +3,23 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Any
+
+__all__ = ["FileInfo", "SortKey", "TraversalConfig"]
+
+
+class SortKey(str, Enum):
+    """Sort criteria keys for directory traversal."""
+
+    NAME = "name"
+    VERSION = "version"
+    TIME = "time"
+    MTIME = "mtime"
+    CTIME = "ctime"
+    SIZE = "size"
+    NONE = "none"
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,6 +96,10 @@ class TraversalConfig:
         show_tags: Whether to print identified tags alongside file paths.
         show_summary: Whether to output summary statistics of matches.
         output_format: Requested output serialization format.
+        sort_by: Criterion for ordering directory traversal entries.
+        reverse_sort: Whether to invert the active sort order.
+        dirs_first: Whether to list directories before files within directory levels.
+        files_first: Whether to list files before directories within directory levels.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -107,3 +126,7 @@ class TraversalConfig:
     show_tags: bool = False
     show_summary: bool = False
     output_format: str = "text"
+    sort_by: SortKey = SortKey.NAME
+    reverse_sort: bool = False
+    dirs_first: bool = False
+    files_first: bool = False
