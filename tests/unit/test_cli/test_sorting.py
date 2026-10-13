@@ -46,6 +46,10 @@ def test_cli_unsorted_and_sort_none(tmp_path: Path) -> None:
     assert res_none.exit_code == 0
 
 
+def _normalize_lines(output: str) -> list[str]:
+    return [line.strip().replace("\\", "/") for line in output.strip().splitlines() if line.strip()]
+
+
 def test_cli_dirsfirst_and_filesfirst(tmp_path: Path) -> None:
     """Verify --dirsfirst and --filesfirst CLI flags."""
     sub_dir = tmp_path / "subdir"
@@ -56,20 +60,17 @@ def test_cli_dirsfirst_and_filesfirst(tmp_path: Path) -> None:
     # --dirsfirst
     res_df = runner.invoke(app, [str(tmp_path), "--dirsfirst", "--no-pager"])
     assert res_df.exit_code == 0
-    lines_df = [line.strip() for line in res_df.output.strip().splitlines() if line.strip()]
-    assert lines_df == ["subdir/child.txt", "root.txt"]
+    assert _normalize_lines(res_df.output) == ["subdir/child.txt", "root.txt"]
 
     # --group-directories-first alias
     res_gdf = runner.invoke(app, [str(tmp_path), "--group-directories-first", "--no-pager"])
     assert res_gdf.exit_code == 0
-    lines_gdf = [line.strip() for line in res_gdf.output.strip().splitlines() if line.strip()]
-    assert lines_gdf == ["subdir/child.txt", "root.txt"]
+    assert _normalize_lines(res_gdf.output) == ["subdir/child.txt", "root.txt"]
 
     # --filesfirst
     res_ff = runner.invoke(app, [str(tmp_path), "--filesfirst", "--no-pager"])
     assert res_ff.exit_code == 0
-    lines_ff = [line.strip() for line in res_ff.output.strip().splitlines() if line.strip()]
-    assert lines_ff == ["root.txt", "subdir/child.txt"]
+    assert _normalize_lines(res_ff.output) == ["root.txt", "subdir/child.txt"]
 
 
 def test_cli_conflicting_grouping_options(tmp_path: Path) -> None:
