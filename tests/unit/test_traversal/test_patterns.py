@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 from findfmt.models import FileInfo, TraversalConfig
-from findfmt.patterns import (
+from findfmt.traversal.patterns import (
     PatternMatcher,
     _apply_ignore_case,
     compile_pattern_spec,

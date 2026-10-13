@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pathspec
 
 from findfmt.models import FileInfo, TraversalConfig
-from findfmt.traversal import (
+from findfmt.traversal.engine import (
     _is_path_ignored,
     _load_active_specs,
     _scan_directory_entries,

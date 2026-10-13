@@ -38,7 +38,7 @@ component_management:
       paths: [src/findfmt/classifier.py]
     - component_id: traversal
       name: traversal
-      paths: [src/findfmt/traversal.py]
+      paths: [src/findfmt/traversal/**]
     - component_id: cli
       name: cli
       paths: [src/findfmt/cli/**, src/findfmt/__main__.py]

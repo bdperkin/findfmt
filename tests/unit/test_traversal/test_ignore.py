@@ -10,7 +10,9 @@ import pytest
 from typer.testing import CliRunner
 
 from findfmt.cli import app
-from findfmt.ignore import (
+from findfmt.models import TraversalConfig
+from findfmt.traversal import find_files
+from findfmt.traversal.ignore import (
     PathSpecType,
     find_git_repo_root,
     is_path_ignored,
@@ -20,8 +22,6 @@ from findfmt.ignore import (
     load_gitignore_spec,
     load_spec_file,
 )
-from findfmt.models import TraversalConfig
-from findfmt.traversal import find_files
 
 
 def test_load_spec_file_valid_and_empty(tmp_path: Path) -> None:
@@ -163,7 +163,7 @@ def test_load_ancestor_specs(tmp_path: Path) -> None:
     outside = tmp_path / "non_repo" / "child"
     outside.mkdir(parents=True)
     (outside.parent / ".gitignore").write_text("*.tmp\n", encoding="utf-8")
-    with patch("findfmt.ignore.find_git_repo_root", return_value=None):
+    with patch("findfmt.traversal.ignore.find_git_repo_root", return_value=None):
         specs_outside = load_ancestor_specs(outside)
         assert any(base == outside.parent.resolve() for base, _ in specs_outside)
 

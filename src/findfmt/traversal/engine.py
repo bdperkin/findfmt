@@ -6,7 +6,8 @@ import os
 from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, Any
 
-from findfmt.boundaries import (
+from findfmt.classifier import classify_file, compute_relative_prefix
+from findfmt.traversal.boundaries import (
     check_depth_limit,
     check_file_limit,
     filter_directory_entry,
@@ -19,8 +20,7 @@ from findfmt.boundaries import (
     should_skip_symlink_dir,
     yield_matching_items,
 )
-from findfmt.classifier import classify_file, compute_relative_prefix
-from findfmt.ignore import (
+from findfmt.traversal.ignore import (
     is_path_ignored,
     load_ancestor_specs,
     load_child_specs,
@@ -28,7 +28,7 @@ from findfmt.ignore import (
     load_gitignore_spec,
     load_spec_file,
 )
-from findfmt.patterns import create_pattern_matcher
+from findfmt.traversal.patterns import create_pattern_matcher
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     import pathspec
 
     from findfmt.models import FileInfo, TraversalConfig
-    from findfmt.patterns import PatternMatcher
+    from findfmt.traversal.patterns import PatternMatcher
 
     PathSpecType = pathspec.PathSpec[Any]
 else:

@@ -9,7 +9,8 @@ from unittest.mock import MagicMock, patch
 
 import pathspec
 
-from findfmt.boundaries import (
+from findfmt.models import TraversalConfig
+from findfmt.traversal.boundaries import (
     _inspect_entries,
     check_depth_limit,
     check_device_boundary,
@@ -22,7 +23,6 @@ from findfmt.boundaries import (
     should_skip_symlink_dir,
     yield_matching_items,
 )
-from findfmt.models import TraversalConfig
 
 
 def test_init_visited_dirs(tmp_path: Path) -> None:
@@ -118,19 +118,19 @@ def test_filter_directory_entry(tmp_path: Path) -> None:
 
     entry.name = "visible.txt"
     entry.path = str(tmp_path / "visible.txt")
-    with patch("findfmt.boundaries.check_device_boundary", return_value=False):
+    with patch("findfmt.traversal.boundaries.check_device_boundary", return_value=False):
         assert filter_directory_entry(entry, config, (), 123) is None
 
     with (
-        patch("findfmt.boundaries.check_device_boundary", return_value=True),
-        patch("findfmt.boundaries.is_path_ignored", return_value=True),
+        patch("findfmt.traversal.boundaries.check_device_boundary", return_value=True),
+        patch("findfmt.traversal.boundaries.is_path_ignored", return_value=True),
     ):
         entry.is_dir.return_value = False
         assert filter_directory_entry(entry, config, (), None) is None
 
     with (
-        patch("findfmt.boundaries.check_device_boundary", return_value=True),
-        patch("findfmt.boundaries.is_path_ignored", return_value=False),
+        patch("findfmt.traversal.boundaries.check_device_boundary", return_value=True),
+        patch("findfmt.traversal.boundaries.is_path_ignored", return_value=False),
     ):
         entry.is_dir.return_value = False
         res = filter_directory_entry(entry, config, (), None)

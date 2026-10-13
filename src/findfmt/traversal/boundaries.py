@@ -8,9 +8,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from findfmt.classifier import classify_file
-from findfmt.ignore import is_path_ignored, load_ancestor_specs, load_child_specs
-from findfmt.patterns import matches_pattern_criteria
-from findfmt.symlinks import init_visited_dirs, should_skip_symlink_dir
+from findfmt.traversal.ignore import (
+    is_path_ignored,
+    load_ancestor_specs,
+    load_child_specs,
+)
+from findfmt.traversal.patterns import matches_pattern_criteria
+from findfmt.traversal.symlinks import init_visited_dirs, should_skip_symlink_dir
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Sequence
@@ -18,7 +22,7 @@ if TYPE_CHECKING:
     import pathspec
 
     from findfmt.models import FileInfo, TraversalConfig
-    from findfmt.patterns import PatternMatcher
+    from findfmt.traversal.patterns import PatternMatcher
 
     PathSpecType = pathspec.PathSpec[Any]
 else:
