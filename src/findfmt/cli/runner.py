@@ -77,6 +77,7 @@ def _resolve_effective_format(
     xml: bool,
     html: str | None,
     tree: bool,
+    json: bool = False,
 ) -> OutputFormat:
     """Resolve effective serialization format taking precedence rules into account."""
     if xml:
@@ -84,6 +85,9 @@ def _resolve_effective_format(
 
     if html is not None:
         return OutputFormat.HTML
+
+    if json:
+        return OutputFormat.JSON
 
     if tree:
         return OutputFormat.TREE
@@ -196,6 +200,7 @@ def execute_findfmt(  # noqa: PLR0913
     tree: bool = False,
     xml: bool = False,
     html: str | None = None,
+    json: bool = False,
     intro: Path | None = None,
     outro: Path | None = None,
     title: str | None = None,
@@ -303,6 +308,7 @@ def execute_findfmt(  # noqa: PLR0913
         cp437: Whether to use CP437 console graphics line drawing characters.
         xml: Whether XML document output format flag is active.
         html: Optional HTML base HREF string if active.
+        json: Whether JSON document output format flag is active.
         intro: Optional HTML template intro header fragment path.
         outro: Optional HTML template outro footer fragment path.
         title: Optional custom HTML document title.
@@ -317,6 +323,7 @@ def execute_findfmt(  # noqa: PLR0913
         xml=xml,
         html=html,
         tree=tree,
+        json=json,
     )
 
     config = build_traversal_config(
@@ -370,6 +377,7 @@ def execute_findfmt(  # noqa: PLR0913
         tree=tree,
         xml=xml,
         html=html,
+        json=json,
         intro=intro,
         outro=outro,
         title=title,

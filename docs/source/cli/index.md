@@ -124,6 +124,8 @@ level, sorting each group by active criteria.
 `--tree / --no-tree` : Render output in a hierarchical directory tree (equivalent to
 `--format tree`).
 
+`-J, --json / --no-json` : Render output as structured JSON records (equivalent to `--format json`).
+
 `-X, --xml / --no-xml` : Render output as a hierarchical XML document (equivalent to
 `--format xml`).
 
@@ -350,4 +352,29 @@ findfmt -f rst --table-style grid > docs/source/_generated_inventory.rst
 
 # Render aligned CSV table for terminal review
 findfmt -f csv-table --table-style rounded
+```
+
+### 7.5. HTML Documentation Export with Templating
+
+Generate a semantic HTML document tree with customized headers, footers, and hyperlinks:
+
+```bash
+# Generate standalone HTML document tree with custom header and footer
+findfmt -H "https://github.com/myorg/myproject/blob/main/" \
+  --title "Project Inventory" \
+  --intro assets/header.html \
+  --outro assets/footer.html \
+  -o site/inventory.html
+```
+
+### 7.6. Terminal Navigation with Clickable Hyperlinks
+
+Navigate directory structures directly in modern terminal emulators using OSC 8 escape sequences:
+
+```bash
+# Browse files with click-to-open hyperlinks in editor
+findfmt --hyperlink --hyperlink-schema "vscode://file/"
+
+# Render hierarchical tree with OSC 8 hyperlinks
+findfmt --tree --hyperlink
 ```

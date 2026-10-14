@@ -172,6 +172,15 @@ OptTree = Annotated[
     bool,
     typer.Option("--tree/--no-tree", rich_help_panel=_PO, help=h.HELP_TREE),
 ]
+OptJson = Annotated[
+    bool,
+    typer.Option(
+        "-J",
+        "--json/--no-json",
+        rich_help_panel=_PO,
+        help=h.HELP_JSON,
+    ),
+]
 OptXml = Annotated[
     bool,
     typer.Option(

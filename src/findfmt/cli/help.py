@@ -134,6 +134,10 @@ HELP_FORMAT = (
     "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
     "markdown, md, rst, table, tree, xml, html, ndjson)."
 )
+HELP_JSON = (
+    "Output structured JSON representation of the file tree and classifications "
+    "(equivalent to --format json)."
+)
 HELP_XML = "Output directory tree as an XML document (equivalent to --format xml)."
 HELP_HTML = "Output directory tree as an HTML document with HTTP reference hyperlinks."
 HELP_INTRO = "Read and insert contents of specified HTML fragment file prior to directory listing."
@@ -248,6 +252,7 @@ def get_help_all() -> str:
         "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb,\n"
         "                                csv, csv-table, tsv, markdown, rst, table, tree,\n"
         "                                xml, html) [default: text].\n"
+        "  --json, -J / --no-json        Output structured JSON representation.\n"
         "  --xml, -X / --no-xml          Output directory tree as an XML document.\n"
         "  --html, -H <baseHREF>         Output directory tree as an HTML document.\n"
         "  --intro <path>                Prepend custom HTML fragment before listing.\n"

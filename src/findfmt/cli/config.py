@@ -24,11 +24,22 @@ def _validate_file_exists(file_path: Path | None, label: str) -> None:
         raise typer.Exit(code=2)
 
 
-def _validate_format_conflicts(*, tree: bool, xml: bool, html: str | None) -> None:
+def _validate_format_conflicts(
+    *,
+    tree: bool,
+    xml: bool,
+    html: str | None,
+    json: bool = False,
+) -> None:
     """Ensure mutually exclusive output format flags are not combined."""
     active = [
         opt
-        for opt, flag in (("--tree", tree), ("-X/--xml", xml), ("-H/--html", html is not None))
+        for opt, flag in (
+            ("--tree", tree),
+            ("-J/--json", json),
+            ("-X/--xml", xml),
+            ("-H/--html", html is not None),
+        )
         if flag
     ]
     if len(active) > 1:
@@ -65,6 +76,7 @@ def validate_cli_options(  # noqa: PLR0913
     tree: bool = False,
     xml: bool = False,
     html: str | None = None,
+    json: bool = False,
 ) -> SortKey:
     """Validate CLI flag combinations and return resolved canonical SortKey.
 
@@ -80,6 +92,7 @@ def validate_cli_options(  # noqa: PLR0913
         tree: Whether tree format flag is active.
         xml: Whether XML format flag is active.
         html: Optional HTML base HREF string if active.
+        json: Whether JSON format flag is active.
 
     Returns:
         Resolved canonical SortKey enum value.
@@ -90,7 +103,7 @@ def validate_cli_options(  # noqa: PLR0913
     _validate_file_exists(gitignore_file, "Gitignore file")
     _validate_file_exists(intro, "Intro file")
     _validate_file_exists(outro, "Outro file")
-    _validate_format_conflicts(tree=tree, xml=xml, html=html)
+    _validate_format_conflicts(tree=tree, xml=xml, html=html, json=json)
     _validate_from_file(from_file)
     _validate_ordering(dirs_first=dirs_first, files_first=files_first)
 
@@ -153,6 +166,7 @@ def build_traversal_config(  # noqa: PLR0913
     tree: bool = False,
     xml: bool = False,
     html: str | None = None,
+    json: bool = False,
     intro: Path | None = None,
     outro: Path | None = None,
     title: str | None = None,
@@ -214,6 +228,7 @@ def build_traversal_config(  # noqa: PLR0913
         tree: Whether tree format flag is active.
         xml: Whether XML format flag is active.
         html: Optional HTML base HREF string.
+        json: Whether JSON format flag is active.
         intro: Optional HTML template intro header fragment path.
         outro: Optional HTML template outro footer fragment path.
         title: Optional custom HTML document title.
@@ -237,6 +252,7 @@ def build_traversal_config(  # noqa: PLR0913
         tree=tree,
         xml=xml,
         html=html,
+        json=json,
     )
 
     root_paths = tuple(paths) if paths else (Path(),)
