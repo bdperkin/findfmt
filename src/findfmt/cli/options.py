@@ -172,6 +172,57 @@ OptTree = Annotated[
     bool,
     typer.Option("--tree/--no-tree", rich_help_panel=_PO, help=h.HELP_TREE),
 ]
+OptXml = Annotated[
+    bool,
+    typer.Option(
+        "-X",
+        "--xml/--no-xml",
+        rich_help_panel=_PO,
+        help=h.HELP_XML,
+    ),
+]
+OptHtml = Annotated[
+    str | None,
+    typer.Option(
+        "-H",
+        "--html",
+        rich_help_panel=_PO,
+        help=h.HELP_HTML,
+    ),
+]
+OptIntro = Annotated[
+    Path | None,
+    typer.Option(
+        "--intro",
+        rich_help_panel=_PO,
+        help=h.HELP_INTRO,
+    ),
+]
+OptOutro = Annotated[
+    Path | None,
+    typer.Option(
+        "--outro",
+        rich_help_panel=_PO,
+        help=h.HELP_OUTRO,
+    ),
+]
+OptTitle = Annotated[
+    str | None,
+    typer.Option(
+        "-T",
+        "--title",
+        rich_help_panel=_PO,
+        help=h.HELP_TITLE,
+    ),
+]
+OptNoLinks = Annotated[
+    bool,
+    typer.Option(
+        "--nolinks/--no-nolinks",
+        rich_help_panel=_PO,
+        help=h.HELP_NO_LINKS,
+    ),
+]
 OptTableStyle = Annotated[
     str | None,
     typer.Option("--table-style", rich_help_panel=_PO, help=h.HELP_TABLE_STYLE),

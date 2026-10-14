@@ -116,8 +116,29 @@ level, sorting each group by active criteria.
 
 - `tree`: Hierarchical directory tree rendering files within their directory branches.
 
+- `xml`: Well-formed hierarchical XML document capturing directories, files, tags, and metadata
+  attributes.
+
+- `html`: Semantic, accessible HTML5 document with styled directory tree and hyperlinks.
+
 `--tree / --no-tree` : Render output in a hierarchical directory tree (equivalent to
 `--format tree`).
+
+`-X, --xml / --no-xml` : Render output as a hierarchical XML document (equivalent to
+`--format xml`).
+
+`-H, --html BASEHREF` : Render output as a semantic HTML5 document with clickable hyperlinks
+prefixed with `BASEHREF` (equivalent to `--format html`).
+
+`--intro PATH` : Prepend custom HTML fragment file before the directory listing in HTML mode.
+
+`--outro PATH` : Append custom HTML fragment file after the directory listing in HTML mode.
+
+`-T, --title TITLE` : Configure document `<title>` and `<h1>` heading for HTML output (defaults to
+`Directory Tree`).
+
+`--nolinks / --no-nolinks` : Suppress hyperlink anchors in HTML output, rendering paths as styled
+plain text.
 
 `-o, --output PATH` : Send command output directly to a file rather than standard output.
 

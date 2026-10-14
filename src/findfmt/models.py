@@ -149,6 +149,12 @@ class TraversalConfig:
         hide_control_chars: Whether to mask non-printable characters as '?'.
         literal: Whether to print non-printable characters verbatim.
         quote_name: Whether to enclose filenames in double quotes with backslash escaping.
+        base_href: Optional base URL prefix for HTML hyperlinks.
+        intro_file: Optional path to HTML fragment file prepended to directory listing.
+        outro_file: Optional path to HTML fragment file appended to directory listing.
+        html_title: Document title and heading for HTML output.
+        no_links: Whether to suppress hyperlinks in HTML mode.
+        xml: Whether XML output format flag is active.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -197,3 +203,9 @@ class TraversalConfig:
     hide_control_chars: bool = False
     literal: bool = False
     quote_name: bool = False
+    base_href: str | None = None
+    intro_file: Path | None = None
+    outro_file: Path | None = None
+    html_title: str | None = None
+    no_links: bool = False
+    xml: bool = False

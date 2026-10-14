@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import csv
+from pathlib import Path
+from typing import Any
 
 from findfmt.formatters.base import (
     TABLE_FIELD_NAMES,
@@ -15,6 +17,7 @@ from findfmt.formatters.delimited import (
     CsvTableFormatter,
     TsvFormatter,
 )
+from findfmt.formatters.html_formatter import HtmlFormatter
 from findfmt.formatters.markup import (
     MarkdownFormatter,
     RstFormatter,
@@ -31,12 +34,14 @@ from findfmt.formatters.visual import (
     RichTableFormatter,
     RichTreeFormatter,
 )
+from findfmt.formatters.xml_formatter import XmlFormatter
 
 __all__ = [
     "TABLE_FIELD_NAMES",
     "CsvFormatter",
     "CsvTableFormatter",
     "Formatter",
+    "HtmlFormatter",
     "IpynbFormatter",
     "JsonFormatter",
     "JsonlFormatter",
@@ -49,6 +54,7 @@ __all__ = [
     "TsvFormatter",
     "UnsupportedFormatError",
     "UnsupportedTableStyleError",
+    "XmlFormatter",
     "YamlFormatter",
     "get_formatter",
 ]
@@ -77,6 +83,12 @@ def _normalize_format_name(format_type: OutputFormat | str) -> str:
     return val
 
 
+def _resolve_indent(kwargs: dict[str, object], default: int = 2) -> int | None:
+    """Extract integer indent or default."""
+    indent = kwargs.get("indent", default)
+    return indent if isinstance(indent, int) or indent is None else default
+
+
 def _create_structured_formatter(
     fmt_str: str,
     *,
@@ -95,20 +107,99 @@ def _create_structured_formatter(
     """
     no_indent = bool(kwargs.get("no_indent", False))
     if fmt_str == OutputFormat.JSON.value:
-        indent = kwargs.get("indent", 2)
-        indent_val = indent if isinstance(indent, int) or indent is None else 2
-        return JsonFormatter(absolute=absolute, indent=indent_val, no_indent=no_indent)
+        return JsonFormatter(
+            absolute=absolute,
+            indent=_resolve_indent(kwargs, 2),
+            no_indent=no_indent,
+        )
 
     if fmt_str == OutputFormat.JSONL.value:
         return JsonlFormatter(absolute=absolute)
 
     if fmt_str == OutputFormat.YAML.value:
-        indent = kwargs.get("indent", 2)
-        indent_int = indent if isinstance(indent, int) else 2
+        indent_val = _resolve_indent(kwargs, 2)
+        indent_int = indent_val if isinstance(indent_val, int) else 2
         return YamlFormatter(absolute=absolute, indent=indent_int, no_indent=no_indent)
 
     if fmt_str == OutputFormat.IPYNB.value:
         return IpynbFormatter(absolute=absolute)
+
+    return None
+
+
+def _extract_common_formatter_kwargs(kwargs: dict[str, object]) -> dict[str, Any]:
+    """Extract POSIX metadata and rendering kwargs for tree-based serializers."""
+    time_fmt_raw = kwargs.get("time_format")
+    time_fmt = str(time_fmt_raw) if time_fmt_raw is not None else None
+    return {
+        "show_permissions": bool(kwargs.get("show_permissions", False)),
+        "show_user": bool(kwargs.get("show_user", False)),
+        "show_group": bool(kwargs.get("show_group", False)),
+        "show_inodes": bool(kwargs.get("show_inodes", False)),
+        "show_device": bool(kwargs.get("show_device", False)),
+        "show_size": bool(kwargs.get("show_size", False)),
+        "human_readable": bool(kwargs.get("human_readable", False)),
+        "show_si": bool(kwargs.get("show_si", False)),
+        "accumulate_size": bool(kwargs.get("accumulate_size", False)),
+        "show_mtime": bool(kwargs.get("show_mtime", False)),
+        "show_ctime": bool(kwargs.get("show_ctime", False)),
+        "time_format": time_fmt,
+        "classify": bool(kwargs.get("classify", False)),
+        "hide_control_chars": bool(kwargs.get("hide_control_chars", False)),
+        "literal": bool(kwargs.get("literal", False)),
+        "quote_name": bool(kwargs.get("quote_name", False)),
+    }
+
+
+def _as_str(val: object | None) -> str | None:
+    """Cast non-None value to string."""
+    return str(val) if val is not None else None
+
+
+def _as_path(val: object | None) -> Path | None:
+    """Return value if Path instance, otherwise None."""
+    return val if isinstance(val, Path) else None
+
+
+def _create_html_formatter(
+    *,
+    absolute: bool,
+    common: dict[str, Any],
+    kwargs: dict[str, object],
+) -> HtmlFormatter:
+    """Instantiate configured HtmlFormatter."""
+    return HtmlFormatter(
+        absolute=absolute,
+        base_href=_as_str(kwargs.get("base_href")),
+        title=_as_str(kwargs.get("title")),
+        intro=_as_str(kwargs.get("intro")),
+        intro_file=_as_path(kwargs.get("intro_file")),
+        outro=_as_str(kwargs.get("outro")),
+        outro_file=_as_path(kwargs.get("outro_file")),
+        no_links=bool(kwargs.get("no_links", False)),
+        no_indent=bool(kwargs.get("no_indent", False)),
+        **common,  # type: ignore[arg-type]
+    )
+
+
+def _create_document_formatter(
+    fmt_str: str,
+    *,
+    absolute: bool,
+    kwargs: dict[str, object],
+) -> Formatter | None:
+    """Instantiate XML or HTML document serializer if matched."""
+    if fmt_str == OutputFormat.XML.value:
+        common = _extract_common_formatter_kwargs(kwargs)
+        return XmlFormatter(
+            absolute=absolute,
+            no_indent=bool(kwargs.get("no_indent", False)),
+            **common,  # type: ignore[arg-type]
+        )
+
+    if fmt_str == OutputFormat.HTML.value:
+        common = _extract_common_formatter_kwargs(kwargs)
+        return _create_html_formatter(absolute=absolute, common=common, kwargs=kwargs)
 
     return None
 
@@ -209,6 +300,7 @@ def _create_visual_formatter(
     """
     force_color_raw = kwargs.get("force_color")
     force_color = force_color_raw if isinstance(force_color_raw, bool) else None
+    common = _extract_common_formatter_kwargs(kwargs)
 
     if fmt_str == OutputFormat.TABLE.value:
         style = kwargs.get("table_style", "rounded")
@@ -217,24 +309,7 @@ def _create_visual_formatter(
             absolute=absolute,
             table_style=style_str,
             force_color=force_color,
-            show_permissions=bool(kwargs.get("show_permissions", False)),
-            show_user=bool(kwargs.get("show_user", False)),
-            show_group=bool(kwargs.get("show_group", False)),
-            show_inodes=bool(kwargs.get("show_inodes", False)),
-            show_device=bool(kwargs.get("show_device", False)),
-            show_size=bool(kwargs.get("show_size", False)),
-            human_readable=bool(kwargs.get("human_readable", False)),
-            show_si=bool(kwargs.get("show_si", False)),
-            accumulate_size=bool(kwargs.get("accumulate_size", False)),
-            show_mtime=bool(kwargs.get("show_mtime", False)),
-            show_ctime=bool(kwargs.get("show_ctime", False)),
-            time_format=str(kwargs["time_format"])
-            if kwargs.get("time_format") is not None
-            else None,
-            classify=bool(kwargs.get("classify", False)),
-            hide_control_chars=bool(kwargs.get("hide_control_chars", False)),
-            literal=bool(kwargs.get("literal", False)),
-            quote_name=bool(kwargs.get("quote_name", False)),
+            **common,  # type: ignore[arg-type]
         )
 
     if fmt_str == OutputFormat.TREE.value:
@@ -244,24 +319,7 @@ def _create_visual_formatter(
             no_indent=bool(kwargs.get("no_indent", False)),
             ansi_lines=bool(kwargs.get("ansi_lines", False)),
             cp437=bool(kwargs.get("cp437", False)),
-            show_permissions=bool(kwargs.get("show_permissions", False)),
-            show_user=bool(kwargs.get("show_user", False)),
-            show_group=bool(kwargs.get("show_group", False)),
-            show_inodes=bool(kwargs.get("show_inodes", False)),
-            show_device=bool(kwargs.get("show_device", False)),
-            show_size=bool(kwargs.get("show_size", False)),
-            human_readable=bool(kwargs.get("human_readable", False)),
-            show_si=bool(kwargs.get("show_si", False)),
-            accumulate_size=bool(kwargs.get("accumulate_size", False)),
-            show_mtime=bool(kwargs.get("show_mtime", False)),
-            show_ctime=bool(kwargs.get("show_ctime", False)),
-            time_format=str(kwargs["time_format"])
-            if kwargs.get("time_format") is not None
-            else None,
-            classify=bool(kwargs.get("classify", False)),
-            hide_control_chars=bool(kwargs.get("hide_control_chars", False)),
-            literal=bool(kwargs.get("literal", False)),
-            quote_name=bool(kwargs.get("quote_name", False)),
+            **common,  # type: ignore[arg-type]
         )
 
     return None
@@ -276,27 +334,13 @@ def _create_text_formatter(
 ) -> TextFormatter:
     """Instantiate text formatter."""
     delim = delimiter if delimiter is not None else "\n"
-    time_fmt_raw = kwargs.get("time_format")
-    time_format = str(time_fmt_raw) if time_fmt_raw is not None else None
+    common = _extract_common_formatter_kwargs(kwargs)
+    common.pop("accumulate_size", None)
     return TextFormatter(
         absolute=absolute,
         show_tags=show_tags,
         delimiter=delim,
-        show_permissions=bool(kwargs.get("show_permissions", False)),
-        show_user=bool(kwargs.get("show_user", False)),
-        show_group=bool(kwargs.get("show_group", False)),
-        show_inodes=bool(kwargs.get("show_inodes", False)),
-        show_device=bool(kwargs.get("show_device", False)),
-        show_size=bool(kwargs.get("show_size", False)),
-        human_readable=bool(kwargs.get("human_readable", False)),
-        show_si=bool(kwargs.get("show_si", False)),
-        show_mtime=bool(kwargs.get("show_mtime", False)),
-        show_ctime=bool(kwargs.get("show_ctime", False)),
-        time_format=time_format,
-        classify=bool(kwargs.get("classify", False)),
-        hide_control_chars=bool(kwargs.get("hide_control_chars", False)),
-        literal=bool(kwargs.get("literal", False)),
-        quote_name=bool(kwargs.get("quote_name", False)),
+        **common,  # type: ignore[arg-type]
     )
 
 
@@ -357,6 +401,10 @@ def get_formatter(
     structured = _create_structured_formatter(fmt_str, absolute=absolute, kwargs=kwargs)
     if structured is not None:
         return structured
+
+    document = _create_document_formatter(fmt_str, absolute=absolute, kwargs=kwargs)
+    if document is not None:
+        return document
 
     valid_formats = ", ".join(f.value for f in OutputFormat)
     raise UnsupportedFormatError(str(format_type), valid_formats)

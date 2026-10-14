@@ -71,6 +71,103 @@ def _open_output_sink(
         return out_file, out_file
 
 
+def _resolve_effective_format(
+    output_format: OutputFormat,
+    *,
+    xml: bool,
+    html: str | None,
+    tree: bool,
+) -> OutputFormat:
+    """Resolve effective serialization format taking precedence rules into account."""
+    if xml:
+        return OutputFormat.XML
+
+    if html is not None:
+        return OutputFormat.HTML
+
+    if tree:
+        return OutputFormat.TREE
+
+    return output_format
+
+
+def _append_html_kwargs(  # noqa: PLR0913
+    kwargs: dict[str, object],
+    config: TraversalConfig,
+    *,
+    html: str | None,
+    title: str | None,
+    intro: Path | None,
+    outro: Path | None,
+    no_links: bool,
+) -> None:
+    """Populate HTML-specific template and hyperlink arguments."""
+    kwargs["base_href"] = html if html is not None else config.base_href
+    kwargs["title"] = title if title is not None else config.html_title
+    kwargs["intro_file"] = intro if intro is not None else config.intro_file
+    kwargs["outro_file"] = outro if outro is not None else config.outro_file
+    kwargs["no_links"] = no_links or config.no_links
+
+
+def _build_formatter_kwargs(  # noqa: PLR0913
+    config: TraversalConfig,
+    *,
+    effective_format: OutputFormat,
+    no_indent: bool,
+    ansi_lines: bool,
+    cp437: bool,
+    table_style: str | None,
+    target_stream: TextIO,
+    color: bool | None,
+    html: str | None,
+    title: str | None,
+    intro: Path | None,
+    outro: Path | None,
+    no_links: bool,
+) -> dict[str, object]:
+    """Assemble keyword arguments dictionary for target output formatter."""
+    kwargs: dict[str, object] = {
+        "no_indent": no_indent,
+        "ansi_lines": ansi_lines,
+        "cp437": cp437,
+        "show_permissions": config.show_permissions,
+        "show_user": config.show_user,
+        "show_group": config.show_group,
+        "show_inodes": config.show_inodes,
+        "show_device": config.show_device,
+        "show_size": config.show_size,
+        "human_readable": config.human_readable,
+        "show_si": config.show_si,
+        "accumulate_size": config.accumulate_size,
+        "show_mtime": config.show_mtime,
+        "show_ctime": config.show_ctime,
+        "time_format": config.time_format,
+        "classify": config.classify,
+        "hide_control_chars": config.hide_control_chars,
+        "literal": config.literal,
+        "quote_name": config.quote_name,
+    }
+    if effective_format == OutputFormat.HTML:
+        _append_html_kwargs(
+            kwargs,
+            config,
+            html=html,
+            title=title,
+            intro=intro,
+            outro=outro,
+            no_links=no_links,
+        )
+
+    if table_style is not None:
+        kwargs["table_style"] = table_style
+
+    color_on = is_color_enabled(target_stream, force_color=color)
+    if effective_format in (OutputFormat.TABLE, OutputFormat.TREE, OutputFormat.CSV_TABLE):
+        kwargs["force_color"] = color_on
+
+    return kwargs
+
+
 def execute_findfmt(  # noqa: PLR0913
     *,
     paths: list[Path] | None,
@@ -93,9 +190,15 @@ def execute_findfmt(  # noqa: PLR0913
     match_dirs: bool = False,
     output_format: OutputFormat,
     output: Path | None = None,
-    tree: bool,
-    table_style: str | None,
-    absolute: bool,
+    tree: bool = False,
+    xml: bool = False,
+    html: str | None = None,
+    intro: Path | None = None,
+    outro: Path | None = None,
+    title: str | None = None,
+    no_links: bool = False,
+    table_style: str | None = None,
+    absolute: bool = False,
     relative: bool = False,
     print0: bool,
     list_tags: bool,
@@ -192,9 +295,20 @@ def execute_findfmt(  # noqa: PLR0913
         no_indent: Whether to suppress branch indentation and whitespace padding.
         ansi_lines: Whether to use ANSI/VT100 alternate line drawing escapes.
         cp437: Whether to use CP437 console graphics line drawing characters.
+        xml: Whether XML document output format flag is active.
+        html: Optional HTML base HREF string if active.
+        intro: Optional HTML template intro header fragment path.
+        outro: Optional HTML template outro footer fragment path.
+        title: Optional custom HTML document title.
+        no_links: Whether to suppress hyperlinks in HTML mode.
         color: Explicit color enable override flag.
     """
-    effective_format = OutputFormat.TREE if tree else output_format
+    effective_format = _resolve_effective_format(
+        output_format,
+        xml=xml,
+        html=html,
+        tree=tree,
+    )
 
     config = build_traversal_config(
         paths,
@@ -244,6 +358,13 @@ def execute_findfmt(  # noqa: PLR0913
         hide_control_chars=hide_control_chars,
         literal=literal,
         quote_name=quote_name,
+        tree=tree,
+        xml=xml,
+        html=html,
+        intro=intro,
+        outro=outro,
+        title=title,
+        no_links=no_links,
     )
 
     tag_counter: Counter[str] = Counter()
@@ -257,33 +378,21 @@ def execute_findfmt(  # noqa: PLR0913
         force_color=color,
     )
 
-    formatter_kwargs: dict[str, object] = {
-        "no_indent": no_indent,
-        "ansi_lines": ansi_lines,
-        "cp437": cp437,
-        "show_permissions": config.show_permissions,
-        "show_user": config.show_user,
-        "show_group": config.show_group,
-        "show_inodes": config.show_inodes,
-        "show_device": config.show_device,
-        "show_size": config.show_size,
-        "human_readable": config.human_readable,
-        "show_si": config.show_si,
-        "accumulate_size": config.accumulate_size,
-        "show_mtime": config.show_mtime,
-        "show_ctime": config.show_ctime,
-        "time_format": config.time_format,
-        "classify": config.classify,
-        "hide_control_chars": config.hide_control_chars,
-        "literal": config.literal,
-        "quote_name": config.quote_name,
-    }
-    if table_style is not None:
-        formatter_kwargs["table_style"] = table_style
-
-    color_on = is_color_enabled(target_stream, force_color=color)
-    if effective_format in (OutputFormat.TABLE, OutputFormat.TREE, OutputFormat.CSV_TABLE):
-        formatter_kwargs["force_color"] = color_on
+    formatter_kwargs = _build_formatter_kwargs(
+        config,
+        effective_format=effective_format,
+        no_indent=no_indent,
+        ansi_lines=ansi_lines,
+        cp437=cp437,
+        table_style=table_style,
+        target_stream=target_stream,
+        color=color,
+        html=html,
+        title=title,
+        intro=intro,
+        outro=outro,
+        no_links=no_links,
+    )
 
     formatter = get_formatter(
         effective_format,

@@ -18,6 +18,7 @@ from findfmt.formatters import (
     CsvFormatter,
     CsvTableFormatter,
     Formatter,
+    HtmlFormatter,
     IpynbFormatter,
     JsonFormatter,
     JsonlFormatter,
@@ -29,6 +30,7 @@ from findfmt.formatters import (
     TextFormatter,
     TsvFormatter,
     UnsupportedFormatError,
+    XmlFormatter,
     YamlFormatter,
     get_formatter,
 )
@@ -80,6 +82,9 @@ def test_get_formatter_supported_types() -> None:
     assert isinstance(get_formatter(OutputFormat.CSV_TABLE), CsvTableFormatter)
     assert isinstance(get_formatter(OutputFormat.NDJSON), JsonlFormatter)
 
+    assert isinstance(get_formatter(OutputFormat.XML), XmlFormatter)
+    assert isinstance(get_formatter(OutputFormat.HTML), HtmlFormatter)
+
     assert isinstance(get_formatter("text"), TextFormatter)
     assert isinstance(get_formatter("JSON"), JsonFormatter)
     assert isinstance(get_formatter("jsonl"), JsonlFormatter)
@@ -98,6 +103,10 @@ def test_get_formatter_supported_types() -> None:
     assert isinstance(get_formatter("CSV-TABLE"), CsvTableFormatter)
     assert isinstance(get_formatter("ndjson"), JsonlFormatter)
     assert isinstance(get_formatter("NDJSON"), JsonlFormatter)
+    assert isinstance(get_formatter("xml"), XmlFormatter)
+    assert isinstance(get_formatter("XML"), XmlFormatter)
+    assert isinstance(get_formatter("html"), HtmlFormatter)
+    assert isinstance(get_formatter("HTML"), HtmlFormatter)
 
 
 def test_get_formatter_with_options() -> None:

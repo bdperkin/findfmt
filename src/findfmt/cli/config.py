@@ -17,6 +17,41 @@ if TYPE_CHECKING:
 __all__ = ["build_traversal_config", "validate_cli_options"]
 
 
+def _validate_file_exists(file_path: Path | None, label: str) -> None:
+    """Validate that specified file exists if provided."""
+    if file_path is not None and not file_path.is_file():
+        typer.echo(f"Error: {label} '{file_path}' not found.", err=True)
+        raise typer.Exit(code=2)
+
+
+def _validate_format_conflicts(*, tree: bool, xml: bool, html: str | None) -> None:
+    """Ensure mutually exclusive output format flags are not combined."""
+    active = [
+        opt
+        for opt, flag in (("--tree", tree), ("-X/--xml", xml), ("-H/--html", html is not None))
+        if flag
+    ]
+    if len(active) > 1:
+        typer.echo(f"Error: Conflicting format options: {', '.join(active)}.", err=True)
+        raise typer.Exit(code=2)
+
+
+def _validate_from_file(from_file: str | None) -> None:
+    """Validate from-file path existence if not standard input."""
+    if from_file is not None and from_file != "-":
+        from_file_path = Path(from_file)
+        if not from_file_path.is_file():
+            typer.echo(f"Error: Input file '{from_file}' not found.", err=True)
+            raise typer.Exit(code=2)
+
+
+def _validate_ordering(*, dirs_first: bool, files_first: bool) -> None:
+    """Ensure mutually exclusive directory/file ordering flags are not combined."""
+    if dirs_first and files_first:
+        typer.echo("Error: Cannot specify both --dirsfirst and --filesfirst.", err=True)
+        raise typer.Exit(code=2)
+
+
 def validate_cli_options(  # noqa: PLR0913
     *,
     gitignore_file: Path | None,
@@ -25,6 +60,11 @@ def validate_cli_options(  # noqa: PLR0913
     dirs_first: bool,
     files_first: bool,
     from_file: str | None = None,
+    intro: Path | None = None,
+    outro: Path | None = None,
+    tree: bool = False,
+    xml: bool = False,
+    html: str | None = None,
 ) -> SortKey:
     """Validate CLI flag combinations and return resolved canonical SortKey.
 
@@ -35,6 +75,11 @@ def validate_cli_options(  # noqa: PLR0913
         dirs_first: Whether directories first grouping is requested.
         files_first: Whether files first grouping is requested.
         from_file: Optional input file path or '-' for stdin.
+        intro: Optional HTML template intro header fragment path.
+        outro: Optional HTML template outro footer fragment path.
+        tree: Whether tree format flag is active.
+        xml: Whether XML format flag is active.
+        html: Optional HTML base HREF string if active.
 
     Returns:
         Resolved canonical SortKey enum value.
@@ -42,19 +87,12 @@ def validate_cli_options(  # noqa: PLR0913
     Raises:
         typer.Exit: On invalid argument values or conflicting options.
     """
-    if gitignore_file is not None and not gitignore_file.is_file():
-        typer.echo(f"Error: Gitignore file '{gitignore_file}' not found.", err=True)
-        raise typer.Exit(code=2)
-
-    if from_file is not None and from_file != "-":
-        from_file_path = Path(from_file)
-        if not from_file_path.is_file():
-            typer.echo(f"Error: Input file '{from_file}' not found.", err=True)
-            raise typer.Exit(code=2)
-
-    if dirs_first and files_first:
-        typer.echo("Error: Cannot specify both --dirsfirst and --filesfirst.", err=True)
-        raise typer.Exit(code=2)
+    _validate_file_exists(gitignore_file, "Gitignore file")
+    _validate_file_exists(intro, "Intro file")
+    _validate_file_exists(outro, "Outro file")
+    _validate_format_conflicts(tree=tree, xml=xml, html=html)
+    _validate_from_file(from_file)
+    _validate_ordering(dirs_first=dirs_first, files_first=files_first)
 
     try:
         return resolve_sort_key(sort, unsorted=unsorted)
@@ -112,6 +150,13 @@ def build_traversal_config(  # noqa: PLR0913
     hide_control_chars: bool = False,
     literal: bool = False,
     quote_name: bool = False,
+    tree: bool = False,
+    xml: bool = False,
+    html: str | None = None,
+    intro: Path | None = None,
+    outro: Path | None = None,
+    title: str | None = None,
+    no_links: bool = False,
 ) -> TraversalConfig:
     """Build and validate TraversalConfig from CLI options.
 
@@ -163,6 +208,13 @@ def build_traversal_config(  # noqa: PLR0913
         hide_control_chars: Whether to mask non-printable characters with '?'.
         literal: Whether to emit literal control characters.
         quote_name: Whether to enclose filenames in double quotes.
+        tree: Whether tree format flag is active.
+        xml: Whether XML format flag is active.
+        html: Optional HTML base HREF string.
+        intro: Optional HTML template intro header fragment path.
+        outro: Optional HTML template outro footer fragment path.
+        title: Optional custom HTML document title.
+        no_links: Whether to suppress hyperlinks in HTML mode.
 
     Returns:
         Configured TraversalConfig instance.
@@ -174,13 +226,18 @@ def build_traversal_config(  # noqa: PLR0913
         dirs_first=dirs_first,
         files_first=files_first,
         from_file=from_file,
+        intro=intro,
+        outro=outro,
+        tree=tree,
+        xml=xml,
+        html=html,
     )
 
     root_paths = tuple(paths) if paths else (Path(),)
     format_val = str(
         output_format.value if hasattr(output_format, "value") else output_format,
     )
-    effective_dirs_only = dirs_only or (du and format_val != "tree")
+    effective_dirs_only = dirs_only or (du and format_val not in {"tree", "xml", "html"})
     show_mtime = mtime or (time_format is not None and not ctime)
     show_ctime = ctime
 
@@ -231,4 +288,10 @@ def build_traversal_config(  # noqa: PLR0913
         hide_control_chars=hide_control_chars,
         literal=literal,
         quote_name=quote_name,
+        base_href=html,
+        intro_file=intro,
+        outro_file=outro,
+        html_title=title,
+        no_links=no_links,
+        xml=xml,
     )

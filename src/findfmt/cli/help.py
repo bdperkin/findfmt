@@ -35,9 +35,11 @@ __all__ = [
     "HELP_HELP_ALL",
     "HELP_HIDDEN",
     "HELP_HIDE_CONTROL_CHARS",
+    "HELP_HTML",
     "HELP_HUMAN_READABLE",
     "HELP_IGNORE_CASE",
     "HELP_INODES",
+    "HELP_INTRO",
     "HELP_KNOWN_TAGS",
     "HELP_LIST_TAGS",
     "HELP_LITERAL",
@@ -46,9 +48,11 @@ __all__ = [
     "HELP_MTIME",
     "HELP_NO_IGNORE",
     "HELP_NO_INDENT",
+    "HELP_NO_LINKS",
     "HELP_OFFLINE",
     "HELP_ONE_FILE_SYSTEM",
     "HELP_OUTPUT",
+    "HELP_OUTRO",
     "HELP_PAGER",
     "HELP_PATHS",
     "HELP_PATTERN",
@@ -66,11 +70,13 @@ __all__ = [
     "HELP_TABLE_STYLE",
     "HELP_TAGS",
     "HELP_TIME_FORMAT",
+    "HELP_TITLE",
     "HELP_TREE",
     "HELP_UNSORTED",
     "HELP_USER",
     "HELP_VERBOSE",
     "HELP_VERSION",
+    "HELP_XML",
     "get_help_all",
     "help_all_callback",
     "known_tags_callback",
@@ -126,8 +132,14 @@ HELP_DIRS_FIRST = "List directories before files within each directory level."
 HELP_FILES_FIRST = "List files before directories within each directory level."
 HELP_FORMAT = (
     "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
-    "markdown, md, rst, table, tree, ndjson)."
+    "markdown, md, rst, table, tree, xml, html, ndjson)."
 )
+HELP_XML = "Output directory tree as an XML document (equivalent to --format xml)."
+HELP_HTML = "Output directory tree as an HTML document with HTTP reference hyperlinks."
+HELP_INTRO = "Read and insert contents of specified HTML fragment file prior to directory listing."
+HELP_OUTRO = "Read and insert contents of specified HTML fragment file after directory listing."
+HELP_TITLE = "Set title and <h1> heading for HTML document output (default: 'Directory Tree')."
+HELP_NO_LINKS = "Suppress hyperlink anchors in HTML document output, rendering plain text paths."
 HELP_OUTPUT = "Send command output directly to a file rather than standard output."
 HELP_TREE = "Render output in a hierarchical directory tree (equivalent to --format tree)."
 HELP_TABLE_STYLE = (
@@ -226,8 +238,14 @@ def get_help_all() -> str:
         "  --filesfirst                  List files before directories within directory levels.\n\n"
         "Output Formatting:\n"
         "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb,\n"
-        "                                csv, csv-table, tsv, markdown, rst, table, tree)\n"
-        "                                [default: text].\n"
+        "                                csv, csv-table, tsv, markdown, rst, table, tree,\n"
+        "                                xml, html) [default: text].\n"
+        "  --xml, -X / --no-xml          Output directory tree as an XML document.\n"
+        "  --html, -H <baseHREF>         Output directory tree as an HTML document.\n"
+        "  --intro <path>                Prepend custom HTML fragment before listing.\n"
+        "  --outro <path>                Append custom HTML fragment after listing.\n"
+        "  --title, -T <title>           Set title and <h1> heading for HTML output.\n"
+        "  --nolinks / --no-nolinks      Suppress hyperlink anchors in HTML output.\n"
         "  --output, -o <path>           Send command output directly to a file.\n"
         "  --tree / --no-tree            Render output in hierarchical tree view.\n"
         "  --table-style <style>         Border style (rounded, cp437, ascii, etc.).\n"
