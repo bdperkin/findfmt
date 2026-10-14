@@ -136,9 +136,9 @@ The following baseline metrics were recorded on an x86_64 Linux environment (Pyt
 
 | Benchmark Tier   | Total Files | Traversed Directories | Duration (s) | Throughput (files/s) | Dirs/sec | TTFR Latency (ms) | Peak Heap (MB) |
 | :--------------- | :---------- | :-------------------- | :----------- | :------------------- | :------- | :---------------- | :------------- |
-| **Small**        | 518         | 60                    | 0.5055 s     | 1,024.6 f/s          | 118.7    | 20.15 ms          | 0.38 MB        |
-| **Medium**       | 7,901       | 60                    | 6.8758 s     | 1,149.1 f/s          | 8.7      | 35.98 ms          | 2.49 MB        |
-| **findfmt Repo** | 152         | 1,841                 | 0.2217 s     | 685.5 f/s            | 8,303.2  | 36.92 ms          | 0.43 MB        |
+| **Small**        | 518         | 60                    | 0.2240 s     | 2,312.6 f/s          | 267.9    | 22.15 ms          | 0.41 MB        |
+| **Medium**       | 7,901       | 60                    | 5.1981 s     | 1,520.0 f/s          | 11.5     | 39.30 ms          | 2.90 MB        |
+| **findfmt Repo** | 154         | 1,846                 | 0.1084 s     | 1,420.8 f/s          | 17,031.5 | 39.06 ms          | 0.47 MB        |
 
 ______________________________________________________________________
 

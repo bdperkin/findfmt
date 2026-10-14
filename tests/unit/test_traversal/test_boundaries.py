@@ -12,6 +12,7 @@ import pathspec
 from findfmt.models import TraversalConfig
 from findfmt.traversal.boundaries import (
     _inspect_entries,
+    can_skip_file_by_tags,
     check_depth_limit,
     check_device_boundary,
     check_file_limit,
@@ -23,6 +24,7 @@ from findfmt.traversal.boundaries import (
     should_skip_symlink_dir,
     yield_matching_items,
 )
+from findfmt.traversal.patterns import PatternMatcher
 
 
 def test_init_visited_dirs(tmp_path: Path) -> None:
@@ -222,3 +224,132 @@ def test_yield_matching_items(tmp_path: Path) -> None:
     )
     assert len(results) == 1
     assert results[0].path == sub_with_file.resolve()
+
+
+def test_can_skip_file_by_tags() -> None:
+    # No filters
+    assert not can_skip_file_by_tags("file.txt", TraversalConfig())
+
+    # Exclude tags matched vs not matched
+    cfg_ex = TraversalConfig(exclude_tags=frozenset({"python"}))
+    assert can_skip_file_by_tags("script.py", cfg_ex) is True
+    assert can_skip_file_by_tags("readme.md", cfg_ex) is False
+
+    # Generic tags bypass skipping
+    cfg_gen = TraversalConfig(include_tags=frozenset({"file"}))
+    assert not can_skip_file_by_tags("anything.bin", cfg_gen)
+
+    # Include tag matches filename tag
+    cfg_py = TraversalConfig(include_tags=frozenset({"python"}))
+    assert not can_skip_file_by_tags("module.py", cfg_py)
+    # Non-interpreter tag can skip photo.jpg even without is_executable
+    cfg_c = TraversalConfig(include_tags=frozenset({"c"}))
+    assert can_skip_file_by_tags("photo.jpg", cfg_c) is True
+    # Interpreter tag with is_executable=False can skip photo.jpg
+    assert can_skip_file_by_tags("photo.jpg", cfg_py, is_executable=False) is True
+
+    # Include tag matches MIME type
+    cfg_mime = TraversalConfig(include_tags=frozenset({"image"}))
+    assert not can_skip_file_by_tags("photo.jpg", cfg_mime)
+    cfg_full_mime = TraversalConfig(include_tags=frozenset({"mime:image/jpeg"}))
+    assert not can_skip_file_by_tags("photo.jpg", cfg_full_mime)
+
+    # Interpreter tags when executable is True vs False
+    cfg_sh = TraversalConfig(include_tags=frozenset({"bash"}))
+    assert not can_skip_file_by_tags("tool", cfg_sh, is_executable=True)
+    assert not can_skip_file_by_tags("tool", cfg_sh, is_executable=None)
+    assert can_skip_file_by_tags("tool", cfg_sh, is_executable=False) is True
+
+    # all_tags mode: cannot match vs matches
+    cfg_all_miss = TraversalConfig(include_tags=frozenset({"python", "c"}), all_tags=True)
+    assert can_skip_file_by_tags("test.py", cfg_all_miss) is True
+    assert (
+        can_skip_file_by_tags(
+            "test.py",
+            TraversalConfig(include_tags=frozenset({"python", "ruby"}), all_tags=True),
+            is_executable=False,
+        )
+        is True
+    )
+    cfg_all_match = TraversalConfig(include_tags=frozenset({"python"}), all_tags=True)
+    assert not can_skip_file_by_tags("test.py", cfg_all_match)
+
+
+def test_inspect_entries_stat_os_error_and_tag_skip(tmp_path: Path) -> None:
+    mock_entry = MagicMock(spec=os.DirEntry)
+    mock_entry.name = "test.sh"
+    mock_entry.path = str(tmp_path / "test.sh")
+    mock_entry.is_dir.return_value = False
+    mock_entry.is_file.return_value = True
+    mock_entry.stat.side_effect = OSError("stat error")
+
+    # When include_tags contains interpreter tag, stat is attempted
+    config = TraversalConfig(include_tags=frozenset({"bash"}))
+    subdirs, found = _inspect_entries([mock_entry], config, (), None)
+    assert subdirs == []
+    assert not found
+
+    # Entry skipped by tags
+    cfg_skip = TraversalConfig(include_tags=frozenset({"ruby"}))
+    subdirs_skip, found_skip = _inspect_entries([mock_entry], cfg_skip, (), None)
+    assert subdirs_skip == []
+    assert found_skip is False
+
+
+def test_yield_matching_items_files_and_tuples(tmp_path: Path) -> None:
+    f = tmp_path / "test.py"
+    f.write_text("print(1)\n")
+    mock_entry = MagicMock(spec=os.DirEntry)
+    mock_entry.name = "test.py"
+    mock_entry.path = str(f)
+    mock_entry.is_dir.return_value = False
+    mock_entry.is_file.return_value = True
+    mock_entry.stat.side_effect = OSError("stat error")
+
+    config = TraversalConfig(include_tags=frozenset({"python"}))
+    # Tuple target with stat OSError on entry
+    results = list(
+        yield_matching_items(
+            [(f, mock_entry)],
+            config,
+            (),
+            base_root=tmp_path,
+            prefix=None,
+            root_dev=None,
+            current_depth=1,
+        ),
+    )
+    assert len(results) == 1
+
+    # Matcher rejection before classification
+    mock_matcher = MagicMock(spec=PatternMatcher)
+    mock_matcher.matches_file.return_value = False
+
+    results_rej = list(
+        yield_matching_items(
+            [(f, mock_entry)],
+            config,
+            (),
+            base_root=tmp_path,
+            prefix=None,
+            root_dev=None,
+            current_depth=1,
+            matcher=mock_matcher,
+        ),
+    )
+    assert len(results_rej) == 0
+
+    # Tag rejection before classification
+    cfg_skip = TraversalConfig(include_tags=frozenset({"ruby"}))
+    results_tag_skip = list(
+        yield_matching_items(
+            [(f, mock_entry)],
+            cfg_skip,
+            (),
+            base_root=tmp_path,
+            prefix=None,
+            root_dev=None,
+            current_depth=1,
+        ),
+    )
+    assert len(results_tag_skip) == 0

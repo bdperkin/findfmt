@@ -35,6 +35,7 @@ from findfmt.traversal.patterns import create_pattern_matcher
 from findfmt.traversal.sorting import collect_directory_entries
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Iterator
 
     import pathspec
@@ -85,14 +86,14 @@ def _scan_directory_entries(  # noqa: PLR0913
     root_dev: int | None = None,
     matcher: PatternMatcher | None = None,
     base_root: Path | None = None,
-) -> tuple[list[Path], list[Path]]:
+) -> tuple[list[Path], list[tuple[Path, os.DirEntry[str]]]]:
     """Scan and partition directory entries into subdirectories and files."""
     entries = collect_directory_entries(root, config)
     if entries is None:
         return [], []
 
     subdirs: list[Path] = []
-    files: list[Path] = []
+    files: list[tuple[Path, os.DirEntry[str]]] = []
 
     for entry in entries:
         filtered = filter_directory_entry(
@@ -111,7 +112,7 @@ def _scan_directory_entries(  # noqa: PLR0913
             if not should_skip_dir(entry.name, include_hidden=config.include_hidden):
                 subdirs.append(entry_path)
         elif entry.is_file(follow_symlinks=config.follow_symlinks):
-            files.append(entry_path)
+            files.append((entry_path, entry))
 
     return subdirs, files
 

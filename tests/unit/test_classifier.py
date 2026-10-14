@@ -1,12 +1,16 @@
 import os
 import stat
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from findfmt.classifier import (
+    _identify_tags,
+    _inspect_metadata,
+    _resolve_relative,
     classify_file,
     compute_relative_prefix,
     extract_shebang,
+    extract_shebang_from_buffer,
     get_known_tags,
 )
 
@@ -219,3 +223,81 @@ def test_classify_file_with_prefix(tmp_path: Path) -> None:
     # Prefix "." or empty returns un-prefixed relative path
     info_dot = classify_file(f, root_path=sub, prefix=Path())
     assert info_dot.relative_path == Path("doc.txt")
+
+
+def test_resolve_relative_relpath_error(tmp_path: Path) -> None:
+    f = tmp_path / "a.txt"
+    with patch("os.path.relpath", side_effect=ValueError("different drive")):
+        assert _resolve_relative(f, Path("/other/root")) == f
+
+
+def test_identify_tags_empty_shebang_and_errors(tmp_path: Path) -> None:
+    # Buffer starting with #! but with invalid or unknown shebang that yields empty parts
+    with patch("identify.identify.parse_shebang", return_value=()):
+        tags = _identify_tags(
+            tmp_path / "script",
+            str(tmp_path / "script"),
+            exists=True,
+            is_regular_or_symlink=True,
+            buffer=b"#!\n",
+            is_executable=True,
+        )
+        assert "file" in tags
+        assert "executable" in tags
+
+    # tags_from_path raises OSError when buffer is None
+    with patch("identify.identify.tags_from_path", side_effect=OSError("read error")):
+        tags_err = _identify_tags(
+            tmp_path / "err.py",
+            str(tmp_path / "err.py"),
+            exists=True,
+            is_regular_or_symlink=True,
+            buffer=None,
+        )
+        assert "python" in tags_err
+
+
+def test_inspect_metadata_direntry_error_branches(tmp_path: Path) -> None:
+    mock_entry = MagicMock(spec=os.DirEntry)
+    mock_entry.is_symlink.side_effect = OSError("symlink check error")
+    mock_entry.stat.side_effect = OSError("stat error")
+
+    is_sym, exists, is_file, size, st = _inspect_metadata(tmp_path / "file", entry=mock_entry)
+    assert not is_sym
+    assert not exists
+    assert not is_file
+    assert size == 0
+    assert st is None
+
+    # is_symlink=True and exists=True, but path.is_file() raises OSError
+    mock_entry2 = MagicMock(spec=os.DirEntry)
+    mock_entry2.is_symlink.return_value = True
+    fake_stat = tmp_path.stat()
+    mock_entry2.stat.return_value = fake_stat
+
+    with patch.object(Path, "is_file", side_effect=OSError("is_file error")):
+        is_sym2, exists2, is_file2, size2, _ = _inspect_metadata(
+            tmp_path / "sym",
+            entry=mock_entry2,
+        )
+        assert is_sym2
+        assert exists2
+        assert not is_file2
+        assert size2 == fake_stat.st_size
+
+
+def test_extract_shebang_from_buffer() -> None:
+    assert extract_shebang_from_buffer(b"#!/bin/bash\necho hi") == "#!/bin/bash"
+    assert extract_shebang_from_buffer(b"no shebang here") is None
+
+
+def test_classify_file_with_direntry(tmp_path: Path) -> None:
+    f = tmp_path / "script.py"
+    f.write_text("print('hello')", encoding="utf-8")
+    entries = list(os.scandir(tmp_path))
+    py_entry = next(e for e in entries if e.name == "script.py")
+
+    info = classify_file(f, root_path=tmp_path, entry=py_entry)
+    assert "python" in info.tags
+    assert info.size_bytes > 0
+    assert info.path == f

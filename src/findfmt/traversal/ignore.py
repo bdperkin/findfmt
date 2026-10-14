@@ -278,13 +278,22 @@ def is_path_ignored(
     Returns:
         True if the entry is ignored, False otherwise.
     """
+    if not specs:
+        return False
+
+    entry_str = entry_path.as_posix()
     for base_dir, spec in reversed(specs):
-        if not entry_path.is_relative_to(base_dir):
+        base_str = base_dir.as_posix()
+        prefix = base_str if base_str.endswith("/") else base_str + "/"
+        if entry_str.startswith(prefix):
+            rel_str = entry_str[len(prefix) :]
+        elif entry_str == base_str:
+            rel_str = ""
+        else:
             continue
 
-        rel = entry_path.relative_to(base_dir)
-        rel_str = rel.as_posix() + ("/" if is_dir else "")
-        check = spec.check_file(rel_str)
+        target_str = (rel_str + "/") if is_dir else rel_str
+        check = spec.check_file(target_str)
         if check.include is not None:
             return bool(check.include)
 

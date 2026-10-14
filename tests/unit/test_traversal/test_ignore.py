@@ -243,6 +243,9 @@ def test_is_path_ignored_precedence_and_negation(tmp_path: Path) -> None:
     unrelated = Path("/some/unrelated/file.log")
     assert not is_path_ignored(unrelated, is_dir=False, specs=specs)
 
+    # Path exactly matching base_dir itself
+    assert not is_path_ignored(sub, is_dir=True, specs=specs)
+
 
 def test_cli_subdir_respects_ancestor_gitignore(
     sample_repo: Path,

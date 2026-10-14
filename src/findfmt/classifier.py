@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import mimetypes
 import os
 import stat
@@ -23,6 +24,22 @@ def get_known_tags() -> frozenset[str]:
     return frozenset(identify_engine.ALL_TAGS)
 
 
+def extract_shebang_from_buffer(buffer: bytes) -> str | None:
+    """Extract shebang interpreter line from a pre-read file buffer.
+
+    Args:
+        buffer: Initial bytes read from the file.
+
+    Returns:
+        The raw shebang line string if present and valid, or None.
+    """
+    if buffer.startswith(b"#!"):
+        first_line = buffer.split(b"\n", 1)[0]
+        return first_line.decode("utf-8", errors="replace").strip()
+
+    return None
+
+
 def extract_shebang(path: Path) -> str | None:
     """Extract the shebang interpreter from the top of an executable file.
 
@@ -37,13 +54,9 @@ def extract_shebang(path: Path) -> str | None:
             return None
 
         with path.open("rb") as f:
-            first_line = f.readline(512)
-            if first_line.startswith(b"#!"):
-                return first_line.decode("utf-8", errors="replace").strip()
+            return extract_shebang_from_buffer(f.readline(512))
     except (OSError, UnicodeDecodeError):
         return None
-
-    return None
 
 
 def compute_relative_prefix(root: Path) -> Path | None:
@@ -84,9 +97,16 @@ def _resolve_relative(
         return path
 
     try:
-        rel = path.resolve().relative_to(root_path.resolve())
-    except (ValueError, OSError):
-        return path
+        rel = path.relative_to(root_path)
+    except ValueError:
+        try:
+            rel_str = os.path.relpath(path, root_path)
+            if rel_str.startswith(".."):
+                return path
+
+            rel = Path(rel_str)
+        except (ValueError, OSError):
+            return path
 
     if prefix is not None and prefix != Path():
         return prefix / rel
@@ -94,29 +114,81 @@ def _resolve_relative(
     return rel
 
 
-def _identify_tags(
+def _read_initial_buffer(path: Path, max_bytes: int = 2048) -> bytes:
+    """Read initial bytes once for shebang, encoding, and content checks.
+
+    Args:
+        path: Path to target file.
+        max_bytes: Maximum number of bytes to read into memory.
+
+    Returns:
+        Bytes buffer if successfully read, otherwise empty bytes.
+    """
+    try:
+        with path.open("rb") as f:
+            return f.read(max_bytes)
+    except OSError:
+        return b""
+
+
+def _identify_tags_from_buffer(
+    name: str,
+    buffer: bytes,
+    *,
+    is_executable: bool,
+) -> set[str]:
+    """Identify file tags directly from an in-memory buffer."""
+    tags = {identify_engine.FILE}
+    tags.add(
+        identify_engine.EXECUTABLE if is_executable else identify_engine.NON_EXECUTABLE,
+    )
+    t = identify_engine.tags_from_filename(name)
+    if t:
+        tags.update(t)
+    elif is_executable and buffer.startswith(b"#!"):
+        parts = identify_engine.parse_shebang(io.BytesIO(buffer))
+        if parts:
+            tags.update(identify_engine.tags_from_interpreter(parts[0]))
+
+    if not (identify_engine.ENCODING_TAGS & tags):
+        if identify_engine.is_text(io.BytesIO(buffer)):
+            tags.add(identify_engine.TEXT)
+        else:
+            tags.add(identify_engine.BINARY)
+
+    return tags
+
+
+def _identify_tags(  # noqa: PLR0913
     path: Path,
     str_path: str,
     *,
     exists: bool,
     is_regular_or_symlink: bool = True,
+    buffer: bytes | None = None,
+    is_executable: bool = False,
 ) -> set[str]:
-    """Extract identify tags with fallback handling.
+    """Extract identify tags with fallback handling, using buffer if available.
 
     Args:
         path: Target file path.
         str_path: String representation of path.
         exists: Flag indicating whether path exists on disk.
         is_regular_or_symlink: Flag indicating whether path is regular file or symlink.
+        buffer: Optional pre-read file content buffer.
+        is_executable: Flag indicating whether file is executable.
 
     Returns:
         Set of tag strings identified for the file.
     """
     try:
-        if exists and is_regular_or_symlink:
-            return set(identify_engine.tags_from_path(str_path))
+        if not exists or not is_regular_or_symlink:
+            return set(identify_engine.tags_from_filename(path.name))
 
-        return set(identify_engine.tags_from_filename(path.name))
+        if buffer is not None:
+            return _identify_tags_from_buffer(path.name, buffer, is_executable=is_executable)
+
+        return set(identify_engine.tags_from_path(str_path))
     except (ValueError, OSError):
         return set(identify_engine.tags_from_filename(path.name))
 
@@ -127,6 +199,7 @@ def _shebang_info(
     *,
     is_file: bool,
     is_symlink: bool,
+    buffer: bytes | None = None,
 ) -> tuple[str | None, set[str]]:
     """Extract shebang and interpreter tags if applicable.
 
@@ -135,6 +208,7 @@ def _shebang_info(
         str_path: String representation of path.
         is_file: Flag indicating whether path is a regular file.
         is_symlink: Flag indicating whether path is a symbolic link.
+        buffer: Optional pre-read file content buffer.
 
     Returns:
         Tuple containing shebang string (or None) and set of tags.
@@ -142,10 +216,14 @@ def _shebang_info(
     if not (is_file and not is_symlink):
         return None, set()
 
-    shebang = extract_shebang(path)
+    shebang = extract_shebang_from_buffer(buffer) if buffer is not None else extract_shebang(path)
     tags: set[str] = set()
     if shebang:
-        parts = identify_engine.parse_shebang_from_file(str_path)
+        parts = (
+            identify_engine.parse_shebang(io.BytesIO(buffer))
+            if buffer is not None
+            else identify_engine.parse_shebang_from_file(str_path)
+        )
         for part in parts:
             tags.update(identify_engine.tags_from_interpreter(part))
 
@@ -193,15 +271,40 @@ def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -
     return os.access(path, os.X_OK)
 
 
-def _inspect_metadata(path: Path) -> tuple[bool, bool, bool, int, os.stat_result | None]:
-    """Inspect filesystem metadata safely.
+def _inspect_entry_metadata(
+    path: Path,
+    entry: os.DirEntry[str],
+) -> tuple[bool, bool, bool, int, os.stat_result | None]:
+    """Inspect metadata from an os.DirEntry object."""
+    try:
+        is_symlink = entry.is_symlink()
+    except OSError:
+        is_symlink = False
 
-    Args:
-        path: File path to inspect.
+    try:
+        stat_result = entry.stat(follow_symlinks=not is_symlink)
+        size_bytes = stat_result.st_size
+        exists = True
+        is_file = stat.S_ISREG(stat_result.st_mode)
+    except OSError:
+        stat_result = None
+        size_bytes = 0
+        exists = False
+        is_file = False
 
-    Returns:
-        Tuple of (is_symlink, exists, is_file, size_bytes, stat_result).
-    """
+    if is_symlink and exists:
+        try:
+            is_file = path.is_file()
+        except OSError:
+            is_file = False
+
+    return is_symlink, exists, is_file, size_bytes, stat_result
+
+
+def _inspect_path_metadata(
+    path: Path,
+) -> tuple[bool, bool, bool, int, os.stat_result | None]:
+    """Inspect filesystem metadata directly from a Path object."""
     try:
         is_symlink = path.is_symlink()
     except OSError:
@@ -216,15 +319,31 @@ def _inspect_metadata(path: Path) -> tuple[bool, bool, bool, int, os.stat_result
 
     try:
         exists = path.exists()
-    except OSError:
-        exists = False
-
-    try:
         is_file = path.is_file() if exists else False
     except OSError:
+        exists = False
         is_file = False
 
     return is_symlink, exists, is_file, size_bytes, stat_result
+
+
+def _inspect_metadata(
+    path: Path,
+    entry: os.DirEntry[str] | None = None,
+) -> tuple[bool, bool, bool, int, os.stat_result | None]:
+    """Inspect filesystem metadata safely, reusing DirEntry when available.
+
+    Args:
+        path: File path to inspect.
+        entry: Optional os.DirEntry from directory scanning.
+
+    Returns:
+        Tuple of (is_symlink, exists, is_file, size_bytes, stat_result).
+    """
+    if entry is not None:
+        return _inspect_entry_metadata(path, entry)
+
+    return _inspect_path_metadata(path)
 
 
 def _adjust_nt_tags(tags: set[str], *, is_executable: bool) -> None:
@@ -278,6 +397,8 @@ def classify_file(
     root_path: Path | None = None,
     prefix: Path | None = None,
     accumulated_size: int | None = None,
+    *,
+    entry: os.DirEntry[str] | None = None,
 ) -> FileInfo:
     """Classify a given file path by inspection of name, content, and metadata.
 
@@ -286,31 +407,44 @@ def classify_file(
         root_path: Optional root directory used to compute relative_path.
         prefix: Optional prefix to prepend to relative_path.
         accumulated_size: Optional accumulated directory disk usage in bytes.
+        entry: Optional os.DirEntry metadata from scandir.
 
     Returns:
         FileInfo containing metadata, identified tags, shebang, and MIME info.
     """
     str_path = str(path)
-    is_symlink, exists, is_file, size_bytes, stat_result = _inspect_metadata(path)
+    is_symlink, exists, is_file, size_bytes, stat_result = _inspect_metadata(path, entry=entry)
     permissions_str, owner_user, owner_group, inode, device = extract_metadata(stat_result)
+
+    buffer: bytes | None = None
+    if exists and is_file and not is_symlink:
+        buffer = _read_initial_buffer(path) if size_bytes > 0 else b""
+
+    shebang, shebang_tags = _shebang_info(
+        path,
+        str_path,
+        is_file=is_file,
+        is_symlink=is_symlink,
+        buffer=buffer,
+    )
+    is_executable = _check_executable(path, exists=exists, shebang=shebang)
 
     tags = _identify_tags(
         path,
         str_path,
         exists=exists,
         is_regular_or_symlink=is_file or is_symlink,
+        buffer=buffer,
+        is_executable=is_executable,
     )
-    shebang, shebang_tags = _shebang_info(path, str_path, is_file=is_file, is_symlink=is_symlink)
     tags.update(shebang_tags)
-
-    is_executable = _check_executable(path, exists=exists, shebang=shebang)
     _adjust_nt_tags(tags, is_executable=is_executable)
 
     mime_type, mime_tags = _mime_info(str_path)
     tags.update(mime_tags)
 
     relative_path = _resolve_relative(path, root_path, prefix=prefix)
-    resolved_path = path.resolve() if exists else path
+    resolved_path = path.resolve() if (is_symlink or entry is None) and exists else path
     effective_size = accumulated_size if accumulated_size is not None else size_bytes
     mtime, ctime, indicator = _extract_timestamps_and_indicator(
         path,

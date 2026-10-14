@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import contextlib
+import mimetypes
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from findfmt.classifier import classify_file
+import identify.identify as identify_engine
+
+from findfmt.classifier import _resolve_relative, classify_file
 from findfmt.traversal.ignore import (
     is_path_ignored,
     load_ancestor_specs,
@@ -30,6 +33,7 @@ else:
     PathSpecType = Any
 
 __all__ = [
+    "can_skip_file_by_tags",
     "check_depth_limit",
     "check_device_boundary",
     "check_file_limit",
@@ -138,6 +142,94 @@ def matches_filter(
     )
 
 
+_INTERPRETER_TAGS: frozenset[str] = frozenset(
+    {
+        "ash",
+        "awk",
+        "bash",
+        "bats",
+        "cbsd",
+        "csh",
+        "dash",
+        "erlang",
+        "expect",
+        "javascript",
+        "ksh",
+        "nushell",
+        "perl",
+        "php",
+        "php7",
+        "php8",
+        "python",
+        "python2",
+        "python3",
+        "ruby",
+        "sh",
+        "shell",
+        "tcsh",
+        "zsh",
+    },
+)
+_GENERIC_TAGS: frozenset[str] = frozenset(
+    {
+        "file",
+        "text",
+        "binary",
+        "executable",
+        "non-executable",
+        "directory",
+        "symlink",
+    },
+)
+
+
+def _collect_possible_tags(
+    filename: str,
+    name_tags: frozenset[str] | set[str],
+    *,
+    allow_interpreters: bool,
+) -> set[str]:
+    """Collect possible tags from filename, MIME type, and interpreters."""
+    mime_type, _ = mimetypes.guess_type(filename)
+    mime_tags: set[str] = set()
+    if mime_type:
+        mime_tags.add(f"mime:{mime_type}")
+        mime_tags.add(mime_type.split("/", 1)[0])
+
+    possible = set(name_tags) | mime_tags
+    if allow_interpreters:
+        possible.update(_INTERPRETER_TAGS)
+
+    return possible
+
+
+def can_skip_file_by_tags(
+    filename: str,
+    config: TraversalConfig,
+    *,
+    is_executable: bool | None = None,
+) -> bool:
+    """Determine if a file can be rejected early based on tag criteria."""
+    if not config.include_tags and not config.exclude_tags:
+        return False
+
+    name_tags = identify_engine.tags_from_filename(filename)
+
+    if config.exclude_tags and bool(name_tags & config.exclude_tags):
+        return True
+
+    if not config.include_tags or (config.include_tags & _GENERIC_TAGS):
+        return False
+
+    allow_interp = is_executable is not False and bool(config.include_tags & _INTERPRETER_TAGS)
+    possible_tags = _collect_possible_tags(filename, name_tags, allow_interpreters=allow_interp)
+
+    if config.all_tags:
+        return not config.include_tags.issubset(possible_tags)
+
+    return not bool(config.include_tags & possible_tags)
+
+
 def filter_directory_entry(  # noqa: PLR0913
     entry: os.DirEntry[str],
     config: TraversalConfig,
@@ -152,7 +244,7 @@ def filter_directory_entry(  # noqa: PLR0913
         return None
 
     entry_path = Path(entry.path)
-    if not check_device_boundary(entry_path, root_dev):
+    if root_dev is not None and not check_device_boundary(entry_path, root_dev):
         return None
 
     is_dir = entry.is_dir(follow_symlinks=config.follow_symlinks)
@@ -198,7 +290,17 @@ def _inspect_entries(  # noqa: PLR0913
             if not should_skip_dir(entry.name, include_hidden=config.include_hidden):
                 subdirs.append(entry_path)
         elif entry.is_file(follow_symlinks=config.follow_symlinks):
-            info = classify_file(entry_path)
+            is_exec: bool | None = None
+            if config.include_tags & _INTERPRETER_TAGS:
+                with contextlib.suppress(OSError):
+                    is_exec = bool(
+                        entry.stat(follow_symlinks=config.follow_symlinks).st_mode & 0o111,
+                    )
+
+            if can_skip_file_by_tags(entry.name, config, is_executable=is_exec):
+                continue
+
+            info = classify_file(entry_path, entry=entry)
             if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
                 return [], True
 
@@ -263,8 +365,61 @@ def has_matching_descendants(  # noqa: PLR0913
     return False
 
 
+def _should_skip_dir_prune(  # noqa: PLR0913
+    path: Path,
+    config: TraversalConfig,
+    specs: tuple[tuple[Path, PathSpecType], ...],
+    *,
+    base_root: Path,
+    root_dev: int | None,
+    current_depth: int,
+    matcher: PatternMatcher | None,
+    inherited_match: bool,
+) -> bool:
+    """Determine if a directory should be skipped due to empty pruning."""
+    if not (config.dirs_only and config.prune_empty):
+        return False
+
+    child_specs = load_child_specs(path, specs) if config.respect_gitignore else specs
+    return not has_matching_descendants(
+        path,
+        config,
+        child_specs,
+        root_dev=root_dev,
+        current_depth=current_depth + 1,
+        matcher=matcher,
+        inherited_match=inherited_match,
+        base_root=base_root,
+    )
+
+
+def _can_skip_candidate_file(  # noqa: PLR0913
+    path: Path,
+    entry: os.DirEntry[str] | None,
+    config: TraversalConfig,
+    *,
+    base_root: Path,
+    prefix: Path | None,
+    matcher: PatternMatcher | None,
+    inherited_match: bool,
+) -> bool:
+    """Check if a candidate file can be skipped before full classification."""
+    rel_path = _resolve_relative(path, base_root, prefix=prefix)
+    if matcher and not matcher.matches_file(rel_path, inherited_match=inherited_match):
+        return True
+
+    is_exec: bool | None = None
+    if entry is not None and (config.include_tags & _INTERPRETER_TAGS):
+        with contextlib.suppress(OSError):
+            is_exec = bool(
+                entry.stat(follow_symlinks=config.follow_symlinks).st_mode & 0o111,
+            )
+
+    return can_skip_file_by_tags(path.name, config, is_executable=is_exec)
+
+
 def yield_matching_items(  # noqa: PLR0913
-    targets: list[Path],
+    targets: Sequence[Path | tuple[Path, os.DirEntry[str]]],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
     *,
@@ -277,20 +432,31 @@ def yield_matching_items(  # noqa: PLR0913
     accumulated_sizes: dict[Path, int] | None = None,
 ) -> Iterator[FileInfo]:
     """Yield FileInfo records for candidate paths that satisfy filters and pruning."""
-    for path in targets:
-        if config.dirs_only and config.prune_empty:
-            child_specs = load_child_specs(path, specs) if config.respect_gitignore else specs
-            if not has_matching_descendants(
-                path,
-                config,
-                child_specs,
-                root_dev=root_dev,
-                current_depth=current_depth + 1,
-                matcher=matcher,
-                inherited_match=inherited_match,
-                base_root=base_root,
-            ):
-                continue
+    for item in targets:
+        path, entry = item if isinstance(item, tuple) else (item, None)
+
+        if _should_skip_dir_prune(
+            path,
+            config,
+            specs,
+            base_root=base_root,
+            root_dev=root_dev,
+            current_depth=current_depth,
+            matcher=matcher,
+            inherited_match=inherited_match,
+        ):
+            continue
+
+        if not config.dirs_only and _can_skip_candidate_file(
+            path,
+            entry,
+            config,
+            base_root=base_root,
+            prefix=prefix,
+            matcher=matcher,
+            inherited_match=inherited_match,
+        ):
+            continue
 
         accum_size = (
             accumulated_sizes.get(path, accumulated_sizes.get(path.resolve()))
@@ -302,6 +468,7 @@ def yield_matching_items(  # noqa: PLR0913
             root_path=base_root,
             prefix=prefix,
             accumulated_size=accum_size,
+            entry=entry,
         )
         if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
             yield info
