@@ -231,6 +231,16 @@ def test_resolve_relative_relpath_error(tmp_path: Path) -> None:
         assert _resolve_relative(f, Path("/other/root")) == f
 
 
+def test_resolve_relative_sibling_unrelated(tmp_path: Path) -> None:
+    dir_a = tmp_path / "dir_a"
+    dir_b = tmp_path / "dir_b"
+    dir_a.mkdir()
+    dir_b.mkdir()
+    f = dir_a / "a.txt"
+    f.write_text("data", encoding="utf-8")
+    assert _resolve_relative(f, dir_b) == f
+
+
 def test_identify_tags_empty_shebang_and_errors(tmp_path: Path) -> None:
     # Buffer starting with #! but with invalid or unknown shebang that yields empty parts
     with patch("identify.identify.parse_shebang", return_value=()):
