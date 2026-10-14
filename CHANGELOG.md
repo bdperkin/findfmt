@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-14
+
+### Features
+
+- *(metadata)* Implement permissions, ownership, and system identifiers (#54) (#167)
+- *(metadata)* Implement file size formatting and disk usage accumulation (#55) (#168)
+- *(metadata)* Implement timestamps, classification indicators, and quoting (#56) (#169)
+- *(cli)* Complete extended file metadata and display options (#20) (#170)
+
 ## [0.4.1] - 2026-10-13
 
 ### Features
