@@ -28,4 +28,5 @@ macOS, and Windows. See the complete analysis and version matrix:
 :maxdepth: 1
 
 compatibility
+performance
 ```

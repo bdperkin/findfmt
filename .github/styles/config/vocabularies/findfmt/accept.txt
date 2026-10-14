@@ -93,3 +93,5 @@
 (?i)inodes
 (?i)hostname
 (?i)hostnames
+(?i)monorepo
+(?i)monorepos
