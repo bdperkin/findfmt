@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-14
+
+### Performance
+
+- *(benchmark)* Create automated benchmark harness (`tools/benchmark.py`) tracking throughput and
+  memory (#61) (#176)
+- *(engine)* Optimize filesystem traversal, eliminate redundant `resolve()` calls, and single-buffer
+  content reads (#62) (#182)
+- *(engine)* Analyze traversal and classification performance bottlenecks and implement
+  optimizations (#38) (#183)
+
+### Dependencies
+
+- Bump `actions/download-artifact` from 4.3.0 to 8.0.2 (#177)
+- Bump `ossf/scorecard-action` from 2.4.1 to 2.5.0 (#178)
+- Bump `actions/labeler` from 5.0.0 to 7.0.0 (#179)
+- Bump `softprops/action-gh-release` from 2.6.2 to 3.0.3 (#180)
+- Bump `github/codeql-action/upload-sarif` from 4.38.2 to 4.38.3 (#181)
+
 ## [0.5.1] - 2026-10-14
 
 ### Features
