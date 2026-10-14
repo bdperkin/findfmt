@@ -91,3 +91,5 @@
 (?i)subtrees
 (?i)inode
 (?i)inodes
+(?i)hostname
+(?i)hostnames

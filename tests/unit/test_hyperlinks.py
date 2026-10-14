@@ -133,7 +133,7 @@ def test_text_formatter_hyperlink() -> None:
     )
     output = formatter.format([file_info])
     assert "\033]8;;vscode://localhost/file/workspace/project/src/app.py\033\\" in output
-    assert strip_ansi(output).strip() == "src/app.py"
+    assert strip_ansi(output).strip() == str(file_info.relative_path)
 
 
 def test_tree_formatter_hyperlink() -> None:
@@ -159,7 +159,7 @@ def test_table_formatter_hyperlink() -> None:
     formatter = RichTableFormatter(hyperlink=True)
     output = formatter.format([file_info])
     assert "\033]8;;file:///workspace/project/src/app.py\033\\" in output
-    assert "src/app.py" in strip_ansi(output)
+    assert str(file_info.relative_path) in strip_ansi(output)
 
 
 def test_get_formatter_with_hyperlink_document() -> None:
