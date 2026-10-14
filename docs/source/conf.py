@@ -118,6 +118,13 @@ suppress_warnings = ["epub.unknown_project_files"]
 latex_elements: dict[str, str] = {
     "papersize": "letterpaper",
     "pointsize": "10pt",
+    "geometry": r"\usepackage[margin=1in]{geometry}",
+    "preamble": r"""
+\DeclareUnicodeCharacter{256D}{\mbox{+}}
+\DeclareUnicodeCharacter{256E}{\mbox{+}}
+\DeclareUnicodeCharacter{2570}{\mbox{+}}
+\DeclareUnicodeCharacter{256F}{\mbox{+}}
+""",
 }
 latex_documents = [
     (
@@ -126,6 +133,19 @@ latex_documents = [
         "findfmt Documentation",
         "Brandon Perkins",
         "manual",
+    ),
+]
+
+# GNU Texinfo output
+texinfo_documents = [
+    (
+        "index",
+        "findfmt",
+        "findfmt Documentation",
+        author,
+        "findfmt",
+        "Content-aware file discovery and classification suite.",
+        "Utilities",
     ),
 ]
 

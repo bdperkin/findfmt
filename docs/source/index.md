@@ -1,10 +1,20 @@
 # findfmt Documentation
 
+````{only} not (latex or latexpdf)
 ```{image} _static/logo.svg
 :alt: findfmt Logo
 :align: center
 :width: 600px
 ```
+````
+
+````{only} latex or latexpdf
+```{image} _static/logo.pdf
+:alt: findfmt Logo
+:align: center
+:width: 400px
+```
+````
 
 <p align="center">
   <a href="https://github.com/bdperkin/findfmt/actions/workflows/ci.yml"><img src="https://github.com/bdperkin/findfmt/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
