@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import mimetypes
 import os
+import stat
 from pathlib import Path
 
 import identify.identify as identify_engine
 
 from findfmt.metadata import extract_metadata
 from findfmt.models import FileInfo
+from findfmt.utils.strings import get_classification_indicator
 
 
 def get_known_tags() -> frozenset[str]:
@@ -243,6 +245,34 @@ def _adjust_nt_tags(tags: set[str], *, is_executable: bool) -> None:
         tags.add("non-executable")
 
 
+def _extract_timestamps_and_indicator(  # noqa: PLR0913
+    path: Path,
+    stat_result: os.stat_result | None,
+    *,
+    exists: bool,
+    is_file: bool,
+    is_symlink: bool,
+    is_executable: bool,
+) -> tuple[float | None, float | None, str | None]:
+    """Extract mtime, ctime, and classification indicator safely."""
+    if stat_result is not None:
+        mtime: float | None = stat_result.st_mtime
+        ctime: float | None = stat_result.st_ctime
+        is_dir = stat.S_ISDIR(stat_result.st_mode)
+    else:
+        mtime = None
+        ctime = None
+        is_dir = exists and not is_file and not is_symlink and path.is_dir()
+
+    indicator = get_classification_indicator(
+        is_dir=is_dir,
+        is_symlink=is_symlink,
+        is_executable=is_executable and not is_dir,
+        stat_result=stat_result,
+    )
+    return mtime, ctime, indicator
+
+
 def classify_file(
     path: Path,
     root_path: Path | None = None,
@@ -282,6 +312,14 @@ def classify_file(
     relative_path = _resolve_relative(path, root_path, prefix=prefix)
     resolved_path = path.resolve() if exists else path
     effective_size = accumulated_size if accumulated_size is not None else size_bytes
+    mtime, ctime, indicator = _extract_timestamps_and_indicator(
+        path,
+        stat_result,
+        exists=exists,
+        is_file=is_file,
+        is_symlink=is_symlink,
+        is_executable=is_executable,
+    )
 
     return FileInfo(
         path=resolved_path,
@@ -298,4 +336,7 @@ def classify_file(
         inode=inode,
         device=device,
         accumulated_size=accumulated_size,
+        mtime=mtime,
+        ctime=ctime,
+        indicator=indicator,
     )

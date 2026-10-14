@@ -105,6 +105,13 @@ def build_traversal_config(  # noqa: PLR0913
     human_readable: bool = False,
     si: bool = False,
     du: bool = False,
+    mtime: bool = False,
+    ctime: bool = False,
+    time_format: str | None = None,
+    classify: bool = False,
+    hide_control_chars: bool = False,
+    literal: bool = False,
+    quote_name: bool = False,
 ) -> TraversalConfig:
     """Build and validate TraversalConfig from CLI options.
 
@@ -149,6 +156,13 @@ def build_traversal_config(  # noqa: PLR0913
         human_readable: Whether to format sizes using binary units.
         si: Whether to format sizes using SI metric units.
         du: Whether to accumulate recursive directory disk usage.
+        mtime: Whether to display file modification date/time.
+        ctime: Whether to display last status change date/time.
+        time_format: Optional strftime syntax format string for dates/times.
+        classify: Whether to append file classification indicator characters.
+        hide_control_chars: Whether to mask non-printable characters with '?'.
+        literal: Whether to emit literal control characters.
+        quote_name: Whether to enclose filenames in double quotes.
 
     Returns:
         Configured TraversalConfig instance.
@@ -167,6 +181,8 @@ def build_traversal_config(  # noqa: PLR0913
         output_format.value if hasattr(output_format, "value") else output_format,
     )
     effective_dirs_only = dirs_only or (du and format_val != "tree")
+    show_mtime = mtime or (time_format is not None and not ctime)
+    show_ctime = ctime
 
     return TraversalConfig(
         root_paths=root_paths,
@@ -208,4 +224,11 @@ def build_traversal_config(  # noqa: PLR0913
         human_readable=human_readable,
         show_si=si,
         accumulate_size=du,
+        show_mtime=show_mtime,
+        show_ctime=show_ctime,
+        time_format=time_format,
+        classify=classify,
+        hide_control_chars=hide_control_chars,
+        literal=literal,
+        quote_name=quote_name,
     )

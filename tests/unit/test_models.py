@@ -31,6 +31,9 @@ def test_file_info_defaults():
     assert info.inode is None
     assert info.device is None
     assert info.accumulated_size is None
+    assert info.mtime is None
+    assert info.ctime is None
+    assert info.indicator is None
 
 
 def test_file_info_custom():
@@ -52,6 +55,9 @@ def test_file_info_custom():
         inode=123456,
         device=42,
         accumulated_size=1024,
+        mtime=1700000000.0,
+        ctime=1700000001.0,
+        indicator="*",
     )
     assert info.tags == tags
     assert info.shebang == "#!/usr/bin/python3"
@@ -64,6 +70,9 @@ def test_file_info_custom():
     assert info.inode == 123456
     assert info.device == 42
     assert info.accumulated_size == 1024
+    assert info.mtime == 1700000000.0
+    assert info.ctime == 1700000001.0
+    assert info.indicator == "*"
 
 
 def test_traversal_config_defaults():
@@ -97,7 +106,16 @@ def test_traversal_config_defaults():
     assert not config.human_readable
     assert not config.show_si
     assert not config.accumulate_size
+    assert not config.show_mtime
+    assert not config.show_ctime
+    assert config.time_format is None
+    assert not config.classify
+    assert not config.hide_control_chars
+    assert not config.literal
+    assert not config.quote_name
 
+
+def test_traversal_config_custom():
     custom = TraversalConfig(
         relative_prefix=True,
         sort_by=SortKey.SIZE,
@@ -114,6 +132,13 @@ def test_traversal_config_defaults():
         human_readable=True,
         show_si=True,
         accumulate_size=True,
+        show_mtime=True,
+        show_ctime=True,
+        time_format="%Y-%m-%d",
+        classify=True,
+        hide_control_chars=True,
+        literal=True,
+        quote_name=True,
     )
     assert custom.relative_prefix
     assert custom.sort_by == SortKey.SIZE
@@ -131,6 +156,13 @@ def test_traversal_config_defaults():
     assert custom.human_readable
     assert custom.show_si
     assert custom.accumulate_size
+    assert custom.show_mtime
+    assert custom.show_ctime
+    assert custom.time_format == "%Y-%m-%d"
+    assert custom.classify
+    assert custom.hide_control_chars
+    assert custom.literal
+    assert custom.quote_name
 
 
 def test_file_info_to_dict():
@@ -156,6 +188,9 @@ def test_file_info_to_dict():
     assert "inode" not in d_rel
     assert "device" not in d_rel
     assert "accumulated_size" not in d_rel
+    assert "mtime" not in d_rel
+    assert "ctime" not in d_rel
+    assert "indicator" not in d_rel
 
     d_abs = info.to_dict(absolute=True)
     assert d_abs["path"] == str(info.path)
@@ -173,6 +208,9 @@ def test_file_info_to_dict():
         inode=99999,
         device=101,
         accumulated_size=2048,
+        mtime=1700000000.0,
+        ctime=1700000001.0,
+        indicator="@",
     )
     d_meta = info_meta.to_dict()
     assert d_meta["is_symlink"] is True
@@ -183,3 +221,6 @@ def test_file_info_to_dict():
     assert d_meta["inode"] == 99999
     assert d_meta["device"] == 101
     assert d_meta["accumulated_size"] == 2048
+    assert d_meta["mtime"] == 1700000000.0
+    assert d_meta["ctime"] == 1700000001.0
+    assert d_meta["indicator"] == "@"

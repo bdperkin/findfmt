@@ -270,6 +270,44 @@ OptDu = Annotated[
         help=h.HELP_DU,
     ),
 ]
+OptMtime = Annotated[
+    bool,
+    typer.Option("-D", "--mtime/--no-mtime", rich_help_panel=_PO, help=h.HELP_MTIME),
+]
+OptCtime = Annotated[
+    bool,
+    typer.Option("--ctime/--no-ctime", rich_help_panel=_PO, help=h.HELP_CTIME),
+]
+OptTimeFormat = Annotated[
+    str | None,
+    typer.Option(
+        "--time-format",
+        "--timefmt",
+        rich_help_panel=_PO,
+        help=h.HELP_TIME_FORMAT,
+    ),
+]
+OptClassify = Annotated[
+    bool,
+    typer.Option("-F", "--classify/--no-classify", rich_help_panel=_PO, help=h.HELP_CLASSIFY),
+]
+OptHideControlChars = Annotated[
+    bool,
+    typer.Option(
+        "-q",
+        "--hide-control-chars/--no-hide-control-chars",
+        rich_help_panel=_PO,
+        help=h.HELP_HIDE_CONTROL_CHARS,
+    ),
+]
+OptLiteral = Annotated[
+    bool,
+    typer.Option("-N", "--literal/--no-literal", rich_help_panel=_PO, help=h.HELP_LITERAL),
+]
+OptQuoteName = Annotated[
+    bool,
+    typer.Option("-Q", "--quote-name/--no-quote-name", rich_help_panel=_PO, help=h.HELP_QUOTE_NAME),
+]
 OptPrint0 = Annotated[
     bool,
     typer.Option("-0", "--print0/--no-print0", rich_help_panel=_PO, help=h.HELP_PRINT0),

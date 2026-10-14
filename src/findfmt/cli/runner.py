@@ -116,6 +116,13 @@ def execute_findfmt(  # noqa: PLR0913
     du: bool = False,
     inodes: bool = False,
     device: bool = False,
+    mtime: bool = False,
+    ctime: bool = False,
+    time_format: str | None = None,
+    classify: bool = False,
+    hide_control_chars: bool = False,
+    literal: bool = False,
+    quote_name: bool = False,
     find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]] = find_files,
     pager: bool | None = None,
     stream: TextIO | None = None,
@@ -171,6 +178,13 @@ def execute_findfmt(  # noqa: PLR0913
         du: Whether to accumulate recursive directory disk usage.
         inodes: Whether to display filesystem inode number.
         device: Whether to display filesystem device number.
+        mtime: Whether to display file modification date/time.
+        ctime: Whether to display last status change date/time.
+        time_format: Optional strftime syntax format string for dates/times.
+        classify: Whether to append file classification indicator characters.
+        hide_control_chars: Whether to mask non-printable characters with '?'.
+        literal: Whether to emit literal control characters.
+        quote_name: Whether to enclose filenames in double quotes.
         find_files_func: Traversal generator function to execute.
         pager: Optional interactive pager override flag.
         stream: Target output text stream (defaults to sys.stdout).
@@ -223,6 +237,13 @@ def execute_findfmt(  # noqa: PLR0913
         human_readable=human_readable,
         si=si,
         du=du,
+        mtime=mtime,
+        ctime=ctime,
+        time_format=time_format,
+        classify=classify,
+        hide_control_chars=hide_control_chars,
+        literal=literal,
+        quote_name=quote_name,
     )
 
     tag_counter: Counter[str] = Counter()
@@ -249,6 +270,13 @@ def execute_findfmt(  # noqa: PLR0913
         "human_readable": config.human_readable,
         "show_si": config.show_si,
         "accumulate_size": config.accumulate_size,
+        "show_mtime": config.show_mtime,
+        "show_ctime": config.show_ctime,
+        "time_format": config.time_format,
+        "classify": config.classify,
+        "hide_control_chars": config.hide_control_chars,
+        "literal": config.literal,
+        "quote_name": config.quote_name,
     }
     if table_style is not None:
         formatter_kwargs["table_style"] = table_style

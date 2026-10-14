@@ -39,6 +39,7 @@ component_management:
         - src/findfmt/classifier.py
         - src/findfmt/metadata.py
         - src/findfmt/sizes.py
+        - src/findfmt/utils/**
     - component_id: traversal
       name: traversal
       paths: [src/findfmt/traversal/**, src/findfmt/parsers/**]

@@ -14,11 +14,15 @@ __all__ = [
     "HELP_ABSOLUTE",
     "HELP_ALL_TAGS",
     "HELP_ANSI_LINES",
+    "HELP_CLASSIFY",
     "HELP_COLOR",
     "HELP_CP437",
+    "HELP_CTIME",
+    "HELP_DEVICE",
     "HELP_DIAGNOSTICS",
     "HELP_DIRS_FIRST",
     "HELP_DIRS_ONLY",
+    "HELP_DU",
     "HELP_EXCLUDE_PATTERN",
     "HELP_EXCLUDE_TAGS",
     "HELP_FILES_FIRST",
@@ -27,13 +31,19 @@ __all__ = [
     "HELP_FORMAT",
     "HELP_FROM_FILE",
     "HELP_GITIGNORE_FILE",
+    "HELP_GROUP",
     "HELP_HELP_ALL",
     "HELP_HIDDEN",
+    "HELP_HIDE_CONTROL_CHARS",
+    "HELP_HUMAN_READABLE",
     "HELP_IGNORE_CASE",
+    "HELP_INODES",
     "HELP_KNOWN_TAGS",
     "HELP_LIST_TAGS",
+    "HELP_LITERAL",
     "HELP_MATCH_DIRS",
     "HELP_MAX_DEPTH",
+    "HELP_MTIME",
     "HELP_NO_IGNORE",
     "HELP_NO_INDENT",
     "HELP_OFFLINE",
@@ -42,17 +52,23 @@ __all__ = [
     "HELP_PAGER",
     "HELP_PATHS",
     "HELP_PATTERN",
+    "HELP_PERMISSIONS",
     "HELP_PRINT0",
     "HELP_PRUNE",
+    "HELP_QUOTE_NAME",
     "HELP_RELATIVE",
     "HELP_REVERSE",
     "HELP_SHEBANG",
+    "HELP_SI",
+    "HELP_SIZE",
     "HELP_SORT",
     "HELP_SUMMARY",
     "HELP_TABLE_STYLE",
     "HELP_TAGS",
+    "HELP_TIME_FORMAT",
     "HELP_TREE",
     "HELP_UNSORTED",
+    "HELP_USER",
     "HELP_VERBOSE",
     "HELP_VERSION",
     "get_help_all",
@@ -147,6 +163,18 @@ HELP_SIZE = "Print file size in bytes."
 HELP_HUMAN_READABLE = "Print file sizes in human-readable binary format (e.g. 1K, 234M, 2G)."
 HELP_SI = "Print file sizes in human-readable SI metric format (e.g. 1kB, 234MB, 2GB)."
 HELP_DU = "Report directory size as the recursive sum of all child files and subdirectories."
+HELP_MTIME = "Print the date and time of the last modification (st_mtime)."
+HELP_CTIME = "Print the date and time of the last status change (st_ctime)."
+HELP_TIME_FORMAT = (
+    "Specify date and time output format string (strftime syntax; implies -D unless --ctime)."
+)
+HELP_CLASSIFY = (
+    "Append file type indicator to filenames (* for executable, / for directory, "
+    "@ for symlink, = for socket, | for FIFO, > for door)."
+)
+HELP_HIDE_CONTROL_CHARS = "Replace non-printable control characters in filenames with '?'."
+HELP_LITERAL = "Print non-printable control characters literally as raw bytes without masking."
+HELP_QUOTE_NAME = "Enclose filenames in double quotes, escaping embedded quotes and backslashes."
 HELP_KNOWN_TAGS = "List all known classification tags supported by the engine and exit."
 HELP_VERBOSE = "Enable verbose output or extended runtime diagnostics with --version."
 HELP_DIAGNOSTICS = "Display runtime environment diagnostics and exit."
@@ -219,6 +247,13 @@ def get_help_all() -> str:
         "  --human-readable, -h          Print sizes in human-readable binary format.\n"
         "  --si / --no-si                Print sizes in human-readable SI metric format.\n"
         "  --du, --accumulate-size       Accumulate recursive directory disk usage.\n"
+        "  --mtime, -D                   Display last modification time.\n"
+        "  --ctime                       Display last status change time.\n"
+        "  --time-format, --timefmt <f>  Date and time format string (strftime syntax).\n"
+        "  --classify, -F                Append indicator (/ @ * = | >) to filenames.\n"
+        "  --hide-control-chars, -q      Mask non-printable control characters with '?'.\n"
+        "  --literal, -N                 Print non-printable characters literally.\n"
+        "  --quote-name, -Q              Enclose filenames in double quotes.\n"
         "  --print0, -0 / --no-print0    Delimit with NUL (\\0) byte [default: no-print0].\n"
         "  --list-tags / --no-list-tags  Display identified tags [default: no-list-tags].\n"
         "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n\n"

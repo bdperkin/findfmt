@@ -174,6 +174,26 @@ directory disk usage sizes across all contained files and child directories. In 
 accumulated directory sizes alongside folder nodes. In non-tree formats, lists directories with
 their total accumulated sizes.
 
+`-D, --mtime / --no-mtime` : Print the date and time of the last modification (`st_mtime`).
+
+`--ctime / --no-ctime` : Print the date and time of the last status change (`st_ctime`).
+
+`--time-format, --timefmt FORMAT` : Specify custom date and time output format using `strftime`
+syntax (implies `-D` unless `--ctime` is explicitly specified).
+
+`-F, --classify / --no-classify` : Append a file classification indicator character to each filename
+(`*` for executable, `/` for directory, `@` for symbolic link, `=` for socket, `|` for FIFO, `>` for
+door).
+
+`-q, --hide-control-chars / --no-hide-control-chars` : Replace non-printable control characters in
+filenames with question marks (`?`).
+
+`-N, --literal / --no-literal` : Print non-printable control characters literally as raw bytes
+without masking.
+
+`-Q, --quote-name / --no-quote-name` : Enclose filenames in double quotes (`"..."`), escaping any
+embedded double quotes (`\"`) and backslashes (`\\`).
+
 `-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
 consumption by `xargs -0`.
 

@@ -23,6 +23,13 @@ from findfmt.sizes import (
     format_size_si,
 )
 from findfmt.traversal import find_files, traverse_directory
+from findfmt.utils.strings import (
+    format_display_path,
+    format_timestamp,
+    get_classification_indicator,
+    mask_control_characters,
+    quote_filename,
+)
 
 __version__ = get_version()
 
@@ -37,11 +44,14 @@ __all__ = [
     "classify_file",
     "extract_metadata",
     "find_files",
+    "format_display_path",
     "format_permissions",
     "format_size",
     "format_size_binary",
     "format_size_bytes",
     "format_size_si",
+    "format_timestamp",
+    "get_classification_indicator",
     "get_formatter",
     "get_known_tags",
     "get_version",
@@ -52,5 +62,7 @@ __all__ = [
     "main_findfmt0",
     "main_findshebang",
     "main_findsummary",
+    "mask_control_characters",
+    "quote_filename",
     "traverse_directory",
 ]

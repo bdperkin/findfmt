@@ -12,6 +12,7 @@ else:  # pragma: no cover
 
 from findfmt.formatters.base import Formatter
 from findfmt.metadata import format_metadata_parts
+from findfmt.utils.strings import format_display_path
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -36,6 +37,13 @@ class TextFormatter(Formatter):
         show_size: bool = False,
         human_readable: bool = False,
         show_si: bool = False,
+        show_mtime: bool = False,
+        show_ctime: bool = False,
+        time_format: str | None = None,
+        classify: bool = False,
+        hide_control_chars: bool = False,
+        literal: bool = False,
+        quote_name: bool = False,
     ) -> None:
         r"""Initialize TextFormatter.
 
@@ -51,6 +59,13 @@ class TextFormatter(Formatter):
             show_size: Whether to display exact byte size.
             human_readable: Whether to format sizes using binary units.
             show_si: Whether to format sizes using SI metric units.
+            show_mtime: Whether to display file modification date/time.
+            show_ctime: Whether to display last status change date/time.
+            time_format: Optional strftime syntax format string for dates/times.
+            classify: Whether to append file classification indicator characters.
+            hide_control_chars: Whether to mask non-printable characters with '?'.
+            literal: Whether to emit literal control characters.
+            quote_name: Whether to enclose filenames in double quotes.
         """
         super().__init__(absolute=absolute)
         self.show_tags = show_tags
@@ -63,6 +78,13 @@ class TextFormatter(Formatter):
         self.show_size = show_size
         self.human_readable = human_readable
         self.show_si = show_si
+        self.show_mtime = show_mtime
+        self.show_ctime = show_ctime
+        self.time_format = time_format
+        self.classify = classify
+        self.hide_control_chars = hide_control_chars
+        self.literal = literal
+        self.quote_name = quote_name
 
     def format_item(self, file_info: FileInfo) -> str:
         """Format an individual file record as a text line.
@@ -83,15 +105,26 @@ class TextFormatter(Formatter):
             show_size=self.show_size,
             human_readable=self.human_readable,
             show_si=self.show_si,
+            show_mtime=self.show_mtime,
+            show_ctime=self.show_ctime,
+            time_format=self.time_format,
         )
-        path_str = str(file_info.path if self.absolute else file_info.relative_path)
+        raw_path = str(file_info.path if self.absolute else file_info.relative_path)
+        indicator = file_info.indicator if self.classify else None
+        display_path = format_display_path(
+            raw_path,
+            quote_name=self.quote_name,
+            hide_control_chars=self.hide_control_chars,
+            literal=self.literal,
+            indicator=indicator,
+        )
         prefix = f"[{' '.join(meta_parts)}] " if meta_parts else ""
 
         if self.show_tags:
             tags_repr = ", ".join(sorted(file_info.tags))
-            return f"{prefix}{path_str} [{tags_repr}]{self.delimiter}"
+            return f"{prefix}{display_path} [{tags_repr}]{self.delimiter}"
 
-        return f"{prefix}{path_str}{self.delimiter}"
+        return f"{prefix}{display_path}{self.delimiter}"
 
     @override
     def format(self, files: Iterable[FileInfo]) -> str:

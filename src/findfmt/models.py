@@ -59,6 +59,9 @@ class FileInfo:
     inode: int | None = None
     device: int | None = None
     accumulated_size: int | None = None
+    mtime: float | None = None
+    ctime: float | None = None
+    indicator: str | None = None
 
     def to_dict(self, *, absolute: bool = False) -> dict[str, Any]:
         """Serialize file attributes to a dictionary representation.
@@ -79,27 +82,19 @@ class FileInfo:
             "is_symlink": self.is_symlink,
             "size_bytes": self.size_bytes,
         }
-        if self.symlink_target is not None:
-            result["symlink_target"] = self.symlink_target
-
-        if self.permissions_str is not None:
-            result["permissions_str"] = self.permissions_str
-
-        if self.owner_user is not None:
-            result["owner_user"] = self.owner_user
-
-        if self.owner_group is not None:
-            result["owner_group"] = self.owner_group
-
-        if self.inode is not None:
-            result["inode"] = self.inode
-
-        if self.device is not None:
-            result["device"] = self.device
-
-        if self.accumulated_size is not None:
-            result["accumulated_size"] = self.accumulated_size
-
+        optional_fields: tuple[tuple[str, Any], ...] = (
+            ("symlink_target", self.symlink_target),
+            ("permissions_str", self.permissions_str),
+            ("owner_user", self.owner_user),
+            ("owner_group", self.owner_group),
+            ("inode", self.inode),
+            ("device", self.device),
+            ("accumulated_size", self.accumulated_size),
+            ("mtime", self.mtime),
+            ("ctime", self.ctime),
+            ("indicator", self.indicator),
+        )
+        result.update({k: v for k, v in optional_fields if v is not None})
         return result
 
 
@@ -147,6 +142,13 @@ class TraversalConfig:
         human_readable: Whether to format sizes using binary units (powers of 1024).
         show_si: Whether to format sizes using SI metric units (powers of 1000).
         accumulate_size: Whether to accumulate recursive directory disk usage.
+        show_mtime: Whether to display file modification date/time.
+        show_ctime: Whether to display inode status change date/time.
+        time_format: Optional strftime format string for timestamps.
+        classify: Whether to append file classification indicators.
+        hide_control_chars: Whether to mask non-printable characters as '?'.
+        literal: Whether to print non-printable characters verbatim.
+        quote_name: Whether to enclose filenames in double quotes with backslash escaping.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -188,3 +190,10 @@ class TraversalConfig:
     human_readable: bool = False
     show_si: bool = False
     accumulate_size: bool = False
+    show_mtime: bool = False
+    show_ctime: bool = False
+    time_format: str | None = None
+    classify: bool = False
+    hide_control_chars: bool = False
+    literal: bool = False
+    quote_name: bool = False

@@ -87,6 +87,7 @@ def classify_file_offline(
         is_executable = any(path.name.upper().endswith(ext.upper()) for ext in pathext if ext)
 
     _adjust_nt_tags(tags, is_executable=is_executable)
+    indicator = "@" if is_symlink else ("*" if is_executable else None)
 
     return FileInfo(
         path=path,
@@ -98,6 +99,7 @@ def classify_file_offline(
         is_symlink=is_symlink,
         symlink_target=symlink_target,
         size_bytes=0,
+        indicator=indicator,
     )
 
 

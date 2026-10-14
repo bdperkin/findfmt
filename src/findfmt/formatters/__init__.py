@@ -226,6 +226,15 @@ def _create_visual_formatter(
             human_readable=bool(kwargs.get("human_readable", False)),
             show_si=bool(kwargs.get("show_si", False)),
             accumulate_size=bool(kwargs.get("accumulate_size", False)),
+            show_mtime=bool(kwargs.get("show_mtime", False)),
+            show_ctime=bool(kwargs.get("show_ctime", False)),
+            time_format=str(kwargs["time_format"])
+            if kwargs.get("time_format") is not None
+            else None,
+            classify=bool(kwargs.get("classify", False)),
+            hide_control_chars=bool(kwargs.get("hide_control_chars", False)),
+            literal=bool(kwargs.get("literal", False)),
+            quote_name=bool(kwargs.get("quote_name", False)),
         )
 
     if fmt_str == OutputFormat.TREE.value:
@@ -244,9 +253,51 @@ def _create_visual_formatter(
             human_readable=bool(kwargs.get("human_readable", False)),
             show_si=bool(kwargs.get("show_si", False)),
             accumulate_size=bool(kwargs.get("accumulate_size", False)),
+            show_mtime=bool(kwargs.get("show_mtime", False)),
+            show_ctime=bool(kwargs.get("show_ctime", False)),
+            time_format=str(kwargs["time_format"])
+            if kwargs.get("time_format") is not None
+            else None,
+            classify=bool(kwargs.get("classify", False)),
+            hide_control_chars=bool(kwargs.get("hide_control_chars", False)),
+            literal=bool(kwargs.get("literal", False)),
+            quote_name=bool(kwargs.get("quote_name", False)),
         )
 
     return None
+
+
+def _create_text_formatter(
+    *,
+    absolute: bool,
+    show_tags: bool,
+    delimiter: str | None,
+    kwargs: dict[str, object],
+) -> TextFormatter:
+    """Instantiate text formatter."""
+    delim = delimiter if delimiter is not None else "\n"
+    time_fmt_raw = kwargs.get("time_format")
+    time_format = str(time_fmt_raw) if time_fmt_raw is not None else None
+    return TextFormatter(
+        absolute=absolute,
+        show_tags=show_tags,
+        delimiter=delim,
+        show_permissions=bool(kwargs.get("show_permissions", False)),
+        show_user=bool(kwargs.get("show_user", False)),
+        show_group=bool(kwargs.get("show_group", False)),
+        show_inodes=bool(kwargs.get("show_inodes", False)),
+        show_device=bool(kwargs.get("show_device", False)),
+        show_size=bool(kwargs.get("show_size", False)),
+        human_readable=bool(kwargs.get("human_readable", False)),
+        show_si=bool(kwargs.get("show_si", False)),
+        show_mtime=bool(kwargs.get("show_mtime", False)),
+        show_ctime=bool(kwargs.get("show_ctime", False)),
+        time_format=time_format,
+        classify=bool(kwargs.get("classify", False)),
+        hide_control_chars=bool(kwargs.get("hide_control_chars", False)),
+        literal=bool(kwargs.get("literal", False)),
+        quote_name=bool(kwargs.get("quote_name", False)),
+    )
 
 
 def get_formatter(
@@ -278,18 +329,11 @@ def get_formatter(
         kwargs["delimiter"] = delimiter
 
     if fmt_str == OutputFormat.TEXT.value:
-        return TextFormatter(
+        return _create_text_formatter(
             absolute=absolute,
             show_tags=show_tags,
-            delimiter=delimiter if delimiter is not None else "\n",
-            show_permissions=bool(kwargs.get("show_permissions", False)),
-            show_user=bool(kwargs.get("show_user", False)),
-            show_group=bool(kwargs.get("show_group", False)),
-            show_inodes=bool(kwargs.get("show_inodes", False)),
-            show_device=bool(kwargs.get("show_device", False)),
-            show_size=bool(kwargs.get("show_size", False)),
-            human_readable=bool(kwargs.get("human_readable", False)),
-            show_si=bool(kwargs.get("show_si", False)),
+            delimiter=delimiter,
+            kwargs=kwargs,
         )
 
     visual = _create_visual_formatter(fmt_str, absolute=absolute, kwargs=kwargs)

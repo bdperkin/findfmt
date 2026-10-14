@@ -7,6 +7,7 @@ import stat
 from typing import TYPE_CHECKING
 
 from findfmt.sizes import format_size_binary, format_size_bytes, format_size_si
+from findfmt.utils.strings import format_timestamp
 
 if TYPE_CHECKING:
     import os
@@ -44,6 +45,9 @@ def format_metadata_parts(  # noqa: PLR0913
     show_size: bool = False,
     human_readable: bool = False,
     show_si: bool = False,
+    show_mtime: bool = False,
+    show_ctime: bool = False,
+    time_format: str | None = None,
 ) -> list[str]:
     """Format active POSIX metadata fields into string representations.
 
@@ -57,6 +61,9 @@ def format_metadata_parts(  # noqa: PLR0913
         show_size: Whether to include exact byte size.
         human_readable: Whether to include binary human-readable size.
         show_si: Whether to include SI metric human-readable size.
+        show_mtime: Whether to include file modification date/time.
+        show_ctime: Whether to include inode status change date/time.
+        time_format: Optional strftime format string for timestamps.
 
     Returns:
         List of formatted string metadata fields.
@@ -69,6 +76,12 @@ def format_metadata_parts(  # noqa: PLR0913
     elif show_size:
         size_str = format_size_bytes(file_info.size_bytes)
 
+    time_str: str | None = None
+    if show_ctime:
+        time_str = format_timestamp(file_info.ctime, time_format)
+    elif show_mtime:
+        time_str = format_timestamp(file_info.mtime, time_format)
+
     specs: tuple[tuple[bool, object], ...] = (
         (show_inodes, file_info.inode),
         (show_device, file_info.device),
@@ -76,6 +89,7 @@ def format_metadata_parts(  # noqa: PLR0913
         (show_user, file_info.owner_user),
         (show_group, file_info.owner_group),
         (size_str is not None, size_str),
+        (time_str is not None, time_str),
     )
     return [str(val) if val is not None else "-" for enabled, val in specs if enabled]
 
