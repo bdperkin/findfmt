@@ -35,7 +35,7 @@ component_management:
   individual_components:
     - component_id: classifier
       name: classifier
-      paths: [src/findfmt/classifier.py]
+      paths: [src/findfmt/classifier.py, src/findfmt/metadata.py]
     - component_id: traversal
       name: traversal
       paths: [src/findfmt/traversal/**, src/findfmt/parsers/**]

@@ -148,6 +148,19 @@ than relative paths.
 `--relative, --relative-path / --no-relative, --no-relative-path` : Prepend input search path prefix
 to relative output paths rather than stripping the traversal root.
 
+`-p, --permissions / --no-permissions` : Print file type and permissions in standard `ls -l` format
+(e.g. `-rw-r--r--`, `drwxr-xr-x`).
+
+`-u, --user / --no-user` : Print file owner username, falling back to numeric UID if username is
+unresolvable.
+
+`-g, --group / --no-group` : Print file owner group name, falling back to numeric GID if group name
+is unresolvable.
+
+`--inodes / --no-inodes` : Print filesystem inode number (`st_ino`).
+
+`--device / --no-device` : Print filesystem device number (`st_dev`).
+
 `-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
 consumption by `xargs -0`.
 

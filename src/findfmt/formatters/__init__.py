@@ -217,6 +217,11 @@ def _create_visual_formatter(
             absolute=absolute,
             table_style=style_str,
             force_color=force_color,
+            show_permissions=bool(kwargs.get("show_permissions", False)),
+            show_user=bool(kwargs.get("show_user", False)),
+            show_group=bool(kwargs.get("show_group", False)),
+            show_inodes=bool(kwargs.get("show_inodes", False)),
+            show_device=bool(kwargs.get("show_device", False)),
         )
 
     if fmt_str == OutputFormat.TREE.value:
@@ -226,6 +231,11 @@ def _create_visual_formatter(
             no_indent=bool(kwargs.get("no_indent", False)),
             ansi_lines=bool(kwargs.get("ansi_lines", False)),
             cp437=bool(kwargs.get("cp437", False)),
+            show_permissions=bool(kwargs.get("show_permissions", False)),
+            show_user=bool(kwargs.get("show_user", False)),
+            show_group=bool(kwargs.get("show_group", False)),
+            show_inodes=bool(kwargs.get("show_inodes", False)),
+            show_device=bool(kwargs.get("show_device", False)),
         )
 
     return None
@@ -264,6 +274,11 @@ def get_formatter(
             absolute=absolute,
             show_tags=show_tags,
             delimiter=delimiter if delimiter is not None else "\n",
+            show_permissions=bool(kwargs.get("show_permissions", False)),
+            show_user=bool(kwargs.get("show_user", False)),
+            show_group=bool(kwargs.get("show_group", False)),
+            show_inodes=bool(kwargs.get("show_inodes", False)),
+            show_device=bool(kwargs.get("show_device", False)),
         )
 
     visual = _create_visual_formatter(fmt_str, absolute=absolute, kwargs=kwargs)

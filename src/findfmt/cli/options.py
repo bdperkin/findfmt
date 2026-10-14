@@ -219,6 +219,31 @@ OptRelative = Annotated[
         help=h.HELP_RELATIVE,
     ),
 ]
+OptPermissions = Annotated[
+    bool,
+    typer.Option(
+        "-p",
+        "--permissions/--no-permissions",
+        rich_help_panel=_PO,
+        help=h.HELP_PERMISSIONS,
+    ),
+]
+OptUser = Annotated[
+    bool,
+    typer.Option("-u", "--user/--no-user", rich_help_panel=_PO, help=h.HELP_USER),
+]
+OptGroup = Annotated[
+    bool,
+    typer.Option("-g", "--group/--no-group", rich_help_panel=_PO, help=h.HELP_GROUP),
+]
+OptInodes = Annotated[
+    bool,
+    typer.Option("--inodes/--no-inodes", rich_help_panel=_PO, help=h.HELP_INODES),
+]
+OptDevice = Annotated[
+    bool,
+    typer.Option("--device/--no-device", rich_help_panel=_PO, help=h.HELP_DEVICE),
+]
 OptPrint0 = Annotated[
     bool,
     typer.Option("-0", "--print0/--no-print0", rich_help_panel=_PO, help=h.HELP_PRINT0),

@@ -36,6 +36,11 @@ class FileInfo:
         is_symlink: Whether the path is a symbolic link.
         symlink_target: Target path if the file is a symbolic link, otherwise None.
         size_bytes: File size in bytes.
+        permissions_str: Formatted file mode in standard ls -l format (e.g. -rw-r--r--).
+        owner_user: File owner username or UID if username is unavailable.
+        owner_group: File owner group name or GID if group name is unavailable.
+        inode: Filesystem inode number (st_ino).
+        device: Filesystem device number (st_dev).
     """
 
     path: Path
@@ -47,6 +52,11 @@ class FileInfo:
     is_symlink: bool = False
     symlink_target: str | None = None
     size_bytes: int = 0
+    permissions_str: str | None = None
+    owner_user: str | None = None
+    owner_group: str | None = None
+    inode: int | None = None
+    device: int | None = None
 
     def to_dict(self, *, absolute: bool = False) -> dict[str, Any]:
         """Serialize file attributes to a dictionary representation.
@@ -69,6 +79,21 @@ class FileInfo:
         }
         if self.symlink_target is not None:
             result["symlink_target"] = self.symlink_target
+
+        if self.permissions_str is not None:
+            result["permissions_str"] = self.permissions_str
+
+        if self.owner_user is not None:
+            result["owner_user"] = self.owner_user
+
+        if self.owner_group is not None:
+            result["owner_group"] = self.owner_group
+
+        if self.inode is not None:
+            result["inode"] = self.inode
+
+        if self.device is not None:
+            result["device"] = self.device
 
         return result
 
@@ -108,6 +133,11 @@ class TraversalConfig:
         files_first: Whether to list files before directories within directory levels.
         from_file: Input file path or '-' for stdin to ingest directory structure from.
         offline: Whether to enforce extension-only classification without disk access.
+        show_permissions: Whether to display file permissions in ls -l format.
+        show_user: Whether to display file owner username or UID.
+        show_group: Whether to display file owner group name or GID.
+        show_inodes: Whether to display filesystem inode numbers.
+        show_device: Whether to display filesystem device numbers.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -140,3 +170,8 @@ class TraversalConfig:
     files_first: bool = False
     from_file: str | None = None
     offline: bool = False
+    show_permissions: bool = False
+    show_user: bool = False
+    show_group: bool = False
+    show_inodes: bool = False
+    show_device: bool = False

@@ -18,6 +18,7 @@ from rich.tree import Tree
 
 from findfmt.formatters.base import Formatter
 from findfmt.formatters.glyphs import CP437_BOX, resolve_tree_guides
+from findfmt.metadata import format_metadata_parts
 from findfmt.terminal import get_console
 
 if TYPE_CHECKING:
@@ -114,13 +115,31 @@ class UnsupportedBoxStyleError(ValueError):
         )
 
 
-def _format_file_label(file_info: FileInfo, filename: str) -> str:
-    """Format Rich leaf node label for a file with badges."""
+def _format_file_label(  # noqa: PLR0913
+    file_info: FileInfo,
+    filename: str,
+    *,
+    show_permissions: bool = False,
+    show_user: bool = False,
+    show_group: bool = False,
+    show_inodes: bool = False,
+    show_device: bool = False,
+) -> str:
+    """Format Rich leaf node label for a file with badges and optional metadata."""
+    meta_parts = format_metadata_parts(
+        file_info,
+        show_inodes=show_inodes,
+        show_device=show_device,
+        show_permissions=show_permissions,
+        show_user=show_user,
+        show_group=show_group,
+    )
+    prefix = f"[cyan][{' '.join(meta_parts)}][/] " if meta_parts else ""
     tags_list = " ".join(format_tag_badge(t) for t in sorted(file_info.tags))
     tags_part = f" {tags_list}" if file_info.tags else ""
     size_part = f" [green]{format_size(file_info.size_bytes)}[/]"
     mime_part = f" [dim]{file_info.mime_type}[/]" if file_info.mime_type else ""
-    return f"📄 {filename}{size_part}{tags_part}{mime_part}"
+    return f"{prefix}📄 {filename}{size_part}{tags_part}{mime_part}"
 
 
 def _traverse_tree_node(
@@ -143,13 +162,18 @@ def _traverse_tree_node(
 class RichTableFormatter(Formatter):
     """Rich visual table serializer supporting customizable borders and tag badges."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         absolute: bool = False,
         table_style: str = "rounded",
         console_width: int | None = None,
         force_color: bool | None = None,
+        show_permissions: bool = False,
+        show_user: bool = False,
+        show_group: bool = False,
+        show_inodes: bool = False,
+        show_device: bool = False,
     ) -> None:
         """Initialize RichTableFormatter.
 
@@ -158,6 +182,11 @@ class RichTableFormatter(Formatter):
             table_style: Border style name mapping to rich.box styles.
             console_width: Optional terminal output column width override.
             force_color: Explicit color enable override flag.
+            show_permissions: Whether to display permissions column.
+            show_user: Whether to display file owner user column.
+            show_group: Whether to display file owner group column.
+            show_inodes: Whether to display filesystem inode column.
+            show_device: Whether to display filesystem device column.
 
         Raises:
             UnsupportedBoxStyleError: If table_style is not recognized.
@@ -172,6 +201,59 @@ class RichTableFormatter(Formatter):
         self.box_style = RICH_BOX_STYLES[normalized]
         self.console_width = console_width
         self.force_color = force_color
+        self.show_permissions = show_permissions
+        self.show_user = show_user
+        self.show_group = show_group
+        self.show_inodes = show_inodes
+        self.show_device = show_device
+
+    def _setup_columns(self, table: Table) -> None:
+        """Configure table columns including optional metadata columns."""
+        if self.show_inodes:
+            table.add_column("Inode", justify="right")
+
+        if self.show_device:
+            table.add_column("Device", justify="right")
+
+        if self.show_permissions:
+            table.add_column("Permissions", style="dim")
+
+        if self.show_user:
+            table.add_column("User")
+
+        if self.show_group:
+            table.add_column("Group")
+
+        table.add_column("Path", style="cyan", no_wrap=True)
+        table.add_column("Tags", no_wrap=False)
+        table.add_column("MIME Type", style="magenta")
+        table.add_column("Size", justify="right", style="green")
+        table.add_column("Executable", justify="center")
+        table.add_column("Symlink", justify="center")
+        table.add_column("Shebang", style="dim")
+
+    def _format_row(self, file_info: FileInfo) -> list[str]:
+        """Format an individual file record as a table row sequence."""
+        row = format_metadata_parts(
+            file_info,
+            show_inodes=self.show_inodes,
+            show_device=self.show_device,
+            show_permissions=self.show_permissions,
+            show_user=self.show_user,
+            show_group=self.show_group,
+        )
+        row.extend(
+            [
+                str(file_info.path if self.absolute else file_info.relative_path),
+                " ".join(format_tag_badge(t) for t in sorted(file_info.tags)),
+                file_info.mime_type or "",
+                format_size(file_info.size_bytes),
+                "[green]✓[/]" if file_info.is_executable else "[dim]-[/]",
+                "[yellow]✓[/]" if file_info.is_symlink else "[dim]-[/]",
+                file_info.shebang or "",
+            ],
+        )
+        return row
 
     def _build_table(self, files: Iterable[FileInfo]) -> Table:
         """Construct a configured Rich Table populated with file rows."""
@@ -181,24 +263,9 @@ class RichTableFormatter(Formatter):
             header_style="bold cyan",
             title="findfmt Files",
         )
-        table.add_column("Path", style="cyan", no_wrap=True)
-        table.add_column("Tags", no_wrap=False)
-        table.add_column("MIME Type", style="magenta")
-        table.add_column("Size", justify="right", style="green")
-        table.add_column("Executable", justify="center")
-        table.add_column("Symlink", justify="center")
-        table.add_column("Shebang", style="dim")
-
+        self._setup_columns(table)
         for file_info in files:
-            table.add_row(
-                str(file_info.path if self.absolute else file_info.relative_path),
-                " ".join(format_tag_badge(t) for t in sorted(file_info.tags)),
-                file_info.mime_type or "",
-                format_size(file_info.size_bytes),
-                "[green]✓[/]" if file_info.is_executable else "[dim]-[/]",
-                "[yellow]✓[/]" if file_info.is_symlink else "[dim]-[/]",
-                file_info.shebang or "",
-            )
+            table.add_row(*self._format_row(file_info))
 
         return table
 
@@ -230,6 +297,11 @@ class RichTreeFormatter(Formatter):
         no_indent: bool = False,
         ansi_lines: bool = False,
         cp437: bool = False,
+        show_permissions: bool = False,
+        show_user: bool = False,
+        show_group: bool = False,
+        show_inodes: bool = False,
+        show_device: bool = False,
     ) -> None:
         """Initialize RichTreeFormatter.
 
@@ -240,6 +312,11 @@ class RichTreeFormatter(Formatter):
             no_indent: Whether to suppress branch indentation lines.
             ansi_lines: Whether to use ANSI/VT100 escape sequences.
             cp437: Whether to use CP437 console characters.
+            show_permissions: Whether to display permissions string in labels.
+            show_user: Whether to display file owner user in labels.
+            show_group: Whether to display file owner group in labels.
+            show_inodes: Whether to display filesystem inode in labels.
+            show_device: Whether to display filesystem device in labels.
         """
         super().__init__(absolute=absolute)
         self.console_width = console_width
@@ -247,6 +324,11 @@ class RichTreeFormatter(Formatter):
         self.no_indent = no_indent
         self.ansi_lines = ansi_lines
         self.cp437 = cp437
+        self.show_permissions = show_permissions
+        self.show_user = show_user
+        self.show_group = show_group
+        self.show_inodes = show_inodes
+        self.show_device = show_device
 
     def _build_tree(self, files: Iterable[FileInfo]) -> Tree:
         """Construct a nested Rich Tree populated with directory branches and files."""
@@ -274,7 +356,17 @@ class RichTreeFormatter(Formatter):
             dir_parts = tuple(parts[1:-1] if is_abs else parts[:-1])
             curr_node = _traverse_tree_node(tree, dir_nodes, dir_parts)
             filename = parts[-1] if parts else str(target_path)
-            curr_node.add(_format_file_label(file_info, filename))
+            curr_node.add(
+                _format_file_label(
+                    file_info,
+                    filename,
+                    show_permissions=self.show_permissions,
+                    show_user=self.show_user,
+                    show_group=self.show_group,
+                    show_inodes=self.show_inodes,
+                    show_device=self.show_device,
+                ),
+            )
 
         return tree
 

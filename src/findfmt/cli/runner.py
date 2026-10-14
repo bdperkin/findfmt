@@ -107,6 +107,11 @@ def execute_findfmt(  # noqa: PLR0913
     files_first: bool = False,
     from_file: str | None = None,
     offline: bool = False,
+    permissions: bool = False,
+    user: bool = False,
+    group: bool = False,
+    inodes: bool = False,
+    device: bool = False,
     find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]] = find_files,
     pager: bool | None = None,
     stream: TextIO | None = None,
@@ -153,6 +158,11 @@ def execute_findfmt(  # noqa: PLR0913
         files_first: Whether to group files first.
         from_file: Optional input file or '-' for stdin to ingest directory structure.
         offline: Whether to enforce offline classification without disk access.
+        permissions: Whether to display permissions in ls -l format.
+        user: Whether to display file owner username or UID.
+        group: Whether to display file owner group name or GID.
+        inodes: Whether to display filesystem inode number.
+        device: Whether to display filesystem device number.
         find_files_func: Traversal generator function to execute.
         pager: Optional interactive pager override flag.
         stream: Target output text stream (defaults to sys.stdout).
@@ -196,6 +206,11 @@ def execute_findfmt(  # noqa: PLR0913
         files_first=files_first,
         from_file=from_file,
         offline=offline,
+        permissions=permissions,
+        user=user,
+        group=group,
+        inodes=inodes,
+        device=device,
     )
 
     tag_counter: Counter[str] = Counter()
@@ -213,6 +228,11 @@ def execute_findfmt(  # noqa: PLR0913
         "no_indent": no_indent,
         "ansi_lines": ansi_lines,
         "cp437": cp437,
+        "show_permissions": config.show_permissions,
+        "show_user": config.show_user,
+        "show_group": config.show_group,
+        "show_inodes": config.show_inodes,
+        "show_device": config.show_device,
     }
     if table_style is not None:
         formatter_kwargs["table_style"] = table_style

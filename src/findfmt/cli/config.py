@@ -96,6 +96,11 @@ def build_traversal_config(  # noqa: PLR0913
     files_first: bool = False,
     from_file: str | None = None,
     offline: bool = False,
+    permissions: bool = False,
+    user: bool = False,
+    group: bool = False,
+    inodes: bool = False,
+    device: bool = False,
 ) -> TraversalConfig:
     """Build and validate TraversalConfig from CLI options.
 
@@ -131,6 +136,11 @@ def build_traversal_config(  # noqa: PLR0913
         files_first: Whether files precede directories.
         from_file: Input file or '-' for stdin.
         offline: Whether to enforce offline classification.
+        permissions: Whether to display permissions in ls -l format.
+        user: Whether to display file owner username or UID.
+        group: Whether to display file owner group name or GID.
+        inodes: Whether to display filesystem inode number.
+        device: Whether to display filesystem device number.
 
     Returns:
         Configured TraversalConfig instance.
@@ -180,4 +190,9 @@ def build_traversal_config(  # noqa: PLR0913
         files_first=files_first,
         from_file=from_file,
         offline=offline,
+        show_permissions=permissions,
+        show_user=user,
+        show_group=group,
+        show_inodes=inodes,
+        show_device=device,
     )

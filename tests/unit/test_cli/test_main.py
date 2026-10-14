@@ -286,3 +286,97 @@ def test_cli_format_json_with_summary(sample_repo: Path):
     assert isinstance(data, list)
     assert "--- findfmt summary ---" in res.stderr
     assert "Matched files:" in res.stderr
+
+
+def test_cli_metadata_flags(sample_repo: Path):
+    runner = CliRunner()
+
+    # Test permissions flag -p and --permissions
+    res_p = runner.invoke(app, ["-p", str(sample_repo / "src")])
+    assert res_p.exit_code == 0
+    assert "[-r" in res_p.stdout
+
+    res_perms = runner.invoke(app, ["--permissions", str(sample_repo / "src")])
+    assert res_perms.exit_code == 0
+    assert "[-r" in res_perms.stdout
+
+    # Test user flag -u and --user
+    res_u = runner.invoke(app, ["-u", str(sample_repo / "src")])
+    assert res_u.exit_code == 0
+    assert "[" in res_u.stdout
+
+    res_user = runner.invoke(app, ["--user", str(sample_repo / "src")])
+    assert res_user.exit_code == 0
+    assert "[" in res_user.stdout
+
+    # Test group flag -g and --group
+    res_g = runner.invoke(app, ["-g", str(sample_repo / "src")])
+    assert res_g.exit_code == 0
+    assert "[" in res_g.stdout
+
+    res_group = runner.invoke(app, ["--group", str(sample_repo / "src")])
+    assert res_group.exit_code == 0
+    assert "[" in res_group.stdout
+
+    # Test inode and device flags
+    res_inodes = runner.invoke(app, ["--inodes", str(sample_repo / "src")])
+    assert res_inodes.exit_code == 0
+    assert "[" in res_inodes.stdout
+
+    res_device = runner.invoke(app, ["--device", str(sample_repo / "src")])
+    assert res_device.exit_code == 0
+    assert "[" in res_device.stdout
+
+    # Test combined flags
+    res_all_meta = runner.invoke(
+        app,
+        ["--inodes", "--device", "-p", "-u", "-g", "--list-tags", str(sample_repo / "src")],
+    )
+    assert res_all_meta.exit_code == 0
+    assert "[" in res_all_meta.stdout
+
+
+def test_cli_metadata_with_formatters(sample_repo: Path):
+    runner = CliRunner(env={"COLUMNS": "200"})
+
+    # Table format with metadata flags
+    res_table = runner.invoke(
+        app,
+        ["-f", "table", "--inodes", "--device", "-p", "-u", "-g", str(sample_repo / "src")],
+    )
+    assert res_table.exit_code == 0
+    assert "Inode" in res_table.stdout
+    assert "Device" in res_table.stdout
+    assert "Permissions" in res_table.stdout
+    assert "User" in res_table.stdout
+    assert "Group" in res_table.stdout
+
+    # Tree format with metadata flags
+    res_tree = runner.invoke(
+        app,
+        ["--tree", "--inodes", "--device", "-p", "-u", "-g", str(sample_repo / "src")],
+    )
+    assert res_tree.exit_code == 0
+    assert "[" in res_tree.stdout
+
+    # JSON format with metadata
+    res_json = runner.invoke(app, ["-f", "json", str(sample_repo / "src")])
+    assert res_json.exit_code == 0
+    data = json.loads(res_json.stdout)
+    assert len(data) > 0
+    assert "permissions_str" in data[0]
+    assert "owner_user" in data[0]
+    assert "owner_group" in data[0]
+    assert "inode" in data[0]
+    assert "device" in data[0]
+
+
+def test_cli_help_all_contains_metadata_flags():
+    runner = CliRunner()
+    res = runner.invoke(app, ["--help-all"])
+    assert res.exit_code == 0
+    assert "--permissions, -p" in res.stdout
+    assert "--user, -u" in res.stdout
+    assert "--group, -g" in res.stdout
+    assert "--inodes" in res.stdout
+    assert "--device" in res.stdout

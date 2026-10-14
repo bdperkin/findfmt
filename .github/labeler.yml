@@ -5,7 +5,9 @@ area:cli:
       - any-glob-to-any-file: [src/findfmt/cli/**, src/findfmt/__main__.py]
 area:classifier:
   - changed-files:
-      - any-glob-to-any-file: [src/findfmt/classifier.py]
+      - any-glob-to-any-file:
+          - src/findfmt/classifier.py
+          - src/findfmt/metadata.py
 area:traversal:
   - changed-files:
       - any-glob-to-any-file: [src/findfmt/traversal/**, src/findfmt/parsers/**]

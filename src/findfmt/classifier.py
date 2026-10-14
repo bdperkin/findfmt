@@ -8,6 +8,7 @@ from pathlib import Path
 
 import identify.identify as identify_engine
 
+from findfmt.metadata import extract_metadata
 from findfmt.models import FileInfo
 
 
@@ -190,14 +191,14 @@ def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -
     return os.access(path, os.X_OK)
 
 
-def _inspect_metadata(path: Path) -> tuple[bool, bool, bool, int]:
+def _inspect_metadata(path: Path) -> tuple[bool, bool, bool, int, os.stat_result | None]:
     """Inspect filesystem metadata safely.
 
     Args:
         path: File path to inspect.
 
     Returns:
-        Tuple of (is_symlink, exists, is_file, size_bytes).
+        Tuple of (is_symlink, exists, is_file, size_bytes, stat_result).
     """
     try:
         is_symlink = path.is_symlink()
@@ -208,6 +209,7 @@ def _inspect_metadata(path: Path) -> tuple[bool, bool, bool, int]:
         stat_result = path.lstat() if is_symlink else path.stat()
         size_bytes = stat_result.st_size
     except OSError:
+        stat_result = None
         size_bytes = 0
 
     try:
@@ -220,7 +222,7 @@ def _inspect_metadata(path: Path) -> tuple[bool, bool, bool, int]:
     except OSError:
         is_file = False
 
-    return is_symlink, exists, is_file, size_bytes
+    return is_symlink, exists, is_file, size_bytes, stat_result
 
 
 def _adjust_nt_tags(tags: set[str], *, is_executable: bool) -> None:
@@ -257,7 +259,8 @@ def classify_file(
         FileInfo containing metadata, identified tags, shebang, and MIME info.
     """
     str_path = str(path)
-    is_symlink, exists, is_file, size_bytes = _inspect_metadata(path)
+    is_symlink, exists, is_file, size_bytes, stat_result = _inspect_metadata(path)
+    permissions_str, owner_user, owner_group, inode, device = extract_metadata(stat_result)
 
     tags = _identify_tags(
         path,
@@ -286,4 +289,9 @@ def classify_file(
         is_executable=is_executable,
         is_symlink=is_symlink,
         size_bytes=size_bytes,
+        permissions_str=permissions_str,
+        owner_user=owner_user,
+        owner_group=owner_group,
+        inode=inode,
+        device=device,
     )

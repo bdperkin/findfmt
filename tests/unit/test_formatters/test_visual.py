@@ -218,3 +218,66 @@ def test_rich_tree_formatter_cp437(sample_files: list[FileInfo]) -> None:
     output = fmt.format(sample_files)
     assert "\xc3\xc4\xc4" in output or "\xc0\xc4\xc4" in output
     assert "app.py" in output
+
+
+def test_rich_formatters_metadata_populated_and_none() -> None:
+    """Verify table and tree formatters render metadata and fall back to '-' when None."""
+    files_with_meta = [
+        FileInfo(
+            path=Path("/tmp/file1.txt"),
+            relative_path=Path("file1.txt"),
+            permissions_str="-rw-r--r--",
+            owner_user="alice",
+            owner_group="users",
+            inode=12345,
+            device=6789,
+        ),
+        FileInfo(
+            path=Path("/tmp/file2.txt"),
+            relative_path=Path("file2.txt"),
+            permissions_str=None,
+            owner_user=None,
+            owner_group=None,
+            inode=None,
+            device=None,
+        ),
+    ]
+
+    # Test RichTableFormatter
+    table_fmt = RichTableFormatter(
+        console_width=200,
+        show_permissions=True,
+        show_user=True,
+        show_group=True,
+        show_inodes=True,
+        show_device=True,
+    )
+    table_out = table_fmt.format(files_with_meta)
+    assert "Inode" in table_out
+    assert "Device" in table_out
+    assert "Permissions" in table_out
+    assert "User" in table_out
+    assert "Group" in table_out
+    assert "-rw-r--r--" in table_out
+    assert "alice" in table_out
+    assert "users" in table_out
+    assert "12345" in table_out
+    assert "6789" in table_out
+    assert "-" in table_out
+
+    # Test RichTreeFormatter
+    tree_fmt = RichTreeFormatter(
+        console_width=200,
+        show_permissions=True,
+        show_user=True,
+        show_group=True,
+        show_inodes=True,
+        show_device=True,
+    )
+    tree_out = tree_fmt.format(files_with_meta)
+    assert "-rw-r--r--" in tree_out
+    assert "alice" in tree_out
+    assert "users" in tree_out
+    assert "12345" in tree_out
+    assert "6789" in tree_out
+    assert "[- - - - -]" in tree_out or "-" in tree_out

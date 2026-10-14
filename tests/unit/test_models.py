@@ -25,6 +25,11 @@ def test_file_info_defaults():
     assert not info.is_executable
     assert not info.is_symlink
     assert info.size_bytes == 0
+    assert info.permissions_str is None
+    assert info.owner_user is None
+    assert info.owner_group is None
+    assert info.inode is None
+    assert info.device is None
 
 
 def test_file_info_custom():
@@ -40,12 +45,22 @@ def test_file_info_custom():
         is_executable=True,
         is_symlink=False,
         size_bytes=128,
+        permissions_str="-rwxr-xr-x",
+        owner_user="alice",
+        owner_group="developers",
+        inode=123456,
+        device=42,
     )
     assert info.tags == tags
     assert info.shebang == "#!/usr/bin/python3"
     assert info.mime_type == "text/x-python"
     assert info.is_executable
     assert info.size_bytes == 128
+    assert info.permissions_str == "-rwxr-xr-x"
+    assert info.owner_user == "alice"
+    assert info.owner_group == "developers"
+    assert info.inode == 123456
+    assert info.device == 42
 
 
 def test_traversal_config_defaults():
@@ -70,6 +85,11 @@ def test_traversal_config_defaults():
     assert not config.files_first
     assert config.from_file is None
     assert not config.offline
+    assert not config.show_permissions
+    assert not config.show_user
+    assert not config.show_group
+    assert not config.show_inodes
+    assert not config.show_device
 
     custom = TraversalConfig(
         relative_prefix=True,
@@ -78,6 +98,11 @@ def test_traversal_config_defaults():
         dirs_first=True,
         from_file="dump.txt",
         offline=True,
+        show_permissions=True,
+        show_user=True,
+        show_group=True,
+        show_inodes=True,
+        show_device=True,
     )
     assert custom.relative_prefix
     assert custom.sort_by == SortKey.SIZE
@@ -86,6 +111,11 @@ def test_traversal_config_defaults():
     assert not custom.files_first
     assert custom.from_file == "dump.txt"
     assert custom.offline
+    assert custom.show_permissions
+    assert custom.show_user
+    assert custom.show_group
+    assert custom.show_inodes
+    assert custom.show_device
 
 
 def test_file_info_to_dict():
@@ -105,18 +135,33 @@ def test_file_info_to_dict():
     assert d_rel["tags"] == ["shell", "text"]
     assert d_rel["shebang"] == "#!/bin/bash"
     assert "symlink_target" not in d_rel
+    assert "permissions_str" not in d_rel
+    assert "owner_user" not in d_rel
+    assert "owner_group" not in d_rel
+    assert "inode" not in d_rel
+    assert "device" not in d_rel
 
     d_abs = info.to_dict(absolute=True)
     assert d_abs["path"] == str(info.path)
     assert d_abs["relative_path"] == "test.sh"
 
-    # Test symlink_target present
-    info_symlink = FileInfo(
+    # Test symlink_target and metadata fields present
+    info_meta = FileInfo(
         path=Path("/tmp/dir/link"),
         relative_path=Path("link"),
         is_symlink=True,
         symlink_target="/tmp/dir/target",
+        permissions_str="lrwxrwxrwx",
+        owner_user="alice",
+        owner_group="developers",
+        inode=99999,
+        device=101,
     )
-    d_sym = info_symlink.to_dict()
-    assert d_sym["is_symlink"] is True
-    assert d_sym["symlink_target"] == "/tmp/dir/target"
+    d_meta = info_meta.to_dict()
+    assert d_meta["is_symlink"] is True
+    assert d_meta["symlink_target"] == "/tmp/dir/target"
+    assert d_meta["permissions_str"] == "lrwxrwxrwx"
+    assert d_meta["owner_user"] == "alice"
+    assert d_meta["owner_group"] == "developers"
+    assert d_meta["inode"] == 99999
+    assert d_meta["device"] == 101

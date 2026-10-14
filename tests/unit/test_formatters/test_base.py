@@ -175,3 +175,51 @@ def test_text_formatter_relative_no_tags(sample_files: list[FileInfo]) -> None:
     fmt = TextFormatter(absolute=False, show_tags=False)
     output = fmt.format(sample_files)
     assert output == "main.py\ndata.json\n"
+
+
+def test_text_formatter_with_metadata() -> None:
+    """Verify TextFormatter formats metadata prefixes and handles None values."""
+    files_with_meta = [
+        FileInfo(
+            path=Path("/workspace/project/main.py"),
+            relative_path=Path("main.py"),
+            tags=frozenset({"python"}),
+            permissions_str="-rwxr-xr-x",
+            owner_user="alice",
+            owner_group="developers",
+            inode=12345,
+            device=42,
+        ),
+        FileInfo(
+            path=Path("/workspace/project/data.json"),
+            relative_path=Path("data.json"),
+            tags=frozenset({"json"}),
+            permissions_str=None,
+            owner_user=None,
+            owner_group=None,
+            inode=None,
+            device=None,
+        ),
+    ]
+
+    fmt = TextFormatter(
+        show_inodes=True,
+        show_device=True,
+        show_permissions=True,
+        show_user=True,
+        show_group=True,
+        show_tags=True,
+    )
+    output = fmt.format(files_with_meta)
+    lines = output.strip().split("\n")
+    assert lines[0] == "[12345 42 -rwxr-xr-x alice developers] main.py [python]"
+    assert lines[1] == "[- - - - -] data.json [json]"
+
+    fmt_no_tags = TextFormatter(
+        show_permissions=True,
+        show_user=True,
+    )
+    output_no_tags = fmt_no_tags.format(files_with_meta)
+    lines_no_tags = output_no_tags.strip().split("\n")
+    assert lines_no_tags[0] == "[-rwxr-xr-x alice] main.py"
+    assert lines_no_tags[1] == "[- -] data.json"
