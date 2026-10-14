@@ -133,30 +133,34 @@ def test_calculate_accumulated_sizes_tree(tmp_path: Path) -> None:
 
 def test_calculate_accumulated_sizes_symlinks(tmp_path: Path) -> None:
     """Verify calculate_accumulated_sizes respects symlink flags and prevents cycles."""
-    target_dir = tmp_path / "target_dir"
-    target_dir.mkdir()
-    (target_dir / "data.bin").write_bytes(b"y" * 50)
+    ext_dir = tmp_path / "external"
+    ext_dir.mkdir()
+    (ext_dir / "data.bin").write_bytes(b"y" * 50)
 
-    link_dir = tmp_path / "link_dir"
-    link_dir.symlink_to(target_dir, target_is_directory=True)
+    search_root = tmp_path / "search"
+    search_root.mkdir()
+    link_dir = search_root / "link_to_ext"
+    link_dir.symlink_to(ext_dir, target_is_directory=True)
 
     # With follow_symlinks=False
-    sizes_no_follow = calculate_accumulated_sizes(tmp_path, follow_symlinks=False)
-    # link_dir is not traversed as directory
-    assert sizes_no_follow[target_dir] == 50
+    sizes_no_follow = calculate_accumulated_sizes(search_root, follow_symlinks=False)
+    assert link_dir not in sizes_no_follow
+    assert sizes_no_follow[search_root] == 0
 
     # With follow_symlinks=True
-    sizes_follow = calculate_accumulated_sizes(tmp_path, follow_symlinks=True)
-    assert sizes_follow[target_dir] == 50
+    sizes_follow = calculate_accumulated_sizes(search_root, follow_symlinks=True)
+    assert sizes_follow[link_dir] == 50
+    assert sizes_follow[search_root] == 50
 
     # Cycle test
     cycle_dir = tmp_path / "cycle_dir"
     cycle_dir.mkdir()
+    (cycle_dir / "cycle_file.bin").write_bytes(b"z" * 25)
     loop_link = cycle_dir / "loop"
     loop_link.symlink_to(cycle_dir, target_is_directory=True)
     # Should not raise RecursionError or hang
     cycle_sizes = calculate_accumulated_sizes(cycle_dir, follow_symlinks=True)
-    assert cycle_dir in cycle_sizes
+    assert cycle_sizes[cycle_dir] == 25
 
 
 def test_calculate_accumulated_sizes_visited_root(tmp_path: Path) -> None:
