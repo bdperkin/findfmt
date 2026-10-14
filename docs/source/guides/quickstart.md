@@ -22,7 +22,7 @@ findfmt --shebang python
 Inspect all classification tags assigned to files:
 
 ```bash
-findfmt -l -t python
+findfmt --list-tags -t python
 ```
 
 Sample output:
@@ -47,4 +47,19 @@ Print matching frequencies and top detected tags to stderr:
 
 ```bash
 findfmt -s
+```
+
+## 6. Inspecting File Metadata
+
+Inspect file permissions, ownership, sizes, timestamps, and classification indicators:
+
+```bash
+# Print permissions, ownership, and human-readable sizes
+findfmt -p -u -g -h
+
+# Print modification time, human-readable size, and classification indicators
+findfmt -D -h -F
+
+# View accumulated directory sizes in a rich tree
+findfmt --tree --du -h
 ```

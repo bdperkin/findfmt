@@ -125,7 +125,7 @@ findfmt -t shell -0 | xargs -r -0 shellcheck
 
 ```bash
 # Print matched files and their classification tags
-findfmt -l -t python
+findfmt --list-tags -t python
 
 # Print summary statistics to stderr
 findfmt -s
@@ -158,7 +158,25 @@ findfmt -f csv-table --table-style rounded
 findfmt -t python -f markdown
 ```
 
-### 3.6. Command Aliases & Entry Points
+### 3.6. File Metadata & Presentation Options
+
+Inspect extended Unix-style attributes and customize file presentation:
+
+```bash
+# Print permissions, ownership, and human-readable sizes
+findfmt -p -u -g -h
+
+# Print modification timestamps, sizes, and file type classification indicators
+findfmt -D -h -F
+
+# View accumulated recursive directory disk usage in a hierarchical tree
+findfmt --tree --du -h
+
+# Print filenames in double quotes, escaping embedded quotes and non-printables
+findfmt -Q -q
+```
+
+### 3.7. Command Aliases & Entry Points
 
 `findfmt` installs dedicated executable wrappers for frequent operations:
 
@@ -175,39 +193,58 @@ ______________________________________________________________________
 
 ## 4. CLI Options
 
-| Flag                                              | Description                                                                                                             |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `-t, --tag, --type TAG`                           | Match files containing specified tag(s)                                                                                 |
-| `-e, --exclude, --exclude-tag TAG`                | Exclude files containing specified tag(s)                                                                               |
-| `--all-tags` / `--no-all-tags`                    | Require match against all include tags (AND logic)                                                                      |
-| `--shebang INTERPRETER`                           | Match shebang interpreter name or pattern                                                                               |
-| `--no-ignore` / `--ignore`                        | Toggle respecting `.gitignore` files                                                                                    |
-| `--hidden` / `--no-hidden`                        | Toggle inspecting hidden files and directories                                                                          |
-| `-d, --dirs-only`                                 | List directories only, suppressing regular file entries                                                                 |
-| `-l, --follow-links` / `--no-follow-links`        | Follow directory symlinks with loop detection                                                                           |
-| `-x, --one-file-system`                           | Confine traversal to starting directory's filesystem device                                                             |
-| `-L, --max-depth LEVEL`                           | Restrict directory traversal descent to maximum depth level                                                             |
-| `--filelimit LIMIT`                               | Skip directories exceeding child entry count threshold                                                                  |
-| `--prune`                                         | Omit empty directories and directories with zero matching files                                                         |
-| `-P, --pattern PATTERN`                           | Match files against wildcard or glob pattern (supports multiple `-P` and `\|`)                                          |
-| `-I, --exclude-pattern PATTERN`                   | Exclude files against wildcard or glob pattern (supports multiple `-I` and `\|`)                                        |
-| `--ignore-case` / `--no-ignore-case`              | Apply case-insensitive pattern matching across `-P` and `-I`                                                            |
-| `--match-dirs` / `--no-match-dirs`                | Match directories against patterns; matched directories inherit to child files                                          |
-| `-f, --format FORMAT`                             | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`) |
-| `--tree` / `--no-tree`                            | Toggle hierarchical directory tree view (equivalent to `--format tree`)                                                 |
-| `--table-style STYLE`                             | Border style (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`)        |
-| `--pager` / `--no-pager`                          | Toggle interactive paging (auto-pages on TTY when lines exceed terminal height)                                         |
-| `-i, --no-indent` / `--indent`                    | Omit branch indentation in tree view and strip extraneous whitespace in structured formats                              |
-| `-A, --ansi-lines` / `--no-ansi-lines`            | Use ANSI/VT100 line drawing escapes for tree indentation lines                                                          |
-| `-S, --cp437` / `--no-cp437`                      | Use CP437 console graphics line drawing characters for tree indentation lines                                           |
-| `-C, --color` / `-n, --no-color`                  | Force enable or disable ANSI color output across all output channels                                                    |
-| `--absolute`, `--full-path` / `--no-absolute`     | Toggle absolute vs relative output paths                                                                                |
-| `--relative`, `--relative-path` / `--no-relative` | Prepend input search path prefix to relative output paths                                                               |
-| `--known-tags`                                    | List all supported classification tags and exit                                                                         |
-| `-v, -V, --version`                               | Display version (`--verbose` adds runtime diagnostics)                                                                  |
-| `--diagnostics`                                   | Display runtime environment diagnostics and exit                                                                        |
-| `--help-all`                                      | Display comprehensive manual, env vars, and exit codes                                                                  |
-| `-- [PATHS...]`                                   | POSIX terminator: treat following tokens strictly as paths                                                              |
+| Flag                                                   | Description                                                                                                             |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `-t, --tag, --type TAG`                                | Match files containing specified tag(s)                                                                                 |
+| `-e, --exclude, --exclude-tag TAG`                     | Exclude files containing specified tag(s)                                                                               |
+| `--all-tags` / `--no-all-tags`                         | Require match against all include tags (AND logic)                                                                      |
+| `--shebang INTERPRETER`                                | Match shebang interpreter name or pattern                                                                               |
+| `--no-ignore` / `--ignore`                             | Toggle respecting `.gitignore` files                                                                                    |
+| `--hidden` / `--no-hidden`                             | Toggle inspecting hidden files and directories                                                                          |
+| `-d, --dirs-only`                                      | List directories only, suppressing regular file entries                                                                 |
+| `-l, --follow-links` / `--no-follow-links`             | Follow directory symlinks with loop detection                                                                           |
+| `-x, --one-file-system`                                | Confine traversal to starting directory's filesystem device                                                             |
+| `-L, --max-depth LEVEL`                                | Restrict directory traversal descent to maximum depth level                                                             |
+| `--filelimit LIMIT`                                    | Skip directories exceeding child entry count threshold                                                                  |
+| `--prune`                                              | Omit empty directories and directories with zero matching files                                                         |
+| `-P, --pattern PATTERN`                                | Match files against wildcard or glob pattern (supports multiple `-P` and `\|`)                                          |
+| `-I, --exclude-pattern PATTERN`                        | Exclude files against wildcard or glob pattern (supports multiple `-I` and `\|`)                                        |
+| `--ignore-case` / `--no-ignore-case`                   | Apply case-insensitive pattern matching across `-P` and `-I`                                                            |
+| `--match-dirs` / `--no-match-dirs`                     | Match directories against patterns; matched directories inherit to child files                                          |
+| `-p, --permissions` / `--no-permissions`               | Print file type and permissions in standard `ls -l` format                                                              |
+| `-u, --user` / `--no-user`                             | Print file owner username (or numeric UID)                                                                              |
+| `-g, --group` / `--no-group`                           | Print file owner group name (or numeric GID)                                                                            |
+| `--inodes` / `--no-inodes`                             | Print filesystem inode number (`st_ino`)                                                                                |
+| `--device` / `--no-device`                             | Print filesystem device number (`st_dev`)                                                                               |
+| `--size` / `--no-size`                                 | Print file size in bytes (`st_size`)                                                                                    |
+| `-h, --human-readable` / `--no-human-readable`         | Print sizes in human-readable format with binary IEC units (`K`, `M`, `G`, `T`)                                         |
+| `--si` / `--no-si`                                     | Print sizes in human-readable format with SI metric units (`kB`, `MB`, `GB`, `TB`)                                      |
+| `--du, --accumulate-size` / `--no-du`                  | Recursively calculate and accumulate directory disk usage sizes                                                         |
+| `-D, --mtime` / `--no-mtime`                           | Print date and time of last modification (`st_mtime`)                                                                   |
+| `--ctime` / `--no-ctime`                               | Print date and time of last metadata status change (`st_ctime`)                                                         |
+| `--time-format, --timefmt FORMAT`                      | Custom `strftime` timestamp format (implies `-D`)                                                                       |
+| `-F, --classify` / `--no-classify`                     | Append classification indicator (`*` executable, `/` dir, `@` link, `=` socket, `\|` FIFO, `>` door)                    |
+| `-q, --hide-control-chars` / `--no-hide-control-chars` | Replace non-printable control characters in filenames with `?`                                                          |
+| `-N, --literal` / `--no-literal`                       | Print non-printable characters literally without masking                                                                |
+| `-Q, --quote-name` / `--no-quote-name`                 | Enclose filenames in double quotes (`"..."`) with backslash escaping                                                    |
+| `-f, --format FORMAT`                                  | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`) |
+| `--tree` / `--no-tree`                                 | Toggle hierarchical directory tree view (equivalent to `--format tree`)                                                 |
+| `--table-style STYLE`                                  | Border style (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`)        |
+| `--pager` / `--no-pager`                               | Toggle interactive paging (auto-pages on TTY when lines exceed terminal height)                                         |
+| `-i, --no-indent` / `--indent`                         | Omit branch indentation in tree view and strip extraneous whitespace in structured formats                              |
+| `-A, --ansi-lines` / `--no-ansi-lines`                 | Use ANSI/VT100 line drawing escapes for tree indentation lines                                                          |
+| `-S, --cp437` / `--no-cp437`                           | Use CP437 console graphics line drawing characters for tree indentation lines                                           |
+| `-C, --color` / `-n, --no-color`                       | Force enable or disable ANSI color output across all output channels                                                    |
+| `--absolute`, `--full-path` / `--no-absolute`          | Toggle absolute vs relative output paths                                                                                |
+| `--relative`, `--relative-path` / `--no-relative`      | Prepend input search path prefix to relative output paths                                                               |
+| `--list-tags` / `--no-list-tags`                       | Display identified classification and MIME tags alongside paths                                                         |
+| `-s, --summary` / `--no-summary`                       | Output summary frequency statistics to `stderr`                                                                         |
+| `-0, --print0` / `--no-print0`                         | Delimit paths with a NUL (`\0`) byte for `xargs -0`                                                                     |
+| `--known-tags`                                         | List all supported classification tags and exit                                                                         |
+| `-v, -V, --version`                                    | Display version (`--verbose` adds runtime diagnostics)                                                                  |
+| `--diagnostics`                                        | Display runtime environment diagnostics and exit                                                                        |
+| `--help-all`                                           | Display comprehensive manual, env vars, and exit codes                                                                  |
+| `-- [PATHS...]`                                        | POSIX terminator: treat following tokens strictly as paths                                                              |
 
 ______________________________________________________________________
 
