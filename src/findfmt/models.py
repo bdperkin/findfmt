@@ -155,6 +155,9 @@ class TraversalConfig:
         html_title: Document title and heading for HTML output.
         no_links: Whether to suppress hyperlinks in HTML mode.
         xml: Whether XML output format flag is active.
+        hyperlink: Whether to emit OSC 8 terminal hyperlinks for paths.
+        hyperlink_schema: URI schema for terminal hyperlinks.
+        hyperlink_authority: Optional URI authority component for terminal hyperlinks.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -209,3 +212,6 @@ class TraversalConfig:
     html_title: str | None = None
     no_links: bool = False
     xml: bool = False
+    hyperlink: bool = False
+    hyperlink_schema: str = "file://"
+    hyperlink_authority: str | None = None

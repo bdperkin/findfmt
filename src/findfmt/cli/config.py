@@ -157,6 +157,9 @@ def build_traversal_config(  # noqa: PLR0913
     outro: Path | None = None,
     title: str | None = None,
     no_links: bool = False,
+    hyperlink: bool = False,
+    hyperlink_schema: str = "file://",
+    hyperlink_authority: str | None = None,
 ) -> TraversalConfig:
     """Build and validate TraversalConfig from CLI options.
 
@@ -215,6 +218,9 @@ def build_traversal_config(  # noqa: PLR0913
         outro: Optional HTML template outro footer fragment path.
         title: Optional custom HTML document title.
         no_links: Whether to suppress hyperlinks in HTML mode.
+        hyperlink: Whether to emit OSC 8 terminal hyperlinks for paths.
+        hyperlink_schema: URI schema for terminal hyperlinks.
+        hyperlink_authority: Optional URI authority component for terminal hyperlinks.
 
     Returns:
         Configured TraversalConfig instance.
@@ -294,4 +300,7 @@ def build_traversal_config(  # noqa: PLR0913
         html_title=title,
         no_links=no_links,
         xml=xml,
+        hyperlink=hyperlink,
+        hyperlink_schema=hyperlink_schema,
+        hyperlink_authority=hyperlink_authority,
     )

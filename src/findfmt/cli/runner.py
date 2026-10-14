@@ -146,6 +146,9 @@ def _build_formatter_kwargs(  # noqa: PLR0913
         "hide_control_chars": config.hide_control_chars,
         "literal": config.literal,
         "quote_name": config.quote_name,
+        "hyperlink": config.hyperlink,
+        "hyperlink_schema": config.hyperlink_schema,
+        "hyperlink_authority": config.hyperlink_authority,
     }
     if effective_format == OutputFormat.HTML:
         _append_html_kwargs(
@@ -197,6 +200,9 @@ def execute_findfmt(  # noqa: PLR0913
     outro: Path | None = None,
     title: str | None = None,
     no_links: bool = False,
+    hyperlink: bool = False,
+    hyperlink_schema: str = "file://",
+    hyperlink_authority: str | None = None,
     table_style: str | None = None,
     absolute: bool = False,
     relative: bool = False,
@@ -301,6 +307,9 @@ def execute_findfmt(  # noqa: PLR0913
         outro: Optional HTML template outro footer fragment path.
         title: Optional custom HTML document title.
         no_links: Whether to suppress hyperlinks in HTML mode.
+        hyperlink: Whether to wrap paths in OSC 8 terminal hyperlink escapes.
+        hyperlink_schema: URI schema for terminal hyperlinks.
+        hyperlink_authority: Optional URI authority component for terminal hyperlinks.
         color: Explicit color enable override flag.
     """
     effective_format = _resolve_effective_format(
@@ -365,6 +374,9 @@ def execute_findfmt(  # noqa: PLR0913
         outro=outro,
         title=title,
         no_links=no_links,
+        hyperlink=hyperlink,
+        hyperlink_schema=hyperlink_schema,
+        hyperlink_authority=hyperlink_authority,
     )
 
     tag_counter: Counter[str] = Counter()

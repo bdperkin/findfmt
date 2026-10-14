@@ -12,6 +12,7 @@ else:  # pragma: no cover
 
 from findfmt.formatters.base import Formatter
 from findfmt.metadata import format_metadata_parts
+from findfmt.utils.hyperlinks import build_file_uri
 from findfmt.utils.strings import format_display_path
 
 if TYPE_CHECKING:
@@ -44,6 +45,9 @@ class TextFormatter(Formatter):
         hide_control_chars: bool = False,
         literal: bool = False,
         quote_name: bool = False,
+        hyperlink: bool = False,
+        hyperlink_schema: str = "file://",
+        hyperlink_authority: str | None = None,
     ) -> None:
         r"""Initialize TextFormatter.
 
@@ -66,6 +70,9 @@ class TextFormatter(Formatter):
             hide_control_chars: Whether to mask non-printable characters with '?'.
             literal: Whether to emit literal control characters.
             quote_name: Whether to enclose filenames in double quotes.
+            hyperlink: Whether to wrap paths in OSC 8 terminal hyperlink escapes.
+            hyperlink_schema: URI schema for terminal hyperlinks.
+            hyperlink_authority: Optional URI authority component for terminal hyperlinks.
         """
         super().__init__(absolute=absolute)
         self.show_tags = show_tags
@@ -85,6 +92,9 @@ class TextFormatter(Formatter):
         self.hide_control_chars = hide_control_chars
         self.literal = literal
         self.quote_name = quote_name
+        self.hyperlink = hyperlink
+        self.hyperlink_schema = hyperlink_schema
+        self.hyperlink_authority = hyperlink_authority
 
     def format_item(self, file_info: FileInfo) -> str:
         """Format an individual file record as a text line.
@@ -111,12 +121,23 @@ class TextFormatter(Formatter):
         )
         raw_path = str(file_info.path if self.absolute else file_info.relative_path)
         indicator = file_info.indicator if self.classify else None
+        uri = (
+            build_file_uri(
+                file_info.path,
+                schema=self.hyperlink_schema,
+                authority=self.hyperlink_authority,
+            )
+            if self.hyperlink
+            else None
+        )
         display_path = format_display_path(
             raw_path,
             quote_name=self.quote_name,
             hide_control_chars=self.hide_control_chars,
             literal=self.literal,
             indicator=indicator,
+            hyperlink=self.hyperlink,
+            uri=uri,
         )
         prefix = f"[{' '.join(meta_parts)}] " if meta_parts else ""
 

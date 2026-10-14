@@ -140,6 +140,14 @@ HELP_INTRO = "Read and insert contents of specified HTML fragment file prior to 
 HELP_OUTRO = "Read and insert contents of specified HTML fragment file after directory listing."
 HELP_TITLE = "Set title and <h1> heading for HTML document output (default: 'Directory Tree')."
 HELP_NO_LINKS = "Suppress hyperlink anchors in HTML document output, rendering plain text paths."
+HELP_HYPERLINK = "Wrap paths in standard OSC 8 clickable terminal hyperlink escape sequences."
+HELP_HYPERLINK_SCHEMA = (
+    "URI schema for terminal hyperlinks (defaults to 'file://', e.g. "
+    "'vscode://file/', 'cursor://file/', 'subl://')."
+)
+HELP_HYPERLINK_AUTHORITY = (
+    "URI authority component for terminal hyperlinks (e.g. 'localhost' or remote hostname)."
+)
 HELP_OUTPUT = "Send command output directly to a file rather than standard output."
 HELP_TREE = "Render output in a hierarchical directory tree (equivalent to --format tree)."
 HELP_TABLE_STYLE = (
@@ -246,6 +254,9 @@ def get_help_all() -> str:
         "  --outro <path>                Append custom HTML fragment after listing.\n"
         "  --title, -T <title>           Set title and <h1> heading for HTML output.\n"
         "  --nolinks / --no-nolinks      Suppress hyperlink anchors in HTML output.\n"
+        "  --hyperlink / --no-hyperlink  Wrap paths in OSC 8 terminal hyperlinks.\n"
+        "  --hyperlink-schema <schema>   URI schema prefix (default: file://).\n"
+        "  --hyperlink-authority <auth>  URI authority override (e.g. localhost).\n"
         "  --output, -o <path>           Send command output directly to a file.\n"
         "  --tree / --no-tree            Render output in hierarchical tree view.\n"
         "  --table-style <style>         Border style (rounded, cp437, ascii, etc.).\n"

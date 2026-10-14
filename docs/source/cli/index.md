@@ -215,6 +215,17 @@ without masking.
 `-Q, --quote-name / --no-quote-name` : Enclose filenames in double quotes (`"..."`), escaping any
 embedded double quotes (`\"`) and backslashes (`\\`).
 
+`--hyperlink / --no-hyperlink` : Wrap rendered file and directory paths in standard OSC 8 terminal
+hyperlink escape sequences (`\033]8;;URI\033\TEXT\033]8;;\033\`), enabling direct click-to-open
+navigation in modern terminal emulators.
+
+`--hyperlink-schema SCHEMA` : Custom URI schema prefix for terminal hyperlinks (defaults to
+`file://`). Supports standard local file schemes as well as editor URI schemas such as
+`vscode://file/`, `cursor://file/`, or `subl://`.
+
+`--hyperlink-authority AUTHORITY` : Optional authority or hostname component for terminal hyperlinks
+(e.g., `localhost` or remote workstation hostnames).
+
 `-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
 consumption by `xargs -0`.
 

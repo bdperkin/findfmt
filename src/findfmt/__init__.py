@@ -23,6 +23,12 @@ from findfmt.sizes import (
     format_size_si,
 )
 from findfmt.traversal import find_files, traverse_directory
+from findfmt.utils.hyperlinks import (
+    build_file_uri,
+    format_hyperlink,
+    format_osc8_link,
+    format_rich_link,
+)
 from findfmt.utils.strings import (
     format_display_path,
     format_timestamp,
@@ -40,12 +46,16 @@ __all__ = [
     "SortKey",
     "TraversalConfig",
     "__version__",
+    "build_file_uri",
     "calculate_accumulated_sizes",
     "classify_file",
     "extract_metadata",
     "find_files",
     "format_display_path",
+    "format_hyperlink",
+    "format_osc8_link",
     "format_permissions",
+    "format_rich_link",
     "format_size",
     "format_size_binary",
     "format_size_bytes",

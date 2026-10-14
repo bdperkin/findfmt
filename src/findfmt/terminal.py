@@ -24,7 +24,9 @@ __all__ = [
     "strip_ansi",
 ]
 
-_ANSI_REGEX = re.compile(r"\x1b(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+_ANSI_REGEX = re.compile(
+    r"\x1b\][^\x1b\x07]*(?:\x1b\\|\x07)|\x1b(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])",
+)
 
 
 def strip_ansi(text: str) -> str:

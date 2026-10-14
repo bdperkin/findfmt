@@ -6,6 +6,8 @@ import datetime as dt
 import stat
 from typing import TYPE_CHECKING
 
+from findfmt.utils.hyperlinks import format_osc8_link
+
 if TYPE_CHECKING:
     import os
 
@@ -50,15 +52,17 @@ def quote_filename(text: str) -> str:
     return f'"{escaped}"'
 
 
-def format_display_path(
+def format_display_path(  # noqa: PLR0913
     path_str: str,
     *,
     quote_name: bool = False,
     hide_control_chars: bool = False,
     literal: bool = False,
     indicator: str | None = None,
+    hyperlink: bool = False,
+    uri: str | None = None,
 ) -> str:
-    """Format path string applying control character masking, quoting, and indicators.
+    """Format path string applying control character masking, quoting, indicators, and links.
 
     Args:
         path_str: Raw path or filename string.
@@ -66,6 +70,8 @@ def format_display_path(
         hide_control_chars: Whether to mask non-printable characters as '?'.
         literal: Whether to output characters verbatim without masking.
         indicator: Optional classification indicator character to append.
+        hyperlink: Whether to wrap formatted path in an OSC 8 terminal hyperlink.
+        uri: Target destination URI for terminal hyperlink.
 
     Returns:
         Formatted path or filename string.
@@ -79,6 +85,9 @@ def format_display_path(
 
     if indicator:
         result = f"{result}{indicator}"
+
+    if hyperlink and uri:
+        result = format_osc8_link(result, uri)
 
     return result
 

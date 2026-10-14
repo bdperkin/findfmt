@@ -131,6 +131,10 @@ def _extract_common_formatter_kwargs(kwargs: dict[str, object]) -> dict[str, Any
     """Extract POSIX metadata and rendering kwargs for tree-based serializers."""
     time_fmt_raw = kwargs.get("time_format")
     time_fmt = str(time_fmt_raw) if time_fmt_raw is not None else None
+    schema_raw = kwargs.get("hyperlink_schema")
+    schema = str(schema_raw) if schema_raw is not None else "file://"
+    auth_raw = kwargs.get("hyperlink_authority")
+    auth = str(auth_raw) if auth_raw is not None else None
     return {
         "show_permissions": bool(kwargs.get("show_permissions", False)),
         "show_user": bool(kwargs.get("show_user", False)),
@@ -148,6 +152,9 @@ def _extract_common_formatter_kwargs(kwargs: dict[str, object]) -> dict[str, Any
         "hide_control_chars": bool(kwargs.get("hide_control_chars", False)),
         "literal": bool(kwargs.get("literal", False)),
         "quote_name": bool(kwargs.get("quote_name", False)),
+        "hyperlink": bool(kwargs.get("hyperlink", False)),
+        "hyperlink_schema": schema,
+        "hyperlink_authority": auth,
     }
 
 
@@ -191,6 +198,9 @@ def _create_document_formatter(
     """Instantiate XML or HTML document serializer if matched."""
     if fmt_str == OutputFormat.XML.value:
         common = _extract_common_formatter_kwargs(kwargs)
+        for key in ("hyperlink", "hyperlink_schema", "hyperlink_authority"):
+            common.pop(key, None)
+
         return XmlFormatter(
             absolute=absolute,
             no_indent=bool(kwargs.get("no_indent", False)),
@@ -199,6 +209,9 @@ def _create_document_formatter(
 
     if fmt_str == OutputFormat.HTML.value:
         common = _extract_common_formatter_kwargs(kwargs)
+        for key in ("hyperlink", "hyperlink_schema", "hyperlink_authority"):
+            common.pop(key, None)
+
         return _create_html_formatter(absolute=absolute, common=common, kwargs=kwargs)
 
     return None

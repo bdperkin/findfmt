@@ -20,10 +20,12 @@ from findfmt.formatters.glyphs import resolve_tree_guides
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
 from findfmt.terminal import get_console
+from findfmt.utils.hyperlinks import build_file_uri
 from findfmt.utils.strings import format_display_path
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
 
     from findfmt.models import FileInfo
 
@@ -49,6 +51,9 @@ def _format_file_label(  # noqa: PLR0913
     hide_control_chars: bool = False,
     literal: bool = False,
     quote_name: bool = False,
+    hyperlink: bool = False,
+    hyperlink_schema: str = "file://",
+    hyperlink_authority: str | None = None,
 ) -> str:
     """Format Rich leaf node label for a file with badges and optional metadata."""
     meta_parts = format_metadata_parts(
@@ -64,12 +69,23 @@ def _format_file_label(  # noqa: PLR0913
     )
     prefix = f"[cyan][{' '.join(meta_parts)}][/] " if meta_parts else ""
     indicator = file_info.indicator if classify else None
+    uri = (
+        build_file_uri(
+            file_info.path,
+            schema=hyperlink_schema,
+            authority=hyperlink_authority,
+        )
+        if hyperlink
+        else None
+    )
     display_name = format_display_path(
         filename,
         quote_name=quote_name,
         hide_control_chars=hide_control_chars,
         literal=literal,
         indicator=indicator,
+        hyperlink=hyperlink,
+        uri=uri,
     )
     tags_list = " ".join(format_tag_badge(t) for t in sorted(file_info.tags))
     tags_part = f" {tags_list}" if file_info.tags else ""
@@ -84,16 +100,34 @@ def _format_file_label(  # noqa: PLR0913
     return f"{prefix}📄 {display_name}{size_part}{tags_part}{mime_part}"
 
 
+def _record_dir_disk_paths(
+    file_info: FileInfo,
+    parts: tuple[str, ...],
+    dir_parts: tuple[str, ...],
+    dir_disk_paths: dict[tuple[str, ...], Path],
+) -> None:
+    """Record filesystem disk paths for directory parts if not already registered."""
+    for idx in range(1, len(dir_parts) + 1):
+        sub_t = dir_parts[:idx]
+        if sub_t not in dir_disk_paths:
+            parent_idx = len(parts) - 1 - idx
+            dir_disk_paths[sub_t] = file_info.path.parents[parent_idx]
+
+
 def _traverse_tree_node(  # noqa: PLR0913
     tree: Tree,
     dir_nodes: dict[tuple[str, ...], Tree],
     dir_parts: tuple[str, ...],
     *,
     dir_sizes: dict[tuple[str, ...], str] | None = None,
+    dir_disk_paths: dict[tuple[str, ...], Path] | None = None,
     classify: bool = False,
     hide_control_chars: bool = False,
     literal: bool = False,
     quote_name: bool = False,
+    hyperlink: bool = False,
+    hyperlink_schema: str = "file://",
+    hyperlink_authority: str | None = None,
 ) -> Tree:
     """Traverse or create branch nodes in tree for directory parts."""
     curr_node = tree
@@ -107,12 +141,23 @@ def _traverse_tree_node(  # noqa: PLR0913
             )
             raw_dir_name = dir_parts[i - 1]
             indicator = "/" if classify else None
+            dir_uri = (
+                build_file_uri(
+                    dir_disk_paths[sub_tuple],
+                    schema=hyperlink_schema,
+                    authority=hyperlink_authority,
+                )
+                if (hyperlink and dir_disk_paths is not None and sub_tuple in dir_disk_paths)
+                else None
+            )
             display_dir_name = format_display_path(
                 raw_dir_name,
                 quote_name=quote_name,
                 hide_control_chars=hide_control_chars,
                 literal=literal,
                 indicator=indicator,
+                hyperlink=hyperlink,
+                uri=dir_uri,
             )
             node_label = f"[bold blue]📁 {display_dir_name}[/]{size_suffix}"
             dir_nodes[sub_tuple] = curr_node.add(node_label)
@@ -180,6 +225,9 @@ class RichTreeFormatter(Formatter):
         hide_control_chars: bool = False,
         literal: bool = False,
         quote_name: bool = False,
+        hyperlink: bool = False,
+        hyperlink_schema: str = "file://",
+        hyperlink_authority: str | None = None,
     ) -> None:
         """Initialize RichTreeFormatter.
 
@@ -206,6 +254,9 @@ class RichTreeFormatter(Formatter):
             hide_control_chars: Whether to mask non-printable characters with '?'.
             literal: Whether to emit literal control characters.
             quote_name: Whether to enclose filenames in double quotes.
+            hyperlink: Whether to wrap paths in OSC 8 terminal hyperlink escapes.
+            hyperlink_schema: URI schema for terminal hyperlinks.
+            hyperlink_authority: Optional URI authority component for terminal hyperlinks.
         """
         super().__init__(absolute=absolute)
         self.console_width = console_width
@@ -229,14 +280,12 @@ class RichTreeFormatter(Formatter):
         self.hide_control_chars = hide_control_chars
         self.literal = literal
         self.quote_name = quote_name
+        self.hyperlink = hyperlink
+        self.hyperlink_schema = hyperlink_schema
+        self.hyperlink_authority = hyperlink_authority
 
-    def _build_tree(self, files: Iterable[FileInfo]) -> Tree:
-        """Construct a nested Rich Tree populated with directory branches and files."""
-        sorted_files = sorted(
-            files,
-            key=lambda f: str(f.path if self.absolute else f.relative_path),
-        )
-
+    def _init_tree_root(self) -> Tree:
+        """Initialize the root Tree node with guides and styling."""
         root_name = "/" if self.absolute else "."
         root_indicator = "/" if (self.classify and not self.absolute) else None
         display_root = format_display_path(
@@ -246,8 +295,7 @@ class RichTreeFormatter(Formatter):
             literal=self.literal,
             indicator=root_indicator,
         )
-        root_label = f"[bold]{display_root}[/]"
-        tree = Tree(root_label)
+        tree = Tree(f"[bold]{display_root}[/]")
         guides = resolve_tree_guides(
             no_indent=self.no_indent,
             ansi_lines=self.ansi_lines,
@@ -255,7 +303,17 @@ class RichTreeFormatter(Formatter):
         )
         tree.TREE_GUIDES = [guides, guides, guides]
         tree.ASCII_GUIDES = guides
+        return tree
+
+    def _build_tree(self, files: Iterable[FileInfo]) -> Tree:
+        """Construct a nested Rich Tree populated with directory branches and files."""
+        sorted_files = sorted(
+            files,
+            key=lambda f: str(f.path if self.absolute else f.relative_path),
+        )
+        tree = self._init_tree_root()
         dir_nodes: dict[tuple[str, ...], Tree] = {}
+        dir_disk_paths: dict[tuple[str, ...], Path] = {}
 
         dir_sizes_formatted: dict[tuple[str, ...], str] | None = None
         if self.accumulate_size:
@@ -271,17 +329,23 @@ class RichTreeFormatter(Formatter):
             target_path = file_info.path if self.absolute else file_info.relative_path
             is_abs = target_path.is_absolute()
             parts = target_path.parts
-
             dir_parts = tuple(parts[1:-1] if is_abs else parts[:-1])
+            if self.hyperlink:
+                _record_dir_disk_paths(file_info, parts, dir_parts, dir_disk_paths)
+
             curr_node = _traverse_tree_node(
                 tree,
                 dir_nodes,
                 dir_parts,
                 dir_sizes=dir_sizes_formatted,
+                dir_disk_paths=dir_disk_paths,
                 classify=self.classify,
                 hide_control_chars=self.hide_control_chars,
                 literal=self.literal,
                 quote_name=self.quote_name,
+                hyperlink=self.hyperlink,
+                hyperlink_schema=self.hyperlink_schema,
+                hyperlink_authority=self.hyperlink_authority,
             )
             filename = parts[-1] if parts else str(target_path)
             curr_node.add(
@@ -303,6 +367,9 @@ class RichTreeFormatter(Formatter):
                     hide_control_chars=self.hide_control_chars,
                     literal=self.literal,
                     quote_name=self.quote_name,
+                    hyperlink=self.hyperlink,
+                    hyperlink_schema=self.hyperlink_schema,
+                    hyperlink_authority=self.hyperlink_authority,
                 ),
             )
 

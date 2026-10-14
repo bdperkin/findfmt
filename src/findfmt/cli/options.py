@@ -223,6 +223,30 @@ OptNoLinks = Annotated[
         help=h.HELP_NO_LINKS,
     ),
 ]
+OptHyperlink = Annotated[
+    bool,
+    typer.Option(
+        "--hyperlink/--no-hyperlink",
+        rich_help_panel=_PO,
+        help=h.HELP_HYPERLINK,
+    ),
+]
+OptHyperlinkSchema = Annotated[
+    str,
+    typer.Option(
+        "--hyperlink-schema",
+        rich_help_panel=_PO,
+        help=h.HELP_HYPERLINK_SCHEMA,
+    ),
+]
+OptHyperlinkAuthority = Annotated[
+    str | None,
+    typer.Option(
+        "--hyperlink-authority",
+        rich_help_panel=_PO,
+        help=h.HELP_HYPERLINK_AUTHORITY,
+    ),
+]
 OptTableStyle = Annotated[
     str | None,
     typer.Option("--table-style", rich_help_panel=_PO, help=h.HELP_TABLE_STYLE),
