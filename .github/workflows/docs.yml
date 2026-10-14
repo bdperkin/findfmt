@@ -31,7 +31,15 @@ jobs:
       - name: Install Dependencies
         run: uv sync --all-groups
       - name: Build All Sphinx Formats (Strict)
-        run: make -C docs clean html epub man latex linkcheck
+        run: make -C docs clean html dirhtml singlehtml epub man latex linkcheck
+      - name: Upload Digital Documentation (EPUB & SingleHTML)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: digital-documentation
+          path: |
+            docs/_build/epub/*.epub
+            docs/_build/singlehtml
+          retention-days: 14
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6
         if: github.ref == 'refs/heads/main' || github.event_name == 'release'

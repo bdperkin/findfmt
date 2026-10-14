@@ -105,7 +105,12 @@ man_pages = [
 ]
 
 # EPUB output
+epub_title = project
+epub_author = author
+epub_publisher = author
+epub_copyright = copyright
 epub_show_urls = "footnote"
+epub_use_index = True
 epub_exclude_files = ["_static/favicon.ico"]
 suppress_warnings = ["epub.unknown_project_files"]
 

@@ -6,13 +6,19 @@ SOURCEDIR     = source
 BUILDDIR      = _build
 DOCTREEDIR    = $(BUILDDIR)/doctrees
 
-.PHONY: help Makefile html epub man latex linkcheck clean
+.PHONY: help Makefile html dirhtml singlehtml epub man latex linkcheck clean
 
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 html:
 	@$(SPHINXBUILD) -b html -d "$(DOCTREEDIR)" "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS)
+
+dirhtml:
+	@$(SPHINXBUILD) -b dirhtml -d "$(DOCTREEDIR)" "$(SOURCEDIR)" "$(BUILDDIR)/dirhtml" $(SPHINXOPTS)
+
+singlehtml:
+	@$(SPHINXBUILD) -b singlehtml -d "$(DOCTREEDIR)" "$(SOURCEDIR)" "$(BUILDDIR)/singlehtml" $(SPHINXOPTS)
 
 epub:
 	@$(SPHINXBUILD) -b epub -d "$(DOCTREEDIR)" "$(SOURCEDIR)" "$(BUILDDIR)/epub" $(SPHINXOPTS)
