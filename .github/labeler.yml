@@ -8,6 +8,7 @@ area:classifier:
       - any-glob-to-any-file:
           - src/findfmt/classifier.py
           - src/findfmt/metadata.py
+          - src/findfmt/sizes.py
 area:traversal:
   - changed-files:
       - any-glob-to-any-file: [src/findfmt/traversal/**, src/findfmt/parsers/**]

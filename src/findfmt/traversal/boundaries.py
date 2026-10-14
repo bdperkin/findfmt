@@ -274,6 +274,7 @@ def yield_matching_items(  # noqa: PLR0913
     current_depth: int,
     matcher: PatternMatcher | None = None,
     inherited_match: bool = False,
+    accumulated_sizes: dict[Path, int] | None = None,
 ) -> Iterator[FileInfo]:
     """Yield FileInfo records for candidate paths that satisfy filters and pruning."""
     for path in targets:
@@ -291,6 +292,16 @@ def yield_matching_items(  # noqa: PLR0913
             ):
                 continue
 
-        info = classify_file(path, root_path=base_root, prefix=prefix)
+        accum_size = (
+            accumulated_sizes.get(path, accumulated_sizes.get(path.resolve()))
+            if accumulated_sizes is not None
+            else None
+        )
+        info = classify_file(
+            path,
+            root_path=base_root,
+            prefix=prefix,
+            accumulated_size=accum_size,
+        )
         if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
             yield info

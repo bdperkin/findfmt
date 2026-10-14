@@ -244,6 +244,32 @@ OptDevice = Annotated[
     bool,
     typer.Option("--device/--no-device", rich_help_panel=_PO, help=h.HELP_DEVICE),
 ]
+OptSize = Annotated[
+    bool,
+    typer.Option("--size/--no-size", rich_help_panel=_PO, help=h.HELP_SIZE),
+]
+OptHumanReadable = Annotated[
+    bool,
+    typer.Option(
+        "-h",
+        "--human-readable/--no-human-readable",
+        rich_help_panel=_PO,
+        help=h.HELP_HUMAN_READABLE,
+    ),
+]
+OptSi = Annotated[
+    bool,
+    typer.Option("--si/--no-si", rich_help_panel=_PO, help=h.HELP_SI),
+]
+OptDu = Annotated[
+    bool,
+    typer.Option(
+        "--du/--no-du",
+        "--accumulate-size/--no-accumulate-size",
+        rich_help_panel=_PO,
+        help=h.HELP_DU,
+    ),
+]
 OptPrint0 = Annotated[
     bool,
     typer.Option("-0", "--print0/--no-print0", rich_help_panel=_PO, help=h.HELP_PRINT0),

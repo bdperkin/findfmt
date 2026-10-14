@@ -6,6 +6,8 @@ import functools
 import stat
 from typing import TYPE_CHECKING
 
+from findfmt.sizes import format_size_binary, format_size_bytes, format_size_si
+
 if TYPE_CHECKING:
     import os
 
@@ -39,6 +41,9 @@ def format_metadata_parts(  # noqa: PLR0913
     show_permissions: bool = False,
     show_user: bool = False,
     show_group: bool = False,
+    show_size: bool = False,
+    human_readable: bool = False,
+    show_si: bool = False,
 ) -> list[str]:
     """Format active POSIX metadata fields into string representations.
 
@@ -49,16 +54,28 @@ def format_metadata_parts(  # noqa: PLR0913
         show_permissions: Whether to include permissions string.
         show_user: Whether to include owner username.
         show_group: Whether to include owner group name.
+        show_size: Whether to include exact byte size.
+        human_readable: Whether to include binary human-readable size.
+        show_si: Whether to include SI metric human-readable size.
 
     Returns:
         List of formatted string metadata fields.
     """
+    size_str: str | None = None
+    if show_si:
+        size_str = format_size_si(file_info.size_bytes)
+    elif human_readable:
+        size_str = format_size_binary(file_info.size_bytes)
+    elif show_size:
+        size_str = format_size_bytes(file_info.size_bytes)
+
     specs: tuple[tuple[bool, object], ...] = (
         (show_inodes, file_info.inode),
         (show_device, file_info.device),
         (show_permissions, file_info.permissions_str),
         (show_user, file_info.owner_user),
         (show_group, file_info.owner_group),
+        (size_str is not None, size_str),
     )
     return [str(val) if val is not None else "-" for enabled, val in specs if enabled]
 

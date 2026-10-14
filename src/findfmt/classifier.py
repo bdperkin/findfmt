@@ -247,6 +247,7 @@ def classify_file(
     path: Path,
     root_path: Path | None = None,
     prefix: Path | None = None,
+    accumulated_size: int | None = None,
 ) -> FileInfo:
     """Classify a given file path by inspection of name, content, and metadata.
 
@@ -254,6 +255,7 @@ def classify_file(
         path: The path of the file to classify.
         root_path: Optional root directory used to compute relative_path.
         prefix: Optional prefix to prepend to relative_path.
+        accumulated_size: Optional accumulated directory disk usage in bytes.
 
     Returns:
         FileInfo containing metadata, identified tags, shebang, and MIME info.
@@ -279,6 +281,7 @@ def classify_file(
 
     relative_path = _resolve_relative(path, root_path, prefix=prefix)
     resolved_path = path.resolve() if exists else path
+    effective_size = accumulated_size if accumulated_size is not None else size_bytes
 
     return FileInfo(
         path=resolved_path,
@@ -288,10 +291,11 @@ def classify_file(
         mime_type=mime_type,
         is_executable=is_executable,
         is_symlink=is_symlink,
-        size_bytes=size_bytes,
+        size_bytes=effective_size,
         permissions_str=permissions_str,
         owner_user=owner_user,
         owner_group=owner_group,
         inode=inode,
         device=device,
+        accumulated_size=accumulated_size,
     )

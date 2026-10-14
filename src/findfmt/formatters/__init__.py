@@ -222,6 +222,10 @@ def _create_visual_formatter(
             show_group=bool(kwargs.get("show_group", False)),
             show_inodes=bool(kwargs.get("show_inodes", False)),
             show_device=bool(kwargs.get("show_device", False)),
+            show_size=bool(kwargs.get("show_size", False)),
+            human_readable=bool(kwargs.get("human_readable", False)),
+            show_si=bool(kwargs.get("show_si", False)),
+            accumulate_size=bool(kwargs.get("accumulate_size", False)),
         )
 
     if fmt_str == OutputFormat.TREE.value:
@@ -236,6 +240,10 @@ def _create_visual_formatter(
             show_group=bool(kwargs.get("show_group", False)),
             show_inodes=bool(kwargs.get("show_inodes", False)),
             show_device=bool(kwargs.get("show_device", False)),
+            show_size=bool(kwargs.get("show_size", False)),
+            human_readable=bool(kwargs.get("human_readable", False)),
+            show_si=bool(kwargs.get("show_si", False)),
+            accumulate_size=bool(kwargs.get("accumulate_size", False)),
         )
 
     return None
@@ -279,6 +287,9 @@ def get_formatter(
             show_group=bool(kwargs.get("show_group", False)),
             show_inodes=bool(kwargs.get("show_inodes", False)),
             show_device=bool(kwargs.get("show_device", False)),
+            show_size=bool(kwargs.get("show_size", False)),
+            human_readable=bool(kwargs.get("human_readable", False)),
+            show_si=bool(kwargs.get("show_si", False)),
         )
 
     visual = _create_visual_formatter(fmt_str, absolute=absolute, kwargs=kwargs)

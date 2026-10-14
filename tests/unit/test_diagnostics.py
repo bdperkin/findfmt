@@ -61,11 +61,6 @@ def test_cli_help():
     assert "Usage:" in result.stdout
     assert "findfmt" in result.stdout
 
-    result_short = runner.invoke(app, ["-h"])
-    assert result_short.exit_code == 0
-    assert "Usage:" in result_short.stdout
-    assert "findfmt" in result_short.stdout
-
 
 def test_get_git_version():
     with patch("shutil.which", return_value=None):

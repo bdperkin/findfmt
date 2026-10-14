@@ -110,6 +110,10 @@ def execute_findfmt(  # noqa: PLR0913
     permissions: bool = False,
     user: bool = False,
     group: bool = False,
+    size: bool = False,
+    human_readable: bool = False,
+    si: bool = False,
+    du: bool = False,
     inodes: bool = False,
     device: bool = False,
     find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]] = find_files,
@@ -161,6 +165,10 @@ def execute_findfmt(  # noqa: PLR0913
         permissions: Whether to display permissions in ls -l format.
         user: Whether to display file owner username or UID.
         group: Whether to display file owner group name or GID.
+        size: Whether to display file size in bytes.
+        human_readable: Whether to format sizes using binary units.
+        si: Whether to format sizes using SI metric units.
+        du: Whether to accumulate recursive directory disk usage.
         inodes: Whether to display filesystem inode number.
         device: Whether to display filesystem device number.
         find_files_func: Traversal generator function to execute.
@@ -211,6 +219,10 @@ def execute_findfmt(  # noqa: PLR0913
         group=group,
         inodes=inodes,
         device=device,
+        size=size,
+        human_readable=human_readable,
+        si=si,
+        du=du,
     )
 
     tag_counter: Counter[str] = Counter()
@@ -233,6 +245,10 @@ def execute_findfmt(  # noqa: PLR0913
         "show_group": config.show_group,
         "show_inodes": config.show_inodes,
         "show_device": config.show_device,
+        "show_size": config.show_size,
+        "human_readable": config.human_readable,
+        "show_si": config.show_si,
+        "accumulate_size": config.accumulate_size,
     }
     if table_style is not None:
         formatter_kwargs["table_style"] = table_style

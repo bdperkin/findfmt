@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any
 from findfmt.classifier import classify_file, compute_relative_prefix
 from findfmt.models import SortKey
 from findfmt.parsers import ingest_from_file
+from findfmt.sizes import calculate_accumulated_sizes
 from findfmt.traversal.boundaries import (
     check_depth_limit,
     filter_directory_entry,
@@ -127,6 +128,7 @@ def _traverse_subdirs(  # noqa: PLR0913
     current_depth: int,
     matcher: PatternMatcher,
     inherited_match: bool,
+    accumulated_sizes: dict[Path, int] | None = None,
 ) -> Iterator[FileInfo]:
     """Descend and traverse discovered subdirectories."""
     if not check_depth_limit(current_depth, config.max_depth):
@@ -169,6 +171,7 @@ def _traverse_subdirs(  # noqa: PLR0913
             current_depth=current_depth + 1,
             matcher=matcher,
             inherited_match=child_inherit,
+            accumulated_sizes=accumulated_sizes,
         )
 
 
@@ -184,6 +187,7 @@ def traverse_directory(  # noqa: PLR0913
     current_depth: int = 1,
     matcher: PatternMatcher | None = None,
     inherited_match: bool = False,
+    accumulated_sizes: dict[Path, int] | None = None,
 ) -> Iterator[FileInfo]:
     """Recursively traverse a directory hierarchy honoring .gitignore, filters, and boundaries."""
     effective_base = base_root if base_root is not None else root
@@ -225,6 +229,7 @@ def traverse_directory(  # noqa: PLR0913
         current_depth=current_depth,
         matcher=active_matcher,
         inherited_match=inherited_match,
+        accumulated_sizes=accumulated_sizes,
     )
     descendants = _traverse_subdirs(
         subdirs,
@@ -237,6 +242,7 @@ def traverse_directory(  # noqa: PLR0913
         current_depth=current_depth,
         matcher=active_matcher,
         inherited_match=inherited_match,
+        accumulated_sizes=accumulated_sizes,
     )
 
     if config.dirs_first:
@@ -245,6 +251,42 @@ def traverse_directory(  # noqa: PLR0913
     else:
         yield from current_items
         yield from descendants
+
+
+def _traverse_single_root(
+    root: Path,
+    resolved_root: Path,
+    config: TraversalConfig,
+    matcher: PatternMatcher,
+) -> Iterator[FileInfo]:
+    """Yield matching items from a single root path (file or directory)."""
+    if resolved_root.is_file():
+        if not config.dirs_only:
+            prefix = compute_relative_prefix(root.parent) if config.relative_prefix else None
+            info = classify_file(resolved_root, root_path=resolved_root.parent, prefix=prefix)
+            if matches_filter(info, config, matcher=matcher):
+                yield info
+
+        return
+
+    accumulated_sizes = (
+        calculate_accumulated_sizes(
+            resolved_root,
+            follow_symlinks=config.follow_symlinks,
+            include_hidden=config.include_hidden,
+        )
+        if config.accumulate_size
+        else None
+    )
+    prefix = compute_relative_prefix(root) if config.relative_prefix else None
+    yield from traverse_directory(
+        resolved_root,
+        config,
+        base_root=resolved_root,
+        prefix=prefix,
+        matcher=matcher,
+        accumulated_sizes=accumulated_sizes,
+    )
 
 
 def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
@@ -257,23 +299,5 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
     roots = config.root_paths if config.sort_by == SortKey.NONE else sorted(config.root_paths)
     for root in roots:
         resolved_root = root.resolve()
-        if not resolved_root.exists():
-            continue
-
-        if resolved_root.is_file():
-            if config.dirs_only:
-                continue
-
-            prefix = compute_relative_prefix(root.parent) if config.relative_prefix else None
-            info = classify_file(resolved_root, root_path=resolved_root.parent, prefix=prefix)
-            if matches_filter(info, config, matcher=matcher):
-                yield info
-        else:
-            prefix = compute_relative_prefix(root) if config.relative_prefix else None
-            yield from traverse_directory(
-                resolved_root,
-                config,
-                base_root=resolved_root,
-                prefix=prefix,
-                matcher=matcher,
-            )
+        if resolved_root.exists():
+            yield from _traverse_single_root(root, resolved_root, config, matcher)

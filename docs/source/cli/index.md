@@ -161,6 +161,19 @@ is unresolvable.
 
 `--device / --no-device` : Print filesystem device number (`st_dev`).
 
+`--size / --no-size` : Print file size in bytes (`st_size`).
+
+`-h, --human-readable / --no-human-readable` : Print sizes in human-readable format with IEC/binary
+unit prefixes (`K`, `M`, `G`, `T`, `P`, `E`) using powers of 1024.
+
+`--si / --no-si` : Print sizes in human-readable format with SI unit prefixes (`kB`, `MB`, `GB`,
+`TB`, `PB`, `EB`) using powers of 1000.
+
+`--du, --accumulate-size / --no-du, --no-accumulate-size` : Recursively calculate and accumulate
+directory disk usage sizes across all contained files and child directories. In tree format, prints
+accumulated directory sizes alongside folder nodes. In non-tree formats, lists directories with
+their total accumulated sizes.
+
 `-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
 consumption by `xargs -0`.
 
@@ -186,8 +199,8 @@ interactive pager on TTY sessions exceeding terminal height).
 `--help-all` : Display the comprehensive CLI manual, environment variables, and exit codes (routed
 through the interactive pager on TTY sessions exceeding terminal height).
 
-`-h, --help` : Show the categorized help message and exit (automatically routed through the
-interactive pager on TTY sessions exceeding terminal height).
+`--help` : Show the categorized help message and exit (automatically routed through the interactive
+pager on TTY sessions exceeding terminal height).
 
 ## 3. Command Wrappers & Aliases
 

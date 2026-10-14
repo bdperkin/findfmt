@@ -33,6 +33,9 @@ class TextFormatter(Formatter):
         show_group: bool = False,
         show_inodes: bool = False,
         show_device: bool = False,
+        show_size: bool = False,
+        human_readable: bool = False,
+        show_si: bool = False,
     ) -> None:
         r"""Initialize TextFormatter.
 
@@ -45,6 +48,9 @@ class TextFormatter(Formatter):
             show_group: Whether to display file owner group name or GID.
             show_inodes: Whether to display filesystem inode number.
             show_device: Whether to display filesystem device number.
+            show_size: Whether to display exact byte size.
+            human_readable: Whether to format sizes using binary units.
+            show_si: Whether to format sizes using SI metric units.
         """
         super().__init__(absolute=absolute)
         self.show_tags = show_tags
@@ -54,6 +60,9 @@ class TextFormatter(Formatter):
         self.show_group = show_group
         self.show_inodes = show_inodes
         self.show_device = show_device
+        self.show_size = show_size
+        self.human_readable = human_readable
+        self.show_si = show_si
 
     def format_item(self, file_info: FileInfo) -> str:
         """Format an individual file record as a text line.
@@ -71,6 +80,9 @@ class TextFormatter(Formatter):
             show_permissions=self.show_permissions,
             show_user=self.show_user,
             show_group=self.show_group,
+            show_size=self.show_size,
+            human_readable=self.human_readable,
+            show_si=self.show_si,
         )
         path_str = str(file_info.path if self.absolute else file_info.relative_path)
         prefix = f"[{' '.join(meta_parts)}] " if meta_parts else ""

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import collections
 import io
 import sys
 from typing import TYPE_CHECKING, TextIO
@@ -19,6 +20,7 @@ from rich.tree import Tree
 from findfmt.formatters.base import Formatter
 from findfmt.formatters.glyphs import CP437_BOX, resolve_tree_guides
 from findfmt.metadata import format_metadata_parts
+from findfmt.sizes import format_size
 from findfmt.terminal import get_console
 
 if TYPE_CHECKING:
@@ -36,8 +38,6 @@ __all__ = [
     "format_summary_panel",
     "format_tag_badge",
 ]
-
-_KIB, _MIB, _GIB = 1024, 1024 * 1024, 1024 * 1024 * 1024
 
 RICH_BOX_STYLES: dict[str, box.Box] = {
     "ascii": box.ASCII,
@@ -65,20 +65,6 @@ TAG_COLOR_MAP: dict[str, str] = {
     "text": "green",
     "yaml": "magenta",
 }
-
-
-def format_size(size_bytes: int) -> str:
-    """Format byte count into human-readable representation."""
-    if size_bytes < _KIB:
-        return f"{size_bytes} B"
-
-    if size_bytes < _MIB:
-        return f"{size_bytes / _KIB:.1f} KB"
-
-    if size_bytes < _GIB:
-        return f"{size_bytes / _MIB:.1f} MB"
-
-    return f"{size_bytes / _GIB:.1f} GB"
 
 
 def format_tag_badge(tag: str) -> str:
@@ -124,6 +110,9 @@ def _format_file_label(  # noqa: PLR0913
     show_group: bool = False,
     show_inodes: bool = False,
     show_device: bool = False,
+    show_size: bool = False,
+    human_readable: bool = False,
+    show_si: bool = False,
 ) -> str:
     """Format Rich leaf node label for a file with badges and optional metadata."""
     meta_parts = format_metadata_parts(
@@ -137,7 +126,13 @@ def _format_file_label(  # noqa: PLR0913
     prefix = f"[cyan][{' '.join(meta_parts)}][/] " if meta_parts else ""
     tags_list = " ".join(format_tag_badge(t) for t in sorted(file_info.tags))
     tags_part = f" {tags_list}" if file_info.tags else ""
-    size_part = f" [green]{format_size(file_info.size_bytes)}[/]"
+    formatted_sz = format_size(
+        file_info.size_bytes,
+        human_readable=human_readable,
+        si=show_si,
+        exact=show_size,
+    )
+    size_part = f" [green]{formatted_sz}[/]"
     mime_part = f" [dim]{file_info.mime_type}[/]" if file_info.mime_type else ""
     return f"{prefix}📄 {filename}{size_part}{tags_part}{mime_part}"
 
@@ -146,13 +141,21 @@ def _traverse_tree_node(
     tree: Tree,
     dir_nodes: dict[tuple[str, ...], Tree],
     dir_parts: tuple[str, ...],
+    *,
+    dir_sizes: dict[tuple[str, ...], str] | None = None,
 ) -> Tree:
     """Traverse or create branch nodes in tree for directory parts."""
     curr_node = tree
     for i in range(1, len(dir_parts) + 1):
         sub_tuple = dir_parts[:i]
         if sub_tuple not in dir_nodes:
-            dir_nodes[sub_tuple] = curr_node.add(f"[bold blue]📁 {dir_parts[i - 1]}[/]")
+            size_suffix = (
+                f" [green]{dir_sizes[sub_tuple]}[/]"
+                if dir_sizes is not None and sub_tuple in dir_sizes
+                else ""
+            )
+            node_label = f"[bold blue]📁 {dir_parts[i - 1]}[/]{size_suffix}"
+            dir_nodes[sub_tuple] = curr_node.add(node_label)
 
         curr_node = dir_nodes[sub_tuple]
 
@@ -174,6 +177,10 @@ class RichTableFormatter(Formatter):
         show_group: bool = False,
         show_inodes: bool = False,
         show_device: bool = False,
+        show_size: bool = False,
+        human_readable: bool = False,
+        show_si: bool = False,
+        accumulate_size: bool = False,
     ) -> None:
         """Initialize RichTableFormatter.
 
@@ -187,6 +194,10 @@ class RichTableFormatter(Formatter):
             show_group: Whether to display file owner group column.
             show_inodes: Whether to display filesystem inode column.
             show_device: Whether to display filesystem device column.
+            show_size: Whether to display exact byte size.
+            human_readable: Whether to format sizes using binary units.
+            show_si: Whether to format sizes using SI metric units.
+            accumulate_size: Whether to accumulate recursive directory disk usage.
 
         Raises:
             UnsupportedBoxStyleError: If table_style is not recognized.
@@ -206,6 +217,10 @@ class RichTableFormatter(Formatter):
         self.show_group = show_group
         self.show_inodes = show_inodes
         self.show_device = show_device
+        self.show_size = show_size
+        self.human_readable = human_readable
+        self.show_si = show_si
+        self.accumulate_size = accumulate_size
 
     def _setup_columns(self, table: Table) -> None:
         """Configure table columns including optional metadata columns."""
@@ -242,12 +257,18 @@ class RichTableFormatter(Formatter):
             show_user=self.show_user,
             show_group=self.show_group,
         )
+        formatted_sz = format_size(
+            file_info.size_bytes,
+            human_readable=self.human_readable,
+            si=self.show_si,
+            exact=self.show_size,
+        )
         row.extend(
             [
                 str(file_info.path if self.absolute else file_info.relative_path),
                 " ".join(format_tag_badge(t) for t in sorted(file_info.tags)),
                 file_info.mime_type or "",
-                format_size(file_info.size_bytes),
+                formatted_sz,
                 "[green]✓[/]" if file_info.is_executable else "[dim]-[/]",
                 "[yellow]✓[/]" if file_info.is_symlink else "[dim]-[/]",
                 file_info.shebang or "",
@@ -285,6 +306,36 @@ class RichTableFormatter(Formatter):
         get_console(stream, width=self.console_width, force_color=self.force_color).print(table)
 
 
+def _compute_tree_dir_sizes(
+    sorted_files: list[FileInfo],
+    *,
+    absolute: bool,
+    human_readable: bool,
+    show_si: bool,
+    show_size: bool,
+) -> dict[tuple[str, ...], str]:
+    """Compute formatted accumulated directory sizes for tree display."""
+    dir_sizes_raw: dict[tuple[str, ...], int] = collections.defaultdict(int)
+    for file_info in sorted_files:
+        target_path = file_info.path if absolute else file_info.relative_path
+        is_abs = target_path.is_absolute()
+        parts = target_path.parts
+        dir_parts = tuple(parts[1:-1] if is_abs else parts[:-1])
+        for i in range(1, len(dir_parts) + 1):
+            dir_sizes_raw[dir_parts[:i]] += file_info.size_bytes
+
+    dir_sizes_formatted: dict[tuple[str, ...], str] = {}
+    for sub_tup, raw_sz in dir_sizes_raw.items():
+        dir_sizes_formatted[sub_tup] = format_size(
+            raw_sz,
+            human_readable=human_readable,
+            si=show_si,
+            exact=show_size,
+        )
+
+    return dir_sizes_formatted
+
+
 class RichTreeFormatter(Formatter):
     """Hierarchical directory tree serializer using Rich."""
 
@@ -302,6 +353,10 @@ class RichTreeFormatter(Formatter):
         show_group: bool = False,
         show_inodes: bool = False,
         show_device: bool = False,
+        show_size: bool = False,
+        human_readable: bool = False,
+        show_si: bool = False,
+        accumulate_size: bool = False,
     ) -> None:
         """Initialize RichTreeFormatter.
 
@@ -317,6 +372,10 @@ class RichTreeFormatter(Formatter):
             show_group: Whether to display file owner group in labels.
             show_inodes: Whether to display filesystem inode in labels.
             show_device: Whether to display filesystem device in labels.
+            show_size: Whether to display exact byte size.
+            human_readable: Whether to format sizes using binary units.
+            show_si: Whether to format sizes using SI metric units.
+            accumulate_size: Whether to accumulate recursive directory disk usage.
         """
         super().__init__(absolute=absolute)
         self.console_width = console_width
@@ -329,6 +388,10 @@ class RichTreeFormatter(Formatter):
         self.show_group = show_group
         self.show_inodes = show_inodes
         self.show_device = show_device
+        self.show_size = show_size
+        self.human_readable = human_readable
+        self.show_si = show_si
+        self.accumulate_size = accumulate_size
 
     def _build_tree(self, files: Iterable[FileInfo]) -> Tree:
         """Construct a nested Rich Tree populated with directory branches and files."""
@@ -348,13 +411,28 @@ class RichTreeFormatter(Formatter):
         tree.ASCII_GUIDES = guides
         dir_nodes: dict[tuple[str, ...], Tree] = {}
 
+        dir_sizes_formatted: dict[tuple[str, ...], str] | None = None
+        if self.accumulate_size:
+            dir_sizes_formatted = _compute_tree_dir_sizes(
+                sorted_files,
+                absolute=self.absolute,
+                human_readable=self.human_readable,
+                show_si=self.show_si,
+                show_size=self.show_size,
+            )
+
         for file_info in sorted_files:
             target_path = file_info.path if self.absolute else file_info.relative_path
             is_abs = target_path.is_absolute()
             parts = target_path.parts
 
             dir_parts = tuple(parts[1:-1] if is_abs else parts[:-1])
-            curr_node = _traverse_tree_node(tree, dir_nodes, dir_parts)
+            curr_node = _traverse_tree_node(
+                tree,
+                dir_nodes,
+                dir_parts,
+                dir_sizes=dir_sizes_formatted,
+            )
             filename = parts[-1] if parts else str(target_path)
             curr_node.add(
                 _format_file_label(
@@ -365,6 +443,9 @@ class RichTreeFormatter(Formatter):
                     show_group=self.show_group,
                     show_inodes=self.show_inodes,
                     show_device=self.show_device,
+                    show_size=self.show_size,
+                    human_readable=self.human_readable,
+                    show_si=self.show_si,
                 ),
             )
 

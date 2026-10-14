@@ -41,6 +41,7 @@ class FileInfo:
         owner_group: File owner group name or GID if group name is unavailable.
         inode: Filesystem inode number (st_ino).
         device: Filesystem device number (st_dev).
+        accumulated_size: Accumulated directory disk usage in bytes if --du is active.
     """
 
     path: Path
@@ -57,6 +58,7 @@ class FileInfo:
     owner_group: str | None = None
     inode: int | None = None
     device: int | None = None
+    accumulated_size: int | None = None
 
     def to_dict(self, *, absolute: bool = False) -> dict[str, Any]:
         """Serialize file attributes to a dictionary representation.
@@ -94,6 +96,9 @@ class FileInfo:
 
         if self.device is not None:
             result["device"] = self.device
+
+        if self.accumulated_size is not None:
+            result["accumulated_size"] = self.accumulated_size
 
         return result
 
@@ -138,6 +143,10 @@ class TraversalConfig:
         show_group: Whether to display file owner group name or GID.
         show_inodes: Whether to display filesystem inode numbers.
         show_device: Whether to display filesystem device numbers.
+        show_size: Whether to display file size in bytes.
+        human_readable: Whether to format sizes using binary units (powers of 1024).
+        show_si: Whether to format sizes using SI metric units (powers of 1000).
+        accumulate_size: Whether to accumulate recursive directory disk usage.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -175,3 +184,7 @@ class TraversalConfig:
     show_group: bool = False
     show_inodes: bool = False
     show_device: bool = False
+    show_size: bool = False
+    human_readable: bool = False
+    show_si: bool = False
+    accumulate_size: bool = False

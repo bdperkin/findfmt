@@ -101,6 +101,10 @@ def build_traversal_config(  # noqa: PLR0913
     group: bool = False,
     inodes: bool = False,
     device: bool = False,
+    size: bool = False,
+    human_readable: bool = False,
+    si: bool = False,
+    du: bool = False,
 ) -> TraversalConfig:
     """Build and validate TraversalConfig from CLI options.
 
@@ -141,6 +145,10 @@ def build_traversal_config(  # noqa: PLR0913
         group: Whether to display file owner group name or GID.
         inodes: Whether to display filesystem inode number.
         device: Whether to display filesystem device number.
+        size: Whether to display file size in bytes.
+        human_readable: Whether to format sizes using binary units.
+        si: Whether to format sizes using SI metric units.
+        du: Whether to accumulate recursive directory disk usage.
 
     Returns:
         Configured TraversalConfig instance.
@@ -158,6 +166,7 @@ def build_traversal_config(  # noqa: PLR0913
     format_val = str(
         output_format.value if hasattr(output_format, "value") else output_format,
     )
+    effective_dirs_only = dirs_only or (du and format_val != "tree")
 
     return TraversalConfig(
         root_paths=root_paths,
@@ -169,7 +178,7 @@ def build_traversal_config(  # noqa: PLR0913
         gitignore_file=gitignore_file,
         include_hidden=hidden,
         follow_symlinks=follow_symlinks,
-        dirs_only=dirs_only,
+        dirs_only=effective_dirs_only,
         one_file_system=one_file_system,
         max_depth=max_depth,
         file_limit=file_limit,
@@ -195,4 +204,8 @@ def build_traversal_config(  # noqa: PLR0913
         show_group=group,
         show_inodes=inodes,
         show_device=device,
+        show_size=size or du,
+        human_readable=human_readable,
+        show_si=si,
+        accumulate_size=du,
     )

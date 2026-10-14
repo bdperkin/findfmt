@@ -30,6 +30,7 @@ def test_file_info_defaults():
     assert info.owner_group is None
     assert info.inode is None
     assert info.device is None
+    assert info.accumulated_size is None
 
 
 def test_file_info_custom():
@@ -50,6 +51,7 @@ def test_file_info_custom():
         owner_group="developers",
         inode=123456,
         device=42,
+        accumulated_size=1024,
     )
     assert info.tags == tags
     assert info.shebang == "#!/usr/bin/python3"
@@ -61,6 +63,7 @@ def test_file_info_custom():
     assert info.owner_group == "developers"
     assert info.inode == 123456
     assert info.device == 42
+    assert info.accumulated_size == 1024
 
 
 def test_traversal_config_defaults():
@@ -90,6 +93,10 @@ def test_traversal_config_defaults():
     assert not config.show_group
     assert not config.show_inodes
     assert not config.show_device
+    assert not config.show_size
+    assert not config.human_readable
+    assert not config.show_si
+    assert not config.accumulate_size
 
     custom = TraversalConfig(
         relative_prefix=True,
@@ -103,6 +110,10 @@ def test_traversal_config_defaults():
         show_group=True,
         show_inodes=True,
         show_device=True,
+        show_size=True,
+        human_readable=True,
+        show_si=True,
+        accumulate_size=True,
     )
     assert custom.relative_prefix
     assert custom.sort_by == SortKey.SIZE
@@ -116,6 +127,10 @@ def test_traversal_config_defaults():
     assert custom.show_group
     assert custom.show_inodes
     assert custom.show_device
+    assert custom.show_size
+    assert custom.human_readable
+    assert custom.show_si
+    assert custom.accumulate_size
 
 
 def test_file_info_to_dict():
@@ -140,6 +155,7 @@ def test_file_info_to_dict():
     assert "owner_group" not in d_rel
     assert "inode" not in d_rel
     assert "device" not in d_rel
+    assert "accumulated_size" not in d_rel
 
     d_abs = info.to_dict(absolute=True)
     assert d_abs["path"] == str(info.path)
@@ -156,6 +172,7 @@ def test_file_info_to_dict():
         owner_group="developers",
         inode=99999,
         device=101,
+        accumulated_size=2048,
     )
     d_meta = info_meta.to_dict()
     assert d_meta["is_symlink"] is True
@@ -165,3 +182,4 @@ def test_file_info_to_dict():
     assert d_meta["owner_group"] == "developers"
     assert d_meta["inode"] == 99999
     assert d_meta["device"] == 101
+    assert d_meta["accumulated_size"] == 2048
