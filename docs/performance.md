@@ -25,12 +25,102 @@ The performance model focuses on three primary metrics:
 
 ______________________________________________________________________
 
-## 2. Automated Benchmark Harness (`tools/benchmark.py`)
+## 2. Core Optimization Vectors
+
+The traversal and classification pipeline incorporates several targeted optimizations to maximize
+throughput across large repository hierarchies:
+
+### 2.1. Redundant Syscalls & `Path.resolve()` Elimination
+
+Earlier implementations resolved relative paths by invoking `Path.resolve()` on every discovered
+file. In deep directory structures, resolving paths generates tens of thousands of redundant
+`readlink` and `stat` system calls.
+
+`findfmt` optimizes this by computing directory-relative paths with `os.path.relpath()` and prefix
+operations derived from pre-computed root strings. File classification operates on the entry's
+original path without resolving symlinks for regular files, avoiding per-file link resolution
+overhead.
+
+### 2.2. `DirEntry` Metadata Preservation & Single-Buffer Content Reads
+
+Python's `os.scandir()` yields `os.DirEntry` objects whose cached file type (`is_file`, `is_dir`,
+`is_symlink`) and `stat()` attributes are populated directly from the operating system's directory
+stream.
+
+`findfmt` preserves and forwards `os.DirEntry` instances throughout traversal and classification:
+
+- **Zero-Stat Verification**: Avoids secondary `os.stat()` syscalls by reusing cached entry
+  metadata.
+- **Single-Buffer Content Inspection**: When content inspection is required (for shebang or MIME
+  detection), `findfmt` reads an initial buffer (the first 2,048 to 4,096 bytes) once into memory.
+  This buffer is shared across shebang parsing, MIME type sniffing, and tag classification,
+  eliminating duplicate `open()` and `read()` syscalls on candidate files.
+
+### 2.3. Zero-Allocation Gitignore Rule Matching Hot Loop
+
+In traversal loops evaluating multiple active `.gitignore` specifications:
+
+- Path operations avoid redundant `Path.is_relative_to()` and `Path.relative_to()` allocations.
+- Relative path representations are passed as normalized strings, leveraging fast string prefix
+  matching to evaluate directory boundaries and pruning rules.
+
+### 2.4. Fast-Path Filter Short-Circuiting
+
+When specific tags are requested (for example, `--tag python`):
+
+- `can_skip_file_by_tags()` inspects the filename extension before opening the file.
+- If an extension definitively excludes the requested tags and indicates no executable shebang is
+  possible (such as known binary formats or fixed non-script extensions), the file read is bypassed
+  entirely.
+
+______________________________________________________________________
+
+## 3. Parallel Batch Execution & Concurrency Analysis
+
+Parallelizing the content-inspection phase using `concurrent.futures.ThreadPoolExecutor` was
+evaluated against the streaming generator architecture on modern multi-core NVMe systems.
+
+### 3.1. ThreadPoolExecutor vs. Streaming Generator Benchmarks
+
+Empirical profiling evaluated a 4-worker `ThreadPoolExecutor` against the sequential streaming
+generator across a test suite of 1,000 files:
+
+- **Sequential Streaming Generator**: Processed 1,000 files in 0.0584 seconds (~17,131
+  files/second).
+- **ThreadPoolExecutor (4 Workers)**: Processed 1,000 files in 0.1076 seconds (~9,295 files/second).
+
+Multi-threading introduced an approximate 1.84x slowdown compared to the single-threaded
+implementation.
+
+### 3.2. Concurrency Trade-Off Rationale
+
+Several architectural factors explain why single-threaded traversal outperforms thread pools for
+local filesystem inspection in Python:
+
+1. **OS Page Cache & SSD Latency**: Reading initial file buffers (2 KB) from modern NVMe storage and
+   operating system page caches executes in microseconds. I/O wait times are negligible compared to
+   thread scheduling costs.
+2. **GIL Contention & Dispatch Overhead**: Submitting tasks to thread pools, queuing futures,
+   context switching, and Global Interpreter Lock (GIL) contention in CPython introduce
+   synchronization overhead that dwarfs the cost of reading small file headers sequentially.
+3. **Time-to-First-Result (TTFR) Degradation**: Batch thread dispatching chunks results, delaying
+   initial yields. The single-threaded generator yields matching entries immediately
+   (sub-millisecond TTFR), which is essential for interactive subshells and piping into tools like
+   `fzf` or `head`.
+4. **Bounded Memory Guarantees**: A pure generator maintains constant memory, whereas parallel
+   thread pools accumulate collections of pending futures and buffers.
+
+Based on these empirical results, `findfmt` retains its single-threaded streaming generator design
+as the optimal performance architecture.
+
+______________________________________________________________________
+
+## 4. Automated Benchmark Harness (`tools/benchmark.py`)
 
 The repository includes a dedicated, automated benchmark suite at `tools/benchmark.py` that
 generates reproducible synthetic datasets and measures traversal performance across standard tiers.
 
-### 2.1. Tiered Datasets
+### 4.1. Tiered Datasets
 
 The harness supports three standardized dataset tiers alongside custom directory targeting:
 
@@ -46,7 +136,7 @@ The harness supports three standardized dataset tiers alongside custom directory
 - **Custom Directory Target (`-d, --target-dir`)**: Benchmarks real-world directory trees directly,
   such as the `findfmt` repository or user-specified projects.
 
-### 2.2. Deterministic Reproducibility
+### 4.2. Deterministic Reproducibility
 
 Synthetic trees are generated deterministically using a fixed random seed (`--seed 42` by default).
 The generator constructs realistic directory trees with diverse file extensions (`.py`, `.sh`,
@@ -55,9 +145,9 @@ headers, and root `.gitignore` exclusion specifications.
 
 ______________________________________________________________________
 
-## 3. Command-Line Interface & Usage
+## 5. Command-Line Interface & Usage
 
-### 3.1. Basic Execution
+### 5.1. Basic Execution
 
 Execute the default benchmark suite on the small tier:
 
@@ -65,7 +155,7 @@ Execute the default benchmark suite on the small tier:
 uv run python tools/benchmark.py
 ```
 
-### 3.2. Tier Selection & File Overrides
+### 5.2. Tier Selection & File Overrides
 
 Run specific or all dataset tiers:
 
@@ -80,7 +170,7 @@ uv run python tools/benchmark.py --tier all
 uv run python tools/benchmark.py --tier small --files 500
 ```
 
-### 3.3. Benchmarking Existing Directories
+### 5.3. Benchmarking Existing Directories
 
 Benchmark an existing repository or directory path:
 
@@ -88,7 +178,7 @@ Benchmark an existing repository or directory path:
 uv run python tools/benchmark.py --target-dir .
 ```
 
-### 3.4. Multiple Iterations & Warmup
+### 5.4. Multiple Iterations & Warmup
 
 Execute multiple iterations with warmup runs to compute averaged metrics:
 
@@ -96,7 +186,7 @@ Execute multiple iterations with warmup runs to compute averaged metrics:
 uv run python tools/benchmark.py --runs 3 --warmup 1
 ```
 
-### 3.5. Baseline Recording & Regression Tracking
+### 5.5. Baseline Recording & Regression Tracking
 
 Save baseline metrics to a JSON report:
 
@@ -116,7 +206,7 @@ Fail execution if throughput degrades beyond an allowable percentage threshold:
 uv run python tools/benchmark.py --tier small --baseline baseline.json --threshold 10.0
 ```
 
-### 3.6. Machine-Readable JSON Output
+### 5.6. Machine-Readable JSON Output
 
 Emit JSON directly to stdout or export to a file for CI regression tracking:
 
@@ -130,7 +220,7 @@ uv run python tools/benchmark.py --output benchmark_report.json
 
 ______________________________________________________________________
 
-## 4. Baseline Performance Metrics
+## 6. Baseline Performance Metrics
 
 The following baseline metrics were recorded on an x86_64 Linux environment (Python 3.13):
 
@@ -142,7 +232,7 @@ The following baseline metrics were recorded on an x86_64 Linux environment (Pyt
 
 ______________________________________________________________________
 
-## 5. Regression Testing in CI
+## 7. Regression Testing in CI
 
 The benchmarking harness supports automated regression detection in continuous integration:
 

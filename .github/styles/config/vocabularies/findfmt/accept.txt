@@ -95,3 +95,7 @@
 (?i)hostnames
 (?i)monorepo
 (?i)monorepos
+(?i)syscall
+(?i)syscalls
+(?i)nvme
+(?i)cpython
