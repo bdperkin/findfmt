@@ -7,7 +7,7 @@ output formatting.
 
 ```{typer} findfmt.cli:app
 :prog: findfmt
-:builders: latex=text:latexpdf=text:texinfo=text
+:builders: latex=text:latexpdf=text:texinfo=text:qthelp=text:devhelp=text:htmlhelp=text
 ```
 
 ## 2. Options

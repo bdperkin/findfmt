@@ -32,7 +32,7 @@ jobs:
         run: uv sync --all-groups
       - name: Build All Sphinx Formats (Strict)
         run: make -C docs clean html dirhtml singlehtml epub man latex text texinfo
-          linkcheck
+          htmlhelp qthelp devhelp linkcheck
       - name: Upload Digital Documentation (EPUB & SingleHTML)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
@@ -49,6 +49,15 @@ jobs:
             docs/_build/man/*.[1-8]
             docs/_build/text
             docs/_build/texinfo/*.texi
+          retention-days: 14
+      - name: Upload Help System Documentation (HTML Help, Qt Help, Devhelp)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: help-system-documentation
+          path: |
+            docs/_build/htmlhelp
+            docs/_build/qthelp
+            docs/_build/devhelp
           retention-days: 14
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6

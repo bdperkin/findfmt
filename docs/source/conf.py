@@ -149,6 +149,11 @@ texinfo_documents = [
     ),
 ]
 
+# Help system output
+htmlhelp_basename = "findfmtdoc"
+qthelp_basename = "findfmt"
+devhelp_basename = "findfmt"
+
 # Napoleon settings for Google-style docstrings
 napoleon_google_docstring = True
 napoleon_numpy_docstring = False
