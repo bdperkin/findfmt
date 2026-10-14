@@ -204,9 +204,10 @@ def test_classifier_and_parser_indicators(tmp_path: Path) -> None:
     assert link_info.indicator == "@"
 
     # Test offline classification
+    test_exe = Path("test.exe")
     with pytest.MonkeyPatch.context() as mp:
         mp.setattr(os, "name", "nt")
-        offline_exec = classify_file_offline(Path("test.exe"), relative_path=Path("test.exe"))
+        offline_exec = classify_file_offline(test_exe, relative_path=test_exe)
         assert offline_exec.indicator == "*"
 
     offline_link = classify_file_offline(Path("link"), relative_path=Path("link"), is_symlink=True)
