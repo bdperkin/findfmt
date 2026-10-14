@@ -29,16 +29,19 @@ def test_format_permissions_regular_file() -> None:
 def test_resolve_user_name_real() -> None:
     """Verify resolve_user_name resolves current user UID and utilizes caching."""
     clear_metadata_cache()
-    current_uid = os.getuid()
-    username = resolve_user_name(current_uid)
-    assert isinstance(username, str)
-    assert len(username) > 0
+    if hasattr(os, "getuid"):
+        current_uid = os.getuid()
+        username = resolve_user_name(current_uid)
+        assert isinstance(username, str)
+        assert len(username) > 0
 
-    # Verify cache hit
-    cached_name = resolve_user_name(current_uid)
-    assert cached_name == username
-    info = resolve_user_name.cache_info()
-    assert info.hits >= 1
+        # Verify cache hit
+        cached_name = resolve_user_name(current_uid)
+        assert cached_name == username
+        info = resolve_user_name.cache_info()
+        assert info.hits >= 1
+    else:
+        assert resolve_user_name(1000) == "1000"
 
 
 def test_resolve_user_name_fallbacks() -> None:
@@ -72,16 +75,19 @@ def test_resolve_user_name_fallbacks() -> None:
 def test_resolve_group_name_real() -> None:
     """Verify resolve_group_name resolves current group GID and utilizes caching."""
     clear_metadata_cache()
-    current_gid = os.getgid()
-    groupname = resolve_group_name(current_gid)
-    assert isinstance(groupname, str)
-    assert len(groupname) > 0
+    if hasattr(os, "getgid"):
+        current_gid = os.getgid()
+        groupname = resolve_group_name(current_gid)
+        assert isinstance(groupname, str)
+        assert len(groupname) > 0
 
-    # Verify cache hit
-    cached_name = resolve_group_name(current_gid)
-    assert cached_name == groupname
-    info = resolve_group_name.cache_info()
-    assert info.hits >= 1
+        # Verify cache hit
+        cached_name = resolve_group_name(current_gid)
+        assert cached_name == groupname
+        info = resolve_group_name.cache_info()
+        assert info.hits >= 1
+    else:
+        assert resolve_group_name(1000) == "1000"
 
 
 def test_resolve_group_name_fallbacks() -> None:
