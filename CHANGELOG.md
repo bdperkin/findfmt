@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-10-14
+
+### Features
+
+- *(format)* Implement XML and HTML document serializers with intro/outro templating (#57) (#172)
+- *(cli)* Implement OSC 8 clickable terminal hyperlinks with schema and authority overrides (#58)
+  (#173)
+- *(cli)* Implement JSON document serialization shortcut flag (-J, --json) (#23) (#174)
+
 ## [0.5.0] - 2026-10-14
 
 ### Features
