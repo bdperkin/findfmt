@@ -32,7 +32,7 @@ jobs:
         run: uv sync --all-groups
       - name: Build All Sphinx Formats (Strict)
         run: make -C docs clean html dirhtml singlehtml epub man latex text texinfo
-          htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck
+          htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck changes gettext
       - name: Upload Digital Documentation (EPUB & SingleHTML)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
         with:
@@ -68,6 +68,12 @@ jobs:
             docs/_build/pickle
             docs/_build/xml
             docs/_build/pseudoxml
+          retention-days: 14
+      - name: Upload Localization Catalogs (Gettext POT)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        with:
+          name: localization-catalogs
+          path: docs/_build/gettext
           retention-days: 14
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6

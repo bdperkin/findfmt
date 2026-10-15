@@ -5,8 +5,9 @@ SPHINXBUILD   ?= uv run sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = _build
 DOCTREEDIR    = $(BUILDDIR)/doctrees
+DOCTREEDIR_GETTEXT ?= $(BUILDDIR)/doctrees-gettext
 
-.PHONY: help Makefile html dirhtml singlehtml epub man latex latexpdf text texinfo htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck clean
+.PHONY: help Makefile html dirhtml singlehtml epub man latex latexpdf text texinfo htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck gettext changes clean
 
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -61,6 +62,12 @@ pseudoxml:
 
 linkcheck:
 	@$(SPHINXBUILD) -b linkcheck -d "$(DOCTREEDIR)" "$(SOURCEDIR)" "$(BUILDDIR)/linkcheck" $(SPHINXOPTS)
+
+gettext:
+	@$(SPHINXBUILD) -b gettext -d "$(DOCTREEDIR_GETTEXT)" "$(SOURCEDIR)" "$(BUILDDIR)/gettext" $(SPHINXOPTS)
+
+changes:
+	@$(SPHINXBUILD) -b changes -d "$(DOCTREEDIR)" "$(SOURCEDIR)" "$(BUILDDIR)/changes" $(SPHINXOPTS)
 
 clean:
 	rm -rf "$(BUILDDIR)"

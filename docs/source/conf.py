@@ -8,11 +8,13 @@ from pathlib import Path
 # Ensure package is importable for autodoc
 sys.path.insert(0, str(Path("../..").resolve() / "src"))
 
+from findfmt import __version__
+
 project = "findfmt"
 copyright = "Brandon Perkins"
 author = "Brandon Perkins"
-version = "0.1.0"
-release = "0.1.0"
+version = __version__
+release = __version__
 
 extensions = [
     "myst_parser",
@@ -164,7 +166,17 @@ napoleon_use_rtype = True
 napoleon_use_ivar = True
 
 # Linkcheck options
+linkcheck_timeout = 15
+linkcheck_retries = 3
+linkcheck_workers = 5
+linkcheck_anchors = True
 linkcheck_ignore = [
     r"https://github\.com/.*/security/.*",
     r"https://github\.com/.*/advisories/.*",
+    r"https://github\.com/bdperkin/findfmt/pull/\d+",  # Skip dynamic PRs
 ]
+
+# Gettext localization configuration
+locale_dirs = ["locale/"]
+gettext_compact = False
+gettext_uuid = True
