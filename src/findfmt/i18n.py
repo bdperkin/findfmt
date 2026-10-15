@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import contextlib
 import gettext
+import locale
 import os
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -20,6 +21,8 @@ __all__ = [
     "_",
     "detect_locale",
     "detect_locales",
+    "format_integer",
+    "format_number",
     "get_current_locale",
     "get_current_translation",
     "locale_callback",
@@ -31,6 +34,7 @@ __all__ = [
 
 _current_locale: str = "C"
 _current_translation: gettext.NullTranslations = gettext.NullTranslations()
+_ISO_639_1_CODE_LEN: int = 2
 
 
 def detect_locale(env: Mapping[str, str] | None = None) -> str:
@@ -104,6 +108,59 @@ def get_current_translation() -> gettext.NullTranslations:
     return _current_translation
 
 
+def _try_apply_locale_candidate(cand: str) -> bool:
+    """Attempt to apply a locale candidate string to the system locale.
+
+    Args:
+        cand: The locale identifier candidate string.
+
+    Returns:
+        True if LC_ALL was successfully set, False otherwise.
+    """
+    try:
+        locale.setlocale(locale.LC_ALL, cand)
+    except (locale.Error, ValueError, OSError):
+        with contextlib.suppress(locale.Error, ValueError, OSError):
+            locale.setlocale(locale.LC_TIME, cand)
+
+        with contextlib.suppress(locale.Error, ValueError, OSError):
+            locale.setlocale(locale.LC_NUMERIC, cand)
+
+        return False
+    else:
+        return True
+
+
+def _sync_system_locale(locale_name: str | None) -> None:
+    """Synchronize Python's standard locale with the target or environment settings."""
+    if locale_name is None:
+        with contextlib.suppress(locale.Error, ValueError, OSError):
+            locale.setlocale(locale.LC_ALL, "")
+
+        return
+
+    if locale_name in ("C", "POSIX"):
+        with contextlib.suppress(locale.Error, ValueError, OSError):
+            locale.setlocale(locale.LC_ALL, "C")
+
+        return
+
+    candidates = [locale_name, f"{locale_name}.UTF-8", f"{locale_name}.utf8"]
+    if len(locale_name) == _ISO_639_1_CODE_LEN:
+        upper = locale_name.upper()
+        candidates.extend(
+            [
+                f"{locale_name}_{upper}.UTF-8",
+                f"{locale_name}_{upper}.utf8",
+                f"{locale_name}_{upper}",
+            ],
+        )
+
+    for cand in candidates:
+        if _try_apply_locale_candidate(cand):
+            return
+
+
 def set_locale(
     locale_name: str | None = None,
     localedir: Path | str | None = None,
@@ -125,6 +182,8 @@ def set_locale(
         The resolved active locale code.
     """
     global _current_locale, _current_translation  # noqa: PLW0603
+
+    _sync_system_locale(locale_name)
 
     if locale_name is None:
         locales = detect_locales()
@@ -180,12 +239,19 @@ def override_locale(
     global _current_locale, _current_translation  # noqa: PLW0603
     saved_locale = _current_locale
     saved_translation = _current_translation
+    saved_system_locale: str | None = None
+    with contextlib.suppress(locale.Error, ValueError, OSError):
+        saved_system_locale = locale.setlocale(locale.LC_ALL)
+
     try:
         active = set_locale(locale_name=locale_name, localedir=localedir, domain=domain)
         yield active
     finally:
         _current_locale = saved_locale
         _current_translation = saved_translation
+        if saved_system_locale is not None:
+            with contextlib.suppress(locale.Error, ValueError, OSError):
+                locale.setlocale(locale.LC_ALL, saved_system_locale)
 
 
 def locale_callback(value: str | None) -> str | None:
@@ -227,6 +293,41 @@ def ngettext(singular: str, plural: str, n: int) -> str:
         Translated string matching plural rules for n.
     """
     return _current_translation.ngettext(singular, plural, n)
+
+
+def format_number(value: float, decimals: int = 1) -> str:
+    """Format a floating point number respecting LC_NUMERIC decimal separator.
+
+    Args:
+        value: Float or int value to format.
+        decimals: Number of decimal places.
+
+    Returns:
+        Formatted number string.
+    """
+    try:
+        return locale.format_string(f"%.{decimals}f", value, grouping=True)
+    except (ValueError, TypeError):  # pragma: no cover
+        return f"{value:.{decimals}f}"
+
+
+def format_integer(value: int, *, grouping: bool = False) -> str:
+    """Format an integer respecting LC_NUMERIC thousands separator if requested.
+
+    Args:
+        value: Integer value to format.
+        grouping: Whether to insert thousands grouping separators.
+
+    Returns:
+        Formatted integer string.
+    """
+    if not grouping:
+        return str(value)
+
+    try:
+        return locale.format_string("%d", value, grouping=True)
+    except (ValueError, TypeError):  # pragma: no cover
+        return str(value)
 
 
 # Initialize default locale from environment

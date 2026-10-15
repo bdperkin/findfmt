@@ -351,10 +351,6 @@ def test_starter_locale_catalogs_exist_and_translate() -> None:
         with override_locale(lang, localedir=locale_dir):
             assert _(msgid) == expected_msgstr
 
-    # Clean compiled MO files
-    for mo in locale_dir.glob("*/LC_MESSAGES/*.mo"):
-        mo.unlink()
-
 
 def test_sphinx_intl_configuration() -> None:
     """Verify sphinx-intl configuration in docs/source/locale."""

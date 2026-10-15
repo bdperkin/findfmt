@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from findfmt.i18n import format_number
+
 __all__ = [
     "BINARY_UNITS",
     "SI_UNITS",
@@ -52,9 +54,9 @@ def format_size_binary(size_bytes: int) -> str:
     for unit in BINARY_UNITS[1:-1]:
         value /= _IEC_BASE
         if value < _IEC_BASE:
-            return f"{value:.1f} {unit}"
+            return f"{format_number(value, 1)} {unit}"
 
-    return f"{value / _IEC_BASE:.1f} {BINARY_UNITS[-1]}"
+    return f"{format_number(value / _IEC_BASE, 1)} {BINARY_UNITS[-1]}"
 
 
 def format_size_si(size_bytes: int) -> str:
@@ -73,9 +75,9 @@ def format_size_si(size_bytes: int) -> str:
     for unit in SI_UNITS[1:-1]:
         value /= _SI_BASE
         if value < _SI_BASE:
-            return f"{value:.1f} {unit}"
+            return f"{format_number(value, 1)} {unit}"
 
-    return f"{value / _SI_BASE:.1f} {SI_UNITS[-1]}"
+    return f"{format_number(value / _SI_BASE, 1)} {SI_UNITS[-1]}"
 
 
 def format_size(
@@ -106,12 +108,12 @@ def format_size(
         return format_size_bytes(size_bytes)
 
     if size_bytes < _MIB:
-        return f"{size_bytes / _KIB:.1f} KB"
+        return f"{format_number(size_bytes / _KIB, 1)} KB"
 
     if size_bytes < _GIB:
-        return f"{size_bytes / _MIB:.1f} MB"
+        return f"{format_number(size_bytes / _MIB, 1)} MB"
 
-    return f"{size_bytes / _GIB:.1f} GB"
+    return f"{format_number(size_bytes / _GIB, 1)} GB"
 
 
 def _get_root_file_size(root: Path, *, follow_symlinks: bool) -> int:

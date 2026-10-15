@@ -3,9 +3,26 @@
 from __future__ import annotations
 
 import stat
+import sys
 from pathlib import Path
 
 import pytest
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from tools.hatch_build import compile_po_to_mo  # noqa: E402
+
+
+@pytest.fixture(scope="session", autouse=True)
+def compile_locale_catalogs_for_tests() -> None:
+    """Ensure starter locale .mo catalogs in src/findfmt/locale are compiled for tests."""
+    locale_root = PROJECT_ROOT / "src" / "findfmt" / "locale"
+    for po_file in locale_root.glob("*/LC_MESSAGES/*.po"):
+        mo_file = po_file.with_suffix(".mo")
+        if not mo_file.is_file() or po_file.stat().st_mtime > mo_file.stat().st_mtime:
+            compile_po_to_mo(po_file, mo_file)
 
 
 @pytest.fixture

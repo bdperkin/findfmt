@@ -120,7 +120,11 @@ def mock_locale_catalog(tmp_path: Path) -> Path:
             "Symlink": "Enlace simbolico",
             "Shebang": "Directiva shebang",
             "--- findfmt summary ---": "--- resumen findfmt ---",
-            "[bold]Matched files:[/] [cyan]{count}[/]": (
+            (
+                "[bold]Matched file:[/] [cyan]{count}[/]\x00"
+                "[bold]Matched files:[/] [cyan]{count}[/]"
+            ): (
+                "[bold]Archivo coincidente:[/] [cyan]{count}[/]\x00"
                 "[bold]Archivos coincidentes:[/] [cyan]{count}[/]"
             ),
             "[bold]Top tags:[/ /]": "[bold]Etiquetas principales:[/]",
@@ -322,6 +326,9 @@ def test_summary_panel_translated(mock_locale_catalog: Path) -> None:
         assert panel.title is not None
         assert "resumen findfmt" in str(panel.title)
         assert "Archivos coincidentes" in str(panel.renderable)
+
+        single_panel = format_summary_panel(1, Counter({"python": 1}))
+        assert "Archivo coincidente" in str(single_panel.renderable)
 
 
 def test_exceptions_translated(mock_locale_catalog: Path) -> None:

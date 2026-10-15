@@ -19,7 +19,7 @@ from findfmt.formatters.badges import format_tag_badge
 from findfmt.formatters.base import Formatter
 from findfmt.formatters.glyphs import CP437_BOX
 from findfmt.formatters.tree import RichTreeFormatter
-from findfmt.i18n import _
+from findfmt.i18n import _, format_integer, ngettext
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
 from findfmt.terminal import get_console
@@ -58,14 +58,20 @@ RICH_BOX_STYLES: dict[str, box.Box] = {
 
 def format_summary_panel(match_count: int, tag_counter: Counter[str]) -> Panel:
     """Format execution statistics into a styled Rich Panel."""
-    matched_label = _("[bold]Matched files:[/] [cyan]{count}[/]").format(count=match_count)
+    count_str = format_integer(match_count, grouping=True)
+    matched_label = ngettext(
+        "[bold]Matched file:[/] [cyan]{count}[/]",
+        "[bold]Matched files:[/] [cyan]{count}[/]",
+        match_count,
+    ).format(count=count_str)
     body_lines = [matched_label]
     if tag_counter:
         body_lines.append("")
         body_lines.append(_("[bold]Top tags:[/]") or "[bold]Top tags:[/]")
         for tag, count in tag_counter.most_common(10):
             badge = format_tag_badge(tag)
-            body_lines.append(f"  {badge}: [green]{count}[/]")
+            tag_count_str = format_integer(count, grouping=True)
+            body_lines.append(f"  {badge}: [green]{tag_count_str}[/]")
 
     return Panel(
         "\n".join(body_lines),

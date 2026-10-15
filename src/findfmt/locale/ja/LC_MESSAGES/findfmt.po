@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-10-15 13:30-0400\n"
+"POT-Creation-Date: 2026-10-15 14:49-0400\n"
 "PO-Revision-Date: 2026-10-15 13:26-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -676,77 +676,78 @@ msgstr ""
 msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:61
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:63
 #, python-brace-format
-msgid "[bold]Matched files:[/] [cyan]{count}[/]"
-msgstr "[bold]一致したファイル:[/] [cyan]{count}[/]"
+msgid "[bold]Matched file:[/] [cyan]{count}[/]"
+msgid_plural "[bold]Matched files:[/] [cyan]{count}[/]"
+msgstr[0] "[bold]一致したファイル:[/] [cyan]{count}[/]"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:65
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:70
 msgid "[bold]Top tags:[/]"
 msgstr "[bold]上位のタグ:[/]"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:72
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:78
 msgid "--- findfmt summary ---"
 msgstr "--- findfmt 要約 ---"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:84
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:90
 #, python-brace-format
 msgid "Unsupported table style: '{style}'. Expected one of: {valid_styles}"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:184
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:190
 msgid "Inode"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:187
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:193
 msgid "Device"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:190
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:196
 msgid "Permissions"
 msgstr "アクセス権"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:193
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:199
 msgid "User"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:196
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:202
 msgid "Group"
 msgstr "グループ"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:199
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:205
 msgid "Modified"
 msgstr "更新日時"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:201
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:207
 msgid "Status Changed"
 msgstr "状態変更日時"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:203
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:209
 msgid "Path"
 msgstr "パス"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:204
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:210
 msgid "Tags"
 msgstr "タグ"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:205
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:211
 msgid "MIME Type"
 msgstr "MIMEタイプ"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:206
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:212
 msgid "Size"
 msgstr "サイズ"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:207
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:213
 msgid "Executable"
 msgstr "実行可能"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:208
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:214
 msgid "Symlink"
 msgstr "シンボリックリンク"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:209
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:215
 msgid "Shebang"
 msgstr "シェバンディレクティブ"
 

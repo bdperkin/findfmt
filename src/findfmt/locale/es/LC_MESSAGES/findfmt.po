@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-10-15 13:30-0400\n"
+"POT-Creation-Date: 2026-10-15 14:49-0400\n"
 "PO-Revision-Date: 2026-10-15 13:26-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -676,77 +676,79 @@ msgstr ""
 msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:61
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:63
 #, python-brace-format
-msgid "[bold]Matched files:[/] [cyan]{count}[/]"
-msgstr "[bold]Archivos coincidentes:[/] [cyan]{count}[/]"
+msgid "[bold]Matched file:[/] [cyan]{count}[/]"
+msgid_plural "[bold]Matched files:[/] [cyan]{count}[/]"
+msgstr[0] "[bold]Archivo coincidente:[/] [cyan]{count}[/]"
+msgstr[1] "[bold]Archivos coincidentes:[/] [cyan]{count}[/]"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:65
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:70
 msgid "[bold]Top tags:[/]"
 msgstr "[bold]Etiquetas principales:[/]"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:72
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:78
 msgid "--- findfmt summary ---"
 msgstr "--- resumen findfmt ---"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:84
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:90
 #, python-brace-format
 msgid "Unsupported table style: '{style}'. Expected one of: {valid_styles}"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:184
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:190
 msgid "Inode"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:187
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:193
 msgid "Device"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:190
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:196
 msgid "Permissions"
 msgstr "Permisos"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:193
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:199
 msgid "User"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:196
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:202
 msgid "Group"
 msgstr "Grupo"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:199
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:205
 msgid "Modified"
 msgstr "Modificado"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:201
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:207
 msgid "Status Changed"
 msgstr "Estado cambiado"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:203
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:209
 msgid "Path"
 msgstr "Ruta"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:204
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:210
 msgid "Tags"
 msgstr "Etiquetas"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:205
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:211
 msgid "MIME Type"
 msgstr "Tipo MIME"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:206
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:212
 msgid "Size"
 msgstr "Tamaño"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:207
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:213
 msgid "Executable"
 msgstr "Ejecutable"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:208
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:214
 msgid "Symlink"
 msgstr "Enlace simbólico"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:209
+#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:215
 msgid "Shebang"
 msgstr "Directiva shebang"
 
