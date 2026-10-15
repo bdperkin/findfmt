@@ -4,6 +4,7 @@ FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim@sha256:531f855bda2c73cd6ef67d
 WORKDIR /src
 COPY pyproject.toml README.md LICENSE ./
 COPY src/ ./src/
+COPY tools/ ./tools/
 
 # Install into a standalone system environment
 RUN uv pip install --no-cache --system .
