@@ -1,0 +1,120 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/index.md:61
+msgid "User Guide"
+msgstr ""
+
+#: ../../source/index.md:68
+msgid "CLI Reference"
+msgstr ""
+
+#: ../../source/index.md:75
+msgid "API Documentation"
+msgstr ""
+
+#: ../../source/index.md:82
+msgid "Quality & Architecture"
+msgstr ""
+
+#: ../../source/index.md:89
+msgid "Community & Governance"
+msgstr ""
+
+#: ../../source/index.md:1 4d6c153b7cf94b3294e4ce43794cbf47
+msgid "findfmt Documentation"
+msgstr ""
+
+#: ../../source/index.md:4 ../../source/index.md:12
+#: 640fe4ac6e654b958ff05b7134e41ef1 9361e313941d4f8d99ea93ce748d9fca
+msgid "findfmt Logo"
+msgstr ""
+
+#: ../../source/index.md:45 d8ecce42a80b4379b6c7b02a5d7e608f
+msgid ""
+"**findfmt** is a high-performance, `.gitignore`-aware file discovery and "
+"classification suite. It locates files by content format, shebang, and "
+"MIME tag rather than relying strictly on file extensions."
+msgstr ""
+
+#: ../../source/index.md:49 55a82b549477425e97c99cd91864233c
+msgid "1. Core Capabilities"
+msgstr ""
+
+#: ../../source/index.md:51 8ddf84c40e564c70b6e646c041501b00
+msgid ""
+"**Intelligent Classification**: Powered by the `identify` engine and "
+"content heuristics to identify file types (e.g. Python, Shell, YAML, "
+"JSON, Executable) even when filenames lack extensions."
+msgstr ""
+
+#: ../../source/index.md:54 ed7fa930dcbf464084cb33e9dc17096b
+msgid ""
+"**Git-Aware Traversal**: Automatically prunes directories and files "
+"matched by `.gitignore` and `.git/info/exclude` rules early in traversal."
+msgstr ""
+
+#: ../../source/index.md:56 b3a0489525b54a23af6e09de7b296d3f
+msgid ""
+"**Deterministic Output**: Always produces clean, relative, alphabetically"
+" sorted file paths ready for Unix pipelines and `xargs`."
+msgstr ""
+
+#: ../../source/index.md:58 e18a321820d944ca885257c671963ed0
+msgid ""
+"**Modern Python Architecture**: Built with a strict `uv`-first "
+"methodology, 100% test coverage, and strict static type checking."
+msgstr ""
+
+#: ../../source/index.md:99 697d711faa7e45679b073a0d89b6c1e4
+msgid "2. Community & Feedback"
+msgstr ""
+
+#: ../../source/index.md:101 785278adfe8b46718ad74162655eede0
+msgid ""
+"**Source Code**: "
+"[github.com/bdperkin/findfmt](https://github.com/bdperkin/findfmt)"
+msgstr ""
+
+#: ../../source/index.md:102 d62cbed296124374a97f4842798c79ee
+msgid ""
+"**Issue Tracker**: Report bugs, request formats, or propose features on "
+"[GitHub Issues](https://github.com/bdperkin/findfmt/issues)."
+msgstr ""
+
+#: ../../source/index.md:104 672cf2ce2715412f988d0e23d0308ab5
+msgid ""
+"**Contributing**: Review the [Contributing "
+"Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)"
+" to get started with local development."
+msgstr ""
+
+#: ../../source/index.md:107 0f39458a0044441d8a331f2165c44999
+msgid ""
+"**Accessibility**: See our [Accessibility Statement](accessibility.md) "
+"for supported assistive technologies and barrier reporting."
+msgstr ""
+
+#: ../../source/index.md:109 651c1eadda1d49d7bfd04d732c33c8c0
+msgid ""
+"**Security Policy**: See our [Security Policy](security.md) for reporting"
+" vulnerabilities and threat modeling details."
+msgstr ""

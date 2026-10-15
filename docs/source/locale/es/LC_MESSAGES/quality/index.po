@@ -1,0 +1,89 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/quality/index.md:1 e430deac43ba4184bc6df0f68b379c4b
+msgid "Quality Metrics & Architecture"
+msgstr ""
+
+#: ../../source/quality/index.md:3 5da440af6b444aed8c2c6193d97e9cfb
+msgid "`findfmt` is engineered under the strictest software quality standards."
+msgstr ""
+
+#: ../../source/quality/index.md:5 f31400fa0fbc4cb8b0793aeb02f26370
+msgid "1. Code Quality Standards"
+msgstr ""
+
+#: ../../source/quality/index.md:7 04541578e0b84a3cbd95d0595149dce2
+msgid ""
+"**100% Code Coverage**: Enforced through `pytest-cov` and Codecov CI "
+"checks."
+msgstr ""
+
+#: ../../source/quality/index.md:8 07579e16cc784a9f800ed61b598459c0
+msgid ""
+"**Strict Static Typing**: Verified with `ty` in pedantic mode (`all = "
+"\"error\"`) and `pyproject.toml` configuration."
+msgstr ""
+
+#: ../../source/quality/index.md:10 e1f684795afa4ed0a20f0d8e4c13e5b6
+msgid ""
+"**Ruff Strictness**: Formatted and linted using `ruff` with `ALL` rules "
+"selected."
+msgstr ""
+
+#: ../../source/quality/index.md:11 8dcde05fb10a4c24a2ab2e431d1d5131
+msgid "**Cyclomatic Complexity**: Monitored using `radon` and capped via `xenon`."
+msgstr ""
+
+#: ../../source/quality/index.md:12 84aee582cac143b8a4044b16983e1eda
+#, python-format
+msgid ""
+"**Documentation Completeness**: Monitored via `interrogate` ensuring 100%"
+" docstring coverage."
+msgstr ""
+
+#: ../../source/quality/index.md:13 c7012f49c8154201ba24652e8645c4ec
+msgid ""
+"**Prose & Style Linting**: Enforced on all Markdown documentation using "
+"Vale with Google and Proselint style standards."
+msgstr ""
+
+#: ../../source/quality/index.md:16 46a61ac1d2ed4ebaac1c64a21973b545
+msgid "2. Traversal Complexity Optimization"
+msgstr ""
+
+#: ../../source/quality/index.md:18 b0e3bf59a4d1430db5e37d639eaa50ea
+msgid ""
+"Repository traversal performs early pruning of `.gitignore` hierarchies "
+"to prevent recursing into expansive unneeded directory trees such as "
+"`node_modules`, `.venv`, or compilation artifact directories."
+msgstr ""
+
+#: ../../source/quality/index.md:22 cdf2afb82fab429a9c8ad7b5a1335e95
+msgid "3. Python Runtime Compatibility"
+msgstr ""
+
+#: ../../source/quality/index.md:24 63147d538be5457fa75b652d537b8414
+msgid ""
+"`findfmt` officially supports Python 3.10 through 3.15, with automated CI"
+" matrices testing Ubuntu, macOS, and Windows. See the complete analysis "
+"and version matrix:"
+msgstr ""

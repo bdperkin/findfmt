@@ -1,0 +1,1476 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/api/findfmt.md:1 440b9980e2794575a05da03d6165eac9
+msgid "Package Modules"
+msgstr ""
+
+#: ../../source/api/findfmt.md:3 bc9515a138084b7786f2837ef372c3c2
+msgid "Documentation for `findfmt` modules and types."
+msgstr ""
+
+#: ../../source/api/findfmt.md:5 109e72c8861f4776ade40af143bf5246
+msgid "1. Models"
+msgstr ""
+
+#: 835ebc7515c847448a5df97e7df132b1 findfmt.models:1 of
+msgid "Core data models and configurations for findfmt."
+msgstr ""
+
+#: 205b0173a6234500a667b1b3496e81fb findfmt.models.FileInfo:1 of
+msgid "Represents file metadata, classification tags, and content attributes."
+msgstr ""
+
+#: ../../source/api/findfmt.md d29822442e974a9e8c2a05ac4b5755e8
+#: ff02651515be4b9e8391297976fc6534
+msgid "Variables"
+msgstr ""
+
+#: a1239ab7573b43be968c67827b8aaead findfmt.models.FileInfo:3 of
+msgid "Absolute path to the file."
+msgstr ""
+
+#: 3d6c25fb46f4485fbe21b4696c0db0b8 findfmt.models.FileInfo:5 of
+msgid "Path relative to the traversal root."
+msgstr ""
+
+#: 50316cdb922a4eceb02afd8f69d0d610 findfmt.models.FileInfo:7 of
+msgid "Set of tags assigned by the classifier (e.g., 'python', 'text')."
+msgstr ""
+
+#: e03b53b62a4d43a78135673fd6fd9f7e findfmt.models.FileInfo:9 of
+msgid "Extracted shebang line if present, otherwise None."
+msgstr ""
+
+#: 8310a57c9b9c486d8d3bcc9fce7bfcaa findfmt.models.FileInfo:11 of
+msgid "Detected MIME type if available, otherwise None."
+msgstr ""
+
+#: a639f65a027d4db1b26d537867ae15ee findfmt.models.FileInfo:13 of
+msgid "Whether the file has executable permissions."
+msgstr ""
+
+#: 4536a5e93e9a4ba1a676b38a404d79e3 findfmt.models.FileInfo:15 of
+msgid "Whether the path is a symbolic link."
+msgstr ""
+
+#: 9be09fd47c4742a29a7348e4ddc3540d findfmt.models.FileInfo:17 of
+msgid "Target path if the file is a symbolic link, otherwise None."
+msgstr ""
+
+#: 7d7f392fa2af479499735e4060b88bdb findfmt.models.FileInfo:19 of
+msgid "File size in bytes."
+msgstr ""
+
+#: 3d5e968f362841b2b8514b628081b58f findfmt.models.FileInfo:21 of
+msgid "Formatted file mode in standard ls -l format (e.g. -rw-r--r--)."
+msgstr ""
+
+#: c7e194ce2ca5412e905d7778754ec69e findfmt.models.FileInfo:23 of
+msgid "File owner username or UID if username is unavailable."
+msgstr ""
+
+#: c65bd941a37b4d46943acf38790838de findfmt.models.FileInfo:25 of
+msgid "File owner group name or GID if group name is unavailable."
+msgstr ""
+
+#: 46aae9aa8d7b4581bb09150de4a0e115 findfmt.models.FileInfo:27 of
+msgid "Filesystem inode number (st_ino)."
+msgstr ""
+
+#: f2c228eb2b6447f587863884c57463d7 findfmt.models.FileInfo:29 of
+msgid "Filesystem device number (st_dev)."
+msgstr ""
+
+#: c6e6711941224e7496a83ded6db37b97 findfmt.models.FileInfo:31 of
+msgid "Accumulated directory disk usage in bytes if --du is active."
+msgstr ""
+
+#: f44de2ea00604cc0845eaa0bee35464f findfmt.models.FileInfo.to_dict:1 of
+msgid "Serialize file attributes to a dictionary representation."
+msgstr ""
+
+#: ../../source/api/findfmt.md 01b6e56c7084434cac6fc008a319a41e
+#: 049a2dc50135439aa1e72d9004bab82e 077c4ce82a64432bb65b0cd630e0a0c0
+#: 09d17fc512644b629c8397ab233ccc23 13335fbdee8149f5ba9101342b941079
+#: 2c02b1dd4a8f45b98f9adc28d53a35b4 2da5d4dcf8f34811a31bb4b113783a29
+#: 2e46b3dee58a46d5bea50970ec1b35ac 313940d420774eedb3146bf4f74d852b
+#: 32432f950249417c8b80bd0e21fe51d8 34aa70a0c9ad47048ee757a17ebf606b
+#: 3b132f536b4a47c3b7218a6b0c5b4cd7 3dc20836347247ae85424a4737c569bd
+#: 49ba6e523b2f4dceae2bf8535e6783ae 5b545736778344a08525f75ddfda48ed
+#: 6021a9e909c64294a7bd423d81efa091 66cae5120b4c4a9fa71dfc350bc21ad1
+#: 66deb603646b482fb78894dde8f18e66 696b9920c63447319bd040875b672cfb
+#: 9320ecaa9b93417eb12fd204b917db23 958702dc48884923a603199cc29dfe9b
+#: 962738960f6e4a09b7314433bb2ed702 a5440e18dd95483bac5610cfb30fca04
+#: a79550338fbf416fa19c8c856e82fcf0 ad815afdcb8a42668857de3a18346a0f
+#: c9b43f3a378c48b0841c8b9c014b1653 d3c4616707cf4ff0816a3d0f7860bf19
+#: e248bb80c49243dd863cfff06619b262 eb46aaa891d941f3827f0c4c2b69e1a5
+#: f23d607baaac40eeaf81860d631176a7
+msgid "Parameters"
+msgstr ""
+
+#: 5267b0abb1eb4c489fac0b8bf564f093 findfmt.models.FileInfo.to_dict:3 of
+msgid "Whether the 'path' entry contains the absolute path."
+msgstr ""
+
+#: ../../source/api/findfmt.md 08c3bce05d9d4970975af0ca5cfe3ca6
+#: 1034c60a8d3c421d9dbf711273f7787b 162a11c93e734162980fce53a576035f
+#: 17ca272beb554de0b815cfcd66fdf181 192421f88a3f47a6bff1d522d66967f9
+#: 1b9e385dae8b449aba4c7b3ecaf07bf5 1f02b991bb8949699b16babf3b751c36
+#: 2b0569dd168e49c687e32626e36e38c7 2f4b2c273a524b8a9b9ee1824a2a7988
+#: 3bbf659b2f214f57aa44e2f932aaef41 4a69d981eda143c7802ef074a40ae483
+#: 4d580aa601824bfa8cdab7cc0639d61d 4fca02211d4242d8ad67fc34f39432a1
+#: 55413ed5245c4e04aef731ae6f6d4bc9 58a9baa6c7a443438c5e00d718891e3d
+#: 5ffb225d0b79484fbb77d79887e6b867 675a42aa9604443584ca83c70fae1671
+#: 8a91750be8d54e0ab8d46012d645a8a8 ac72026f11c5450da1652d027b023870
+#: c0e9310721c14d65995b77e4f21126dc c45b6b68a7904badbaaad7565a029fd1
+#: cb472cb57bfa48688d60f10ea3c8499d d71a2c6ce9b6497fa5f926febddc2646
+#: e0180d6ca07b492791c4e31a0be4c823 f05de3136ea441d896d8e3bc46bb4cf1
+#: f72ff948a7594074b5c6c41c06070393
+msgid "Returns"
+msgstr ""
+
+#: 968bec012dc549ca9343e79945213837 findfmt.models.FileInfo.to_dict:5 of
+msgid "Dictionary mapping attribute names to serialized values."
+msgstr ""
+
+#: 845bf2f9a4d0485fb790358ada7827eb findfmt.models.SortKey:1 of
+msgid "Sort criteria keys for directory traversal."
+msgstr ""
+
+#: eda72631efbd48cdb9abbe44598cb46a findfmt.models.TraversalConfig:1 of
+msgid "Configuration options for repository traversal and format filtering."
+msgstr ""
+
+#: 62c0c98259ef4451b50276f46d4d9275 findfmt.models.TraversalConfig:3 of
+msgid "Roots from which to begin file discovery."
+msgstr ""
+
+#: 47855289cc7d4419acda98c81f9c89a9 findfmt.models.TraversalConfig:5 of
+msgid "Tags that files must have to be included."
+msgstr ""
+
+#: de26895ef3fd47fcb2535d3f2f6b0626 findfmt.models.TraversalConfig:7 of
+msgid "Tags that disqualify a file from inclusion."
+msgstr ""
+
+#: f35937f084fb4beb9b5c85a0544885b1 findfmt.models.TraversalConfig:9 of
+msgid "If True, file must match all include_tags; if False, any tag."
+msgstr ""
+
+#: ce6fec22e9764bdc955fcbea74d283b8 findfmt.models.TraversalConfig:11 of
+msgid "Substring or interpreter name required in shebang."
+msgstr ""
+
+#: fa21050e3bf4402da750f3ff34955f41 findfmt.models.TraversalConfig:13 of
+msgid "Whether to ignore paths matched by gitignore rules."
+msgstr ""
+
+#: fa8b466a33d84e6290e784286f2c1309 findfmt.models.TraversalConfig:15 of
+msgid "External gitignore file path to apply across traversal scope."
+msgstr ""
+
+#: 48cce22c492d415f867f1b82c3562e33 findfmt.models.TraversalConfig:17 of
+msgid "Whether to inspect hidden files and directories."
+msgstr ""
+
+#: 9f6c547de1db4919839dcafc36060234 findfmt.models.TraversalConfig:19 of
+msgid "Whether to resolve and traverse symbolic links."
+msgstr ""
+
+#: 2137dcf96e024e8aa19f82824ee29edd findfmt.models.TraversalConfig:21 of
+msgid "Whether to list directories only, suppressing file entries."
+msgstr ""
+
+#: 14bcc7beb2ba4b76af90fa3a1e84ecd7 b2d205cbd0204e8d9305b79053abbd79
+#: findfmt.cli.runner.execute_findfmt:13 findfmt.models.TraversalConfig:23 of
+msgid "Whether to confine traversal to the root filesystem device."
+msgstr ""
+
+#: c36a7e62d19c4372941f34f060cab7f2 findfmt.models.TraversalConfig:25 of
+msgid "Maximum directory descent depth, or None for unlimited."
+msgstr ""
+
+#: 945243e3975c433384996096d77d67ef findfmt.models.TraversalConfig:27 of
+msgid "Maximum directory entries threshold before skipping descent, or None."
+msgstr ""
+
+#: d8fc371fd2af47d2adf37518a7fe736f findfmt.models.TraversalConfig:29 of
+msgid "Whether to prune empty directories or directories with no matching files."
+msgstr ""
+
+#: f6f9ff8951354fffaf5c67f1ecec8386 findfmt.models.TraversalConfig:31 of
+msgid "Wildcard/glob patterns for including files (-P)."
+msgstr ""
+
+#: eea2a94630cc4864976e0bb94caa16e1 findfmt.models.TraversalConfig:33 of
+msgid "Wildcard/glob patterns for excluding files (-I)."
+msgstr ""
+
+#: 1e2ea74579ae4808be5a85936214f068 6f4edbc531824d18843251db3e430017
+#: findfmt.cli.runner.execute_findfmt:19 findfmt.models.TraversalConfig:35 of
+msgid "Whether pattern comparisons are case-insensitive."
+msgstr ""
+
+#: 19cebbf72d0240c1bc85e100dcca72de findfmt.models.TraversalConfig:37 of
+msgid "Whether directory names are matched against patterns and inherit."
+msgstr ""
+
+#: eb31e0406eb74eec817081a91abbdd00 findfmt.models.TraversalConfig:39 of
+msgid "Whether to output relative paths rather than absolute."
+msgstr ""
+
+#: 8f4f75d38ca145adace46ef8d3558cb3 a1fa1f62f0b345d8a95adab850692171
+#: findfmt.cli.runner.execute_findfmt:26 findfmt.models.TraversalConfig:41 of
+msgid "Whether to prepend input search path prefix to relative paths."
+msgstr ""
+
+#: 7f3367f46b884526a22f14b844b673a3 findfmt.models.TraversalConfig:43 of
+msgid "Whether to delimit output paths with NUL bytes (\\0)."
+msgstr ""
+
+#: c28e940055f64e2792152fdc224618bc findfmt.models.TraversalConfig:45 of
+msgid "Whether to print identified tags alongside file paths."
+msgstr ""
+
+#: 023a07e9dfbd46a1863f5c26e7f4d037 findfmt.models.TraversalConfig:47 of
+msgid "Whether to output summary statistics of matches."
+msgstr ""
+
+#: a0b3afdebc0440c984c049a6fe87b2fd findfmt.models.TraversalConfig:49 of
+msgid "Requested output serialization format."
+msgstr ""
+
+#: ad9f7008a86b4d9d9cd675be240e2208 findfmt.models.TraversalConfig:51 of
+msgid "Criterion for ordering directory traversal entries."
+msgstr ""
+
+#: 01b5ee8f49e540939619152316dbe9eb findfmt.models.TraversalConfig:53 of
+msgid "Whether to invert the active sort order."
+msgstr ""
+
+#: fb247b17a06b43d3ab10506305d3470d findfmt.models.TraversalConfig:55 of
+msgid "Whether to list directories before files within directory levels."
+msgstr ""
+
+#: ad35cbd1b03c495085c202bec4a29ce3 findfmt.models.TraversalConfig:57 of
+msgid "Whether to list files before directories within directory levels."
+msgstr ""
+
+#: 4c9369a088ae4774b4654ecae55e7466 findfmt.models.TraversalConfig:59 of
+msgid "Input file path or '-' for stdin to ingest directory structure from."
+msgstr ""
+
+#: 6e255f17202d4a35a86bb411513ec6fd findfmt.models.TraversalConfig:61 of
+msgid "Whether to enforce extension-only classification without disk access."
+msgstr ""
+
+#: 0506cb643acd4d5cbf35031898ba3906 findfmt.models.TraversalConfig:63 of
+msgid "Whether to display file permissions in ls -l format."
+msgstr ""
+
+#: 52d06cc8ef77472bbf67f361f3b38d51 8c046acfc888471aa91784e397f18d43
+#: dd5eb84624f142649e6ed74f079f99a8
+#: findfmt.cli.config.build_traversal_config:35
+#: findfmt.cli.runner.execute_findfmt:38 findfmt.models.TraversalConfig:65 of
+msgid "Whether to display file owner username or UID."
+msgstr ""
+
+#: 661f2b9c85a84507bde1768a36f02614 e48536f1acb548689a0bb53afa8eac1d
+#: f2747671cc284cddb4955594525eb2aa
+#: findfmt.cli.config.build_traversal_config:36
+#: findfmt.cli.runner.execute_findfmt:39 findfmt.models.TraversalConfig:67 of
+msgid "Whether to display file owner group name or GID."
+msgstr ""
+
+#: 06fb50bda43c49e1ac1db7994f02a62f findfmt.models.TraversalConfig:69 of
+msgid "Whether to display filesystem inode numbers."
+msgstr ""
+
+#: 930fd74c6fbe4c1b9db5d4e381848571 findfmt.models.TraversalConfig:71 of
+msgid "Whether to display filesystem device numbers."
+msgstr ""
+
+#: 03462b123d4c4f0889cff966f8749ee5 1fe78c5b995b428296d7b5d7e7a0ab50
+#: 4386c37c1979450a861140ce11f9ad0c
+#: findfmt.cli.config.build_traversal_config:39
+#: findfmt.cli.runner.execute_findfmt:40 findfmt.models.TraversalConfig:73 of
+msgid "Whether to display file size in bytes."
+msgstr ""
+
+#: 7d03c7a23cc3439a9ee2027d674f1fe6 findfmt.models.TraversalConfig:75 of
+msgid "Whether to format sizes using binary units (powers of 1024)."
+msgstr ""
+
+#: f95df3fcf3494d2991862142dd4b138a findfmt.models.TraversalConfig:77 of
+msgid "Whether to format sizes using SI metric units (powers of 1000)."
+msgstr ""
+
+#: 0897a15cbac24a068aaf2f3c9416cded 36f9ebc74b2c4998baf916fb04e8914b
+#: 482eb0534a054bc8914074239381e66a
+#: findfmt.cli.config.build_traversal_config:42
+#: findfmt.cli.runner.execute_findfmt:43 findfmt.models.TraversalConfig:79 of
+msgid "Whether to accumulate recursive directory disk usage."
+msgstr ""
+
+#: 6fa84a91e6b2409f8417db8555d56a7e c9572b201004410db8aec1bca785f61f
+#: de696036333049d586ef65976d78f71a
+#: findfmt.cli.config.build_traversal_config:43
+#: findfmt.cli.runner.execute_findfmt:46 findfmt.models.TraversalConfig:81 of
+msgid "Whether to display file modification date/time."
+msgstr ""
+
+#: d64653f0775c4e03863fea8db7912da0 findfmt.models.TraversalConfig:83 of
+msgid "Whether to display inode status change date/time."
+msgstr ""
+
+#: ed3ca3c5a51846a1a7dc99b650fbfce9 findfmt.models.TraversalConfig:85 of
+msgid "Optional strftime format string for timestamps."
+msgstr ""
+
+#: 894eec6833b04ef6a55c2e060b913ecf findfmt.models.TraversalConfig:87 of
+msgid "Whether to append file classification indicators."
+msgstr ""
+
+#: ae9b39bc3975452fbe803157ed53310e findfmt.models.TraversalConfig:89 of
+msgid "Whether to mask non-printable characters as '?'."
+msgstr ""
+
+#: cc0303366f1b4b2c9692e0a40256f6f4 findfmt.models.TraversalConfig:91 of
+msgid "Whether to print non-printable characters verbatim."
+msgstr ""
+
+#: ced6257d66ad41e0983b93af64138f6d findfmt.models.TraversalConfig:93 of
+msgid "Whether to enclose filenames in double quotes with backslash escaping."
+msgstr ""
+
+#: 1df05fb086c24ee0899f5a9f026b1f89 findfmt.models.TraversalConfig:95 of
+msgid "Optional base URL prefix for HTML hyperlinks."
+msgstr ""
+
+#: b6c3906748ef4c3c86abf5a8a761ced2 findfmt.models.TraversalConfig:97 of
+msgid "Optional path to HTML fragment file prepended to directory listing."
+msgstr ""
+
+#: de80099656a04149a02e62d0796ffa16 findfmt.models.TraversalConfig:99 of
+msgid "Optional path to HTML fragment file appended to directory listing."
+msgstr ""
+
+#: 13e8b43b67bf46e59adeccff91353615 findfmt.models.TraversalConfig:101 of
+msgid "Document title and heading for HTML output."
+msgstr ""
+
+#: 2e89806840d14126b6574e1582f278a8 665d431d1a6a438b97b63665997dd969
+#: 86a7095bf02147039ffacd288d4e81e5
+#: findfmt.cli.config.build_traversal_config:57
+#: findfmt.cli.runner.execute_findfmt:66 findfmt.models.TraversalConfig:103 of
+msgid "Whether to suppress hyperlinks in HTML mode."
+msgstr ""
+
+#: 0a4b411f25fe46e297806b45cbc2aead findfmt.models.TraversalConfig:105 of
+msgid "Whether XML output format flag is active."
+msgstr ""
+
+#: 4e18c30a6dac4e6596dc5f8afb08f055 80475f887f1145dab54d2a4d3ebb75f1
+#: findfmt.cli.config.build_traversal_config:58
+#: findfmt.models.TraversalConfig:107 of
+msgid "Whether to emit OSC 8 terminal hyperlinks for paths."
+msgstr ""
+
+#: 35a52b07482e49a182d0097720b0a7e5 ce0fe18a97f543ad84452ad99c6d66f7
+#: edb334b1328c4fb1bf59661327df3dd6
+#: findfmt.cli.config.build_traversal_config:59
+#: findfmt.cli.runner.execute_findfmt:68 findfmt.models.TraversalConfig:109 of
+msgid "URI schema for terminal hyperlinks."
+msgstr ""
+
+#: 3e246b816e924390ae19fa73c9c96a38 8912ba0d16d646e1a3679d01f029746c
+#: 977cd00af6354a528a2eb9cc898459eb
+#: findfmt.cli.config.build_traversal_config:60
+#: findfmt.cli.runner.execute_findfmt:69 findfmt.models.TraversalConfig:111 of
+msgid "Optional URI authority component for terminal hyperlinks."
+msgstr ""
+
+#: 161f57284245482d91f4f97e48187028 findfmt.models.TraversalConfig:113 of
+msgid "Optional locale string for translations and formatting."
+msgstr ""
+
+#: ../../source/api/findfmt.md:14 bef0ff03865d43c69ce18c4a89cc4685
+msgid "2. Classifier"
+msgstr ""
+
+#: e288ba32ac30425b9792e12fa14ba21a findfmt.classifier:1 of
+msgid "File classification and content analysis engine."
+msgstr ""
+
+#: 3543950a9edb4c33abc5fc482a367132 findfmt.classifier.classify_file:1 of
+msgid "Classify a given file path by inspection of name, content, and metadata."
+msgstr ""
+
+#: 694aac842d504984a056ded585031b7e findfmt.classifier.classify_file:3 of
+msgid "The path of the file to classify."
+msgstr ""
+
+#: 8a077b71964846b1bea9baf2b6b76a50 findfmt.classifier.classify_file:4 of
+msgid "Optional root directory used to compute relative_path."
+msgstr ""
+
+#: 1cd8a101e87d4f30a7c569a7cd184602 findfmt.classifier.classify_file:5 of
+msgid "Optional prefix to prepend to relative_path."
+msgstr ""
+
+#: 2347fa2f41414bf48cbd7073d55909fb findfmt.classifier.classify_file:6 of
+msgid "Optional accumulated directory disk usage in bytes."
+msgstr ""
+
+#: 1d0fdb80c47440bb82c2db1eb39652cd findfmt.classifier.classify_file:7 of
+msgid "Optional os.DirEntry metadata from scandir."
+msgstr ""
+
+#: b54f9405fede4d8ba46eedb2f723b068 findfmt.classifier.classify_file:9 of
+msgid "FileInfo containing metadata, identified tags, shebang, and MIME info."
+msgstr ""
+
+#: 9ca194ad2e4b4c598d8fae31988ef8a2
+#: findfmt.classifier.compute_relative_prefix:1 of
+msgid "Compute relative prefix from an input root path."
+msgstr ""
+
+#: 2de88a000c28401e953b15fcbfe0d56c
+#: findfmt.classifier.compute_relative_prefix:3 of
+msgid "Target search root path."
+msgstr ""
+
+#: eb67ee4a70b34300aa781b6260b3744e
+#: findfmt.classifier.compute_relative_prefix:5 of
+msgid "Relative Path prefix to prepend, or None if no prefix is needed."
+msgstr ""
+
+#: c733849559484a2a80b39bd624ff63a2 findfmt.classifier.extract_shebang:1 of
+msgid "Extract the shebang interpreter from the top of an executable file."
+msgstr ""
+
+#: 271209ff0c934d3dbf4bba3ebc5d9d58 findfmt.classifier.extract_shebang:3 of
+msgid "Path to the target file."
+msgstr ""
+
+#: a4f300f09e244c24a7eac8f226e9fe7e findfmt.classifier.extract_shebang:5 of
+msgid "The raw shebang line string if present and readable, or None."
+msgstr ""
+
+#: ce8d008b9cbd4a93a07dcd459f2a12ee
+#: findfmt.classifier.extract_shebang_from_buffer:1 of
+msgid "Extract shebang interpreter line from a pre-read file buffer."
+msgstr ""
+
+#: 17b3c825762a44ea9286a48f664d9821
+#: findfmt.classifier.extract_shebang_from_buffer:3 of
+msgid "Initial bytes read from the file."
+msgstr ""
+
+#: ff75c1af4ab54c36af3676b2c4ad7980
+#: findfmt.classifier.extract_shebang_from_buffer:5 of
+msgid "The raw shebang line string if present and valid, or None."
+msgstr ""
+
+#: 0b82cbf400134c2dbd7fc0360b6bc7da findfmt.classifier.get_known_tags:1 of
+msgid "Retrieve all known format and type tags recognized by the engine."
+msgstr ""
+
+#: f6b95e73d8174150872e5f7534b833ed findfmt.classifier.get_known_tags:3 of
+msgid "frozenset of all recognized string tags."
+msgstr ""
+
+#: ../../source/api/findfmt.md:23 01f53c2db4a94ad9a395607c868ac81e
+msgid "3. Traversal Engine"
+msgstr ""
+
+#: 4279377c75f047a18cf85cab48ad0681 findfmt.traversal:1 of
+msgid "Filesystem traversal, filtering, and ignore engine package for findfmt."
+msgstr ""
+
+#: 0f211214de0147e891c6889509865b53 findfmt.traversal.patterns.PatternMatcher:1
+#: of
+msgid "Compiled pattern matcher for include (-P) and exclude (-I) glob rules."
+msgstr ""
+
+#: b022b07f14f740c690b41b48cb2c20e0
+#: findfmt.traversal.patterns.PatternMatcher.__init__:1 of
+msgid ""
+"Initialize PatternMatcher with compiled inclusion/exclusion "
+"specifications."
+msgstr ""
+
+#: 0ca337905aaf401c923f822d9c05ce65
+#: findfmt.traversal.patterns.PatternMatcher.from_config:1 of
+msgid "Construct PatternMatcher from TraversalConfig options."
+msgstr ""
+
+#: 43b3e38b236a48a0bf9d403312e27d44
+#: findfmt.traversal.patterns.PatternMatcher.matches_dir:1 of
+msgid "Determine whether a directory name/path matches include patterns (-P)."
+msgstr ""
+
+#: d47963a6ff774968996de4830a4c91b5
+#: findfmt.traversal.patterns.PatternMatcher.matches_file:1 of
+msgid "Determine whether a file path satisfies active pattern criteria."
+msgstr ""
+
+#: d730576b17d24675948111d92aa80cb3
+#: findfmt.traversal.patterns.PatternMatcher.should_exclude:1 of
+msgid "Determine whether a file or directory path matches exclude patterns (-I)."
+msgstr ""
+
+#: 9010009217294cd9a85a851972ce2743
+#: findfmt.traversal.patterns.PatternMatcher.should_inherit_match:1 of
+msgid "Determine whether children of a directory inherit pattern inclusion."
+msgstr ""
+
+#: e7a03f892ced44f597f356f9a4a7e4d0
+#: findfmt.traversal.patterns.PatternMatcher.to_posix:1 of
+msgid "Convert path to POSIX relative path and basename string pair."
+msgstr ""
+
+#: 032ba20b6eea487c8a5f44f887bd5071
+#: findfmt.traversal.patterns.create_pattern_matcher:1 of
+msgid "Create a PatternMatcher instance from TraversalConfig."
+msgstr ""
+
+#: 42d32714290b43c39253d03f6bb6da01 findfmt.traversal.engine.find_files:1 of
+msgid ""
+"Discover and classify files across all configured root paths or external "
+"listings."
+msgstr ""
+
+#: 45954092fd6341a0b2da670fb378a994 findfmt.traversal.ignore.is_path_ignored:1
+#: of
+msgid "Check if an entry matches any active gitignore rule."
+msgstr ""
+
+#: d89c61a8204d454da78c80959036c972 findfmt.traversal.ignore.is_path_ignored:3
+#: of
+msgid "Evaluates specs in reverse hierarchical order (deepest to shallowest)."
+msgstr ""
+
+#: 48aa90bfdab44a2a9ba95073cc1b83d4 findfmt.traversal.ignore.is_path_ignored:5
+#: of
+msgid "Path of the directory or file entry to test."
+msgstr ""
+
+#: 2583cfa093e1486880cef8acb527796e findfmt.traversal.ignore.is_path_ignored:6
+#: of
+msgid "Whether the entry is a directory."
+msgstr ""
+
+#: 69d00ca8b665473683e5b324640209c6 findfmt.traversal.ignore.is_path_ignored:7
+#: of
+msgid "Active (base_path, spec) pairs."
+msgstr ""
+
+#: 5278233ea79641dc99a13c64efde9da1 findfmt.traversal.ignore.is_path_ignored:9
+#: of
+msgid "True if the entry is ignored, False otherwise."
+msgstr ""
+
+#: 23c7c4f43b8e4ac797c4bcd71dcac153
+#: findfmt.traversal.ignore.load_custom_gitignore_spec:1 of
+msgid "Load custom gitignore patterns from an external specification file."
+msgstr ""
+
+#: b4963d5040a5441b8347e14d39d8f379
+#: findfmt.traversal.ignore.load_git_exclude_spec:1 of
+msgid "Load exclude patterns from .git/info/exclude if present."
+msgstr ""
+
+#: 1b39ff015a03440a8cd0ce30bee9a267
+#: findfmt.traversal.ignore.load_git_exclude_spec:3 of
+msgid ""
+"Supports both standard Git repositories with a .git directory and "
+"submodules or worktrees with a .git pointer file."
+msgstr ""
+
+#: 3b1ed116b0424312bf2eb91f142cfb02
+#: findfmt.traversal.ignore.load_git_exclude_spec:6 of
+msgid "Git repository root directory."
+msgstr ""
+
+#: befed25274464ac385921cee7927b65b
+#: findfmt.traversal.ignore.load_git_exclude_spec:8 of
+msgid "PathSpec instance if exclude patterns exist, or None."
+msgstr ""
+
+#: 9b46211603b14ff180ed17f1f0e61d2c
+#: findfmt.traversal.ignore.load_gitignore_spec:1 of
+msgid "Load gitignore patterns from a directory if a .gitignore file exists."
+msgstr ""
+
+#: fd0a6c4dc8db45c89cff56060a9c22fa
+#: findfmt.traversal.ignore.load_gitignore_spec:3 of
+msgid "Directory to check for .gitignore."
+msgstr ""
+
+#: d8debe96842145a0933f186121dac971
+#: findfmt.traversal.ignore.load_gitignore_spec:5 of
+msgid "PathSpec instance if rules exist, or None."
+msgstr ""
+
+#: 0d0b5270c21847b18b3162821d3dd72e
+#: findfmt.traversal.ignore.load_global_gitignore_spec:1 of
+msgid "Load global gitignore patterns from git config or standard user paths."
+msgstr ""
+
+#: ba6d69d35afd4dcab3854bdb389e2a77
+#: findfmt.traversal.boundaries.matches_filter:1 of
+msgid "Determine whether a classified file satisfies filter criteria."
+msgstr ""
+
+#: e8c3cb3dd79e427db647915ed92cf7b3
+#: findfmt.traversal.sorting.natural_sort_key:1 of
+msgid "Generate natural version sort key chunking embedded integers."
+msgstr ""
+
+#: f7e3e6529a084098a224fcea099e5a8a
+#: findfmt.traversal.sorting.natural_sort_key:3 of
+msgid "Entry filename to chunk."
+msgstr ""
+
+#: dfc6a98237e84262bab6f5bce78211f7
+#: findfmt.traversal.sorting.natural_sort_key:4 of
+msgid "Whether string chunks are compared case-insensitively."
+msgstr ""
+
+#: eadd2649e62a4b039cc91d67cc1c10cc
+#: findfmt.traversal.sorting.natural_sort_key:6 of
+msgid "Tuple of parsed SortChunk tokens, with filename tie-breaker."
+msgstr ""
+
+#: 9d6e7bc2266c4f0fa81a1ed115f6853e
+#: findfmt.traversal.sorting.resolve_sort_key:1 of
+msgid "Resolve CLI sort parameter and unsorted flag to canonical SortKey enum."
+msgstr ""
+
+#: 4bfbb668ab8f42d09ce13c17c23a022c
+#: findfmt.traversal.sorting.resolve_sort_key:3 of
+msgid "Input string or SortKey enum from CLI."
+msgstr ""
+
+#: 1bd501b5834d4b1fa01dd39c6a6b61a5
+#: findfmt.traversal.sorting.resolve_sort_key:4 of
+msgid "Whether the raw unsorted flag (-U) was passed."
+msgstr ""
+
+#: 9809eef0ddf84457a03ef3b58afcafbe
+#: findfmt.traversal.sorting.resolve_sort_key:6 of
+msgid "Canonical SortKey enum value."
+msgstr ""
+
+#: ../../source/api/findfmt.md 1b3cfe277c2e4f7d8e81458ba6a856df
+#: 21732f0fb55b4f718c86a3fb676442c7 3b4ba50a950f48ceb81d1c00bea1b9ce
+#: 41d15d1744034bf897949ee605a0b258 b78763110b5142d48297f5188cbb795d
+#: cb06efc735c04fd7921c1e9c09ca2a71
+msgid "Raises"
+msgstr ""
+
+#: 00ad02947988427fb602a10b56cae700
+#: findfmt.traversal.sorting.resolve_sort_key:8 of
+msgid "If input string does not match any recognized criteria."
+msgstr ""
+
+#: 6d2906c740ae486bb812cd6d5ef3123d
+#: findfmt.traversal.boundaries.should_skip_dir:1 of
+msgid "Determine if a directory should be skipped during descent."
+msgstr ""
+
+#: b00a8d87eb3a416987f360530c51e005
+#: findfmt.traversal.sorting.sort_directory_entries:1 of
+msgid "Sort directory entries according to traversal configuration."
+msgstr ""
+
+#: d9e4e836a66e492face2010bf521488f
+#: findfmt.traversal.sorting.sort_directory_entries:3 of
+msgid "Mutable list of os.DirEntry objects to sort."
+msgstr ""
+
+#: 9d8ce964f274483191bc74997eff6e20
+#: findfmt.traversal.sorting.sort_directory_entries:4 of
+msgid "Traversal configuration containing sort criteria."
+msgstr ""
+
+#: d759e5db1aae428abd2c00c62903130d
+#: findfmt.traversal.sorting.sort_directory_entries:6 of
+msgid "Sorted list of directory entries."
+msgstr ""
+
+#: 4db6860eab274f01a7477ff779b20c31
+#: findfmt.traversal.engine.traverse_directory:1 of
+msgid ""
+"Recursively traverse a directory hierarchy honoring .gitignore, filters, "
+"and boundaries."
+msgstr ""
+
+#: ../../source/api/findfmt.md:32 b4709c85de504da395993de1f5efecca
+msgid "4. Command-Line Interface"
+msgstr ""
+
+#: 4747dd678d2842749b95003fc8825f7a findfmt.cli:1 of
+msgid "Command-line interface package for findfmt."
+msgstr ""
+
+#: 1d30f9fee28b4374a40ab7812f8e0a95 findfmt.cli.pager.FindfmtCommand:1 of
+msgid "Custom TyperCommand routing help output through interactive pager on TTY."
+msgstr ""
+
+#: 7a54ab9958684df0a12355d9a2383dd0
+#: findfmt.cli.pager.FindfmtCommand.format_help:1 of
+msgid "Format and page command help text when appropriate."
+msgstr ""
+
+#: fc635d1c66a34b0fb5cc96eeeb75d6a3
+#: findfmt.cli.pager.FindfmtCommand.format_help:3 of
+msgid "Active Click context."
+msgstr ""
+
+#: 55a1914483e846b28c52e738ff176cd1
+#: findfmt.cli.pager.FindfmtCommand.format_help:4 of
+msgid "Click help formatter."
+msgstr ""
+
+#: 2abc811016e245a6bdfba3b24b2c7269 findfmt.terminal.PagerController:1 of
+msgid "Controller for interactive terminal paging and TTY/color handling."
+msgstr ""
+
+#: fcd6899eba6f4105a6a6fea21707ac15 findfmt.terminal.PagerController.__init__:1
+#: of
+msgid "Initialize PagerController."
+msgstr ""
+
+#: 764a84821c5845fe8e8aec7442ef3bbe findfmt.terminal.PagerController.__init__:3
+#: of
+msgid "Pager override flag (True=force, False=disable, None=auto)."
+msgstr ""
+
+#: 191ea1ff223e4c6dbd3a47252c5e44b9 77241c35f7fa4ac7b7adc95b384cc94f
+#: ad497969578e4bc1bae85838e6987df3 findfmt.cli.pager.display_with_pager:5
+#: findfmt.cli.runner.execute_findfmt:55
+#: findfmt.terminal.PagerController.__init__:4 of
+msgid "Target output text stream (defaults to sys.stdout)."
+msgstr ""
+
+#: 45675bb9cc1146ad8c8e0f1c4cc3a504 97f5d3727bc843fd838f62853adfe5bd
+#: findfmt.cli.pager.display_with_pager:6
+#: findfmt.terminal.PagerController.__init__:5 of
+msgid "Terminal height override for testing."
+msgstr ""
+
+#: c10c7d2e76d6463f8b81327556dad721 findfmt.terminal.PagerController.__init__:6
+#: of
+msgid "Optional pre-configured Rich Console."
+msgstr ""
+
+#: 980053ae679143628698b776df6f36e6 e789d61646414b74b7a3d7641382fd18
+#: findfmt.cli.pager.display_with_pager:7
+#: findfmt.terminal.PagerController.__init__:7 of
+msgid "Optional custom Rich Pager instance."
+msgstr ""
+
+#: 4d9e8e091aa74c80a31155d461f16a39 findfmt.terminal.PagerController.__init__:8
+#: of
+msgid "Optional environment mapping for color resolution."
+msgstr ""
+
+#: 1fbe4f4a9fa34f7f99b3b8789ead5c9d 222dea533e814ec9b08b97b07dd38d6e
+#: 56c44b65f6814d0b85d486f715e31e4d findfmt.cli.pager.display_with_pager:8
+#: findfmt.cli.runner.execute_findfmt:70
+#: findfmt.terminal.PagerController.__init__:9 of
+msgid "Explicit color enable override flag."
+msgstr ""
+
+#: 9f2004a981ca447093e2345e7ce7d264 findfmt.terminal.PagerController.display:1
+#: of
+msgid "Route formatted content to pager or write directly to target stream."
+msgstr ""
+
+#: 1763bc1d06f046feaab861750a20c869 findfmt.terminal.PagerController.display:3
+#: of
+msgid "Formatted output string to display."
+msgstr ""
+
+#: 2762b2d3db9b4efdaa8be6877e9d1e68
+#: findfmt.terminal.PagerController.should_page:1 of
+msgid "Determine whether output with line_count should be routed through a pager."
+msgstr ""
+
+#: 6e8518afd3234845ad0e04e5b5a4a479
+#: findfmt.terminal.PagerController.should_page:3 of
+msgid "Number of lines in output."
+msgstr ""
+
+#: 91076a7ac4054ada9f4a19f5c0377b71
+#: findfmt.terminal.PagerController.should_page:5 of
+msgid "True if pager should be invoked, False otherwise."
+msgstr ""
+
+#: c300fd658fd4490083d32f7899d172f3 findfmt.cli.config.build_traversal_config:1
+#: of
+msgid "Build and validate TraversalConfig from CLI options."
+msgstr ""
+
+#: 6e0d096f98ee493da66f41e7015f8593 findfmt.cli.config.build_traversal_config:3
+#: of
+msgid "Target root paths."
+msgstr ""
+
+#: 5b142ec923d84501a6c67b0e344e9a0b findfmt.cli.config.build_traversal_config:4
+#: of
+msgid "Included tag filters."
+msgstr ""
+
+#: 7f38a84bbbc84f64bed50684147bedb7 findfmt.cli.config.build_traversal_config:5
+#: of
+msgid "Excluded tag filters."
+msgstr ""
+
+#: 133b16e3e8c449a1a1a288fda7e9b13a findfmt.cli.config.build_traversal_config:6
+#: of
+msgid "Whether all tags are required."
+msgstr ""
+
+#: fd93353f43d84763927f388ec80b6547 findfmt.cli.config.build_traversal_config:7
+#: of
+msgid "Interpreter shebang filter pattern."
+msgstr ""
+
+#: 6e9cdc715a354b06a86622a44209e3c3 findfmt.cli.config.build_traversal_config:8
+#: of
+msgid "Whether gitignore rules are ignored."
+msgstr ""
+
+#: ba4a8605d4534802b53b7152c7c4b8f3 findfmt.cli.config.build_traversal_config:9
+#: of
+msgid "External gitignore file path."
+msgstr ""
+
+#: 28431c817e40469aa895049f08cfb25c
+#: findfmt.cli.config.build_traversal_config:10 of
+msgid "Whether hidden entries are included."
+msgstr ""
+
+#: f109df6654654bc5a5b7b971a341ab13
+#: findfmt.cli.config.build_traversal_config:11 of
+msgid "Whether directory symlinks are traversed."
+msgstr ""
+
+#: 24e17d65aba846d190d10c650cd22ac2
+#: findfmt.cli.config.build_traversal_config:12 of
+msgid "Whether to emit directories only."
+msgstr ""
+
+#: 4d3d7fe7417949df8900419231a55318
+#: findfmt.cli.config.build_traversal_config:13 of
+msgid "Whether traversal is restricted to root device."
+msgstr ""
+
+#: 6fc9fc59f9ef4c50ad983deb6cef7a9d
+#: findfmt.cli.config.build_traversal_config:14 of
+msgid "Maximum descent depth level."
+msgstr ""
+
+#: e9312d65d0df4d389c623e59370c6a2d
+#: findfmt.cli.config.build_traversal_config:15 of
+msgid "Directory entry count limit threshold."
+msgstr ""
+
+#: 427d08c7a99a43f8a3497cbcb5a58d39
+#: findfmt.cli.config.build_traversal_config:16 of
+msgid "Whether empty directories are pruned."
+msgstr ""
+
+#: 2341b56076f7437ba21df2a7ae53dd2b
+#: findfmt.cli.config.build_traversal_config:17 of
+msgid "Include glob patterns."
+msgstr ""
+
+#: 2d368064733b4ef3ad8184c4da647b2c
+#: findfmt.cli.config.build_traversal_config:18 of
+msgid "Exclude glob patterns."
+msgstr ""
+
+#: b386f5f5983242b9bfcda4ad99663be1
+#: findfmt.cli.config.build_traversal_config:19 of
+msgid "Whether pattern comparisons ignore case."
+msgstr ""
+
+#: 8a7444ec13164b17919c107ea2b5ef68 bd9a875623af4860b41df52f3a5e4810
+#: findfmt.cli.config.build_traversal_config:20
+#: findfmt.cli.runner.execute_findfmt:20 of
+msgid "Whether directory matches inherit to descendants."
+msgstr ""
+
+#: 6e95a3d588294a90b85d3e3a740d182f ccbea00c8e2848af9b03717f5f004aa8
+#: findfmt.cli.config.build_traversal_config:21
+#: findfmt.cli.runner.execute_findfmt:25 of
+msgid "Whether to emit absolute paths."
+msgstr ""
+
+#: 9e09aa6c71a646e2a20441ab01c0c058
+#: findfmt.cli.config.build_traversal_config:22 of
+msgid "Whether to prepend relative path search prefix."
+msgstr ""
+
+#: 8cc6e4b7b9f04f79a335eb8ad66181aa
+#: findfmt.cli.config.build_traversal_config:23 of
+msgid "Whether output is NUL-delimited."
+msgstr ""
+
+#: 29a613b3ab1544c99376e6f0badf3df5
+#: findfmt.cli.config.build_traversal_config:24 of
+msgid "Whether tags are printed in output."
+msgstr ""
+
+#: 27fff38000ed4ada9bc8810350bc8d62
+#: findfmt.cli.config.build_traversal_config:25 of
+msgid "Whether summary statistics are generated."
+msgstr ""
+
+#: 1e2ea82a69394a7aae0d5179af3dfaf8
+#: findfmt.cli.config.build_traversal_config:26 of
+msgid "Output format identifier."
+msgstr ""
+
+#: 9b11d65dbb2f487c8e2c5b441e03f198
+#: findfmt.cli.config.build_traversal_config:27 of
+msgid "Sort criteria option."
+msgstr ""
+
+#: 9a4382ac28db4cc482d009543f360999
+#: findfmt.cli.config.build_traversal_config:28 of
+msgid "Whether sort direction is inverted."
+msgstr ""
+
+#: b79ea19cc94045b2b4d98abd69af59cc f5256856eba14566b51674c45bca1028
+#: findfmt.cli.config.build_traversal_config:29
+#: findfmt.cli.runner.execute_findfmt:32 of
+msgid "Whether to disable sorting."
+msgstr ""
+
+#: e75ee4d5574a46f99942c8e677bf52a4
+#: findfmt.cli.config.build_traversal_config:30 of
+msgid "Whether directories precede files."
+msgstr ""
+
+#: 10b10334d50d479c9b25468806a2e396
+#: findfmt.cli.config.build_traversal_config:31 of
+msgid "Whether files precede directories."
+msgstr ""
+
+#: 95c055027ba343d69c8c75865b8f80cb
+#: findfmt.cli.config.build_traversal_config:32 of
+msgid "Input file or '-' for stdin."
+msgstr ""
+
+#: 0a5f38321006435ca98e0408654b1d10
+#: findfmt.cli.config.build_traversal_config:33 of
+msgid "Whether to enforce offline classification."
+msgstr ""
+
+#: c3e4730155254d2abb63926f25094bcd c890ce14b4ec454fa428d1069ee33799
+#: findfmt.cli.config.build_traversal_config:34
+#: findfmt.cli.runner.execute_findfmt:37 of
+msgid "Whether to display permissions in ls -l format."
+msgstr ""
+
+#: 4ba7b71d094a4759a78a558e2e3d047d 7d1863448a4c4630baa041c418c33879
+#: findfmt.cli.config.build_traversal_config:37
+#: findfmt.cli.runner.execute_findfmt:44 of
+msgid "Whether to display filesystem inode number."
+msgstr ""
+
+#: 3c7f657397a94d0aab93fec21339fbeb a9b236447a4d48c6a0c74fe81b109d7c
+#: findfmt.cli.config.build_traversal_config:38
+#: findfmt.cli.runner.execute_findfmt:45 of
+msgid "Whether to display filesystem device number."
+msgstr ""
+
+#: 1b146749d4fd4e10b216e0fbf4d68cc3 fe2df89858f840efb790be38bdf99578
+#: findfmt.cli.config.build_traversal_config:40
+#: findfmt.cli.runner.execute_findfmt:41 of
+msgid "Whether to format sizes using binary units."
+msgstr ""
+
+#: 0a5686ffdb674d718205aaaaa36b4b38 3c8f093d6d254569a5913bebd3b6fccd
+#: findfmt.cli.config.build_traversal_config:41
+#: findfmt.cli.runner.execute_findfmt:42 of
+msgid "Whether to format sizes using SI metric units."
+msgstr ""
+
+#: 17143a8637af41cc90be794faae229de 7d5f8adac6174f0a90f38942e6c6c296
+#: findfmt.cli.config.build_traversal_config:44
+#: findfmt.cli.runner.execute_findfmt:47 of
+msgid "Whether to display last status change date/time."
+msgstr ""
+
+#: 79c150b576fc4f329aaa590cada1ee4e a16f30ee0d724b95a76741c86d950907
+#: findfmt.cli.config.build_traversal_config:45
+#: findfmt.cli.runner.execute_findfmt:48 of
+msgid "Optional strftime syntax format string for dates/times."
+msgstr ""
+
+#: 8e7517c2e5e94a11b50a8226bea60f0d 9a88cb9ec4154c03918eab0170c4a1bc
+#: findfmt.cli.config.build_traversal_config:46
+#: findfmt.cli.runner.execute_findfmt:49 of
+msgid "Whether to append file classification indicator characters."
+msgstr ""
+
+#: a3958be56297432894bba1c764ddbfac a8cdbb9f88fb41aeade21de59b3b46ff
+#: findfmt.cli.config.build_traversal_config:47
+#: findfmt.cli.runner.execute_findfmt:50 of
+msgid "Whether to mask non-printable characters with '?'."
+msgstr ""
+
+#: 83d620813d734cb1946fc536cbc400bb d731acb61a454ee4b687a97b6a1599b5
+#: findfmt.cli.config.build_traversal_config:48
+#: findfmt.cli.runner.execute_findfmt:51 of
+msgid "Whether to emit literal control characters."
+msgstr ""
+
+#: 3635140473234af487571ec959e17ece 46815a028ee24dfdb4e688badf8730c5
+#: findfmt.cli.config.build_traversal_config:49
+#: findfmt.cli.runner.execute_findfmt:52 of
+msgid "Whether to enclose filenames in double quotes."
+msgstr ""
+
+#: 0648913d602a4dcbb43c9305f110ac9c ee3d2208b38e4d58a90810ab94746e3b
+#: findfmt.cli.config.build_traversal_config:50
+#: findfmt.cli.config.validate_cli_options:11 of
+msgid "Whether tree format flag is active."
+msgstr ""
+
+#: 3813132eafa44742bdbff9ced6e0c33f 4ace50b4ca7b4a3ca1b69f0807558331
+#: findfmt.cli.config.build_traversal_config:51
+#: findfmt.cli.config.validate_cli_options:12 of
+msgid "Whether XML format flag is active."
+msgstr ""
+
+#: 58d887d5386d4e7bbc66a7782941e7ca
+#: findfmt.cli.config.build_traversal_config:52 of
+msgid "Optional HTML base HREF string."
+msgstr ""
+
+#: 72dce5f00d194a9bbf45d3eb29455607 a2ef0b1f2fb24552b0710f45bafad70e
+#: findfmt.cli.config.build_traversal_config:53
+#: findfmt.cli.config.validate_cli_options:14 of
+msgid "Whether JSON format flag is active."
+msgstr ""
+
+#: 0bccb13c3c7e4d2193c22e1129612f29 34837ebda53144da887fe99ecd9ae953
+#: 544502c2979f4f4ea622f6ce7c33a0c0
+#: findfmt.cli.config.build_traversal_config:54
+#: findfmt.cli.config.validate_cli_options:9
+#: findfmt.cli.runner.execute_findfmt:63 of
+msgid "Optional HTML template intro header fragment path."
+msgstr ""
+
+#: 4ffc130f323744a7bbe12f6aae55c36b e0b774eb43594f66abb265801941e7af
+#: ef6f3103650749588082d4bae93c5dce
+#: findfmt.cli.config.build_traversal_config:55
+#: findfmt.cli.config.validate_cli_options:10
+#: findfmt.cli.runner.execute_findfmt:64 of
+msgid "Optional HTML template outro footer fragment path."
+msgstr ""
+
+#: 279d3ed1823142218eabd83e7f7016b8 8a3c7a1d39cf47e5aa3f5687a4d172a0
+#: findfmt.cli.config.build_traversal_config:56
+#: findfmt.cli.runner.execute_findfmt:65 of
+msgid "Optional custom HTML document title."
+msgstr ""
+
+#: 27436f85070a41f19aad49f56d8b3f5b dde96383eedc4dc8a5a442113b317372
+#: findfmt.cli.config.build_traversal_config:61
+#: findfmt.cli.runner.execute_findfmt:71 of
+msgid "Optional display locale override string."
+msgstr ""
+
+#: 3bdd46a0970249cd82afb0deb95023e1
+#: findfmt.cli.config.build_traversal_config:63 of
+msgid "Configured TraversalConfig instance."
+msgstr ""
+
+#: d6a4b668e41e4352b4df9dcc8a9e271f findfmt.diagnostics.diagnostics_callback:1
+#: of
+msgid "Display runtime environment diagnostics and exit."
+msgstr ""
+
+#: 31f563820f744aba96d0efdc7c1f2a2e 7ba183e81dd642019d407b7fef252c2c
+#: 7cb579769e974eb18db203459e7d06a1 dfd705af44474957b17c81d3c8766da0
+#: findfmt.cli.help.help_all_callback:3 findfmt.cli.help.known_tags_callback:3
+#: findfmt.diagnostics.diagnostics_callback:3
+#: findfmt.diagnostics.version_callback:3 of
+msgid "Typer context, if provided by Click callback."
+msgstr ""
+
+#: cbb0a6afba6d46e8a79cb7e0c9609d09 findfmt.diagnostics.diagnostics_callback:4
+#: of
+msgid "Boolean flag indicating if diagnostics flag was passed."
+msgstr ""
+
+#: 65d827ba64e24633bfc9482fbb7dcd09 findfmt.diagnostics.diagnostics_callback:6
+#: of
+msgid "Upon printing diagnostics."
+msgstr ""
+
+#: 407cafaf1f5548c4b8f6e659a8364c3e findfmt.cli.pager.display_with_pager:1 of
+msgid ""
+"Display informational text via PagerController, honoring CLI flags and "
+"TTY."
+msgstr ""
+
+#: 42c9bf58cdcb41588751d066756d67ee findfmt.cli.pager.display_with_pager:3 of
+msgid "Formatted multi-line text to display."
+msgstr ""
+
+#: 4b756e34e0c741b99bb1898b49598505 findfmt.cli.pager.display_with_pager:4 of
+msgid "Click/Typer context, if available."
+msgstr ""
+
+#: 44d405b30c594d659708155f16f8c5cd findfmt.cli.runner.execute_findfmt:1 of
+msgid "Execute file discovery, classification, formatting, and summary reporting."
+msgstr ""
+
+#: cf6522a2f61848fdaf5267a33a92a468 findfmt.cli.runner.execute_findfmt:3 of
+msgid "Directory or file paths to inspect."
+msgstr ""
+
+#: 89f1e5ee79d74fb3b5db5b63baacab3f findfmt.cli.runner.execute_findfmt:4 of
+msgid "Tags to match."
+msgstr ""
+
+#: 1c0a7710acb747259d73151851df8d7a findfmt.cli.runner.execute_findfmt:5 of
+msgid "Tags to exclude."
+msgstr ""
+
+#: b54a2d0421884ec8bfd5f38cf8b24aee findfmt.cli.runner.execute_findfmt:6 of
+msgid "Whether all tags must match."
+msgstr ""
+
+#: 30773e47b42c4cebaf99435c2552246d findfmt.cli.runner.execute_findfmt:7 of
+msgid "Shebang filter pattern."
+msgstr ""
+
+#: 95519d76cff14d77808ac58716a9c30e findfmt.cli.runner.execute_findfmt:8 of
+msgid "Whether to ignore gitignore rules."
+msgstr ""
+
+#: 61fd180069bc48b3a9d1f27dec460501 findfmt.cli.runner.execute_findfmt:9 of
+msgid "External gitignore file to apply across traversal scope."
+msgstr ""
+
+#: 74b4eab2005c46fda530aa4e1afbb1bc findfmt.cli.runner.execute_findfmt:10 of
+msgid "Whether to include hidden files."
+msgstr ""
+
+#: 62b7bb26de1c43c0aefcda60751a3703 findfmt.cli.runner.execute_findfmt:11 of
+msgid "Whether to follow symbolic links."
+msgstr ""
+
+#: 1343064e5be243008357df64652c43bd findfmt.cli.runner.execute_findfmt:12 of
+msgid "Whether to list directories only and suppress files."
+msgstr ""
+
+#: 4ad80937cdbf42089a00d5eb5c26221f findfmt.cli.runner.execute_findfmt:14 of
+msgid "Maximum directory depth level."
+msgstr ""
+
+#: 80e030f897a1472786df9b8661bede36 findfmt.cli.runner.execute_findfmt:15 of
+msgid "Entry count threshold to skip directories."
+msgstr ""
+
+#: f17a5bac9aff4aa5aad3488ab27a92f0 findfmt.cli.runner.execute_findfmt:16 of
+msgid "Whether to omit directories with zero matching files."
+msgstr ""
+
+#: 80f540b98bfd44a8a28fe1451bf98e7a findfmt.cli.runner.execute_findfmt:17 of
+msgid "Include wildcard/glob pattern list."
+msgstr ""
+
+#: 5b04e04d63d0472fb85e6745b4e04f5d findfmt.cli.runner.execute_findfmt:18 of
+msgid "Exclude wildcard/glob pattern list."
+msgstr ""
+
+#: 6feed49668004907b57ee953a1f6b6da findfmt.cli.runner.execute_findfmt:21 of
+msgid "Configured output serialization format."
+msgstr ""
+
+#: 379444bf53504f32bfadb4c154f6b14a findfmt.cli.runner.execute_findfmt:22 of
+msgid "Destination file path for redirected output."
+msgstr ""
+
+#: 2bb3242c85ce4448aad0cf4a5eded991 findfmt.cli.runner.execute_findfmt:23 of
+msgid "Whether tree view was explicitly requested."
+msgstr ""
+
+#: 210348114f5e4c85a39870f50d94244e findfmt.cli.runner.execute_findfmt:24 of
+msgid "Optional table border style name."
+msgstr ""
+
+#: 1f69674f626c45888bd5438949082bad findfmt.cli.runner.execute_findfmt:27 of
+msgid "Whether to delimit output with NUL characters."
+msgstr ""
+
+#: 59697219c869480d983ca67a6a28212b findfmt.cli.runner.execute_findfmt:28 of
+msgid "Whether to display tags in output."
+msgstr ""
+
+#: 136e265325b349c985ccd88fb098d074 findfmt.cli.runner.execute_findfmt:29 of
+msgid "Whether to display execution summary."
+msgstr ""
+
+#: a305a9b228a24fbe96e202653c86dd62 findfmt.cli.runner.execute_findfmt:30 of
+msgid "Sort criteria identifier."
+msgstr ""
+
+#: 9b60a01c635b493eaa1d6b5802f2a31a findfmt.cli.runner.execute_findfmt:31 of
+msgid "Whether to reverse sort order."
+msgstr ""
+
+#: 08023088fe414e2b9ac8b76665fa5ef6 findfmt.cli.runner.execute_findfmt:33 of
+msgid "Whether to group directories first."
+msgstr ""
+
+#: 05fecaf4dcf44f83a816b789f22f7002 findfmt.cli.runner.execute_findfmt:34 of
+msgid "Whether to group files first."
+msgstr ""
+
+#: b86dcef109f5411dba0c8476ba8a798a findfmt.cli.runner.execute_findfmt:35 of
+msgid "Optional input file or '-' for stdin to ingest directory structure."
+msgstr ""
+
+#: 90c2db4a7cff42e1a3bde674351aa410 findfmt.cli.runner.execute_findfmt:36 of
+msgid "Whether to enforce offline classification without disk access."
+msgstr ""
+
+#: 85d82346f9f84b4ba8ac5f961e2c6812 findfmt.cli.runner.execute_findfmt:53 of
+msgid "Traversal generator function to execute."
+msgstr ""
+
+#: 915f6e98ba5e4fafb402d6d3409561ea findfmt.cli.runner.execute_findfmt:54 of
+msgid "Optional interactive pager override flag."
+msgstr ""
+
+#: 9e1a127f2c844484b2d523db66837ac8 findfmt.cli.runner.execute_findfmt:56 of
+msgid "Optional injected PagerController instance."
+msgstr ""
+
+#: 2779b2267f164d3ab0ccf345a9067e6d findfmt.cli.runner.execute_findfmt:57 of
+msgid "Whether to suppress branch indentation and whitespace padding."
+msgstr ""
+
+#: 9c76686bfe6b474590820140fb2b3cea findfmt.cli.runner.execute_findfmt:58 of
+msgid "Whether to use ANSI/VT100 alternate line drawing escapes."
+msgstr ""
+
+#: bc110f3bc0994ad2af46b2fc290b2da6 findfmt.cli.runner.execute_findfmt:59 of
+msgid "Whether to use CP437 console graphics line drawing characters."
+msgstr ""
+
+#: 16bd6ce6bfa94630bc0daeb0367b02c2 findfmt.cli.runner.execute_findfmt:60 of
+msgid "Whether XML document output format flag is active."
+msgstr ""
+
+#: 32fc5d9b449244e1bbb94935ec5c689e 35f58ae4ee1f43b796923679af03ed44
+#: findfmt.cli.config.validate_cli_options:13
+#: findfmt.cli.runner.execute_findfmt:61 of
+msgid "Optional HTML base HREF string if active."
+msgstr ""
+
+#: 8bf3cfc07dd248f687722d8a0749a729 findfmt.cli.runner.execute_findfmt:62 of
+msgid "Whether JSON document output format flag is active."
+msgstr ""
+
+#: 36b5cb8734f749ccb8572e1f5794409e findfmt.cli.runner.execute_findfmt:67 of
+msgid "Whether to wrap paths in OSC 8 terminal hyperlink escapes."
+msgstr ""
+
+#: f06bbd8c9c104ef891cf8a349db0a9d5 findfmt.cli.main.findfmt:1 of
+msgid "Execute file discovery and classification matching."
+msgstr ""
+
+#: 9d4771f62abd489a9b3696d4b2a328ab findfmt.diagnostics.get_diagnostics:1 of
+msgid "Compile runtime environment diagnostics."
+msgstr ""
+
+#: 1ec20b1ef04c4f89be6eb54df604a7cc findfmt.diagnostics.get_diagnostics:3 of
+msgid "Formatted multi-line diagnostics string ending in a newline."
+msgstr ""
+
+#: 1e43b4db2b2340dba847694fe6799acb findfmt.diagnostics.get_git_version:1 of
+msgid "Retrieve git executable version string if git is available."
+msgstr ""
+
+#: 1bd0cfca6f054542ac2217d1b6022152 findfmt.diagnostics.get_git_version:3 of
+msgid "Git version string or None if git is not detected."
+msgstr ""
+
+#: 26e8b38baab64f9c814e60cf7322cff5 findfmt.cli.help.get_help_all:1 of
+msgid "Compile comprehensive help reference manual."
+msgstr ""
+
+#: 8173659510aa42719aa974161edd9fa1 findfmt.cli.help.get_help_all:3 of
+msgid "Formatted multi-line manual text string ending in a newline."
+msgstr ""
+
+#: dafc0b5471444bd694cc3fe833e1519e findfmt.diagnostics.get_version:1 of
+msgid "Retrieve package version or fallback string."
+msgstr ""
+
+#: eb1f165be2e64d20bd002db2da91ec70 findfmt.diagnostics.get_version:3 of
+msgid "Version string."
+msgstr ""
+
+#: 570dabe9e81640f4836ffdb9aa052969 findfmt.cli.help.help_all_callback:1 of
+msgid "Display comprehensive help reference and exit."
+msgstr ""
+
+#: 2f72e72351a14e9a8ed23e01c3564da7 findfmt.cli.help.help_all_callback:4 of
+msgid "Boolean flag indicating if help-all flag was passed."
+msgstr ""
+
+#: 0dec4ce7764e4ba0bf42c5768809185f findfmt.cli.help.help_all_callback:6 of
+msgid "Upon printing comprehensive help reference."
+msgstr ""
+
+#: 80306dadcb45483eb794b6c074e94719 findfmt.cli.help.known_tags_callback:1 of
+msgid "List all known classification tags supported by the engine and exit."
+msgstr ""
+
+#: b479151ed31c4402a857b11fc33f7af1 findfmt.cli.help.known_tags_callback:4 of
+msgid "Boolean flag indicating if known-tags flag was passed."
+msgstr ""
+
+#: bd0399c732b54061bc7e4734dbdc1398 findfmt.cli.help.known_tags_callback:6 of
+msgid "Upon printing known tags."
+msgstr ""
+
+#: 7a5ad731e3d441c2942ce91990a2a9ba findfmt.entrypoints.main:1 of
+msgid "Main CLI entrypoint for findfmt."
+msgstr ""
+
+#: 503ae9b35f114371bf270dd8ee4cabeb 5fedc6802dc94de5bee138e28e066fda
+#: 703b725ccc744eb6a84474db1045ce81 796da8135d3d41389e7aed49f98f5f6b
+#: a67d0252a8f94bb49bf53f7f57ac46f9 e14d0809df0e426784c810bbeef8cf8c
+#: e44bc054228b4f6886421dd90dcd58c9 findfmt.entrypoints.main:3
+#: findfmt.entrypoints.main_findfilefmt:3
+#: findfmt.entrypoints.main_findfilemime:3 findfmt.entrypoints.main_findfiles:3
+#: findfmt.entrypoints.main_findfmt0:3 findfmt.entrypoints.main_findshebang:3
+#: findfmt.entrypoints.main_findsummary:3 of
+msgid "Optional command-line arguments (defaults to sys.argv[1:])."
+msgstr ""
+
+#: 158818c06e0f48dd862603e26da09a0b 1e93d0354efc4d4eac8cf85bef5e4044
+#: 2a0d5200709e48b792412e78127073d3 5927922f57fc4c228805c29285d39fed
+#: f151c2de87014c2f87d4817adbd23e96 f51c9b30b99d497992a7e92741fb5d90
+#: fa034eb3ac1b44fcadc724a1b01a14c2 findfmt.entrypoints.main:5
+#: findfmt.entrypoints.main_findfilefmt:5
+#: findfmt.entrypoints.main_findfilemime:5 findfmt.entrypoints.main_findfiles:5
+#: findfmt.entrypoints.main_findfmt0:5 findfmt.entrypoints.main_findshebang:5
+#: findfmt.entrypoints.main_findsummary:5 of
+msgid "Integer exit code (0 for success, non-zero on error)."
+msgstr ""
+
+#: df64fb6d0de343008b445a99dbef67ca findfmt.entrypoints.main_findfilefmt:1 of
+msgid "Entry point for 'findfilefmt' (findfmt --hidden [--tag TAG])."
+msgstr ""
+
+#: 466a492d683d47e197ebbb9f85db657e findfmt.entrypoints.main_findfilemime:1 of
+msgid "Entry point for 'findfilemime' (findfmt --hidden --list-tags)."
+msgstr ""
+
+#: ecc70ad90998488ba212cc9314b15f12 findfmt.entrypoints.main_findfiles:1 of
+msgid "Entry point for 'findfiles' (findfmt --hidden)."
+msgstr ""
+
+#: b7cef9c46c364186b1e3868b039c17a2 findfmt.entrypoints.main_findfmt0:1 of
+msgid "Entry point for 'findfmt0' (findfmt --hidden --print0)."
+msgstr ""
+
+#: c460257d989e47c4a3488da1d7990606 findfmt.entrypoints.main_findshebang:1 of
+msgid "Entry point for 'findshebang' (findfmt --hidden [--shebang INTERPRETER])."
+msgstr ""
+
+#: 110ec0f2eec04268980bdb031b6a7c46 findfmt.entrypoints.main_findsummary:1 of
+msgid "Entry point for 'findsummary' (findfmt --hidden --summary)."
+msgstr ""
+
+#: a3c22300f0064de4a42b35c6b6d4e94e findfmt.cli.config.validate_cli_options:1
+#: of
+msgid "Validate CLI flag combinations and return resolved canonical SortKey."
+msgstr ""
+
+#: 03f55a787cdc4303bb2c7f60db0a5c5e findfmt.cli.config.validate_cli_options:3
+#: of
+msgid "Optional external gitignore file path."
+msgstr ""
+
+#: 0a83e80d933d483387ae64c567c12e0c findfmt.cli.config.validate_cli_options:4
+#: of
+msgid "Optional sort criterion name string."
+msgstr ""
+
+#: 66916987c7f541efaf768009838f68ca findfmt.cli.config.validate_cli_options:5
+#: of
+msgid "Whether raw unsorted mode flag is set."
+msgstr ""
+
+#: 2e288fa00cfa4a3b88dddb66f99a55c6 findfmt.cli.config.validate_cli_options:6
+#: of
+msgid "Whether directories first grouping is requested."
+msgstr ""
+
+#: ac3b5aeee0c346c780645602be3d5272 findfmt.cli.config.validate_cli_options:7
+#: of
+msgid "Whether files first grouping is requested."
+msgstr ""
+
+#: f4db270f4dc7413cac9b36a14f54001c findfmt.cli.config.validate_cli_options:8
+#: of
+msgid "Optional input file path or '-' for stdin."
+msgstr ""
+
+#: 1b709147fe0540aa88db00734df9d310 findfmt.cli.config.validate_cli_options:16
+#: of
+msgid "Resolved canonical SortKey enum value."
+msgstr ""
+
+#: 2810e9e1104942bead9f70f87341c96f findfmt.cli.config.validate_cli_options:18
+#: of
+msgid "On invalid argument values or conflicting options."
+msgstr ""
+
+#: 8e423165d3054be1b6a92282a8e2e95e findfmt.diagnostics.version_callback:1 of
+msgid "Display the version of findfmt and exit."
+msgstr ""
+
+#: 0371acddf679402b87ba109cab4ce7b9 findfmt.diagnostics.version_callback:4 of
+msgid "Boolean flag indicating if version flag was passed."
+msgstr ""
+
+#: 62f69a3e01c7442abecb3e6ae53b78a7 findfmt.diagnostics.version_callback:6 of
+msgid "Upon printing version."
+msgstr ""

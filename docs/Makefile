@@ -7,7 +7,11 @@ BUILDDIR      = _build
 DOCTREEDIR    = $(BUILDDIR)/doctrees
 DOCTREEDIR_GETTEXT ?= $(BUILDDIR)/doctrees-gettext
 
-.PHONY: help Makefile html dirhtml singlehtml epub man latex latexpdf text texinfo htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck gettext changes clean
+SPHINXINTL   ?= uv run sphinx-intl
+LOCALEDIR    = $(SOURCEDIR)/locale
+LANGUAGES    ?= es fr de ja
+
+.PHONY: help Makefile html dirhtml singlehtml epub man latex latexpdf text texinfo htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck gettext changes intl-update intl-build html-all clean
 
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -68,6 +72,18 @@ gettext:
 
 changes:
 	@$(SPHINXBUILD) -b changes -d "$(DOCTREEDIR)" "$(SOURCEDIR)" "$(BUILDDIR)/changes" $(SPHINXOPTS)
+
+intl-update: gettext
+	@$(SPHINXINTL) update -p "$(BUILDDIR)/gettext" -d "$(LOCALEDIR)" $(foreach lang,$(LANGUAGES),-l $(lang))
+
+intl-build:
+	@$(SPHINXINTL) build -d "$(LOCALEDIR)"
+
+html-all: html intl-build
+	@for lang in $(LANGUAGES); do \
+		echo "Building $$lang documentation..."; \
+		$(SPHINXBUILD) -b html -d "$(DOCTREEDIR)-$$lang" -D language=$$lang "$(SOURCEDIR)" "$(BUILDDIR)/html/$$lang" $(SPHINXOPTS); \
+	done
 
 clean:
 	rm -rf "$(BUILDDIR)"

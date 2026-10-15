@@ -113,6 +113,7 @@ repos:
     hooks:
       - id: codespell
         additional_dependencies: [tomli]
+        exclude: \.(po|pot)$
 
   # Pygrep hooks
   - repo: https://github.com/pre-commit/pygrep-hooks

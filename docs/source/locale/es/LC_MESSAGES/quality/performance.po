@@ -1,0 +1,548 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/quality/performance.md:1 e3d4c5a42702470f8737a04af20cbe10
+msgid "Performance Architecture & Benchmarks"
+msgstr ""
+
+#: ../../performance.md:43 020f56c3bc5d4a108af9c73e951cc5de
+msgid ""
+"This document outlines the performance characteristics, benchmarking "
+"architecture, and baseline performance metrics for `findfmt`."
+msgstr ""
+
+#: ../../performance.md:48 2e69c71e1fe74b1eb7c4894b4a00804e
+msgid "1. Performance Goals & Architecture"
+msgstr ""
+
+#: ../../performance.md:50 79d08367bbd54d96bd14b0c255f48bdd
+msgid ""
+"`findfmt` is engineered to deliver high-throughput filesystem traversal "
+"and intelligent content classification across large codebases and "
+"monorepos (>100,000 files)."
+msgstr ""
+
+#: ../../performance.md:53 ab73f4650916499a98bcb04e940cc982
+msgid "The performance model focuses on three primary metrics:"
+msgstr ""
+
+#: ../../performance.md:55 e84a10701d8a4a89a7834e1bfaf73658
+msgid ""
+"**Traversal Throughput (files/sec and dirs/sec)**: Maximizing file "
+"discovery and content inspection throughput across large repository "
+"hierarchies while pruning excluded trees early via `.gitignore` "
+"specifications."
+msgstr ""
+
+#: ../../performance.md:59 3f5993cf6b1c4ba1930a4c04672a297a
+msgid ""
+"**Latency to First Yielded Result (TTFR)**: Measuring first-byte "
+"responsiveness (in milliseconds) from execution start until the first "
+"matching item is yielded. Low TTFR is critical for pipe streaming and "
+"interactive subshells."
+msgstr ""
+
+#: ../../performance.md:63 6815b2d21ef146dfb9f41773da55a659
+msgid ""
+"**Peak Heap Memory Footprint**: Tracking peak heap memory allocation "
+"using Python's `tracemalloc` standard library to ensure low, bounded "
+"memory usage during multi-level directory traversal."
+msgstr ""
+
+#: ../../performance.md:68 6976eb518e73423fbc5baf73c74a199a
+msgid "2. Core Optimization Vectors"
+msgstr ""
+
+#: ../../performance.md:70 dae62ac953cf404bbe2bd4db435b739a
+msgid ""
+"The traversal and classification pipeline incorporates several targeted "
+"optimizations to maximize throughput across large repository hierarchies:"
+msgstr ""
+
+#: ../../performance.md:73 a6b12e5f988848cd80888fd31a17c05a
+msgid "2.1. Redundant Syscalls & `Path.resolve()` Elimination"
+msgstr ""
+
+#: ../../performance.md:75 911c341d3f274696b3cbf9358ceb84c8
+msgid ""
+"Earlier implementations resolved relative paths by invoking "
+"`Path.resolve()` on every discovered file. In deep directory structures, "
+"resolving paths generates tens of thousands of redundant `readlink` and "
+"`stat` system calls."
+msgstr ""
+
+#: ../../performance.md:79 3db1b3f7d4724bb6b8e4ddd9ab930eb6
+msgid ""
+"`findfmt` optimizes this by computing directory-relative paths with "
+"`os.path.relpath()` and prefix operations derived from pre-computed root "
+"strings. File classification operates on the entry's original path "
+"without resolving symlinks for regular files, avoiding per-file link "
+"resolution overhead."
+msgstr ""
+
+#: ../../performance.md:84 dff56ee5737a4612b19051eeae86a680
+msgid "2.2. `DirEntry` Metadata Preservation & Single-Buffer Content Reads"
+msgstr ""
+
+#: ../../performance.md:86 b80c6bac96f84c40a700584962ebc82e
+msgid ""
+"Python's `os.scandir()` yields `os.DirEntry` objects whose cached file "
+"type (`is_file`, `is_dir`, `is_symlink`) and `stat()` attributes are "
+"populated directly from the operating system's directory stream."
+msgstr ""
+
+#: ../../performance.md:90 60f7429dc6ad498e9f4d07f6620ab85d
+msgid ""
+"`findfmt` preserves and forwards `os.DirEntry` instances throughout "
+"traversal and classification:"
+msgstr ""
+
+#: ../../performance.md:92 cf248e18f91b4cd9b37bc603e7431c4a
+msgid ""
+"**Zero-Stat Verification**: Avoids secondary `os.stat()` syscalls by "
+"reusing cached entry metadata."
+msgstr ""
+
+#: ../../performance.md:94 ea1942e1edf148d19db06a702c536011
+msgid ""
+"**Single-Buffer Content Inspection**: When content inspection is required"
+" (for shebang or MIME detection), `findfmt` reads an initial buffer (the "
+"first 2,048 to 4,096 bytes) once into memory. This buffer is shared "
+"across shebang parsing, MIME type sniffing, and tag classification, "
+"eliminating duplicate `open()` and `read()` syscalls on candidate files."
+msgstr ""
+
+#: ../../performance.md:99 5c79a1aa858a4e3b8e44cb5decaaabcc
+msgid "2.3. Zero-Allocation Gitignore Rule Matching Hot Loop"
+msgstr ""
+
+#: ../../performance.md:101 c55f2471b69044528dc7c0e60f1d7be0
+msgid "In traversal loops evaluating multiple active `.gitignore` specifications:"
+msgstr ""
+
+#: ../../performance.md:103 2898b9e72655423596766f708366febe
+msgid ""
+"Path operations avoid redundant `Path.is_relative_to()` and "
+"`Path.relative_to()` allocations."
+msgstr ""
+
+#: ../../performance.md:104 2731795865434286b8223611c24ca3ce
+msgid ""
+"Relative path representations are passed as normalized strings, "
+"leveraging fast string prefix matching to evaluate directory boundaries "
+"and pruning rules."
+msgstr ""
+
+#: ../../performance.md:107 d81e0ba18fb140ac8e7c672d1338188c
+msgid "2.4. Fast-Path Filter Short-Circuiting"
+msgstr ""
+
+#: ../../performance.md:109 8ef376dee7004cf8ae761001bbe1516d
+msgid "When specific tags are requested (for example, `--tag python`):"
+msgstr ""
+
+#: ../../performance.md:111 3d118dc3bebb4e26bacd77ccdb7fa9c9
+msgid ""
+"`can_skip_file_by_tags()` inspects the filename extension before opening "
+"the file."
+msgstr ""
+
+#: ../../performance.md:112 8e400b242f0f4bf69a7ef7c3ab03d8e2
+msgid ""
+"If an extension definitively excludes the requested tags and indicates no"
+" executable shebang is possible (such as known binary formats or fixed "
+"non-script extensions), the file read is bypassed entirely."
+msgstr ""
+
+#: ../../performance.md:118 4468a5dfb1fa4094ba061ce9869b74f2
+msgid "3. Parallel Batch Execution & Concurrency Analysis"
+msgstr ""
+
+#: ../../performance.md:120 0ace72e8d2c04f0ab637e2101788808d
+msgid ""
+"Parallelizing the content-inspection phase using "
+"`concurrent.futures.ThreadPoolExecutor` was evaluated against the "
+"streaming generator architecture on modern multi-core NVMe systems."
+msgstr ""
+
+#: ../../performance.md:123 7c530932045d427f94fcd05f647cd4f2
+msgid "3.1. ThreadPoolExecutor vs. Streaming Generator Benchmarks"
+msgstr ""
+
+#: ../../performance.md:125 64f2fb4ea52b4c108d40c8c69ccdd919
+msgid ""
+"Empirical profiling evaluated a 4-worker `ThreadPoolExecutor` against the"
+" sequential streaming generator across a test suite of 1,000 files:"
+msgstr ""
+
+#: ../../performance.md:128 11cae5cc5d984f26a7edb99939316cff
+msgid ""
+"**Sequential Streaming Generator**: Processed 1,000 files in 0.0584 "
+"seconds (~17,131 files/second)."
+msgstr ""
+
+#: ../../performance.md:130 e6d0ccd6d6914719881dc0c22307b12e
+msgid ""
+"**ThreadPoolExecutor (4 Workers)**: Processed 1,000 files in 0.1076 "
+"seconds (~9,295 files/second)."
+msgstr ""
+
+#: ../../performance.md:132 3815f583818a4d7fa9c8acb3c2cb7ec9
+msgid ""
+"Multi-threading introduced an approximate 1.84x slowdown compared to the "
+"single-threaded implementation."
+msgstr ""
+
+#: ../../performance.md:135 ab07455df26e4ce59da0f76cbf50ead3
+msgid "3.2. Concurrency Trade-Off Rationale"
+msgstr ""
+
+#: ../../performance.md:137 137c7e8d39f7462f92c716a1683d823f
+msgid ""
+"Several architectural factors explain why single-threaded traversal "
+"outperforms thread pools for local filesystem inspection in Python:"
+msgstr ""
+
+#: ../../performance.md:140 ec00e43ac24b4e84bd6883545851e041
+msgid ""
+"**OS Page Cache & SSD Latency**: Reading initial file buffers (2 KB) from"
+" modern NVMe storage and operating system page caches executes in "
+"microseconds. I/O wait times are negligible compared to thread scheduling"
+" costs."
+msgstr ""
+
+#: ../../performance.md:143 3e565fffc5ff49889229aafea69fa5bf
+msgid ""
+"**GIL Contention & Dispatch Overhead**: Submitting tasks to thread pools,"
+" queuing futures, context switching, and Global Interpreter Lock (GIL) "
+"contention in CPython introduce synchronization overhead that dwarfs the "
+"cost of reading small file headers sequentially."
+msgstr ""
+
+#: ../../performance.md:146 694f29b9918b4c9fb35feece31016156
+msgid ""
+"**Time-to-First-Result (TTFR) Degradation**: Batch thread dispatching "
+"chunks results, delaying initial yields. The single-threaded generator "
+"yields matching entries immediately (sub-millisecond TTFR), which is "
+"essential for interactive subshells and piping into tools like `fzf` or "
+"`head`."
+msgstr ""
+
+#: ../../performance.md:150 25dc2eda33b74b558e49c1a928706e92
+msgid ""
+"**Bounded Memory Guarantees**: A pure generator maintains constant "
+"memory, whereas parallel thread pools accumulate collections of pending "
+"futures and buffers."
+msgstr ""
+
+#: ../../performance.md:153 850721251e7040a798210a550aa494ad
+msgid ""
+"Based on these empirical results, `findfmt` retains its single-threaded "
+"streaming generator design as the optimal performance architecture."
+msgstr ""
+
+#: ../../performance.md:158 5764f83cf4bd4e46bfdaa1c9093504dd
+msgid "4. Automated Benchmark Harness (`tools/benchmark.py`)"
+msgstr ""
+
+#: ../../performance.md:160 e78e171cf3fe426887d9d5141c54433d
+msgid ""
+"The repository includes a dedicated, automated benchmark suite at "
+"`tools/benchmark.py` that generates reproducible synthetic datasets and "
+"measures traversal performance across standard tiers."
+msgstr ""
+
+#: ../../performance.md:163 0e65d72bb1bc49b29e9e48ffbaf21eb1
+msgid "4.1. Tiered Datasets"
+msgstr ""
+
+#: ../../performance.md:165 2ca099a67a0c44a7a6c2fa5c849c9529
+msgid ""
+"The harness supports three standardized dataset tiers alongside custom "
+"directory targeting:"
+msgstr ""
+
+#: ../../performance.md:167 5866eef8025f42899e2b1a89c1fb5393
+msgid ""
+"**Small Tier (\\<1,000 files)**: Generates approximately 800 files across"
+" nested directories with `.gitignore` exclusion rules. Designed for fast "
+"local feedback (\\<1 second execution)."
+msgstr ""
+
+#: ../../performance.md:170 2707b181c6f347fe9134a596b2137344
+msgid ""
+"**Medium Tier (10,000–50,000 files)**: Generates approximately 12,000 "
+"files across multiple package subtrees, simulating standard enterprise "
+"codebases."
+msgstr ""
+
+#: ../../performance.md:173 a0836b287b484b43bcd6947ee5aaa6d7
+msgid ""
+"**Monorepo Tier (>100,000 files)**: Stress test dataset simulating large "
+"monorepo structures with deep hierarchies and mixed file types."
+msgstr ""
+
+#: ../../performance.md:176 fdf2da7fb8254564a4a5ce470b96d1c5
+msgid ""
+"**Custom Directory Target (`-d, --target-dir`)**: Benchmarks real-world "
+"directory trees directly, such as the `findfmt` repository or user-"
+"specified projects."
+msgstr ""
+
+#: ../../performance.md:179 8341dbd3d1594517bba18b1d03d03704
+msgid "4.2. Deterministic Reproducibility"
+msgstr ""
+
+#: ../../performance.md:181 49084567a38b426485fbfffd96efcbe7
+msgid ""
+"Synthetic trees are generated deterministically using a fixed random seed"
+" (`--seed 42` by default). The generator constructs realistic directory "
+"trees with diverse file extensions (`.py`, `.sh`, `.md`, `.json`, "
+"`.yaml`, `.txt`, `.bin`), executable scripts without extensions "
+"containing shebang headers, and root `.gitignore` exclusion "
+"specifications."
+msgstr ""
+
+#: ../../performance.md:188 dc435bcbb1fc44c797a658352d0dd71a
+msgid "5. Command-Line Interface & Usage"
+msgstr ""
+
+#: ../../performance.md:190 33535e1f098147848074c34982d6a893
+msgid "5.1. Basic Execution"
+msgstr ""
+
+#: ../../performance.md:192 ad806e173fba4aefbd6caa81a115e7a1
+msgid "Execute the default benchmark suite on the small tier:"
+msgstr ""
+
+#: ../../performance.md:198 15b95185fb064740b01089d1500401b6
+msgid "5.2. Tier Selection & File Overrides"
+msgstr ""
+
+#: ../../performance.md:200 bfba728bf75d4c6c86a6b188b4382b01
+msgid "Run specific or all dataset tiers:"
+msgstr ""
+
+#: ../../performance.md:213 bb08adcdd82e4823b8ebefd99c23f600
+msgid "5.3. Benchmarking Existing Directories"
+msgstr ""
+
+#: ../../performance.md:215 2e353664a34f40d1ac955370e29e0b3e
+msgid "Benchmark an existing repository or directory path:"
+msgstr ""
+
+#: ../../performance.md:221 39239ac16bc74592b8fd7c0ea8f70516
+msgid "5.4. Multiple Iterations & Warmup"
+msgstr ""
+
+#: ../../performance.md:223 9fa476afa58b462e8db4e5b5a3efc879
+msgid "Execute multiple iterations with warmup runs to compute averaged metrics:"
+msgstr ""
+
+#: ../../performance.md:229 97a39ce228654fc8a50710915357a691
+msgid "5.5. Baseline Recording & Regression Tracking"
+msgstr ""
+
+#: ../../performance.md:231 3bcde933ca224db1a67b46b2e2e0ba78
+msgid "Save baseline metrics to a JSON report:"
+msgstr ""
+
+#: ../../performance.md:237 c6b3d277a46143d4b4014a1cb8735e75
+msgid "Compare current performance against a recorded baseline:"
+msgstr ""
+
+#: ../../performance.md:243 86fc403aa5894deabb83693afe7dc385
+msgid ""
+"Fail execution if throughput degrades beyond an allowable percentage "
+"threshold:"
+msgstr ""
+
+#: ../../performance.md:249 1c36bed0193d4d93be460304388e7d73
+msgid "5.6. Machine-Readable JSON Output"
+msgstr ""
+
+#: ../../performance.md:251 45c1dd68694b40728bd0cfe273c8778e
+msgid ""
+"Emit JSON directly to stdout or export to a file for CI regression "
+"tracking:"
+msgstr ""
+
+#: ../../performance.md:263 04ebdf77a82045ca85ae3faac8e44061
+msgid "6. Baseline Performance Metrics"
+msgstr ""
+
+#: ../../performance.md:265 297a19fb27f044ec9d95c2011949ba63
+msgid ""
+"The following baseline metrics were recorded on an x86_64 Linux "
+"environment (Python 3.13):"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 0f3ace6fd27d43f3a585076ec2e08cde
+msgid "Benchmark Tier"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 6ab2229420824207ac3f2e91368ebb5e
+msgid "Total Files"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 f109724268b54a26b65cd41db5263bba
+msgid "Traversed Directories"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 a4c35e135ff64bfebf8cb026113dba2a
+msgid "Duration (s)"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 b02f2a2a1d134eaab228baee46820f56
+msgid "Throughput (files/s)"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 f2ef90ef51ea4a9faa2c2d683b573445
+msgid "Dirs/sec"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 1bed1ba56c484d4d8c869da3f9120b06
+msgid "TTFR Latency (ms)"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 a6aa554958b64377b570843dcc4c350b
+msgid "Peak Heap (MB)"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 c97d5e47c7b34fa9ba516f403f801b4c
+msgid "**Small**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 52ca79705a2f42ac864ee4f9ca0e03a7
+msgid "518"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 016338eabee449b6883eb89af24258fe
+#: 18792898199b45d5b080b6a2ffe005f2
+msgid "60"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 a168455b20a547d389b99794fa1b24e9
+msgid "0.2240 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 5ed800acb5c343008983c06aacda4ec4
+msgid "2,312.6 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 3e09757227b044d0b9cbc1e7ec50a863
+msgid "267.9"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 d39c3b14c2bb4481976dca3fa90afbed
+msgid "22.15 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 ea592f2840fd40bf8bd3a205303f76d6
+msgid "0.41 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 73bbed86b606497191db9a9a62fa117e
+msgid "**Medium**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 19dd2122bd77490dbf9e9e2e5164da63
+msgid "7,901"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 aef5e68ec3924972a903b6b9bdfad14c
+msgid "5.1981 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 1b1bd9d41cf748939a266ac2ccd61871
+msgid "1,520.0 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 6a1700e1048544019aaada5ac2f8d16c
+msgid "11.5"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 413249cb02f9476dbf5788e56e2e92e8
+msgid "39.30 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 a4cfd2481b9f4429935d34b4641098c5
+msgid "2.90 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 6559b5d402a04fba91fb2a65a1295930
+msgid "**findfmt Repo**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 52ea61837672482aa96e703107f41015
+msgid "154"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 e094afad049c4e2fb227cddffcbc70ee
+msgid "1,846"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 338800fc7722481d9b5cd195bbbf8eff
+msgid "0.1084 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 11cf3cf205774e9883921700bc3346d6
+msgid "1,420.8 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 2d93a09bd63e4cc685edc1f93b63c107
+msgid "17,031.5"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 02e1838b1c1e420fb9e4ccc3c02f3436
+msgid "39.06 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 780bd048bc7641f3aa02ca1a8d453d36
+msgid "0.47 MB"
+msgstr ""
+
+#: ../../performance.md:275 f69d4a90098344d0926d35178cde60f0
+msgid "7. Regression Testing in CI"
+msgstr ""
+
+#: ../../performance.md:277 c03bdb3a22bc4f8591ce664dffa1b398
+msgid ""
+"The benchmarking harness supports automated regression detection in "
+"continuous integration:"
+msgstr ""
+
+#: ../../performance.md:279 403a5112e543402b97d5ab834f4b32d6
+msgid "Baselines are established and preserved as versioned JSON artifacts."
+msgstr ""
+
+#: ../../performance.md:280 44e3d5de4d1a45e3bd3dd4b3ed1af4b9
+msgid ""
+"Pull requests execute `tools/benchmark.py --baseline <baseline.json> "
+"--threshold <pct>`."
+msgstr ""
+
+#: ../../performance.md:281 25f8d09f29454182ba8d1fc6e3823cd2
+msgid ""
+"If throughput degrades by more than the specified threshold percentage, "
+"the tool emits a comparison table and exits with non-zero status code "
+"`1`, halting the quality gate."
+msgstr ""

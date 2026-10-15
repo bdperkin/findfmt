@@ -1,0 +1,56 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guides/installation.md:1 5812d7054d2c4721af919ef8a1513814
+msgid "Installation"
+msgstr ""
+
+#: ../../source/guides/installation.md:3 a85de5d5e44742f0b2739a0479128d0a
+msgid "`findfmt` can be installed in several ways depending on your environment."
+msgstr ""
+
+#: ../../source/guides/installation.md:5 0a0863994469444dac11a75b84be34b8
+msgid "1. Using `uv` (Recommended)"
+msgstr ""
+
+#: ../../source/guides/installation.md:7 2e631efafe3b4925832ba8b1d1a9f290
+msgid "To run `findfmt` as a standalone tool via `uvx`:"
+msgstr ""
+
+#: ../../source/guides/installation.md:13 b93476e327b242c187bc1b05e454d919
+msgid "To install it into your local user tools:"
+msgstr ""
+
+#: ../../source/guides/installation.md:19 4f49d9c39498445b91458dfe85cd8a48
+msgid "Or add it to a project virtual environment:"
+msgstr ""
+
+#: ../../source/guides/installation.md:25 3d6e43f65cd148fabbfd6c5c9ddd3ac0
+msgid "2. Using `pip`"
+msgstr ""
+
+#: ../../source/guides/installation.md:31 15457cc94c844407afd7016dc7ec048f
+msgid "3. Using Container Image"
+msgstr ""
+
+#: ../../source/guides/installation.md:33 71ce5020191443189bb81133969a7fc1
+msgid "Pre-built slim containers are published to GitHub Container Registry:"
+msgstr ""

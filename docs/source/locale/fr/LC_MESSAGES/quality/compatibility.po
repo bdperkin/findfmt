@@ -1,0 +1,519 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/quality/compatibility.md:1 5ef99ddd8f8b452e96c113410d9f9c4e
+msgid "Python Compatibility & Runtime Matrix"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:3 7292a7cd441f4c78a3605f90ca783717
+msgid ""
+"This document defines the formal Python runtime compatibility matrix for "
+"`findfmt`, detailing verified runtimes, dependency constraints, language-"
+"level requirements, and technical justifications across Python 3.6 "
+"through 3.15."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:9 cf5021bd94a241e6836db52ab699be63
+msgid "1. Compatibility Overview & Runtime Matrix"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:11 26a77eba78c34abbb512041d0cf527ee
+msgid ""
+"`findfmt` enforces `requires-python = \">=3.10\"`. The runtime "
+"compatibility status across modern and legacy Python interpreters is "
+"summarized below:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 8e72106fdc954e67b71f381f1f5ecf20
+msgid "Python Version"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 2e01a5d841c344c5933f28c8e13e9812
+msgid "Release / EOL Status"
+msgstr ""
+
+#: ../../source/quality/compatibility.md f82b055f52684156b795585c37ab7362
+msgid "Tested on Fedora 44"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 4dfd72fd113a425eb28303ffa4f147b4
+msgid "Build & CLI Execution"
+msgstr ""
+
+#: ../../source/quality/compatibility.md e6fc72d8971841ffa45dc20749128a8d
+msgid "Test Suite & 100% Coverage"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 85adfaa7d70d45bb9e3e86ba4d159bcc
+msgid "Compatibility Verdict & Primary Rationale"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 707237f37c704a2f8b69e87e7074233f
+msgid "**3.6**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md a5b5018bef184e1b98970bd1a112847c
+msgid "EOL (Dec 2021)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md c781325068d6466a953421fded8e66c6
+msgid "Yes (3.6.15)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 81d88ec81677408da5be12c73a43b043
+#: 8c8e682e88224a2aaa8f30d15e3c70db dc72ca09068c42ac919764d2bcfffd1f
+#: faf4870f0f974bf0861a4a56976e563c
+msgid "Blocked"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 0585168fa3f84a1a904723867e170e50
+#: 09cbb5a9c80142928933619261d7e13b 36a6137ee6104050b8b3ae25890b74c7
+#: 715493cf61544cd1b5e52dc0728a0a6f 9b51eceb977e497aac5e934b6eab0cb5
+#: ccfc28928d504edfa729d6a5e57d9370
+msgid "N/A"
+msgstr ""
+
+#: ../../source/quality/compatibility.md a021e26073244a6b979ce15862ade0b3
+msgid ""
+"**Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and "
+"`typer>=0.12` drop 3.6; lacks runtime PEP 604 type support."
+msgstr ""
+
+#: ../../source/quality/compatibility.md 76b0905b1d4b42e4a726a664b341b4f3
+msgid "**3.7**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 26ca1b2f9d5b438ab4d8cd2115c13bbc
+msgid "EOL (Jun 2023)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md ebcf4a664ba4409991a87115052754c7
+msgid ""
+"**Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and "
+"`typer>=0.12` drop 3.7."
+msgstr ""
+
+#: ../../source/quality/compatibility.md 17b0fab8e1ce4664990f1726303beb2a
+msgid "**3.8**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md a89df3ae46594068a787cb51b6fcf88a
+msgid "EOL (Oct 2024)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 0147fa2733a84b52b3347784213e9379
+msgid ""
+"**Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6.2` "
+"drops 3.8; lacks standard library `typing.Annotated`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md 84b55cba1af74e2d8351d7bae4bbd9e7
+msgid "**3.9**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 13c4516a177b4f3f89fef030e5c93e8d
+msgid "EOL (Oct 2025)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 96ade3332e4b4b71af1974d1321bdfe2
+msgid "Yes (3.9.25)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 5006de5c751349fc9dbffe9705c6cacc
+msgid ""
+"**Unsupported**: `@dataclass(slots=True)` raises `TypeError`; "
+"`identify>=2.6.16` and `typer>=0.24` require `>=3.10`; runtime PEP 604 "
+"reflection fails."
+msgstr ""
+
+#: ../../source/quality/compatibility.md 110f6dd887c34c27b9a259d2f6e2ebcb
+msgid "**3.10**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 488ee3763d764649b74cc1bf541ddfa1
+msgid "Security (to Oct 2026)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 55c045a6c672487da519e2347b5e09cf
+msgid "Yes (3.10.21)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 2b5d2a6a077d4c4d95247047aa0558bc
+#: 2f8eb5cfd8434b6f8c4b2dc13ce01ba7 4dddf1f6167949328d425dd184c07df1
+#: 4eb1bd9ab47c4f62a645c6bb257db2ab 5304d6feec744e5a98955b7cf9567a4a
+#: 5ded3cdb87434620abb35801e8393eaf 8c5a8325f047415dbfbf0286d7482917
+#: 9024ac7ee6cb4ea59ec4656624aa17ac 98cc2679261e4e88acfa1b86577533e9
+#: bda2ba56749c44ddabbbf829817de3b1 c807ee7ca51f4bba840ccc4e8c046e01
+#: f2e2a973daae4ddd908bfb079d17735c
+msgid "**Passed**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 3299fc9afdf54a10a101a31262ed4d4b
+msgid ""
+"**Supported (Minimum)**: Baseline runtime; `@dataclass(slots=True)` and "
+"PEP 604 supported; requires `tomli` shim for TOML config parsing."
+msgstr ""
+
+#: ../../source/quality/compatibility.md 997ae08dd4b54cb584059974dd8cddb5
+msgid "**3.11**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md e413ec93c713475ea80adb0adb9b34b5
+#: fd1c13802e944cde8534ebfbe6821708
+msgid "Bugfix / Security"
+msgstr ""
+
+#: ../../source/quality/compatibility.md a425a364840f46e7a7a04a2e130b522b
+msgid "Yes (3.11.16)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 321762fa839f489093a28422bfc06407
+msgid ""
+"**Supported**: Native `tomllib` available; exceptional performance and "
+"stability."
+msgstr ""
+
+#: ../../source/quality/compatibility.md a6b63ae521e54b75b56bc0e5ab347f45
+msgid "**3.12**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 586f19e962004217be395fec9e750fc6
+msgid "Yes (3.12.14)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 7a2542a15f0547dc8d7c982521b590cf
+msgid "**Supported**: Full native support; standard CI testing target."
+msgstr ""
+
+#: ../../source/quality/compatibility.md 671bed4ffa93461f80e3dbd0279be6dc
+msgid "**3.13**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 447a856c537d4a52a56d08c18ddc4b02
+msgid "Current Mainstream"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 855bf59842fa4653a9abb00562aacaf1
+msgid "Yes (3.13.15)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 0e0595c304b64d7d84fedd1bd5f1633a
+msgid "**Supported**: Primary local development target; wheel smoke-test target."
+msgstr ""
+
+#: ../../source/quality/compatibility.md 11dcae5f5f2a44ccb9c14220437a52ef
+msgid "**3.14**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md a1a10ffd97d94004b96870432e861ad4
+msgid "Certified Modern"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 3ac2130e549844569e5d40c7f608f3bd
+msgid "Yes (3.14.7)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md a2006ea5a4e64d26ad615b54269a696c
+#, python-format
+msgid ""
+"**Supported (Certified)**: Primary CI quality gate target; PyPI Trove "
+"classifier active; 100% statement and branch coverage."
+msgstr ""
+
+#: ../../source/quality/compatibility.md dd2d178611184bf79336ad37ecce9563
+msgid "**3.15**"
+msgstr ""
+
+#: ../../source/quality/compatibility.md e87f01b62e834490988bb3300f7b72fe
+msgid "Preview / Dev (rc/dev)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 18daa41c45ae4ef58944352d5c0d7ef9
+msgid "Yes (3.15.0rc2)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md 91e79f75bde24590a61082b43746ea3a
+#, python-format
+msgid ""
+"**Supported (Preview)**: Validated against 3.15.0rc2 and CI `3.15-dev`; "
+"PyPI Trove classifier active; 100% statement and branch coverage."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:29 629a57a629c44649a4f90102845e07ca
+msgid "2. Minimum Python Version Analysis (3.6 – 3.9)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:31 a258f2b889fe4c6fadd1f2e1ae4fa32f
+msgid "2.1. Upstream Dependency Ecosystem Floors"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:33 6569ac4327dd48719e46dbe811da41bb
+msgid ""
+"A critical factor in determining the minimum supported runtime is the "
+"upstream dependency ecosystem:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:35 df2acf25d8a04074bc80134b5d7b76a5
+msgid "**`identify` (pre-commit team)**:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:37 5f02b9c1b25d4ecb9a5205d383e05f9f
+msgid "`identify>=2.6.16` explicitly specifies `requires-python = \">=3.10\"`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:38 a6959e9879b74f9790b17d3e34a3e12d
+msgid "Versions `2.6.2` to `2.6.15` require `>=3.9`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:39 1debb53f39984d1398bc5fca1282d418
+msgid "Versions `2.6.0` to `2.6.1` require `>=3.8`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:40 4fe44116496747d3bca9327c81306b3e
+msgid ""
+"No version within the `identify>=2.6` range supports Python 3.6 or 3.7. "
+"Attempting to install dependencies on Python 3.6 fails immediately at the"
+" resolver stage."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:43 8b2eb184b81a4f8f953e2bd48d7bfd51
+msgid "**`typer` (CLI Framework)**:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:45 d871b1de23d044998c29ff84283a7b80
+msgid "`typer>=0.24.0` specifies `requires-python = \">=3.10\"`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:46 5795864b31e94bd8984dc3dc773c4c16
+msgid "`typer>=0.21.0` requires `>=3.9`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:47 002e216b395c40acaecc33e07f1bcc9e
+msgid "`typer>=0.19.2` requires `>=3.8`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:48 6d540b225769490888e655532880a6db
+msgid "Python 3.6 is unsupported by any modern Typer release."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:50 cfbd88819e114fc3935cc5e10282e04c
+msgid "**`pathspec` & `rich`**:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:52 2ca915a5c0ff4dc5b01be7d124521015
+msgid "`pathspec>=0.12` requires Python `>=3.8`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:53 ad4516c66f7349f7bb65d036ef5aa198
+msgid ""
+"`rich` releases drop Python `<3.8` and leverage modern terminal and "
+"typing enhancements."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:55 b06752d03af645ff973f48cce956bc87
+msgid "2.2. Language Features and Runtime Typing Constraints"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:57 ec79248a08c54d2cba1dca2d8f901c18
+msgid "**`@dataclass(slots=True)` (PEP 557 / PEP 654)**:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:59 c50e2e5239454012b062207d4b6a435f
+msgid ""
+"`src/findfmt/models.py` defines core data structures (`FileInfo`, "
+"`TraversalStats`) using `@dataclass(frozen=True, slots=True)` for high "
+"performance and reduced memory footprint."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:61 8274c14ab4ca4c3a8706cb70cf09b9a9
+msgid ""
+"The `slots` argument was introduced in Python 3.10. On Python 3.9 and "
+"earlier, invoking `@dataclass(slots=True)` raises `TypeError: dataclass()"
+" got an unexpected keyword argument 'slots'`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:65 d12356fa80e74b818dab9edbcd39be30
+msgid "**PEP 604 Union Syntax (`str | None`, `Path | str`)**:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:67 781611d9d0b94c4094d3f99397b4c828
+msgid ""
+"While `from __future__ import annotations` postpones evaluation of type "
+"annotations in standard code on Python 3.7+, frameworks like Typer and "
+"Click inspect type annotations at runtime to construct CLI options and "
+"type coercion logic."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:70 fed9b8cc2a8a497cad24e200d3b26022
+msgid ""
+"Evaluating union syntax (`str | None`) at runtime in Python 3.9 and "
+"earlier triggers `TypeError: unsupported operand type(s) for |: 'type' "
+"and 'type'`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:73 8d780d596c7b4d63ab004153bff75017
+msgid "**Standard Library Configuration Parsing**:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:75 7373d931b39341c5b39c8ce0f8566984
+msgid "Python 3.11+ includes `tomllib` in the standard library."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:76 caa9bf5f43754c70a9fb9c7d4832ca63
+msgid ""
+"Python 3.10 is cleanly supported using the conditional dependency "
+"`tomli>=2.0.1; python_version<'3.11'`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:79 e8355b717972401f9c8fd5647b5a5989
+msgid "2.3. Tooling and Linter Floors"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:81 ba0a0e3c646949c6ba254f4bfe530533
+msgid "The project's verification suite relies on modern developer tooling:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:83 61e57e73c2e549889452a12b39c07179
+msgid "`sphinx>=8` requires Python `>=3.10`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:84 8fc503dfe1614ed690ae91f13aa9dd60
+msgid "`deptry>=0.20` requires Python `>=3.10`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:85 ca82d1f20b034f1495bd0077763a5962
+msgid ""
+"`ty>=0.0.80`, `radon`, `xenon`, and `vulture` require modern AST parsers "
+"and Python `>=3.10`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:87 21173a3f76ef428ab5c6c24238adb057
+msgid "2.4. Maintenance Cost vs. Upstream EOL Status"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:89 7b282c4d413e409d9426f29fcd7dbe93
+msgid "Python 3.6 reached End-of-Life (EOL) in December 2021."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:90 9d701597307944e4b2340a3cac1cf9ca
+msgid "Python 3.7 reached EOL in June 2023."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:91 a51beeed22bb44efb159b26be7116b4b
+msgid "Python 3.8 reached EOL in October 2024."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:92 6690903ded8845a2bee63729cf49e353
+msgid "Python 3.9 reached EOL in October 2025."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:93 e0ed5252e4944fed970a3c0b17434382
+msgid ""
+"Python 3.10 is the oldest currently maintained Python version receiving "
+"security updates (through October 2026)."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:96 82841bd79f904b48b68a1145e5090440
+msgid ""
+"Supporting Python < 3.10 would require downgrading data models, "
+"discarding `slots=True`, introducing verbose `typing.Union` constructs, "
+"and freezing dependencies to outdated versions with unpatched "
+"vulnerabilities. Therefore, maintaining `requires-python = \">=3.10\"` is"
+" technically sound and necessary."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:103 0d57fab927284126ad759af7d5358a52
+msgid "3. Modern & Future Python Certification (3.14 – 3.15)"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:105 bf15d90de417488eb54d55c9882d276e
+msgid "3.1. Python 3.14 Certification"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:107 9c1e7a8fc458467081d0c5d45774092f
+msgid "Python 3.14 is certified as a tier-1 supported runtime:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:109 1519ecb4554a453481fa087530122af6
+msgid ""
+"**CI Quality Gate**: Serves as the primary Python version for the "
+"`quality-gate` workflow in GitHub Actions."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:111 6f56acc722e74eae8006b233348b1a44
+#, python-format
+msgid ""
+"**Test Suite Pass**: 91 of 91 unit and integration tests pass with "
+"100.00% statement and branch coverage."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:113 44af5ccff4404394b7a5253fd5cdc9a4
+msgid ""
+"**CLI Verification**: Built distribution wheels install and execute all "
+"entry points without warnings."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:115 694d8b37cf9e44f4b36dae579b29b373
+msgid ""
+"**Trove Classifier**: Officially published on PyPI as `Programming "
+"Language :: Python :: 3.14`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:117 b6e39dff60a3439f8465cca56f554698
+msgid "3.2. Python 3.15 Preview / Dev Certification"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:119 db63609e7de549e998c9639e1d7e32ec
+msgid "Python 3.15 is validated and certified for development and preview:"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:121 747d1ac560cb4210b05477c8d5fb75d9
+msgid "**Local Testing**: Verified under Fedora 44 with `CPython 3.15.0rc2`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:122 b1586ad7bd7f4923807a2ba3efe910b5
+#, python-format
+msgid ""
+"**Test Suite Pass**: 91 of 91 unit and integration tests pass with "
+"100.00% statement and branch coverage with zero deprecation warnings."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:124 abb032220043406cb5449e4ef35d4d5f
+msgid ""
+"**CI Test Matrix**: Runs as an experimental builder on `ubuntu-latest` "
+"with `python-version: 3.15-dev`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:126 61b7920391b84943a110816a8a8439b5
+msgid ""
+"**Trove Classifier**: Officially published on PyPI as `Programming "
+"Language :: Python :: 3.15`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:130 dd537e8380884ae0ad10c725cd243c2a
+msgid "4. Multi-Platform CI Matrix"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:132 dae73f30b7b84cd9bb612273010bbbd2
+msgid ""
+"Automated verification runs across all certified runtimes and operating "
+"systems:"
+msgstr ""

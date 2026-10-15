@@ -1,0 +1,78 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guides/quickstart.md:1 5cce5463ebde4d48bc9a282e0ef8eee3
+msgid "Quickstart"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:3 8ad947953e1f48bfa8d0e21b65d84a14
+msgid "1. Basic File Discovery"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:5 5d249dd3fafb48b788c3b4dc88d21c3c
+msgid "Find all Python files in the current repository, honoring `.gitignore`:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:11 195b6ea4d46c4f14b06fd3633099df41
+msgid "2. Shebang-Based Discovery"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:13 2c6ba09ffd9f4a3e8985b88b088ed5c9
+msgid "Find all executable scripts invoking bash or python via shebang:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:20 9c33b54ff25d493b9737d037ab82b495
+msgid "3. Listing Identified Tags"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:22 3b846008b0894aaf9a1dd2626a2d2420
+msgid "Inspect all classification tags assigned to files:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:28 ac753c603b674ab4b3f05fc21cdbe5c3
+msgid "Sample output:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:35 5122da09146f44129ef144a536a03ae8
+msgid "4. Pipelining with `xargs`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:37 19bc21d53631470a84763032b8d539fe
+msgid "Safely pipe matching files with NUL delimiters:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:44 27e948d22bc04be3811f498bd4e55d9a
+msgid "5. Display Summary Statistics"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:46 a224e43a98ce407d898f2dfbd5e7a426
+msgid "Print matching frequencies and top detected tags to stderr:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:52 da6a0fb753534f02bb4726b8c4349343
+msgid "6. Inspecting File Metadata"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:54 035b8d16ea5e4a72a96322c404348e26
+msgid ""
+"Inspect file permissions, ownership, sizes, timestamps, and "
+"classification indicators:"
+msgstr ""
