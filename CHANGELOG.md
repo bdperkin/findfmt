@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-10-14
+
+### Documentation
+
+- *(sphinx)* Implement and verify Web & Digital formats (`html`, `dirhtml`, `singlehtml`, `epub`)
+  (#31) (#185)
+- *(sphinx)* Implement and verify Print & Offline formats (`latexpdf`, `text`, `man`, `texinfo`)
+  (#32) (#186)
+- *(sphinx)* Implement and verify Help System formats (`htmlhelp`, `qthelp`, `devhelp`) (#33) (#187)
+- *(sphinx)* Implement and verify Data & Serialization formats (`json`, `pickle`, `xml`,
+  `pseudoxml`) (#34) (#188)
+- *(sphinx)* Implement and verify Localization & Quality Control builders (#35) (#189)
+
 ## [0.6.0] - 2026-10-14
 
 ### Performance

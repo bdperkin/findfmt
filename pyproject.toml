@@ -100,7 +100,7 @@ lint = [
 
 [tool.hatch]
 version.source = "vcs"
-version.fallback-version = "0.6.0.dev0"
+version.fallback-version = "0.7.0.dev0"
 build.targets.wheel.packages = [ "src/findfmt" ]
 build.targets.sdist.include = [
   "/src",
