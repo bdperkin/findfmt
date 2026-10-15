@@ -15,8 +15,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+import tools.hatch_build  # noqa: E402
 import tools.i18n  # noqa: E402
-from hatch_build import (  # noqa: E402
+from tools.hatch_build import (  # noqa: E402
     CatalogBuildHook,
     _compile_po_pure_python,
     _generate_mo_bytes,

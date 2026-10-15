@@ -9,9 +9,12 @@ import sys
 from pathlib import Path
 
 try:
-    from hatch_build import compile_po_to_mo
+    from tools.hatch_build import compile_po_to_mo
 except ImportError:
-    compile_po_to_mo = None  # type: ignore[assignment]
+    try:
+        from hatch_build import compile_po_to_mo  # type: ignore[no-redef]
+    except ImportError:
+        compile_po_to_mo = None  # type: ignore[assignment]
 
 DEFAULT_DOMAIN = "findfmt"
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
