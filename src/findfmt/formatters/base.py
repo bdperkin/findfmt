@@ -6,6 +6,8 @@ import enum
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TextIO
 
+from findfmt.i18n import _
+
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
@@ -56,7 +58,10 @@ class UnsupportedFormatError(ValueError):
             valid_formats: Comma-separated list of valid formats.
         """
         super().__init__(
-            f"Unsupported output format: '{format_type}'. Expected one of: {valid_formats}",
+            _("Unsupported output format: '{format}'. Expected one of: {valid_formats}").format(
+                format=format_type,
+                valid_formats=valid_formats,
+            ),
         )
 
 

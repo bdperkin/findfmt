@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING, Any
 
 import typer
 
+from findfmt.i18n import _
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -168,7 +170,9 @@ def main_findfiles(argv: Sequence[str] | None = None) -> int:
         "findfiles",
         {"hidden": True},
         argv=argv,
-        help_text="Find all files and directories, including hidden files respecting .gitignore.",
+        help_text=_(
+            "Find all files and directories, including hidden files respecting .gitignore.",
+        ),
     )
 
 
@@ -185,9 +189,9 @@ def main_findfilemime(argv: Sequence[str] | None = None) -> int:
         "findfilemime",
         {"hidden": True, "list_tags": True},
         argv=argv,
-        help_text=(
+        help_text=_(
             "Find files and list detected format and MIME tags, "
-            "including hidden files respecting .gitignore."
+            "including hidden files respecting .gitignore.",
         ),
     )
 
@@ -214,9 +218,9 @@ def main_findfilefmt(argv: Sequence[str] | None = None) -> int:
         "findfilefmt",
         defaults,
         argv=raw_args,
-        help_text=(
+        help_text=_(
             "Find files by format tag, including hidden files respecting .gitignore.\n\n"
-            "Optionally provide TAG as the first positional argument (e.g. 'findfilefmt python')."
+            "Optionally provide TAG as the first positional argument (e.g. 'findfilefmt python').",
         ),
     )
 
@@ -243,11 +247,11 @@ def main_findshebang(argv: Sequence[str] | None = None) -> int:
         "findshebang",
         defaults,
         argv=raw_args,
-        help_text=(
+        help_text=_(
             "Find files by shebang interpreter pattern, including hidden files respecting "
             ".gitignore.\n\n"
             "Optionally provide INTERPRETER as the first positional argument "
-            "(e.g. 'findshebang bash')."
+            "(e.g. 'findshebang bash').",
         ),
     )
 
@@ -265,9 +269,9 @@ def main_findfmt0(argv: Sequence[str] | None = None) -> int:
         "findfmt0",
         {"hidden": True, "print0": True},
         argv=argv,
-        help_text=(
+        help_text=_(
             "Find files and output NUL-delimited paths (--print0), "
-            "including hidden files respecting .gitignore."
+            "including hidden files respecting .gitignore.",
         ),
     )
 
@@ -285,8 +289,8 @@ def main_findsummary(argv: Sequence[str] | None = None) -> int:
         "findsummary",
         {"hidden": True, "summary": True},
         argv=argv,
-        help_text=(
+        help_text=_(
             "Find files and print summary statistics to stderr, "
-            "including hidden files respecting .gitignore."
+            "including hidden files respecting .gitignore.",
         ),
     )

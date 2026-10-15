@@ -12,6 +12,7 @@ import typer
 
 from findfmt.cli.config import build_traversal_config
 from findfmt.formatters import OutputFormat, get_formatter
+from findfmt.i18n import _, set_locale
 from findfmt.summary import write_summary
 from findfmt.terminal import PagerController, is_color_enabled
 from findfmt.traversal import find_files
@@ -65,7 +66,10 @@ def _open_output_sink(
     try:
         out_file = output.open("w", encoding="utf-8")
     except OSError as e:
-        typer.echo(f"Error opening output file '{output}': {e}", err=True)
+        typer.echo(
+            _("Error opening output file '{path}': {error}").format(path=output, error=e),
+            err=True,
+        )
         raise typer.Exit(code=1) from e
     else:
         return out_file, out_file
@@ -245,6 +249,7 @@ def execute_findfmt(  # noqa: PLR0913
     ansi_lines: bool = False,
     cp437: bool = False,
     color: bool | None = None,
+    locale: str | None = None,
 ) -> None:
     """Execute file discovery, classification, formatting, and summary reporting.
 
@@ -317,7 +322,11 @@ def execute_findfmt(  # noqa: PLR0913
         hyperlink_schema: URI schema for terminal hyperlinks.
         hyperlink_authority: Optional URI authority component for terminal hyperlinks.
         color: Explicit color enable override flag.
+        locale: Optional display locale override string.
     """
+    if locale is not None:
+        set_locale(locale)
+
     effective_format = _resolve_effective_format(
         output_format,
         xml=xml,
@@ -385,6 +394,7 @@ def execute_findfmt(  # noqa: PLR0913
         hyperlink=hyperlink,
         hyperlink_schema=hyperlink_schema,
         hyperlink_authority=hyperlink_authority,
+        locale=locale,
     )
 
     tag_counter: Counter[str] = Counter()

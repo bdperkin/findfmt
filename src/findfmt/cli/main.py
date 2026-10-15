@@ -41,6 +41,7 @@ from findfmt.cli.options import (  # noqa: TC001
     OptKnownTags,
     OptListTags,
     OptLiteral,
+    OptLocale,
     OptMatchDirs,
     OptMaxDepth,
     OptMtime,
@@ -192,6 +193,7 @@ def findfmt(
     diagnostics: OptDiagnostics = False,
     version: OptVersion = None,
     help_all: OptHelpAll = False,
+    locale: OptLocale = None,
 ) -> None:
     """Execute file discovery and classification matching."""
     params = {

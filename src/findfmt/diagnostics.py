@@ -12,6 +12,7 @@ from importlib.metadata import PackageNotFoundError, version
 import typer
 
 from findfmt.cli.pager import display_with_pager
+from findfmt.i18n import _
 
 __all__ = [
     "diagnostics_callback",
@@ -74,12 +75,12 @@ def get_diagnostics() -> str:
     try:
         identify_ver = version("identify")
     except PackageNotFoundError:
-        identify_ver = "not installed"
+        identify_ver = _("not installed")
 
     lines.append(f"identify: {identify_ver}")
 
     git_ver = get_git_version()
-    lines.append(f"Git: {git_ver or 'not found'}")
+    lines.append(f"Git: {git_ver or _('not found')}")
 
     return "\n".join(lines) + "\n"
 

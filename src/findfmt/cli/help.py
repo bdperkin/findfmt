@@ -7,6 +7,7 @@ import typer
 from findfmt.classifier import get_known_tags
 from findfmt.cli.pager import display_with_pager
 from findfmt.diagnostics import get_version
+from findfmt.i18n import _
 
 __all__ = [
     "APP_HELP",
@@ -43,6 +44,7 @@ __all__ = [
     "HELP_KNOWN_TAGS",
     "HELP_LIST_TAGS",
     "HELP_LITERAL",
+    "HELP_LOCALE",
     "HELP_MATCH_DIRS",
     "HELP_MAX_DEPTH",
     "HELP_MTIME",
@@ -82,12 +84,12 @@ __all__ = [
     "known_tags_callback",
 ]
 
-APP_HELP: str = (
+APP_HELP: str = _(
     "A .gitignore-aware file discovery and classification suite that locates "
-    "files by content format, shebang, and MIME tag."
+    "files by content format, shebang, and MIME tag.",
 )
 
-CLI_EPILOG: str = (
+CLI_EPILOG: str = _(
     "Common Examples:\n"
     "  findfmt -t python                        # Find Python files\n"
     "  findfmt --shebang bash scripts/          # Find bash scripts in scripts/\n"
@@ -95,118 +97,121 @@ CLI_EPILOG: str = (
     "  findfiles --no-hidden                    # Wrapper: exclude hidden files\n"
     "  findfmt -- -weird-name                   # Path starting with a dash\n\n"
     "Run 'findfmt --help-all' for the comprehensive manual, environment variables, "
-    "and exit codes."
+    "and exit codes.",
 )
 
 
-HELP_PATHS = "One or more directory or file paths to inspect (default: current directory)."
-HELP_TAGS = "Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', 'executable')."
-HELP_EXCLUDE_TAGS = "Tag or comma-separated tags to exclude."
-HELP_ALL_TAGS = "Require matching files to have ALL specified tags rather than ANY tag."
-HELP_SHEBANG = "Filter files whose shebang contains this interpreter or pattern."
-HELP_NO_IGNORE = "Do not respect .gitignore rules during traversal."
-HELP_GITIGNORE_FILE = "Load and enforce an external gitignore file across the traversal scope."
-HELP_FROM_FILE = (
-    "Read directory listing from a file or standard input ('-') instead of scanning filesystem."
+HELP_PATHS = _("One or more directory or file paths to inspect (default: current directory).")
+HELP_TAGS = _("Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', 'executable').")
+HELP_EXCLUDE_TAGS = _("Tag or comma-separated tags to exclude.")
+HELP_ALL_TAGS = _("Require matching files to have ALL specified tags rather than ANY tag.")
+HELP_SHEBANG = _("Filter files whose shebang contains this interpreter or pattern.")
+HELP_NO_IGNORE = _("Do not respect .gitignore rules during traversal.")
+HELP_GITIGNORE_FILE = _("Load and enforce an external gitignore file across the traversal scope.")
+HELP_FROM_FILE = _(
+    "Read directory listing from a file or standard input ('-') instead of scanning filesystem.",
 )
-HELP_OFFLINE = "Enforce offline extension- and filename-only identification without disk IO."
-HELP_HIDDEN = "Include hidden files and directories."
-HELP_FOLLOW_SYMLINKS = "Follow symbolic links during traversal."
-HELP_DIRS_ONLY = "List directories only, suppressing regular file entries."
-HELP_ONE_FILE_SYSTEM = "Confine traversal to the root filesystem device."
-HELP_MAX_DEPTH = "Restrict descent to a maximum directory depth level."
-HELP_FILE_LIMIT = "Skip directories exceeding this entry count threshold."
-HELP_PRUNE = "Omit empty directories and directories with zero matching files."
-HELP_PATTERN = "Include files matching wildcard or glob pattern (supports multiple -P and '|')."
-HELP_EXCLUDE_PATTERN = (
-    "Exclude files matching wildcard or glob pattern (supports multiple -I and '|')."
+HELP_OFFLINE = _("Enforce offline extension- and filename-only identification without disk IO.")
+HELP_HIDDEN = _("Include hidden files and directories.")
+HELP_FOLLOW_SYMLINKS = _("Follow symbolic links during traversal.")
+HELP_DIRS_ONLY = _("List directories only, suppressing regular file entries.")
+HELP_ONE_FILE_SYSTEM = _("Confine traversal to the root filesystem device.")
+HELP_MAX_DEPTH = _("Restrict descent to a maximum directory depth level.")
+HELP_FILE_LIMIT = _("Skip directories exceeding this entry count threshold.")
+HELP_PRUNE = _("Omit empty directories and directories with zero matching files.")
+HELP_PATTERN = _("Include files matching wildcard or glob pattern (supports multiple -P and '|').")
+HELP_EXCLUDE_PATTERN = _(
+    "Exclude files matching wildcard or glob pattern (supports multiple -I and '|').",
 )
-HELP_IGNORE_CASE = "Apply case-insensitive matching across -P and -I patterns."
-HELP_MATCH_DIRS = "Match directory names against patterns; matched dirs inherit to children."
-HELP_SORT = "Sort files by criteria: name, version, time (mtime), ctime, size, none."
-HELP_REVERSE = "Invert the active sort order."
-HELP_UNSORTED = (
-    "Do not sort entries; yield files in raw filesystem order (equivalent to --sort=none)."
+HELP_IGNORE_CASE = _("Apply case-insensitive matching across -P and -I patterns.")
+HELP_MATCH_DIRS = _("Match directory names against patterns; matched dirs inherit to children.")
+HELP_SORT = _("Sort files by criteria: name, version, time (mtime), ctime, size, none.")
+HELP_REVERSE = _("Invert the active sort order.")
+HELP_UNSORTED = _(
+    "Do not sort entries; yield files in raw filesystem order (equivalent to --sort=none).",
 )
-HELP_DIRS_FIRST = "List directories before files within each directory level."
-HELP_FILES_FIRST = "List files before directories within each directory level."
-HELP_FORMAT = (
+HELP_DIRS_FIRST = _("List directories before files within each directory level.")
+HELP_FILES_FIRST = _("List files before directories within each directory level.")
+HELP_FORMAT = _(
     "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
-    "markdown, md, rst, table, tree, xml, html, ndjson)."
+    "markdown, md, rst, table, tree, xml, html, ndjson).",
 )
-HELP_JSON = (
+HELP_JSON = _(
     "Output structured JSON representation of the file tree and classifications "
-    "(equivalent to --format json)."
+    "(equivalent to --format json).",
 )
-HELP_XML = "Output directory tree as an XML document (equivalent to --format xml)."
-HELP_HTML = "Output directory tree as an HTML document with HTTP reference hyperlinks."
-HELP_INTRO = "Read and insert contents of specified HTML fragment file prior to directory listing."
-HELP_OUTRO = "Read and insert contents of specified HTML fragment file after directory listing."
-HELP_TITLE = "Set title and <h1> heading for HTML document output (default: 'Directory Tree')."
-HELP_NO_LINKS = "Suppress hyperlink anchors in HTML document output, rendering plain text paths."
-HELP_HYPERLINK = "Wrap paths in standard OSC 8 clickable terminal hyperlink escape sequences."
-HELP_HYPERLINK_SCHEMA = (
+HELP_XML = _("Output directory tree as an XML document (equivalent to --format xml).")
+HELP_HTML = _("Output directory tree as an HTML document with HTTP reference hyperlinks.")
+HELP_INTRO = _(
+    "Read and insert contents of specified HTML fragment file prior to directory listing.",
+)
+HELP_OUTRO = _("Read and insert contents of specified HTML fragment file after directory listing.")
+HELP_TITLE = _("Set title and <h1> heading for HTML document output (default: 'Directory Tree').")
+HELP_NO_LINKS = _("Suppress hyperlink anchors in HTML document output, rendering plain text paths.")
+HELP_HYPERLINK = _("Wrap paths in standard OSC 8 clickable terminal hyperlink escape sequences.")
+HELP_HYPERLINK_SCHEMA = _(
     "URI schema for terminal hyperlinks (defaults to 'file://', e.g. "
-    "'vscode://file/', 'cursor://file/', 'subl://')."
+    "'vscode://file/', 'cursor://file/', 'subl://').",
 )
-HELP_HYPERLINK_AUTHORITY = (
-    "URI authority component for terminal hyperlinks (e.g. 'localhost' or remote hostname)."
+HELP_HYPERLINK_AUTHORITY = _(
+    "URI authority component for terminal hyperlinks (e.g. 'localhost' or remote hostname).",
 )
-HELP_OUTPUT = "Send command output directly to a file rather than standard output."
-HELP_TREE = "Render output in a hierarchical directory tree (equivalent to --format tree)."
-HELP_TABLE_STYLE = (
+HELP_OUTPUT = _("Send command output directly to a file rather than standard output.")
+HELP_TREE = _("Render output in a hierarchical directory tree (equivalent to --format tree).")
+HELP_TABLE_STYLE = _(
     "Border style for table, csv-table, or rst output (e.g. rounded, simple, "
-    "minimal, double, heavy, markdown, ascii, cp437, square, grid)."
+    "minimal, double, heavy, markdown, ascii, cp437, square, grid).",
 )
-HELP_PAGER = "Enable or disable interactive paging (defaults to auto-paging on TTY)."
-HELP_NO_INDENT = (
+HELP_PAGER = _("Enable or disable interactive paging (defaults to auto-paging on TTY).")
+HELP_NO_INDENT = _(
     "Do not print indentation lines in tree format and strip extraneous "
-    "whitespace in structured formats."
+    "whitespace in structured formats.",
 )
-HELP_ANSI_LINES = (
-    "Use ANSI/VT100 alternate character set line drawing escapes for tree indentation lines."
+HELP_ANSI_LINES = _(
+    "Use ANSI/VT100 alternate character set line drawing escapes for tree indentation lines.",
 )
-HELP_CP437 = "Use CP437 (IBM-PC) console graphics characters for tree indentation lines."
-HELP_COLOR = (
+HELP_CP437 = _("Use CP437 (IBM-PC) console graphics characters for tree indentation lines.")
+HELP_COLOR = _(
     "Force enable or disable ANSI color output "
-    "(defaults to auto-detection with NO_COLOR compliance)."
+    "(defaults to auto-detection with NO_COLOR compliance).",
 )
-HELP_ABSOLUTE = "Output absolute paths rather than paths relative to the traversal root."
-HELP_RELATIVE = (
-    "Prepend input search path prefix to relative output paths rather than stripping the root."
+HELP_ABSOLUTE = _("Output absolute paths rather than paths relative to the traversal root.")
+HELP_RELATIVE = _(
+    "Prepend input search path prefix to relative output paths rather than stripping the root.",
 )
-HELP_PRINT0 = r"Delimit path outputs with a NUL (\0) character instead of a newline."
-HELP_LIST_TAGS = "Display identified tags alongside each matched path."
-HELP_SUMMARY = "Print summary match statistics to stderr."
-HELP_PERMISSIONS = "Print file type and permissions in standard ls -l format (e.g. -rw-r--r--)."
-HELP_USER = "Print the username, or UID if username is unavailable, of the file owner."
-HELP_GROUP = "Print the group name, or GID if group name is unavailable, of the file group."
-HELP_INODES = "Print filesystem inode number (st_ino)."
-HELP_DEVICE = "Print filesystem device number (st_dev)."
-HELP_SIZE = "Print file size in bytes."
-HELP_HUMAN_READABLE = "Print file sizes in human-readable binary format (e.g. 1K, 234M, 2G)."
-HELP_SI = "Print file sizes in human-readable SI metric format (e.g. 1kB, 234MB, 2GB)."
-HELP_DU = "Report directory size as the recursive sum of all child files and subdirectories."
-HELP_MTIME = "Print the date and time of the last modification (st_mtime)."
-HELP_CTIME = "Print the date and time of the last status change (st_ctime)."
-HELP_TIME_FORMAT = (
-    "Specify date and time output format string (strftime syntax; implies -D unless --ctime)."
+HELP_PRINT0 = _(r"Delimit path outputs with a NUL (\0) character instead of a newline.")
+HELP_LIST_TAGS = _("Display identified tags alongside each matched path.")
+HELP_SUMMARY = _("Print summary match statistics to stderr.")
+HELP_PERMISSIONS = _("Print file type and permissions in standard ls -l format (e.g. -rw-r--r--).")
+HELP_USER = _("Print the username, or UID if username is unavailable, of the file owner.")
+HELP_GROUP = _("Print the group name, or GID if group name is unavailable, of the file group.")
+HELP_INODES = _("Print filesystem inode number (st_ino).")
+HELP_DEVICE = _("Print filesystem device number (st_dev).")
+HELP_SIZE = _("Print file size in bytes.")
+HELP_HUMAN_READABLE = _("Print file sizes in human-readable binary format (e.g. 1K, 234M, 2G).")
+HELP_SI = _("Print file sizes in human-readable SI metric format (e.g. 1kB, 234MB, 2GB).")
+HELP_DU = _("Report directory size as the recursive sum of all child files and subdirectories.")
+HELP_MTIME = _("Print the date and time of the last modification (st_mtime).")
+HELP_CTIME = _("Print the date and time of the last status change (st_ctime).")
+HELP_TIME_FORMAT = _(
+    "Specify date and time output format string (strftime syntax; implies -D unless --ctime).",
 )
-HELP_CLASSIFY = (
+HELP_CLASSIFY = _(
     "Append file type indicator to filenames (* for executable, / for directory, "
-    "@ for symlink, = for socket, | for FIFO, > for door)."
+    "@ for symlink, = for socket, | for FIFO, > for door).",
 )
-HELP_HIDE_CONTROL_CHARS = "Replace non-printable control characters in filenames with '?'."
-HELP_LITERAL = "Print non-printable control characters literally as raw bytes without masking."
-HELP_QUOTE_NAME = "Enclose filenames in double quotes, escaping embedded quotes and backslashes."
-HELP_KNOWN_TAGS = "List all known classification tags supported by the engine and exit."
-HELP_VERBOSE = "Enable verbose output or extended runtime diagnostics with --version."
-HELP_DIAGNOSTICS = "Display runtime environment diagnostics and exit."
-HELP_VERSION = "Display the version of findfmt and exit."
-HELP_HELP_ALL = (
+HELP_HIDE_CONTROL_CHARS = _("Replace non-printable control characters in filenames with '?'.")
+HELP_LITERAL = _("Print non-printable control characters literally as raw bytes without masking.")
+HELP_QUOTE_NAME = _("Enclose filenames in double quotes, escaping embedded quotes and backslashes.")
+HELP_KNOWN_TAGS = _("List all known classification tags supported by the engine and exit.")
+HELP_VERBOSE = _("Enable verbose output or extended runtime diagnostics with --version.")
+HELP_DIAGNOSTICS = _("Display runtime environment diagnostics and exit.")
+HELP_VERSION = _("Display the version of findfmt and exit.")
+HELP_HELP_ALL = _(
     "Display comprehensive help reference including environment variables, "
-    "exit codes, and examples."
+    "exit codes, and examples.",
 )
+HELP_LOCALE = _("Explicitly set locale for translations and display (e.g. 'en_US', 'es', 'C').")
 
 
 def get_help_all() -> str:
@@ -215,8 +220,8 @@ def get_help_all() -> str:
     Returns:
         Formatted multi-line manual text string ending in a newline.
     """
-    return (
-        f"findfmt {get_version()} - Comprehensive CLI Reference\n\n"
+    header = f"findfmt {get_version()} - {_('Comprehensive CLI Reference')}\n\n"
+    manual = _(
         "Usage: findfmt [OPTIONS] [paths]...\n\n"
         "Tag Filtering:\n"
         "  --type, -t, --tag <str>       Tag or comma-separated tags to match.\n"
@@ -293,6 +298,7 @@ def get_help_all() -> str:
         "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n\n"
         "Help & Diagnostics:\n"
         "  --known-tags                  List all known classification tags and exit.\n"
+        "  --locale, --lang <locale>     Set display locale (e.g. 'en_US', 'es', 'C').\n"
         "  --version, -v, -V             Display version (use with --verbose for diagnostics).\n"
         "  --verbose                     Enable verbose output or extended runtime diagnostics.\n"
         "  --diagnostics                 Display runtime environment diagnostics and exit.\n"
@@ -326,8 +332,9 @@ def get_help_all() -> str:
         "  $ findfilefmt json                      # Shortcut: find JSON files\n"
         "  $ findshebang python                    # Shortcut: find Python shebang scripts\n"
         "  $ findfmt0 -t python | xargs -0 flake8  # Pipe NUL-delimited paths safely\n"
-        "  $ findsummary                           # Print summary match statistics to stderr\n"
+        "  $ findsummary                           # Print summary match statistics to stderr\n",
     )
+    return f"{header}{manual}"
 
 
 def help_all_callback(

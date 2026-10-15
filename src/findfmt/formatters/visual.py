@@ -19,6 +19,7 @@ from findfmt.formatters.badges import format_tag_badge
 from findfmt.formatters.base import Formatter
 from findfmt.formatters.glyphs import CP437_BOX
 from findfmt.formatters.tree import RichTreeFormatter
+from findfmt.i18n import _
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
 from findfmt.terminal import get_console
@@ -57,17 +58,18 @@ RICH_BOX_STYLES: dict[str, box.Box] = {
 
 def format_summary_panel(match_count: int, tag_counter: Counter[str]) -> Panel:
     """Format execution statistics into a styled Rich Panel."""
-    body_lines = [f"[bold]Matched files:[/] [cyan]{match_count}[/]"]
+    matched_label = _("[bold]Matched files:[/] [cyan]{count}[/]").format(count=match_count)
+    body_lines = [matched_label]
     if tag_counter:
         body_lines.append("")
-        body_lines.append("[bold]Top tags:[/]")
+        body_lines.append(_("[bold]Top tags:[/]") or "[bold]Top tags:[/]")
         for tag, count in tag_counter.most_common(10):
             badge = format_tag_badge(tag)
             body_lines.append(f"  {badge}: [green]{count}[/]")
 
     return Panel(
         "\n".join(body_lines),
-        title="--- findfmt summary ---",
+        title=_("--- findfmt summary ---"),
         border_style="blue",
         expand=False,
     )
@@ -79,7 +81,10 @@ class UnsupportedBoxStyleError(ValueError):
     def __init__(self, table_style: str, valid_styles: str) -> None:
         """Initialize UnsupportedBoxStyleError."""
         super().__init__(
-            f"Unsupported table style: '{table_style}'. Expected one of: {valid_styles}",
+            _("Unsupported table style: '{style}'. Expected one of: {valid_styles}").format(
+                style=table_style,
+                valid_styles=valid_styles,
+            ),
         )
 
 
@@ -176,32 +181,32 @@ class RichTableFormatter(Formatter):
     def _setup_columns(self, table: Table) -> None:
         """Configure table columns including optional metadata columns."""
         if self.show_inodes:
-            table.add_column("Inode", justify="right")
+            table.add_column(_("Inode"), justify="right")
 
         if self.show_device:
-            table.add_column("Device", justify="right")
+            table.add_column(_("Device"), justify="right")
 
         if self.show_permissions:
-            table.add_column("Permissions", style="dim")
+            table.add_column(_("Permissions"), style="dim")
 
         if self.show_user:
-            table.add_column("User")
+            table.add_column(_("User"))
 
         if self.show_group:
-            table.add_column("Group")
+            table.add_column(_("Group"))
 
         if self.show_mtime:
-            table.add_column("Modified", style="blue")
+            table.add_column(_("Modified"), style="blue")
         elif self.show_ctime:
-            table.add_column("Status Changed", style="blue")
+            table.add_column(_("Status Changed"), style="blue")
 
-        table.add_column("Path", style="cyan", no_wrap=True)
-        table.add_column("Tags", no_wrap=False)
-        table.add_column("MIME Type", style="magenta")
-        table.add_column("Size", justify="right", style="green")
-        table.add_column("Executable", justify="center")
-        table.add_column("Symlink", justify="center")
-        table.add_column("Shebang", style="dim")
+        table.add_column(_("Path"), style="cyan", no_wrap=True)
+        table.add_column(_("Tags"), no_wrap=False)
+        table.add_column(_("MIME Type"), style="magenta")
+        table.add_column(_("Size"), justify="right", style="green")
+        table.add_column(_("Executable"), justify="center")
+        table.add_column(_("Symlink"), justify="center")
+        table.add_column(_("Shebang"), style="dim")
 
     def _format_row(self, file_info: FileInfo) -> list[str]:
         """Format an individual file record as a table row sequence."""

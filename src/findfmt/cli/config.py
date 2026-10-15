@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 import typer
 
+from findfmt.i18n import _
 from findfmt.models import SortKey, TraversalConfig
 from findfmt.summary import parse_tag_arguments
 from findfmt.traversal.sorting import resolve_sort_key
@@ -20,7 +21,8 @@ __all__ = ["build_traversal_config", "validate_cli_options"]
 def _validate_file_exists(file_path: Path | None, label: str) -> None:
     """Validate that specified file exists if provided."""
     if file_path is not None and not file_path.is_file():
-        typer.echo(f"Error: {label} '{file_path}' not found.", err=True)
+        msg = _("Error: {label} '{path}' not found.").format(label=_(label), path=file_path)
+        typer.echo(msg, err=True)
         raise typer.Exit(code=2)
 
 
@@ -43,7 +45,10 @@ def _validate_format_conflicts(
         if flag
     ]
     if len(active) > 1:
-        typer.echo(f"Error: Conflicting format options: {', '.join(active)}.", err=True)
+        typer.echo(
+            _("Error: Conflicting format options: {options}.").format(options=", ".join(active)),
+            err=True,
+        )
         raise typer.Exit(code=2)
 
 
@@ -52,14 +57,14 @@ def _validate_from_file(from_file: str | None) -> None:
     if from_file is not None and from_file != "-":
         from_file_path = Path(from_file)
         if not from_file_path.is_file():
-            typer.echo(f"Error: Input file '{from_file}' not found.", err=True)
+            typer.echo(_("Error: Input file '{path}' not found.").format(path=from_file), err=True)
             raise typer.Exit(code=2)
 
 
 def _validate_ordering(*, dirs_first: bool, files_first: bool) -> None:
     """Ensure mutually exclusive directory/file ordering flags are not combined."""
     if dirs_first and files_first:
-        typer.echo("Error: Cannot specify both --dirsfirst and --filesfirst.", err=True)
+        typer.echo(_("Error: Cannot specify both --dirsfirst and --filesfirst."), err=True)
         raise typer.Exit(code=2)
 
 
@@ -174,6 +179,7 @@ def build_traversal_config(  # noqa: PLR0913
     hyperlink: bool = False,
     hyperlink_schema: str = "file://",
     hyperlink_authority: str | None = None,
+    locale: str | None = None,
 ) -> TraversalConfig:
     """Build and validate TraversalConfig from CLI options.
 
@@ -236,6 +242,7 @@ def build_traversal_config(  # noqa: PLR0913
         hyperlink: Whether to emit OSC 8 terminal hyperlinks for paths.
         hyperlink_schema: URI schema for terminal hyperlinks.
         hyperlink_authority: Optional URI authority component for terminal hyperlinks.
+        locale: Optional display locale override string.
 
     Returns:
         Configured TraversalConfig instance.
@@ -319,4 +326,5 @@ def build_traversal_config(  # noqa: PLR0913
         hyperlink=hyperlink,
         hyperlink_schema=hyperlink_schema,
         hyperlink_authority=hyperlink_authority,
+        locale=locale,
     )

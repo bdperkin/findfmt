@@ -158,6 +158,7 @@ class TraversalConfig:
         hyperlink: Whether to emit OSC 8 terminal hyperlinks for paths.
         hyperlink_schema: URI schema for terminal hyperlinks.
         hyperlink_authority: Optional URI authority component for terminal hyperlinks.
+        locale: Optional locale string for translations and formatting.
     """
 
     root_paths: tuple[Path, ...] = field(default_factory=lambda: (Path(),))
@@ -215,3 +216,4 @@ class TraversalConfig:
     hyperlink: bool = False
     hyperlink_schema: str = "file://"
     hyperlink_authority: str | None = None
+    locale: str | None = None

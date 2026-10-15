@@ -13,6 +13,17 @@ from findfmt.entrypoints import (
     main_findsummary,
 )
 from findfmt.formatters import Formatter, OutputFormat, get_formatter
+from findfmt.i18n import (
+    _,
+    detect_locale,
+    detect_locales,
+    get_current_locale,
+    get_current_translation,
+    ngettext,
+    override_locale,
+    reset_locale,
+    set_locale,
+)
 from findfmt.metadata import extract_metadata, format_permissions
 from findfmt.models import FileInfo, SortKey, TraversalConfig
 from findfmt.sizes import (
@@ -45,10 +56,13 @@ __all__ = [
     "OutputFormat",
     "SortKey",
     "TraversalConfig",
+    "_",
     "__version__",
     "build_file_uri",
     "calculate_accumulated_sizes",
     "classify_file",
+    "detect_locale",
+    "detect_locales",
     "extract_metadata",
     "find_files",
     "format_display_path",
@@ -62,6 +76,8 @@ __all__ = [
     "format_size_si",
     "format_timestamp",
     "get_classification_indicator",
+    "get_current_locale",
+    "get_current_translation",
     "get_formatter",
     "get_known_tags",
     "get_version",
@@ -73,6 +89,10 @@ __all__ = [
     "main_findshebang",
     "main_findsummary",
     "mask_control_characters",
+    "ngettext",
+    "override_locale",
     "quote_filename",
+    "reset_locale",
+    "set_locale",
     "traverse_directory",
 ]

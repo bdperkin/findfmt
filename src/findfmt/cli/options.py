@@ -10,13 +10,14 @@ import typer
 from findfmt.cli import help as h
 from findfmt.diagnostics import diagnostics_callback, version_callback
 from findfmt.formatters import OutputFormat
+from findfmt.i18n import _, locale_callback
 
 help_all_callback = h.help_all_callback
 known_tags_callback = h.known_tags_callback
 
-_PT = "Tag Filtering"
-_PC = "Traversal Controls"
-_PO = "Output Formatting"
+_PT = _("Tag Filtering")
+_PC = _("Traversal Controls")
+_PO = _("Output Formatting")
 
 OptPaths = Annotated[list[Path] | None, typer.Argument(help=h.HELP_PATHS)]
 OptTags = Annotated[
@@ -437,4 +438,14 @@ OptVersion = Annotated[
 OptHelpAll = Annotated[
     bool,
     typer.Option("--help-all", is_eager=True, callback=help_all_callback, help=h.HELP_HELP_ALL),
+]
+OptLocale = Annotated[
+    str | None,
+    typer.Option(
+        "--locale",
+        "--lang",
+        is_eager=True,
+        callback=locale_callback,
+        help=h.HELP_LOCALE,
+    ),
 ]

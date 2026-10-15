@@ -12,6 +12,7 @@ else:  # pragma: no cover
 
 from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter
 from findfmt.formatters.delimited import file_to_record
+from findfmt.i18n import _
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -205,7 +206,9 @@ class UnsupportedTableStyleError(ValueError):
             table_style: The invalid table style requested.
         """
         super().__init__(
-            f"Unsupported RST table style: '{table_style}'. Expected 'grid' or 'simple'.",
+            _("Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'.").format(
+                style=table_style,
+            ),
         )
 
 
