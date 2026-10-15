@@ -30,7 +30,7 @@ def _to_rel_path_str(path: Path, base: Path = PROJECT_ROOT) -> str:
     """Return path as a relative string if inside base, else as absolute string."""
     try:
         if path.resolve().is_relative_to(base.resolve()):
-            return str(path.resolve().relative_to(base.resolve()))
+            return path.resolve().relative_to(base.resolve()).as_posix()
     except (ValueError, OSError):
         pass
 
