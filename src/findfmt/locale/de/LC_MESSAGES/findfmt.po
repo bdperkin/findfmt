@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-10-15 14:49-0400\n"
+"POT-Creation-Date: 2026-10-15 17:53-0400\n"
 "PO-Revision-Date: 2026-10-15 13:26-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -18,27 +18,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: /home/bperkins/git/findfmt/src/findfmt/diagnostics.py:78
+#: src/findfmt/diagnostics.py:78
 msgid "not installed"
 msgstr "nicht installiert"
 
-#: /home/bperkins/git/findfmt/src/findfmt/diagnostics.py:83
+#: src/findfmt/diagnostics.py:83
 msgid "not found"
 msgstr "nicht gefunden"
 
-#: /home/bperkins/git/findfmt/src/findfmt/entrypoints.py:174
+#: src/findfmt/entrypoints.py:174
 msgid ""
 "Find all files and directories, including hidden files respecting "
 ".gitignore."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/entrypoints.py:193
+#: src/findfmt/entrypoints.py:193
 msgid ""
 "Find files and list detected format and MIME tags, including hidden files"
 " respecting .gitignore."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/entrypoints.py:222
+#: src/findfmt/entrypoints.py:222
 msgid ""
 "Find files by format tag, including hidden files respecting .gitignore.\n"
 "\n"
@@ -46,7 +46,7 @@ msgid ""
 "'findfilefmt python')."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/entrypoints.py:251
+#: src/findfmt/entrypoints.py:251
 msgid ""
 "Find files by shebang interpreter pattern, including hidden files "
 "respecting .gitignore.\n"
@@ -55,44 +55,44 @@ msgid ""
 "'findshebang bash')."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/entrypoints.py:273
+#: src/findfmt/entrypoints.py:273
 msgid ""
 "Find files and output NUL-delimited paths (--print0), including hidden "
 "files respecting .gitignore."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/entrypoints.py:293
+#: src/findfmt/entrypoints.py:293
 msgid ""
 "Find files and print summary statistics to stderr, including hidden files"
 " respecting .gitignore."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/config.py:24
+#: src/findfmt/cli/config.py:24
 #, python-brace-format
 msgid "Error: {label} '{path}' not found."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/config.py:49
+#: src/findfmt/cli/config.py:49
 #, python-brace-format
 msgid "Error: Conflicting format options: {options}."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/config.py:60
+#: src/findfmt/cli/config.py:60
 #, python-brace-format
 msgid "Error: Input file '{path}' not found."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/config.py:67
+#: src/findfmt/cli/config.py:67
 msgid "Error: Cannot specify both --dirsfirst and --filesfirst."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:88
+#: src/findfmt/cli/help.py:88
 msgid ""
 "A .gitignore-aware file discovery and classification suite that locates "
 "files by content format, shebang, and MIME tag."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:93
+#: src/findfmt/cli/help.py:93
 msgid ""
 "Common Examples:\n"
 "  findfmt -t python                        # Find Python files\n"
@@ -107,359 +107,359 @@ msgid ""
 "variables, and exit codes."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:104
+#: src/findfmt/cli/help.py:104
 msgid ""
 "One or more directory or file paths to inspect (default: current "
 "directory)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:105
+#: src/findfmt/cli/help.py:105
 msgid ""
 "Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', "
 "'executable')."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:106
+#: src/findfmt/cli/help.py:106
 msgid "Tag or comma-separated tags to exclude."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:107
+#: src/findfmt/cli/help.py:107
 msgid "Require matching files to have ALL specified tags rather than ANY tag."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:108
+#: src/findfmt/cli/help.py:108
 msgid "Filter files whose shebang contains this interpreter or pattern."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:109
+#: src/findfmt/cli/help.py:109
 msgid "Do not respect .gitignore rules during traversal."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:110
+#: src/findfmt/cli/help.py:110
 msgid "Load and enforce an external gitignore file across the traversal scope."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:112
+#: src/findfmt/cli/help.py:112
 msgid ""
 "Read directory listing from a file or standard input ('-') instead of "
 "scanning filesystem."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:114
+#: src/findfmt/cli/help.py:114
 msgid ""
 "Enforce offline extension- and filename-only identification without disk "
 "IO."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:115
+#: src/findfmt/cli/help.py:115
 msgid "Include hidden files and directories."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:116
+#: src/findfmt/cli/help.py:116
 msgid "Follow symbolic links during traversal."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:117
+#: src/findfmt/cli/help.py:117
 msgid "List directories only, suppressing regular file entries."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:118
+#: src/findfmt/cli/help.py:118
 msgid "Confine traversal to the root filesystem device."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:119
+#: src/findfmt/cli/help.py:119
 msgid "Restrict descent to a maximum directory depth level."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:120
+#: src/findfmt/cli/help.py:120
 msgid "Skip directories exceeding this entry count threshold."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:121
+#: src/findfmt/cli/help.py:121
 msgid "Omit empty directories and directories with zero matching files."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:122
+#: src/findfmt/cli/help.py:122
 msgid ""
 "Include files matching wildcard or glob pattern (supports multiple -P and"
 " '|')."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:124
+#: src/findfmt/cli/help.py:124
 msgid ""
 "Exclude files matching wildcard or glob pattern (supports multiple -I and"
 " '|')."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:126
+#: src/findfmt/cli/help.py:126
 msgid "Apply case-insensitive matching across -P and -I patterns."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:127
+#: src/findfmt/cli/help.py:127
 msgid "Match directory names against patterns; matched dirs inherit to children."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:128
+#: src/findfmt/cli/help.py:128
 msgid "Sort files by criteria: name, version, time (mtime), ctime, size, none."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:129
+#: src/findfmt/cli/help.py:129
 msgid "Invert the active sort order."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:131
+#: src/findfmt/cli/help.py:131
 msgid ""
 "Do not sort entries; yield files in raw filesystem order (equivalent to "
 "--sort=none)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:133
+#: src/findfmt/cli/help.py:133
 msgid "List directories before files within each directory level."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:134
+#: src/findfmt/cli/help.py:134
 msgid "List files before directories within each directory level."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:136
+#: src/findfmt/cli/help.py:136
 msgid ""
 "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
 "markdown, md, rst, table, tree, xml, html, ndjson)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:140
+#: src/findfmt/cli/help.py:140
 msgid ""
 "Output structured JSON representation of the file tree and "
 "classifications (equivalent to --format json)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:143
+#: src/findfmt/cli/help.py:143
 msgid "Output directory tree as an XML document (equivalent to --format xml)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:144
+#: src/findfmt/cli/help.py:144
 msgid "Output directory tree as an HTML document with HTTP reference hyperlinks."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:146
+#: src/findfmt/cli/help.py:146
 msgid ""
 "Read and insert contents of specified HTML fragment file prior to "
 "directory listing."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:148
+#: src/findfmt/cli/help.py:148
 msgid ""
 "Read and insert contents of specified HTML fragment file after directory "
 "listing."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:149
+#: src/findfmt/cli/help.py:149
 msgid ""
 "Set title and <h1> heading for HTML document output (default: 'Directory "
 "Tree')."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:150
+#: src/findfmt/cli/help.py:150
 msgid ""
 "Suppress hyperlink anchors in HTML document output, rendering plain text "
 "paths."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:151
+#: src/findfmt/cli/help.py:151
 msgid ""
 "Wrap paths in standard OSC 8 clickable terminal hyperlink escape "
 "sequences."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:153
+#: src/findfmt/cli/help.py:153
 msgid ""
 "URI schema for terminal hyperlinks (defaults to 'file://', e.g. "
 "'vscode://file/', 'cursor://file/', 'subl://')."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:157
+#: src/findfmt/cli/help.py:157
 msgid ""
 "URI authority component for terminal hyperlinks (e.g. 'localhost' or "
 "remote hostname)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:159
+#: src/findfmt/cli/help.py:159
 msgid "Send command output directly to a file rather than standard output."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:160
+#: src/findfmt/cli/help.py:160
 msgid ""
 "Render output in a hierarchical directory tree (equivalent to --format "
 "tree)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:162
+#: src/findfmt/cli/help.py:162
 msgid ""
 "Border style for table, csv-table, or rst output (e.g. rounded, simple, "
 "minimal, double, heavy, markdown, ascii, cp437, square, grid)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:165
+#: src/findfmt/cli/help.py:165
 msgid "Enable or disable interactive paging (defaults to auto-paging on TTY)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:167
+#: src/findfmt/cli/help.py:167
 msgid ""
 "Do not print indentation lines in tree format and strip extraneous "
 "whitespace in structured formats."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:171
+#: src/findfmt/cli/help.py:171
 msgid ""
 "Use ANSI/VT100 alternate character set line drawing escapes for tree "
 "indentation lines."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:173
+#: src/findfmt/cli/help.py:173
 msgid "Use CP437 (IBM-PC) console graphics characters for tree indentation lines."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:175
+#: src/findfmt/cli/help.py:175
 msgid ""
 "Force enable or disable ANSI color output (defaults to auto-detection "
 "with NO_COLOR compliance)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:178
+#: src/findfmt/cli/help.py:178
 msgid "Output absolute paths rather than paths relative to the traversal root."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:180
+#: src/findfmt/cli/help.py:180
 msgid ""
 "Prepend input search path prefix to relative output paths rather than "
 "stripping the root."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:182
+#: src/findfmt/cli/help.py:182
 msgid "Delimit path outputs with a NUL (\\0) character instead of a newline."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:183
+#: src/findfmt/cli/help.py:183
 msgid "Display identified tags alongside each matched path."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:184
+#: src/findfmt/cli/help.py:184
 msgid "Print summary match statistics to stderr."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:185
+#: src/findfmt/cli/help.py:185
 msgid ""
 "Print file type and permissions in standard ls -l format (e.g. -rw-r--"
 "r--)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:186
+#: src/findfmt/cli/help.py:186
 msgid "Print the username, or UID if username is unavailable, of the file owner."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:187
+#: src/findfmt/cli/help.py:187
 msgid ""
 "Print the group name, or GID if group name is unavailable, of the file "
 "group."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:188
+#: src/findfmt/cli/help.py:188
 msgid "Print filesystem inode number (st_ino)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:189
+#: src/findfmt/cli/help.py:189
 msgid "Print filesystem device number (st_dev)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:190
+#: src/findfmt/cli/help.py:190
 msgid "Print file size in bytes."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:191
+#: src/findfmt/cli/help.py:191
 msgid "Print file sizes in human-readable binary format (e.g. 1K, 234M, 2G)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:192
+#: src/findfmt/cli/help.py:192
 msgid ""
 "Print file sizes in human-readable SI metric format (e.g. 1kB, 234MB, "
 "2GB)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:193
+#: src/findfmt/cli/help.py:193
 msgid ""
 "Report directory size as the recursive sum of all child files and "
 "subdirectories."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:194
+#: src/findfmt/cli/help.py:194
 msgid "Print the date and time of the last modification (st_mtime)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:195
+#: src/findfmt/cli/help.py:195
 msgid "Print the date and time of the last status change (st_ctime)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:197
+#: src/findfmt/cli/help.py:197
 msgid ""
 "Specify date and time output format string (strftime syntax; implies -D "
 "unless --ctime)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:200
+#: src/findfmt/cli/help.py:200
 msgid ""
 "Append file type indicator to filenames (* for executable, / for "
 "directory, @ for symlink, = for socket, | for FIFO, > for door)."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:203
+#: src/findfmt/cli/help.py:203
 msgid "Replace non-printable control characters in filenames with '?'."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:204
+#: src/findfmt/cli/help.py:204
 msgid ""
 "Print non-printable control characters literally as raw bytes without "
 "masking."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:205
+#: src/findfmt/cli/help.py:205
 msgid ""
 "Enclose filenames in double quotes, escaping embedded quotes and "
 "backslashes."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:206
+#: src/findfmt/cli/help.py:206
 msgid "List all known classification tags supported by the engine and exit."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:207
+#: src/findfmt/cli/help.py:207
 msgid "Enable verbose output or extended runtime diagnostics with --version."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:208
+#: src/findfmt/cli/help.py:208
 msgid "Display runtime environment diagnostics and exit."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:209
+#: src/findfmt/cli/help.py:209
 msgid "Display the version of findfmt and exit."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:211
+#: src/findfmt/cli/help.py:211
 msgid ""
 "Display comprehensive help reference including environment variables, "
 "exit codes, and examples."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:214
+#: src/findfmt/cli/help.py:214
 msgid ""
 "Explicitly set locale for translations and display (e.g. 'en_US', 'es', "
 "'C')."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:223
+#: src/findfmt/cli/help.py:223
 msgid "Comprehensive CLI Reference"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/help.py:225
+#: src/findfmt/cli/help.py:225
 msgid ""
 "Usage: findfmt [OPTIONS] [paths]...\n"
 "\n"
@@ -649,110 +649,110 @@ msgid ""
 "statistics to stderr\n"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/options.py:18
+#: src/findfmt/cli/options.py:18
 msgid "Tag Filtering"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/options.py:19
+#: src/findfmt/cli/options.py:19
 msgid "Traversal Controls"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/options.py:20
+#: src/findfmt/cli/options.py:20
 msgid "Output Formatting"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/cli/runner.py:70
+#: src/findfmt/cli/runner.py:70
 #, python-brace-format
 msgid "Error opening output file '{path}': {error}"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/base.py:61
+#: src/findfmt/formatters/base.py:61
 #, python-brace-format
 msgid "Unsupported output format: '{format}'. Expected one of: {valid_formats}"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/markup.py:209
+#: src/findfmt/formatters/markup.py:209
 #, python-brace-format
 msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:63
+#: src/findfmt/formatters/visual.py:63
 #, python-brace-format
 msgid "[bold]Matched file:[/] [cyan]{count}[/]"
 msgid_plural "[bold]Matched files:[/] [cyan]{count}[/]"
 msgstr[0] "[bold]Passende Datei:[/] [cyan]{count}[/]"
 msgstr[1] "[bold]Passende Dateien:[/] [cyan]{count}[/]"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:70
+#: src/findfmt/formatters/visual.py:70
 msgid "[bold]Top tags:[/]"
 msgstr "[bold]Häufigste Tags:[/]"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:78
+#: src/findfmt/formatters/visual.py:78
 msgid "--- findfmt summary ---"
 msgstr "--- findfmt Zusammenfassung ---"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:90
+#: src/findfmt/formatters/visual.py:90
 #, python-brace-format
 msgid "Unsupported table style: '{style}'. Expected one of: {valid_styles}"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:190
+#: src/findfmt/formatters/visual.py:190
 msgid "Inode"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:193
+#: src/findfmt/formatters/visual.py:193
 msgid "Device"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:196
+#: src/findfmt/formatters/visual.py:196
 msgid "Permissions"
 msgstr "Berechtigungen"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:199
+#: src/findfmt/formatters/visual.py:199
 msgid "User"
 msgstr ""
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:202
+#: src/findfmt/formatters/visual.py:202
 msgid "Group"
 msgstr "Gruppe"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:205
+#: src/findfmt/formatters/visual.py:205
 msgid "Modified"
 msgstr "Geändert"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:207
+#: src/findfmt/formatters/visual.py:207
 msgid "Status Changed"
 msgstr "Status geändert"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:209
+#: src/findfmt/formatters/visual.py:209
 msgid "Path"
 msgstr "Pfad"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:210
+#: src/findfmt/formatters/visual.py:210
 msgid "Tags"
 msgstr "Tags"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:211
+#: src/findfmt/formatters/visual.py:211
 msgid "MIME Type"
 msgstr "MIME-Typ"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:212
+#: src/findfmt/formatters/visual.py:212
 msgid "Size"
 msgstr "Größe"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:213
+#: src/findfmt/formatters/visual.py:213
 msgid "Executable"
 msgstr "Ausführbar"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:214
+#: src/findfmt/formatters/visual.py:214
 msgid "Symlink"
 msgstr "Symlink"
 
-#: /home/bperkins/git/findfmt/src/findfmt/formatters/visual.py:215
+#: src/findfmt/formatters/visual.py:215
 msgid "Shebang"
 msgstr "Shebang-Direktive"
 
-#: /home/bperkins/git/findfmt/src/findfmt/traversal/sorting.py:267
+#: src/findfmt/traversal/sorting.py:267
 #, python-brace-format
 msgid ""
 "Invalid sort criteria '{criteria}'. Choose from: name, version, time, "

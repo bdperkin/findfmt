@@ -26,6 +26,9 @@ from tools.hatch_build import (  # noqa: E402
     compile_po_to_mo,
 )
 from tools.i18n import (  # noqa: E402
+    _get_working_dir,
+    _sanitize_po_locations,
+    _to_rel_path_str,
     compile_catalogs,
     extract_messages,
     init_catalog,
@@ -362,3 +365,80 @@ def test_sphinx_intl_configuration() -> None:
         assert lang_dir.is_dir(), f"Missing Sphinx docs locale for {lang}"
         po_files = list(lang_dir.glob("*.po"))
         assert len(po_files) > 0, f"No Sphinx PO files found for {lang}"
+
+
+def test_sanitize_po_locations(tmp_path: Path) -> None:
+    """Verify _sanitize_po_locations strips absolute prefixes and normalizes locations."""
+    # 1. Non-existent file handled without error
+    _sanitize_po_locations(tmp_path / "nonexistent.po")
+
+    # 2. File with various location formats and non-location lines
+    sample_po = tmp_path / "sample.po"
+    content = (
+        "# Header comment with /home/user/path\n"
+        'msgid "/not/a/location/file.py"\n'
+        'msgstr "/also/not/a/location"\n'
+        "#: /home/user/git/findfmt/src/findfmt/diagnostics.py:78\n"
+        'msgid "test1"\n'
+        'msgstr "test1"\n'
+        "#: /home/user/git/findfmt/src/findfmt/a.py:10 /home/user/git/findfmt/src/findfmt/b.py:20\n"
+        'msgid "test2"\n'
+        'msgstr "test2"\n'
+        "#: C:\\Users\\user\\findfmt\\src\\findfmt\\c.py:30\n"
+        'msgid "test3"\n'
+        'msgstr "test3"\n'
+        "#: src/findfmt/already_clean.py:40\n"
+        'msgid "test4"\n'
+        'msgstr "test4"\n'
+    )
+    sample_po.write_text(content, encoding="utf-8")
+
+    _sanitize_po_locations(sample_po, root=Path("/home/user/git/findfmt"))
+
+    cleaned = sample_po.read_text(encoding="utf-8")
+    assert "#: src/findfmt/diagnostics.py:78" in cleaned
+    assert "#: src/findfmt/a.py:10 src/findfmt/b.py:20" in cleaned
+    assert "#: src/findfmt/c.py:30" in cleaned
+    assert "#: src/findfmt/already_clean.py:40" in cleaned
+    assert "# Header comment with /home/user/path" in cleaned
+    assert 'msgid "/not/a/location/file.py"' in cleaned
+    assert "/home/user/git/findfmt" not in cleaned
+
+
+def test_i18n_path_helpers(tmp_path: Path) -> None:
+    """Verify _to_rel_path_str and _get_working_dir behaviors."""
+    assert _to_rel_path_str(PROJECT_ROOT / "src" / "findfmt") == "src/findfmt"
+    assert _to_rel_path_str(tmp_path) == str(tmp_path)
+
+    assert _get_working_dir(PROJECT_ROOT / "src", PROJECT_ROOT / "tests") == PROJECT_ROOT
+    assert _get_working_dir(PROJECT_ROOT / "src", tmp_path) is None
+
+
+def test_no_absolute_paths_in_tracked_locale_catalogs() -> None:
+    """Verify no tracked PO/POT catalogs contain absolute path comments."""
+    locale_dir = PROJECT_ROOT / "src" / "findfmt" / "locale"
+    pot_file = locale_dir / "findfmt.pot"
+    assert pot_file.is_file()
+
+    catalogs = [pot_file, *list(locale_dir.glob("*/LC_MESSAGES/*.po"))]
+    assert len(catalogs) >= 5  # pot + 4 languages
+
+    for catalog in catalogs:
+        lines = catalog.read_text(encoding="utf-8").splitlines()
+        for idx, line in enumerate(lines, start=1):
+            if line.startswith("#: "):
+                assert not line.startswith("#: /"), (
+                    f"Absolute path location comment found in {catalog.name}:{idx}: {line}"
+                )
+                tokens = line[3:].split()
+                for token in tokens:
+                    path_part = token.split(":")[0]
+                    assert not path_part.startswith("/"), (
+                        f"Absolute path token found in {catalog.name}:{idx}: {token}"
+                    )
+                    is_windows_drive = (
+                        len(path_part) > 2 and path_part[1] == ":" and path_part[2] in "/\\"
+                    )
+                    assert not is_windows_drive, (
+                        f"Windows absolute path found in {catalog.name}:{idx}: {token}"
+                    )

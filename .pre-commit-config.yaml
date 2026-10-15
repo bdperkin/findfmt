@@ -256,3 +256,8 @@ repos:
         types: [text]
         additional_dependencies: [pathspec, identify, typer, pyyaml, rich]
         pass_filenames: true
+      - id: check-no-absolute-locale-paths
+        name: Check no absolute paths in message catalogs
+        entry: '^#: (\S+\s+)*(/|[A-Za-z]:[\\/])'
+        language: pygrep
+        files: ^src/findfmt/locale/.*\.(po|pot)$
