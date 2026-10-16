@@ -19,8 +19,21 @@ __all__ = [
     "handle_broken_pipe",
     "handle_keyboard_interrupt",
     "install_signal_handlers",
+    "is_broken_pipe_wrapper",
     "trap_cli_signals",
 ]
+
+
+def is_broken_pipe_wrapper(stream: object | None) -> bool:
+    """Check if stream is wrapped by Click or Typer broken pipe pacifier.
+
+    Args:
+        stream: Stream instance to inspect.
+
+    Returns:
+        True if stream is wrapped by a broken pipe pacifier, False otherwise.
+    """
+    return stream is not None and "PacifyFlushWrapper" in type(stream).__name__
 
 
 def _sigint_handler(_signum: int, _frame: object) -> None:

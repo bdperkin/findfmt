@@ -15,15 +15,19 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import typer
+import typer.core
+from click.utils import _PacifyFlushWrapper
 from typer.testing import CliRunner
 
 from findfmt.cli import (
+    FindfmtCommand,
     app,
     display_with_pager,
     execute_findfmt,
     handle_broken_pipe,
     handle_keyboard_interrupt,
     install_signal_handlers,
+    is_broken_pipe_wrapper,
     trap_cli_signals,
 )
 from findfmt.cli.runner import _deliver_output
@@ -256,14 +260,14 @@ def test_pager_controller_display_pager_broken_pipe():
 
 def test_entrypoints_invoke_with_defaults_broken_pipe():
     """Verify _invoke_with_defaults catches BrokenPipeError and returns 0."""
-    with patch("findfmt.cli.main.execute_findfmt", side_effect=BrokenPipeError):
+    with patch("findfmt.cli.runner.execute_findfmt", side_effect=BrokenPipeError):
         code = _invoke_with_defaults("findfmt", {}, argv=["."])
         assert code == 0
 
 
 def test_entrypoints_invoke_with_defaults_keyboard_interrupt():
     """Verify _invoke_with_defaults catches KeyboardInterrupt and returns 130."""
-    with patch("findfmt.cli.main.execute_findfmt", side_effect=KeyboardInterrupt):
+    with patch("findfmt.cli.runner.execute_findfmt", side_effect=KeyboardInterrupt):
         code = _invoke_with_defaults("findfmt", {}, argv=["."])
         assert code == 130
 
@@ -271,7 +275,7 @@ def test_entrypoints_invoke_with_defaults_keyboard_interrupt():
 def test_cli_runner_invoke_broken_pipe():
     """Verify CliRunner invocation handles BrokenPipeError cleanly."""
     runner = CliRunner()
-    with patch("findfmt.cli.main.execute_findfmt", side_effect=BrokenPipeError):
+    with patch("findfmt.cli.runner.execute_findfmt", side_effect=BrokenPipeError):
         result = runner.invoke(app, ["."])
         assert result.exit_code == 0
 
@@ -279,7 +283,7 @@ def test_cli_runner_invoke_broken_pipe():
 def test_cli_runner_invoke_keyboard_interrupt():
     """Verify CliRunner invocation handles KeyboardInterrupt cleanly."""
     runner = CliRunner()
-    with patch("findfmt.cli.main.execute_findfmt", side_effect=KeyboardInterrupt):
+    with patch("findfmt.cli.runner.execute_findfmt", side_effect=KeyboardInterrupt):
         result = runner.invoke(app, ["."])
         assert result.exit_code == 130
 
@@ -376,3 +380,86 @@ def test_entrypoints_invoke_with_defaults_typer_exit():
         mock_get_cmd.return_value = mock_cmd
         code = _invoke_with_defaults("findfmt", {}, argv=["."])
         assert code == 42
+
+
+def test_findfmt_command_main_click_pacify_flush_standalone():
+    """Verify FindfmtCommand.main exits 0 when Click raises SystemExit(1) on broken pipe."""
+    cmd = FindfmtCommand(name="test")
+    wrapped_stdout = _PacifyFlushWrapper(sys.stdout)
+    with (
+        patch.object(typer.core.TyperCommand, "main", side_effect=SystemExit(1)),
+        patch("sys.stdout", wrapped_stdout),
+        pytest.raises(SystemExit) as exc,
+    ):
+        cmd.main(args=["."], standalone_mode=True)
+
+    assert exc.value.code == 0
+
+
+def test_findfmt_command_main_click_pacify_flush_non_standalone():
+    """Verify FindfmtCommand.main returns 0 when Click raises SystemExit(1) non-standalone."""
+    cmd = FindfmtCommand(name="test")
+    wrapped_stdout = _PacifyFlushWrapper(sys.stdout)
+    with (
+        patch.object(typer.core.TyperCommand, "main", side_effect=SystemExit(1)),
+        patch("sys.stdout", wrapped_stdout),
+    ):
+        code = cmd.main(args=["."], standalone_mode=False)
+        assert code == 0
+
+
+def test_findfmt_command_main_reraises_other_system_exit():
+    """Verify FindfmtCommand.main re-raises regular SystemExit error."""
+    cmd = FindfmtCommand(name="test")
+    with (
+        patch.object(typer.core.TyperCommand, "main", side_effect=SystemExit(2)),
+        pytest.raises(SystemExit) as exc,
+    ):
+        cmd.main(args=["."], standalone_mode=True)
+
+    assert exc.value.code == 2
+
+
+def test_entrypoints_invoke_with_defaults_click_pacify_flush():
+    """Verify _invoke_with_defaults returns 0 when Click raises SystemExit(1) on broken pipe."""
+    wrapped_stdout = _PacifyFlushWrapper(sys.stdout)
+    with (
+        patch("typer.main.get_command") as mock_get_cmd,
+        patch("sys.stdout", wrapped_stdout),
+    ):
+        mock_cmd = MagicMock()
+        mock_cmd.main.side_effect = SystemExit(1)
+        mock_get_cmd.return_value = mock_cmd
+        code = _invoke_with_defaults("findfmt", {}, argv=["."])
+        assert code == 0
+
+
+def test_entrypoints_invoke_with_defaults_reraises_other_system_exit():
+    """Verify _invoke_with_defaults returns non-zero code on other SystemExit."""
+    with patch("typer.main.get_command") as mock_get_cmd:
+        mock_cmd = MagicMock()
+        mock_cmd.main.side_effect = SystemExit(2)
+        mock_get_cmd.return_value = mock_cmd
+        code = _invoke_with_defaults("findfmt", {}, argv=["."])
+        assert code == 2
+
+
+def test_entrypoints_invoke_with_defaults_system_exit_1_regular():
+    """Verify _invoke_with_defaults returns 1 when SystemExit(1) is not from broken pipe."""
+    with patch("typer.main.get_command") as mock_get_cmd:
+        mock_cmd = MagicMock()
+        mock_cmd.main.side_effect = SystemExit(1)
+        mock_get_cmd.return_value = mock_cmd
+        code = _invoke_with_defaults("findfmt", {}, argv=["."])
+        assert code == 1
+
+
+def test_is_broken_pipe_wrapper():
+    """Verify is_broken_pipe_wrapper detects wrapper classes and ignores normal streams."""
+    assert not is_broken_pipe_wrapper(None)
+    assert not is_broken_pipe_wrapper(io.StringIO())
+
+    class FakePacifyFlushWrapper:
+        pass
+
+    assert is_broken_pipe_wrapper(FakePacifyFlushWrapper())

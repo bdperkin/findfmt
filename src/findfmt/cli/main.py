@@ -5,6 +5,7 @@ from __future__ import annotations
 import typer
 
 from findfmt.cli import help as h
+from findfmt.cli import runner
 from findfmt.cli.options import (
     OptAbsolute,
     OptAllTags,
@@ -83,7 +84,6 @@ from findfmt.cli.options import (
     show_config_callback,
 )
 from findfmt.cli.pager import FindfmtCommand
-from findfmt.cli.runner import execute_findfmt
 from findfmt.diagnostics import (
     diagnostics_callback,
     get_diagnostics,
@@ -219,7 +219,7 @@ def findfmt(
             "show_config",
         }
     }
-    execute_findfmt(**params)
+    runner.execute_findfmt(**params)
 
 
 if __name__ == "__main__":  # pragma: no cover

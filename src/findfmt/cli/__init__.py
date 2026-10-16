@@ -25,6 +25,7 @@ from findfmt.cli.signals import (
     handle_broken_pipe,
     handle_keyboard_interrupt,
     install_signal_handlers,
+    is_broken_pipe_wrapper,
     trap_cli_signals,
 )
 from findfmt.diagnostics import (
@@ -66,6 +67,7 @@ __all__ = [
     "handle_keyboard_interrupt",
     "help_all_callback",
     "install_signal_handlers",
+    "is_broken_pipe_wrapper",
     "known_tags_callback",
     "load_toml_config",
     "main",

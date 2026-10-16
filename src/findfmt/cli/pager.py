@@ -21,6 +21,7 @@ from findfmt.cli.file_config import extract_config_args, resolve_and_load_config
 from findfmt.cli.signals import (
     handle_broken_pipe,
     install_signal_handlers,
+    is_broken_pipe_wrapper,
     trap_cli_signals,
 )
 from findfmt.terminal import PagerController, get_console, is_color_enabled
@@ -356,12 +357,23 @@ class FindfmtCommand(typer.core.TyperCommand):
     ) -> Any:
         """Execute command with graceful Unix signal and broken pipe handling."""
         install_signal_handlers()
-        with trap_cli_signals(standalone_mode=standalone_mode):
-            return super().main(
-                args=args,
-                prog_name=prog_name,
-                complete_var=complete_var,
-                standalone_mode=standalone_mode,
-                windows_expand_args=windows_expand_args,
-                **extra,
-            )
+        try:
+            with trap_cli_signals(standalone_mode=standalone_mode):
+                return super().main(
+                    args=args,
+                    prog_name=prog_name,
+                    complete_var=complete_var,
+                    standalone_mode=standalone_mode,
+                    windows_expand_args=windows_expand_args,
+                    **extra,
+                )
+        except SystemExit as exc:
+            if exc.code == 1 and (
+                is_broken_pipe_wrapper(sys.stdout) or is_broken_pipe_wrapper(sys.stderr)
+            ):
+                if standalone_mode:
+                    sys.exit(0)
+
+                return 0
+
+            raise

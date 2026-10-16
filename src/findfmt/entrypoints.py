@@ -126,7 +126,11 @@ def _invoke_with_defaults(
         Integer exit code (0 for success, non-zero on error).
     """
     from findfmt.cli import app
-    from findfmt.cli.signals import install_signal_handlers, trap_cli_signals
+    from findfmt.cli.signals import (
+        install_signal_handlers,
+        is_broken_pipe_wrapper,
+        trap_cli_signals,
+    )
 
     install_signal_handlers()
     cmd = typer.main.get_command(app)
@@ -144,6 +148,11 @@ def _invoke_with_defaults(
                 obj={"argv": args_list if args_list is not None else list(sys.argv[1:])},
             )
     except SystemExit as exc:
+        if exc.code == 1 and (
+            is_broken_pipe_wrapper(sys.stdout) or is_broken_pipe_wrapper(sys.stderr)
+        ):
+            return 0
+
         return exc.code if isinstance(exc.code, int) else 0
     except typer.Exit as exc:
         return exc.exit_code
