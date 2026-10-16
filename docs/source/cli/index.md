@@ -10,9 +10,16 @@ output formatting.
 :builders: latex=text:latexpdf=text:texinfo=text:qthelp=text:devhelp=text:htmlhelp=text
 ```
 
-## 2. Options
+## 2. Description
 
-### 2.1. Tag Filtering
+`findfmt` is a high-performance, `.gitignore`-aware file discovery and classification suite. It
+locates files by content format, shebang, and MIME tag rather than relying strictly on file
+extensions, producing clean, sorted relative paths ready for Unix pipelines and interactive terminal
+review.
+
+## 3. Options
+
+### 3.1. Tag Filtering
 
 `-t, --type, --tag TAG` : Filter files by tag (e.g. `python`, `yaml`, `json`, `shell`,
 `executable`). Can be specified multiple times or comma-separated (`-t python,shell`).
@@ -25,7 +32,7 @@ rather than at least one (`--no-all-tags` disables this requirement).
 `--shebang INTERPRETER` : Filter files whose shebang line contains the specified interpreter name or
 substring.
 
-### 2.2. Traversal Controls
+### 3.2. Traversal Controls
 
 `-d, --dirs-only` : List directories only, suppressing regular file entries.
 
@@ -83,7 +90,7 @@ level, sorting each group by active criteria.
 
 `--filesfirst` : Group all regular files before directories within each directory level.
 
-### 2.3. Output Controls
+### 3.3. Output Controls
 
 - `-f, --format FORMAT` : Choose the output serialization format (`text`, `json`, `jsonl`, `yaml`,
   `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`). Defaults to `text`.
@@ -237,7 +244,7 @@ path.
 
 `-s, --summary / --no-summary` : Print summary match statistics and top format tags to `stderr`.
 
-### 2.4. Information & Diagnostics
+### 3.4. Information & Diagnostics
 
 `--known-tags` : List all tags supported by the classifier engine and exit immediately (routed
 through the interactive pager on TTY sessions exceeding terminal height).
@@ -260,7 +267,7 @@ through the interactive pager on TTY sessions exceeding terminal height).
 `--help` : Show the categorized help message and exit (automatically routed through the interactive
 pager on TTY sessions exceeding terminal height).
 
-## 3. Command Wrappers & Aliases
+## 4. Command Wrappers & Aliases
 
 In addition to `findfmt`, several specialized command-line entry points are provided to streamline
 common workflows:
@@ -281,7 +288,7 @@ common workflows:
 - **`findsummary [PATHS...]`** : Print format tag frequency statistics directly to `stderr`,
   including hidden files (equivalent to `findfmt --hidden --summary`). Negate with `--no-summary`.
 
-## 4. POSIX Option Terminator (--)
+## 5. POSIX Option Terminator (--)
 
 A standalone double-dash (`--`) halts option processing per POSIX Guideline 10. All subsequent
 tokens are treated strictly as positional filesystem paths, even if their names begin with a hyphen:
@@ -291,7 +298,7 @@ findfmt -- -weird-directory/
 findfilefmt python -- -hyphenated-dir/
 ```
 
-## 5. Environment Variables
+## 6. Environment
 
 - `NO_COLOR`: When set to any value, colored output is suppressed per
   [no-color.org](https://no-color.org).
@@ -306,18 +313,18 @@ findfilefmt python -- -hyphenated-dir/
 - `XDG_CONFIG_HOME`: Configuration directory root used to resolve `$XDG_CONFIG_HOME/git/ignore`.
 - `PATHEXT`: Semicolon-delimited list of executable file extensions on Windows.
 
-## 6. Exit Codes
+## 7. Exit Status
 
 - `0`: Success (matching files found, or help/version/diagnostics queried).
 - `1`: Runtime traversal, classification, or filesystem I/O error.
 - `2`: Invalid command-line arguments or syntax error.
 
-## 7. Pipeline Integration Examples
+## 8. Examples
 
 `findfmt` integrates smoothly with automated Unix pipelines, linters, data processing utilities, and
 documentation generators.
 
-### 7.1. Safe Command Execution with `xargs`
+### 8.1. Safe Command Execution with `xargs`
 
 Safely pipe matching file paths to linters or formatters using NUL delimiters (`-0` / `--print0`):
 
@@ -329,7 +336,7 @@ findfmt -t python -0 | xargs -0 ruff format
 findfmt -t shell -0 | xargs -r -0 shellcheck
 ```
 
-### 7.2. JSON Filtering with `jq`
+### 8.2. JSON Filtering with `jq`
 
 Process deterministic metadata records using `jq`:
 
@@ -341,7 +348,7 @@ findfmt -f json | jq -r '.[] | select(.is_executable == true) | .path'
 findfmt -f json | jq '.[] | select(.size_bytes > 102400) | {path, size: .size_bytes}'
 ```
 
-### 7.3. Delimited Data Processing with `csvkit`
+### 8.3. Delimited Data Processing with `csvkit`
 
 Inspect and slice CSV records with `csvkit`:
 
@@ -353,7 +360,7 @@ findfmt -f csv | csvcut -c path,tags,size_bytes
 findfmt -f csv | csvgrep -c is_executable -m true
 ```
 
-### 7.4. Sphinx Documentation Inclusion
+### 8.4. Sphinx Documentation Inclusion
 
 Export tables directly into documentation build directories for Sphinx inclusion:
 
@@ -365,7 +372,7 @@ findfmt -f rst --table-style grid > docs/source/_generated_inventory.rst
 findfmt -f csv-table --table-style rounded
 ```
 
-### 7.5. HTML Documentation Export with Templating
+### 8.5. HTML Documentation Export with Templating
 
 Generate a semantic HTML document tree with customized headers, footers, and hyperlinks:
 
@@ -378,7 +385,7 @@ findfmt -H "https://github.com/myorg/myproject/blob/main/" \
   -o site/inventory.html
 ```
 
-### 7.6. Terminal Navigation with Clickable Hyperlinks
+### 8.6. Terminal Navigation with Clickable Hyperlinks
 
 Navigate directory structures directly in modern terminal emulators using OSC 8 escape sequences:
 
@@ -389,3 +396,9 @@ findfmt --hyperlink --hyperlink-schema "vscode://file/"
 # Render hierarchical tree with OSC 8 hyperlinks
 findfmt --tree --hyperlink
 ```
+
+## 9. See Also
+
+- `find(1)`, `xargs(1)`, `file(1)`
+- Documentation: <https://bdperkin.github.io/findfmt>
+- Repository & Bug Tracker: <https://github.com/bdperkin/findfmt>
