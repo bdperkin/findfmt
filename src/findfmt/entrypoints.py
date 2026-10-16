@@ -126,7 +126,9 @@ def _invoke_with_defaults(
         Integer exit code (0 for success, non-zero on error).
     """
     from findfmt.cli import app
+    from findfmt.cli.signals import install_signal_handlers, trap_cli_signals
 
+    install_signal_handlers()
     cmd = typer.main.get_command(app)
     if help_text is not None:
         cmd = copy.copy(cmd)
@@ -134,14 +136,17 @@ def _invoke_with_defaults(
 
     args_list = list(argv) if argv is not None else None
     try:
-        cmd.main(
-            args=args_list,
-            prog_name=info_name,
-            default_map=defaults,
-            obj={"argv": args_list if args_list is not None else list(sys.argv[1:])},
-        )
+        with trap_cli_signals():
+            cmd.main(
+                args=args_list,
+                prog_name=info_name,
+                default_map=defaults,
+                obj={"argv": args_list if args_list is not None else list(sys.argv[1:])},
+            )
     except SystemExit as exc:
         return exc.code if isinstance(exc.code, int) else 0
+    except typer.Exit as exc:
+        return exc.exit_code
 
     return 0  # pragma: no cover
 

@@ -11,6 +11,11 @@ from typing import TYPE_CHECKING, TextIO, cast
 import typer
 
 from findfmt.cli.config import build_traversal_config
+from findfmt.cli.signals import (
+    handle_broken_pipe,
+    install_signal_handlers,
+    trap_cli_signals,
+)
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.i18n import _, set_locale
 from findfmt.summary import write_summary
@@ -45,13 +50,16 @@ def _deliver_output(  # noqa: PLR0913
         pager: Explicit pager override flag.
         custom_controller: Whether a custom controller was injected.
     """
-    is_tty = bool(getattr(target_stream, "isatty", lambda: False)())
-    if custom_controller or (is_tty and pager is not False):
-        buf = io.StringIO()
-        formatter.stream(files, buf)
-        pager_ctrl.display(buf.getvalue())
-    else:
-        formatter.stream(files, target_stream)
+    try:
+        is_tty = bool(getattr(target_stream, "isatty", lambda: False)())
+        if custom_controller or (is_tty and pager is not False):
+            buf = io.StringIO()
+            formatter.stream(files, buf)
+            pager_ctrl.display(buf.getvalue())
+        else:
+            formatter.stream(files, target_stream)
+    except BrokenPipeError:
+        handle_broken_pipe(target_stream)
 
 
 def _open_output_sink(
@@ -324,6 +332,8 @@ def execute_findfmt(  # noqa: PLR0913
         color: Explicit color enable override flag.
         locale: Optional display locale override string.
     """
+    install_signal_handlers()
+
     if locale is not None:
         set_locale(locale)
 
@@ -442,18 +452,19 @@ def execute_findfmt(  # noqa: PLR0913
 
             yield file_info
 
-    try:
-        _deliver_output(
-            formatter,
-            _matched_files(),
-            pager_ctrl,
-            target_stream,
-            pager=pager,
-            custom_controller=pager_controller is not None,
-        )
-    finally:
-        if out_file is not None:
-            out_file.close()
+    with trap_cli_signals(target_stream):
+        try:
+            _deliver_output(
+                formatter,
+                _matched_files(),
+                pager_ctrl,
+                target_stream,
+                pager=pager,
+                custom_controller=pager_controller is not None,
+            )
+        finally:
+            if out_file is not None:
+                out_file.close()
 
-    if config.show_summary:
-        write_summary(match_count, tag_counter, force_color=color)
+        if config.show_summary:
+            write_summary(match_count, tag_counter, force_color=color)

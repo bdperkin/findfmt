@@ -18,6 +18,11 @@ import typer.core
 from typer import rich_utils
 
 from findfmt.cli.file_config import extract_config_args, resolve_and_load_config
+from findfmt.cli.signals import (
+    handle_broken_pipe,
+    install_signal_handlers,
+    trap_cli_signals,
+)
 from findfmt.terminal import PagerController, get_console, is_color_enabled
 
 if TYPE_CHECKING:
@@ -221,7 +226,10 @@ def display_with_pager(  # noqa: PLR0913
         pager_impl=pager_impl,
         force_color=color_flag,
     )
-    controller.display(content)
+    try:
+        controller.display(content)
+    except BrokenPipeError:
+        handle_broken_pipe(target_stream)
 
 
 def _capture_help_output(
@@ -335,3 +343,25 @@ class FindfmtCommand(typer.core.TyperCommand):
         content = _capture_help_output(self, ctx, formatter)
         if content:
             display_with_pager(content, ctx=ctx)
+
+    @override
+    def main(
+        self,
+        args: Sequence[str] | None = None,
+        prog_name: str | None = None,
+        complete_var: str | None = None,
+        standalone_mode: bool = True,
+        windows_expand_args: bool = True,
+        **extra: Any,
+    ) -> Any:
+        """Execute command with graceful Unix signal and broken pipe handling."""
+        install_signal_handlers()
+        with trap_cli_signals(standalone_mode=standalone_mode):
+            return super().main(
+                args=args,
+                prog_name=prog_name,
+                complete_var=complete_var,
+                standalone_mode=standalone_mode,
+                windows_expand_args=windows_expand_args,
+                **extra,
+            )

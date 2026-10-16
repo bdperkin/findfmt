@@ -249,14 +249,17 @@ class PagerController:
         out = content if color_active else strip_ansi(content)
         lines = len(out.splitlines())
         if self.should_page(lines):
-            with self.console.pager(pager=self.pager_impl, styles=True):
-                self.console.print(
-                    out,
-                    end="",
-                    markup=False,
-                    highlight=False,
-                    soft_wrap=True,
-                )
+            try:
+                with self.console.pager(pager=self.pager_impl, styles=True):
+                    self.console.print(
+                        out,
+                        end="",
+                        markup=False,
+                        highlight=False,
+                        soft_wrap=True,
+                    )
+            except BrokenPipeError:
+                return
         else:
             self.stream.write(out)
             self.stream.flush()

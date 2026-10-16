@@ -21,6 +21,12 @@ from findfmt.cli.help import (
 from findfmt.cli.main import app, findfmt, show_config_callback
 from findfmt.cli.pager import FindfmtCommand, display_with_pager
 from findfmt.cli.runner import execute_findfmt
+from findfmt.cli.signals import (
+    handle_broken_pipe,
+    handle_keyboard_interrupt,
+    install_signal_handlers,
+    trap_cli_signals,
+)
 from findfmt.diagnostics import (
     diagnostics_callback,
     get_diagnostics,
@@ -56,7 +62,10 @@ __all__ = [
     "get_git_version",
     "get_help_all",
     "get_version",
+    "handle_broken_pipe",
+    "handle_keyboard_interrupt",
     "help_all_callback",
+    "install_signal_handlers",
     "known_tags_callback",
     "load_toml_config",
     "main",
@@ -68,6 +77,7 @@ __all__ = [
     "main_findsummary",
     "resolve_and_load_config",
     "show_config_callback",
+    "trap_cli_signals",
     "validate_and_convert_config",
     "validate_cli_options",
     "version_callback",
