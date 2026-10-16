@@ -8,4 +8,5 @@ This section provides tutorials and guides for installing, configuring, and depl
 installation
 quickstart
 ci_integration
+localization_plan
 ```
