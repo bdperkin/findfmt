@@ -242,6 +242,9 @@ path.
 `--known-tags` : List all tags supported by the classifier engine and exit immediately (routed
 through the interactive pager on TTY sessions exceeding terminal height).
 
+`--locale, --lang LOCALE` : Set display language and locale for console messages, help descriptions,
+and diagnostic outputs (e.g. `en_US`, `es`, `fr`, `de`, `ja`, or `C` for raw untranslated strings).
+
 `-v, -V, --version` : Display the version of `findfmt` and exit. When combined with `--verbose`,
 prints runtime environment diagnostics (Python runtime, OS platform, identify engine, and Git) via
 the interactive pager when exceeding terminal height.
@@ -294,12 +297,19 @@ findfilefmt python -- -hyphenated-dir/
   [no-color.org](https://no-color.org).
 - `CLICOLOR`: When set to `0`, ANSI color codes are disabled; when `1`, colors are enabled.
 - `CLICOLOR_FORCE`: When non-zero, forces color output even when redirected or piped.
+- `LANGUAGE`: POSIX language lookup order (colon-separated list of locale codes, e.g.
+  `es_ES:es:en`).
+- `LC_ALL`: Highest-precedence locale override overriding all other `LC_*` variables.
+- `LC_MESSAGES`: Localization category determining message translation catalog selection.
+- `LANG`: Default system fallback locale identifier.
 - `FINDFMT_CONFIG`: Path to a custom user configuration file overriding defaults.
+- `XDG_CONFIG_HOME`: Configuration directory root used to resolve `$XDG_CONFIG_HOME/git/ignore`.
+- `PATHEXT`: Semicolon-delimited list of executable file extensions on Windows.
 
 ## 6. Exit Codes
 
-- `0`: Success (files matched or help/version queried).
-- `1`: Runtime traversal or classification error.
+- `0`: Success (matching files found, or help/version/diagnostics queried).
+- `1`: Runtime traversal, classification, or filesystem I/O error.
 - `2`: Invalid command-line arguments or syntax error.
 
 ## 7. Pipeline Integration Examples
