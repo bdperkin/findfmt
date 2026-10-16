@@ -107,7 +107,7 @@ lint = [
 
 [tool.hatch]
 version.source = "vcs"
-version.fallback-version = "0.8.0.dev0"
+version.fallback-version = "0.9.0.dev0"
 build.targets.wheel.packages = [ "src/findfmt" ]
 build.targets.wheel.artifacts = [ "*.mo" ]
 build.targets.wheel.hooks.custom.path = "tools/hatch_build.py"

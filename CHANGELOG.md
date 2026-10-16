@@ -7,6 +7,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-10-15
+
+### Bug Fixes
+
+- *(i18n)* Sanitize absolute paths in message catalogs and enforce relative paths (#196)
+
+### Documentation
+
+- *(i18n)* Add comprehensive localization plan guide and language epic prompt (#271)
+- *(community)* Update root governance, security, contributing, and changelog documents (#272)
+- *(sphinx)* Audit and expand user guides, CLI reference, and man page (#273)
+- Complete repository documentation audit and synchronization (#40) (#274)
+
 ## [0.8.0] - 2026-10-15
 
 ### Features
@@ -237,4 +250,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 [0.6.0]: https://github.com/bdperkin/findfmt/compare/v0.5.1...v0.6.0
 [0.7.0]: https://github.com/bdperkin/findfmt/compare/v0.6.0...v0.7.0
 [0.8.0]: https://github.com/bdperkin/findfmt/compare/v0.7.0...v0.8.0
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v0.8.0...HEAD
+[0.9.0]: https://github.com/bdperkin/findfmt/compare/v0.8.0...v0.9.0
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v0.9.0...HEAD
