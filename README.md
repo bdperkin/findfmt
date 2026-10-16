@@ -16,6 +16,7 @@
   <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/pyversions/findfmt?logo=python&logoColor=white" alt="Python Versions" /></a>
   <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/wheel/findfmt?logo=pypi&logoColor=white" alt="PyPI Wheel" /></a>
   <a href="https://github.com/bdperkin/findfmt/pkgs/container/findfmt"><img src="https://img.shields.io/badge/GHCR-container-blue?logo=docker&logoColor=white" alt="GHCR Container" /></a>
+  <a href="https://securityscorecards.dev/viewer/?uri=github.com/bdperkin/findfmt"><img src="https://api.securityscorecards.dev/projects/github.com/bdperkin/findfmt/badge" alt="OpenSSF Scorecard" /></a>
   <a href="https://github.com/bdperkin/findfmt/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
 </p>
 
@@ -241,6 +242,7 @@ ______________________________________________________________________
 | `-s, --summary` / `--no-summary`                       | Output summary frequency statistics to `stderr`                                                                         |
 | `-0, --print0` / `--no-print0`                         | Delimit paths with a NUL (`\0`) byte for `xargs -0`                                                                     |
 | `--known-tags`                                         | List all supported classification tags and exit                                                                         |
+| `--locale, --lang <locale>`                            | Set display locale for localized messages and format strings (e.g. `es`, `de`, `zh_CN`)                                 |
 | `-v, -V, --version`                                    | Display version (`--verbose` adds runtime diagnostics)                                                                  |
 | `--diagnostics`                                        | Display runtime environment diagnostics and exit                                                                        |
 | `--help-all`                                           | Display comprehensive manual, env vars, and exit codes                                                                  |
@@ -278,8 +280,10 @@ ______________________________________________________________________
 - [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)
 - [Code of Conduct](https://github.com/bdperkin/findfmt/blob/main/CODE_OF_CONDUCT.md)
 - [Security Policy](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)
-- [Support Information](https://github.com/bdperkin/findfmt/blob/main/SUPPORT.md)
+- [Support Guide](https://github.com/bdperkin/findfmt/blob/main/SUPPORT.md)
 - [Accessibility Statement](https://github.com/bdperkin/findfmt/blob/main/ACCESSIBILITY.md)
+- [Changelog](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md)
+- [Documentation & User Guides](https://bdperkin.github.io/findfmt)
 
 ## 7. License
 

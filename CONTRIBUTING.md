@@ -79,6 +79,14 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
 
 All pull requests must satisfy our quality gate before merging:
 
+- **Full Verification Suite**:
+  ```bash
+  uv run python tools/verify_quality.py
+  ```
+- **Pre-Commit Quality Suite**: Run all 25+ pre-commit hooks across the repository:
+  ```bash
+  uv run pre-commit run --all-files
+  ```
 - **100% Test Coverage**: Every line and branch must be covered.
   ```bash
   uv run pytest
@@ -92,16 +100,21 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   uv run ty check
   ```
-- **Full Verification Suite**:
+- **Documentation Build Verification**: Ensure Sphinx HTML builds cleanly with zero warnings (`-W`):
   ```bash
-  uv run python tools/verify_quality.py
+  uv run sphinx-build -M html docs/source docs/build -W
   ```
 - **Prose and Documentation Linting**: All Markdown files (`.md`) are linted using
   [Vale](https://vale.sh/) with style rules defined in `.vale.ini` and project vocabulary in
-  `.github/styles/`, automatically ignoring code blocks and URLs. Run Vale locally before submitting
-  changes:
+  `.github/styles/`:
   ```bash
   vale *.md docs/
+  ```
+- **Localization Tooling & Message Catalogs**: If updating translatable strings or locale catalogs,
+  extract and compile message catalogs:
+  ```bash
+  uv run python tools/i18n.py extract
+  uv run python tools/i18n.py compile
   ```
 
 ## 5. Commit Guidelines

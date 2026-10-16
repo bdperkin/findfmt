@@ -6,8 +6,8 @@ Only the latest release of `findfmt` is actively supported with security updates
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.3.x   | :white_check_mark: |
-| < 0.3.0 | :x:                |
+| 0.8.x   | :white_check_mark: |
+| < 0.8.0 | :x:                |
 
 ## 2. Reporting a Vulnerability
 
@@ -102,8 +102,9 @@ mitigations implemented in `findfmt`.
   command output when rendered to an interactive terminal emulator.
 - **Mitigation**: `findfmt` provides `-0` / `--print0` to delimit paths with NUL (`\0`) bytes,
   ensuring safe ingestion by downstream tools such as `xargs -0` without word splitting or shell
-  expansion. Quoting and sanitization features (`-q` / `--quote`) are tracked on the roadmap (#20
-  and #22).
+  expansion. In addition, `-q` / `--hide-control-chars` masks control characters with `?` and `-Q` /
+  `--quote-name` safely wraps paths in double quotes with backslash escaping to protect terminal
+  emulators against control injection.
 
 ### 3.4. Supply Chain & Dependency Hygiene
 
@@ -113,7 +114,7 @@ mitigations implemented in `findfmt`.
   could introduce vulnerabilities into the toolchain.
 - **Mitigation**: Continuous dependency vulnerability scanning is integrated into the primary
   verification quality gate via `uv audit --preview-features audit-command`, cross-referencing all
-  91 resolved dependencies against the Python Packaging Advisory Database.
+  resolved project dependencies against the Python Packaging Advisory Database.
 
 #### 3.4.2. Absence of Dangerous Shell Executions
 
