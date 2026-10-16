@@ -197,11 +197,12 @@ def test_cli_diagnostics_shows_none_when_no_config():
     assert "Configuration: none" in res.stdout
 
 
-def test_cli_missing_explicit_config_error():
+def test_cli_missing_explicit_config_error(tmp_path: Path):
+    nonexistent = tmp_path / "custom.toml"
     runner = CliRunner()
-    res = runner.invoke(app, ["--config", "/nonexistent/path/custom.toml"])
+    res = runner.invoke(app, ["--config", str(nonexistent)])
     assert res.exit_code == 2
-    assert "Error: Configuration file '/nonexistent/path/custom.toml' not found." in res.stderr
+    assert f"Error: Configuration file '{nonexistent}' not found." in res.stderr
 
 
 def test_cli_invalid_toml_error(tmp_path: Path):
@@ -260,9 +261,10 @@ def test_cli_help_all_displays_despite_invalid_config(tmp_path: Path):
 
 
 def test_get_diagnostics_with_context_meta_config():
+    p = Path("/custom/meta_config.toml")
     cmd = typer.main.get_command(app)
     ctx = typer.Context(cmd)
-    ctx.meta["findfmt_config_path"] = Path("/custom/meta_config.toml")
+    ctx.meta["findfmt_config_path"] = p
 
     diag = get_diagnostics(ctx=ctx)
-    assert "Configuration: /custom/meta_config.toml" in diag
+    assert f"Configuration: {p}" in diag

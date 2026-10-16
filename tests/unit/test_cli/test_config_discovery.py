@@ -134,12 +134,18 @@ def test_find_config_file_xdg_env_var(tmp_path: Path):
     cfg_file.parent.mkdir(parents=True)
     cfg_file.write_text("format = 'table'\n")
 
-    with patch.dict(os.environ, {"XDG_CONFIG_HOME": str(xdg_dir), "FINDFMT_CONFIG": ""}):
+    with (
+        patch("platform.system", return_value="Linux"),
+        patch.dict(os.environ, {"XDG_CONFIG_HOME": str(xdg_dir), "FINDFMT_CONFIG": ""}),
+    ):
         path, is_explicit = find_config_file(no_config=False)
         assert path is None
         assert is_explicit is False
 
-    with patch.dict(os.environ, {"XDG_CONFIG_HOME": str(xdg_dir)}):
+    with (
+        patch("platform.system", return_value="Linux"),
+        patch.dict(os.environ, {"XDG_CONFIG_HOME": str(xdg_dir)}),
+    ):
         os.environ.pop("FINDFMT_CONFIG", None)
         path, is_explicit = find_config_file()
         assert path == cfg_file
@@ -204,7 +210,10 @@ def test_find_config_file_pyproject_fallback(tmp_path: Path):
     pyproject = work_dir / "pyproject.toml"
     pyproject.write_text("[tool.findfmt]\nformat = 'json'\n")
 
-    with patch.dict(os.environ, {"XDG_CONFIG_HOME": str(tmp_path / "nonexistent")}, clear=False):
+    with (
+        patch("platform.system", return_value="Linux"),
+        patch.dict(os.environ, {"XDG_CONFIG_HOME": str(tmp_path / "nonexistent")}, clear=False),
+    ):
         os.environ.pop("FINDFMT_CONFIG", None)
         path, is_explicit = find_config_file(cwd=work_dir)
         assert path == pyproject
@@ -214,7 +223,10 @@ def test_find_config_file_pyproject_fallback(tmp_path: Path):
 def test_find_config_file_not_found(tmp_path: Path):
     empty_dir = tmp_path / "empty"
     empty_dir.mkdir()
-    with patch.dict(os.environ, {"XDG_CONFIG_HOME": str(tmp_path / "nonexistent")}, clear=False):
+    with (
+        patch("platform.system", return_value="Linux"),
+        patch.dict(os.environ, {"XDG_CONFIG_HOME": str(tmp_path / "nonexistent")}, clear=False),
+    ):
         os.environ.pop("FINDFMT_CONFIG", None)
         path, is_explicit = find_config_file(cwd=empty_dir)
         assert path is None

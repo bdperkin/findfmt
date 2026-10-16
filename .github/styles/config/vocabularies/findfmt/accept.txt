@@ -115,3 +115,7 @@
 (?i)n'ko
 (?i)manding
 (?i)mojibake
+(?i)bool
+(?i)boolean
+(?i)dotfiles
+(?i)strftime

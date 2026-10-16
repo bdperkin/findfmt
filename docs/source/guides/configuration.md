@@ -26,9 +26,11 @@ where higher-priority sources override lower-priority sources:
 6. **Built-in Defaults** (Lowest Priority): Factory default options (`format = "text"`,
    `color = "auto"`, `pager = "auto"`, etc.).
 
-> [!NOTE] Passing `--no-config` on the command line or setting `FINDFMT_CONFIG=""` completely
-> suppresses discovery and loading of configuration files, forcing `findfmt` to rely strictly on
-> built-in defaults and command-line flags.
+```{note}
+Passing `--no-config` on the command line or setting `FINDFMT_CONFIG=""` completely
+suppresses discovery and loading of configuration files, forcing `findfmt` to rely strictly on
+built-in defaults and command-line flags.
+```
 
 ______________________________________________________________________
 
