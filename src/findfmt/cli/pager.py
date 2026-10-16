@@ -6,7 +6,7 @@ import contextlib
 import inspect
 import io
 import sys
-from typing import TYPE_CHECKING, Literal, TextIO, cast
+from typing import TYPE_CHECKING, Any, Literal, TextIO, cast
 
 if sys.version_info >= (3, 12):  # pragma: no cover
     from typing import override
@@ -17,6 +17,7 @@ import typer
 import typer.core
 from typer import rich_utils
 
+from findfmt.cli.file_config import extract_config_args, resolve_and_load_config
 from findfmt.terminal import PagerController, get_console, is_color_enabled
 
 if TYPE_CHECKING:
@@ -275,6 +276,53 @@ def _capture_help_output(
 
 class FindfmtCommand(typer.core.TyperCommand):
     """Custom TyperCommand routing help output through interactive pager on TTY."""
+
+    @override
+    def make_context(
+        self,
+        info_name: str | None,
+        args: list[str],
+        parent: _click.Context | None = None,
+        **extra: Any,
+    ) -> _click.Context:
+        """Create Click execution context with injected configuration defaults.
+
+        Args:
+            info_name: Invoked command name.
+            args: Command-line arguments.
+            parent: Optional parent Click context.
+            **extra: Extra keyword arguments for Context creation.
+
+        Returns:
+            Configured Click Context instance.
+        """
+        config_path, no_config, _ = extract_config_args(args)
+        help_requested = any(arg in ("--help", "-h", "--help-all") for arg in args)
+
+        if not help_requested:
+            path, defaults = resolve_and_load_config(
+                explicit_path=config_path,
+                no_config=no_config,
+            )
+        else:
+            try:
+                path, defaults = resolve_and_load_config(
+                    explicit_path=config_path,
+                    no_config=no_config,
+                )
+            except typer.Exit:
+                path, defaults = None, {}
+
+        existing_defaults = extra.get("default_map")
+        merged_defaults = dict(defaults)
+        if isinstance(existing_defaults, dict):
+            merged_defaults.update(existing_defaults)
+
+        extra["default_map"] = merged_defaults
+        ctx = super().make_context(info_name, args, parent=parent, **extra)
+        ctx.meta["findfmt_config_path"] = path
+        ctx.meta["findfmt_config_data"] = defaults
+        return ctx
 
     @override
     def format_help(self, ctx: _click.Context, formatter: _click.HelpFormatter) -> None:

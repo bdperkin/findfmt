@@ -32,6 +32,7 @@ _OPTIONS_WITH_VALUE: frozenset[str] = frozenset(
         "--exclude",
         "--exclude-tag",
         "--shebang",
+        "--config",
     },
 )
 

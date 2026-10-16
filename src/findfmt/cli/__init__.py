@@ -2,13 +2,23 @@
 
 from __future__ import annotations
 
-from findfmt.cli.config import build_traversal_config, validate_cli_options
+from findfmt.cli.config import (
+    build_traversal_config,
+    find_config_file,
+    format_config_dump,
+    get_active_config_data,
+    get_active_config_path,
+    load_toml_config,
+    resolve_and_load_config,
+    validate_and_convert_config,
+    validate_cli_options,
+)
 from findfmt.cli.help import (
     get_help_all,
     help_all_callback,
     known_tags_callback,
 )
-from findfmt.cli.main import app, findfmt
+from findfmt.cli.main import app, findfmt, show_config_callback
 from findfmt.cli.pager import FindfmtCommand, display_with_pager
 from findfmt.cli.runner import execute_findfmt
 from findfmt.diagnostics import (
@@ -37,13 +47,18 @@ __all__ = [
     "diagnostics_callback",
     "display_with_pager",
     "execute_findfmt",
+    "find_config_file",
     "findfmt",
+    "format_config_dump",
+    "get_active_config_data",
+    "get_active_config_path",
     "get_diagnostics",
     "get_git_version",
     "get_help_all",
     "get_version",
     "help_all_callback",
     "known_tags_callback",
+    "load_toml_config",
     "main",
     "main_findfilefmt",
     "main_findfilemime",
@@ -51,6 +66,9 @@ __all__ = [
     "main_findfmt0",
     "main_findshebang",
     "main_findsummary",
+    "resolve_and_load_config",
+    "show_config_callback",
+    "validate_and_convert_config",
     "validate_cli_options",
     "version_callback",
 ]

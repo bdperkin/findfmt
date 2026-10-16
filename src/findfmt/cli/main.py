@@ -5,12 +5,13 @@ from __future__ import annotations
 import typer
 
 from findfmt.cli import help as h
-from findfmt.cli.options import (  # noqa: TC001
+from findfmt.cli.options import (
     OptAbsolute,
     OptAllTags,
     OptAnsiLines,
     OptClassify,
     OptColor,
+    OptConfig,
     OptCp437,
     OptCtime,
     OptDevice,
@@ -45,6 +46,7 @@ from findfmt.cli.options import (  # noqa: TC001
     OptMatchDirs,
     OptMaxDepth,
     OptMtime,
+    OptNoConfig,
     OptNoIgnore,
     OptNoIndent,
     OptNoLinks,
@@ -63,6 +65,7 @@ from findfmt.cli.options import (  # noqa: TC001
     OptRelative,
     OptReverse,
     OptShebang,
+    OptShowConfig,
     OptSi,
     OptSize,
     OptSort,
@@ -77,6 +80,7 @@ from findfmt.cli.options import (  # noqa: TC001
     OptVerbose,
     OptVersion,
     OptXml,
+    show_config_callback,
 )
 from findfmt.cli.pager import FindfmtCommand
 from findfmt.cli.runner import execute_findfmt
@@ -109,6 +113,7 @@ __all__ = [
     "help_all_callback",
     "known_tags_callback",
     "main",
+    "show_config_callback",
     "version_callback",
 ]
 
@@ -194,12 +199,25 @@ def findfmt(
     version: OptVersion = None,
     help_all: OptHelpAll = False,
     locale: OptLocale = None,
+    config: OptConfig = None,
+    no_config: OptNoConfig = False,
+    show_config: OptShowConfig = False,
 ) -> None:
     """Execute file discovery and classification matching."""
     params = {
         k: v
         for k, v in locals().items()
-        if k not in {"known_tags", "verbose", "diagnostics", "version", "help_all"}
+        if k
+        not in {
+            "known_tags",
+            "verbose",
+            "diagnostics",
+            "version",
+            "help_all",
+            "config",
+            "no_config",
+            "show_config",
+        }
     }
     execute_findfmt(**params)
 

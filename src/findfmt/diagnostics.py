@@ -11,6 +11,11 @@ from importlib.metadata import PackageNotFoundError, version
 
 import typer
 
+from findfmt.cli.file_config import (
+    format_config_dump,
+    get_active_config_data,
+    get_active_config_path,
+)
 from findfmt.cli.pager import display_with_pager
 from findfmt.i18n import _
 
@@ -19,6 +24,7 @@ __all__ = [
     "get_diagnostics",
     "get_git_version",
     "get_version",
+    "show_config_callback",
     "version_callback",
 ]
 
@@ -61,8 +67,11 @@ def get_git_version() -> str | None:
     return None
 
 
-def get_diagnostics() -> str:
+def get_diagnostics(ctx: typer.Context | None = None) -> str:
     """Compile runtime environment diagnostics.
+
+    Args:
+        ctx: Optional Click/Typer context.
 
     Returns:
         Formatted multi-line diagnostics string ending in a newline.
@@ -81,6 +90,16 @@ def get_diagnostics() -> str:
 
     git_ver = get_git_version()
     lines.append(f"Git: {git_ver or _('not found')}")
+
+    config_path = None
+    if ctx is not None:
+        config_path = ctx.meta.get("findfmt_config_path")
+
+    if config_path is None:
+        config_path = get_active_config_path()
+
+    cfg_str = str(config_path) if config_path is not None else _("none")
+    lines.append(f"Configuration: {cfg_str}")
 
     return "\n".join(lines) + "\n"
 
@@ -160,7 +179,7 @@ def version_callback(
 
     if value:
         if _is_verbose_requested(ctx):
-            display_with_pager(get_diagnostics(), ctx=ctx)
+            display_with_pager(get_diagnostics(ctx=ctx), ctx=ctx)
         else:
             sys.stdout.write(f"findfmt {get_version()}\n")
 
@@ -185,5 +204,34 @@ def diagnostics_callback(
         ctx = None
 
     if value:
-        display_with_pager(get_diagnostics(), ctx=ctx)
+        display_with_pager(get_diagnostics(ctx=ctx), ctx=ctx)
+        raise typer.Exit(code=0)
+
+
+def show_config_callback(
+    ctx: typer.Context | bool | None = None,
+    value: bool = False,
+) -> None:
+    """Display active configuration settings and exit.
+
+    Args:
+        ctx: Typer context, if provided by Click callback.
+        value: Boolean flag indicating if show-config flag was passed.
+
+    Raises:
+        typer.Exit: Upon printing configuration settings.
+    """
+    if isinstance(ctx, bool):
+        value = ctx
+        ctx = None
+
+    if value:
+        path = get_active_config_path()
+        data = get_active_config_data()
+        if ctx is not None:
+            path = ctx.meta.get("findfmt_config_path", path)
+            data = ctx.meta.get("findfmt_config_data", data)
+
+        content = format_config_dump(path, data)
+        display_with_pager(content, ctx=ctx)
         raise typer.Exit(code=0)

@@ -7,6 +7,16 @@ from typing import TYPE_CHECKING
 
 import typer
 
+from findfmt.cli.file_config import (
+    find_config_file,
+    format_config_dump,
+    get_active_config_data,
+    get_active_config_path,
+    load_toml_config,
+    reset_active_config,
+    resolve_and_load_config,
+    validate_and_convert_config,
+)
 from findfmt.i18n import _
 from findfmt.models import SortKey, TraversalConfig
 from findfmt.summary import parse_tag_arguments
@@ -15,7 +25,18 @@ from findfmt.traversal.sorting import resolve_sort_key
 if TYPE_CHECKING:
     from findfmt.formatters import OutputFormat
 
-__all__ = ["build_traversal_config", "validate_cli_options"]
+__all__ = [
+    "build_traversal_config",
+    "find_config_file",
+    "format_config_dump",
+    "get_active_config_data",
+    "get_active_config_path",
+    "load_toml_config",
+    "reset_active_config",
+    "resolve_and_load_config",
+    "validate_and_convert_config",
+    "validate_cli_options",
+]
 
 
 def _validate_file_exists(file_path: Path | None, label: str) -> None:

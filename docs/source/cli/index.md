@@ -246,6 +246,14 @@ path.
 
 ### 3.4. Information & Diagnostics
 
+`--config PATH` : Path to a custom user configuration file overriding default settings.
+
+`--no-config` : Suppress discovery and loading of any configuration file, enforcing built-in factory
+defaults.
+
+`--show-config` : Display the active configuration file and resolved configuration settings, then
+exit immediately.
+
 `--known-tags` : List all tags supported by the classifier engine and exit immediately (routed
 through the interactive pager on TTY sessions exceeding terminal height).
 
@@ -309,8 +317,12 @@ findfilefmt python -- -hyphenated-dir/
 - `LC_ALL`: Highest-precedence locale override overriding all other `LC_*` variables.
 - `LC_MESSAGES`: Localization category determining message translation catalog selection.
 - `LANG`: Default system fallback locale identifier.
-- `FINDFMT_CONFIG`: Path to a custom user configuration file overriding defaults.
-- `XDG_CONFIG_HOME`: Configuration directory root used to resolve `$XDG_CONFIG_HOME/git/ignore`.
+- `FINDFMT_CONFIG`: Path to a custom user configuration file overriding defaults. When unset,
+  `findfmt` checks `$XDG_CONFIG_HOME/findfmt/config.toml` (or `~/.config/findfmt/config.toml`),
+  followed by `pyproject.toml` (`[tool.findfmt]` table) in the working directory. Refer to the
+  [Configuration Guide](../guides/configuration.md) for full schema details.
+- `XDG_CONFIG_HOME`: Configuration directory root used to resolve
+  `$XDG_CONFIG_HOME/findfmt/config.toml` and `$XDG_CONFIG_HOME/git/ignore`.
 - `PATHEXT`: Semicolon-delimited list of executable file extensions on Windows.
 
 ## 7. Exit Status

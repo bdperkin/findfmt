@@ -8,7 +8,7 @@ from typing import Annotated
 import typer
 
 from findfmt.cli import help as h
-from findfmt.diagnostics import diagnostics_callback, version_callback
+from findfmt.diagnostics import diagnostics_callback, show_config_callback, version_callback
 from findfmt.formatters import OutputFormat
 from findfmt.i18n import _, locale_callback
 
@@ -447,5 +447,29 @@ OptLocale = Annotated[
         is_eager=True,
         callback=locale_callback,
         help=h.HELP_LOCALE,
+    ),
+]
+OptConfig = Annotated[
+    Path | None,
+    typer.Option(
+        "--config",
+        help=h.HELP_CONFIG,
+    ),
+]
+OptNoConfig = Annotated[
+    bool,
+    typer.Option(
+        "--no-config",
+        help=h.HELP_NO_CONFIG,
+    ),
+]
+
+OptShowConfig = Annotated[
+    bool,
+    typer.Option(
+        "--show-config",
+        is_eager=True,
+        callback=show_config_callback,
+        help=h.HELP_SHOW_CONFIG,
     ),
 ]

@@ -17,6 +17,7 @@ __all__ = [
     "HELP_ANSI_LINES",
     "HELP_CLASSIFY",
     "HELP_COLOR",
+    "HELP_CONFIG",
     "HELP_CP437",
     "HELP_CTIME",
     "HELP_DEVICE",
@@ -48,6 +49,7 @@ __all__ = [
     "HELP_MATCH_DIRS",
     "HELP_MAX_DEPTH",
     "HELP_MTIME",
+    "HELP_NO_CONFIG",
     "HELP_NO_IGNORE",
     "HELP_NO_INDENT",
     "HELP_NO_LINKS",
@@ -65,6 +67,7 @@ __all__ = [
     "HELP_RELATIVE",
     "HELP_REVERSE",
     "HELP_SHEBANG",
+    "HELP_SHOW_CONFIG",
     "HELP_SI",
     "HELP_SIZE",
     "HELP_SORT",
@@ -211,6 +214,9 @@ HELP_HELP_ALL = _(
     "Display comprehensive help reference including environment variables, "
     "exit codes, and examples.",
 )
+HELP_CONFIG = _("Path to custom configuration file overriding defaults.")
+HELP_NO_CONFIG = _("Suppress loading any configuration file.")
+HELP_SHOW_CONFIG = _("Display resolved configuration settings and exit.")
 HELP_LOCALE = _("Explicitly set locale for translations and display (e.g. 'en_US', 'es', 'C').")
 
 
@@ -297,6 +303,9 @@ def get_help_all() -> str:
         "  --list-tags / --no-list-tags  Display identified tags [default: no-list-tags].\n"
         "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n\n"
         "Help & Diagnostics:\n"
+        "  --config <path>               Path to custom configuration file overriding defaults.\n"
+        "  --no-config                   Suppress loading any configuration file.\n"
+        "  --show-config                 Display resolved configuration settings and exit.\n"
         "  --known-tags                  List all known classification tags and exit.\n"
         "  --locale, --lang <locale>     Set display locale (e.g. 'en_US', 'es', 'C').\n"
         "  --version, -v, -V             Display version (use with --verbose for diagnostics).\n"
