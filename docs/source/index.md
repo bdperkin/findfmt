@@ -58,6 +58,68 @@ extensions.
 - **Modern Python Architecture**: Built with a strict `uv`-first methodology, 100% test coverage,
   and strict static type checking.
 
+## 2. Quickstart
+
+### 2.1. Direct Execution & Installation
+
+Execute immediately with `uvx` without an explicit installation step:
+
+```bash
+uvx findfmt --help
+uvx findfmt -t python
+```
+
+Install as an isolated user tool or project dependency:
+
+```bash
+# Global tool installation via uv
+uv tool install findfmt
+
+# Add to managed Python project
+uv add findfmt
+
+# Standard pip installation
+pip install findfmt
+```
+
+### 2.2. Core Discovery Workflows
+
+```bash
+# Locate all Python files
+findfmt -t python
+
+# Locate files matching either Python or Shell scripts
+findfmt -t python,shell
+
+# Discover executable scripts by shebang pattern
+findfmt --shebang bash
+
+# Filter by glob pattern while honoring .gitignore
+findfmt -P "*.py|*.md"
+
+# Safe piping with NUL delimiters for xargs
+findfmt -t python -0 | xargs -0 ruff format
+```
+
+### 2.3. Programmatic Python Library Usage
+
+Integrate `findfmt` directly into Python scripts and automated pipelines:
+
+```python
+from findfmt import FileInfo, TraversalConfig, find_files, get_formatter
+
+# Configure traversal scope and format filtering
+config = TraversalConfig(include_tags={"python"}, root_paths=["src"])
+
+# Iterate through discovered FileInfo objects
+for file_info in find_files(config):
+    print(f"{file_info.path} ({file_info.size_bytes} bytes)")
+
+# Format output using any built-in serializer (e.g. table, json, tree)
+formatter = get_formatter("table")
+print(formatter.format(find_files(config)))
+```
+
 ```{toctree}
 :maxdepth: 2
 :caption: User Guide
@@ -96,7 +158,7 @@ security
 
 ______________________________________________________________________
 
-## 2. Community & Feedback
+## 3. Community & Feedback
 
 - **Source Code**: [github.com/bdperkin/findfmt](https://github.com/bdperkin/findfmt)
 - **Issue Tracker**: Report bugs, request formats, or propose features on

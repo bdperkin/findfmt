@@ -93,7 +93,8 @@ level, sorting each group by active criteria.
 ### 3.3. Output Controls
 
 - `-f, --format FORMAT` : Choose the output serialization format (`text`, `json`, `jsonl`, `yaml`,
-  `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`). Defaults to `text`.
+  `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`, `xml`, `html`). Defaults
+  to `text`.
 
 - `text`: Standard line-oriented or NUL-delimited plain text paths.
 
@@ -407,6 +408,21 @@ findfmt --hyperlink --hyperlink-schema "vscode://file/"
 
 # Render hierarchical tree with OSC 8 hyperlinks
 findfmt --tree --hyperlink
+```
+
+### 8.7. Structured Document and Streaming Exports
+
+Stream or serialize metadata records in line-delimited JSON, YAML, or XML formats:
+
+```bash
+# Stream line-delimited JSON records (NDJSON)
+findfmt -f jsonl -t yaml
+
+# Export YAML document
+findfmt -f yaml -t shell
+
+# Export hierarchical XML document
+findfmt -f xml -L 2
 ```
 
 ## 9. See Also

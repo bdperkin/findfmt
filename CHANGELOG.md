@@ -7,6 +7,71 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-19
+
+### Overview & Stability Commitment
+
+This release represents the first major production-ready release of **findfmt** (v1.0.0 GA).
+Starting with v1.0.0, `findfmt` strictly adheres to
+[Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). All public Python APIs exported
+from the top-level `findfmt` package (`find_files`, `FileInfo`, `TraversalConfig`, `get_formatter`,
+`classify_file`, `OutputFormat`, `FindFmtError`), as well as all CLI command options, configuration
+schemas, environment variables, and exit codes, are guaranteed backwards-compatible across future
+1.x releases.
+
+### Flagship Highlights
+
+- **Intelligent Content Classification**: File classification powered by `identify` and shebang
+  heuristics, reliably detecting script interpreters and MIME types even in the absence of file
+  extensions.
+- **Hierarchical Traversal Engine**: High-performance, `.gitignore`-aware directory walker with
+  early subtree pruning, maintaining constant $O(1)$ streaming memory across massive repositories.
+- **Multi-Format Serialization Suite**: Built-in support for 14 serialization formats (`text`,
+  `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`,
+  `xml`, `html`) with Rich terminal styling, customizable borders, and OSC 8 terminal hyperlinks.
+- **Hierarchical Configuration System**: Cascading configuration resolution supporting CLI
+  arguments, environment variables, user configuration files (`~/.config/findfmt/config.toml` or
+  Windows `%APPDATA%`), and `pyproject.toml` (`[tool.findfmt]`).
+- **Terminal Security & Signal Resilience**: Automatic ANSI escape sequence stripping and
+  control-character masking for untrusted filenames by default, paired with graceful Unix signal
+  handling (`SIGPIPE`, `SIGINT`).
+- **Internationalization & Localization**: Native `gettext` runtime architecture (`findfmt.i18n`)
+  supporting localized console messages, help descriptions, and locale-aware number/date formatting.
+
+### Added
+
+- *(config)* Hierarchical configuration file support with `--config`, `--no-config`,
+  `--show-config`, `FINDFMT_CONFIG` environment variable, XDG and Windows AppData discovery, and
+  `pyproject.toml` `[tool.findfmt]` table integration (#281, #285).
+- *(perf)* Official v1.0.0 traversal throughput and memory baselines establishing canonical
+  performance benchmarks across flat (10k), deep (20-level hierarchy), and monorepo topologies
+  (#284, #290).
+- *(api)* Public module boundary audit, explicit `__all__` across all 49 submodules under `findfmt`,
+  and top-level package exports for seamless library integration (#277, #288).
+- *(format)* Full multi-format serialization suite supporting 14 output targets with intro/outro
+  templating and OSC 8 terminal hyperlinks (#172, #173, #174).
+
+### Changed
+
+- *(security)* Enforce automatic ANSI escape sequence stripping and control-character masking for
+  untrusted filenames by default across all formatters, Rich tables, tree views, Markdown, and XML
+  serializers, with `--literal`/`-N` for raw output (#283, #287).
+- *(signals)* Robust Unix signal handling (`SIGPIPE`, `SIGINT`) across CLI runner, entrypoints, and
+  pager dispatch, terminating gracefully with zero Python tracebacks when piped to `head`, `sed`, or
+  closed downstream processes (#282, #286).
+- *(deps)* Updated pre-commit hooks and pinned stable dependencies (`uv-pre-commit 0.13.1`,
+  `ruff-pre-commit v0.17.1`, `pymarkdown v0.9.41`, `pyroma 5.0.1`, `ty-pre-commit v0.0.84`) (#291).
+
+### Fixed
+
+- *(audit)* Comprehensive cross-platform edge cases, broken symlink resilience, cyclic symlink loop
+  detection, and Windows drive path normalization in `build_file_uri` (#280, #289).
+
+### Documentation
+
+- *(sphinx)* Documentation, discoverability, quickstart guides, CLI reference synchronization, and
+  manual pages polish for v1.0.0 release (#278).
+
 ## [0.9.0] - 2026-10-15
 
 ### Bug Fixes
@@ -251,4 +316,5 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 [0.7.0]: https://github.com/bdperkin/findfmt/compare/v0.6.0...v0.7.0
 [0.8.0]: https://github.com/bdperkin/findfmt/compare/v0.7.0...v0.8.0
 [0.9.0]: https://github.com/bdperkin/findfmt/compare/v0.8.0...v0.9.0
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v0.9.0...HEAD
+[1.0.0]: https://github.com/bdperkin/findfmt/compare/v0.9.0...v1.0.0
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.0.0...HEAD

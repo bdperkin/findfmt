@@ -119,3 +119,10 @@
 (?i)boolean
 (?i)dotfiles
 (?i)strftime
+(?i)subtree
+(?i)perf
+(?i)api
+(?i)traceback
+(?i)tracebacks
+(?i)discoverability
+(?i)semver
