@@ -70,7 +70,13 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 ### Documentation
 
 - *(sphinx)* Documentation, discoverability, quickstart guides, CLI reference synchronization, and
-  manual pages polish for v1.0.0 release (#278).
+  manual pages polish for v1.0.0 release (#278, #293).
+
+### Packaging & Security
+
+- *(packaging)* Comprehensive packaging, distribution, and supply chain security verification for
+  v1.0.0, including OIDC Trusted Publishing, global MO catalog compilation in wheels and source
+  distributions, and release quality gate automation (#279, #294).
 
 ## [0.9.0] - 2026-10-15
 
