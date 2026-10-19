@@ -66,6 +66,9 @@ def test_smoke_zero_matching_files_filter(tmp_path: Path) -> None:
 
 def test_smoke_unreadable_directory_resilience(tmp_path: Path) -> None:
     """Verify unreadable subdirectories are skipped gracefully and unreadable roots fail cleanly."""
+    if sys.platform == "win32":
+        pytest.skip("POSIX permissions (chmod 0o000) do not restrict directory reading on Windows")
+
     valid_file = tmp_path / "valid.txt"
     valid_file.write_text("ok", encoding="utf-8")
 
@@ -88,6 +91,15 @@ def test_smoke_unreadable_directory_resilience(tmp_path: Path) -> None:
         assert "not readable" in res_root.output.lower()
     finally:
         unreadable_sub.chmod(0o755)
+
+
+def test_smoke_permission_error_graceful(tmp_path: Path) -> None:
+    """Verify PermissionError during directory scanning is handled without tracebacks."""
+    (tmp_path / "valid.txt").write_text("ok", encoding="utf-8")
+    with patch("os.scandir", side_effect=PermissionError("Access denied")):
+        res = runner.invoke(app, [str(tmp_path), "--no-pager"])
+        assert res.exit_code == 0
+        assert "Traceback" not in res.output
 
 
 def test_smoke_broken_symlinks_and_cycles(tmp_path: Path) -> None:
