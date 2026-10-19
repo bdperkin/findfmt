@@ -1,0 +1,87 @@
+{
+  "timestamp": "2026-10-19T17:30:00Z",
+  "findfmt_version": "1.0.0",
+  "python_version": "3.13.15",
+  "platform": "Linux-x86_64",
+  "seed": 42,
+  "metrics": [
+    {
+      "tier": "small",
+      "target_path": "synthetic-small",
+      "files_count": 518,
+      "dirs_count": 60,
+      "duration_seconds": 0.1785,
+      "files_per_sec": 2902.4,
+      "dirs_per_sec": 336.1,
+      "first_file_latency_ms": 3.87,
+      "peak_memory_bytes": 94371,
+      "peak_memory_mb": 0.09,
+      "peak_rss_mb": 843.05
+    },
+    {
+      "tier": "medium",
+      "target_path": "synthetic-medium",
+      "files_count": 7901,
+      "dirs_count": 60,
+      "duration_seconds": 2.4989,
+      "files_per_sec": 3162.0,
+      "dirs_per_sec": 24.0,
+      "first_file_latency_ms": 10.24,
+      "peak_memory_bytes": 744488,
+      "peak_memory_mb": 0.71,
+      "peak_rss_mb": 843.05
+    },
+    {
+      "tier": "flat",
+      "target_path": "synthetic-flat-10k",
+      "files_count": 8261,
+      "dirs_count": 0,
+      "duration_seconds": 2.3497,
+      "files_per_sec": 3522.9,
+      "dirs_per_sec": 0.0,
+      "first_file_latency_ms": 348.84,
+      "peak_memory_bytes": 12519997,
+      "peak_memory_mb": 11.94,
+      "peak_rss_mb": 843.05
+    },
+    {
+      "tier": "deep",
+      "target_path": "synthetic-deep-20lvl",
+      "files_count": 4119,
+      "dirs_count": 286,
+      "duration_seconds": 3.4016,
+      "files_per_sec": 1211.8,
+      "dirs_per_sec": 84.1,
+      "first_file_latency_ms": 3.68,
+      "peak_memory_bytes": 597688,
+      "peak_memory_mb": 0.57,
+      "peak_rss_mb": 843.05
+    },
+    {
+      "tier": "real-world",
+      "target_path": "synthetic-monorepo",
+      "files_count": 826,
+      "dirs_count": 35,
+      "duration_seconds": 0.3734,
+      "files_per_sec": 2213.1,
+      "dirs_per_sec": 93.7,
+      "first_file_latency_ms": 5.93,
+      "peak_memory_bytes": 199229,
+      "peak_memory_mb": 0.19,
+      "peak_rss_mb": 843.05
+    },
+    {
+      "tier": "findfmt-repo",
+      "target_path": ".",
+      "files_count": 233,
+      "dirs_count": 1933,
+      "duration_seconds": 0.1575,
+      "files_per_sec": 1480.3,
+      "dirs_per_sec": 12273.0,
+      "first_file_latency_ms": 9.24,
+      "peak_memory_bytes": 136314,
+      "peak_memory_mb": 0.13,
+      "peak_rss_mb": 843.05
+    }
+  ]
+}

@@ -3,163 +3,118 @@
 from __future__ import annotations
 
 import argparse
-import contextlib
+import io
 import json
-import os
 import platform
-import random
 import sys
 import tempfile
 import time
 import tracemalloc
-from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, cast
+from typing import TYPE_CHECKING
 
 from rich import box
 from rich.console import Console
 from rich.table import Table
 
+if sys.version_info >= (3, 12):  # pragma: no cover
+    from typing import override
+else:  # pragma: no cover
+    from typing_extensions import override
+
+from tools.benchmark_models import (
+    BenchmarkMetric,
+    BenchmarkReport,
+    ComparisonRow,
+    compute_comparisons,
+    load_baseline_report,
+    save_baseline_report,
+)
+from tools.benchmark_topologies import (
+    DEFAULT_SEED,
+    count_directories,
+    generate_synthetic_tree,
+)
+
 from findfmt.diagnostics import get_version
+from findfmt.formatters import (
+    CsvFormatter,
+    JsonFormatter,
+    JsonlFormatter,
+    RichTableFormatter,
+    RichTreeFormatter,
+    TextFormatter,
+    TsvFormatter,
+)
 from findfmt.models import TraversalConfig
 from findfmt.traversal.engine import find_files
 
-DEFAULT_SEED = 42
+try:
+    import resource
+except ImportError:  # pragma: no cover
+    resource = None  # type: ignore[assignment]
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+
+    from findfmt.models import FileInfo
+
 DEFAULT_RUNS = 1
 
 TIER_FILE_COUNTS: dict[str, int] = {"small": 800, "medium": 12_000, "monorepo": 100_000}
 
 
-class _DictMixin:
-    """Mixin for dataclass dictionary serialization."""
+class _NullSink(io.StringIO):
+    """Sink that discards formatted output while measuring TTFR and write count."""
 
-    __slots__ = ()
+    __slots__ = ("first_write_time", "write_count")
 
-    def to_dict(self) -> dict[str, Any]:
-        """Convert dataclass to dictionary representation."""
-        return asdict(cast("Any", self))
+    def __init__(self) -> None:
+        """Initialize empty null sink."""
+        super().__init__()
+        self.first_write_time: float | None = None
+        self.write_count: int = 0
 
+    @override
+    def write(self, s: str) -> int:
+        """Discard content while recording first write timestamp."""
+        if self.first_write_time is None and s:
+            self.first_write_time = time.perf_counter()
 
-@dataclass(frozen=True, slots=True)
-class BenchmarkMetric(_DictMixin):
-    """Performance metrics recorded for a benchmark tier."""
+        self.write_count += 1
+        return len(s)
 
-    tier: str
-    target_path: str
-    files_count: int
-    dirs_count: int
-    duration_seconds: float
-    files_per_sec: float
-    dirs_per_sec: float
-    first_file_latency_ms: float
-    peak_memory_bytes: int
-    peak_memory_mb: float
-
-
-@dataclass(frozen=True, slots=True)
-class BenchmarkReport(_DictMixin):
-    """Comprehensive benchmark report with environment metadata."""
-
-    timestamp: str
-    findfmt_version: str
-    python_version: str
-    platform: str
-    seed: int
-    metrics: list[BenchmarkMetric]
+    @override
+    def writelines(self, lines: Iterable[str]) -> None:
+        """Discard lines while recording first write timestamp."""
+        for line in lines:
+            self.write(line)
 
 
-@dataclass(frozen=True, slots=True)
-class ComparisonRow(_DictMixin):
-    """Comparison deltas between baseline and current runs."""
+def get_peak_rss_mb() -> float:
+    """Measure peak resident set size in megabytes."""
+    if resource is None:
+        return 0.0
 
-    tier: str
-    baseline_files_per_sec: float
-    current_files_per_sec: float
-    throughput_delta_pct: float
-    baseline_latency_ms: float
-    current_latency_ms: float
-    latency_delta_pct: float
-    baseline_memory_mb: float
-    current_memory_mb: float
-    memory_delta_pct: float
-    regressed: bool
+    try:
+        rss = float(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+        if sys.platform == "darwin":
+            return rss / (1024.0 * 1024.0)
+
+        return rss / 1024.0
+    except (AttributeError, OSError):
+        return 0.0
 
 
-def count_directories(root: Path) -> int:
-    """Count total subdirectories beneath root path."""
-    return sum(len(dirs) for _, dirs, _ in os.walk(root))
-
-
-def generate_synthetic_tree(
-    root: Path,
-    target_files: int,
-    seed: int = DEFAULT_SEED,
-) -> tuple[int, int]:
-    """Generate a reproducible, tiered synthetic directory tree."""
-    rng = random.Random(seed)
-    top_names = (
-        "src",
-        "lib",
-        "pkg",
-        "components",
-        "utils",
-        "tests",
-        "docs",
-        "scripts",
-        "build",
-        "node_modules",
-    )
-    sub_names = ("core", "api", "handlers", "models", "helpers")
-    dirs: list[Path] = [root]
-    dirs.extend(root / top for top in top_names)
-    dirs.extend(root / top / sub for top in top_names for sub in sub_names)
-    for d in dirs:
-        d.mkdir(parents=True, exist_ok=True)
-
-    ignore_rules = "node_modules/\nbuild/\n*.tmp\n*.log\n.cache/\n"
-    (root / ".gitignore").write_text(ignore_rules, encoding="utf-8")
-    extensions = [".py"] * 3 + [".sh", ".md", ".json", ".yaml", ".txt", ".tmp", ".log", ".bin"]
-    templates: dict[str, Any] = {
-        ".py": "def action() -> int:\n    return 42\n",
-        ".sh": "#!/usr/bin/env bash\necho 42\n",
-        ".md": "# Doc\nContent.\n",
-        ".json": '{"id": 42}\n',
-        ".yaml": "id: 42\n",
-        ".bin": b"\x00\x01\x02\x03",
-    }
-
-    files_created = 0
-    for i in range(max(1, target_files)):
-        target_dir = rng.choice(dirs)
-        ext = rng.choice(extensions)
-        fp = target_dir / f"item_{i:06d}{ext}"
-        content = templates.get(ext, f"content {i}\n")
-        if isinstance(content, bytes):
-            fp.write_bytes(content)
-        else:
-            fp.write_text(content, encoding="utf-8")
-
-        files_created += 1
-
-    shebang = "#!/usr/bin/env python3\nimport sys\nsys.exit(0)\n"
-    for s_name in ("worker", "deploy"):
-        sp = root / "scripts" / s_name
-        sp.write_text(shebang, encoding="utf-8")
-        with contextlib.suppress(OSError):
-            sp.chmod(0o755)
-
-        files_created += 1
-
-    return files_created, count_directories(root)
-
-
-def _run_single_traversal(
+def _run_single_traversal(  # noqa: PLR0913
     target_path: Path,
     tier_name: str,
     *,
     tag_filter: str | None = None,
     total_dirs: int = 0,
+    output_format: str = "traversal",
+    show_tags: bool = False,
 ) -> BenchmarkMetric:
     """Execute a single traversal measurement run."""
     config = TraversalConfig(
@@ -172,11 +127,34 @@ def _run_single_traversal(
     first_latency: float | None = None
     files_count = 0
 
-    for _ in find_files(config):
-        if first_latency is None:
-            first_latency = time.perf_counter() - start_time
+    if output_format == "traversal":
+        for _ in find_files(config):
+            if first_latency is None:
+                first_latency = time.perf_counter() - start_time
 
-        files_count += 1
+            files_count += 1
+    else:
+        sink = _NullSink()
+        fmt_factories = {
+            "text": lambda: TextFormatter(show_tags=show_tags),
+            "jsonl": JsonlFormatter,
+            "tsv": TsvFormatter,
+            "csv": CsvFormatter,
+            "json": JsonFormatter,
+            "tree": RichTreeFormatter,
+            "table": RichTableFormatter,
+        }
+        formatter = fmt_factories.get(output_format, TextFormatter)()
+
+        def _counting_stream() -> Iterator[FileInfo]:
+            nonlocal files_count
+            for item in find_files(config):
+                files_count += 1
+                yield item
+
+        formatter.stream(_counting_stream(), sink)
+        if sink.first_write_time is not None:
+            first_latency = sink.first_write_time - start_time
 
     end_time = time.perf_counter()
     _, peak_bytes = tracemalloc.get_traced_memory()
@@ -184,6 +162,7 @@ def _run_single_traversal(
 
     duration = max(end_time - start_time, 1e-9)
     first_latency_ms = (first_latency * 1000.0) if first_latency is not None else 0.0
+    rss_mb = get_peak_rss_mb()
 
     return BenchmarkMetric(
         tier_name,
@@ -196,6 +175,7 @@ def _run_single_traversal(
         first_latency_ms,
         peak_bytes,
         peak_bytes / (1024.0 * 1024.0),
+        rss_mb,
     )
 
 
@@ -207,14 +187,30 @@ def measure_traversal(  # noqa: PLR0913
     warmup: int = 0,
     tag_filter: str | None = None,
     total_dirs: int | None = None,
+    output_format: str = "traversal",
+    show_tags: bool = False,
 ) -> BenchmarkMetric:
     """Measure throughput, latency to first file, and peak heap memory."""
     dirs_count = total_dirs if total_dirs is not None else count_directories(target_path)
     for _ in range(warmup):
-        _run_single_traversal(target_path, tier_name, tag_filter=tag_filter, total_dirs=dirs_count)
+        _run_single_traversal(
+            target_path,
+            tier_name,
+            tag_filter=tag_filter,
+            total_dirs=dirs_count,
+            output_format=output_format,
+            show_tags=show_tags,
+        )
 
     results = [
-        _run_single_traversal(target_path, tier_name, tag_filter=tag_filter, total_dirs=dirs_count)
+        _run_single_traversal(
+            target_path,
+            tier_name,
+            tag_filter=tag_filter,
+            total_dirs=dirs_count,
+            output_format=output_format,
+            show_tags=show_tags,
+        )
         for _ in range(max(1, runs))
     ]
     cnt = len(results)
@@ -230,62 +226,8 @@ def measure_traversal(  # noqa: PLR0913
         sum(r.first_file_latency_ms for r in results) / cnt,
         int(sum(r.peak_memory_bytes for r in results) / cnt),
         sum(r.peak_memory_mb for r in results) / cnt,
+        sum(r.peak_rss_mb for r in results) / cnt,
     )
-
-
-def _pct_delta(base: float, curr: float) -> float:
-    return ((curr - base) / base * 100.0) if base > 0 else 0.0
-
-
-def compute_comparisons(
-    baseline_metrics: list[BenchmarkMetric],
-    current_metrics: list[BenchmarkMetric],
-    threshold_pct: float | None = None,
-) -> list[ComparisonRow]:
-    """Compare current benchmark metrics against a baseline."""
-    base_map = {m.tier: m for m in baseline_metrics}
-    comparisons: list[ComparisonRow] = []
-
-    for curr in current_metrics:
-        base = base_map.get(curr.tier)
-        if not base:
-            continue
-
-        tp_b, tp_c = base.files_per_sec, curr.files_per_sec
-        lat_b, lat_c = base.first_file_latency_ms, curr.first_file_latency_ms
-        mem_b, mem_c = base.peak_memory_mb, curr.peak_memory_mb
-        tp_d = _pct_delta(tp_b, tp_c)
-        lat_d = _pct_delta(lat_b, lat_c)
-        mem_d = _pct_delta(mem_b, mem_c)
-        regressed = bool(threshold_pct and threshold_pct > 0 and tp_d < -threshold_pct)
-        comparisons.append(
-            ComparisonRow(
-                curr.tier,
-                tp_b,
-                tp_c,
-                tp_d,
-                lat_b,
-                lat_c,
-                lat_d,
-                mem_b,
-                mem_c,
-                mem_d,
-                regressed,
-            ),
-        )
-
-    return comparisons
-
-
-def save_baseline_report(report: BenchmarkReport, file_path: Path) -> None:
-    """Save benchmark report to a JSON baseline file."""
-    file_path.write_text(json.dumps(report.to_dict(), indent=2) + "\n", encoding="utf-8")
-
-
-def load_baseline_report(file_path: Path) -> list[BenchmarkMetric]:
-    """Load baseline metrics from a JSON baseline file."""
-    data = json.loads(file_path.read_text(encoding="utf-8"))
-    return [BenchmarkMetric(**item) for item in data.get("metrics", [])]
 
 
 def render_metrics_table(metrics: list[BenchmarkMetric], console: Console | None = None) -> None:
@@ -304,6 +246,7 @@ def render_metrics_table(metrics: list[BenchmarkMetric], console: Console | None
     table.add_column("Dirs/sec", justify="right")
     table.add_column("TTFR Latency", style="yellow", justify="right")
     table.add_column("Peak Heap", style="blue", justify="right")
+    table.add_column("Peak RSS", style="cyan", justify="right")
 
     for m in metrics:
         table.add_row(
@@ -315,6 +258,7 @@ def render_metrics_table(metrics: list[BenchmarkMetric], console: Console | None
             f"{m.dirs_per_sec:,.1f} d/s",
             f"{m.first_file_latency_ms:.2f} ms",
             f"{m.peak_memory_mb:.2f} MB",
+            f"{m.peak_rss_mb:.2f} MB" if m.peak_rss_mb > 0 else "N/A",
         )
 
     con.print(table)
@@ -366,6 +310,27 @@ def build_parser() -> argparse.ArgumentParser:
     """Construct command-line argument parser."""
     p = argparse.ArgumentParser(prog="benchmark", description="findfmt benchmark harness.")
     p.add_argument("--tier", "-t", choices=["small", "medium", "monorepo", "all"], default="small")
+    p.add_argument(
+        "--topology",
+        "-T",
+        choices=["standard", "flat", "deep", "real-world", "all"],
+        default="standard",
+        help="Filesystem hierarchy topology to benchmark (default: standard).",
+    )
+    p.add_argument(
+        "--format",
+        "-F",
+        choices=["traversal", "text", "jsonl", "tsv", "csv", "json", "tree", "table", "all"],
+        default="traversal",
+        help="Output formatter to benchmark (default: traversal).",
+    )
+    p.add_argument(
+        "--list-tags",
+        "--show-tags",
+        dest="show_tags",
+        action="store_true",
+        help="Measure MIME and tag classification overhead.",
+    )
     p.add_argument("--target-dir", "-d", type=Path)
     p.add_argument("--files", "-f", type=int)
     p.add_argument("--seed", type=int, default=DEFAULT_SEED)
@@ -384,43 +349,80 @@ def build_parser() -> argparse.ArgumentParser:
 def _collect_metrics(
     args: argparse.Namespace,
 ) -> tuple[list[BenchmarkMetric], list[tempfile.TemporaryDirectory[str]]]:
-    """Execute benchmark measurements across selected targets or tiers."""
+    """Execute benchmark measurements across selected targets, topologies, or tiers."""
+    selected_formats = (
+        ["traversal", "text", "jsonl", "tsv", "csv", "json", "tree", "table"]
+        if args.format == "all"
+        else [args.format]
+    )
+
     if args.target_dir is not None:
         target = args.target_dir.resolve()
         if not target.exists():
             sys.stderr.write(f"Error: Target directory does not exist: {target}\n")
             return [], []
 
-        metric = measure_traversal(
-            target,
-            tier_name="custom",
-            runs=args.runs,
-            warmup=args.warmup,
-            tag_filter=args.tag,
-        )
-        return [metric], []
+        metrics: list[BenchmarkMetric] = []
+        for fmt in selected_formats:
+            tier_label = f"custom [{fmt}]" if len(selected_formats) > 1 else "custom"
+            metrics.append(
+                measure_traversal(
+                    target,
+                    tier_name=tier_label,
+                    runs=args.runs,
+                    warmup=args.warmup,
+                    tag_filter=args.tag,
+                    output_format=fmt,
+                    show_tags=args.show_tags,
+                ),
+            )
 
-    selected = ["small", "medium", "monorepo"] if args.tier == "all" else [args.tier]
+        return metrics, []
+
+    selected_tiers = ["small", "medium", "monorepo"] if args.tier == "all" else [args.tier]
+    selected_topologies = (
+        ["standard", "flat", "deep", "real-world"] if args.topology == "all" else [args.topology]
+    )
+
     cleanups: list[tempfile.TemporaryDirectory[str]] = []
-    metrics: list[BenchmarkMetric] = []
-    for tier in selected:
-        target_files = args.files if args.files is not None else TIER_FILE_COUNTS[tier]
-        td = tempfile.TemporaryDirectory(prefix=f"findfmt_bench_{tier}_")
-        if not args.keep_temp:
-            cleanups.append(td)
+    metrics = []
 
-        root_path = Path(td.name)
-        _, total_dirs = generate_synthetic_tree(root_path, target_files, seed=args.seed)
-        metrics.append(
-            measure_traversal(
+    for top in selected_topologies:
+        for tier in selected_tiers:
+            target_files = args.files if args.files is not None else TIER_FILE_COUNTS[tier]
+            td = tempfile.TemporaryDirectory(prefix=f"findfmt_bench_{tier}_{top}_")
+            if not args.keep_temp:
+                cleanups.append(td)
+
+            root_path = Path(td.name)
+            _, total_dirs = generate_synthetic_tree(
                 root_path,
-                tier_name=tier,
-                runs=args.runs,
-                warmup=args.warmup,
-                tag_filter=args.tag,
-                total_dirs=total_dirs,
-            ),
-        )
+                target_files,
+                seed=args.seed,
+                topology=top,
+            )
+
+            for fmt in selected_formats:
+                tier_parts = [tier]
+                if len(selected_topologies) > 1 or top != "standard":
+                    tier_parts.append(top)
+
+                if len(selected_formats) > 1 or fmt != "traversal":
+                    tier_parts.append(fmt)
+
+                tier_label = " ".join(tier_parts)
+                metrics.append(
+                    measure_traversal(
+                        root_path,
+                        tier_name=tier_label,
+                        runs=args.runs,
+                        warmup=args.warmup,
+                        tag_filter=args.tag,
+                        total_dirs=total_dirs,
+                        output_format=fmt,
+                        show_tags=args.show_tags,
+                    ),
+                )
 
     return metrics, cleanups
 

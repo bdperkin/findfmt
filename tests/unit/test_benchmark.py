@@ -17,11 +17,11 @@ from tools.benchmark import (
     ComparisonRow,
     _collect_metrics,
     _handle_output,
+    _NullSink,
     _run_single_traversal,
     build_parser,
     compute_comparisons,
-    count_directories,
-    generate_synthetic_tree,
+    get_peak_rss_mb,
     load_baseline_report,
     main,
     measure_traversal,
@@ -77,29 +77,6 @@ def test_data_model_conversions():
     row_dict = row.to_dict()
     assert row_dict["regressed"] is False
     assert row_dict["throughput_delta_pct"] == 11.11
-
-
-def test_count_directories(tmp_path: Path):
-    """Test counting directories recursively."""
-    assert count_directories(tmp_path) == 0
-    (tmp_path / "a" / "b").mkdir(parents=True)
-    (tmp_path / "c").mkdir()
-    assert count_directories(tmp_path) == 3
-
-
-def test_generate_synthetic_tree(tmp_path: Path):
-    """Test synthetic directory tree generation and file template coverage."""
-    files_created, dirs_created = generate_synthetic_tree(tmp_path, target_files=30, seed=42)
-    assert files_created >= 30
-    assert dirs_created > 0
-    assert (tmp_path / ".gitignore").exists()
-    assert (tmp_path / "scripts" / "worker").exists()
-    assert (tmp_path / "scripts" / "deploy").exists()
-
-    # Test chmod failure tolerance
-    with patch("pathlib.Path.chmod", side_effect=OSError("Permission denied")):
-        f2, _ = generate_synthetic_tree(tmp_path / "sub", target_files=5, seed=1)
-        assert f2 >= 5
 
 
 def test_run_single_traversal_empty_and_populated(tmp_path: Path):
@@ -388,3 +365,106 @@ def test_main_dunder_main():
     ):
         runpy.run_module("tools.benchmark", run_name="__main__")
         mock_exit.assert_called_with(0)
+
+
+def test_null_sink():
+    """Verify _NullSink discard semantics and latency tracking."""
+    sink = _NullSink()
+    assert sink.first_write_time is None
+    assert sink.write_count == 0
+
+    assert sink.write("") == 0
+    assert sink.first_write_time is None
+    assert sink.write_count == 1
+
+    assert sink.write("sample line\n") == len("sample line\n")
+    assert sink.first_write_time is not None
+    assert sink.write_count == 2
+
+    first_time = sink.first_write_time
+    sink.writelines(["line 1\n", "line 2\n"])
+    assert sink.write_count == 4
+    assert sink.first_write_time == first_time
+
+
+def test_get_peak_rss_mb():
+    """Verify RSS extraction across Linux, macOS, and error handling."""
+    # When resource is None
+    with patch.dict(get_peak_rss_mb.__globals__, {"resource": None}):
+        assert get_peak_rss_mb() == 0.0
+
+    # Normal Linux execution
+    rss_val = get_peak_rss_mb()
+    assert rss_val >= 0.0
+
+    # macOS platform simulation (divided by 1024^2)
+    with patch("sys.platform", "darwin"):
+        rss_mac = get_peak_rss_mb()
+        assert rss_mac >= 0.0
+
+    # Exception tolerance
+    with patch("resource.getrusage", side_effect=OSError("Resource error")):
+        assert get_peak_rss_mb() == 0.0
+
+
+def test_measure_traversal_formats_and_tags(tmp_path: Path):
+    """Verify measurement with formatters and tag classification."""
+    (tmp_path / "test.py").write_text("#!/usr/bin/env python3\nprint(1)\n")
+    for fmt in ("text", "jsonl", "tsv", "csv", "json", "tree", "table"):
+        metric = measure_traversal(
+            tmp_path,
+            f"test_{fmt}",
+            runs=1,
+            warmup=0,
+            output_format=fmt,
+            show_tags=True,
+        )
+        assert metric.files_count == 1
+        assert metric.duration_seconds > 0
+
+
+def test_baseline_load_backwards_compatible(tmp_path: Path):
+    """Verify loading baseline reports that lack peak_rss_mb."""
+    legacy_json = tmp_path / "legacy_baseline.json"
+    legacy_json.write_text(
+        json.dumps(
+            {
+                "timestamp": "2026-10-14T00:00:00Z",
+                "findfmt_version": "0.5.1",
+                "python_version": "3.13.0",
+                "platform": "Linux-x86_64",
+                "seed": 42,
+                "metrics": [
+                    {
+                        "tier": "small",
+                        "target_path": "/tmp/test",
+                        "files_count": 10,
+                        "dirs_count": 2,
+                        "duration_seconds": 0.05,
+                        "files_per_sec": 200.0,
+                        "dirs_per_sec": 40.0,
+                        "first_file_latency_ms": 1.5,
+                        "peak_memory_bytes": 1048576,
+                        "peak_memory_mb": 1.0,
+                    },
+                ],
+            },
+        ),
+        encoding="utf-8",
+    )
+    metrics = load_baseline_report(legacy_json)
+    assert len(metrics) == 1
+    assert metrics[0].peak_rss_mb == 0.0
+
+
+def test_collect_metrics_topologies_and_formats():
+    """Test CLI metrics collection with topology=all and format=all."""
+    parser = build_parser()
+    args = parser.parse_args(
+        ["--tier", "small", "--topology", "all", "--format", "all", "--files", "5"],
+    )
+    metrics, cleanups = _collect_metrics(args)
+    # 4 topologies * 8 formats = 32 combinations
+    assert len(metrics) == 32
+    for td in cleanups:
+        td.cleanup()

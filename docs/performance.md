@@ -136,12 +136,40 @@ The harness supports three standardized dataset tiers alongside custom directory
 - **Custom Directory Target (`-d, --target-dir`)**: Benchmarks real-world directory trees directly,
   such as the `findfmt` repository or user-specified projects.
 
-### 4.2. Deterministic Reproducibility
+#### 4.1.1. Deterministic Reproducibility
 
 Synthetic trees are generated deterministically using a fixed random seed (`--seed 42` by default).
 The generator constructs realistic directory trees with diverse file extensions (`.py`, `.sh`,
 `.md`, `.json`, `.yaml`, `.txt`, `.bin`), executable scripts without extensions containing shebang
 headers, and root `.gitignore` exclusion specifications.
+
+### 4.2. Filesystem Topologies
+
+To model realistic disk structures, the benchmark harness supports representative topologies via
+`--topology` (`-T`):
+
+- **Standard (`standard`)**: A balanced multi-tier package tree (60 directories) simulating a
+  typical project directory hierarchy.
+- **Flat (`flat`)**: A single directory containing all generated files (for example, 10,000 files in
+  one folder), isolating raw directory stream parsing throughput from recursive traversal overhead.
+- **Deep (`deep`)**: A deeply nested hierarchy (20 levels of nesting with a branching factor of 2),
+  testing recursion depth limits, call-stack efficiency, and path concatenation overhead.
+- **Real-World Monorepo (`real-world`)**: A realistic monorepo topology featuring multiple
+  sub-projects alongside massive ignored directories (`node_modules/`, `.venv/`, `dist/`, `build/`)
+  containing thousands of excluded files, verifying early `.gitignore` directory pruning efficiency
+  in $O(1)$ time.
+
+### 4.3. Output Formatters & Classification Modes
+
+The harness benchmarks output formatting throughput, streaming efficiency, and Time-to-First-Result
+(TTFR) latency via `--format` (`-F`) and `--list-tags`:
+
+- **Streaming Formats (`text`, `jsonl`, `tsv`, `csv`)**: Streams entries lazily directly to the sink
+  without buffering matching inventories into RAM, maintaining bounded $O(1)$ heap overhead.
+- **Buffered Formats (`json`, `tree`, `table`)**: Ingests all matching records before building
+  structured trees or serialized tabular representations.
+- **Tag & MIME Inspection (`--list-tags`)**: Measures content inspection overhead when resolving
+  MIME classifications and tag metadata across discovered files.
 
 ______________________________________________________________________
 
@@ -170,7 +198,34 @@ uv run python tools/benchmark.py --tier all
 uv run python tools/benchmark.py --tier small --files 500
 ```
 
-### 5.3. Benchmarking Existing Directories
+### 5.3. Topology Benchmarking
+
+Benchmark specific filesystem topologies:
+
+```bash
+# Benchmark flat topology with 10,000 files
+uv run python tools/benchmark.py --topology flat --files 10000
+
+# Benchmark deeply nested hierarchy (20 levels)
+uv run python tools/benchmark.py --topology deep --files 5000
+
+# Benchmark real-world monorepo topology with ignored dependencies
+uv run python tools/benchmark.py --topology real-world
+```
+
+### 5.4. Formatter Comparison & Classification
+
+Compare streaming vs buffered output formats:
+
+```bash
+# Compare all output formatters on small tier
+uv run python tools/benchmark.py --tier small --format all
+
+# Measure MIME and tag classification overhead
+uv run python tools/benchmark.py --tier small --format text --list-tags
+```
+
+### 5.5. Benchmarking Existing Directories
 
 Benchmark an existing repository or directory path:
 
@@ -178,7 +233,7 @@ Benchmark an existing repository or directory path:
 uv run python tools/benchmark.py --target-dir .
 ```
 
-### 5.4. Multiple Iterations & Warmup
+### 5.6. Multiple Iterations & Warmup
 
 Execute multiple iterations with warmup runs to compute averaged metrics:
 
@@ -186,7 +241,7 @@ Execute multiple iterations with warmup runs to compute averaged metrics:
 uv run python tools/benchmark.py --runs 3 --warmup 1
 ```
 
-### 5.5. Baseline Recording & Regression Tracking
+### 5.7. Baseline Recording & Regression Tracking
 
 Save baseline metrics to a JSON report:
 
@@ -206,7 +261,7 @@ Fail execution if throughput degrades beyond an allowable percentage threshold:
 uv run python tools/benchmark.py --tier small --baseline baseline.json --threshold 10.0
 ```
 
-### 5.6. Machine-Readable JSON Output
+### 5.8. Machine-Readable JSON Output
 
 Emit JSON directly to stdout or export to a file for CI regression tracking:
 
@@ -220,23 +275,57 @@ uv run python tools/benchmark.py --output benchmark_report.json
 
 ______________________________________________________________________
 
-## 6. Baseline Performance Metrics
+## 6. Official v1.0.0 Baseline Performance Metrics
 
-The following baseline metrics were recorded on an x86_64 Linux environment (Python 3.13):
+The canonical v1.0.0 baselines were recorded on an x86_64 Linux environment (CPython 3.13.15, Linux
+6.12+):
 
-| Benchmark Tier   | Total Files | Traversed Directories | Duration (s) | Throughput (files/s) | Dirs/sec | TTFR Latency (ms) | Peak Heap (MB) |
-| :--------------- | :---------- | :-------------------- | :----------- | :------------------- | :------- | :---------------- | :------------- |
-| **Small**        | 518         | 60                    | 0.2240 s     | 2,312.6 f/s          | 267.9    | 22.15 ms          | 0.41 MB        |
-| **Medium**       | 7,901       | 60                    | 5.1981 s     | 1,520.0 f/s          | 11.5     | 39.30 ms          | 2.90 MB        |
-| **findfmt Repo** | 154         | 1,846                 | 0.1084 s     | 1,420.8 f/s          | 17,031.5 | 39.06 ms          | 0.47 MB        |
+### 6.1. Filesystem Topology Baselines
+
+| Topology / Benchmark Tier         | Matched Files | Traversed Directories | Duration (s) | Throughput (files/s) | TTFR Latency (ms) | Peak Heap (MB) |
+| :-------------------------------- | :------------ | :-------------------- | :----------- | :------------------- | :---------------- | :------------- |
+| **Standard Small (800 files)**    | 518           | 60                    | 0.1785 s     | 2,902.4 f/s          | 3.87 ms           | 0.09 MB        |
+| **Standard Medium (12k files)**   | 7,901         | 60                    | 2.4989 s     | 3,162.0 f/s          | 10.24 ms          | 0.71 MB        |
+| **Flat (10k files in 1 dir)**     | 8,261         | 0                     | 2.3497 s     | 3,522.9 f/s          | 348.84 ms         | 11.94 MB       |
+| **Deep (20 levels, 5k files)**    | 4,119         | 286                   | 3.4016 s     | 1,211.8 f/s          | 3.68 ms           | 0.57 MB        |
+| **Real-World Monorepo (Ignored)** | 826           | 35                    | 0.3734 s     | 2,213.1 f/s          | 5.93 ms           | 0.19 MB        |
+| **findfmt Repository**            | 233           | 1,933                 | 0.1575 s     | 1,480.3 f/s          | 9.24 ms           | 0.13 MB        |
+
+*Note: In the Real-World Monorepo benchmark, 5,000+ files located in `node_modules/` and `.venv/`
+were pruned in $O(1)$ time at the directory root level, completing in 0.37 seconds.*
+
+### 6.2. Output Formatter & Classification Performance (Medium Tier, 7,901 Files)
+
+| Formatter / Mode    | Category   | Duration (s) | Throughput (files/s) | TTFR Latency (ms) | Peak Heap (MB) | Memory Scaling |
+| :------------------ | :--------- | :----------- | :------------------- | :---------------- | :------------- | :------------- |
+| **Raw Traversal**   | Engine     | 2.5437 s     | 3,106.1 f/s          | 24.75 ms          | 2.89 MB        | $O(1)$ Bounded |
+| **Text (`text`)**   | Streaming  | 2.6332 s     | 3,000.6 f/s          | 11.07 ms          | 0.72 MB        | $O(1)$ Bounded |
+| **JSONL (`jsonl`)** | Streaming  | 3.1472 s     | 2,510.4 f/s          | 10.43 ms          | 0.72 MB        | $O(1)$ Bounded |
+| **TSV (`tsv`)**     | Streaming  | 2.5570 s     | 3,089.9 f/s          | 0.02 ms           | 0.72 MB        | $O(1)$ Bounded |
+| **CSV (`csv`)**     | Streaming  | 2.5785 s     | 3,064.2 f/s          | 0.04 ms           | 0.84 MB        | $O(1)$ Bounded |
+| **JSON (`json`)**   | Buffered   | 2.9981 s     | 2,635.3 f/s          | 2,997.77 ms       | 15.25 MB       | $O(N)$ Linear  |
+| **Tree (`tree`)**   | Buffered   | 16.3280 s    | 483.9 f/s            | 16,265.90 ms      | 36.30 MB       | $O(N)$ Linear  |
+| **Table (`table`)** | Buffered   | 57.7142 s    | 136.9 f/s            | 57,581.79 ms      | 64.80 MB       | $O(N)$ Linear  |
+| **Text + Tags**     | Classified | 3.5339 s     | 2,235.8 f/s          | 14.60 ms          | 0.72 MB        | $O(1)$ Bounded |
 
 ______________________________________________________________________
 
 ## 7. Regression Testing in CI
 
-The benchmarking harness supports automated regression detection in continuous integration:
+The benchmarking harness and automated test suite ensure continuous regression protection:
 
-1. Baselines are established and preserved as versioned JSON artifacts.
-2. Pull requests execute `tools/benchmark.py --baseline <baseline.json> --threshold <pct>`.
-3. If throughput degrades by more than the specified threshold percentage, the tool emits a
-   comparison table and exits with non-zero status code `1`, halting the quality gate.
+1. Canonical v1.0.0 baselines are committed and versioned at `tests/fixtures/v1_baseline.json`.
+2. Automated integration tests in `tests/integration/test_performance_baselines.py` continuously
+   assert that:
+   - Streaming formatters (`text`, `jsonl`, `tsv`, `csv`) maintain bounded $O(1)$ heap memory.
+   - Early `.gitignore` pruning bounds traversal time and memory when skipping massive directory
+     trees.
+   - Continuous multi-run traversals exhibit zero unbounded memory leaks.
+3. Pull requests can execute regression checks via:
+
+```bash
+uv run python tools/benchmark.py --baseline tests/fixtures/v1_baseline.json --threshold 10.0
+```
+
+If throughput degrades by more than the specified threshold percentage, the tool emits a comparison
+table and exits with non-zero status code `1`, halting the quality gate.

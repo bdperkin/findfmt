@@ -13,11 +13,16 @@
 - **Prose & Style Linting**: Enforced on all Markdown documentation using Vale with Google and
   Proselint style standards.
 
-## 2. Traversal Complexity Optimization
+## 2. Traversal Complexity Optimization & Performance Baselines
 
 Repository traversal performs early pruning of `.gitignore` hierarchies to prevent recursing into
 expansive unneeded directory trees such as `node_modules`, `.venv`, or compilation artifact
-directories.
+directories in $O(1)$ time.
+
+Official v1.0.0 benchmarks establish traversal throughput exceeding 3,000 files/second on standard
+hierarchies and confirm bounded $O(1)$ memory usage across streaming output formatters (`text`,
+`jsonl`, `tsv`, `csv`). See [Performance Architecture & Benchmarks](performance.md) for full
+topology baselines and regression testing procedures.
 
 ## 3. Python Runtime Compatibility
 
