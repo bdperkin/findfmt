@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import datetime as dt
+import re
 import stat
 from typing import TYPE_CHECKING
+
+import rich.markup
 
 from findfmt.utils.hyperlinks import format_osc8_link
 
@@ -14,6 +17,19 @@ if TYPE_CHECKING:
 DEFAULT_TIME_FORMAT = "%b %d %H:%M"
 _MIN_PRINTABLE_ASCII = 32
 _DEL_ASCII = 127
+_C1_CONTROL_MIN = 128
+_C1_CONTROL_MAX = 159
+
+_ANSI_ESCAPE_RE = re.compile(
+    r"""
+    \x1b\[[0-?]*[ -/]*[@-~]                  # 7-bit CSI sequence
+    | \x1b\][^\x07\x1b]*(?:\x07|\x1b\\)        # 7-bit OSC sequence
+    | \x1b[ -/]*[0-~]                        # 7-bit Fe/Fs/Fp sequence
+    | \x9b[0-?]*[ -/]*[@-~]                  # 8-bit C1 CSI sequence
+    | \x9d[^\x07\x1b\x9c]*(?:\x07|\x1b\\|\x9c)    # 8-bit C1 OSC sequence
+    """,
+    re.VERBOSE,
+)
 
 __all__ = [
     "DEFAULT_TIME_FORMAT",
@@ -22,7 +38,20 @@ __all__ = [
     "get_classification_indicator",
     "mask_control_characters",
     "quote_filename",
+    "strip_ansi_escapes",
 ]
+
+
+def strip_ansi_escapes(text: str) -> str:
+    """Strip ANSI escape sequences (CSI, OSC, and 8-bit C1 sequences) from text.
+
+    Args:
+        text: Input string potentially containing ANSI escape sequences.
+
+    Returns:
+        String with all recognized ANSI escape sequences removed.
+    """
+    return _ANSI_ESCAPE_RE.sub("", text)
 
 
 def mask_control_characters(text: str) -> str:
@@ -32,10 +61,16 @@ def mask_control_characters(text: str) -> str:
         text: Input string potentially containing control characters.
 
     Returns:
-        String with characters with ASCII ordinal < 32 or == 127 replaced by '?'.
+        String with C0 (ord < 32), DEL (ord == 127), and C1 (128 <= ord <= 159)
+        control characters replaced by '?'.
     """
     return "".join(
-        "?" if ord(c) < _MIN_PRINTABLE_ASCII or ord(c) == _DEL_ASCII else c for c in text
+        "?"
+        if ord(c) < _MIN_PRINTABLE_ASCII
+        or ord(c) == _DEL_ASCII
+        or (_C1_CONTROL_MIN <= ord(c) <= _C1_CONTROL_MAX)
+        else c
+        for c in text
     )
 
 
@@ -61,6 +96,7 @@ def format_display_path(  # noqa: PLR0913
     indicator: str | None = None,
     hyperlink: bool = False,
     uri: str | None = None,
+    escape_markup: bool = False,
 ) -> str:
     """Format path string applying control character masking, quoting, indicators, and links.
 
@@ -72,13 +108,18 @@ def format_display_path(  # noqa: PLR0913
         indicator: Optional classification indicator character to append.
         hyperlink: Whether to wrap formatted path in an OSC 8 terminal hyperlink.
         uri: Target destination URI for terminal hyperlink.
+        escape_markup: Whether to escape Rich console markup characters ([ and ]).
 
     Returns:
         Formatted path or filename string.
     """
     result = path_str
-    if hide_control_chars and not literal:
+    if not literal:
+        result = strip_ansi_escapes(result)
         result = mask_control_characters(result)
+    elif hide_control_chars:
+        # Literal mode explicitly suppresses control character masking
+        pass
 
     if quote_name:
         result = quote_filename(result)
@@ -86,8 +127,14 @@ def format_display_path(  # noqa: PLR0913
     if indicator:
         result = f"{result}{indicator}"
 
+    if escape_markup:
+        result = rich.markup.escape(result)
+
     if hyperlink and uri:
-        result = format_osc8_link(result, uri)
+        if escape_markup and result.startswith("\\"):
+            result = format_osc8_link(f"\\{result}", uri)
+        else:
+            result = format_osc8_link(result, uri)
 
     return result
 

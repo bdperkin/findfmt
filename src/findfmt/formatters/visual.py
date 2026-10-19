@@ -11,6 +11,7 @@ if sys.version_info >= (3, 12):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import override
 
+import rich.markup
 from rich import box
 from rich.panel import Panel
 from rich.table import Table
@@ -252,16 +253,20 @@ class RichTableFormatter(Formatter):
             indicator=indicator,
             hyperlink=self.hyperlink,
             uri=uri,
+            escape_markup=True,
         )
+        row = [rich.markup.escape(c) for c in row]
+        mime_val = rich.markup.escape(file_info.mime_type) if file_info.mime_type else ""
+        shebang_val = rich.markup.escape(file_info.shebang) if file_info.shebang else ""
         row.extend(
             [
                 display_path,
                 " ".join(format_tag_badge(t) for t in sorted(file_info.tags)),
-                file_info.mime_type or "",
+                mime_val,
                 formatted_sz,
                 "[green]✓[/]" if file_info.is_executable else "[dim]-[/]",
                 "[yellow]✓[/]" if file_info.is_symlink else "[dim]-[/]",
-                file_info.shebang or "",
+                shebang_val,
             ],
         )
         return row

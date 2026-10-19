@@ -13,6 +13,7 @@ else:  # pragma: no cover
 from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter
 from findfmt.formatters.delimited import file_to_record
 from findfmt.i18n import _
+from findfmt.utils.strings import mask_control_characters, strip_ansi_escapes
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -41,25 +42,31 @@ _MARKDOWN_ALIGNMENTS: tuple[str, ...] = (
 
 def escape_markdown_cell(cell: str) -> str:
     """Escape special characters in a Markdown table cell."""
-    return (
-        cell.replace("\\", "\\\\")
+    clean = strip_ansi_escapes(cell)
+    escaped = (
+        clean.replace("\\", "\\\\")
         .replace("|", "\\|")
+        .replace("`", "\\`")
         .replace("\t", " ")
         .replace("\r\n", " ")
         .replace("\n", " ")
         .replace("\r", " ")
     )
+    return mask_control_characters(escaped)
 
 
 def escape_rst_cell(cell: str) -> str:
     """Escape special characters in a reStructuredText table cell."""
-    return (
-        cell.replace("|", "\\|")
+    clean = strip_ansi_escapes(cell)
+    escaped = (
+        clean.replace("|", "\\|")
+        .replace("`", "\\`")
         .replace("\t", " ")
         .replace("\r\n", " ")
         .replace("\n", " ")
         .replace("\r", " ")
     )
+    return mask_control_characters(escaped)
 
 
 def _pad_cell(cell: str, width: int, alignment: str) -> str:

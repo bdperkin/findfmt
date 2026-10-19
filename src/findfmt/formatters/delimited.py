@@ -12,6 +12,7 @@ if sys.version_info >= (3, 12):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import override
 
+import rich.markup
 from rich.table import Table
 
 from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter
@@ -225,7 +226,9 @@ class CsvTableFormatter(Formatter):
             table.add_column(field_name, no_wrap=field_name in {"path", "relative_path"})
 
         for file_info in files:
-            table.add_row(*file_to_record(file_info, absolute=self.absolute))
+            rec = file_to_record(file_info, absolute=self.absolute)
+            escaped_rec = [rich.markup.escape(c) for c in rec]
+            table.add_row(*escaped_rec)
 
         return table
 

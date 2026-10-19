@@ -14,7 +14,7 @@ else:  # pragma: no cover
 
 from findfmt.formatters.base import Formatter
 from findfmt.sizes import format_size
-from findfmt.utils.strings import format_display_path, format_timestamp
+from findfmt.utils.strings import format_display_path, format_timestamp, strip_ansi_escapes
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -22,6 +22,27 @@ if TYPE_CHECKING:
     from findfmt.models import FileInfo
 
 __all__ = ["XmlFormatter"]
+
+
+_MIN_PRINTABLE_ASCII = 0x20
+_DEL_ASCII = 0x7F
+_VALID_UNICODE_MIN = 0xA0
+
+
+def _sanitize_xml_text(text: str) -> str:
+    """Sanitize string for XML 1.0 validity.
+
+    Strips ANSI escapes and masks invalid control characters.
+    """
+    clean = strip_ansi_escapes(text)
+    return "".join(
+        c
+        if c in ("\t", "\n", "\r")
+        or (_MIN_PRINTABLE_ASCII <= ord(c) < _DEL_ASCII)
+        or (ord(c) >= _VALID_UNICODE_MIN)
+        else "?"
+        for c in clean
+    )
 
 
 class _XmlNode:
@@ -141,6 +162,13 @@ class XmlFormatter(Formatter):
 
         return str(size_bytes)
 
+    def _clean_val(self, val: str | None) -> str | None:
+        """Sanitize text for XML compatibility unless literal output is active."""
+        if val is None or self.literal:
+            return val
+
+        return _sanitize_xml_text(val)
+
     def _apply_metadata_attrs(self, file_info: FileInfo, elem: ET.Element) -> None:
         """Populate optional metadata attributes on target XML element."""
         mt = format_timestamp(file_info.mtime, self.time_format) if file_info.mtime else None
@@ -165,7 +193,7 @@ class XmlFormatter(Formatter):
         )
         for attr, val in pairs:
             if val is not None:
-                elem.set(attr, str(val))
+                elem.set(attr, str(self._clean_val(str(val))))
 
     def _apply_file_info(self, file_info: FileInfo, elem: ET.Element) -> None:
         """Populate file metadata attributes and child elements."""
@@ -173,21 +201,21 @@ class XmlFormatter(Formatter):
         elem.set("executable", "true" if file_info.is_executable else "false")
         elem.set("symlink", "true" if file_info.is_symlink else "false")
         if file_info.symlink_target:
-            elem.set("symlink_target", file_info.symlink_target)
+            elem.set("symlink_target", str(self._clean_val(file_info.symlink_target)))
 
         self._apply_metadata_attrs(file_info, elem)
 
         for tag in sorted(file_info.tags):
             tag_elem = ET.SubElement(elem, "tag")
-            tag_elem.text = tag
+            tag_elem.text = self._clean_val(tag)
 
         if file_info.mime_type:
             mime_elem = ET.SubElement(elem, "mime")
-            mime_elem.text = file_info.mime_type
+            mime_elem.text = self._clean_val(file_info.mime_type)
 
         if file_info.shebang:
             shebang_elem = ET.SubElement(elem, "shebang")
-            shebang_elem.text = file_info.shebang
+            shebang_elem.text = self._clean_val(file_info.shebang)
 
     def _add_leaf_to_tree(
         self,
@@ -247,11 +275,12 @@ class XmlFormatter(Formatter):
         display_name: str,
     ) -> None:
         """Serialize a directory node and recurse for children."""
+        path_str = str(self._clean_val(str(node.path)))
         elem = ET.SubElement(
             parent,
             "directory",
             name=display_name,
-            path=str(node.path),
+            path=path_str,
         )
         if self.accumulate_size and dir_sizes is not None and id(node) in dir_sizes:
             elem.set("accumulated_size", self._format_size_val(dir_sizes[id(node)]))
@@ -260,7 +289,7 @@ class XmlFormatter(Formatter):
             self._apply_metadata_attrs(node.file_info, elem)
             for tag in sorted(node.file_info.tags):
                 tag_elem = ET.SubElement(elem, "tag")
-                tag_elem.text = tag
+                tag_elem.text = self._clean_val(tag)
 
         for child in node.children.values():
             self._convert_node_to_xml(child, elem, dir_sizes)
@@ -272,11 +301,12 @@ class XmlFormatter(Formatter):
         display_name: str,
     ) -> None:
         """Serialize a regular file leaf element."""
+        path_str = str(self._clean_val(str(node.path)))
         elem = ET.SubElement(
             parent,
             "file",
             name=display_name,
-            path=str(node.path),
+            path=path_str,
         )
         file_info = cast("FileInfo", node.file_info)
         self._apply_file_info(file_info, elem)

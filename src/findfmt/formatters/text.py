@@ -13,7 +13,11 @@ else:  # pragma: no cover
 from findfmt.formatters.base import Formatter
 from findfmt.metadata import format_metadata_parts
 from findfmt.utils.hyperlinks import build_file_uri
-from findfmt.utils.strings import format_display_path
+from findfmt.utils.strings import (
+    format_display_path,
+    mask_control_characters,
+    strip_ansi_escapes,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -139,10 +143,16 @@ class TextFormatter(Formatter):
             hyperlink=self.hyperlink,
             uri=uri,
         )
+        if not self.literal and meta_parts:
+            meta_parts = [mask_control_characters(strip_ansi_escapes(p)) for p in meta_parts]
+
         prefix = f"[{' '.join(meta_parts)}] " if meta_parts else ""
 
         if self.show_tags:
             tags_repr = ", ".join(sorted(file_info.tags))
+            if not self.literal:
+                tags_repr = mask_control_characters(strip_ansi_escapes(tags_repr))
+
             return f"{prefix}{display_path} [{tags_repr}]{self.delimiter}"
 
         return f"{prefix}{display_path}{self.delimiter}"

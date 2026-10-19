@@ -46,6 +46,7 @@ from findfmt.utils.strings import (
     get_classification_indicator,
     mask_control_characters,
     quote_filename,
+    strip_ansi_escapes,
 )
 
 __version__ = get_version()
@@ -94,5 +95,6 @@ __all__ = [
     "quote_filename",
     "reset_locale",
     "set_locale",
+    "strip_ansi_escapes",
     "traverse_directory",
 ]

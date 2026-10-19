@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import rich.markup
+
 __all__ = ["TAG_COLOR_MAP", "format_tag_badge"]
 
 TAG_COLOR_MAP: dict[str, str] = {
@@ -22,4 +24,5 @@ TAG_COLOR_MAP: dict[str, str] = {
 def format_tag_badge(tag: str) -> str:
     """Render a colorful tag pill badge in Rich markup format."""
     color = TAG_COLOR_MAP.get(tag.lower(), "cyan")
-    return f"[black on {color}] {tag} [/]"
+    escaped_tag = rich.markup.escape(tag)
+    return f"[black on {color}] {escaped_tag} [/]"

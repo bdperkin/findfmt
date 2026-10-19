@@ -15,6 +15,7 @@ from findfmt.utils.strings import (
     get_classification_indicator,
     mask_control_characters,
     quote_filename,
+    strip_ansi_escapes,
 )
 
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     "get_classification_indicator",
     "mask_control_characters",
     "quote_filename",
+    "strip_ansi_escapes",
 ]

@@ -12,6 +12,7 @@ if sys.version_info >= (3, 12):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import override
 
+import rich.markup
 from rich.tree import Tree
 
 from findfmt.formatters.badges import format_tag_badge
@@ -86,6 +87,7 @@ def _format_file_label(  # noqa: PLR0913
         indicator=indicator,
         hyperlink=hyperlink,
         uri=uri,
+        escape_markup=True,
     )
     tags_list = " ".join(format_tag_badge(t) for t in sorted(file_info.tags))
     tags_part = f" {tags_list}" if file_info.tags else ""
@@ -96,7 +98,8 @@ def _format_file_label(  # noqa: PLR0913
         exact=show_size,
     )
     size_part = f" [green]{formatted_sz}[/]"
-    mime_part = f" [dim]{file_info.mime_type}[/]" if file_info.mime_type else ""
+    mime_val = rich.markup.escape(file_info.mime_type) if file_info.mime_type else ""
+    mime_part = f" [dim]{mime_val}[/]" if file_info.mime_type else ""
     return f"{prefix}📄 {display_name}{size_part}{tags_part}{mime_part}"
 
 
@@ -158,6 +161,7 @@ def _traverse_tree_node(  # noqa: PLR0913
                 indicator=indicator,
                 hyperlink=hyperlink,
                 uri=dir_uri,
+                escape_markup=True,
             )
             node_label = f"[bold blue]📁 {display_dir_name}[/]{size_suffix}"
             dir_nodes[sub_tuple] = curr_node.add(node_label)
@@ -294,6 +298,7 @@ class RichTreeFormatter(Formatter):
             hide_control_chars=self.hide_control_chars,
             literal=self.literal,
             indicator=root_indicator,
+            escape_markup=True,
         )
         tree = Tree(f"[bold]{display_root}[/]")
         guides = resolve_tree_guides(
