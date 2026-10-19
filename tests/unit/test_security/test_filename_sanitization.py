@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import docutils.core
+import docutils.writers
+import pytest
 from typer.testing import CliRunner
 
 from findfmt import (
@@ -191,7 +194,7 @@ def test_rich_table_formatter_markup_injection() -> None:
     formatter = RichTableFormatter(absolute=False, console_width=200)
     output = formatter.format([file_markup])
     # The literal tag string must appear in the rendered table without being stripped
-    assert "[bold red]malicious[/bold red].py" in output
+    assert str(file_markup.relative_path) in output
     assert "text/[malicious]" in output
     assert "#!/bin/sh [danger]" in output
 
@@ -225,7 +228,7 @@ def test_csv_table_formatter_markup_injection() -> None:
 
     formatter = CsvTableFormatter(absolute=False, console_width=200)
     output = formatter.format([file_markup])
-    assert "[red]test[/red].txt" in output
+    assert str(file_markup.relative_path) in output
     assert "[cyan]tag[/cyan]" in output
 
 
@@ -256,7 +259,8 @@ def test_rst_formatter_special_delimiters() -> None:
     assert r"rst\|pipe\`tick\`file.txt" in output
 
     # Docutils parser should parse the generated RST table without syntax errors
-    parsed_html = docutils.core.publish_string(output, writer="html")
+    writer = docutils.writers.get_writer_class("html")()
+    parsed_html = docutils.core.publish_string(output, writer=writer)
     assert parsed_html is not None
 
 
@@ -312,6 +316,10 @@ def test_tag_badge_markup_safety() -> None:
     assert r"\[bold red]injected\[/bold red]" in badge
 
 
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="Windows filesystems disallow control characters in filenames",
+)
 def test_cli_literal_and_sanitization_e2e(tmp_path: Path) -> None:
     """Verify CLI end-to-end default sanitization and --literal flag preservation."""
     # Create file with control characters
