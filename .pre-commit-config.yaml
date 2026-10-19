@@ -54,7 +54,7 @@ repos:
 
   # UV dependency management
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.13.0
+    rev: 0.13.1
     hooks:
       - id: uv-lock
       - id: uv-export
@@ -70,7 +70,7 @@ repos:
 
   # PyPI packaging compliance
   - repo: https://github.com/regebro/pyroma
-    rev: 5.0.1
+    rev: 5.1b1
     hooks:
       - id: pyroma
         args: [-d, --min=10, .]
@@ -101,7 +101,7 @@ repos:
 
   # Astral Ruff (Linter & Formatter)
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.0
+    rev: v0.17.1
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -180,7 +180,7 @@ repos:
 
   # PyMarkdown linter
   - repo: https://github.com/jackdewinter/pymarkdown
-    rev: v0.9.40
+    rev: v0.9.41
     hooks:
       - id: pymarkdown
 
@@ -206,7 +206,7 @@ repos:
 
   # Astral Ty type checker
   - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.84
+    rev: v0.0.89
     hooks:
       - id: ty
         args: [--group, lint]
