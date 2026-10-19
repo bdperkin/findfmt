@@ -49,14 +49,14 @@ def parse_flat_listing(lines: Iterable[str]) -> Iterator[ParsedEntry]:
             continue
 
         token, is_symlink, target = parse_symlink_target(stripped)
-        token = token.removeprefix("./")
+        token = token.removeprefix("./").removeprefix(".\\")
 
-        if token in ("", "."):
+        if token in ("", ".", ".\\"):
             continue
 
         is_dir = token.endswith(("/", "\\"))
         clean_path = token.rstrip("/\\")
-        if not clean_path:
+        if not clean_path or clean_path == ".":
             continue
 
         yield ParsedEntry(

@@ -273,7 +273,13 @@ def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -
 
     if os.name == "nt":
         pathext = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC").split(";")
-        has_pathext = any(path.name.upper().endswith(ext.upper()) for ext in pathext if ext)
+        has_pathext = any(
+            path.name.upper().endswith(
+                ext.strip().upper() if ext.strip().startswith(".") else f".{ext.strip().upper()}",
+            )
+            for ext in pathext
+            if ext.strip()
+        )
         return has_pathext or bool(shebang)
 
     return os.access(path, os.X_OK)

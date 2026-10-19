@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import re
 import urllib.parse
-from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import PurePath
 
 __all__ = [
     "build_file_uri",
@@ -50,7 +53,7 @@ def _normalize_schema(schema: str) -> tuple[str, str]:
 
 
 def build_file_uri(
-    path: Path | str,
+    path: PurePath | str,
     *,
     schema: str = "file://",
     authority: str | None = None,
@@ -65,12 +68,12 @@ def build_file_uri(
     Returns:
         Fully qualified, URL-encoded URI string.
     """
-    p = Path(path) if isinstance(path, str) else path
-    posix_path = p.as_posix()
+    posix_path = path.replace("\\", "/") if isinstance(path, str) else path.as_posix()
+
     if not posix_path.startswith("/"):
         posix_path = f"/{posix_path}"
 
-    quoted_path = urllib.parse.quote(posix_path, safe="/")
+    quoted_path = urllib.parse.quote(posix_path, safe="/:")
     sanitized_schema = _sanitize_uri_component(schema)
     scheme, rest_clean = _normalize_schema(sanitized_schema)
 

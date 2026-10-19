@@ -84,7 +84,13 @@ def classify_file_offline(
     is_executable = False
     if os.name == "nt":
         pathext = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC").split(";")
-        is_executable = any(path.name.upper().endswith(ext.upper()) for ext in pathext if ext)
+        is_executable = any(
+            path.name.upper().endswith(
+                ext.strip().upper() if ext.strip().startswith(".") else f".{ext.strip().upper()}",
+            )
+            for ext in pathext
+            if ext.strip()
+        )
 
     _adjust_nt_tags(tags, is_executable=is_executable)
     indicator = "@" if is_symlink else ("*" if is_executable else None)
@@ -109,7 +115,7 @@ def _resolve_and_classify(
     config: TraversalConfig,
 ) -> FileInfo:
     """Resolve target path and classify entry via online or offline mechanisms."""
-    raw_path = Path(entry.path_str)
+    raw_path = Path(entry.path_str.replace("\\", "/"))
     if raw_path.is_absolute():
         target_path = raw_path
         rel_path = raw_path.relative_to(root) if raw_path.is_relative_to(root) else raw_path

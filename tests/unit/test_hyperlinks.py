@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 from typer.testing import CliRunner
 
@@ -37,6 +37,16 @@ def test_build_file_uri_basic() -> None:
     assert build_file_uri("/workspace/app.py") == "file:///workspace/app.py"
     assert build_file_uri(Path("/workspace/app.py")) == "file:///workspace/app.py"
     assert build_file_uri("relative/path.py") == "file:///relative/path.py"
+
+
+def test_build_file_uri_windows() -> None:
+    """Verify file:// URI generation for Windows drive paths and PureWindowsPath."""
+    assert build_file_uri(r"C:\workspace\app.py") == "file:///C:/workspace/app.py"
+    assert build_file_uri(PureWindowsPath(r"C:\workspace\app.py")) == "file:///C:/workspace/app.py"
+    assert (
+        build_file_uri(r"D:\projects\code\main.py", schema="vscode://file/")
+        == "vscode://file/D:/projects/code/main.py"
+    )
 
 
 def test_build_file_uri_special_chars() -> None:

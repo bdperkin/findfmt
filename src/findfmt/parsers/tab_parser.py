@@ -34,7 +34,7 @@ def _clean_outline_line(raw: str) -> tuple[int, str, bool, str | None, bool] | N
     token, is_symlink, target = parse_symlink_target(content)
     has_slash = token.endswith(("/", "\\"))
     clean_name = token.rstrip("/\\").strip()
-    if not clean_name:
+    if not clean_name or clean_name in (".", "./", ".\\"):
         return None
 
     return indent_col, clean_name, is_symlink, target, has_slash
