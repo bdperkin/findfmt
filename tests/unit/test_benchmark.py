@@ -7,7 +7,7 @@ import json
 import runpy
 import sys
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from rich.console import Console
 from tools.benchmark import (
@@ -388,23 +388,45 @@ def test_null_sink():
 
 
 def test_get_peak_rss_mb():
-    """Verify RSS extraction across Linux, macOS, and error handling."""
+    """Verify RSS extraction across Linux, macOS, Windows, and error handling."""
     # When resource is None
     with patch.dict(get_peak_rss_mb.__globals__, {"resource": None}):
         assert get_peak_rss_mb() == 0.0
 
-    # Normal Linux execution
-    rss_val = get_peak_rss_mb()
-    assert rss_val >= 0.0
+    mock_res = MagicMock()
+    mock_res.RUSAGE_SELF = 0
+    mock_res.getrusage.return_value.ru_maxrss = 102400.0
+
+    # Linux platform simulation (divided by 1024)
+    with (
+        patch.dict(get_peak_rss_mb.__globals__, {"resource": mock_res}),
+        patch("sys.platform", "linux"),
+    ):
+        assert get_peak_rss_mb() == 100.0
 
     # macOS platform simulation (divided by 1024^2)
-    with patch("sys.platform", "darwin"):
-        rss_mac = get_peak_rss_mb()
-        assert rss_mac >= 0.0
+    with (
+        patch.dict(get_peak_rss_mb.__globals__, {"resource": mock_res}),
+        patch("sys.platform", "darwin"),
+    ):
+        assert round(get_peak_rss_mb(), 4) == round(102400.0 / (1024.0 * 1024.0), 4)
 
-    # Exception tolerance
-    with patch("resource.getrusage", side_effect=OSError("Resource error")):
+    # Exception tolerance (OSError)
+    mock_err = MagicMock()
+    mock_err.RUSAGE_SELF = 0
+    mock_err.getrusage.side_effect = OSError("Resource error")
+    with patch.dict(get_peak_rss_mb.__globals__, {"resource": mock_err}):
         assert get_peak_rss_mb() == 0.0
+
+    # Exception tolerance (AttributeError)
+    mock_attr_err = MagicMock()
+    mock_attr_err.RUSAGE_SELF = 0
+    mock_attr_err.getrusage.side_effect = AttributeError("No attribute")
+    with patch.dict(get_peak_rss_mb.__globals__, {"resource": mock_attr_err}):
+        assert get_peak_rss_mb() == 0.0
+
+    # Real call on current platform
+    assert get_peak_rss_mb() >= 0.0
 
 
 def test_measure_traversal_formats_and_tags(tmp_path: Path):
