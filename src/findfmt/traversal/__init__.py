@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from findfmt.exceptions import InvalidSortCriteriaError, TraversalError
 from findfmt.traversal.boundaries import matches_filter, should_skip_dir
 from findfmt.traversal.engine import find_files, traverse_directory
 from findfmt.traversal.ignore import (
@@ -19,7 +20,9 @@ from findfmt.traversal.sorting import (
 )
 
 __all__ = [
+    "InvalidSortCriteriaError",
     "PatternMatcher",
+    "TraversalError",
     "create_pattern_matcher",
     "find_files",
     "is_path_ignored",

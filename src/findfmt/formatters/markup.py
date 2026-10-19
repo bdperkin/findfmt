@@ -10,9 +10,9 @@ if sys.version_info >= (3, 12):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import override
 
+from findfmt.exceptions import UnsupportedTableStyleError
 from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter
 from findfmt.formatters.delimited import file_to_record
-from findfmt.i18n import _
 from findfmt.utils.strings import mask_control_characters, strip_ansi_escapes
 
 if TYPE_CHECKING:
@@ -201,22 +201,6 @@ def _format_rst_simple(
     lines.append(border)
 
     return "\n".join(lines) + "\n"
-
-
-class UnsupportedTableStyleError(ValueError):
-    """Raised when an unsupported table style is requested."""
-
-    def __init__(self, table_style: str) -> None:
-        """Initialize UnsupportedTableStyleError.
-
-        Args:
-            table_style: The invalid table style requested.
-        """
-        super().__init__(
-            _("Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'.").format(
-                style=table_style,
-            ),
-        )
 
 
 class RstFormatter(Formatter):

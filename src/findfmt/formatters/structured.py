@@ -20,6 +20,13 @@ if TYPE_CHECKING:
 
     from findfmt.models import FileInfo
 
+__all__ = [
+    "IpynbFormatter",
+    "JsonFormatter",
+    "JsonlFormatter",
+    "YamlFormatter",
+]
+
 
 class JsonFormatter(Formatter):
     """Deterministic JSON array formatter with configurable indentation."""

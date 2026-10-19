@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from findfmt.exceptions import ParserError
 from findfmt.parsers.engine import (
     classify_file_offline,
     detect_input_format,
@@ -13,6 +14,7 @@ from findfmt.parsers.tab_parser import parse_tab_outline
 
 __all__ = [
     "ParsedEntry",
+    "ParserError",
     "classify_file_offline",
     "detect_input_format",
     "ingest_from_file",

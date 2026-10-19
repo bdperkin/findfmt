@@ -33,6 +33,7 @@ from findfmt.formatters.text import TextFormatter
 from findfmt.formatters.visual import (
     RichTableFormatter,
     RichTreeFormatter,
+    UnsupportedBoxStyleError,
 )
 from findfmt.formatters.xml_formatter import XmlFormatter
 
@@ -52,6 +53,7 @@ __all__ = [
     "RstFormatter",
     "TextFormatter",
     "TsvFormatter",
+    "UnsupportedBoxStyleError",
     "UnsupportedFormatError",
     "UnsupportedTableStyleError",
     "XmlFormatter",

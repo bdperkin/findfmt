@@ -106,6 +106,7 @@ __all__ = [
     "app",
     "diagnostics_callback",
     "find_files",
+    "findfmt",
     "get_diagnostics",
     "get_git_version",
     "get_help_all",

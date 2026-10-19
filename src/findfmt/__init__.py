@@ -12,6 +12,15 @@ from findfmt.entrypoints import (
     main_findshebang,
     main_findsummary,
 )
+from findfmt.exceptions import (
+    FindFmtError,
+    InvalidSortCriteriaError,
+    ParserError,
+    TraversalError,
+    UnsupportedBoxStyleError,
+    UnsupportedFormatError,
+    UnsupportedTableStyleError,
+)
 from findfmt.formatters import Formatter, OutputFormat, get_formatter
 from findfmt.i18n import (
     _,
@@ -53,10 +62,17 @@ __version__ = get_version()
 
 __all__ = [
     "FileInfo",
+    "FindFmtError",
     "Formatter",
+    "InvalidSortCriteriaError",
     "OutputFormat",
+    "ParserError",
     "SortKey",
     "TraversalConfig",
+    "TraversalError",
+    "UnsupportedBoxStyleError",
+    "UnsupportedFormatError",
+    "UnsupportedTableStyleError",
     "_",
     "__version__",
     "build_file_uri",

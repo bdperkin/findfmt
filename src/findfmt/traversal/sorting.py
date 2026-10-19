@@ -12,7 +12,7 @@ if sys.version_info >= (3, 12):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import override
 
-from findfmt.i18n import _
+from findfmt.exceptions import InvalidSortCriteriaError
 from findfmt.models import SortKey
 
 if TYPE_CHECKING:
@@ -22,6 +22,7 @@ if TYPE_CHECKING:
     from findfmt.models import TraversalConfig
 
 __all__ = [
+    "InvalidSortCriteriaError",
     "collect_directory_entries",
     "get_entry_ctime",
     "get_entry_mtime",
@@ -263,8 +264,4 @@ def resolve_sort_key(value: str | SortKey | None, *, unsorted: bool = False) -> 
     if key is not None:
         return key
 
-    msg = _(
-        "Invalid sort criteria '{criteria}'. "
-        "Choose from: name, version, time, mtime, ctime, size, none.",
-    ).format(criteria=value)
-    raise ValueError(msg)
+    raise InvalidSortCriteriaError(value)

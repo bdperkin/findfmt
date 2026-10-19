@@ -8,6 +8,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
 
+__all__ = ["init_visited_dirs", "should_skip_symlink_dir"]
+
 
 def init_visited_dirs(
     root: Path,

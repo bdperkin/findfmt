@@ -14,6 +14,14 @@ from findfmt.metadata import extract_metadata
 from findfmt.models import FileInfo
 from findfmt.utils.strings import get_classification_indicator
 
+__all__ = [
+    "classify_file",
+    "compute_relative_prefix",
+    "extract_shebang",
+    "extract_shebang_from_buffer",
+    "get_known_tags",
+]
+
 
 def get_known_tags() -> frozenset[str]:
     """Retrieve all known format and type tags recognized by the engine.

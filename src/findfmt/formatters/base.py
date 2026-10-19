@@ -6,12 +6,19 @@ import enum
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, TextIO
 
-from findfmt.i18n import _
+from findfmt.exceptions import UnsupportedFormatError
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
     from findfmt.models import FileInfo
+
+__all__ = [
+    "TABLE_FIELD_NAMES",
+    "Formatter",
+    "OutputFormat",
+    "UnsupportedFormatError",
+]
 
 
 class OutputFormat(str, enum.Enum):
@@ -45,24 +52,6 @@ TABLE_FIELD_NAMES: tuple[str, ...] = (
     "is_symlink",
     "size_bytes",
 )
-
-
-class UnsupportedFormatError(ValueError):
-    """Raised when an unsupported output format is requested."""
-
-    def __init__(self, format_type: str, valid_formats: str) -> None:
-        """Initialize UnsupportedFormatError.
-
-        Args:
-            format_type: The invalid format requested.
-            valid_formats: Comma-separated list of valid formats.
-        """
-        super().__init__(
-            _("Unsupported output format: '{format}'. Expected one of: {valid_formats}").format(
-                format=format_type,
-                valid_formats=valid_formats,
-            ),
-        )
 
 
 class Formatter(ABC):

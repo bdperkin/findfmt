@@ -16,6 +16,7 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
+from findfmt.exceptions import UnsupportedBoxStyleError
 from findfmt.formatters.badges import format_tag_badge
 from findfmt.formatters.base import Formatter
 from findfmt.formatters.glyphs import CP437_BOX
@@ -80,19 +81,6 @@ def format_summary_panel(match_count: int, tag_counter: Counter[str]) -> Panel:
         border_style="blue",
         expand=False,
     )
-
-
-class UnsupportedBoxStyleError(ValueError):
-    """Raised when an unsupported table border style is requested."""
-
-    def __init__(self, table_style: str, valid_styles: str) -> None:
-        """Initialize UnsupportedBoxStyleError."""
-        super().__init__(
-            _("Unsupported table style: '{style}'. Expected one of: {valid_styles}").format(
-                style=table_style,
-                valid_styles=valid_styles,
-            ),
-        )
 
 
 class RichTableFormatter(Formatter):

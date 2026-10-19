@@ -15,6 +15,86 @@ from findfmt.i18n import _, locale_callback
 help_all_callback = h.help_all_callback
 known_tags_callback = h.known_tags_callback
 
+__all__ = [
+    "OptAbsolute",
+    "OptAllTags",
+    "OptAnsiLines",
+    "OptClassify",
+    "OptColor",
+    "OptConfig",
+    "OptCp437",
+    "OptCtime",
+    "OptDevice",
+    "OptDiagnostics",
+    "OptDirsFirst",
+    "OptDirsOnly",
+    "OptDu",
+    "OptExcludePattern",
+    "OptExcludeTags",
+    "OptFileLimit",
+    "OptFilesFirst",
+    "OptFollowSymlinks",
+    "OptFromFile",
+    "OptGitignoreFile",
+    "OptGroup",
+    "OptHelpAll",
+    "OptHidden",
+    "OptHideControlChars",
+    "OptHtml",
+    "OptHumanReadable",
+    "OptHyperlink",
+    "OptHyperlinkAuthority",
+    "OptHyperlinkSchema",
+    "OptIgnoreCase",
+    "OptInodes",
+    "OptIntro",
+    "OptJson",
+    "OptKnownTags",
+    "OptListTags",
+    "OptLiteral",
+    "OptLocale",
+    "OptMatchDirs",
+    "OptMaxDepth",
+    "OptMtime",
+    "OptNoConfig",
+    "OptNoIgnore",
+    "OptNoIndent",
+    "OptNoLinks",
+    "OptOffline",
+    "OptOneFileSystem",
+    "OptOutput",
+    "OptOutputFormat",
+    "OptOutro",
+    "OptPager",
+    "OptPaths",
+    "OptPattern",
+    "OptPermissions",
+    "OptPrint0",
+    "OptPrune",
+    "OptQuoteName",
+    "OptRelative",
+    "OptReverse",
+    "OptShebang",
+    "OptShowConfig",
+    "OptSi",
+    "OptSize",
+    "OptSort",
+    "OptSummary",
+    "OptTableStyle",
+    "OptTags",
+    "OptTimeFormat",
+    "OptTitle",
+    "OptTree",
+    "OptUnsorted",
+    "OptUser",
+    "OptVerbose",
+    "OptVersion",
+    "OptXml",
+    "help_all_callback",
+    "known_tags_callback",
+    "show_config_callback",
+]
+
 _PT = _("Tag Filtering")
 _PC = _("Traversal Controls")
 _PO = _("Output Formatting")
@@ -40,13 +120,7 @@ OptAllTags = Annotated[
 ]
 OptPattern = Annotated[
     list[str] | None,
-    typer.Option(
-        "-P",
-        "--pattern",
-        "--include-pattern",
-        rich_help_panel=_PC,
-        help=h.HELP_PATTERN,
-    ),
+    typer.Option("-P", "--pattern", "--include-pattern", rich_help_panel=_PC, help=h.HELP_PATTERN),
 ]
 OptExcludePattern = Annotated[
     list[str] | None,
@@ -54,11 +128,7 @@ OptExcludePattern = Annotated[
 ]
 OptIgnoreCase = Annotated[
     bool,
-    typer.Option(
-        "--ignore-case/--no-ignore-case",
-        rich_help_panel=_PC,
-        help=h.HELP_IGNORE_CASE,
-    ),
+    typer.Option("--ignore-case/--no-ignore-case", rich_help_panel=_PC, help=h.HELP_IGNORE_CASE),
 ]
 OptMatchDirs = Annotated[
     bool,
@@ -85,10 +155,7 @@ OptFromFile = Annotated[
     str | None,
     typer.Option("--from-file", "--fromfile", rich_help_panel=_PC, help=h.HELP_FROM_FILE),
 ]
-OptOffline = Annotated[
-    bool,
-    typer.Option("--offline", rich_help_panel=_PC, help=h.HELP_OFFLINE),
-]
+OptOffline = Annotated[bool, typer.Option("--offline", rich_help_panel=_PC, help=h.HELP_OFFLINE)]
 OptHidden = Annotated[
     bool,
     typer.Option(
@@ -126,14 +193,8 @@ OptFileLimit = Annotated[
     int | None,
     typer.Option("--filelimit", rich_help_panel=_PC, help=h.HELP_FILE_LIMIT),
 ]
-OptPrune = Annotated[
-    bool,
-    typer.Option("--prune", rich_help_panel=_PC, help=h.HELP_PRUNE),
-]
-OptSort = Annotated[
-    str | None,
-    typer.Option("--sort", rich_help_panel=_PC, help=h.HELP_SORT),
-]
+OptPrune = Annotated[bool, typer.Option("--prune", rich_help_panel=_PC, help=h.HELP_PRUNE)]
+OptSort = Annotated[str | None, typer.Option("--sort", rich_help_panel=_PC, help=h.HELP_SORT)]
 OptReverse = Annotated[
     bool,
     typer.Option("-r", "--reverse", rich_help_panel=_PC, help=h.HELP_REVERSE),
@@ -157,105 +218,40 @@ OptFilesFirst = Annotated[
 ]
 OptOutputFormat = Annotated[
     OutputFormat,
-    typer.Option(
-        "-f",
-        "--format",
-        case_sensitive=False,
-        rich_help_panel=_PO,
-        help=h.HELP_FORMAT,
-    ),
+    typer.Option("-f", "--format", case_sensitive=False, rich_help_panel=_PO, help=h.HELP_FORMAT),
 ]
 OptOutput = Annotated[
     Path | None,
     typer.Option("-o", "--output", rich_help_panel=_PO, help=h.HELP_OUTPUT),
 ]
-OptTree = Annotated[
-    bool,
-    typer.Option("--tree/--no-tree", rich_help_panel=_PO, help=h.HELP_TREE),
-]
+OptTree = Annotated[bool, typer.Option("--tree/--no-tree", rich_help_panel=_PO, help=h.HELP_TREE)]
 OptJson = Annotated[
     bool,
-    typer.Option(
-        "-J",
-        "--json/--no-json",
-        rich_help_panel=_PO,
-        help=h.HELP_JSON,
-    ),
+    typer.Option("-J", "--json/--no-json", rich_help_panel=_PO, help=h.HELP_JSON),
 ]
-OptXml = Annotated[
-    bool,
-    typer.Option(
-        "-X",
-        "--xml/--no-xml",
-        rich_help_panel=_PO,
-        help=h.HELP_XML,
-    ),
-]
-OptHtml = Annotated[
-    str | None,
-    typer.Option(
-        "-H",
-        "--html",
-        rich_help_panel=_PO,
-        help=h.HELP_HTML,
-    ),
-]
-OptIntro = Annotated[
-    Path | None,
-    typer.Option(
-        "--intro",
-        rich_help_panel=_PO,
-        help=h.HELP_INTRO,
-    ),
-]
-OptOutro = Annotated[
-    Path | None,
-    typer.Option(
-        "--outro",
-        rich_help_panel=_PO,
-        help=h.HELP_OUTRO,
-    ),
-]
+OptXml = Annotated[bool, typer.Option("-X", "--xml/--no-xml", rich_help_panel=_PO, help=h.HELP_XML)]
+OptHtml = Annotated[str | None, typer.Option("-H", "--html", rich_help_panel=_PO, help=h.HELP_HTML)]
+OptIntro = Annotated[Path | None, typer.Option("--intro", rich_help_panel=_PO, help=h.HELP_INTRO)]
+OptOutro = Annotated[Path | None, typer.Option("--outro", rich_help_panel=_PO, help=h.HELP_OUTRO)]
 OptTitle = Annotated[
     str | None,
-    typer.Option(
-        "-T",
-        "--title",
-        rich_help_panel=_PO,
-        help=h.HELP_TITLE,
-    ),
+    typer.Option("-T", "--title", rich_help_panel=_PO, help=h.HELP_TITLE),
 ]
 OptNoLinks = Annotated[
     bool,
-    typer.Option(
-        "--nolinks/--no-nolinks",
-        rich_help_panel=_PO,
-        help=h.HELP_NO_LINKS,
-    ),
+    typer.Option("--nolinks/--no-nolinks", rich_help_panel=_PO, help=h.HELP_NO_LINKS),
 ]
 OptHyperlink = Annotated[
     bool,
-    typer.Option(
-        "--hyperlink/--no-hyperlink",
-        rich_help_panel=_PO,
-        help=h.HELP_HYPERLINK,
-    ),
+    typer.Option("--hyperlink/--no-hyperlink", rich_help_panel=_PO, help=h.HELP_HYPERLINK),
 ]
 OptHyperlinkSchema = Annotated[
     str,
-    typer.Option(
-        "--hyperlink-schema",
-        rich_help_panel=_PO,
-        help=h.HELP_HYPERLINK_SCHEMA,
-    ),
+    typer.Option("--hyperlink-schema", rich_help_panel=_PO, help=h.HELP_HYPERLINK_SCHEMA),
 ]
 OptHyperlinkAuthority = Annotated[
     str | None,
-    typer.Option(
-        "--hyperlink-authority",
-        rich_help_panel=_PO,
-        help=h.HELP_HYPERLINK_AUTHORITY,
-    ),
+    typer.Option("--hyperlink-authority", rich_help_panel=_PO, help=h.HELP_HYPERLINK_AUTHORITY),
 ]
 OptTableStyle = Annotated[
     str | None,
@@ -329,10 +325,7 @@ OptDevice = Annotated[
     bool,
     typer.Option("--device/--no-device", rich_help_panel=_PO, help=h.HELP_DEVICE),
 ]
-OptSize = Annotated[
-    bool,
-    typer.Option("--size/--no-size", rich_help_panel=_PO, help=h.HELP_SIZE),
-]
+OptSize = Annotated[bool, typer.Option("--size/--no-size", rich_help_panel=_PO, help=h.HELP_SIZE)]
 OptHumanReadable = Annotated[
     bool,
     typer.Option(
@@ -342,10 +335,7 @@ OptHumanReadable = Annotated[
         help=h.HELP_HUMAN_READABLE,
     ),
 ]
-OptSi = Annotated[
-    bool,
-    typer.Option("--si/--no-si", rich_help_panel=_PO, help=h.HELP_SI),
-]
+OptSi = Annotated[bool, typer.Option("--si/--no-si", rich_help_panel=_PO, help=h.HELP_SI)]
 OptDu = Annotated[
     bool,
     typer.Option(
@@ -365,12 +355,7 @@ OptCtime = Annotated[
 ]
 OptTimeFormat = Annotated[
     str | None,
-    typer.Option(
-        "--time-format",
-        "--timefmt",
-        rich_help_panel=_PO,
-        help=h.HELP_TIME_FORMAT,
-    ),
+    typer.Option("--time-format", "--timefmt", rich_help_panel=_PO, help=h.HELP_TIME_FORMAT),
 ]
 OptClassify = Annotated[
     bool,
@@ -449,20 +434,8 @@ OptLocale = Annotated[
         help=h.HELP_LOCALE,
     ),
 ]
-OptConfig = Annotated[
-    Path | None,
-    typer.Option(
-        "--config",
-        help=h.HELP_CONFIG,
-    ),
-]
-OptNoConfig = Annotated[
-    bool,
-    typer.Option(
-        "--no-config",
-        help=h.HELP_NO_CONFIG,
-    ),
-]
+OptConfig = Annotated[Path | None, typer.Option("--config", help=h.HELP_CONFIG)]
+OptNoConfig = Annotated[bool, typer.Option("--no-config", help=h.HELP_NO_CONFIG)]
 
 OptShowConfig = Annotated[
     bool,

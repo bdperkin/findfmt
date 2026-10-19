@@ -24,6 +24,8 @@ if TYPE_CHECKING:
 
     from findfmt.models import FileInfo
 
+__all__ = ["TextFormatter"]
+
 
 class TextFormatter(Formatter):
     """Standard line-oriented or NUL-delimited plain text formatter."""
