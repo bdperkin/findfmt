@@ -30,7 +30,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
@@ -42,6 +42,7 @@ classifiers = [
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: 3.15",
+  "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Software Development :: Quality Assurance",
   "Topic :: Utilities",
 ]
@@ -98,6 +99,7 @@ lint = [
   "pyroma>=4.2",
   "radon>=6.0.1",
   "ruff>=0.8",
+  "twine>=6",
   "ty>=0.0.80",
   "types-pyyaml>=6",
   "vulture>=2.11",
@@ -107,10 +109,10 @@ lint = [
 
 [tool.hatch]
 version.source = "vcs"
-version.fallback-version = "0.9.0.dev0"
+version.fallback-version = "1.0.0.dev0"
+build.hooks.custom.path = "tools/hatch_build.py"
 build.targets.wheel.packages = [ "src/findfmt" ]
 build.targets.wheel.artifacts = [ "*.mo" ]
-build.targets.wheel.hooks.custom.path = "tools/hatch_build.py"
 build.targets.sdist.include = [
   "/src",
   "/tests",
@@ -120,6 +122,7 @@ build.targets.sdist.include = [
   "LICENSE",
   "pyproject.toml",
 ]
+build.targets.sdist.artifacts = [ "*.mo" ]
 
 [tool.ruff]
 target-version = "py310"

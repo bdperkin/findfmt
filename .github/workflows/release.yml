@@ -12,8 +12,27 @@ on:
 permissions:
   contents: read
 jobs:
+  verify-release:
+    name: Verify Release Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86  # v5
+        with:
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        with:
+          python-version: '3.14'
+      - name: Install dependencies
+        run: uv sync --all-groups
+      - name: Verify Complete Quality Suite
+        run: uv run python tools/verify_quality.py
   build-distributions:
     name: Build Distributions
+    needs: verify-release
     runs-on: ubuntu-latest
     outputs:
       release_body: ${{ steps.git-cliff.outputs.content }}
@@ -30,8 +49,12 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
           python-version: '3.14'
+      - name: Install dependencies
+        run: uv sync --all-groups
       - name: Build Distributions via uv
         run: uv build
+      - name: Verify Distribution Packages with Twine
+        run: uv run twine check --strict dist/*
       - name: Generate Changelog with git-cliff
         uses: orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff  # v4
         with:
