@@ -111,8 +111,14 @@ def _scan_directory_entries(  # noqa: PLR0913
         if is_dir:
             if not should_skip_dir(entry.name, include_hidden=config.include_hidden):
                 subdirs.append(entry_path)
-        elif entry.is_file(follow_symlinks=config.follow_symlinks):
-            files.append((entry_path, entry))
+        else:
+            try:
+                is_file = entry.is_file(follow_symlinks=config.follow_symlinks)
+            except OSError:
+                continue
+
+            if is_file:
+                files.append((entry_path, entry))
 
     return subdirs, files
 
@@ -130,6 +136,7 @@ def _traverse_subdirs(  # noqa: PLR0913
     matcher: PatternMatcher,
     inherited_match: bool,
     accumulated_sizes: dict[Path, int] | None = None,
+    prune_memo: dict[tuple[int, int], bool] | None = None,
 ) -> Iterator[FileInfo]:
     """Descend and traverse discovered subdirectories."""
     if not check_depth_limit(current_depth, config.max_depth):
@@ -151,6 +158,7 @@ def _traverse_subdirs(  # noqa: PLR0913
             matcher=matcher,
             inherited_match=child_inherit,
             base_root=base_root,
+            memo=prune_memo,
         ):
             continue
 
@@ -173,6 +181,7 @@ def _traverse_subdirs(  # noqa: PLR0913
             matcher=matcher,
             inherited_match=child_inherit,
             accumulated_sizes=accumulated_sizes,
+            prune_memo=prune_memo,
         )
 
 
@@ -189,6 +198,7 @@ def traverse_directory(  # noqa: PLR0913
     matcher: PatternMatcher | None = None,
     inherited_match: bool = False,
     accumulated_sizes: dict[Path, int] | None = None,
+    prune_memo: dict[tuple[int, int], bool] | None = None,
 ) -> Iterator[FileInfo]:
     """Recursively traverse a directory hierarchy honoring .gitignore, filters, and boundaries."""
     effective_base = base_root if base_root is not None else root
@@ -209,6 +219,7 @@ def traverse_directory(  # noqa: PLR0913
         respect_gitignore=config.respect_gitignore,
         gitignore_file=config.gitignore_file,
     )
+    active_prune_memo = prune_memo if prune_memo is not None else {}
 
     subdirs, files = _scan_directory_entries(
         root,
@@ -231,6 +242,7 @@ def traverse_directory(  # noqa: PLR0913
         matcher=active_matcher,
         inherited_match=inherited_match,
         accumulated_sizes=accumulated_sizes,
+        prune_memo=active_prune_memo,
     )
     descendants = _traverse_subdirs(
         subdirs,
@@ -244,6 +256,7 @@ def traverse_directory(  # noqa: PLR0913
         matcher=active_matcher,
         inherited_match=inherited_match,
         accumulated_sizes=accumulated_sizes,
+        prune_memo=active_prune_memo,
     )
 
     if config.dirs_first:
@@ -261,7 +274,12 @@ def _traverse_single_root(
     matcher: PatternMatcher,
 ) -> Iterator[FileInfo]:
     """Yield matching items from a single root path (file or directory)."""
-    if resolved_root.is_file():
+    try:
+        is_file = resolved_root.is_file()
+    except OSError:
+        return
+
+    if is_file:
         if not config.dirs_only:
             prefix = compute_relative_prefix(root.parent) if config.relative_prefix else None
             info = classify_file(resolved_root, root_path=resolved_root.parent, prefix=prefix)
@@ -299,6 +317,11 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
     matcher = create_pattern_matcher(config)
     roots = config.root_paths if config.sort_by == SortKey.NONE else sorted(config.root_paths)
     for root in roots:
-        resolved_root = root.resolve()
-        if resolved_root.exists():
+        try:
+            resolved_root = root.resolve()
+            exists = resolved_root.exists()
+        except OSError:
+            continue
+
+        if exists:
             yield from _traverse_single_root(root, resolved_root, config, matcher)

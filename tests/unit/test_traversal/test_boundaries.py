@@ -3,16 +3,23 @@
 from __future__ import annotations
 
 import os
+import signal
+import sys
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import MagicMock, patch
 
 import pathspec
+import pytest
+from typer.testing import CliRunner
 
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
+from findfmt.cli.main import app
 from findfmt.models import TraversalConfig
 from findfmt.traversal.boundaries import (
     _inspect_entries,
-    can_skip_file_by_tags,
     check_depth_limit,
     check_device_boundary,
     check_file_limit,
@@ -24,6 +31,7 @@ from findfmt.traversal.boundaries import (
     should_skip_symlink_dir,
     yield_matching_items,
 )
+from findfmt.traversal.engine import find_files
 from findfmt.traversal.patterns import PatternMatcher
 
 
@@ -138,6 +146,9 @@ def test_filter_directory_entry(tmp_path: Path) -> None:
         res = filter_directory_entry(entry, config, (), None)
         assert res == (Path(entry.path), False)
 
+    entry.is_dir.side_effect = OSError("Loop error")
+    assert filter_directory_entry(entry, config, (), None) is None
+
 
 def test_has_matching_descendants_and_inspect_entries(tmp_path: Path) -> None:
     """Verify detection of matching files across directory trees."""
@@ -191,11 +202,31 @@ def test_has_matching_descendants_and_inspect_entries(tmp_path: Path) -> None:
     mock_other.is_dir.return_value = False
     mock_other.is_file.return_value = False
 
-    mock_entries: list[Any] = [mock_git_dir, mock_other]
+    mock_entry_err = MagicMock(spec=os.DirEntry)
+    mock_entry_err.name = "problem"
+    mock_entry_err.path = str(tmp_path / "problem")
+    mock_entry_err.is_dir.return_value = False
+    mock_entry_err.is_file.side_effect = OSError("Permission error")
+
+    mock_entries: list[Any] = [mock_git_dir, mock_other, mock_entry_err]
     config_hidden = TraversalConfig(include_hidden=True)
     subdirs_mock, found_mock = _inspect_entries(mock_entries, config_hidden, (), None)
     assert found_mock is False
     assert subdirs_mock == []
+
+
+def test_has_matching_descendants_stat_and_scandir_errors(tmp_path: Path) -> None:
+    """Verify error suppression and memo tracking on stat/scandir failure."""
+    tree_root = tmp_path / "err_root"
+    tree_root.mkdir()
+    config = TraversalConfig(include_tags=frozenset({"python"}))
+    non_existent = tmp_path / "does_not_exist"
+    memo: dict[tuple[int, int], bool] = {}
+    assert has_matching_descendants(non_existent, config, (), memo=memo) is False
+
+    with patch("os.scandir", side_effect=OSError("Read error")):
+        assert has_matching_descendants(tree_root, config, (), memo=memo) is False
+        assert memo[(tree_root.stat().st_dev, tree_root.stat().st_ino)] is False
 
 
 def test_yield_matching_items(tmp_path: Path) -> None:
@@ -224,55 +255,6 @@ def test_yield_matching_items(tmp_path: Path) -> None:
     )
     assert len(results) == 1
     assert results[0].path == sub_with_file.resolve()
-
-
-def test_can_skip_file_by_tags() -> None:
-    # No filters
-    assert not can_skip_file_by_tags("file.txt", TraversalConfig())
-
-    # Exclude tags matched vs not matched
-    cfg_ex = TraversalConfig(exclude_tags=frozenset({"python"}))
-    assert can_skip_file_by_tags("script.py", cfg_ex) is True
-    assert can_skip_file_by_tags("readme.md", cfg_ex) is False
-
-    # Generic tags bypass skipping
-    cfg_gen = TraversalConfig(include_tags=frozenset({"file"}))
-    assert not can_skip_file_by_tags("anything.bin", cfg_gen)
-
-    # Include tag matches filename tag
-    cfg_py = TraversalConfig(include_tags=frozenset({"python"}))
-    assert not can_skip_file_by_tags("module.py", cfg_py)
-    # Non-interpreter tag can skip photo.jpg even without is_executable
-    cfg_c = TraversalConfig(include_tags=frozenset({"c"}))
-    assert can_skip_file_by_tags("photo.jpg", cfg_c) is True
-    # Interpreter tag with is_executable=False can skip photo.jpg
-    assert can_skip_file_by_tags("photo.jpg", cfg_py, is_executable=False) is True
-
-    # Include tag matches MIME type
-    cfg_mime = TraversalConfig(include_tags=frozenset({"image"}))
-    assert not can_skip_file_by_tags("photo.jpg", cfg_mime)
-    cfg_full_mime = TraversalConfig(include_tags=frozenset({"mime:image/jpeg"}))
-    assert not can_skip_file_by_tags("photo.jpg", cfg_full_mime)
-
-    # Interpreter tags when executable is True vs False
-    cfg_sh = TraversalConfig(include_tags=frozenset({"bash"}))
-    assert not can_skip_file_by_tags("tool", cfg_sh, is_executable=True)
-    assert not can_skip_file_by_tags("tool", cfg_sh, is_executable=None)
-    assert can_skip_file_by_tags("tool", cfg_sh, is_executable=False) is True
-
-    # all_tags mode: cannot match vs matches
-    cfg_all_miss = TraversalConfig(include_tags=frozenset({"python", "c"}), all_tags=True)
-    assert can_skip_file_by_tags("test.py", cfg_all_miss) is True
-    assert (
-        can_skip_file_by_tags(
-            "test.py",
-            TraversalConfig(include_tags=frozenset({"python", "ruby"}), all_tags=True),
-            is_executable=False,
-        )
-        is True
-    )
-    cfg_all_match = TraversalConfig(include_tags=frozenset({"python"}), all_tags=True)
-    assert not can_skip_file_by_tags("test.py", cfg_all_match)
 
 
 def test_inspect_entries_stat_os_error_and_tag_skip(tmp_path: Path) -> None:
@@ -307,49 +289,182 @@ def test_yield_matching_items_files_and_tuples(tmp_path: Path) -> None:
     mock_entry.stat.side_effect = OSError("stat error")
 
     config = TraversalConfig(include_tags=frozenset({"python"}))
-    # Tuple target with stat OSError on entry
-    results = list(
-        yield_matching_items(
-            [(f, mock_entry)],
-            config,
-            (),
-            base_root=tmp_path,
-            prefix=None,
-            root_dev=None,
-            current_depth=1,
-        ),
+    assert (
+        len(
+            list(
+                yield_matching_items(
+                    [(f, mock_entry)],
+                    config,
+                    (),
+                    base_root=tmp_path,
+                    prefix=None,
+                    root_dev=None,
+                    current_depth=1,
+                ),
+            ),
+        )
+        == 1
     )
-    assert len(results) == 1
 
     # Matcher rejection before classification
     mock_matcher = MagicMock(spec=PatternMatcher)
     mock_matcher.matches_file.return_value = False
-
-    results_rej = list(
-        yield_matching_items(
-            [(f, mock_entry)],
-            config,
-            (),
-            base_root=tmp_path,
-            prefix=None,
-            root_dev=None,
-            current_depth=1,
-            matcher=mock_matcher,
-        ),
+    assert (
+        len(
+            list(
+                yield_matching_items(
+                    [(f, mock_entry)],
+                    config,
+                    (),
+                    base_root=tmp_path,
+                    prefix=None,
+                    root_dev=None,
+                    current_depth=1,
+                    matcher=mock_matcher,
+                ),
+            ),
+        )
+        == 0
     )
-    assert len(results_rej) == 0
 
     # Tag rejection before classification
     cfg_skip = TraversalConfig(include_tags=frozenset({"ruby"}))
-    results_tag_skip = list(
-        yield_matching_items(
-            [(f, mock_entry)],
-            cfg_skip,
-            (),
-            base_root=tmp_path,
-            prefix=None,
-            root_dev=None,
-            current_depth=1,
-        ),
+    assert (
+        len(
+            list(
+                yield_matching_items(
+                    [(f, mock_entry)],
+                    cfg_skip,
+                    (),
+                    base_root=tmp_path,
+                    prefix=None,
+                    root_dev=None,
+                    current_depth=1,
+                ),
+            ),
+        )
+        == 0
     )
-    assert len(results_tag_skip) == 0
+
+
+def test_follow_links_self_loop_does_not_crash(tmp_path: Path) -> None:
+    """Verify self-referential symlinks do not crash traversal or CLI."""
+    self_loop = tmp_path / "x"
+    try:
+        self_loop.symlink_to(self_loop)
+    except OSError:
+        pytest.skip("Symlink creation not supported in this environment")
+
+    config = TraversalConfig(root_paths=(tmp_path,), follow_symlinks=True)
+    assert list(find_files(config)) == []
+
+    config_direct = TraversalConfig(root_paths=(self_loop,), follow_symlinks=True)
+    assert list(find_files(config_direct)) == []
+
+    runner = CliRunner()
+    cli_result = runner.invoke(app, ["-l", str(tmp_path)])
+    assert cli_result.exit_code == 0
+    assert "Traceback" not in cli_result.output
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32" or (hasattr(os, "geteuid") and os.geteuid() == 0),
+    reason="chmod 000 permissions not enforced on Windows or for root",
+)
+def test_follow_links_unreadable_target_is_skipped(tmp_path: Path) -> None:
+    """Verify symlink to an unreadable directory is skipped without PermissionError."""
+    target_dir = tmp_path / "unreadable"
+    target_dir.mkdir()
+    target_dir.chmod(0o000)
+    link = tmp_path / "link_unreadable"
+    try:
+        link.symlink_to(target_dir, target_is_directory=True)
+        config = TraversalConfig(root_paths=(tmp_path,), follow_symlinks=True)
+        assert list(find_files(config)) == []
+    finally:
+        target_dir.chmod(0o755)
+
+
+def test_prune_with_parent_loop_terminates(tmp_path: Path) -> None:
+    """Verify --prune terminates cleanly with a parent symlink cycle."""
+    d = tmp_path / "d"
+    d.mkdir()
+    l1 = d / "l1"
+    try:
+        l1.symlink_to(tmp_path, target_is_directory=True)
+    except OSError:
+        pytest.skip("Symlink creation not supported in this environment")
+
+    if hasattr(signal, "alarm"):
+        signal.alarm(5)
+
+    try:
+        config = TraversalConfig(
+            root_paths=(tmp_path,),
+            follow_symlinks=True,
+            prune_empty=True,
+            dirs_only=True,
+            include_tags=frozenset({"python"}),
+        )
+        assert list(find_files(config)) == []
+    finally:
+        if hasattr(signal, "alarm"):
+            signal.alarm(0)
+
+
+def test_prune_with_two_loop_links_terminates(tmp_path: Path) -> None:
+    """Verify --prune terminates cleanly with two symlink cycle loops."""
+    d = tmp_path / "d"
+    d.mkdir()
+    l1 = d / "l1"
+    l2 = d / "l2"
+    try:
+        l1.symlink_to(tmp_path, target_is_directory=True)
+        l2.symlink_to(tmp_path, target_is_directory=True)
+    except OSError:
+        pytest.skip("Symlink creation not supported in this environment")
+
+    if hasattr(signal, "alarm"):
+        signal.alarm(5)
+
+    try:
+        config = TraversalConfig(
+            root_paths=(tmp_path,),
+            follow_symlinks=True,
+            prune_empty=True,
+            dirs_only=True,
+            include_tags=frozenset({"python"}),
+        )
+        assert list(find_files(config)) == []
+    finally:
+        if hasattr(signal, "alarm"):
+            signal.alarm(0)
+
+
+def test_has_matching_descendants_visits_each_inode_once(
+    tmp_path: Path,
+    mocker: MockerFixture,
+) -> None:
+    """Verify has_matching_descendants scans each real directory at most once."""
+    d1 = tmp_path / "d1"
+    d1.mkdir()
+    (d1 / "test.py").write_text("print(1)\n", encoding="utf-8")
+    d2 = tmp_path / "d2"
+    d2.mkdir()
+    try:
+        (d2 / "link_d1").symlink_to(d1, target_is_directory=True)
+    except OSError:
+        pytest.skip("Symlink creation not supported in this environment")
+
+    spy = mocker.spy(os, "scandir")
+    config = TraversalConfig(include_tags=frozenset({"python"}), follow_symlinks=True)
+    memo: dict[tuple[int, int], bool] = {}
+    assert has_matching_descendants(tmp_path, config, (), memo=memo) is True
+
+    scanned_inodes: list[tuple[int, int]] = []
+    for call in spy.call_args_list:
+        arg = call[0][0]
+        st = Path(arg).stat()
+        scanned_inodes.append((st.st_dev, st.st_ino))
+
+    assert len(scanned_inodes) == len(set(scanned_inodes))

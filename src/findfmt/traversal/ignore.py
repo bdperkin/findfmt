@@ -29,6 +29,7 @@ __all__ = [
     "load_gitignore_spec",
     "load_global_gitignore_spec",
     "load_spec_file",
+    "resolve_active_specs",
 ]
 
 
@@ -298,3 +299,24 @@ def is_path_ignored(
             return bool(check.include)
 
     return False
+
+
+def resolve_active_specs(
+    root: Path,
+    active_specs: tuple[tuple[Path, PathSpecType], ...] | None,
+    *,
+    respect_gitignore: bool,
+    gitignore_file: Path | None = None,
+) -> tuple[tuple[Path, PathSpecType], ...]:
+    """Resolve active gitignore specifications for current traversal frame."""
+    if active_specs is not None:
+        return active_specs
+
+    specs: list[tuple[Path, PathSpecType]] = []
+    if respect_gitignore:
+        specs.extend(load_ancestor_specs(root))
+
+    if gitignore_file is not None and (custom_spec := load_custom_gitignore_spec(gitignore_file)):
+        specs.append((root, custom_spec))
+
+    return tuple(specs)

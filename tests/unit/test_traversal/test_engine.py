@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pathspec
 
@@ -9,6 +9,7 @@ from findfmt.traversal.engine import (
     _is_path_ignored,
     _load_active_specs,
     _scan_directory_entries,
+    _traverse_single_root,
     find_files,
     load_git_exclude_spec,
     load_gitignore_spec,
@@ -16,6 +17,7 @@ from findfmt.traversal.engine import (
     should_skip_dir,
     traverse_directory,
 )
+from findfmt.traversal.patterns import create_pattern_matcher
 
 
 def test_load_gitignore_spec_valid(tmp_path: Path):
@@ -281,4 +283,36 @@ def test_traverse_directory_resolve_subdir_os_error(tmp_path: Path):
 
     with patch.object(Path, "resolve", autospec=True, side_effect=mock_resolve):
         res = list(traverse_directory(tmp_path, config))
+        assert res == []
+
+
+def test_scan_directory_entries_is_file_oserror(tmp_path: Path):
+    """Verify _scan_directory_entries handles OSError when checking entry.is_file."""
+    entry = MagicMock(spec=os.DirEntry)
+    entry.name = "prob.txt"
+    entry.path = str(tmp_path / "prob.txt")
+    entry.is_dir.return_value = False
+    entry.is_file.side_effect = OSError("Perm error")
+
+    config = TraversalConfig(follow_symlinks=True)
+    with patch("findfmt.traversal.engine.collect_directory_entries", return_value=[entry]):
+        subdirs, files = _scan_directory_entries(tmp_path, config, ())
+        assert subdirs == []
+        assert files == []
+
+
+def test_traverse_single_root_is_file_oserror(tmp_path: Path):
+    """Verify _traverse_single_root handles OSError from resolved_root.is_file."""
+    config = TraversalConfig()
+    matcher = create_pattern_matcher(config)
+    with patch.object(Path, "is_file", side_effect=OSError("Access denied")):
+        res = list(_traverse_single_root(tmp_path, tmp_path, config, matcher))
+        assert res == []
+
+
+def test_find_files_root_resolve_oserror(tmp_path: Path):
+    """Verify find_files handles OSError when resolving a root path."""
+    config = TraversalConfig(root_paths=(tmp_path,))
+    with patch.object(Path, "resolve", side_effect=OSError("Resolution failure")):
+        res = list(find_files(config))
         assert res == []

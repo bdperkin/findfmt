@@ -192,3 +192,29 @@ def test_canonical_v1_baseline_fixture_loads():
     for c in comparisons:
         assert not c.regressed
         assert c.throughput_delta_pct == 0.0
+
+
+def test_prune_runs_in_linear_time_on_deep_tree(tmp_path: Path):
+    """Verify --prune runs in linear time on a deep tree without quadratic rescanning."""
+    depth = 25
+    curr = tmp_path
+    for i in range(depth):
+        curr = curr / f"level_{i:02d}"
+        curr.mkdir()
+
+    (curr / "leaf.py").write_text("print('leaf')\n", encoding="utf-8")
+
+    config = TraversalConfig(
+        root_paths=(tmp_path,),
+        dirs_only=True,
+        prune_empty=True,
+        include_tags=frozenset({"python"}),
+    )
+
+    t0 = time.perf_counter()
+    results = list(find_files(config))
+    duration = time.perf_counter() - t0
+
+    assert len(results) == depth
+    # Pruning on a 25-deep directory tree should complete in well under 1 second with memoization
+    assert duration < 1.0

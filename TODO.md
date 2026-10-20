@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-19
-> **Tracking:** 94 Closed Issues | 134 Actionable Open Tasks | 35 Active Umbrella Epics
+> **Tracking:** 95 Closed Issues | 133 Actionable Open Tasks | 35 Active Umbrella Epics
 
 ______________________________________________________________________
 
@@ -294,6 +294,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#317](https://github.com/bdperkin/findfmt/issues/317)** - fix(i18n): wheels built in
   isolation ship .mo files without a charset, so translations silently fall back to English (Closed:
   2026-10-20 via PR [#391](https://github.com/bdperkin/findfmt/pull/391))
+- [x] **[#318](https://github.com/bdperkin/findfmt/issues/318)** - fix(traversal): symlink-follow
+  mode crashes on OSError, and --prune has no cycle guard (Closed: 2026-10-20 via PR
+  [#393](https://github.com/bdperkin/findfmt/pull/393))
 
 ______________________________________________________________________
 
@@ -303,11 +306,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#318](https://github.com/bdperkin/findfmt/issues/318)** - fix(traversal): symlink-follow
-  mode crashes on OSError, and --prune has no cycle guard *(Epic:
-  [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
-  | Milestone: v1.0.1)* - **Rationale:** Critical filesystem safety fix; prevents ELOOP crash and
-  infinite recursion in prune with targeted cycle detection.
 - [ ] **[#370](https://github.com/bdperkin/findfmt/issues/370)** - [Core] Prevent crash in --sort
   version when encountering Unicode superscript and non-decimal digits *(Epic:
   [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)
