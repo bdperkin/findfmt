@@ -7,6 +7,40 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-20
+
+### Features
+
+- *(i18n)* Localize file sizes, numeric separators, and timestamps per regional locale standards
+  (#231, #397).
+
+### Bug Fixes
+
+- *(format)* Handle non-UTF-8 filenames with `surrogateescape` error handling and binary stdout
+  dispatch across all output serializers and formatting modes (#315, #387, #388, #389).
+- *(cli)* Preserve raw control characters under `-0` and piped text output to avoid truncating
+  filenames containing newlines or tabs, while retaining terminal sanitization on interactive TTYs
+  (#316, #390).
+- *(i18n)* Emit `Content-Type: text/plain; charset=UTF-8` header in pure-Python MO compiler so
+  wheels built without GNU `msgfmt` decode non-ASCII translations properly (#317, #391).
+- *(traversal)* Guard symlink traversal against `OSError` and cyclic link loops across platforms,
+  preventing recursive prune loops and Windows loop `RuntimeError` (#318, #393, #394).
+- *(traversal)* Prevent crash in `--sort version` when handling non-ASCII numeric Unicode characters
+  such as superscript digits (#370, #395).
+- *(traversal)* Eliminate `os.scandir` iterator handle leaks on early traversal termination and
+  enforce `ResourceWarning` error tracking in tests (#371, #396).
+- *(test)* Support platforms without native POSIX `nl_langinfo` constants in localized timestamp
+  tests (#398).
+
+### Testing
+
+- *(i18n)* Automated verification suite for complex multi-tier gettext pluralization rules covering
+  English, German, French, Spanish, Russian, Polish, and Arabic (#232, #399).
+
+### Documentation
+
+- *(todo)* Realign internationalization roadmap across open 1.0.Z release milestones (#392).
+
 ## [1.0.0] - 2026-10-19
 
 ### Overview & Stability Commitment
@@ -323,4 +357,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [0.8.0]: https://github.com/bdperkin/findfmt/compare/v0.7.0...v0.8.0
 [0.9.0]: https://github.com/bdperkin/findfmt/compare/v0.8.0...v0.9.0
 [1.0.0]: https://github.com/bdperkin/findfmt/compare/v0.9.0...v1.0.0
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.0.0...HEAD
+[1.0.1]: https://github.com/bdperkin/findfmt/compare/v1.0.0...v1.0.1
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.0.1...HEAD
