@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import gettext
+import io
 import subprocess
 import sys
 from pathlib import Path
@@ -78,6 +79,8 @@ def test_parse_po_entries() -> None:
     assert entries["hello"] == "hola"
     assert entries["multiline"] == "multilinea"
     assert entries["file\x00files"] == "archivo\x00archivos"
+    assert "" in entries
+    assert "charset=UTF-8" in entries[""]
 
 
 def test_generate_mo_bytes_and_pure_python_compile(tmp_path: Path) -> None:
@@ -442,3 +445,55 @@ def test_no_absolute_paths_in_tracked_locale_catalogs() -> None:
                     assert not is_windows_drive, (
                         f"Windows absolute path found in {catalog.name}:{idx}: {token}"
                     )
+
+
+def test_pure_python_compiler_emits_charset_header(tmp_path: Path) -> None:
+    """Verify _compile_po_pure_python emits charset header so gettext decodes UTF-8."""
+    po_file = tmp_path / "test.po"
+    mo_file = tmp_path / "test.mo"
+    po_file.write_text('msgid "size"\nmsgstr "Größe"\n', encoding="utf-8")
+    _compile_po_pure_python(po_file, mo_file)
+    mo_data = mo_file.read_bytes()
+    translations = gettext.GNUTranslations(io.BytesIO(mo_data))
+    assert translations.gettext("size") == "Größe"
+    assert "charset=UTF-8" in translations.info()["content-type"]
+
+
+SHIPPED_PO_FILES = sorted(
+    (PROJECT_ROOT / "src" / "findfmt" / "locale").glob("*/LC_MESSAGES/findfmt.po"),
+)
+
+
+@pytest.mark.parametrize("po_path", SHIPPED_PO_FILES, ids=lambda p: p.parent.parent.name)
+def test_pure_python_and_babel_compilers_agree(tmp_path: Path, po_path: Path) -> None:
+    """Verify pure-Python fallback and Babel produce identical translations for all shipped POs."""
+    if tools.hatch_build.pofile is None or tools.hatch_build.mofile is None:
+        pytest.skip("Babel is not installed")
+
+    pure_mo = tmp_path / "pure.mo"
+    babel_mo = tmp_path / "babel.mo"
+    _compile_po_pure_python(po_path, pure_mo)
+
+    with po_path.open("r", encoding="utf-8") as f_in:
+        catalog = tools.hatch_build.pofile.read_po(f_in)
+
+    with babel_mo.open("wb") as f_out:
+        tools.hatch_build.mofile.write_mo(f_out, catalog)
+
+    with pure_mo.open("rb") as f_pure:
+        pure_t = gettext.GNUTranslations(f_pure)
+
+    with babel_mo.open("rb") as f_babel:
+        babel_t = gettext.GNUTranslations(f_babel)
+
+    entries = _parse_po_entries(po_path.read_text(encoding="utf-8"))
+    for msgid in entries:
+        if not msgid:
+            continue
+
+        if "\x00" in msgid:
+            singular, plural = msgid.split("\x00", 1)
+            for n in (0, 1, 2, 5):
+                assert pure_t.ngettext(singular, plural, n) == babel_t.ngettext(singular, plural, n)
+        else:
+            assert pure_t.gettext(msgid) == babel_t.gettext(msgid)

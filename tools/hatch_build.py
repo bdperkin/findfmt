@@ -48,7 +48,7 @@ class _PoEntryBuilder:
 
     def flush(self) -> None:
         """Store the current pending message entry."""
-        if self.current_msgid and self.current_msgstr:
+        if self.current_key is not None and self.current_msgstr:
             self.entries[self.current_msgid] = self.current_msgstr
 
         self.current_msgid = ""
@@ -158,6 +158,13 @@ def _compile_po_pure_python(po_path: Path, mo_path: Path) -> None:
     """Compile a .po file to .mo using pure Python fallback."""
     text = po_path.read_text(encoding="utf-8")
     entries = _parse_po_entries(text)
+    if "" not in entries:
+        entries[""] = "Content-Type: text/plain; charset=UTF-8\n"
+    elif "charset=" not in entries[""].lower():
+        entries[""] = entries[""].rstrip("\n") + "\nContent-Type: text/plain; charset=UTF-8\n"
+    else:
+        entries[""] = re.sub(r"(?i)charset=utf-8", "charset=UTF-8", entries[""])
+
     mo_bytes = _generate_mo_bytes(entries)
     mo_path.parent.mkdir(parents=True, exist_ok=True)
     mo_path.write_bytes(mo_bytes)

@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-19
-> **Tracking:** 93 Closed Issues | 135 Actionable Open Tasks | 35 Active Umbrella Epics
+> **Tracking:** 94 Closed Issues | 134 Actionable Open Tasks | 35 Active Umbrella Epics
 
 ______________________________________________________________________
 
@@ -291,6 +291,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#316](https://github.com/bdperkin/findfmt/issues/316)** - fix(cli): -0/findfmt0 and piped
   text output silently rewrite filenames (Closed: 2026-10-20 via PR
   [#390](https://github.com/bdperkin/findfmt/pull/390))
+- [x] **[#317](https://github.com/bdperkin/findfmt/issues/317)** - fix(i18n): wheels built in
+  isolation ship .mo files without a charset, so translations silently fall back to English (Closed:
+  2026-10-20 via PR [#391](https://github.com/bdperkin/findfmt/pull/391))
 
 ______________________________________________________________________
 
@@ -300,11 +303,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#317](https://github.com/bdperkin/findfmt/issues/317)** - fix(i18n): wheels built in
-  isolation ship .mo files without a charset, so translations silently fall back to English *(Epic:
-  [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)
-  | Milestone: v1.0.1)* - **Rationale:** Critical build backend fix; ensures translation catalogs
-  function in clean isolated wheels with low effort.
 - [ ] **[#318](https://github.com/bdperkin/findfmt/issues/318)** - fix(traversal): symlink-follow
   mode crashes on OSError, and --prune has no cycle guard *(Epic:
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)

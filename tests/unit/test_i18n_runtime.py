@@ -469,3 +469,18 @@ def test_cli_flags_locale_and_lang(tmp_path: Path) -> None:
         res2 = runner.invoke(app, ["--lang", "C", str(tmp_path)])
         assert res2.exit_code == 0
         assert get_current_locale() == "C"
+
+
+def test_set_locale_logs_or_raises_on_undecodable_catalog(tmp_path: Path) -> None:
+    """Verify set_locale issues a warning and falls back when catalog has undecodable strings."""
+    mo_path = tmp_path / "de" / "LC_MESSAGES" / "findfmt.mo"
+    mo_path.parent.mkdir(parents=True, exist_ok=True)
+    mo_bytes = _generate_mo_bytes({"size": "Größe"})
+    mo_path.write_bytes(mo_bytes)
+
+    with override_locale(None):
+        with pytest.warns(UserWarning, match="Failed to load translation catalog"):
+            active = set_locale("de", localedir=tmp_path)
+
+        assert active == "de"
+        assert get_current_translation().gettext("size") == "size"

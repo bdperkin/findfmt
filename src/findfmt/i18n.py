@@ -6,6 +6,7 @@ import contextlib
 import gettext
 import locale
 import os
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -205,7 +206,12 @@ def set_locale(
             languages=locales,
             fallback=True,
         )
-    except (OSError, ValueError, UnicodeDecodeError):  # pragma: no cover
+    except (OSError, ValueError, UnicodeDecodeError) as exc:
+        warnings.warn(
+            f"Failed to load translation catalog for locale '{locale_name}': {exc}",
+            UserWarning,
+            stacklevel=2,
+        )
         _current_translation = gettext.NullTranslations()
 
     return _current_locale

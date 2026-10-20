@@ -84,11 +84,32 @@ jobs:
           ./smoke_env/bin/findfmt --help
           ./smoke_env/bin/findfmt -t python -l src
         if: runner.os != 'Windows'
+      - name: Verify Wheel i18n Translations (POSIX)
+        run: |
+          ./smoke_env/bin/python -c '
+          import gettext
+          from findfmt.i18n import get_current_translation, set_locale, _
+          assert set_locale("de") == "de"
+          assert isinstance(get_current_translation(), gettext.GNUTranslations)
+          assert _("not installed") == "nicht installiert"
+          '
+        if: runner.os != 'Windows'
       - name: Verify CLI Executable (Windows)
         run: |
           .\smoke_env\Scripts\findfmt.exe --version
           .\smoke_env\Scripts\findfmt.exe --help
           .\smoke_env\Scripts\findfmt.exe -t python -l src
+        if: runner.os == 'Windows'
+      - name: Verify Wheel i18n Translations (Windows)
+        run: |
+          $code = @'
+          import gettext
+          from findfmt.i18n import get_current_translation, set_locale, _
+          assert set_locale("de") == "de"
+          assert isinstance(get_current_translation(), gettext.GNUTranslations)
+          assert _("not installed") == "nicht installiert"
+          '@
+          .\smoke_env\Scripts\python.exe -c $code
         if: runner.os == 'Windows'
   test-matrix:
     name: Test (${{ matrix.os }} - Python ${{ matrix.python-version }})
