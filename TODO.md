@@ -318,6 +318,16 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)
   | Milestone: v1.0.1)* - **Rationale:** Low-hanging resource cleanup; managing os.scandir in
   context manager eliminates handle leaks across suite.
+- [ ] **[#231](https://github.com/bdperkin/findfmt/issues/231)** - feat(i18n): localize file sizes,
+  numeric separators, and timestamps per regional locale standards *(Epic:
+  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
+  Milestone: v1.0.1)* - **Rationale:** Foundational localization ROI; ensures file sizes, numeric
+  groupings, and date formats adhere to regional conventions.
+- [ ] **[#232](https://github.com/bdperkin/findfmt/issues/232)** - test(i18n): create automated
+  verification suite for complex multi-tier gettext pluralization rules *(Epic:
+  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
+  Milestone: v1.0.1)* - **Rationale:** Test integrity quick win; builds an automated test harness
+  validating 1-form through 6-form plural formulas across languages.
 - [ ] **[#361](https://github.com/bdperkin/findfmt/issues/361)** - [Security] Eliminate quadratic
   ReDoS vulnerability in C1-OSC terminal control-sequence regex *(Epic:
   [[Epic] Security Hardening: Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety](https://github.com/bdperkin/findfmt/issues/338)
@@ -348,6 +358,16 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] CLI Exit Code Contract, Status Code Flags, and Atomic Output Writing](https://github.com/bdperkin/findfmt/issues/347)
   | Milestone: v1.0.2)* - **Rationale:** High reliability ROI; temporary file write and atomic
   replace prevents corrupted files on process crash.
+- [ ] **[#230](https://github.com/bdperkin/findfmt/issues/230)** - fix(format): audit and enforce
+  cell-width alignment for CJK double-width characters across formatters *(Epic:
+  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
+  Milestone: v1.0.2)* - **Rationale:** Terminal formatting fix; enforcing wcwidth cell measurement
+  prevents table and tree misalignment for double-width CJK text.
+- [ ] **[#214](https://github.com/bdperkin/findfmt/issues/214)** - feat(i18n): add language support
+  for English (en) (~1.46 billion) *(Epic:
+  [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
+  | Milestone: v1.0.2)* - **Rationale:** Core catalog foundation; establishes canonical English
+  catalogs and explicit locale overrides.
 - [ ] **[#326](https://github.com/bdperkin/findfmt/issues/326)** - test: make the suite hermetic
   against the developer's global git config *(Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
@@ -574,22 +594,47 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   optional puremagic backend for deep magic signature analysis *(Epic:
   [[Epic] Pluggable Content Classification Engines & MIME Inspection Backends](https://github.com/bdperkin/findfmt/issues/382)
   | Milestone: v1.3.0)*
+- [ ] **[#215](https://github.com/bdperkin/findfmt/issues/215)** - feat(i18n): add language support
+  for German (de) (~133 million) *(Epic:
+  [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
+  | Milestone: v1.0.3)*
+- [ ] **[#303](https://github.com/bdperkin/findfmt/issues/303)** - feat(i18n): benchmark and
+  evaluate open-source Python gettext AI translators (gettext-translator, pytlai,
+  auto-gettext-translator) *(Epic:
+  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
+  | Milestone: v1.0.3)*
+- [ ] **[#304](https://github.com/bdperkin/findfmt/issues/304)** - feat(i18n): design and implement
+  Python format placeholder & variable protection validation for AI translation *(Epic:
+  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
+  | Milestone: v1.0.4)*
+- [ ] **[#305](https://github.com/bdperkin/findfmt/issues/305)** - feat(i18n): formulate domain
+  context prompt engineering and ngettext pluralization rules for AI translation *(Epic:
+  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
+  | Milestone: v1.0.4)*
+- [ ] **[#306](https://github.com/bdperkin/findfmt/issues/306)** - feat(i18n): integrate AI
+  translation command into developer tooling (tools/i18n.py translate) *(Epic:
+  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
+  | Milestone: v1.0.5)*
+- [ ] **[#307](https://github.com/bdperkin/findfmt/issues/307)** - feat(i18n): evaluate managed
+  localization platforms with native AI (POEditor, Crowdin, Localazy) vs local CI automation *(Epic:
+  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
+  | Milestone: v1.0.5)*
+- [ ] **[#221](https://github.com/bdperkin/findfmt/issues/221)** - feat(i18n): add language support
+  for Spanish (es) (~559 million) *(Epic:
+  [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
+  | Milestone: v1.0.5)*
+- [ ] **[#222](https://github.com/bdperkin/findfmt/issues/222)** - feat(i18n): add language support
+  for French (fr) (~310 million) *(Epic:
+  [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
+  | Milestone: v1.0.6)*
+- [ ] **[#228](https://github.com/bdperkin/findfmt/issues/228)** - feat(i18n): add language support
+  for Japanese (ja) (~123 million) *(Epic:
+  [[Epic] Add Language Support: Japonic & Koreanic (~205 Million)](https://github.com/bdperkin/findfmt/issues/205)
+  | Milestone: v1.0.6)*
 - [ ] **[#229](https://github.com/bdperkin/findfmt/issues/229)** - feat(i18n): implement
   right-to-left (RTL) and bidirectional (BiDi) terminal formatting support *(Epic:
   [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
-  Milestone: v1.4.0)*
-- [ ] **[#230](https://github.com/bdperkin/findfmt/issues/230)** - fix(format): audit and enforce
-  cell-width alignment for CJK double-width characters across formatters *(Epic:
-  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
-  Milestone: v1.4.0)*
-- [ ] **[#231](https://github.com/bdperkin/findfmt/issues/231)** - feat(i18n): localize file sizes,
-  numeric separators, and timestamps per regional locale standards *(Epic:
-  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
-  Milestone: v1.4.0)*
-- [ ] **[#232](https://github.com/bdperkin/findfmt/issues/232)** - test(i18n): create automated
-  verification suite for complex multi-tier gettext pluralization rules *(Epic:
-  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
-  Milestone: v1.4.0)*
+  Milestone: v1.0.6)*
 - [ ] **[#233](https://github.com/bdperkin/findfmt/issues/233)** - ci(docs): configure automated
   multilingual Sphinx documentation builds in CI pipeline *(Epic:
   [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
@@ -597,14 +642,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.3. Future / Low-Priority / Backlog
 
-- [ ] **[#214](https://github.com/bdperkin/findfmt/issues/214)** - feat(i18n): add language support
-  for English (en) (~1.46 billion) *(Epic:
-  [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
-  | Milestone: v1.4.1)*
-- [ ] **[#215](https://github.com/bdperkin/findfmt/issues/215)** - feat(i18n): add language support
-  for German (de) (~133 million) *(Epic:
-  [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
-  | Milestone: v1.4.1)*
 - [ ] **[#216](https://github.com/bdperkin/findfmt/issues/216)** - feat(i18n): add language support
   for Chinese - China / Mandarin (zh_CN) (~1.14 billion) *(Epic:
   [[Epic] Add Language Support: Sino-Tibetan (~1.42 Billion)](https://github.com/bdperkin/findfmt/issues/198)
@@ -625,14 +662,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   for Punjabi (pa) (~125 million) *(Epic:
   [[Epic] Add Language Support: Indo-Aryan (~1.39 Billion)](https://github.com/bdperkin/findfmt/issues/199)
   | Milestone: Future Features)*
-- [ ] **[#221](https://github.com/bdperkin/findfmt/issues/221)** - feat(i18n): add language support
-  for Spanish (es) (~559 million) *(Epic:
-  [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
-  | Milestone: v1.4.1)*
-- [ ] **[#222](https://github.com/bdperkin/findfmt/issues/222)** - feat(i18n): add language support
-  for French (fr) (~310 million) *(Epic:
-  [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
-  | Milestone: v1.4.1)*
 - [ ] **[#223](https://github.com/bdperkin/findfmt/issues/223)** - feat(i18n): add language support
   for Portuguese (pt) (~264 million) *(Epic:
   [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
@@ -652,10 +681,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 - [ ] **[#227](https://github.com/bdperkin/findfmt/issues/227)** - feat(i18n): add language support
   for Indonesian (id) (~199 million) *(Epic:
   [[Epic] Add Language Support: Austronesian (~295 Million)](https://github.com/bdperkin/findfmt/issues/203)
-  | Milestone: v1.4.2)*
-- [ ] **[#228](https://github.com/bdperkin/findfmt/issues/228)** - feat(i18n): add language support
-  for Japanese (ja) (~123 million) *(Epic:
-  [[Epic] Add Language Support: Japonic & Koreanic (~205 Million)](https://github.com/bdperkin/findfmt/issues/205)
   | Milestone: v1.4.2)*
 - [ ] **[#234](https://github.com/bdperkin/findfmt/issues/234)** - feat(i18n): add language support
   for English - United Kingdom (en_GB) (~60 million) *(Epic:
@@ -825,27 +850,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   standalone binary installation options and Briefcase evaluation trade-offs *(Epic:
   [[Epic] Investigate BeeWare Briefcase for Native Standalone Binary & Console Application Distribution](https://github.com/bdperkin/findfmt/issues/301)
   | Milestone: v1.6.0)*
-- [ ] **[#303](https://github.com/bdperkin/findfmt/issues/303)** - feat(i18n): benchmark and
-  evaluate open-source Python gettext AI translators (gettext-translator, pytlai,
-  auto-gettext-translator) *(Epic:
-  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
-  | Milestone: v1.5.0)*
-- [ ] **[#304](https://github.com/bdperkin/findfmt/issues/304)** - feat(i18n): design and implement
-  Python format placeholder & variable protection validation for AI translation *(Epic:
-  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
-  | Milestone: v1.5.0)*
-- [ ] **[#305](https://github.com/bdperkin/findfmt/issues/305)** - feat(i18n): formulate domain
-  context prompt engineering and ngettext pluralization rules for AI translation *(Epic:
-  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
-  | Milestone: v1.5.0)*
-- [ ] **[#306](https://github.com/bdperkin/findfmt/issues/306)** - feat(i18n): integrate AI
-  translation command into developer tooling (tools/i18n.py translate) *(Epic:
-  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
-  | Milestone: v1.5.0)*
-- [ ] **[#307](https://github.com/bdperkin/findfmt/issues/307)** - feat(i18n): evaluate managed
-  localization platforms with native AI (POEditor, Crowdin, Localazy) vs local CI automation *(Epic:
-  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
-  | Milestone: v1.5.0)*
 - [ ] **[#374](https://github.com/bdperkin/findfmt/issues/374)** - [CLI] v2.0: Reserve -h short flag
   exclusively for --help and deprecate for --human-readable *(Epic:
   [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
