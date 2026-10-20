@@ -372,17 +372,22 @@ def test_timestamp_localization_and_fallbacks(monkeypatch: pytest.MonkeyPatch) -
         assert format_timestamp(ts) != "-"
         assert resolve_time_format() == "%b %d %H:%M"
 
-    # With mocked nl_langinfo custom format
-    if hasattr(locale, "nl_langinfo") and hasattr(locale, "D_T_FMT"):
-        monkeypatch.setattr(locale, "nl_langinfo", lambda _code: "%Y-%m-%d %H:%M:%S")
-        with override_locale("fr"):
-            res = format_timestamp(ts)
-            assert res.startswith("2026-10-20")
+    # POSIX nl_langinfo custom format (using raising=False for Windows compatibility)
+    monkeypatch.setattr(locale, "D_T_FMT", getattr(locale, "D_T_FMT", 131155), raising=False)
+    monkeypatch.setattr(locale, "nl_langinfo", lambda _code: "%Y-%m-%d %H:%M:%S", raising=False)
+    with override_locale("fr"):
+        res = format_timestamp(ts)
+        assert res.startswith("2026-10-20")
 
-        # Empty lang_fmt falls through to regional fallback
-        monkeypatch.setattr(locale, "nl_langinfo", lambda _code: "")
-        with override_locale("es"):
-            assert resolve_time_format() == "%d/%m/%Y %H:%M:%S"
+    # Empty lang_fmt falls through to regional fallback
+    monkeypatch.setattr(locale, "nl_langinfo", lambda _code: "", raising=False)
+    with override_locale("es"):
+        assert resolve_time_format() == "%d/%m/%Y %H:%M:%S"
+
+    # POSIX C default format falls back to DEFAULT_TIME_FORMAT
+    monkeypatch.setattr(locale, "nl_langinfo", lambda _code: "%a %b %e %H:%M:%S %Y", raising=False)
+    with override_locale("C"):
+        assert resolve_time_format() == "%b %d %H:%M"
 
     # Simulate platform without nl_langinfo (like Windows)
     monkeypatch.delattr(locale, "nl_langinfo", raising=False)
@@ -411,24 +416,17 @@ def test_timestamp_localization_and_fallbacks(monkeypatch: pytest.MonkeyPatch) -
 
 def test_summary_panel_total_bytes_localized() -> None:
     """Verify format_summary_panel includes localized total size when total_bytes provided."""
+    bytes_12_4_mb = int(12.4 * 1024 * 1024)
     # In French
     with override_locale("fr"):
-        panel = format_summary_panel(
-            15,
-            Counter({"python": 10}),
-            total_bytes=int(12.4 * 1024 * 1024),
-        )
+        panel = format_summary_panel(15, Counter({"python": 10}), total_bytes=bytes_12_4_mb)
         render_text = str(panel.renderable)
         assert "12,4 Mo" in render_text
         assert "Taille totale :" in render_text
 
     # In German
     with override_locale("de"):
-        panel_de = format_summary_panel(
-            15,
-            Counter({"python": 10}),
-            total_bytes=int(12.4 * 1024 * 1024),
-        )
+        panel_de = format_summary_panel(15, Counter({"python": 10}), total_bytes=bytes_12_4_mb)
         render_text_de = str(panel_de.renderable)
         assert "12,4 MB" in render_text_de
         assert "Gesamtgröße:" in render_text_de
@@ -469,10 +467,12 @@ def test_get_numeric_conventions_fallbacks(monkeypatch: pytest.MonkeyPatch) -> N
 def test_resolve_time_format_exceptions_and_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify resolve_time_format and format_timestamp handle errors gracefully."""
     ts = 1700000000.0
+    monkeypatch.setattr(locale, "D_T_FMT", getattr(locale, "D_T_FMT", 131155), raising=False)
     monkeypatch.setattr(
         locale,
         "nl_langinfo",
         MagicMock(side_effect=locale.Error("nl_langinfo failed")),
+        raising=False,
     )
     with override_locale("fr"):
         assert resolve_time_format() == "%d/%m/%Y %H:%M:%S"
