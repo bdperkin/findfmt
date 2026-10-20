@@ -73,7 +73,8 @@ class TextFormatter(Formatter):
             show_ctime: Whether to display last status change date/time.
             time_format: Optional strftime syntax format string for dates/times.
             classify: Whether to append file classification indicator characters.
-            hide_control_chars: Whether to mask non-printable characters with '?'.
+            hide_control_chars: Whether to mask non-printable and bidirectional control
+                characters with '?'.
             literal: Whether to emit literal control characters.
             quote_name: Whether to enclose filenames in double quotes.
             hyperlink: Whether to wrap paths in OSC 8 terminal hyperlink escapes.

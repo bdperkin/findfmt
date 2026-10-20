@@ -6,6 +6,7 @@ import datetime as dt
 import locale
 import re
 import stat
+import unicodedata
 from typing import TYPE_CHECKING
 
 import rich.markup
@@ -81,20 +82,21 @@ def strip_ansi_escapes(text: str) -> str:
 
 
 def mask_control_characters(text: str) -> str:
-    """Replace non-printable control characters with question marks.
+    """Replace non-printable and bidirectional control characters with question marks.
 
     Args:
         text: Input string potentially containing control characters.
 
     Returns:
-        String with C0 (ord < 32), DEL (ord == 127), and C1 (128 <= ord <= 159)
-        control characters replaced by '?'.
+        String with C0 (ord < 32), DEL (ord == 127), C1 (128 <= ord <= 159),
+        and Unicode format (Cf) control characters replaced by '?'.
     """
     return "".join(
         "?"
         if ord(c) < _MIN_PRINTABLE_ASCII
         or ord(c) == _DEL_ASCII
         or (_C1_CONTROL_MIN <= ord(c) <= _C1_CONTROL_MAX)
+        or (ord(c) > _DEL_ASCII and unicodedata.category(c) == "Cf")
         else c
         for c in text
     )
@@ -129,7 +131,8 @@ def format_display_path(  # noqa: PLR0913
     Args:
         path_str: Raw path or filename string.
         quote_name: Whether to enclose in double quotes with backslash escaping.
-        hide_control_chars: Whether to mask non-printable characters as '?'.
+        hide_control_chars: Whether to mask non-printable and bidirectional control
+            characters as '?'.
         literal: Whether to output characters verbatim without masking.
         indicator: Optional classification indicator character to append.
         hyperlink: Whether to wrap formatted path in an OSC 8 terminal hyperlink.

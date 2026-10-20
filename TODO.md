@@ -312,6 +312,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#361](https://github.com/bdperkin/findfmt/issues/361)** - [Security] Eliminate quadratic
   ReDoS vulnerability in C1-OSC terminal control-sequence regex (Closed: 2026-10-20 via PR
   [#402](https://github.com/bdperkin/findfmt/pull/402))
+- [x] **[#362](https://github.com/bdperkin/findfmt/issues/362)** - [Security] Mask Unicode
+  bidirectional (bidi) override characters in TTY display mode (Closed: 2026-10-20 via PR
+  [#403](https://github.com/bdperkin/findfmt/pull/403))
 
 ______________________________________________________________________
 
@@ -321,11 +324,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#362](https://github.com/bdperkin/findfmt/issues/362)** - [Security] Mask Unicode
-  bidirectional (bidi) override characters in TTY display mode *(Epic:
-  [[Epic] Security Hardening: Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety](https://github.com/bdperkin/findfmt/issues/338)
-  | Milestone: v1.0.2)* - **Rationale:** High security ROI; masking Cf control characters
-  neutralizes Trojan Source terminal spoofing attacks.
 - [ ] **[#363](https://github.com/bdperkin/findfmt/issues/363)** - [Security] Prevent infinite hang
   during file classification when target is swapped for a FIFO *(Epic:
   [[Epic] Security Hardening: Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety](https://github.com/bdperkin/findfmt/issues/338)

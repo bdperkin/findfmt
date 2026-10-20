@@ -387,3 +387,66 @@ def test_single_shared_control_sequence_pattern() -> None:
     """Verify utils.strings, terminal, and utils.hyperlinks share the identical compiled regex."""
     assert strings._ANSI_ESCAPE_RE is terminal._ANSI_REGEX  # noqa: SLF001
     assert strings._ANSI_ESCAPE_RE is hyperlinks._ESCAPE_SEQ_RE  # noqa: SLF001
+
+
+def test_mask_control_characters_bidi_controls() -> None:
+    """Verify mask_control_characters masks bidi Cf characters while preserving RTL text."""
+    bidi_controls = (
+        "prefix_"
+        "\u202e"  # Right-to-Left Override (RLO)
+        "\u2066"  # Left-to-Right Isolate (LRI)
+        "\u2067"  # Right-to-Left Isolate (RLI)
+        "\u2068"  # First Strong Isolate (FSI)
+        "\u2069"  # Pop Directional Isolate (PDI)
+        "\u200e"  # Left-to-Right Mark (LRM)
+        "\u200f"  # Right-to-Left Mark (RLM)
+        "\u061c"  # Arabic Letter Mark (ALM)
+        "\u202a"  # Left-to-Right Embedding (LRE)
+        "\u202b"  # Right-to-Left Embedding (RLE)
+        "\u202c"  # Pop Directional Formatting (PDF)
+        "\u202d"  # Left-to-Right Override (LRO)
+        "_suffix"
+    )
+    assert mask_control_characters(bidi_controls) == "prefix_????????????_suffix"
+
+    # Legitimate non-Cf RTL scripts (Arabic, Hebrew) and CJK/accents must be preserved
+    assert mask_control_characters("ملف_تجريبي.txt") == "ملف_تجريبي.txt"
+    assert mask_control_characters("קובץ_בדיקה.txt") == "קובץ_בדיקה.txt"
+    assert mask_control_characters("日本語ドキュメント.txt") == "日本語ドキュメント.txt"
+    assert mask_control_characters("résumé_2026.pdf") == "résumé_2026.pdf"
+
+
+def test_bidi_override_masked_on_tty(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify bidi format controls are masked on TTY but preserved when piped, -0, or -N."""
+    # Trojan Source style filename: innocuous extension visually spoofed via RLO (U+202E)
+    bidi_filename = "doc_\u202egnp.js"
+    bidi_file = tmp_path / bidi_filename
+    bidi_file.write_text("alert('exploit')", encoding="utf-8")
+
+    # 1. Piped (non-TTY, default under CliRunner): characters preserved verbatim
+    res_piped = runner.invoke(app, [str(tmp_path)])
+    assert res_piped.exit_code == 0
+    assert "\u202e" in res_piped.stdout
+    assert bidi_filename in res_piped.stdout
+
+    # 2. Interactive TTY mode: bidi control characters masked to '?'
+    monkeypatch.setattr("findfmt.cli.runner._is_stream_tty", lambda _stream: True)
+    res_tty = runner.invoke(app, [str(tmp_path)])
+    assert res_tty.exit_code == 0
+    assert "\u202e" not in res_tty.stdout
+    assert "doc_?gnp.js" in res_tty.stdout
+
+    # 3. NUL delimiter (-0): literal preservation even when on TTY or piped
+    res_null = runner.invoke(app, ["-0", str(tmp_path)])
+    assert res_null.exit_code == 0
+    assert "\u202e" in res_null.stdout
+    assert bidi_filename in res_null.stdout
+
+    # 4. Literal flag (-N): literal preservation even on TTY
+    res_literal = runner.invoke(app, ["-N", str(tmp_path)])
+    assert res_literal.exit_code == 0
+    assert "\u202e" in res_literal.stdout
+    assert bidi_filename in res_literal.stdout
