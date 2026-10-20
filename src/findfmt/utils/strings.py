@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import datetime as dt
 import locale
-import re
 import stat
 from typing import TYPE_CHECKING
 
 import rich.markup
 
 from findfmt.i18n import get_current_locale
+from findfmt.utils.ansi import ANSI_ESCAPE_RE as _ANSI_ESCAPE_RE
 from findfmt.utils.hyperlinks import format_osc8_link
 
 if TYPE_CHECKING:
@@ -21,17 +21,6 @@ _MIN_PRINTABLE_ASCII = 32
 _DEL_ASCII = 127
 _C1_CONTROL_MIN = 128
 _C1_CONTROL_MAX = 159
-
-_ANSI_ESCAPE_RE = re.compile(
-    r"""
-    \x1b\[[0-?]*[ -/]*[@-~]                  # 7-bit CSI sequence
-    | \x1b\][^\x07\x1b]*(?:\x07|\x1b\\)        # 7-bit OSC sequence
-    | \x1b[ -/]*[0-~]                        # 7-bit Fe/Fs/Fp sequence
-    | \x9b[0-?]*[ -/]*[@-~]                  # 8-bit C1 CSI sequence
-    | \x9d[^\x07\x1b\x9c]*(?:\x07|\x1b\\|\x9c)    # 8-bit C1 OSC sequence
-    """,
-    re.VERBOSE,
-)
 
 __all__ = [
     "DEFAULT_TIME_FORMAT",

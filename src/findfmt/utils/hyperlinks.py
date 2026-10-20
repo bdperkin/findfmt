@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import re
 import urllib.parse
 from typing import TYPE_CHECKING
+
+from findfmt.utils.ansi import ANSI_ESCAPE_RE as _ESCAPE_SEQ_RE
 
 if TYPE_CHECKING:
     from pathlib import PurePath
@@ -15,14 +16,6 @@ __all__ = [
     "format_osc8_link",
     "format_rich_link",
 ]
-
-_ESCAPE_SEQ_RE = re.compile(
-    r"\x1b\[[0-?]*[ -/]*[@-~]"
-    r"|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)"
-    r"|\x1b[ -/]*[0-~]"
-    r"|\x9b[0-?]*[ -/]*[@-~]"
-    r"|\x9d[^\x07\x1b\x9c]*(?:\x07|\x1b\\|\x9c)",
-)
 
 _MIN_PRINTABLE_ASCII = 32
 _DEL_ASCII = 127

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -33,8 +34,68 @@ from findfmt.formatters.badges import format_tag_badge
 from findfmt.formatters.tree import RichTreeFormatter
 from findfmt.formatters.visual import RichTableFormatter
 from findfmt.models import FileInfo
+from findfmt.terminal import _ANSI_REGEX, strip_ansi
+from findfmt.utils.hyperlinks import _ESCAPE_SEQ_RE
+from findfmt.utils.strings import _ANSI_ESCAPE_RE
 
 runner = CliRunner()
+
+
+@pytest.mark.parametrize("suffix", ["", "\x1b[31mfile.txt"])
+def test_c1_osc_regex_linear_time(suffix: str) -> None:
+    """Bound the reported malformed-input case in a disposable subprocess."""
+    expected = "file.txt" if suffix else ""
+    script = (
+        "from time import perf_counter\n"
+        "from findfmt.utils.strings import strip_ansi_escapes\n"
+        f"text = '\\x9d' * 50_000 + {suffix!r}\n"
+        "start = perf_counter()\n"
+        "result = strip_ansi_escapes(text)\n"
+        "elapsed = perf_counter() - start\n"
+        f"assert result == {expected!r}\n"
+        "print(elapsed)\n"
+        "from typer.testing import CliRunner\n"
+        "from findfmt.cli import app\n"
+        "args = ['--from-file', '-', '--offline', '--no-pager', '--hide-control-chars']\n"
+        "cli = CliRunner().invoke(app, args, input='safe.py' + text + '\\n')\n"
+        "assert cli.exit_code == 0, cli.exception\n"
+        f"assert cli.stdout.strip() == {'safe.py' + expected!r}\n"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", script],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    assert float(completed.stdout) < 0.1
+
+
+def test_single_shared_control_sequence_pattern() -> None:
+    """All three sanitization paths must use the same compiled pattern."""
+    assert _ANSI_REGEX is _ANSI_ESCAPE_RE
+    assert _ESCAPE_SEQ_RE is _ANSI_ESCAPE_RE
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("host\x9d0;unfinished", "host"),
+        ("host\x9d0;unfinished\x1b[31mname", "hostname"),
+        ("host\x9d0;unfinished\x1bXname", "hostname"),
+        ("host\x9d0;title\x9dmore\x07name", "hostname"),
+        ("host\x9d0;title\x1b\\name", "hostname"),
+        ("host\x9d0;title\x9cname", "hostname"),
+        ("host\x9d\x07name", "hostname"),
+    ],
+)
+def test_c1_osc_boundaries(text: str, expected: str) -> None:
+    """Discard OSC payloads without swallowing text after an escape boundary."""
+    assert strip_ansi_escapes(text) == expected
+    assert strip_ansi(text) == expected
+    assert build_file_uri("/workspace/app.py", authority=text) == (
+        f"file://{expected}/workspace/app.py"
+    )
 
 
 def test_strip_ansi_escapes_csi_and_osc() -> None:
