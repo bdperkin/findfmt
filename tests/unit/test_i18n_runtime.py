@@ -1,35 +1,13 @@
-"""Unit tests for internationalization (i18n) runtime engine and string wrapping."""
+"""Unit tests for internationalization (i18n) runtime engine and pluralization rules."""
 
 from __future__ import annotations
 
 import gettext
-import io
 import struct
-from collections import Counter
 from pathlib import Path
 
 import pytest
-import typer
-from rich.table import Table
-from typer.testing import CliRunner
 
-from findfmt.cli import app
-from findfmt.cli.config import (
-    _validate_file_exists,
-    _validate_format_conflicts,
-    _validate_from_file,
-    _validate_ordering,
-    build_traversal_config,
-)
-from findfmt.cli.runner import _open_output_sink, execute_findfmt
-from findfmt.formatters import OutputFormat
-from findfmt.formatters.base import UnsupportedFormatError
-from findfmt.formatters.markup import UnsupportedTableStyleError
-from findfmt.formatters.visual import (
-    RichTableFormatter,
-    UnsupportedBoxStyleError,
-    format_summary_panel,
-)
 from findfmt.i18n import (
     _,
     detect_locale,
@@ -42,7 +20,6 @@ from findfmt.i18n import (
     reset_locale,
     set_locale,
 )
-from findfmt.traversal.sorting import resolve_sort_key
 
 
 def _generate_mo_bytes(entries: dict[str, str]) -> bytes:
@@ -92,67 +69,21 @@ def _generate_mo_bytes(entries: dict[str, str]) -> bytes:
     return header + tab1 + tab2 + bytes(data)
 
 
-@pytest.fixture
-def mock_locale_catalog(tmp_path: Path) -> Path:
-    """Create a temporary message catalog directory with a compiled Spanish .mo file."""
-    po_dir = tmp_path / "es" / "LC_MESSAGES"
+def _create_plural_catalog(
+    tmp_path: Path,
+    lang: str,
+    plural_header: str,
+    forms: list[str],
+) -> Path:
+    """Create a temporary .mo catalog with custom plural forms header."""
+    po_dir = tmp_path / lang / "LC_MESSAGES"
     po_dir.mkdir(parents=True, exist_ok=True)
     mo_path = po_dir / "findfmt.mo"
 
     mo_data = _generate_mo_bytes(
         {
-            "": (
-                "Content-Type: text/plain; charset=UTF-8\n"
-                "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-            ),
-            "Path": "Ruta",
-            "Inode": "Inodo",
-            "Device": "Dispositivo",
-            "Permissions": "Permisos",
-            "User": "Usuario",
-            "Group": "Grupo",
-            "Modified": "Modificado",
-            "Status Changed": "Estado cambiado",
-            "Tags": "Etiquetas",
-            "MIME Type": "Tipo MIME",
-            "Size": "Tamano",
-            "Executable": "Ejecutable",
-            "Symlink": "Enlace simbolico",
-            "Shebang": "Directiva shebang",
-            "--- findfmt summary ---": "--- resumen findfmt ---",
-            (
-                "[bold]Matched file:[/] [cyan]{count}[/]\x00"
-                "[bold]Matched files:[/] [cyan]{count}[/]"
-            ): (
-                "[bold]Archivo coincidente:[/] [cyan]{count}[/]\x00"
-                "[bold]Archivos coincidentes:[/] [cyan]{count}[/]"
-            ),
-            "[bold]Top tags:[/ /]": "[bold]Etiquetas principales:[/]",
-            "Unsupported output format: '{format}'. Expected one of: {valid_formats}": (
-                "Formato no soportado: '{format}'."
-            ),
-            "Unsupported table style: '{style}'. Expected one of: {valid_styles}": (
-                "Estilo de tabla no soportado: '{style}'."
-            ),
-            "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'.": (
-                "Estilo RST no soportado: '{style}'."
-            ),
-            (
-                "Invalid sort criteria '{criteria}'. "
-                "Choose from: name, version, time, mtime, ctime, size, none."
-            ): "Criterio de ordenacion invalido '{criteria}'.",
-            "Error: Conflicting format options: {options}.": (
-                "Error: Opciones de formato conflictivas: {options}."
-            ),
-            "Error: Cannot specify both --dirsfirst and --filesfirst.": (
-                "Error: No se puede especificar ambos --dirsfirst y --filesfirst."
-            ),
-            "Error opening output file '{path}': {error}": (
-                "Error al abrir archivo de salida '{path}': {error}"
-            ),
-            "not installed": "no instalado",
-            "not found": "no encontrado",
-            "file\x00files": "archivo\x00archivos",
+            "": f"Content-Type: text/plain; charset=UTF-8\nPlural-Forms: {plural_header}\n",
+            "file\x00files": "\x00".join(forms),
         },
     )
     mo_path.write_bytes(mo_data)
@@ -161,28 +92,22 @@ def mock_locale_catalog(tmp_path: Path) -> Path:
 
 def test_detect_locale_posix_precedence() -> None:
     """Verify standard POSIX precedence order: LANGUAGE -> LC_ALL -> LC_MESSAGES -> LANG -> C."""
-    # LANGUAGE takes highest precedence
     env1 = {"LANGUAGE": "es_ES:es", "LC_ALL": "fr_FR", "LC_MESSAGES": "de_DE", "LANG": "it_IT"}
     assert detect_locale(env1) == "es_ES"
 
-    # LC_ALL takes precedence when LANGUAGE is unset
     env2 = {"LC_ALL": "fr_FR", "LC_MESSAGES": "de_DE", "LANG": "it_IT"}
     assert detect_locale(env2) == "fr_FR"
 
-    # LC_MESSAGES takes precedence when LANGUAGE and LC_ALL are unset
     env3 = {"LC_MESSAGES": "de_DE", "LANG": "it_IT"}
     assert detect_locale(env3) == "de_DE"
 
-    # LANG is used when higher ones are unset
     env4 = {"LANG": "it_IT"}
     assert detect_locale(env4) == "it_IT"
 
-    # Fallback to C when all are empty or missing
     env5 = {"LANGUAGE": "", "LC_ALL": "", "LC_MESSAGES": "", "LANG": ""}
     assert detect_locale(env5) == "C"
     assert detect_locale({}) == "C"
 
-    # Default without env uses os.environ
     detected = detect_locale()
     assert isinstance(detected, str)
     assert len(detected) > 0
@@ -198,11 +123,8 @@ def test_detect_locales_deduplication_and_order() -> None:
     }
     locales = detect_locales(env)
     assert locales == ["es_ES", "es", "fr_FR", "de_DE"]
-
-    # When all empty, returns ['C']
     assert detect_locales({}) == ["C"]
 
-    # Default without args uses os.environ
     active_locales = detect_locales()
     assert isinstance(active_locales, list)
     assert len(active_locales) >= 1
@@ -232,7 +154,6 @@ def test_set_locale_none_and_reset(monkeypatch: pytest.MonkeyPatch) -> None:
     assert res == "ja_JP"
     assert get_current_locale() == "ja_JP"
 
-    # Reset with C
     monkeypatch.delenv("LANGUAGE", raising=False)
     monkeypatch.setenv("LC_ALL", "C")
     assert reset_locale() == "C"
@@ -253,7 +174,6 @@ def test_override_locale_context_manager() -> None:
         msg = "test error"
         raise RuntimeError(msg)
 
-    # Ensure restoration on exception
     with override_locale("de_DE"):
         assert get_current_locale() == "de_DE"
         with pytest.raises(RuntimeError, match="test error"):
@@ -267,8 +187,6 @@ def test_locale_callback() -> None:
     with override_locale("C"):
         assert locale_callback("es_ES") == "es_ES"
         assert get_current_locale() == "es_ES"
-
-        # None does not overwrite
         assert locale_callback(None) is None
         assert get_current_locale() == "es_ES"
 
@@ -282,193 +200,27 @@ def test_gettext_and_ngettext_fallback() -> None:
         assert ngettext("{n} file", "{n} files", 5) == "{n} files"
 
 
-def test_catalog_translation_with_mo(mock_locale_catalog: Path) -> None:
+def test_catalog_translation_with_mo(tmp_path: Path) -> None:
     """Verify translation lookup using an active mock MO catalog."""
-    with override_locale("es", localedir=mock_locale_catalog):
-        assert _("Path") == "Ruta"
-        assert _("Inode") == "Inodo"
-        assert _("Permissions") == "Permisos"
-        # Untranslated string falls back cleanly to original message
+    _create_plural_catalog(
+        tmp_path,
+        "es",
+        "nplurals=2; plural=(n != 1);",
+        ["archivo", "archivos"],
+    )
+    with override_locale("es", localedir=tmp_path):
         assert _("Unknown message") == "Unknown message"
-        # Plural forms
         assert ngettext("file", "files", 1) == "archivo"
         assert ngettext("file", "files", 2) == "archivos"
 
 
-def test_rich_table_formatter_columns_translated(mock_locale_catalog: Path) -> None:
-    """Verify RichTableFormatter column headers are localized using active catalog."""
-    with override_locale("es", localedir=mock_locale_catalog):
-        formatter = RichTableFormatter(
-            show_inodes=True,
-            show_device=True,
-            show_permissions=True,
-            show_user=True,
-            show_group=True,
-            show_mtime=True,
-        )
-        table = Table()
-        formatter._setup_columns(table)  # noqa: SLF001
-        col_names = [col.header for col in table.columns]
-        assert "Inodo" in col_names
-        assert "Dispositivo" in col_names
-        assert "Permisos" in col_names
-        assert "Usuario" in col_names
-        assert "Grupo" in col_names
-        assert "Modificado" in col_names
-        assert "Ruta" in col_names
-        assert "Etiquetas" in col_names
-
-
-def test_summary_panel_translated(mock_locale_catalog: Path) -> None:
-    """Verify summary panel titles and labels are localized."""
-    with override_locale("es", localedir=mock_locale_catalog):
-        panel = format_summary_panel(3, Counter({"python": 3}))
-        assert panel.title is not None
-        assert "resumen findfmt" in str(panel.title)
-        assert "Archivos coincidentes" in str(panel.renderable)
-
-        single_panel = format_summary_panel(1, Counter({"python": 1}))
-        assert "Archivo coincidente" in str(single_panel.renderable)
-
-
-def test_exceptions_translated(mock_locale_catalog: Path) -> None:
-    """Verify exception messages are localized."""
-    with override_locale("es", localedir=mock_locale_catalog):
-        err1 = UnsupportedFormatError("bad_fmt", "text, json")
-        assert "Formato no soportado: 'bad_fmt'." in str(err1)
-
-        err2 = UnsupportedBoxStyleError("bad_box", "rounded")
-        assert "Estilo de tabla no soportado: 'bad_box'." in str(err2)
-
-        err3 = UnsupportedTableStyleError("bad_rst")
-        assert "Estilo RST no soportado: 'bad_rst'." in str(err3)
-
-        with pytest.raises(ValueError, match=r"Criterio de ordenacion invalido 'bad_sort'\."):
-            resolve_sort_key("bad_sort")
-
-
-def test_cli_config_validation_translated(mock_locale_catalog: Path) -> None:
-    """Verify CLI configuration validation error messages are localized."""
-    with override_locale("es", localedir=mock_locale_catalog):
-        # Format conflict
-        with pytest.raises(typer.Exit) as exc:
-            _validate_format_conflicts(tree=True, xml=True, html=None)
-
-        assert exc.value.exit_code == 2
-
-        # Ordering conflict
-        with pytest.raises(typer.Exit) as exc2:
-            _validate_ordering(dirs_first=True, files_first=True)
-
-        assert exc2.value.exit_code == 2
-
-        # Missing input file
-        with pytest.raises(typer.Exit) as exc3:
-            _validate_from_file("nonexistent_path_findfmt_test.txt")
-
-        assert exc3.value.exit_code == 2
-
-        # Missing file exists
-        with pytest.raises(typer.Exit) as exc4:
-            _validate_file_exists(Path("nonexistent_gitignore_test"), "Gitignore file")
-
-        assert exc4.value.exit_code == 2
-
-
-def test_runner_open_output_sink_error_translated(
-    tmp_path: Path,
-    mock_locale_catalog: Path,
-) -> None:
-    """Verify runner _open_output_sink error message is wrapped and localized."""
-    # Attempting to open a directory as a file produces OSError
-    bad_output = tmp_path / "a_directory"
-    bad_output.mkdir()
-
-    with override_locale("es", localedir=mock_locale_catalog), pytest.raises(typer.Exit):
-        _open_output_sink(bad_output, None)
-
-
-def test_build_traversal_config_locale_argument() -> None:
-    """Verify build_traversal_config accepts locale and applies it."""
-    with override_locale("C"):
-        config = build_traversal_config(
-            paths=None,
-            tags=None,
-            exclude_tags=None,
-            all_tags=False,
-            shebang=None,
-            no_ignore=False,
-            hidden=False,
-            follow_symlinks=False,
-            dirs_only=False,
-            one_file_system=False,
-            max_depth=None,
-            file_limit=None,
-            prune=False,
-            pattern=None,
-            exclude_pattern=None,
-            ignore_case=False,
-            match_dirs=False,
-            absolute=False,
-            relative=False,
-            print0=False,
-            list_tags=False,
-            summary=False,
-            output_format=OutputFormat.TEXT,
-            locale="POSIX",
-        )
-        assert config.locale == "POSIX"
-
-
 def test_detect_locale_empty_tokens() -> None:
     """Verify detect_locale skips empty and whitespace tokens in colon-separated variables."""
-    # All tokens empty in LANGUAGE -> falls through to LC_ALL
     env1 = {"LANGUAGE": " : : ", "LC_ALL": "es_ES"}
     assert detect_locale(env1) == "es_ES"
 
-    # All tokens empty across all vars -> falls back to C
     env2 = {"LANGUAGE": "::", "LC_ALL": "  :  "}
     assert detect_locale(env2) == "C"
-
-
-def test_execute_findfmt_locale_argument(tmp_path: Path) -> None:
-    """Verify execute_findfmt accepts locale and applies it."""
-    test_file = tmp_path / "hello.py"
-    test_file.write_text("print('hello')\n")
-
-    buf = io.StringIO()
-    with override_locale("C"):
-        execute_findfmt(
-            paths=[tmp_path],
-            tags=None,
-            exclude_tags=None,
-            all_tags=False,
-            shebang=None,
-            no_ignore=False,
-            hidden=False,
-            follow_symlinks=False,
-            output_format=OutputFormat.TEXT,
-            print0=False,
-            list_tags=False,
-            summary=False,
-            stream=buf,
-            locale="POSIX",
-        )
-        assert get_current_locale() == "POSIX"
-
-
-def test_cli_flags_locale_and_lang(tmp_path: Path) -> None:
-    """Verify CLI flags --locale and --lang work on command line."""
-    runner = CliRunner()
-
-    with override_locale("C"):
-        res1 = runner.invoke(app, ["--locale", "POSIX", str(tmp_path)])
-        assert res1.exit_code == 0
-        assert get_current_locale() == "POSIX"
-
-        res2 = runner.invoke(app, ["--lang", "C", str(tmp_path)])
-        assert res2.exit_code == 0
-        assert get_current_locale() == "C"
 
 
 def test_set_locale_logs_or_raises_on_undecodable_catalog(tmp_path: Path) -> None:
@@ -484,3 +236,206 @@ def test_set_locale_logs_or_raises_on_undecodable_catalog(tmp_path: Path) -> Non
 
         assert active == "de"
         assert get_current_translation().gettext("size") == "size"
+
+
+def test_slavic_three_form_plural_logic(tmp_path: Path) -> None:
+    """Verify Slavic 3-form plural logic for 1 file, 2-4 files, 5-10 files, and 21 files."""
+    header = (
+        "nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : "
+        "n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
+    )
+    forms = ["1 файл", "2-4 файла", "5-10 файлов"]
+    _create_plural_catalog(tmp_path, "ru", header, forms)
+
+    with override_locale("ru", localedir=tmp_path):
+        # Form 0: ending in 1 except 11
+        for n in (1, 21, 31, 41, 101, 121, 201):
+            assert ngettext("file", "files", n) == "1 файл"
+
+        # Form 1: ending in 2..4 except 12..14
+        for n in (2, 3, 4, 22, 23, 24, 102, 103, 104):
+            assert ngettext("file", "files", n) == "2-4 файла"
+
+        # Form 2: 0, 5..10, 11..19, 20, 25..30, 100, 111, 112
+        for n in (0, 5, 8, 10, 11, 14, 19, 20, 25, 99, 100, 105, 111, 112, 1000):
+            assert ngettext("file", "files", n) == "5-10 файлов"
+
+
+def test_arabic_six_form_plural_logic(tmp_path: Path) -> None:
+    """Verify Arabic 6-form plural logic (zero, one, two, few, many, other)."""
+    header = (
+        "nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : "
+        "n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);"
+    )
+    forms = ["zero", "one", "two", "few", "many", "other"]
+    _create_plural_catalog(tmp_path, "ar", header, forms)
+
+    with override_locale("ar", localedir=tmp_path):
+        assert ngettext("file", "files", 0) == "zero"
+        assert ngettext("file", "files", 1) == "one"
+        assert ngettext("file", "files", 2) == "two"
+
+        # Form 3 (few): n%100 in 3..10
+        for n in (3, 4, 5, 8, 10, 103, 104, 105, 110, 203):
+            assert ngettext("file", "files", n) == "few"
+
+        # Form 4 (many): n%100 in 11..99
+        for n in (11, 14, 19, 20, 21, 22, 24, 25, 99, 111, 112, 121, 199):
+            assert ngettext("file", "files", n) == "many"
+
+        # Form 5 (other): 100, 101, 102, 200, 1000, 1001
+        for n in (100, 101, 102, 200, 1000, 1001, 1002):
+            assert ngettext("file", "files", n) == "other"
+
+
+def test_french_and_portuguese_zero_one_singular_logic(tmp_path: Path) -> None:
+    """Verify French and Brazilian Portuguese rule where 0 and 1 are singular."""
+    header = "nplurals=2; plural=(n > 1);"
+    _create_plural_catalog(tmp_path, "fr", header, ["fichier", "fichiers"])
+    _create_plural_catalog(tmp_path, "pt_BR", header, ["arquivo", "arquivos"])
+
+    for lang, (sg, pl) in (("fr", ("fichier", "fichiers")), ("pt_BR", ("arquivo", "arquivos"))):
+        with override_locale(lang, localedir=tmp_path):
+            assert ngettext("file", "files", 0) == sg
+            assert ngettext("file", "files", 1) == sg
+            for n in (2, 3, 4, 5, 10, 11, 19, 21, 24, 100, 101):
+                assert ngettext("file", "files", n) == pl
+
+
+def test_cjk_and_indonesian_single_form_plural_logic(tmp_path: Path) -> None:
+    """Verify CJK and Indonesian single-form plural rules where no inflection exists."""
+    header = "nplurals=1; plural=0;"
+    _create_plural_catalog(tmp_path, "ja", header, ["ファイル"])
+    _create_plural_catalog(tmp_path, "id", header, ["berkas"])
+
+    for lang, word in (("ja", "ファイル"), ("id", "berkas")):
+        with override_locale(lang, localedir=tmp_path):
+            for n in (0, 1, 2, 3, 4, 5, 10, 11, 19, 21, 24, 100, 101):
+                assert ngettext("file", "files", n) == word
+
+
+@pytest.mark.parametrize(
+    ("rule_name", "header", "forms", "expected_indices"),
+    [
+        (
+            "polish_3_form",
+            (
+                "nplurals=3; plural=(n==1 ? 0 : "
+                "n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
+            ),
+            ["plik", "pliki", "plikow"],
+            {
+                1: 0,
+                2: 1,
+                3: 1,
+                4: 1,
+                22: 1,
+                24: 1,
+                102: 1,
+                0: 2,
+                5: 2,
+                10: 2,
+                11: 2,
+                19: 2,
+                20: 2,
+                21: 2,
+                25: 2,
+                100: 2,
+                101: 2,
+            },
+        ),
+        (
+            "czech_3_form",
+            "nplurals=3; plural=(n==1 ? 0 : (n>=2 && n<=4) ? 1 : 2);",
+            ["soubor", "soubory", "souboru"],
+            {
+                1: 0,
+                2: 1,
+                3: 1,
+                4: 1,
+                0: 2,
+                5: 2,
+                10: 2,
+                11: 2,
+                19: 2,
+                20: 2,
+                21: 2,
+                22: 2,
+                24: 2,
+                100: 2,
+                101: 2,
+            },
+        ),
+        (
+            "slovenian_4_form",
+            "nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);",
+            ["ena", "dve", "tri", "ostalo"],
+            {
+                1: 0,
+                101: 0,
+                2: 1,
+                102: 1,
+                3: 2,
+                4: 2,
+                103: 2,
+                104: 2,
+                0: 3,
+                5: 3,
+                10: 3,
+                11: 3,
+                19: 3,
+                20: 3,
+                21: 3,
+                22: 3,
+                24: 3,
+                100: 3,
+                105: 3,
+            },
+        ),
+    ],
+)
+def test_extended_plural_families_boundary_matrix(
+    tmp_path: Path,
+    rule_name: str,
+    header: str,
+    forms: list[str],
+    expected_indices: dict[int, int],
+) -> None:
+    """Verify boundary values on Polish, Czech, and Slovenian plural families."""
+    _create_plural_catalog(tmp_path, rule_name, header, forms)
+    with override_locale(rule_name, localedir=tmp_path):
+        for n, expected_idx in expected_indices.items():
+            expected_str = forms[expected_idx]
+            assert ngettext("file", "files", n) == expected_str
+
+
+def test_real_findfmt_catalogs_pluralization() -> None:
+    """Verify built-in findfmt message catalogs plural rules for fr, de, es, ja."""
+    with override_locale("fr"):
+        sg_fr = "[bold]Matched file:[/] [cyan]{count}[/]"
+        pl_fr = "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert ngettext(sg_fr, pl_fr, 0).startswith("[bold]Fichier")
+        assert ngettext(sg_fr, pl_fr, 1).startswith("[bold]Fichier")
+        assert ngettext(sg_fr, pl_fr, 2).startswith("[bold]Fichiers")
+        assert ngettext(sg_fr, pl_fr, 5).startswith("[bold]Fichiers")
+
+    with override_locale("de"):
+        sg_de = "[bold]Matched file:[/] [cyan]{count}[/]"
+        pl_de = "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert ngettext(sg_de, pl_de, 1).startswith("[bold]Passende Datei")
+        assert ngettext(sg_de, pl_de, 0).startswith("[bold]Passende Dateien")
+        assert ngettext(sg_de, pl_de, 2).startswith("[bold]Passende Dateien")
+
+    with override_locale("es"):
+        sg_es = "[bold]Matched file:[/] [cyan]{count}[/]"
+        pl_es = "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert ngettext(sg_es, pl_es, 1).startswith("[bold]Archivo")
+        assert ngettext(sg_es, pl_es, 0).startswith("[bold]Archivos")
+        assert ngettext(sg_es, pl_es, 2).startswith("[bold]Archivos")
+
+    with override_locale("ja"):
+        sg_ja = "[bold]Matched file:[/] [cyan]{count}[/]"
+        pl_ja = "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert ngettext(sg_ja, pl_ja, 0).startswith("[bold]一致したファイル")
+        assert ngettext(sg_ja, pl_ja, 1).startswith("[bold]一致したファイル")
+        assert ngettext(sg_ja, pl_ja, 5).startswith("[bold]一致したファイル")

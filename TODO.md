@@ -306,6 +306,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#231](https://github.com/bdperkin/findfmt/issues/231)** - feat(i18n): localize file sizes,
   numeric separators, and timestamps per regional locale standards (Closed: 2026-10-20 via PR
   [#397](https://github.com/bdperkin/findfmt/pull/397))
+- [x] **[#232](https://github.com/bdperkin/findfmt/issues/232)** - test(i18n): create automated
+  verification suite for complex multi-tier gettext pluralization rules (Closed: 2026-10-20 via PR
+  [#399](https://github.com/bdperkin/findfmt/pull/399))
 
 ______________________________________________________________________
 
@@ -315,11 +318,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#232](https://github.com/bdperkin/findfmt/issues/232)** - test(i18n): create automated
-  verification suite for complex multi-tier gettext pluralization rules *(Epic:
-  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
-  Milestone: v1.0.1)* - **Rationale:** Test integrity quick win; builds an automated test harness
-  validating 1-form through 6-form plural formulas across languages.
 - [ ] **[#361](https://github.com/bdperkin/findfmt/issues/361)** - [Security] Eliminate quadratic
   ReDoS vulnerability in C1-OSC terminal control-sequence regex *(Epic:
   [[Epic] Security Hardening: Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety](https://github.com/bdperkin/findfmt/issues/338)
