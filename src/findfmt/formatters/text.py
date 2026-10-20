@@ -81,6 +81,10 @@ class TextFormatter(Formatter):
             hyperlink_authority: Optional URI authority component for terminal hyperlinks.
         """
         super().__init__(absolute=absolute)
+        if delimiter == "\0":
+            literal = True
+            hide_control_chars = False
+
         self.show_tags = show_tags
         self.delimiter = delimiter
         self.show_permissions = show_permissions

@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-19
-> **Tracking:** 91 Closed Issues | 136 Actionable Open Tasks | 35 Active Umbrella Epics
+> **Tracking:** 93 Closed Issues | 135 Actionable Open Tasks | 35 Active Umbrella Epics
 
 ______________________________________________________________________
 
@@ -288,6 +288,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#315](https://github.com/bdperkin/findfmt/issues/315)** - fix(format): non-UTF-8 filenames
   crash all output modes with UnicodeEncodeError (Closed: 2026-10-19 via PR
   [#387](https://github.com/bdperkin/findfmt/pull/387))
+- [x] **[#316](https://github.com/bdperkin/findfmt/issues/316)** - fix(cli): -0/findfmt0 and piped
+  text output silently rewrite filenames (Closed: 2026-10-20 via PR
+  [#390](https://github.com/bdperkin/findfmt/pull/390))
 
 ______________________________________________________________________
 
@@ -297,11 +300,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#316](https://github.com/bdperkin/findfmt/issues/316)** - fix(cli): -0/findfmt0 and piped
-  text output silently rewrite filenames *(Epic:
-  [[Epic] Formatter Integrity: Encoding Robustness, Stream Sanitization & Format Parity](https://github.com/bdperkin/findfmt/issues/384)
-  | Milestone: v1.0.1)* - **Rationale:** Critical data integrity bug; prevents silent file
-  modification during pipe operations with minimal code change.
 - [ ] **[#317](https://github.com/bdperkin/findfmt/issues/317)** - fix(i18n): wheels built in
   isolation ship .mo files without a charset, so translations silently fall back to English *(Epic:
   [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)

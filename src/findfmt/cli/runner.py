@@ -31,6 +31,14 @@ if TYPE_CHECKING:
 __all__ = ["execute_findfmt"]
 
 
+def _is_stream_tty(stream: TextIO) -> bool:
+    """Determine whether stream behaves as an interactive terminal."""
+    try:
+        return bool(stream.isatty())
+    except (AttributeError, ValueError):
+        return False
+
+
 def _deliver_output(  # noqa: PLR0913
     formatter: Formatter,
     files: Iterable[FileInfo],
@@ -51,7 +59,7 @@ def _deliver_output(  # noqa: PLR0913
         custom_controller: Whether a custom controller was injected.
     """
     try:
-        is_tty = bool(getattr(target_stream, "isatty", lambda: False)())
+        is_tty = _is_stream_tty(target_stream)
         if custom_controller or (is_tty and pager is not False):
             buf = io.StringIO()
             formatter.stream(files, buf)
@@ -150,6 +158,16 @@ def _build_formatter_kwargs(  # noqa: PLR0913
     no_links: bool,
 ) -> dict[str, object]:
     """Assemble keyword arguments dictionary for target output formatter."""
+    is_tty = _is_stream_tty(target_stream)
+    if config.null_delimited or (effective_format == OutputFormat.TEXT and config.literal):
+        effective_literal, effective_hide_control_chars = True, False
+    elif effective_format == OutputFormat.TEXT and config.hide_control_chars:
+        effective_literal, effective_hide_control_chars = False, True
+    elif effective_format == OutputFormat.TEXT:
+        effective_literal, effective_hide_control_chars = not is_tty, is_tty
+    else:
+        effective_literal, effective_hide_control_chars = config.literal, config.hide_control_chars
+
     kwargs: dict[str, object] = {
         "no_indent": no_indent,
         "ansi_lines": ansi_lines,
@@ -167,8 +185,8 @@ def _build_formatter_kwargs(  # noqa: PLR0913
         "show_ctime": config.show_ctime,
         "time_format": config.time_format,
         "classify": config.classify,
-        "hide_control_chars": config.hide_control_chars,
-        "literal": config.literal,
+        "hide_control_chars": effective_hide_control_chars,
+        "literal": effective_literal,
         "quote_name": config.quote_name,
         "hyperlink": config.hyperlink,
         "hyperlink_schema": config.hyperlink_schema,

@@ -316,6 +316,13 @@ def test_tag_badge_markup_safety() -> None:
     assert r"\[bold red]injected\[/bold red]" in badge
 
 
+def test_hide_control_chars_has_effect() -> None:
+    """Verify hide_control_chars=True masks control characters even when literal=True."""
+    raw = "bad\x07file.txt"
+    assert format_display_path(raw, literal=True, hide_control_chars=False) == "bad\x07file.txt"
+    assert format_display_path(raw, literal=True, hide_control_chars=True) == "bad?file.txt"
+
+
 @pytest.mark.skipif(
     sys.platform == "win32",
     reason="Windows filesystems disallow control characters in filenames",
@@ -327,11 +334,17 @@ def test_cli_literal_and_sanitization_e2e(tmp_path: Path) -> None:
     file_path = tmp_path / bad_filename
     file_path.write_text("content\n", encoding="utf-8")
 
-    # Default CLI run should mask control character
+    # Default piped (non-TTY) CLI run preserves raw characters
     res_default = runner.invoke(app, [str(tmp_path)])
     assert res_default.exit_code == 0
-    assert "bad?file.txt" in res_default.stdout
-    assert "\x07" not in res_default.stdout
+    assert "\x07" in res_default.stdout
+    assert "bad\x07file.txt" in res_default.stdout
+
+    # Explicit -q (--hide-control-chars) forces masking even when piped
+    res_hide = runner.invoke(app, ["-q", str(tmp_path)])
+    assert res_hide.exit_code == 0
+    assert "bad?file.txt" in res_hide.stdout
+    assert "\x07" not in res_hide.stdout
 
     # --literal should preserve control character
     res_literal = runner.invoke(app, ["-N", str(tmp_path)])

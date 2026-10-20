@@ -58,11 +58,12 @@ def test_format_display_path() -> None:
     # Masking only
     assert format_display_path("bad\x07name.txt", hide_control_chars=True) == "bad?name.txt"
 
-    # Masking overridden by literal
-    assert (
-        format_display_path("bad\x07name.txt", hide_control_chars=True, literal=True)
-        == "bad\x07name.txt"
-    )
+    # Literal mode without masking
+    raw_bad = "bad\x07name.txt"
+    assert format_display_path(raw_bad, hide_control_chars=False, literal=True) == raw_bad
+
+    # hide_control_chars active under literal
+    assert format_display_path(raw_bad, hide_control_chars=True, literal=True) == "bad?name.txt"
 
     # Quoting only
     assert format_display_path("space name.txt", quote_name=True) == '"space name.txt"'
@@ -251,9 +252,13 @@ def test_text_formatter_presentation() -> None:
     fmt_mask = TextFormatter(hide_control_chars=True)
     assert fmt_mask.format_item(bad_info) == "bad?file.txt\n"
 
-    # Masking with literal override
-    fmt_literal = TextFormatter(hide_control_chars=True, literal=True)
+    # Literal mode without masking
+    fmt_literal = TextFormatter(hide_control_chars=False, literal=True)
     assert fmt_literal.format_item(bad_info) == "bad\x07file.txt\n"
+
+    # hide_control_chars active under literal
+    fmt_mask_literal = TextFormatter(hide_control_chars=True, literal=True)
+    assert fmt_mask_literal.format_item(bad_info) == "bad?file.txt\n"
 
 
 def test_rich_table_formatter_presentation() -> None:
@@ -322,23 +327,13 @@ def test_rich_tree_formatter_presentation() -> None:
 
 def test_get_formatter_forwarding() -> None:
     """Verify get_formatter passes presentation flags to formatters."""
-    fmt_text = get_formatter(
-        OutputFormat.TEXT,
-        show_mtime=True,
-        classify=True,
-        quote_name=True,
-    )
+    fmt_text = get_formatter(OutputFormat.TEXT, show_mtime=True, classify=True, quote_name=True)
     assert isinstance(fmt_text, TextFormatter)
     assert fmt_text.show_mtime is True
     assert fmt_text.classify is True
     assert fmt_text.quote_name is True
 
-    fmt_table = get_formatter(
-        OutputFormat.TABLE,
-        show_ctime=True,
-        classify=True,
-        quote_name=True,
-    )
+    fmt_table = get_formatter(OutputFormat.TABLE, show_ctime=True, classify=True, quote_name=True)
     assert isinstance(fmt_table, RichTableFormatter)
     assert fmt_table.show_ctime is True
     assert fmt_table.classify is True

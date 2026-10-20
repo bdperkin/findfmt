@@ -118,8 +118,7 @@ def format_display_path(  # noqa: PLR0913
         result = strip_ansi_escapes(result)
         result = mask_control_characters(result)
     elif hide_control_chars:
-        # Literal mode explicitly suppresses control character masking
-        pass
+        result = mask_control_characters(result)
 
     if quote_name:
         result = quote_filename(result)
