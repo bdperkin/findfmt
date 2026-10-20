@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime as dt
 import locale
 from collections import Counter
 from pathlib import Path
@@ -10,10 +11,13 @@ from unittest.mock import MagicMock
 import pytest
 from typer.testing import CliRunner
 
+import findfmt.utils.strings
 from findfmt.cli.main import app
 from findfmt.formatters import RichTableFormatter, TextFormatter
 from findfmt.formatters.visual import format_summary_panel
 from findfmt.i18n import (
+    _format_grouped_digits,
+    _get_numeric_conventions,
     _sync_system_locale,
     format_integer,
     format_number,
@@ -21,7 +25,7 @@ from findfmt.i18n import (
 )
 from findfmt.models import FileInfo
 from findfmt.sizes import format_size, format_size_binary, format_size_si
-from findfmt.utils.strings import format_timestamp
+from findfmt.utils.strings import format_timestamp, resolve_time_format
 
 
 def test_format_integer_and_number() -> None:
@@ -296,3 +300,190 @@ def test_parameterized_cli_locales(
     assert result.exit_code == 0
     # Summary title is translated in stderr
     assert expected_summary_title in result.stderr
+
+
+def test_south_asian_and_regional_groupings() -> None:
+    """Verify regional numbering systems including South Asian lakh/crore and European periods."""
+    # South Asian lakh/crore grouping (hi, bn)
+    with override_locale("hi"):
+        assert format_integer(1234567, grouping=True) == "12,34,567"
+        assert format_integer(500, grouping=True) == "500"
+        assert format_integer(-1234567, grouping=True) == "-12,34,567"
+        assert format_number(1234567.89, decimals=2, grouping=True) == "12,34,567.89"
+        assert format_number(12.4, decimals=1) == "12.4"
+
+    with override_locale("bn"):
+        assert format_integer(12345678, grouping=True) == "1,23,45,678"
+
+    # Spanish period-separated thousands and comma decimal
+    with override_locale("es"):
+        assert format_integer(1234567, grouping=True) == "1.234.567"
+        assert format_number(1234567.89, decimals=2, grouping=True) == "1.234.567,89"
+        assert format_number(12.4, decimals=1) == "12,4"
+        assert format_number(42.0, decimals=0) == "42"
+
+    # German period-separated thousands and comma decimal
+    with override_locale("de"):
+        assert format_integer(1234567, grouping=True) == "1.234.567"
+        assert format_number(12.4, decimals=1) == "12,4"
+
+    # French narrow no-break space thousands and comma decimal
+    with override_locale("fr"):
+        assert format_integer(1234567, grouping=True) in ("1\u202f234\u202f567", "1 234 567")
+        assert format_number(12.4, decimals=1) == "12,4"
+        assert format_number(-12.4, decimals=1) == "-12,4"
+
+    # Grouping helpers edge cases
+    assert _format_grouped_digits("123", "", []) == "123"
+    assert _format_grouped_digits("12345", ",", [3, 2]) == "12,345"
+    assert _format_grouped_digits("123456", ",", [2, 0]) == "12,34,56"
+
+
+def test_format_number_and_integer_mock_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify mock locale fallbacks when system locale cannot be loaded or raises error."""
+    # Mock localeconv returning custom conventions
+    monkeypatch.setattr(
+        locale,
+        "localeconv",
+        lambda: {"decimal_point": "#", "thousands_sep": "_", "grouping": [3, 3, 0]},
+    )
+    assert _get_numeric_conventions() == ("#", "_", [3, 3, 0])
+
+    # Mock format_string failure in format_integer and format_number
+    monkeypatch.setattr(locale, "format_string", MagicMock(side_effect=locale.Error("mock err")))
+    assert format_integer(1234567, grouping=True) == "1_234_567"
+    assert format_number(1234.5, decimals=1, grouping=True) == "1_234#5"
+    assert format_number(42.0, decimals=0) == "42"
+    assert format_number(-42.5, decimals=1) == "-42#5"
+
+
+def test_sync_system_locale_all_candidates_fail(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify _sync_system_locale handles the case where all candidate locales fail."""
+    monkeypatch.setattr(locale, "setlocale", MagicMock(side_effect=locale.Error("fail")))
+    _sync_system_locale("xx_YY")
+
+
+def test_timestamp_localization_and_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify timestamp formatting respects nl_langinfo and falls back across platforms."""
+    ts = dt.datetime(2026, 10, 20, 14, 30, 0, tzinfo=dt.timezone.utc).timestamp()
+
+    # C / POSIX default
+    with override_locale("C"):
+        assert format_timestamp(ts) != "-"
+        assert resolve_time_format() == "%b %d %H:%M"
+
+    # With mocked nl_langinfo custom format
+    if hasattr(locale, "nl_langinfo") and hasattr(locale, "D_T_FMT"):
+        monkeypatch.setattr(locale, "nl_langinfo", lambda _code: "%Y-%m-%d %H:%M:%S")
+        with override_locale("fr"):
+            res = format_timestamp(ts)
+            assert res.startswith("2026-10-20")
+
+        # Empty lang_fmt falls through to regional fallback
+        monkeypatch.setattr(locale, "nl_langinfo", lambda _code: "")
+        with override_locale("es"):
+            assert resolve_time_format() == "%d/%m/%Y %H:%M:%S"
+
+    # Simulate platform without nl_langinfo (like Windows)
+    monkeypatch.delattr(locale, "nl_langinfo", raising=False)
+    with override_locale("ja"):
+        fmt_ja = resolve_time_format()
+        assert "年" in fmt_ja
+        res_ja = format_timestamp(ts)
+        assert "年" in res_ja
+
+    with override_locale("de"):
+        assert resolve_time_format() == "%d.%m.%Y %H:%M:%S"
+
+    with override_locale("fr"):
+        assert resolve_time_format() == "%d/%m/%Y %H:%M:%S"
+
+    with override_locale("es"):
+        assert resolve_time_format() == "%d/%m/%Y %H:%M:%S"
+
+    with override_locale("unknown"):
+        assert resolve_time_format() == "%b %d %H:%M"
+
+    # Test ValueError in strftime falls back to DEFAULT_TIME_FORMAT
+    bad_fmt_result = format_timestamp(ts, fmt="%Q %invalid")
+    assert bad_fmt_result != "-"
+
+
+def test_summary_panel_total_bytes_localized() -> None:
+    """Verify format_summary_panel includes localized total size when total_bytes provided."""
+    # In French
+    with override_locale("fr"):
+        panel = format_summary_panel(
+            15,
+            Counter({"python": 10}),
+            total_bytes=int(12.4 * 1024 * 1024),
+        )
+        render_text = str(panel.renderable)
+        assert "12,4 Mo" in render_text
+        assert "Taille totale :" in render_text
+
+    # In German
+    with override_locale("de"):
+        panel_de = format_summary_panel(
+            15,
+            Counter({"python": 10}),
+            total_bytes=int(12.4 * 1024 * 1024),
+        )
+        render_text_de = str(panel_de.renderable)
+        assert "12,4 MB" in render_text_de
+        assert "Gesamtgröße:" in render_text_de
+
+    # In Spanish
+    with override_locale("es"):
+        panel_es = format_summary_panel(1000, Counter({"python": 1000}), total_bytes=1048576)
+        render_text_es = str(panel_es.renderable)
+        assert "Tamaño total:" in render_text_es
+        assert "1.000" in render_text_es
+
+
+def test_get_numeric_conventions_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify numeric convention fallbacks for languages without host system locales."""
+    monkeypatch.setattr(locale, "localeconv", dict)
+    with override_locale("it"):
+        assert _get_numeric_conventions() == (",", ".", [3, 3, 0])
+
+    with override_locale("fr"):
+        assert _get_numeric_conventions() == (",", "\u202f", [3, 3, 0])
+
+    with override_locale("zh"):
+        assert _get_numeric_conventions() == (".", ",", [3, 3, 0])
+
+    with override_locale("unknown"):
+        assert _get_numeric_conventions() == (".", "", [])
+
+    # Tail remaining in _format_grouped_digits via CHAR_MAX
+    char_max = getattr(locale, "CHAR_MAX", 127)
+    assert _format_grouped_digits("1234567", ",", [3, char_max]) == "1234,567"
+
+    # Negative integer fallback without system locale
+    monkeypatch.setattr(locale, "format_string", MagicMock(return_value="-1234567"))
+    with override_locale("es"):
+        assert format_integer(-1234567, grouping=True) == "-1.234.567"
+
+
+def test_resolve_time_format_exceptions_and_value_error(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify resolve_time_format and format_timestamp handle errors gracefully."""
+    ts = 1700000000.0
+    monkeypatch.setattr(
+        locale,
+        "nl_langinfo",
+        MagicMock(side_effect=locale.Error("nl_langinfo failed")),
+    )
+    with override_locale("fr"):
+        assert resolve_time_format() == "%d/%m/%Y %H:%M:%S"
+
+    # Mock date_obj.strftime raising ValueError on first call then succeeding on fallback
+    mock_date = MagicMock()
+    mock_date.strftime.side_effect = [ValueError("Invalid format"), "fallback_time"]
+    mock_dt = MagicMock()
+    mock_dt.timezone.utc = dt.timezone.utc
+    mock_dt.fromtimestamp.return_value.astimezone.return_value = mock_date
+    monkeypatch.setattr(findfmt.utils.strings.dt, "datetime", mock_dt)
+
+    res = format_timestamp(ts, fmt="%unknown")
+    assert res == "fallback_time"

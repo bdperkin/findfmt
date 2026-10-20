@@ -434,7 +434,7 @@ def execute_findfmt(  # noqa: PLR0913
     )
 
     tag_counter: Counter[str] = Counter()
-    match_count = 0
+    match_count = total_bytes = 0
     delimiter = "\0" if config.null_delimited else "\n"
 
     _reconfigure_surrogateescape(sys.stdout)
@@ -472,11 +472,12 @@ def execute_findfmt(  # noqa: PLR0913
 
     def _matched_files() -> Iterable[FileInfo]:
         """Yield matched files while accumulating frequency statistics."""
-        nonlocal match_count
+        nonlocal match_count, total_bytes
         for file_info in find_files_func(config):
             match_count += 1
             if config.show_summary:
                 tag_counter.update(file_info.tags)
+                total_bytes += file_info.size_bytes
 
             yield file_info
 
@@ -495,4 +496,4 @@ def execute_findfmt(  # noqa: PLR0913
                 out_file.close()
 
         if config.show_summary:
-            write_summary(match_count, tag_counter, force_color=color)
+            write_summary(match_count, tag_counter, total_bytes=total_bytes, force_color=color)

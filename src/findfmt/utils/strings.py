@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import datetime as dt
+import locale
 import re
 import stat
 from typing import TYPE_CHECKING
 
 import rich.markup
 
+from findfmt.i18n import get_current_locale
 from findfmt.utils.hyperlinks import format_osc8_link
 
 if TYPE_CHECKING:
@@ -38,6 +40,7 @@ __all__ = [
     "get_classification_indicator",
     "mask_control_characters",
     "quote_filename",
+    "resolve_time_format",
     "strip_ansi_escapes",
 ]
 
@@ -138,12 +141,53 @@ def format_display_path(  # noqa: PLR0913
     return result
 
 
+def resolve_time_format(fmt: str | None = None) -> str:
+    """Resolve the active strftime format string respecting active locale.
+
+    If fmt is provided, it is returned verbatim.
+    Otherwise, if standard POSIX nl_langinfo(locale.D_T_FMT) is available and
+    the current locale is not C/POSIX, the localized datetime format is used.
+    If nl_langinfo is unavailable or raises an exception, a regional fallback or
+    DEFAULT_TIME_FORMAT is used.
+
+    Args:
+        fmt: Explicit strftime format string or None.
+
+    Returns:
+        Resolved strftime format string.
+    """
+    if fmt is not None:
+        return fmt
+
+    if hasattr(locale, "nl_langinfo") and hasattr(locale, "D_T_FMT"):
+        try:
+            lang_fmt = locale.nl_langinfo(locale.D_T_FMT)
+            if lang_fmt:
+                curr = get_current_locale()
+                if curr in ("C", "POSIX") and lang_fmt == "%a %b %e %H:%M:%S %Y":
+                    return DEFAULT_TIME_FORMAT
+
+                return lang_fmt
+        except (locale.Error, ValueError, OSError):
+            pass
+
+    curr = get_current_locale()
+    prefix = curr.split("_", maxsplit=1)[0].split(".", maxsplit=1)[0].lower()
+    fallback_formats = {
+        "ja": "%Y年%m月%d日 %H時%M分%S秒",
+        "de": "%d.%m.%Y %H:%M:%S",
+        "fr": "%d/%m/%Y %H:%M:%S",
+        "es": "%d/%m/%Y %H:%M:%S",
+    }
+    return fallback_formats.get(prefix, DEFAULT_TIME_FORMAT)
+
+
 def format_timestamp(ts: float | None, fmt: str | None = None) -> str:
     """Format POSIX timestamp into a human-readable date/time string.
 
     Args:
         ts: Epoch timestamp in seconds, or None if unavailable.
-        fmt: Optional strftime format string (defaults to '%b %d %H:%M').
+        fmt: Optional strftime format string (defaults to localized format or '%b %d %H:%M').
 
     Returns:
         Formatted date/time string, or '-' if timestamp is None or cannot be formatted.
@@ -151,10 +195,13 @@ def format_timestamp(ts: float | None, fmt: str | None = None) -> str:
     if ts is None:
         return "-"
 
-    time_fmt = fmt if fmt is not None else DEFAULT_TIME_FORMAT
+    time_fmt = resolve_time_format(fmt)
     try:
         date_obj = dt.datetime.fromtimestamp(ts, tz=dt.timezone.utc).astimezone()
-        return date_obj.strftime(time_fmt)
+        try:
+            return date_obj.strftime(time_fmt)
+        except ValueError:
+            return date_obj.strftime(DEFAULT_TIME_FORMAT)
     except (OSError, OverflowError, ValueError):
         return "-"
 

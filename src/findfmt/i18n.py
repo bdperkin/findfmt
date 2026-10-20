@@ -36,6 +36,19 @@ __all__ = [
 _current_locale: str = "C"
 _current_translation: gettext.NullTranslations = gettext.NullTranslations()
 _ISO_639_1_CODE_LEN: int = 2
+_GROUPING_THRESHOLD: int = 1000
+_LANG_TO_TERRITORY: dict[str, str] = {
+    "bn": "BD",
+    "cs": "CZ",
+    "da": "DK",
+    "el": "GR",
+    "en": "US",
+    "hi": "IN",
+    "ja": "JP",
+    "ko": "KR",
+    "sv": "SE",
+    "zh": "CN",
+}
 
 
 def detect_locale(env: Mapping[str, str] | None = None) -> str:
@@ -116,18 +129,21 @@ def _try_apply_locale_candidate(cand: str) -> bool:
         cand: The locale identifier candidate string.
 
     Returns:
-        True if LC_ALL was successfully set, False otherwise.
+        True if LC_ALL or individual categories were successfully set, False otherwise.
     """
     try:
         locale.setlocale(locale.LC_ALL, cand)
     except (locale.Error, ValueError, OSError):
+        applied = False
         with contextlib.suppress(locale.Error, ValueError, OSError):
             locale.setlocale(locale.LC_TIME, cand)
+            applied = True
 
         with contextlib.suppress(locale.Error, ValueError, OSError):
             locale.setlocale(locale.LC_NUMERIC, cand)
+            applied = True
 
-        return False
+        return applied
     else:
         return True
 
@@ -148,12 +164,13 @@ def _sync_system_locale(locale_name: str | None) -> None:
 
     candidates = [locale_name, f"{locale_name}.UTF-8", f"{locale_name}.utf8"]
     if len(locale_name) == _ISO_639_1_CODE_LEN:
-        upper = locale_name.upper()
+        low = locale_name.lower()
+        territory = _LANG_TO_TERRITORY.get(low, locale_name.upper())
         candidates.extend(
             [
-                f"{locale_name}_{upper}.UTF-8",
-                f"{locale_name}_{upper}.utf8",
-                f"{locale_name}_{upper}",
+                f"{locale_name}_{territory}.UTF-8",
+                f"{locale_name}_{territory}.utf8",
+                f"{locale_name}_{territory}",
             ],
         )
 
@@ -301,20 +318,109 @@ def ngettext(singular: str, plural: str, n: int) -> str:
     return _current_translation.ngettext(singular, plural, n)
 
 
-def format_number(value: float, decimals: int = 1) -> str:
+def _format_grouped_digits(digits: str, sep: str, grouping: list[int]) -> str:
+    """Group digit string according to locale grouping rules."""
+    if not grouping or not sep:
+        return digits
+
+    groups: list[str] = []
+    tail = digits
+    rule_idx = 0
+    rule = grouping[0] if grouping else 0
+    char_max = getattr(locale, "CHAR_MAX", 127)
+    while tail and rule > 0:
+        if rule >= char_max:
+            break
+
+        groups.append(tail[-rule:])
+        tail = tail[:-rule]
+        if rule_idx + 1 < len(grouping):
+            rule_idx += 1
+            rule = grouping[rule_idx]
+            if rule == 0:
+                rule = grouping[rule_idx - 1]
+
+    if tail:
+        groups.append(tail)
+
+    return sep.join(reversed(groups))
+
+
+_REGIONAL_DEFAULTS: Mapping[str, tuple[str, str, list[int]]] = {
+    "es": (",", ".", [3, 3, 0]),
+    "de": (",", ".", [3, 3, 0]),
+    "it": (",", ".", [3, 3, 0]),
+    "pt": (",", ".", [3, 3, 0]),
+    "fr": (",", "\u202f", [3, 3, 0]),
+    "en": (".", ",", [3, 3, 0]),
+    "ja": (".", ",", [3, 3, 0]),
+    "zh": (".", ",", [3, 3, 0]),
+}
+
+
+def _resolve_localeconv() -> tuple[str, str, list[int]]:
+    """Query localeconv safely and return decimal point, separator, and grouping."""
+    conv: Mapping[str, object] = {}
+    with contextlib.suppress(locale.Error, ValueError, OSError):
+        conv = locale.localeconv()
+
+    dec_pt = str(conv.get("decimal_point") or ".")
+    th_sep = str(conv.get("thousands_sep") or "")
+    raw_grp = conv.get("grouping")
+    grp: list[int] = list(raw_grp) if isinstance(raw_grp, (list, tuple)) else []
+    return dec_pt, th_sep, grp
+
+
+def _get_numeric_conventions() -> tuple[str, str, list[int]]:
+    """Resolve (decimal_point, thousands_sep, grouping) for current locale."""
+    dec_pt, th_sep, grp = _resolve_localeconv()
+    curr = _current_locale.split(".", maxsplit=1)[0].lower()
+    prefix = curr.split("_", maxsplit=1)[0]
+
+    # South Asian numbering system (India, Bangladesh, Nepal) uses lakh/crore [3, 2, 0]
+    if prefix in ("hi", "bn") or curr.endswith(("_in", "_bd")):
+        return dec_pt if dec_pt != "." else ".", th_sep or ",", [3, 2, 0]
+
+    if grp and th_sep:
+        return dec_pt, th_sep, grp
+
+    return _REGIONAL_DEFAULTS.get(prefix, (dec_pt, th_sep, grp))
+
+
+def format_number(value: float, decimals: int = 1, *, grouping: bool = False) -> str:
     """Format a floating point number respecting LC_NUMERIC decimal separator.
 
     Args:
         value: Float or int value to format.
         decimals: Number of decimal places.
+        grouping: Whether to insert thousands grouping separators.
 
     Returns:
         Formatted number string.
     """
-    try:
-        return locale.format_string(f"%.{decimals}f", value, grouping=True)
-    except (ValueError, TypeError):  # pragma: no cover
-        return f"{value:.{decimals}f}"
+    dec_pt, th_sep, grp = _get_numeric_conventions()
+
+    if not grouping:
+        th_sep = ""
+        grp = []
+
+    if grp != [3, 2, 0]:
+        try:
+            res = locale.format_string(f"%.{decimals}f", value, grouping=grouping)
+            has_sep = th_sep in res or abs(value) < _GROUPING_THRESHOLD
+            if dec_pt in res and (not grouping or has_sep):
+                return res
+        except (locale.Error, ValueError, TypeError):
+            pass
+
+    raw = f"{abs(value):.{decimals}f}"
+    parts = raw.split(".")
+    int_part = _format_grouped_digits(parts[0], th_sep, grp)
+    sign = "-" if value < 0 else ""
+    if decimals > 0:
+        return f"{sign}{int_part}{dec_pt}{parts[1]}"
+
+    return f"{sign}{int_part}"
 
 
 def format_integer(value: int, *, grouping: bool = False) -> str:
@@ -330,10 +436,23 @@ def format_integer(value: int, *, grouping: bool = False) -> str:
     if not grouping:
         return str(value)
 
-    try:
-        return locale.format_string("%d", value, grouping=True)
-    except (ValueError, TypeError):  # pragma: no cover
+    _dec_pt, th_sep, grp = _get_numeric_conventions()
+    if not th_sep or not grp:
         return str(value)
+
+    if grp == [3, 2, 0]:
+        sign = "-" if value < 0 else ""
+        return sign + _format_grouped_digits(str(abs(value)), th_sep, grp)
+
+    try:
+        res = locale.format_string("%d", value, grouping=True)
+        if th_sep in res or abs(value) < _GROUPING_THRESHOLD:
+            return res
+    except (locale.Error, ValueError, TypeError):
+        pass
+
+    sign = "-" if value < 0 else ""
+    return sign + _format_grouped_digits(str(abs(value)), th_sep, grp)
 
 
 # Initialize default locale from environment

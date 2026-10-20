@@ -9,6 +9,7 @@ from typer.testing import CliRunner
 
 from findfmt.cli.main import app
 from findfmt.formatters import RichTableFormatter, RichTreeFormatter, TextFormatter
+from findfmt.i18n import format_integer, override_locale
 from findfmt.metadata import format_metadata_parts
 from findfmt.models import FileInfo
 from findfmt.sizes import (
@@ -77,6 +78,34 @@ def test_format_size_dispatch() -> None:
     assert format_size(1024 * 1024 * 1024) == "1.0 GB"
     # Default unit overflow
     assert format_size(1024**4) == "1024.0 GB"
+
+
+def test_localized_size_formatting() -> None:
+    """Verify format_size, format_size_bytes, and units respect regional locales."""
+    # French: comma decimal separator, Mo/Ko unit names, octets 'o'
+    with override_locale("fr"):
+        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 Mo"
+        assert format_size(int(1.5 * 1024)) == "1,5 Ko"
+        assert format_size(int(2.5 * 1024 * 1024 * 1024)) == "2,5 Go"
+        assert format_size_bytes(1048576) == "1048576 o"
+        assert format_integer(1048576, grouping=True) in ("1\u202f048\u202f576", "1 048 576")
+
+    # German: comma decimal separator, MB/KB unit names, 'B'
+    with override_locale("de"):
+        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 MB"
+        assert format_size_bytes(1048576) == "1048576 B"
+        assert format_integer(1048576, grouping=True) == "1.048.576"
+
+    # Spanish: period-separated thousands, comma decimal
+    with override_locale("es"):
+        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 MB"
+        assert format_size_bytes(1048576) == "1048576 B"
+        assert format_integer(1048576, grouping=True) == "1.048.576"
+
+    # Hindi / South Asian: lakh/crore grouping
+    with override_locale("hi"):
+        assert format_size_bytes(1048576) == "1048576 B"
+        assert format_integer(1048576, grouping=True) == "10,48,576"
 
 
 def test_calculate_accumulated_sizes_file_root(tmp_path: Path) -> None:

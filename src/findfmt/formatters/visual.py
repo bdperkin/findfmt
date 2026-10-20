@@ -58,7 +58,12 @@ RICH_BOX_STYLES: dict[str, box.Box] = {
 }
 
 
-def format_summary_panel(match_count: int, tag_counter: Counter[str]) -> Panel:
+def format_summary_panel(
+    match_count: int,
+    tag_counter: Counter[str],
+    *,
+    total_bytes: int | None = None,
+) -> Panel:
     """Format execution statistics into a styled Rich Panel."""
     count_str = format_integer(match_count, grouping=True)
     matched_label = ngettext(
@@ -67,6 +72,10 @@ def format_summary_panel(match_count: int, tag_counter: Counter[str]) -> Panel:
         match_count,
     ).format(count=count_str)
     body_lines = [matched_label]
+    if total_bytes is not None:
+        size_str = format_size(total_bytes)
+        body_lines.append(f"[bold]{_('Total size:')}[/] [cyan]{size_str}[/]")
+
     if tag_counter:
         body_lines.append("")
         body_lines.append(_("[bold]Top tags:[/]") or "[bold]Top tags:[/]")

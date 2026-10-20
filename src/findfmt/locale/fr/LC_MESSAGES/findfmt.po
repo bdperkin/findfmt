@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-10-16 05:48-0400\n"
+"POT-Creation-Date: 2026-10-20 14:03-0400\n"
 "PO-Revision-Date: 2026-10-15 13:26-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -18,31 +18,31 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: src/findfmt/diagnostics.py:81
+#: src/findfmt/diagnostics.py:87
 msgid "not installed"
 msgstr "non installé"
 
-#: src/findfmt/diagnostics.py:86
+#: src/findfmt/diagnostics.py:92
 msgid "not found"
 msgstr "non trouvé"
 
-#: src/findfmt/diagnostics.py:96
+#: src/findfmt/diagnostics.py:101
 msgid "none"
 msgstr ""
 
-#: src/findfmt/entrypoints.py:175
+#: src/findfmt/entrypoints.py:189
 msgid ""
 "Find all files and directories, including hidden files respecting "
 ".gitignore."
 msgstr ""
 
-#: src/findfmt/entrypoints.py:194
+#: src/findfmt/entrypoints.py:208
 msgid ""
 "Find files and list detected format and MIME tags, including hidden files"
 " respecting .gitignore."
 msgstr ""
 
-#: src/findfmt/entrypoints.py:223
+#: src/findfmt/entrypoints.py:237
 msgid ""
 "Find files by format tag, including hidden files respecting .gitignore.\n"
 "\n"
@@ -50,7 +50,7 @@ msgid ""
 "'findfilefmt python')."
 msgstr ""
 
-#: src/findfmt/entrypoints.py:252
+#: src/findfmt/entrypoints.py:266
 msgid ""
 "Find files by shebang interpreter pattern, including hidden files "
 "respecting .gitignore.\n"
@@ -59,17 +59,95 @@ msgid ""
 "'findshebang bash')."
 msgstr ""
 
-#: src/findfmt/entrypoints.py:274
+#: src/findfmt/entrypoints.py:288
 msgid ""
 "Find files and output NUL-delimited paths (--print0), including hidden "
 "files respecting .gitignore."
 msgstr ""
 
-#: src/findfmt/entrypoints.py:294
+#: src/findfmt/entrypoints.py:308
 msgid ""
 "Find files and print summary statistics to stderr, including hidden files"
 " respecting .gitignore."
 msgstr ""
+
+#: src/findfmt/exceptions.py:39
+#, python-brace-format
+msgid "Unsupported output format: '{format}'. Expected one of: {valid_formats}"
+msgstr ""
+
+#: src/findfmt/exceptions.py:57
+#, python-brace-format
+msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
+msgstr ""
+
+#: src/findfmt/exceptions.py:76
+#, python-brace-format
+msgid "Unsupported table style: '{style}'. Expected one of: {valid_styles}"
+msgstr ""
+
+#: src/findfmt/exceptions.py:95
+#, python-brace-format
+msgid ""
+"Invalid sort criteria '{criteria}'. Choose from: name, version, time, "
+"mtime, ctime, size, none."
+msgstr ""
+
+#: src/findfmt/sizes.py:30 src/findfmt/sizes.py:56
+msgid "B"
+msgstr "o"
+
+#: src/findfmt/sizes.py:31
+msgid "K"
+msgstr ""
+
+#: src/findfmt/sizes.py:32
+msgid "M"
+msgstr ""
+
+#: src/findfmt/sizes.py:33
+msgid "G"
+msgstr ""
+
+#: src/findfmt/sizes.py:34
+msgid "T"
+msgstr ""
+
+#: src/findfmt/sizes.py:35
+msgid "P"
+msgstr ""
+
+#: src/findfmt/sizes.py:36
+msgid "E"
+msgstr ""
+
+#: src/findfmt/sizes.py:37
+msgid "kB"
+msgstr "ko"
+
+#: src/findfmt/sizes.py:38 src/findfmt/sizes.py:132
+msgid "MB"
+msgstr "Mo"
+
+#: src/findfmt/sizes.py:39 src/findfmt/sizes.py:134
+msgid "GB"
+msgstr "Go"
+
+#: src/findfmt/sizes.py:40
+msgid "TB"
+msgstr "To"
+
+#: src/findfmt/sizes.py:41
+msgid "PB"
+msgstr "Po"
+
+#: src/findfmt/sizes.py:42
+msgid "EB"
+msgstr "Eo"
+
+#: src/findfmt/sizes.py:43 src/findfmt/sizes.py:129
+msgid "KB"
+msgstr "Ko"
 
 #: src/findfmt/cli/config.py:45
 #, python-brace-format
@@ -90,79 +168,79 @@ msgstr ""
 msgid "Error: Cannot specify both --dirsfirst and --filesfirst."
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:248
-#, python-brace-format
-msgid "Error: Configuration file '{path}' not found."
-msgstr ""
-
-#: src/findfmt/cli/file_config.py:259
-#, python-brace-format
-msgid "Error: Invalid TOML in configuration file '{path}': {error}"
-msgstr ""
-
-#: src/findfmt/cli/file_config.py:268
-#, python-brace-format
-msgid "Error reading configuration file '{path}': {error}"
-msgstr ""
-
-#: src/findfmt/cli/file_config.py:303
+#: src/findfmt/cli/config_schema.py:122
 #, python-brace-format
 msgid "expected string format name, got {type_name}"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:307 src/findfmt/cli/file_config.py:327
-#: src/findfmt/cli/file_config.py:356 src/findfmt/cli/file_config.py:373
-#: src/findfmt/cli/file_config.py:397 src/findfmt/cli/file_config.py:412
-#: src/findfmt/cli/file_config.py:429
+#: src/findfmt/cli/config_schema.py:126 src/findfmt/cli/config_schema.py:146
+#: src/findfmt/cli/config_schema.py:177 src/findfmt/cli/config_schema.py:194
+#: src/findfmt/cli/config_schema.py:218 src/findfmt/cli/config_schema.py:233
+#: src/findfmt/cli/config_schema.py:250
 #, python-brace-format
 msgid "Error: Invalid value for '{key}' in '{path}': {error}"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:322
+#: src/findfmt/cli/config_schema.py:141
 #, python-brace-format
 msgid "unsupported format '{val}'. Valid options: {valid}"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:354
+#: src/findfmt/cli/config_schema.py:175
 #, python-brace-format
 msgid "expected 'auto', 'always', 'never', or boolean, got '{val}'"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:369
+#: src/findfmt/cli/config_schema.py:190
 #, python-brace-format
 msgid "expected boolean (true/false), got {type_name}"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:393
+#: src/findfmt/cli/config_schema.py:214
 #, python-brace-format
 msgid "expected string or list of strings, got {type_name}"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:410
+#: src/findfmt/cli/config_schema.py:231
 #, python-brace-format
 msgid "expected non-negative integer, got {val}"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:427
+#: src/findfmt/cli/config_schema.py:248
 #, python-brace-format
 msgid "expected string, got {type_name}"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:480
+#: src/findfmt/cli/config_schema.py:301
 #, python-brace-format
 msgid "Error: Unknown configuration key '{key}' in '{path}'."
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:557
+#: src/findfmt/cli/file_config.py:190
+#, python-brace-format
+msgid "Error: Configuration file '{path}' not found."
+msgstr ""
+
+#: src/findfmt/cli/file_config.py:202
+#, python-brace-format
+msgid "Error: Invalid TOML in configuration file '{path}': {error}"
+msgstr ""
+
+#: src/findfmt/cli/file_config.py:211
+#, python-brace-format
+msgid "Error reading configuration file '{path}': {error}"
+msgstr ""
+
+#: src/findfmt/cli/file_config.py:290
 msgid "(none)"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:559
+#: src/findfmt/cli/file_config.py:291
 #, python-brace-format
 msgid "Active configuration: {path} (using built-in defaults)\n"
 msgstr ""
 
-#: src/findfmt/cli/file_config.py:562
+#: src/findfmt/cli/file_config.py:295
 #, python-brace-format
 msgid "Active configuration: {path}"
 msgstr ""
@@ -747,115 +825,97 @@ msgid ""
 "statistics to stderr\n"
 msgstr ""
 
-#: src/findfmt/cli/options.py:18
+#: src/findfmt/cli/options.py:98
 msgid "Tag Filtering"
 msgstr ""
 
-#: src/findfmt/cli/options.py:19
+#: src/findfmt/cli/options.py:99
 msgid "Traversal Controls"
 msgstr ""
 
-#: src/findfmt/cli/options.py:20
+#: src/findfmt/cli/options.py:100
 msgid "Output Formatting"
 msgstr ""
 
-#: src/findfmt/cli/runner.py:70
+#: src/findfmt/cli/runner.py:94
 #, python-brace-format
 msgid "Error opening output file '{path}': {error}"
 msgstr ""
 
-#: src/findfmt/formatters/base.py:61
-#, python-brace-format
-msgid "Unsupported output format: '{format}'. Expected one of: {valid_formats}"
-msgstr ""
-
-#: src/findfmt/formatters/markup.py:209
-#, python-brace-format
-msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
-msgstr ""
-
-#: src/findfmt/formatters/visual.py:63
+#: src/findfmt/formatters/visual.py:70
 #, python-brace-format
 msgid "[bold]Matched file:[/] [cyan]{count}[/]"
 msgid_plural "[bold]Matched files:[/] [cyan]{count}[/]"
 msgstr[0] "[bold]Fichier correspondant:[/] [cyan]{count}[/]"
 msgstr[1] "[bold]Fichiers correspondants:[/] [cyan]{count}[/]"
 
-#: src/findfmt/formatters/visual.py:70
+#: src/findfmt/formatters/visual.py:77
+msgid "Total size:"
+msgstr "Taille totale :"
+
+#: src/findfmt/formatters/visual.py:80
 msgid "[bold]Top tags:[/]"
 msgstr "[bold]Principales balises:[/]"
 
-#: src/findfmt/formatters/visual.py:78
+#: src/findfmt/formatters/visual.py:88
 msgid "--- findfmt summary ---"
 msgstr "--- résumé findfmt ---"
 
-#: src/findfmt/formatters/visual.py:90
-#, python-brace-format
-msgid "Unsupported table style: '{style}'. Expected one of: {valid_styles}"
-msgstr ""
-
-#: src/findfmt/formatters/visual.py:190
+#: src/findfmt/formatters/visual.py:187
 msgid "Inode"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:193
+#: src/findfmt/formatters/visual.py:190
 msgid "Device"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:196
+#: src/findfmt/formatters/visual.py:193
 msgid "Permissions"
 msgstr "Permissions"
 
-#: src/findfmt/formatters/visual.py:199
+#: src/findfmt/formatters/visual.py:196
 msgid "User"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:202
+#: src/findfmt/formatters/visual.py:199
 msgid "Group"
 msgstr "Groupe"
 
-#: src/findfmt/formatters/visual.py:205
+#: src/findfmt/formatters/visual.py:202
 msgid "Modified"
 msgstr "Modifié"
 
-#: src/findfmt/formatters/visual.py:207
+#: src/findfmt/formatters/visual.py:204
 msgid "Status Changed"
 msgstr "Statut modifié"
 
-#: src/findfmt/formatters/visual.py:209
+#: src/findfmt/formatters/visual.py:206
 msgid "Path"
 msgstr "Chemin"
 
-#: src/findfmt/formatters/visual.py:210
+#: src/findfmt/formatters/visual.py:207
 msgid "Tags"
 msgstr "Balises"
 
-#: src/findfmt/formatters/visual.py:211
+#: src/findfmt/formatters/visual.py:208
 msgid "MIME Type"
 msgstr "Type MIME"
 
-#: src/findfmt/formatters/visual.py:212
+#: src/findfmt/formatters/visual.py:209
 msgid "Size"
 msgstr "Taille"
 
-#: src/findfmt/formatters/visual.py:213
+#: src/findfmt/formatters/visual.py:210
 msgid "Executable"
 msgstr "Exécutable"
 
-#: src/findfmt/formatters/visual.py:214
+#: src/findfmt/formatters/visual.py:211
 msgid "Symlink"
 msgstr "Lien symbolique"
 
-#: src/findfmt/formatters/visual.py:215
+#: src/findfmt/formatters/visual.py:212
 msgid "Shebang"
 msgstr "Directive shebang"
-
-#: src/findfmt/traversal/sorting.py:267
-#, python-brace-format
-msgid ""
-"Invalid sort criteria '{criteria}'. Choose from: name, version, time, "
-"mtime, ctime, size, none."
-msgstr ""
 
 #~ msgid ""
 #~ "Usage: findfmt [OPTIONS] [paths]...\n"

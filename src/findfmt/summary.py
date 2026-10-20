@@ -44,6 +44,7 @@ def write_summary(
     match_count: int,
     tag_counter: Counter[str],
     *,
+    total_bytes: int | None = None,
     stream: TextIO | None = None,
     force_color: bool | None = None,
 ) -> None:
@@ -52,10 +53,11 @@ def write_summary(
     Args:
         match_count: Total number of files matched.
         tag_counter: Frequency counter of tags matched.
+        total_bytes: Optional total size in bytes of matched files.
         stream: Optional target output stream (defaults to sys.stderr).
         force_color: Explicit color enable override flag.
     """
     target = stream if stream is not None else sys.stderr
-    panel = format_summary_panel(match_count, tag_counter)
+    panel = format_summary_panel(match_count, tag_counter, total_bytes=total_bytes)
     console = get_console(target, force_color=force_color)
     console.print(panel)

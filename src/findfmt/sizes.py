@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from findfmt.i18n import format_number
+from findfmt.i18n import _, format_number
 
 __all__ = [
     "BINARY_UNITS",
@@ -26,6 +26,24 @@ _SI_BASE = 1000
 _KIB, _MIB, _GIB = 1024, 1024 * 1024, 1024 * 1024 * 1024
 
 
+_TRANSLATABLE_UNITS: tuple[str, ...] = (
+    _("B"),
+    _("K"),
+    _("M"),
+    _("G"),
+    _("T"),
+    _("P"),
+    _("E"),
+    _("kB"),
+    _("MB"),
+    _("GB"),
+    _("TB"),
+    _("PB"),
+    _("EB"),
+    _("KB"),
+)
+
+
 def format_size_bytes(size_bytes: int) -> str:
     """Format byte count into exact byte representation with unit suffix.
 
@@ -35,7 +53,7 @@ def format_size_bytes(size_bytes: int) -> str:
     Returns:
         Exact byte count string (e.g., '1024 B').
     """
-    return f"{size_bytes} B"
+    return f"{size_bytes} {_('B')}"
 
 
 def format_size_binary(size_bytes: int) -> str:
@@ -48,15 +66,15 @@ def format_size_binary(size_bytes: int) -> str:
         Formatted binary size string (e.g., '1.0 K', '2.5 M').
     """
     if size_bytes < _IEC_BASE:
-        return f"{size_bytes} B"
+        return format_size_bytes(size_bytes)
 
     value = float(size_bytes)
     for unit in BINARY_UNITS[1:-1]:
         value /= _IEC_BASE
         if value < _IEC_BASE:
-            return f"{format_number(value, 1)} {unit}"
+            return f"{format_number(value, 1)} {_(unit)}"
 
-    return f"{format_number(value / _IEC_BASE, 1)} {BINARY_UNITS[-1]}"
+    return f"{format_number(value / _IEC_BASE, 1)} {_(BINARY_UNITS[-1])}"
 
 
 def format_size_si(size_bytes: int) -> str:
@@ -69,15 +87,15 @@ def format_size_si(size_bytes: int) -> str:
         Formatted SI decimal size string (e.g., '1.0 kB', '2.5 MB').
     """
     if size_bytes < _SI_BASE:
-        return f"{size_bytes} B"
+        return format_size_bytes(size_bytes)
 
     value = float(size_bytes)
     for unit in SI_UNITS[1:-1]:
         value /= _SI_BASE
         if value < _SI_BASE:
-            return f"{format_number(value, 1)} {unit}"
+            return f"{format_number(value, 1)} {_(unit)}"
 
-    return f"{format_number(value / _SI_BASE, 1)} {SI_UNITS[-1]}"
+    return f"{format_number(value / _SI_BASE, 1)} {_(SI_UNITS[-1])}"
 
 
 def format_size(
@@ -108,12 +126,12 @@ def format_size(
         return format_size_bytes(size_bytes)
 
     if size_bytes < _MIB:
-        return f"{format_number(size_bytes / _KIB, 1)} KB"
+        return f"{format_number(size_bytes / _KIB, 1)} {_('KB')}"
 
     if size_bytes < _GIB:
-        return f"{format_number(size_bytes / _MIB, 1)} MB"
+        return f"{format_number(size_bytes / _MIB, 1)} {_('MB')}"
 
-    return f"{format_number(size_bytes / _GIB, 1)} GB"
+    return f"{format_number(size_bytes / _GIB, 1)} {_('GB')}"
 
 
 def _get_root_file_size(root: Path, *, follow_symlinks: bool) -> int:

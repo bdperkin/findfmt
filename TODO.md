@@ -303,6 +303,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#371](https://github.com/bdperkin/findfmt/issues/371)** - [Core] Eliminate os.scandir
   handle leaks on early termination and enable ResourceWarning in test suite (Closed: 2026-10-20 via
   PR [#396](https://github.com/bdperkin/findfmt/pull/396))
+- [x] **[#231](https://github.com/bdperkin/findfmt/issues/231)** - feat(i18n): localize file sizes,
+  numeric separators, and timestamps per regional locale standards (Closed: 2026-10-20 via PR
+  [#397](https://github.com/bdperkin/findfmt/pull/397))
 
 ______________________________________________________________________
 
@@ -312,11 +315,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#231](https://github.com/bdperkin/findfmt/issues/231)** - feat(i18n): localize file sizes,
-  numeric separators, and timestamps per regional locale standards *(Epic:
-  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
-  Milestone: v1.0.1)* - **Rationale:** Foundational localization ROI; ensures file sizes, numeric
-  groupings, and date formats adhere to regional conventions.
 - [ ] **[#232](https://github.com/bdperkin/findfmt/issues/232)** - test(i18n): create automated
   verification suite for complex multi-tier gettext pluralization rules *(Epic:
   [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
