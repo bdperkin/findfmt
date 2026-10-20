@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import io
 import json
-import os
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -120,8 +119,7 @@ def test_xml_char_validation() -> None:
 
 def test_sanitize_xml_text() -> None:
     """Verify _sanitize_xml_text masks surrogates and control characters as '?'."""
-    byte_ff = os.fsdecode(b"\xff")
-    surrogate_str = f"bad\x1b[31m{byte_ff}\ufffe.txt"
+    surrogate_str = "bad\x1b[31m\udcff\ufffe.txt"
     sanitized = _sanitize_xml_text(surrogate_str)
     assert sanitized == "bad??.txt"
 
@@ -151,8 +149,7 @@ def test_write_stream_safe_buffer_fallback() -> None:
             return len(s)
 
     stream = StrictStream()
-    byte_fe = os.fsdecode(b"\xfe")
-    surrogate_text = f"prefix_{byte_fe}_suffix"
+    surrogate_text = "prefix_\udcfe_suffix"
     write_stream_safe(cast("TextIO", stream), surrogate_text)
     assert stream.buffer.getvalue() == b"prefix_\xfe_suffix"
 
