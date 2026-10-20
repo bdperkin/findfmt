@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import html
-import os
 import sys
 import urllib.parse
 from pathlib import Path
@@ -136,7 +135,11 @@ def _build_href(base_href: str | None, target_path: Path) -> str:
         return base_href or "."
 
     quoted_segments = [
-        urllib.parse.quote_from_bytes(os.fsencode(seg)) for seg in posix_path.split("/") if seg
+        urllib.parse.quote_from_bytes(
+            seg.encode("utf-8", errors="surrogateescape"),
+        )
+        for seg in posix_path.split("/")
+        if seg
     ]
     quoted_path = "/".join(quoted_segments)
 

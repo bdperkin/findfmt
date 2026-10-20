@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path, PureWindowsPath
 
 from typer.testing import CliRunner
@@ -227,7 +226,7 @@ def test_cli_hyperlink_formats(sample_repo: Path) -> None:
 
 def test_build_file_uri_non_utf8() -> None:
     """Verify build_file_uri percent-encodes raw surrogate bytes."""
-    path_with_surrogate = "bad" + os.fsdecode(b"\xff") + ".txt"
+    path_with_surrogate = "bad\udcff.txt"
     uri = build_file_uri(path_with_surrogate)
     assert uri == "file:///bad%FF.txt"
 

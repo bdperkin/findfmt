@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -92,7 +91,9 @@ class FileInfo:
             "size_bytes": self.size_bytes,
         }
         if any(_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX for c in target_path_str):
-            result["path_bytes"] = list(os.fsencode(target_path))
+            result["path_bytes"] = list(
+                target_path_str.encode("utf-8", errors="surrogateescape"),
+            )
 
         optional_fields: tuple[tuple[str, Any], ...] = (
             ("symlink_target", self.symlink_target),

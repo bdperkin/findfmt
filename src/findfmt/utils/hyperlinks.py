@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import re
 import urllib.parse
 from typing import TYPE_CHECKING
@@ -74,7 +73,7 @@ def build_file_uri(
     if not posix_path.startswith("/"):
         posix_path = f"/{posix_path}"
 
-    raw_bytes = os.fsencode(posix_path)
+    raw_bytes = posix_path.encode("utf-8", errors="surrogateescape")
     quoted_path = urllib.parse.quote_from_bytes(raw_bytes, safe=b"/:")
     sanitized_schema = _sanitize_uri_component(schema)
     scheme, rest_clean = _normalize_schema(sanitized_schema)

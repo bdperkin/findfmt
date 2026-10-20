@@ -29,6 +29,7 @@ from findfmt.formatters.xml_formatter import (
     _is_valid_xml_char,
     _sanitize_xml_text,
 )
+from findfmt.models import FileInfo
 
 if TYPE_CHECKING:
     from typing import TextIO
@@ -69,8 +70,7 @@ def test_json_output_is_valid_with_surrogate_path(non_utf8_tree: Path) -> None:
     matching = [r for r in records if "bad" in r.get("path", "")]
     assert len(matching) == 1
     record = matching[0]
-    byte_ff = os.fsdecode(b"\xff")
-    expected_surrogate_name = f"bad{byte_ff}.txt"
+    expected_surrogate_name = "bad\udcff.txt"
     assert record["path"] == expected_surrogate_name
     assert "path_bytes" in record
     assert bytes(record["path_bytes"]).endswith(b"bad\xff.txt")
@@ -93,8 +93,7 @@ def test_escape_surrogates_no_surrogates() -> None:
 
 def test_escape_surrogates_with_surrogates() -> None:
     """Verify escape_surrogates replaces surrogate code points with \\uXXXX ASCII sequences."""
-    byte_ff = os.fsdecode(b"\xff")
-    text = f"bad{byte_ff}.txt"
+    text = "bad\udcff.txt"
     escaped = escape_surrogates(text)
     assert escaped == "bad\\udcff.txt"
     assert escaped.encode("utf-8") == b"bad\\udcff.txt"
@@ -108,7 +107,7 @@ def test_xml_char_validation() -> None:
     assert _is_valid_xml_char("a")
     assert _is_valid_xml_char("\u00a0")
     assert _is_valid_xml_char("\ud7ff")
-    assert not _is_valid_xml_char(os.fsdecode(b"\xff"))
+    assert not _is_valid_xml_char("\udcff")
     assert not _is_valid_xml_char("\ud800")
     assert not _is_valid_xml_char("\udfff")
     assert _is_valid_xml_char("\ue000")
@@ -182,10 +181,20 @@ def test_xml_formatter_clean_val_none() -> None:
 def test_xml_formatter_literal_masks_surrogates() -> None:
     """Verify XmlFormatter in literal mode masks surrogates and noncharacters."""
     fmt = XmlFormatter(literal=True)
-    byte_ff = os.fsdecode(b"\xff")
-    surrogate_text = f"file_{byte_ff}\ufffe_literal.txt"
+    surrogate_text = "file_\udcff\ufffe_literal.txt"
     assert fmt._clean_val(surrogate_text) == "file_??_literal.txt"  # noqa: SLF001
     assert fmt._clean_val("normal_literal\x03.txt") == "normal_literal\x03.txt"  # noqa: SLF001
+
+
+def test_file_info_to_dict_with_surrogate_path() -> None:
+    """Verify FileInfo.to_dict includes path_bytes when path contains surrogate code points."""
+    info = FileInfo(
+        path=Path("bad\udcff.txt"),
+        relative_path=Path("bad\udcff.txt"),
+    )
+    result = info.to_dict()
+    assert "path_bytes" in result
+    assert bytes(result["path_bytes"]) == b"bad\xff.txt"
 
 
 def test_reconfigure_surrogateescape() -> None:

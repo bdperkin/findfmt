@@ -1,3 +1,5 @@
+<!-- vale off -->
+
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-19
