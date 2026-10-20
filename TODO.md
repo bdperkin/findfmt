@@ -297,6 +297,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#318](https://github.com/bdperkin/findfmt/issues/318)** - fix(traversal): symlink-follow
   mode crashes on OSError, and --prune has no cycle guard (Closed: 2026-10-20 via PR
   [#393](https://github.com/bdperkin/findfmt/pull/393))
+- [x] **[#370](https://github.com/bdperkin/findfmt/issues/370)** - [Core] Prevent crash in --sort
+  version when encountering Unicode superscript and non-decimal digits (Closed: 2026-10-20 via PR
+  [#395](https://github.com/bdperkin/findfmt/pull/395))
 
 ______________________________________________________________________
 
@@ -306,11 +309,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#370](https://github.com/bdperkin/findfmt/issues/370)** - [Core] Prevent crash in --sort
-  version when encountering Unicode superscript and non-decimal digits *(Epic:
-  [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)
-  | Milestone: v1.0.1)* - **Rationale:** Quick algorithmic fix; replacing isdigit() with isdecimal()
-  stops version sorting crashes on Unicode exponents.
 - [ ] **[#371](https://github.com/bdperkin/findfmt/issues/371)** - [Core] Eliminate os.scandir
   handle leaks on early termination and enable ResourceWarning in test suite *(Epic:
   [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)

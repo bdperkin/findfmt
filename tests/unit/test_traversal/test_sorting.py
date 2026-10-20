@@ -71,6 +71,48 @@ def test_natural_sort_key() -> None:
     assert case_diff1 != case_diff2
 
 
+def test_version_sort_unicode_superscript_digits(tmp_path: Path) -> None:
+    """Verify version sort safely handles Unicode superscript and non-decimal digits."""
+    chunk_sup2 = _SortChunk("²")
+    assert not chunk_sup2.is_digit
+    assert chunk_sup2.val_str == "²"
+    assert chunk_sup2.val_int == 0
+
+    chunk_sup3 = _SortChunk("³")
+    assert not chunk_sup3.is_digit
+    assert chunk_sup3.val_str == "³"
+
+    # Ensure comparing superscript chunk with digit chunk works without ValueError
+    chunk_num = _SortChunk("2")
+    assert chunk_num.is_digit
+    assert chunk_num < chunk_sup2
+
+    # Natural sort key handles superscript filenames deterministically
+    names = ["²", "a²", "file10", "file2"]
+    sorted_names = sorted(names, key=natural_sort_key)
+    assert sorted_names == ["a²", "file2", "file10", "²"]
+
+    # Verify sort_directory_entries with SortKey.VERSION
+    (tmp_path / "²").write_text("sup")
+    (tmp_path / "a²").write_text("asup")
+    (tmp_path / "file10").write_text("10")
+    (tmp_path / "file2").write_text("2")
+
+    entries = list(os.scandir(tmp_path))
+    sorted_entries = sort_directory_entries(
+        entries.copy(),
+        TraversalConfig(sort_by=SortKey.VERSION),
+    )
+    assert [e.name for e in sorted_entries] == ["a²", "file2", "file10", "²"]
+
+    # Verify end-to-end traversal with find_files
+    results = [
+        f.path.name
+        for f in find_files(TraversalConfig(root_paths=(tmp_path,), sort_by=SortKey.VERSION))
+    ]
+    assert results == ["a²", "file2", "file10", "²"]
+
+
 def test_get_entry_stat_helpers() -> None:
     """Verify stat extraction and OSError fallback handling."""
     mock_entry = MagicMock(spec=os.DirEntry)

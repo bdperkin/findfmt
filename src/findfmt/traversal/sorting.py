@@ -54,7 +54,7 @@ class _SortChunk:
     __slots__ = ("is_digit", "val_int", "val_str")
 
     def __init__(self, val: str) -> None:
-        if val.isdigit():
+        if val.isdecimal():
             self.is_digit = True
             self.val_int = int(val)
             self.val_str = ""
