@@ -134,7 +134,7 @@ def load_git_exclude_spec(root: Path) -> PathSpecType | None:
         PathSpec instance if exclude patterns exist, or None.
     """
     git_path = root / ".git"
-    with contextlib.suppress(OSError):
+    with contextlib.suppress(OSError, RuntimeError):
         if git_path.is_dir():
             return load_spec_file(git_path / "info" / "exclude")
 
@@ -161,11 +161,11 @@ def find_git_repo_root(start_dir: Path) -> Path | None:
     """
     try:
         resolved = start_dir.resolve()
-    except OSError:
+    except (OSError, RuntimeError):
         resolved = start_dir
 
     for directory in (resolved, *resolved.parents):
-        with contextlib.suppress(OSError):
+        with contextlib.suppress(OSError, RuntimeError):
             if (directory / ".git").exists():
                 return directory
 
@@ -198,7 +198,7 @@ def load_ancestor_specs(root: Path) -> tuple[tuple[Path, PathSpecType], ...]:
     """
     try:
         resolved = root.resolve()
-    except OSError:
+    except (OSError, RuntimeError):
         resolved = root
 
     git_root = find_git_repo_root(resolved)
@@ -243,7 +243,7 @@ def load_child_specs(
     git_marker = child_dir / ".git"
     try:
         is_nested_repo = git_marker.exists()
-    except OSError:
+    except (OSError, RuntimeError):
         is_nested_repo = False
 
     if is_nested_repo:

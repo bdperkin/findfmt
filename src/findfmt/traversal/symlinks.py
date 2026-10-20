@@ -22,7 +22,7 @@ def init_visited_dirs(
         return visited
 
     active = set()
-    with contextlib.suppress(OSError):
+    with contextlib.suppress(OSError, RuntimeError):
         active.add(root.resolve())
 
     return active
@@ -40,7 +40,7 @@ def should_skip_symlink_dir(
 
     try:
         resolved = subdir.resolve()
-    except OSError:
+    except (OSError, RuntimeError):
         return True
 
     if resolved in visited:

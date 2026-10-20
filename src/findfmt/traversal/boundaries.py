@@ -101,7 +101,7 @@ def filter_directory_entry(  # noqa: PLR0913
 
     try:
         is_dir = entry.is_dir(follow_symlinks=config.follow_symlinks)
-    except OSError:
+    except (OSError, RuntimeError):
         return None
 
     if _is_entry_excluded(
@@ -148,13 +148,13 @@ def _inspect_entries(  # noqa: PLR0913
         else:
             try:
                 is_file = entry.is_file(follow_symlinks=config.follow_symlinks)
-            except OSError:
+            except (OSError, RuntimeError):
                 continue
 
             if is_file:
                 is_exec: bool | None = None
                 if config.include_tags & INTERPRETER_TAGS:
-                    with contextlib.suppress(OSError):
+                    with contextlib.suppress(OSError, RuntimeError):
                         is_exec = bool(
                             entry.stat(follow_symlinks=config.follow_symlinks).st_mode & 0o111,
                         )
@@ -193,7 +193,7 @@ def _scan_sorted_entries(
     try:
         with os.scandir(directory) as scan_it:
             return sorted(scan_it, key=lambda e: e.name)
-    except OSError:
+    except (OSError, RuntimeError):
         if memo is not None:
             memo[dir_key] = False
 
@@ -303,7 +303,7 @@ def has_matching_descendants(  # noqa: PLR0913
     try:
         st = directory.stat()
         dir_key = (st.st_dev, st.st_ino)
-    except OSError:
+    except (OSError, RuntimeError):
         return False
 
     cached, val = _check_visited_or_memo(dir_key, visited, memo)
@@ -386,7 +386,7 @@ def _can_skip_candidate_file(  # noqa: PLR0913
 
     is_exec: bool | None = None
     if entry is not None and (config.include_tags & INTERPRETER_TAGS):
-        with contextlib.suppress(OSError):
+        with contextlib.suppress(OSError, RuntimeError):
             is_exec = bool(
                 entry.stat(follow_symlinks=config.follow_symlinks).st_mode & 0o111,
             )

@@ -114,7 +114,7 @@ def _scan_directory_entries(  # noqa: PLR0913
         else:
             try:
                 is_file = entry.is_file(follow_symlinks=config.follow_symlinks)
-            except OSError:
+            except (OSError, RuntimeError):
                 continue
 
             if is_file:
@@ -276,7 +276,7 @@ def _traverse_single_root(
     """Yield matching items from a single root path (file or directory)."""
     try:
         is_file = resolved_root.is_file()
-    except OSError:
+    except (OSError, RuntimeError):
         return
 
     if is_file:
@@ -320,7 +320,7 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
         try:
             resolved_root = root.resolve()
             exists = resolved_root.exists()
-        except OSError:
+        except (OSError, RuntimeError):
             continue
 
         if exists:

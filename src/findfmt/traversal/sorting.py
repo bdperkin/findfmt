@@ -115,7 +115,7 @@ def get_entry_mtime(entry: os.DirEntry[str], *, follow_symlinks: bool = False) -
     """Retrieve cached modification timestamp from DirEntry stat."""
     try:
         return entry.stat(follow_symlinks=follow_symlinks).st_mtime
-    except OSError:
+    except (OSError, RuntimeError):
         return 0.0
 
 
@@ -123,7 +123,7 @@ def get_entry_ctime(entry: os.DirEntry[str], *, follow_symlinks: bool = False) -
     """Retrieve cached status change timestamp from DirEntry stat."""
     try:
         return entry.stat(follow_symlinks=follow_symlinks).st_ctime
-    except OSError:
+    except (OSError, RuntimeError):
         return 0.0
 
 
@@ -131,7 +131,7 @@ def get_entry_size(entry: os.DirEntry[str], *, follow_symlinks: bool = False) ->
     """Retrieve cached file size in bytes from DirEntry stat."""
     try:
         return entry.stat(follow_symlinks=follow_symlinks).st_size
-    except OSError:
+    except (OSError, RuntimeError):
         return 0
 
 
@@ -216,7 +216,7 @@ def collect_directory_entries(
     """
     try:
         scandir_iter = os.scandir(root)
-    except OSError:
+    except (OSError, RuntimeError):
         return None
 
     if config.sort_by == SortKey.NONE:
