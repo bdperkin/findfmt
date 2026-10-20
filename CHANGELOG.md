@@ -19,7 +19,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - *(format)* Handle non-UTF-8 filenames with `surrogateescape` error handling and binary stdout
   dispatch across all output serializers and formatting modes (#315, #387, #388, #389).
 - *(cli)* Preserve raw control characters under `-0` and piped text output to avoid truncating
-  filenames containing newlines or tabs, while retaining terminal sanitization on interactive TTYs
+  filenames containing newlines or tabs, while retaining sanitization on interactive terminals
   (#316, #390).
 - *(i18n)* Emit `Content-Type: text/plain; charset=UTF-8` header in pure-Python MO compiler so
   wheels built without GNU `msgfmt` decode non-ASCII translations properly (#317, #391).
@@ -39,7 +39,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Documentation
 
-- *(todo)* Realign internationalization roadmap across open 1.0.Z release milestones (#392).
+- *(roadmap)* Realign internationalization roadmap across open 1.0.Z release milestones (#392).
 
 ## [1.0.0] - 2026-10-19
 

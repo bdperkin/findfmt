@@ -309,6 +309,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#232](https://github.com/bdperkin/findfmt/issues/232)** - test(i18n): create automated
   verification suite for complex multi-tier gettext pluralization rules (Closed: 2026-10-20 via PR
   [#399](https://github.com/bdperkin/findfmt/pull/399))
+- [x] **[#361](https://github.com/bdperkin/findfmt/issues/361)** - [Security] Eliminate quadratic
+  ReDoS vulnerability in C1-OSC terminal control-sequence regex (Closed: 2026-10-20 via PR
+  [#402](https://github.com/bdperkin/findfmt/pull/402))
 
 ______________________________________________________________________
 
@@ -318,11 +321,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#361](https://github.com/bdperkin/findfmt/issues/361)** - [Security] Eliminate quadratic
-  ReDoS vulnerability in C1-OSC terminal control-sequence regex *(Epic:
-  [[Epic] Security Hardening: Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety](https://github.com/bdperkin/findfmt/issues/338)
-  | Milestone: v1.0.2)* - **Rationale:** High security ROI; consolidating duplicated regex into
-  linear-time pattern stops quadratic ReDoS exploits.
 - [ ] **[#362](https://github.com/bdperkin/findfmt/issues/362)** - [Security] Mask Unicode
   bidirectional (bidi) override characters in TTY display mode *(Epic:
   [[Epic] Security Hardening: Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety](https://github.com/bdperkin/findfmt/issues/338)

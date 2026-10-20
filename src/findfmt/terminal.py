@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import os
-import re
 import shutil
 import sys
 from typing import TYPE_CHECKING, TextIO
 
 from rich.console import Console
+
+from findfmt.utils.strings import _ANSI_ESCAPE_RE
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -24,13 +25,7 @@ __all__ = [
     "strip_ansi",
 ]
 
-_ANSI_REGEX = re.compile(
-    r"\x1b\[[0-?]*[ -/]*[@-~]"
-    r"|\x1b\][^\x1b\x07]*(?:\x1b\\|\x07)"
-    r"|\x1b[ -/]*[0-~]"
-    r"|\x9b[0-?]*[ -/]*[@-~]"
-    r"|\x9d[^\x07\x1b\x9c]*(?:\x07|\x1b\\|\x9c)",
-)
+_ANSI_REGEX = _ANSI_ESCAPE_RE
 
 
 def strip_ansi(text: str) -> str:

@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 import rich.markup
 
 from findfmt.i18n import get_current_locale
-from findfmt.utils.hyperlinks import format_osc8_link
 
 if TYPE_CHECKING:
     import os
@@ -28,14 +27,24 @@ _ANSI_ESCAPE_RE = re.compile(
     | \x1b\][^\x07\x1b]*(?:\x07|\x1b\\)        # 7-bit OSC sequence
     | \x1b[ -/]*[0-~]                        # 7-bit Fe/Fs/Fp sequence
     | \x9b[0-?]*[ -/]*[@-~]                  # 8-bit C1 CSI sequence
-    | \x9d[^\x07\x1b\x9c]*(?:\x07|\x1b\\|\x9c)    # 8-bit C1 OSC sequence
+    | \x9d[^\x07\x1b\x9c\x9d]*(?:\x07|\x1b\\|\x9c)    # 8-bit C1 OSC sequence
     """,
     re.VERBOSE,
 )
 
+_URI_FORBIDDEN_CHARS = {
+    c
+    for c in (chr(i) for i in range(256))
+    if ord(c) < _MIN_PRINTABLE_ASCII
+    or ord(c) == _DEL_ASCII
+    or (_C1_CONTROL_MIN <= ord(c) <= _C1_CONTROL_MAX)
+    or c == "\x1b"
+}
+
 __all__ = [
     "DEFAULT_TIME_FORMAT",
     "format_display_path",
+    "format_osc8_link",
     "format_timestamp",
     "get_classification_indicator",
     "mask_control_characters",
@@ -43,6 +52,20 @@ __all__ = [
     "resolve_time_format",
     "strip_ansi_escapes",
 ]
+
+
+def format_osc8_link(text: str, uri: str) -> str:
+    """Wrap text in an OSC 8 terminal hyperlink escape sequence.
+
+    Args:
+        text: Display text visible in terminal.
+        uri: Destination hyperlink target URI.
+
+    Returns:
+        ANSI string containing OSC 8 escape sequences wrapping the text.
+    """
+    clean_uri = "".join(c for c in uri if c not in _URI_FORBIDDEN_CHARS)
+    return f"\033]8;;{clean_uri}\033\\{text}\033]8;;\033\\"
 
 
 def strip_ansi_escapes(text: str) -> str:

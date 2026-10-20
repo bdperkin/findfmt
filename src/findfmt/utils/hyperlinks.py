@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-import re
 import urllib.parse
 from typing import TYPE_CHECKING
+
+from findfmt.utils.strings import _ANSI_ESCAPE_RE, _URI_FORBIDDEN_CHARS, format_osc8_link
 
 if TYPE_CHECKING:
     from pathlib import PurePath
@@ -16,27 +17,7 @@ __all__ = [
     "format_rich_link",
 ]
 
-_ESCAPE_SEQ_RE = re.compile(
-    r"\x1b\[[0-?]*[ -/]*[@-~]"
-    r"|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)"
-    r"|\x1b[ -/]*[0-~]"
-    r"|\x9b[0-?]*[ -/]*[@-~]"
-    r"|\x9d[^\x07\x1b\x9c]*(?:\x07|\x1b\\|\x9c)",
-)
-
-_MIN_PRINTABLE_ASCII = 32
-_DEL_ASCII = 127
-_C1_CONTROL_MIN = 128
-_C1_CONTROL_MAX = 159
-
-_URI_FORBIDDEN_CHARS = {
-    c
-    for c in (chr(i) for i in range(256))
-    if ord(c) < _MIN_PRINTABLE_ASCII
-    or ord(c) == _DEL_ASCII
-    or (_C1_CONTROL_MIN <= ord(c) <= _C1_CONTROL_MAX)
-    or c == "\x1b"
-}
+_ESCAPE_SEQ_RE = _ANSI_ESCAPE_RE
 
 
 def _sanitize_uri_component(comp: str) -> str:
@@ -89,20 +70,6 @@ def build_file_uri(
         return f"{scheme}://{rest_clean}{quoted_path}"
 
     return f"{scheme}://{quoted_path}"
-
-
-def format_osc8_link(text: str, uri: str) -> str:
-    """Wrap text in an OSC 8 terminal hyperlink escape sequence.
-
-    Args:
-        text: Display text visible in terminal.
-        uri: Destination hyperlink target URI.
-
-    Returns:
-        ANSI string containing OSC 8 escape sequences wrapping the text.
-    """
-    clean_uri = "".join(c for c in uri if c not in _URI_FORBIDDEN_CHARS)
-    return f"\033]8;;{clean_uri}\033\\{text}\033]8;;\033\\"
 
 
 def format_rich_link(text: str, uri: str) -> str:

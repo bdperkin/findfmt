@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from findfmt import (
     format_rich_link,
     mask_control_characters,
     strip_ansi_escapes,
+    terminal,
 )
 from findfmt.cli import app
 from findfmt.formatters import (
@@ -33,6 +35,7 @@ from findfmt.formatters.badges import format_tag_badge
 from findfmt.formatters.tree import RichTreeFormatter
 from findfmt.formatters.visual import RichTableFormatter
 from findfmt.models import FileInfo
+from findfmt.utils import hyperlinks, strings
 
 runner = CliRunner()
 
@@ -350,3 +353,37 @@ def test_cli_literal_and_sanitization_e2e(tmp_path: Path) -> None:
     res_literal = runner.invoke(app, ["-N", str(tmp_path)])
     assert res_literal.exit_code == 0
     assert "\x07" in res_literal.stdout
+
+
+def test_c1_osc_regex_linear_time() -> None:
+    """Verify C1-OSC escape stripping executes in linear time without ReDoS vulnerabilities."""
+    stress_input = "\x9d" * 50_000
+    start = time.perf_counter()
+    result = strip_ansi_escapes(stress_input)
+    elapsed = time.perf_counter() - start
+
+    msg = f"Stripping 50,000 repetitious \\x9d took {elapsed:.4f}s, expected < 0.100s"
+    assert elapsed < 0.1, msg
+    assert result == stress_input
+
+    # Also verify interspersed non-terminating repetitive patterns
+    interspersed = ("\x9d" + "x" * 10) * 5_000
+    start_interspersed = time.perf_counter()
+    res_interspersed = strip_ansi_escapes(interspersed)
+    elapsed_interspersed = time.perf_counter() - start_interspersed
+
+    msg_interspersed = (
+        f"Stripping interspersed \\x9d took {elapsed_interspersed:.4f}s, expected < 0.100s"
+    )
+    assert elapsed_interspersed < 0.1, msg_interspersed
+    assert res_interspersed == interspersed
+
+    # Verify standard valid C1-OSC sequence stripping remains fully functional
+    c1_osc_valid = "\x9d0;Title\x9cpayload.txt"
+    assert strip_ansi_escapes(c1_osc_valid) == "payload.txt"
+
+
+def test_single_shared_control_sequence_pattern() -> None:
+    """Verify utils.strings, terminal, and utils.hyperlinks share the identical compiled regex."""
+    assert strings._ANSI_ESCAPE_RE is terminal._ANSI_REGEX  # noqa: SLF001
+    assert strings._ANSI_ESCAPE_RE is hyperlinks._ESCAPE_SEQ_RE  # noqa: SLF001
