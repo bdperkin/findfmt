@@ -89,7 +89,7 @@ def test_cli_one_file_system(sample_repo: Path) -> None:
         entry.name = "diff_dev"
         entry.path = str(sample_repo / "diff_dev")
         entry.is_dir.return_value = True
-        mock_scandir.return_value = [entry]
+        mock_scandir.return_value.__enter__.return_value = [entry]
         with patch("findfmt.traversal.boundaries.check_device_boundary", return_value=False):
             res = runner.invoke(app, [str(sample_repo), "-x"])
             assert res.exit_code == 0

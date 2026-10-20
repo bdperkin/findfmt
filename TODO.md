@@ -300,6 +300,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#370](https://github.com/bdperkin/findfmt/issues/370)** - [Core] Prevent crash in --sort
   version when encountering Unicode superscript and non-decimal digits (Closed: 2026-10-20 via PR
   [#395](https://github.com/bdperkin/findfmt/pull/395))
+- [x] **[#371](https://github.com/bdperkin/findfmt/issues/371)** - [Core] Eliminate os.scandir
+  handle leaks on early termination and enable ResourceWarning in test suite (Closed: 2026-10-20 via
+  PR [#396](https://github.com/bdperkin/findfmt/pull/396))
 
 ______________________________________________________________________
 
@@ -309,11 +312,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#371](https://github.com/bdperkin/findfmt/issues/371)** - [Core] Eliminate os.scandir
-  handle leaks on early termination and enable ResourceWarning in test suite *(Epic:
-  [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)
-  | Milestone: v1.0.1)* - **Rationale:** Low-hanging resource cleanup; managing os.scandir in
-  context manager eliminates handle leaks across suite.
 - [ ] **[#231](https://github.com/bdperkin/findfmt/issues/231)** - feat(i18n): localize file sizes,
   numeric separators, and timestamps per regional locale standards *(Epic:
   [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |

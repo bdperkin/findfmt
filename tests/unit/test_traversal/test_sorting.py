@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import gc
 import os
 import time
+import warnings
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -13,6 +15,7 @@ from findfmt.models import SortKey, TraversalConfig
 from findfmt.traversal.engine import _scan_directory_entries, find_files
 from findfmt.traversal.sorting import (
     _SortChunk,
+    collect_directory_entries,
     get_entry_ctime,
     get_entry_mtime,
     get_entry_size,
@@ -292,3 +295,50 @@ def test_scan_directory_entries_unsorted_and_file_limit(tmp_path: Path) -> None:
     single_found = list(find_files(TraversalConfig(root_paths=(single_file,))))
     assert len(single_found) == 1
     assert single_found[0].path == single_file.resolve()
+
+
+def test_filelimit_closes_scandir(tmp_path: Path) -> None:
+    """Verify os.scandir iterators are closed on early file_limit termination."""
+    for i in range(5):
+        (tmp_path / f"file_{i}.txt").write_text(f"content {i}")
+
+    # Unsorted mode exceeding filelimit
+    config_unsorted_limit = TraversalConfig(sort_by=SortKey.NONE, file_limit=2)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ResourceWarning)
+        res_unsorted = collect_directory_entries(tmp_path, config_unsorted_limit)
+        assert res_unsorted is None
+        gc.collect()
+
+    # Sorted mode exceeding filelimit
+    config_sorted_limit = TraversalConfig(sort_by=SortKey.NAME, file_limit=2)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ResourceWarning)
+        res_sorted = collect_directory_entries(tmp_path, config_sorted_limit)
+        assert res_sorted is None
+        gc.collect()
+
+    # Unsorted mode within filelimit
+    config_unsorted_ok = TraversalConfig(sort_by=SortKey.NONE, file_limit=10)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ResourceWarning)
+        res_unsorted_ok = collect_directory_entries(tmp_path, config_unsorted_ok)
+        assert res_unsorted_ok is not None
+        assert len(res_unsorted_ok) == 5
+        gc.collect()
+
+    # Sorted mode within filelimit
+    config_sorted_ok = TraversalConfig(sort_by=SortKey.NAME, file_limit=10)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ResourceWarning)
+        res_sorted_ok = collect_directory_entries(tmp_path, config_sorted_ok)
+        assert res_sorted_ok is not None
+        assert len(res_sorted_ok) == 5
+        gc.collect()
+
+    # End-to-end find_files with filelimit
+    config_files = TraversalConfig(root_paths=(tmp_path,), file_limit=2)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ResourceWarning)
+        assert list(find_files(config_files)) == []
+        gc.collect()

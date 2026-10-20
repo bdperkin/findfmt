@@ -207,6 +207,9 @@ ini_options.addopts = """\
 ini_options.markers = [
   "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
+ini_options.filterwarnings = [
+  "error::ResourceWarning",
+]
 
 [tool.coverage]
 run.source = [ "findfmt" ]

@@ -16,7 +16,7 @@ from findfmt.exceptions import InvalidSortCriteriaError
 from findfmt.models import SortKey
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable
+    from collections.abc import Callable
     from pathlib import Path
 
     from findfmt.models import TraversalConfig
@@ -204,7 +204,7 @@ def sort_directory_entries(
 def collect_directory_entries(
     root: Path,
     config: TraversalConfig,
-) -> Iterable[os.DirEntry[str]] | None:
+) -> list[os.DirEntry[str]] | None:
     """Collect and optionally sort directory entries from filesystem root.
 
     Args:
@@ -212,30 +212,25 @@ def collect_directory_entries(
         config: Traversal configuration with sort and file_limit parameters.
 
     Returns:
-        Iterable of os.DirEntry objects, or None on error or exceeded limit.
+        List of os.DirEntry objects, or None on error or exceeded limit.
     """
     try:
-        scandir_iter = os.scandir(root)
+        with os.scandir(root) as scan_it:
+            if config.file_limit is None:
+                entries = list(scan_it)
+            else:
+                entries = []
+                for entry in scan_it:
+                    entries.append(entry)
+                    if len(entries) > config.file_limit:
+                        return None
     except (OSError, RuntimeError):
         return None
 
     if config.sort_by == SortKey.NONE:
-        if config.file_limit is None:
-            return scandir_iter
-
-        entries: list[os.DirEntry[str]] = []
-        for entry in scandir_iter:
-            entries.append(entry)
-            if len(entries) > config.file_limit:
-                return None
-
         return entries
 
-    entries_list = list(scandir_iter)
-    if config.file_limit is not None and len(entries_list) > config.file_limit:
-        return None
-
-    return sort_directory_entries(entries_list, config)
+    return sort_directory_entries(entries, config)
 
 
 def resolve_sort_key(value: str | SortKey | None, *, unsorted: bool = False) -> SortKey:
