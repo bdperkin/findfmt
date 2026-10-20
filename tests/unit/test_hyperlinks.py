@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path, PureWindowsPath
 
 from typer.testing import CliRunner
@@ -222,3 +223,18 @@ def test_cli_hyperlink_formats(sample_repo: Path) -> None:
     res_tree = runner.invoke(app, ["--format", "tree", "--hyperlink", str(sample_repo)])
     assert res_tree.exit_code == 0
     assert "\033]8;;file://" in res_tree.stdout
+
+
+def test_build_file_uri_non_utf8() -> None:
+    """Verify build_file_uri percent-encodes raw surrogate bytes."""
+    path_with_surrogate = "bad" + os.fsdecode(b"\xff") + ".txt"
+    uri = build_file_uri(path_with_surrogate)
+    assert uri == "file:///bad%FF.txt"
+
+
+def test_file_uri_percent_encodes_raw_bytes(non_utf8_tree: Path) -> None:
+    """Verify that --hyperlink CLI invocation produces URIs with percent-encoded raw bytes."""
+    runner = CliRunner()
+    result = runner.invoke(app, [str(non_utf8_tree), "--hyperlink"])
+    assert result.exit_code == 0
+    assert "bad%FF.txt" in result.output

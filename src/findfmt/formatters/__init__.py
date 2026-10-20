@@ -11,6 +11,7 @@ from findfmt.formatters.base import (
     Formatter,
     OutputFormat,
     UnsupportedFormatError,
+    write_stream_safe,
 )
 from findfmt.formatters.delimited import (
     CsvFormatter,
@@ -59,6 +60,7 @@ __all__ = [
     "XmlFormatter",
     "YamlFormatter",
     "get_formatter",
+    "write_stream_safe",
 ]
 
 

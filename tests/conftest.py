@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import stat
 import sys
 from pathlib import Path
@@ -85,3 +86,19 @@ def sample_repo(tmp_path: Path) -> Path:
     (repo / "README.md").write_text("# Readme\n", encoding="utf-8")
 
     return repo
+
+
+@pytest.fixture
+def non_utf8_tree(tmp_path: Path) -> Path:
+    """Create a temporary directory tree containing a non-UTF-8 filename."""
+    if sys.platform in ("win32", "darwin"):
+        pytest.skip("Filesystem rejects invalid UTF-8 names on this platform")
+
+    bad_name = os.fsdecode(b"bad\xff.txt")
+    target = tmp_path / bad_name
+    try:
+        target.write_bytes(b"non-utf8 content\n")
+    except OSError as exc:
+        pytest.skip(f"Filesystem does not support non-UTF-8 filenames: {exc}")
+
+    return tmp_path

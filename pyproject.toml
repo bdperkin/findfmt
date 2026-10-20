@@ -251,6 +251,7 @@ include = [
   ".github/**/*.yaml",
 ]
 exclude = [
+  "TODO.md",
   "dist/**",
   "build/**",
   ".venv/**",

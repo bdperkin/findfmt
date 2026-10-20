@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
@@ -20,6 +21,10 @@ class SortKey(str, Enum):
     CTIME = "ctime"
     SIZE = "size"
     NONE = "none"
+
+
+_SURROGATE_MIN = 0xD800
+_SURROGATE_MAX = 0xDFFF
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,10 +75,14 @@ class FileInfo:
             absolute: Whether the 'path' entry contains the absolute path.
 
         Returns:
-            Dictionary mapping attribute names to serialized values.
+            Dictionary mapping attribute names to serialized values. If the path
+            contains surrogate escapes (non-UTF-8 bytes), a 'path_bytes' entry
+            is also included containing the raw byte values.
         """
+        target_path = self.path if absolute else self.relative_path
+        target_path_str = str(target_path)
         result: dict[str, Any] = {
-            "path": str(self.path if absolute else self.relative_path),
+            "path": target_path_str,
             "relative_path": str(self.relative_path),
             "tags": sorted(self.tags),
             "shebang": self.shebang,
@@ -82,6 +91,9 @@ class FileInfo:
             "is_symlink": self.is_symlink,
             "size_bytes": self.size_bytes,
         }
+        if any(_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX for c in target_path_str):
+            result["path_bytes"] = list(os.fsencode(target_path))
+
         optional_fields: tuple[tuple[str, Any], ...] = (
             ("symlink_target", self.symlink_target),
             ("permissions_str", self.permissions_str),

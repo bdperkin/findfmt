@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import html
+import os
 import sys
 import urllib.parse
 from pathlib import Path
@@ -13,7 +14,7 @@ if sys.version_info >= (3, 12):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import override
 
-from findfmt.formatters.base import Formatter
+from findfmt.formatters.base import Formatter, write_stream_safe
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
 from findfmt.utils.strings import format_display_path
@@ -134,7 +135,9 @@ def _build_href(base_href: str | None, target_path: Path) -> str:
     if posix_path in {".", ""}:
         return base_href or "."
 
-    quoted_segments = [urllib.parse.quote(seg) for seg in posix_path.split("/") if seg]
+    quoted_segments = [
+        urllib.parse.quote_from_bytes(os.fsencode(seg)) for seg in posix_path.split("/") if seg
+    ]
     quoted_path = "/".join(quoted_segments)
 
     if not base_href:
@@ -479,5 +482,5 @@ class HtmlFormatter(Formatter):
             files: Iterable of classified file objects.
             stream: Target text stream.
         """
-        stream.write(self.format(files))
+        write_stream_safe(stream, self.format(files))
         stream.flush()

@@ -107,6 +107,10 @@ def get_console(
         Configured Rich Console instance.
     """
     target = stream if stream is not None else sys.stdout
+    reconfigure = getattr(target, "reconfigure", None)
+    if callable(reconfigure):
+        reconfigure(errors="surrogateescape")
+
     color_on = force_color if force_color is not None else is_color_enabled(target, env=env)
     is_tty = getattr(target, "isatty", lambda: False)()
 

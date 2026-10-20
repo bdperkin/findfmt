@@ -18,6 +18,7 @@ __all__ = [
     "Formatter",
     "OutputFormat",
     "UnsupportedFormatError",
+    "write_stream_safe",
 ]
 
 
@@ -54,6 +55,32 @@ TABLE_FIELD_NAMES: tuple[str, ...] = (
 )
 
 
+def write_stream_safe(stream: TextIO, content: str) -> None:
+    """Write text content to a text stream, handling surrogate escapes safely.
+
+    If the target stream or its wrapper raises UnicodeEncodeError, this attempts
+    to encode with errors='surrogateescape' and write directly to the stream's
+    underlying binary buffer.
+
+    Args:
+        stream: Target text stream.
+        content: String content potentially containing surrogate code points.
+    """
+    reconfigure = getattr(stream, "reconfigure", None)
+    if callable(reconfigure):
+        reconfigure(errors="surrogateescape")
+
+    try:
+        stream.write(content)
+    except UnicodeEncodeError:
+        buffer = getattr(stream, "buffer", None)
+        if buffer is not None:
+            encoding = getattr(stream, "encoding", None) or "utf-8"
+            buffer.write(content.encode(encoding, errors="surrogateescape"))
+        else:
+            raise
+
+
 class Formatter(ABC):
     """Abstract base class for all findfmt output formatters."""
 
@@ -83,5 +110,5 @@ class Formatter(ABC):
             files: Iterable of classified file objects.
             stream: Target text output stream (e.g., sys.stdout).
         """
-        stream.write(self.format(files))
+        write_stream_safe(stream, self.format(files))
         stream.flush()

@@ -62,6 +62,13 @@ def _deliver_output(  # noqa: PLR0913
         handle_broken_pipe(target_stream)
 
 
+def _reconfigure_surrogateescape(stream: TextIO) -> None:
+    """Ensure text stream uses surrogateescape to avoid UnicodeEncodeError on raw POSIX paths."""
+    reconfigure = getattr(stream, "reconfigure", None)
+    if callable(reconfigure):
+        reconfigure(errors="surrogateescape")
+
+
 def _open_output_sink(
     output: Path | None,
     fallback: TextIO | None,
@@ -69,10 +76,11 @@ def _open_output_sink(
     """Open destination output file if specified or return fallback stream."""
     if output is None:
         target = fallback if fallback is not None else cast("TextIO", sys.stdout)
+        _reconfigure_surrogateescape(target)
         return target, None
 
     try:
-        out_file = output.open("w", encoding="utf-8")
+        out_file = output.open("w", encoding="utf-8", errors="surrogateescape")
     except OSError as e:
         typer.echo(
             _("Error opening output file '{path}': {error}").format(path=output, error=e),
@@ -411,7 +419,9 @@ def execute_findfmt(  # noqa: PLR0913
     match_count = 0
     delimiter = "\0" if config.null_delimited else "\n"
 
+    _reconfigure_surrogateescape(sys.stdout)
     target_stream, out_file = _open_output_sink(output, stream)
+    _reconfigure_surrogateescape(target_stream)
     pager_ctrl = pager_controller or PagerController(
         pager=pager,
         stream=target_stream,

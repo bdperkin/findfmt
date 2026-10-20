@@ -15,7 +15,7 @@ else:  # pragma: no cover
 import rich.markup
 from rich.table import Table
 
-from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter
+from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter, write_stream_safe
 from findfmt.formatters.visual import RICH_BOX_STYLES, UnsupportedBoxStyleError
 from findfmt.terminal import get_console
 
@@ -119,6 +119,10 @@ class CsvFormatter(Formatter):
             files: Iterable of classified file objects.
             stream: Target text stream.
         """
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(errors="surrogateescape")
+
         writer = csv.writer(
             stream,
             delimiter=self.delimiter,
@@ -172,11 +176,11 @@ class TsvFormatter(Formatter):
             files: Iterable of classified file objects.
             stream: Target text stream.
         """
-        stream.write("\t".join(TABLE_FIELD_NAMES) + self.lineterminator)
+        write_stream_safe(stream, "\t".join(TABLE_FIELD_NAMES) + self.lineterminator)
         for file_info in files:
             record = file_to_record(file_info, absolute=self.absolute)
             escaped_cells = [escape_tsv_cell(c) for c in record]
-            stream.write("\t".join(escaped_cells) + self.lineterminator)
+            write_stream_safe(stream, "\t".join(escaped_cells) + self.lineterminator)
 
         stream.flush()
 
@@ -244,5 +248,9 @@ class CsvTableFormatter(Formatter):
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream aligned CSV table directly to a text stream."""
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure):
+            reconfigure(errors="surrogateescape")
+
         table = self._build_table(files)
         get_console(stream, width=self.console_width, force_color=self.force_color).print(table)

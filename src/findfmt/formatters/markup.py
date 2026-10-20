@@ -11,7 +11,7 @@ else:  # pragma: no cover
     from typing_extensions import override
 
 from findfmt.exceptions import UnsupportedTableStyleError
-from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter
+from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter, write_stream_safe
 from findfmt.formatters.delimited import file_to_record
 from findfmt.utils.strings import mask_control_characters, strip_ansi_escapes
 
@@ -153,7 +153,7 @@ class MarkdownFormatter(Formatter):
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream formatted Markdown table to a text stream."""
-        stream.write(self.format(files))
+        write_stream_safe(stream, self.format(files))
         stream.flush()
 
 
@@ -240,5 +240,5 @@ class RstFormatter(Formatter):
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream formatted reStructuredText table to a text stream."""
-        stream.write(self.format(files))
+        write_stream_safe(stream, self.format(files))
         stream.flush()

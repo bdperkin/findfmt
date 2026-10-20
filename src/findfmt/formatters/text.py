@@ -10,7 +10,7 @@ if sys.version_info >= (3, 12):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import override
 
-from findfmt.formatters.base import Formatter
+from findfmt.formatters.base import Formatter, write_stream_safe
 from findfmt.metadata import format_metadata_parts
 from findfmt.utils.hyperlinks import build_file_uri
 from findfmt.utils.strings import (
@@ -179,5 +179,7 @@ class TextFormatter(Formatter):
             files: Iterable of classified file objects.
             stream: Target text stream.
         """
-        stream.writelines(self.format_item(file_info) for file_info in files)
+        for file_info in files:
+            write_stream_safe(stream, self.format_item(file_info))
+
         stream.flush()

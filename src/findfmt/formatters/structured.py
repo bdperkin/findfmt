@@ -13,7 +13,7 @@ else:  # pragma: no cover
 
 import yaml
 
-from findfmt.formatters.base import Formatter
+from findfmt.formatters.base import Formatter, write_stream_safe
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -25,7 +25,28 @@ __all__ = [
     "JsonFormatter",
     "JsonlFormatter",
     "YamlFormatter",
+    "escape_surrogates",
 ]
+
+_SURROGATE_MIN = 0xD800
+_SURROGATE_MAX = 0xDFFF
+
+
+def escape_surrogates(text: str) -> str:
+    r"""Escape Unicode surrogates as \uXXXX for valid UTF-8/ASCII serialization.
+
+    Args:
+        text: String potentially containing surrogate code points (0xD800-0xDFFF).
+
+    Returns:
+        String with surrogates replaced by ASCII escape sequences.
+    """
+    if not any(_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX for c in text):
+        return text
+
+    return "".join(
+        f"\\u{ord(c):04x}" if _SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX else c for c in text
+    )
 
 
 class JsonFormatter(Formatter):
@@ -60,7 +81,7 @@ class JsonFormatter(Formatter):
             JSON array string ending with a newline.
         """
         records = [f.to_dict(absolute=self.absolute) for f in files]
-        return json.dumps(records, indent=self.indent, ensure_ascii=False) + "\n"
+        return escape_surrogates(json.dumps(records, indent=self.indent, ensure_ascii=False)) + "\n"
 
 
 class JsonlFormatter(Formatter):
@@ -84,7 +105,7 @@ class JsonlFormatter(Formatter):
             Single line JSON string ending with a newline.
         """
         data = file_info.to_dict(absolute=self.absolute)
-        return json.dumps(data, ensure_ascii=False) + "\n"
+        return escape_surrogates(json.dumps(data, ensure_ascii=False)) + "\n"
 
     @override
     def format(self, files: Iterable[FileInfo]) -> str:
@@ -106,7 +127,9 @@ class JsonlFormatter(Formatter):
             files: Iterable of classified file objects.
             stream: Target text stream.
         """
-        stream.writelines(self.format_item(file_info) for file_info in files)
+        for file_info in files:
+            write_stream_safe(stream, self.format_item(file_info))
+
         stream.flush()
 
 
@@ -175,7 +198,7 @@ class IpynbFormatter(Formatter):
             Formatted Jupyter Notebook JSON string.
         """
         records = [f.to_dict(absolute=self.absolute) for f in files]
-        manifest_literal = json.dumps(records, indent=2, ensure_ascii=False)
+        manifest_literal = escape_surrogates(json.dumps(records, indent=2, ensure_ascii=False))
 
         cells: list[dict[str, Any]] = [
             {
@@ -237,4 +260,4 @@ class IpynbFormatter(Formatter):
             "nbformat_minor": 5,
         }
 
-        return json.dumps(notebook, indent=1, ensure_ascii=False) + "\n"
+        return escape_surrogates(json.dumps(notebook, indent=1, ensure_ascii=False)) + "\n"

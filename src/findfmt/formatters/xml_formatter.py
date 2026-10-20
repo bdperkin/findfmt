@@ -12,7 +12,7 @@ if sys.version_info >= (3, 12):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import override
 
-from findfmt.formatters.base import Formatter
+from findfmt.formatters.base import Formatter, write_stream_safe
 from findfmt.sizes import format_size
 from findfmt.utils.strings import format_display_path, format_timestamp, strip_ansi_escapes
 
@@ -27,22 +27,39 @@ __all__ = ["XmlFormatter"]
 _MIN_PRINTABLE_ASCII = 0x20
 _DEL_ASCII = 0x7F
 _VALID_UNICODE_MIN = 0xA0
+_XML_CHAR_TAB = 0x9
+_XML_CHAR_LF = 0xA
+_XML_CHAR_CR = 0xD
+_XML_PRE_SURROGATE_MAX = 0xD7FF
+_XML_POST_SURROGATE_MIN = 0xE000
+_XML_BMP_MAX = 0xFFFD
+_XML_SUPP_MIN = 0x10000
+_XML_UNICODE_MAX = 0x10FFFF
+_SURROGATE_MIN = 0xD800
+_SURROGATE_MAX = 0xDFFF
+_NONCHAR_FFFE = "\ufffe"
+_NONCHAR_FFFF = "\uffff"
+
+
+def _is_valid_xml_char(c: str) -> bool:
+    """Check if character is legal in XML 1.0 (excluding surrogates and U+FFFE/FFFF)."""
+    cp = ord(c)
+    return (
+        cp in (_XML_CHAR_TAB, _XML_CHAR_LF, _XML_CHAR_CR)
+        or (_MIN_PRINTABLE_ASCII <= cp < _DEL_ASCII)
+        or (_VALID_UNICODE_MIN <= cp <= _XML_PRE_SURROGATE_MAX)
+        or (_XML_POST_SURROGATE_MIN <= cp <= _XML_BMP_MAX)
+        or (_XML_SUPP_MIN <= cp <= _XML_UNICODE_MAX)
+    )
 
 
 def _sanitize_xml_text(text: str) -> str:
     """Sanitize string for XML 1.0 validity.
 
-    Strips ANSI escapes and masks invalid control characters.
+    Strips ANSI escapes and masks invalid control characters, surrogates, and noncharacters.
     """
     clean = strip_ansi_escapes(text)
-    return "".join(
-        c
-        if c in ("\t", "\n", "\r")
-        or (_MIN_PRINTABLE_ASCII <= ord(c) < _DEL_ASCII)
-        or (ord(c) >= _VALID_UNICODE_MIN)
-        else "?"
-        for c in clean
-    )
+    return "".join(c if _is_valid_xml_char(c) else "?" for c in clean)
 
 
 class _XmlNode:
@@ -164,7 +181,23 @@ class XmlFormatter(Formatter):
 
     def _clean_val(self, val: str | None) -> str | None:
         """Sanitize text for XML compatibility unless literal output is active."""
-        if val is None or self.literal:
+        if val is None:
+            return None
+
+        if self.literal:
+            has_invalid = any(
+                (_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX) or c in (_NONCHAR_FFFE, _NONCHAR_FFFF)
+                for c in val
+            )
+            if has_invalid:
+                return "".join(
+                    "?"
+                    if (_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX)
+                    or c in (_NONCHAR_FFFE, _NONCHAR_FFFF)
+                    else c
+                    for c in val
+                )
+
             return val
 
         return _sanitize_xml_text(val)
@@ -279,7 +312,7 @@ class XmlFormatter(Formatter):
         elem = ET.SubElement(
             parent,
             "directory",
-            name=display_name,
+            name=str(self._clean_val(display_name) or ""),
             path=path_str,
         )
         if self.accumulate_size and dir_sizes is not None and id(node) in dir_sizes:
@@ -305,7 +338,7 @@ class XmlFormatter(Formatter):
         elem = ET.SubElement(
             parent,
             "file",
-            name=display_name,
+            name=str(self._clean_val(display_name) or ""),
             path=path_str,
         )
         file_info = cast("FileInfo", node.file_info)
@@ -380,5 +413,5 @@ class XmlFormatter(Formatter):
             files: Iterable of classified file objects.
             stream: Target text stream.
         """
-        stream.write(self.format(files))
+        write_stream_safe(stream, self.format(files))
         stream.flush()
