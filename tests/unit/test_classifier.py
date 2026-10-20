@@ -1,11 +1,14 @@
 import os
 import stat
+import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from findfmt import classifier
 from findfmt.classifier import (
     _identify_tags,
     _inspect_metadata,
+    _read_initial_buffer,
     _resolve_relative,
     classify_file,
     compute_relative_prefix,
@@ -311,3 +314,77 @@ def test_classify_file_with_direntry(tmp_path: Path) -> None:
     assert "python" in info.tags
     assert info.size_bytes > 0
     assert info.path == f
+
+
+def test_fifo_swap_does_not_block(tmp_path: Path) -> None:
+    """Verify swapped FIFO never blocks execution and is treated as non-regular."""
+    # 1. Real POSIX FIFO test (when mkfifo is available)
+    if hasattr(os, "mkfifo"):
+        swap_path = tmp_path / "swap.pipe"
+        swap_path.write_text("initial regular content\n", encoding="utf-8")
+        orig_inspect = _inspect_metadata
+
+        def swapped_inspect(path: Path, entry: os.DirEntry[str] | None = None):
+            res = orig_inspect(path, entry=entry)
+            path.unlink()
+            os.mkfifo(path)
+            return res
+
+        start = time.perf_counter()
+        with patch.object(classifier, "_inspect_metadata", side_effect=swapped_inspect):
+            info = classify_file(swap_path, root_path=tmp_path)
+
+        elapsed = time.perf_counter() - start
+
+        assert elapsed < 1.0, f"FIFO swap took {elapsed}s, expected < 1.0s"
+        assert info.indicator == "|"
+        assert info.shebang is None
+        assert "file" not in info.tags
+        assert info.permissions_str is not None
+        assert info.permissions_str.startswith("p")
+
+    # 2. Mocked FIFO swap test (ensures coverage across all platforms including Windows)
+    mock_path = tmp_path / "mock_swap.pipe"
+    mock_path.write_text("initial content\n", encoding="utf-8")
+    mock_stat = MagicMock(spec=os.stat_result)
+    mock_stat.st_mode = stat.S_IFIFO | 0o644
+    mock_stat.st_size = 0
+    mock_stat.st_mtime = 1000.0
+    mock_stat.st_ctime = 1000.0
+    mock_stat.st_uid = 1000
+    mock_stat.st_gid = 1000
+    mock_stat.st_ino = 12345
+    mock_stat.st_dev = 67890
+
+    with (
+        patch("os.open", return_value=99),
+        patch("os.fstat", return_value=mock_stat),
+        patch("os.close") as mock_close,
+    ):
+        info_mock = classify_file(mock_path, root_path=tmp_path)
+
+    mock_close.assert_called_once_with(99)
+    assert info_mock.indicator == "|"
+    assert info_mock.shebang is None
+    assert "file" not in info_mock.tags
+    assert info_mock.permissions_str is not None
+    assert info_mock.permissions_str.startswith("p")
+
+
+def test_read_initial_buffer_error_handling(tmp_path: Path) -> None:
+    """Verify _read_initial_buffer handles open and fstat OSError conditions gracefully."""
+    test_file = tmp_path / "test.txt"
+    test_file.write_text("data", encoding="utf-8")
+
+    # os.open failure returns (b"", None)
+    with patch("os.open", side_effect=OSError("Open denied")):
+        assert _read_initial_buffer(test_file) == (b"", None)
+
+    # os.fstat failure closes fd and returns (b"", None)
+    with (
+        patch("os.open", return_value=88),
+        patch("os.fstat", side_effect=OSError("fstat error")),
+        patch("os.close") as mock_close,
+    ):
+        assert _read_initial_buffer(test_file) == (b"", None)
+        mock_close.assert_called_once_with(88)

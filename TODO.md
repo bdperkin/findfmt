@@ -315,6 +315,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#362](https://github.com/bdperkin/findfmt/issues/362)** - [Security] Mask Unicode
   bidirectional (bidi) override characters in TTY display mode (Closed: 2026-10-20 via PR
   [#403](https://github.com/bdperkin/findfmt/pull/403))
+- [x] **[#363](https://github.com/bdperkin/findfmt/issues/363)** - [Security] Prevent infinite hang
+  during file classification when target is swapped for a FIFO (Closed: 2026-10-20 via PR
+  [#404](https://github.com/bdperkin/findfmt/pull/404))
 
 ______________________________________________________________________
 
@@ -324,11 +327,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#363](https://github.com/bdperkin/findfmt/issues/363)** - [Security] Prevent infinite hang
-  during file classification when target is swapped for a FIFO *(Epic:
-  [[Epic] Security Hardening: Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety](https://github.com/bdperkin/findfmt/issues/338)
-  | Milestone: v1.0.2)* - **Rationale:** High security ROI; non-blocking open prevents permanent
-  classification hangs on FIFO swap attacks.
 - [ ] **[#333](https://github.com/bdperkin/findfmt/issues/333)** - fix(format): Markdown output does
   not escape raw HTML in filenames *(Epic:
   [[Epic] Formatter Integrity: Encoding Robustness, Stream Sanitization & Format Parity](https://github.com/bdperkin/findfmt/issues/384)

@@ -42,8 +42,7 @@ def extract_shebang_from_buffer(buffer: bytes) -> str | None:
         The raw shebang line string if present and valid, or None.
     """
     if buffer.startswith(b"#!"):
-        first_line = buffer.split(b"\n", 1)[0]
-        return first_line.decode("utf-8", errors="replace").strip()
+        return buffer.split(b"\n", 1)[0].decode("utf-8", errors="replace").strip()
 
     return None
 
@@ -58,13 +57,13 @@ def extract_shebang(path: Path) -> str | None:
         The raw shebang line string if present and readable, or None.
     """
     try:
-        if not path.is_file():
-            return None
-
-        with path.open("rb") as f:
-            return extract_shebang_from_buffer(f.readline(512))
+        if path.is_file():
+            with path.open("rb") as f:
+                return extract_shebang_from_buffer(f.readline(512))
     except (OSError, UnicodeDecodeError):
-        return None
+        pass
+
+    return None
 
 
 def compute_relative_prefix(root: Path) -> Path | None:
@@ -116,27 +115,44 @@ def _resolve_relative(
         except (ValueError, OSError):
             return path
 
-    if prefix is not None and prefix != Path():
-        return prefix / rel
-
-    return rel
+    return prefix / rel if prefix is not None and prefix != Path() else rel
 
 
-def _read_initial_buffer(path: Path, max_bytes: int = 2048) -> bytes:
+def _read_initial_buffer(
+    path: Path,
+    max_bytes: int = 2048,
+) -> tuple[bytes, os.stat_result | None]:
     """Read initial bytes once for shebang, encoding, and content checks.
 
-    Args:
-        path: Path to target file.
-        max_bytes: Maximum number of bytes to read into memory.
-
-    Returns:
-        Bytes buffer if successfully read, otherwise empty bytes.
+    Opens target file non-blocking and verifies regular file status via fstat
+    to prevent hanging on unwritten FIFOs or swapped named pipes.
     """
+    flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
     try:
-        with path.open("rb") as f:
-            return f.read(max_bytes)
+        fd = os.open(path, flags)
     except OSError:
-        return b""
+        return b"", None
+
+    try:
+        st = os.fstat(fd)
+        return (os.read(fd, max_bytes), st) if stat.S_ISREG(st.st_mode) else (b"", st)
+    except OSError:
+        return b"", None
+    finally:
+        os.close(fd)
+
+
+def _inspect_file_content(
+    path: Path,
+    size_bytes: int,
+    stat_result: os.stat_result | None,
+) -> tuple[bytes | None, bool, int, os.stat_result | None]:
+    """Read content buffer safely and detect swapped non-regular entries."""
+    buffer, opened_stat = _read_initial_buffer(path)
+    if opened_stat is not None and not stat.S_ISREG(opened_stat.st_mode):
+        return buffer, False, opened_stat.st_size, opened_stat
+
+    return buffer, True, size_bytes, stat_result
 
 
 def _identify_tags_from_buffer(
@@ -225,16 +241,15 @@ def _shebang_info(
         return None, set()
 
     shebang = extract_shebang_from_buffer(buffer) if buffer is not None else extract_shebang(path)
-    tags: set[str] = set()
-    if shebang:
-        parts = (
-            identify_engine.parse_shebang(io.BytesIO(buffer))
-            if buffer is not None
-            else identify_engine.parse_shebang_from_file(str_path)
-        )
-        for part in parts:
-            tags.update(identify_engine.tags_from_interpreter(part))
+    if not shebang:
+        return None, set()
 
+    parts = (
+        identify_engine.parse_shebang(io.BytesIO(buffer))
+        if buffer is not None
+        else identify_engine.parse_shebang_from_file(str_path)
+    )
+    tags = {tag for part in parts for tag in identify_engine.tags_from_interpreter(part)}
     return shebang, tags
 
 
@@ -248,12 +263,7 @@ def _mime_info(str_path: str) -> tuple[str | None, set[str]]:
         Tuple containing MIME type string (or None) and set of MIME tags.
     """
     mime_type, _ = mimetypes.guess_type(str_path)
-    tags: set[str] = set()
-    if mime_type:
-        tags.add(f"mime:{mime_type}")
-        category = mime_type.split("/", 1)[0]
-        tags.add(category)
-
+    tags: set[str] = {f"mime:{mime_type}", mime_type.split("/", 1)[0]} if mime_type else set()
     return mime_type, tags
 
 
@@ -273,14 +283,12 @@ def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -
 
     if os.name == "nt":
         pathext = os.environ.get("PATHEXT", ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC").split(";")
-        has_pathext = any(
-            path.name.upper().endswith(
-                ext.strip().upper() if ext.strip().startswith(".") else f".{ext.strip().upper()}",
-            )
-            for ext in pathext
-            if ext.strip()
+        exts = tuple(
+            e.strip().upper() if e.strip().startswith(".") else f".{e.strip().upper()}"
+            for e in pathext
+            if e.strip()
         )
-        return has_pathext or bool(shebang)
+        return path.name.upper().endswith(exts) or bool(shebang)
 
     return os.access(path, os.X_OK)
 
@@ -301,10 +309,7 @@ def _inspect_entry_metadata(
         exists = True
         is_file = stat.S_ISREG(stat_result.st_mode)
     except OSError:
-        stat_result = None
-        size_bytes = 0
-        exists = False
-        is_file = False
+        stat_result, size_bytes, exists, is_file = None, 0, False, False
 
     if is_symlink and exists:
         try:
@@ -328,15 +333,13 @@ def _inspect_path_metadata(
         stat_result = path.lstat() if is_symlink else path.stat()
         size_bytes = stat_result.st_size
     except OSError:
-        stat_result = None
-        size_bytes = 0
+        stat_result, size_bytes = None, 0
 
     try:
         exists = path.exists()
         is_file = path.is_file() if exists else False
     except OSError:
-        exists = False
-        is_file = False
+        exists, is_file = False, False
 
     return is_symlink, exists, is_file, size_bytes, stat_result
 
@@ -370,12 +373,11 @@ def _adjust_nt_tags(tags: set[str], *, is_executable: bool) -> None:
     if os.name != "nt":
         return
 
-    if is_executable:
-        tags.discard("non-executable")
-        tags.add("executable")
-    else:
-        tags.discard("executable")
-        tags.add("non-executable")
+    add_tag, discard_tag = (
+        ("executable", "non-executable") if is_executable else ("non-executable", "executable")
+    )
+    tags.discard(discard_tag)
+    tags.add(add_tag)
 
 
 def _extract_timestamps_and_indicator(  # noqa: PLR0913
@@ -388,14 +390,13 @@ def _extract_timestamps_and_indicator(  # noqa: PLR0913
     is_executable: bool,
 ) -> tuple[float | None, float | None, str | None]:
     """Extract mtime, ctime, and classification indicator safely."""
-    if stat_result is not None:
-        mtime: float | None = stat_result.st_mtime
-        ctime: float | None = stat_result.st_ctime
-        is_dir = stat.S_ISDIR(stat_result.st_mode)
-    else:
-        mtime = None
-        ctime = None
-        is_dir = exists and not is_file and not is_symlink and path.is_dir()
+    mtime = stat_result.st_mtime if stat_result is not None else None
+    ctime = stat_result.st_ctime if stat_result is not None else None
+    is_dir = (
+        stat.S_ISDIR(stat_result.st_mode)
+        if stat_result is not None
+        else (exists and not is_file and not is_symlink and path.is_dir())
+    )
 
     indicator = get_classification_indicator(
         is_dir=is_dir,
@@ -432,7 +433,13 @@ def classify_file(
 
     buffer: bytes | None = None
     if exists and is_file and not is_symlink:
-        buffer = _read_initial_buffer(path) if size_bytes > 0 else b""
+        buffer, is_file, size_bytes, stat_result = _inspect_file_content(
+            path,
+            size_bytes,
+            stat_result,
+        )
+        if not is_file:
+            permissions_str, owner_user, owner_group, inode, device = extract_metadata(stat_result)
 
     shebang, shebang_tags = _shebang_info(
         path,
