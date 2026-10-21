@@ -296,3 +296,66 @@ def test_traversal_nested_repo_and_submodule(tmp_path: Path) -> None:
     assert "bad.outer_ignore" not in names
     assert "bad.nested_exc" not in names
     assert "bad.nested_ign" not in names
+
+
+def test_gitignore_significant_whitespace(tmp_path: Path) -> None:
+    """Verify gitignore parser preserves leading and escaped trailing whitespace."""
+    spec_path = tmp_path / ".gitignore"
+    spec_path.write_bytes(
+        b" leading.txt\r\n"
+        b"trailing\\ \r\n"
+        b"trailing_multi\\   \r\n"
+        b"unescaped   \r\n"
+        b"escaped_bs\\\\ \r\n"
+        b"# comment\r\n"
+        b" # not a comment\r\n"
+        b"\\#escaped_hash\r\n"
+        b"   \r\n"
+        b"crlf.txt\r\n"
+        b"cr_only.txt\r",
+    )
+    spec = load_spec_file(spec_path)
+    assert spec is not None
+
+    # Leading space: matches ' leading.txt', but not 'leading.txt'
+    assert spec.match_file(" leading.txt")
+    assert not spec.match_file("leading.txt")
+
+    # Escaped trailing space: matches 'trailing ', but not 'trailing'
+    assert spec.match_file("trailing ")
+    assert not spec.match_file("trailing")
+
+    # Escaped space followed by unescaped spaces: matches 'trailing_multi '
+    assert spec.match_file("trailing_multi ")
+    assert not spec.match_file("trailing_multi")
+
+    # Unescaped trailing space: matches 'unescaped', but not 'unescaped   '
+    assert spec.match_file("unescaped")
+    assert not spec.match_file("unescaped   ")
+
+    # Escaped backslash before space: trailing space is unescaped, matches 'escaped_bs\\'
+    assert spec.match_file("escaped_bs\\")
+
+    # Indented line is not a comment, matches ' # not a comment'
+    assert spec.match_file(" # not a comment")
+    assert not spec.match_file("# not a comment")
+
+    # Escaped hash matches '#escaped_hash'
+    assert spec.match_file("#escaped_hash")
+
+    # Carriage return variants match cleanly
+    assert spec.match_file("crlf.txt")
+    assert spec.match_file("cr_only.txt")
+
+    # End-to-end traversal test with find_files
+    (tmp_path / " leading.txt").write_text("1", encoding="utf-8")
+    (tmp_path / "leading.txt").write_text("2", encoding="utf-8")
+    (tmp_path / "trailing ").write_text("3", encoding="utf-8")
+    (tmp_path / "trailing").write_text("4", encoding="utf-8")
+
+    config = TraversalConfig(root_paths=(tmp_path,))
+    results = [r.path.name for r in find_files(config)]
+    assert "leading.txt" in results
+    assert " leading.txt" not in results
+    assert "trailing" in results
+    assert "trailing " not in results

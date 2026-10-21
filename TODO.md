@@ -383,7 +383,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)
   | Milestone: v1.0.4)* - **Rationale:** Low effort quick fix; aligns SystemExit string argument
   mapping in wrappers to return standard exit code 1.
-- [ ] **[#354](https://github.com/bdperkin/findfmt/issues/354)** - [Core] Preserve significant
+- [x] **[#354](https://github.com/bdperkin/findfmt/issues/354)** - [Core] Preserve significant
   leading and escaped trailing whitespace in gitignore parser *(Epic:
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
   Milestone: v1.0.3)* - **Rationale:** Low effort compliance fix; preserves significant leading and

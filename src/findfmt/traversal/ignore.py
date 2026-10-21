@@ -33,6 +33,35 @@ __all__ = [
 ]
 
 
+def _trim_gitignore_line(raw_line: str) -> str:
+    r"""Trim gitignore pattern line preserving significant leading and escaped trailing spaces.
+
+    According to the Gitignore specification, trailing spaces are ignored unless
+    escaped with a backslash. Leading spaces are significant and must be preserved.
+    Carriage returns (\r) and newlines (\n) are trimmed.
+
+    Args:
+        raw_line: Raw line read from a gitignore file.
+
+    Returns:
+        Trimmed pattern line.
+    """
+    line = raw_line.rstrip("\r\n")
+    while line.endswith(" "):
+        num_slashes = 0
+        idx = len(line) - 2
+        while idx >= 0 and line[idx] == "\\":
+            num_slashes += 1
+            idx -= 1
+
+        if num_slashes % 2 == 1:
+            break
+
+        line = line[:-1]
+
+    return line
+
+
 def load_spec_file(spec_file: Path) -> PathSpecType | None:
     """Load and compile pathspec patterns from a specification file."""
     try:
@@ -40,7 +69,12 @@ def load_spec_file(spec_file: Path) -> PathSpecType | None:
             return None
 
         with spec_file.open("r", encoding="utf-8", errors="replace") as f:
-            lines = [line.strip() for line in f if line.strip() and not line.startswith("#")]
+            lines: list[str] = []
+            for raw_line in f:
+                line = _trim_gitignore_line(raw_line)
+                if line.strip() and not line.startswith("#"):
+                    lines.append(line)
+
             return pathspec.PathSpec.from_lines("gitignore", lines) if lines else None
     except (OSError, ValueError, re.error):
         return None
