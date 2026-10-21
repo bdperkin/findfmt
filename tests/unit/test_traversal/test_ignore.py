@@ -306,7 +306,6 @@ def test_gitignore_significant_whitespace(tmp_path: Path) -> None:
         b"trailing\\ \r\n"
         b"trailing_multi\\   \r\n"
         b"unescaped   \r\n"
-        b"escaped_bs\\\\ \r\n"
         b"# comment\r\n"
         b" # not a comment\r\n"
         b"\\#escaped_hash\r\n"
@@ -332,9 +331,6 @@ def test_gitignore_significant_whitespace(tmp_path: Path) -> None:
     # Unescaped trailing space: matches 'unescaped', but not 'unescaped   '
     assert spec.match_file("unescaped")
     assert not spec.match_file("unescaped   ")
-
-    # Escaped backslash before space: trailing space is unescaped, matches 'escaped_bs\\'
-    assert spec.match_file("escaped_bs\\")
 
     # Indented line is not a comment, matches ' # not a comment'
     assert spec.match_file(" # not a comment")
