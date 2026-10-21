@@ -327,6 +327,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#368](https://github.com/bdperkin/findfmt/issues/368)** - [CLI] Ensure atomic file output
   for -o/--output flag using temporary file and atomic replace (Closed: 2026-10-20 via PR
   [#413](https://github.com/bdperkin/findfmt/pull/413))
+- [x] **[#415](https://github.com/bdperkin/findfmt/issues/415)** - [CI] Configure Dependabot
+  dependency groups for codeql-action and package ecosystem updates (Closed: 2026-10-21 via PR
+  [#416](https://github.com/bdperkin/findfmt/pull/416))
 
 ______________________________________________________________________
 
