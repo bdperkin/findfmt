@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, TextIO, cast
 
-if sys.version_info >= (3, 11):
+if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self
 else:  # pragma: no cover
     from typing_extensions import Self
@@ -98,7 +98,7 @@ class OutputSink:
             self._unregister_atexit()
             self._close_stream()
             try:
-                self.temp_path.replace(self.target_path)
+                os.replace(self.temp_path, self.target_path)  # noqa: PTH105
             except OSError as e:
                 self._cleanup_temp()
                 typer.echo(

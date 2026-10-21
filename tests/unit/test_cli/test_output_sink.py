@@ -82,7 +82,7 @@ def test_output_sink_commit_replace_os_error(tmp_path: Path) -> None:
 
     fail_msg = "Replace failed"
     with (
-        patch.object(Path, "replace", side_effect=OSError(fail_msg)),
+        patch("os.replace", side_effect=OSError(fail_msg)),
         pytest.raises(typer.Exit) as exc,
     ):
         sink.commit()
