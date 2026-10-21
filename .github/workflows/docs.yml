@@ -34,7 +34,7 @@ jobs:
         run: make -C docs clean html dirhtml singlehtml epub man latex text texinfo
           htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck changes gettext
       - name: Upload Digital Documentation (EPUB & SingleHTML)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: digital-documentation
           path: |
@@ -42,7 +42,7 @@ jobs:
             docs/_build/singlehtml
           retention-days: 14
       - name: Upload Offline Documentation (Man, Text, Texinfo)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: offline-documentation
           path: |
@@ -51,7 +51,7 @@ jobs:
             docs/_build/texinfo/*.texi
           retention-days: 14
       - name: Upload Help System Documentation (HTML Help, Qt Help, Devhelp)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: help-system-documentation
           path: |
@@ -60,7 +60,7 @@ jobs:
             docs/_build/devhelp
           retention-days: 14
       - name: Upload Data & Serialization Documentation (JSON, Pickle, XML, Pseudo-XML)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: serialization-documentation
           path: |
@@ -70,7 +70,7 @@ jobs:
             docs/_build/pseudoxml
           retention-days: 14
       - name: Upload Localization Catalogs (Gettext POT)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: localization-catalogs
           path: docs/_build/gettext
@@ -97,4 +97,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e  # v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346  # v5.0.1
