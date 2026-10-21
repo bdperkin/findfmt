@@ -263,3 +263,22 @@ def test_cli_flags_locale_and_lang(tmp_path: Path) -> None:
         res2 = runner.invoke(app, ["--lang", "C", str(tmp_path)])
         assert res2.exit_code == 0
         assert get_current_locale() == "C"
+
+
+def test_cli_flags_locale_english(tmp_path: Path) -> None:
+    """Verify CLI execution with --locale en and --lang en_US applies English catalog."""
+    test_file = tmp_path / "sample.txt"
+    test_file.write_text("hello\n", encoding="utf-8")
+
+    runner = CliRunner()
+    with override_locale("C"):
+        res = runner.invoke(app, ["--locale", "en", "--summary", str(tmp_path)])
+        assert res.exit_code == 0
+        assert "Matched file: 1" in res.output
+        assert "Total size:" in res.output
+        assert get_current_locale() == "en"
+
+        res_us = runner.invoke(app, ["--lang", "en_US", "--summary", str(tmp_path)])
+        assert res_us.exit_code == 0
+        assert "Matched file: 1" in res_us.output
+        assert get_current_locale() == "en_US"

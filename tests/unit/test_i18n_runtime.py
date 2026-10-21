@@ -410,7 +410,21 @@ def test_extended_plural_families_boundary_matrix(
 
 
 def test_real_findfmt_catalogs_pluralization() -> None:
-    """Verify built-in findfmt message catalogs plural rules for fr, de, es, ja."""
+    """Verify built-in findfmt message catalogs plural rules for en, fr, de, es, ja."""
+    with override_locale("en"):
+        sg_en = "[bold]Matched file:[/] [cyan]{count}[/]"
+        pl_en = "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert ngettext(sg_en, pl_en, 1) == "[bold]Matched file:[/] [cyan]{count}[/]"
+        assert ngettext(sg_en, pl_en, 0) == "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert ngettext(sg_en, pl_en, 2) == "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert _("Total size:") == "Total size:"
+        assert _("Path") == "Path"
+
+    with override_locale("en_US"):
+        assert ngettext(sg_en, pl_en, 1) == "[bold]Matched file:[/] [cyan]{count}[/]"
+        assert ngettext(sg_en, pl_en, 2) == "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert _("Inode") == "Inode"
+
     with override_locale("fr"):
         sg_fr = "[bold]Matched file:[/] [cyan]{count}[/]"
         pl_fr = "[bold]Matched files:[/] [cyan]{count}[/]"
@@ -439,3 +453,19 @@ def test_real_findfmt_catalogs_pluralization() -> None:
         assert ngettext(sg_ja, pl_ja, 0).startswith("[bold]一致したファイル")
         assert ngettext(sg_ja, pl_ja, 1).startswith("[bold]一致したファイル")
         assert ngettext(sg_ja, pl_ja, 5).startswith("[bold]一致したファイル")
+
+
+def test_english_canonical_catalog_runtime() -> None:
+    """Verify English (en) catalog loads GNUTranslations and handles overrides."""
+    with override_locale("en") as loc:
+        assert loc == "en"
+        assert get_current_locale() == "en"
+        trans = get_current_translation()
+        assert isinstance(trans, gettext.GNUTranslations)
+        assert _("not installed") == "not installed"
+        assert _("not found") == "not found"
+        assert _("Total size:") == "Total size:"
+        for n in (0, 2, 5, 100):
+            assert ngettext("file", "files", n) == "files"
+
+        assert ngettext("file", "files", 1) == "file"

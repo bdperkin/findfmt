@@ -9,7 +9,7 @@ DOCTREEDIR_GETTEXT ?= $(BUILDDIR)/doctrees-gettext
 
 SPHINXINTL   ?= uv run sphinx-intl
 LOCALEDIR    = $(SOURCEDIR)/locale
-LANGUAGES    ?= es fr de ja
+LANGUAGES    ?= en es fr de ja
 
 .PHONY: help Makefile html dirhtml singlehtml epub man latex latexpdf text texinfo htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck gettext changes intl-update intl-build html-all clean
 

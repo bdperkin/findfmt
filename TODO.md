@@ -344,7 +344,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
   Milestone: v1.0.2)* - **Rationale:** Terminal formatting fix; enforcing wcwidth cell measurement
   prevents table and tree misalignment for double-width CJK text.
-- [ ] **[#214](https://github.com/bdperkin/findfmt/issues/214)** - feat(i18n): add language support
+- [x] **[#214](https://github.com/bdperkin/findfmt/issues/214)** - feat(i18n): add language support
   for English (en) (~1.46 billion) *(Epic:
   [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
   | Milestone: v1.0.2)* - **Rationale:** Core catalog foundation; establishes canonical English

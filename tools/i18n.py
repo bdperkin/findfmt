@@ -23,7 +23,7 @@ DEFAULT_SOURCE_DIR = PROJECT_ROOT / "src" / "findfmt"
 DEFAULT_LOCALE_DIR = PROJECT_ROOT / "src" / "findfmt" / "locale"
 DEFAULT_POT_FILE = DEFAULT_LOCALE_DIR / f"{DEFAULT_DOMAIN}.pot"
 BUGS_ADDRESS = "https://github.com/bdperkin/findfmt/issues"
-DEFAULT_LANGUAGES = ["es", "fr", "de", "ja"]
+DEFAULT_LANGUAGES = ["en", "es", "fr", "de", "ja"]
 
 
 def _to_rel_path_str(path: Path, base: Path = PROJECT_ROOT) -> str:
@@ -402,7 +402,7 @@ def build_parser() -> argparse.ArgumentParser:
         parents=[domain_p, pot_p, loc_p],
         help="Initialize a new locale PO catalog.",
     )
-    sub_init.add_argument("locale", help="Locale code (e.g. es, fr, de, ja).")
+    sub_init.add_argument("locale", help="Locale code (e.g. en, es, fr, de, ja).")
 
     subparsers.add_parser(
         "update",

@@ -334,7 +334,7 @@ def test_tools_i18n_main_cli(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_starter_locale_catalogs_exist_and_translate() -> None:
-    """Verify that all starter catalogs (es, fr, de, ja) exist and function."""
+    """Verify that all starter catalogs (en, es, fr, de, ja) exist and function."""
     locale_dir = PROJECT_ROOT / "src" / "findfmt" / "locale"
     assert (locale_dir / "findfmt.pot").is_file()
 
@@ -342,6 +342,7 @@ def test_starter_locale_catalogs_exist_and_translate() -> None:
     compile_catalogs(locale_dir=locale_dir)
 
     expected_translations = {
+        "en": ("not installed", "not installed"),
         "es": ("not installed", "no instalado"),
         "fr": ("not installed", "non installé"),
         "de": ("not installed", "nicht installiert"),
@@ -363,7 +364,7 @@ def test_sphinx_intl_configuration() -> None:
     docs_locale = PROJECT_ROOT / "docs" / "source" / "locale"
     assert docs_locale.is_dir()
 
-    for lang in ("es", "fr", "de", "ja"):
+    for lang in ("en", "es", "fr", "de", "ja"):
         lang_dir = docs_locale / lang / "LC_MESSAGES"
         assert lang_dir.is_dir(), f"Missing Sphinx docs locale for {lang}"
         po_files = list(lang_dir.glob("*.po"))
@@ -378,21 +379,13 @@ def test_sanitize_po_locations(tmp_path: Path) -> None:
     # 2. File with various location formats and non-location lines
     sample_po = tmp_path / "sample.po"
     content = (
-        "# Header comment with /home/user/path\n"
-        'msgid "/not/a/location/file.py"\n'
-        'msgstr "/also/not/a/location"\n'
-        "#: /home/user/git/findfmt/src/findfmt/diagnostics.py:78\n"
-        'msgid "test1"\n'
-        'msgstr "test1"\n'
+        '# Header comment with /home/user/path\nmsgid "/not/a/location/file.py"\n'
+        'msgstr "/also/not/a/location"\n#: /home/user/git/findfmt/src/findfmt/diagnostics.py:78\n'
+        'msgid "test1"\nmsgstr "test1"\n'
         "#: /home/user/git/findfmt/src/findfmt/a.py:10 /home/user/git/findfmt/src/findfmt/b.py:20\n"
-        'msgid "test2"\n'
-        'msgstr "test2"\n'
-        "#: C:\\Users\\user\\findfmt\\src\\findfmt\\c.py:30\n"
-        'msgid "test3"\n'
-        'msgstr "test3"\n'
-        "#: src/findfmt/already_clean.py:40\n"
-        'msgid "test4"\n'
-        'msgstr "test4"\n'
+        'msgid "test2"\nmsgstr "test2"\n#: C:\\Users\\user\\findfmt\\src\\findfmt\\c.py:30\n'
+        'msgid "test3"\nmsgstr "test3"\n#: src/findfmt/already_clean.py:40\n'
+        'msgid "test4"\nmsgstr "test4"\n'
     )
     sample_po.write_text(content, encoding="utf-8")
 
@@ -424,7 +417,7 @@ def test_no_absolute_paths_in_tracked_locale_catalogs() -> None:
     assert pot_file.is_file()
 
     catalogs = [pot_file, *list(locale_dir.glob("*/LC_MESSAGES/*.po"))]
-    assert len(catalogs) >= 5  # pot + 4 languages
+    assert len(catalogs) >= 6  # pot + 5 languages (en, es, fr, de, ja)
 
     for catalog in catalogs:
         lines = catalog.read_text(encoding="utf-8").splitlines()

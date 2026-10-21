@@ -1,0 +1,155 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 1.0.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-21 11:41-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guides/ci_integration.md:1 031310e0a5494cbe8cf8c9bffb8be2b5
+msgid "CI/CD Integration"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:3 fefcd8abef35447bbc18a05fa4a1c037
+msgid ""
+"`findfmt` streamlines continuous integration pipelines by providing "
+"dynamic, content-aware file discovery. Rather than maintaining brittle, "
+"hard-coded file lists across configuration files, CI jobs can locate "
+"target files on the fly while respecting `.gitignore` rules."
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:7 f6330bc3a03b47e8a95d0509df417250
+msgid "1. CI/CD Design Principles with `findfmt`"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:9 5b331d4546b24ab9bd4bdddf6a9e44e6
+msgid ""
+"When integrating `findfmt` into automated workflows, adhere to the "
+"following best practices:"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:11 7843678bb8ae4af19400d7713c7340dd
+msgid ""
+"**Use Pipe-Safe NUL Delimiters (`-0` or `findfmt0`)**: Filesystems may "
+"contain files with spaces, hyphens, or special characters. Always pair "
+"`-0` with `xargs -0` or `xargs -r -0` to prevent argument splitting and "
+"injection issues."
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:14 c2ac0a4f267f44a3bd9c02afcbf5e180
+msgid ""
+"**Leverage Ephemeral Execution via `uvx`**: Tools can run instantly in CI"
+" runners without a separate virtual environment setup step using `uvx "
+"findfmt`."
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:16 2938e56487144ca292f78587c666d938
+msgid ""
+"**Mount Workspaces as Read-Only**: When running containerized jobs, mount"
+" project directories with `:ro` to ensure discovery operations cannot "
+"inadvertently modify source trees."
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:19 76605450af434078b0c858b131691c62
+msgid "2. GitHub Actions Workflows"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:21 361fae9fe05e43e5b3fbdc64ec15bb2f
+msgid "2.1. Dynamic Shell Script Linting with ShellCheck"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:23 dfaaee955eca46cda98f52076cc99904
+msgid ""
+"The following workflow discovers all shell scripts—including scripts "
+"without file extensions that invoke bash or sh shebangs—and verifies them"
+" with `shellcheck`:"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:55 e24d64df183c4d8087a095394d4cd23a
+msgid "2.2. Multi-Format Static Analysis Pipeline"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:57 bf02e8efdca74cd6a6b3eb9aa2dd8935
+msgid ""
+"Validate Python, YAML, and Markdown files in parallel using dynamic "
+"discovery:"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:86 5906daccb18b48078f93dd6771052c5c
+msgid "2.3. Generating Repository Inventory Artifacts"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:88 021c147a74f2464f8cc673af1b57a772
+msgid ""
+"Generate a comprehensive JSON inventory of repository files and upload it"
+" as a build artifact:"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:102 000a9542ee5a4aaca0da27bb9114eb75
+msgid "3. GitLab CI Pipelines"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:104 01634e2d3e884a8e9449f92a79831f9f
+msgid ""
+"In GitLab CI, `findfmt` can be executed within a Python container or "
+"using the pre-built `findfmt` container image."
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:107 018e001dc6a34d8c90d2098a7b368583
+msgid "3.1. Using the `uv` Python Image"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:136 246f7fba69ee4222bdcfd0a6e5198e50
+msgid "3.2. Using the Dedicated `findfmt` Container Image"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:153 5b9109c39e1d461b8f47ced1409effd3
+msgid "4. Pre-commit Hooks Integration"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:155 4064dc922d0d457f8fa18486e7b7c26f
+msgid ""
+"Integrate `findfmt` directly into local developer workflows using `.pre-"
+"commit-config.yaml`."
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:157 46afa724803e4a8a88fd3ee91e428119
+msgid "4.1. Local Repository Hook"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:159 9782157c858a461d8285b3ceca572142
+msgid ""
+"Configure `findfmt` as a local hook to enforce that all Python files are "
+"formatted with Ruff:"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:173 0b1e8ad9680442a2a8daca88a03756d8
+msgid "4.2. File Inventory Check"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:175 e626e194c4014005ab563ed91dfc95ab
+msgid "Ensure an up-to-date repository inventory document is maintained:"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:186 454e816483614345a1715bf6f01a60fc
+msgid "5. Docker & Containerized CI Workflows"
+msgstr ""
+
+#: ../../source/guides/ci_integration.md:188 111d6c4b37eb43438c477f833a3f1ace
+msgid ""
+"For generic container platforms (Jenkins, CircleCI, Argo Workflows), "
+"execute `findfmt` as a containerized command:"
+msgstr ""
