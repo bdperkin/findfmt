@@ -373,7 +373,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
   Milestone: v1.0.4)* - **Rationale:** Low effort quick win; standardizes base-1024 binary units to
   KiB/K consistent with format_size_binary.
-- [ ] **[#367](https://github.com/bdperkin/findfmt/issues/367)** - [CLI] Add --exit-status flag to
+- [x] **[#367](https://github.com/bdperkin/findfmt/issues/367)** - [CLI] Add --exit-status flag to
   return exit code 1 when no matching files are found *(Epic:
   [[Epic] CLI Exit Code Contract, Status Code Flags, and Atomic Output Writing](https://github.com/bdperkin/findfmt/issues/347)
   | Milestone: v1.0.4)* - **Rationale:** High utility CLI win; provides standard grep-like exit

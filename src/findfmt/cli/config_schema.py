@@ -35,6 +35,7 @@ _BOOL_KEYS: dict[str, tuple[str, bool]] = {
     "print0": ("print0", False),
     "list_tags": ("list_tags", False),
     "summary": ("summary", False),
+    "exit_status": ("exit_status", False),
     "permissions": ("permissions", False),
     "user": ("user", False),
     "group": ("group", False),

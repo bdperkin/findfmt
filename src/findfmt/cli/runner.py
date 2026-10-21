@@ -8,6 +8,8 @@ from collections import Counter
 from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, TextIO
 
+import typer
+
 from findfmt.cli.config import build_traversal_config
 from findfmt.cli.output_sink import OutputSink, open_output_sink, reconfigure_surrogateescape
 from findfmt.cli.signals import handle_broken_pipe, install_signal_handlers, trap_cli_signals
@@ -234,6 +236,7 @@ def execute_findfmt(  # noqa: PLR0913
     print0: bool,
     list_tags: bool,
     summary: bool,
+    exit_status: bool = False,
     sort: str | None = None,
     reverse: bool = False,
     unsorted: bool = False,
@@ -298,6 +301,7 @@ def execute_findfmt(  # noqa: PLR0913
         print0: Whether to delimit output with NUL characters.
         list_tags: Whether to display tags in output.
         summary: Whether to display execution summary.
+        exit_status: Whether to exit with code 1 if no matching files are found.
         sort: Sort criteria identifier.
         reverse: Whether to reverse sort order.
         unsorted: Whether to disable sorting.
@@ -483,3 +487,6 @@ def execute_findfmt(  # noqa: PLR0913
 
         if config.show_summary:
             write_summary(match_count, tag_counter, total_bytes=total_bytes, force_color=color)
+
+        if exit_status and match_count == 0:
+            raise typer.Exit(code=1)

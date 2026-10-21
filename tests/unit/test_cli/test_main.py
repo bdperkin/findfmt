@@ -190,6 +190,9 @@ def test_cli_flag_negations(sample_repo: Path):
     assert res.exit_code == 0
     assert "--- findfmt summary ---" not in res.stderr
 
+    res = runner.invoke(app, [str(sample_repo), "--no-exit-status"])
+    assert res.exit_code == 0
+
 
 def test_posix_double_dash_hyphenated_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.chdir(tmp_path)
@@ -458,3 +461,17 @@ def test_output_file_open_failure_exit_code(tmp_path: Path) -> None:
     result_dir = runner.invoke(app, [str(sample_file), "-o", str(dir_target)])
     assert result_dir.exit_code == 2
     assert "Error opening output file" in result_dir.stderr
+
+
+def test_exit_status_flag_no_matches_returns_1(sample_repo: Path) -> None:
+    """Verify --exit-status exits with status 1 on zero matches, 0 otherwise."""
+    runner = CliRunner()
+
+    res = runner.invoke(app, [str(sample_repo), "-t", "nonexistent-tag-xyz", "--exit-status"])
+    assert res.exit_code == 1
+
+    res = runner.invoke(app, [str(sample_repo), "-t", "nonexistent-tag-xyz"])
+    assert res.exit_code == 0
+
+    res = runner.invoke(app, [str(sample_repo), "--exit-status"])
+    assert res.exit_code == 0

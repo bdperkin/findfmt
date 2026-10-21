@@ -28,6 +28,7 @@ __all__ = [
     "HELP_DU",
     "HELP_EXCLUDE_PATTERN",
     "HELP_EXCLUDE_TAGS",
+    "HELP_EXIT_STATUS",
     "HELP_FILES_FIRST",
     "HELP_FILE_LIMIT",
     "HELP_FOLLOW_SYMLINKS",
@@ -190,6 +191,7 @@ HELP_RELATIVE = _(
 HELP_PRINT0 = _(r"Delimit path outputs with a NUL (\0) character instead of a newline.")
 HELP_LIST_TAGS = _("Display identified tags alongside each matched path.")
 HELP_SUMMARY = _("Print summary match statistics to stderr.")
+HELP_EXIT_STATUS = _("Exit with status code 1 if no matching files are found.")
 HELP_PERMISSIONS = _("Print file type and permissions in standard ls -l format (e.g. -rw-r--r--).")
 HELP_USER = _("Print the username, or UID if username is unavailable, of the file owner.")
 HELP_GROUP = _("Print the group name, or GID if group name is unavailable, of the file group.")
@@ -308,7 +310,8 @@ def get_help_all() -> str:
         "  --quote-name, -Q              Enclose filenames in double quotes.\n"
         "  --print0, -0 / --no-print0    Delimit with NUL (\\0) byte [default: no-print0].\n"
         "  --list-tags / --no-list-tags  Display identified tags [default: no-list-tags].\n"
-        "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n\n"
+        "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n"
+        "  --exit-status                 Exit with code 1 if no matching files are found.\n\n"
         "Help & Diagnostics:\n"
         "  --config <path>               Path to custom configuration file overriding defaults.\n"
         "  --no-config                   Suppress loading any configuration file.\n"

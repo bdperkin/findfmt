@@ -279,3 +279,11 @@ def test_cli_config_file_csv_safe(tmp_path: Path):
     res = runner.invoke(app, ["--config", str(cfg), str(tmp_path)])
     assert res.exit_code == 0
     assert "'=evil.csv" in res.stdout
+
+
+def test_cli_config_file_exit_status(tmp_path: Path):
+    cfg = tmp_path / "findfmt.toml"
+    cfg.write_text("exit_status = true\n", encoding="utf-8")
+    runner = CliRunner()
+    res = runner.invoke(app, ["--config", str(cfg), str(tmp_path), "-t", "nonexistent-tag"])
+    assert res.exit_code == 1

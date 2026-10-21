@@ -32,6 +32,7 @@ __all__ = [
     "OptDu",
     "OptExcludePattern",
     "OptExcludeTags",
+    "OptExitStatus",
     "OptFileLimit",
     "OptFilesFirst",
     "OptFollowSymlinks",
@@ -394,6 +395,14 @@ OptListTags = Annotated[
 OptSummary = Annotated[
     bool,
     typer.Option("-s", "--summary/--no-summary", rich_help_panel=_PO, help=h.HELP_SUMMARY),
+]
+OptExitStatus = Annotated[
+    bool,
+    typer.Option(
+        "--exit-status/--no-exit-status",
+        rich_help_panel=_PO,
+        help=h.HELP_EXIT_STATUS,
+    ),
 ]
 OptKnownTags = Annotated[
     bool,

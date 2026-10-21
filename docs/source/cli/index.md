@@ -255,6 +255,9 @@ path.
 
 `-s, --summary / --no-summary` : Print summary match statistics and top format tags to `stderr`.
 
+`--exit-status / --no-exit-status` : Exit with status code 1 if no matching files are found (returns
+code 0 when one or more matches are found).
+
 ### 3.4. Information & Diagnostics
 
 `--config PATH` : Path to a custom user configuration file overriding default settings.
