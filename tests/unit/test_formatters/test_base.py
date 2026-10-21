@@ -132,6 +132,14 @@ def test_get_formatter_with_options() -> None:
     assert text_fmt.show_tags is True
     assert text_fmt.delimiter == "\0"
 
+    csv_fmt = get_formatter("csv", csv_safe=True)
+    assert isinstance(csv_fmt, CsvFormatter)
+    assert csv_fmt.csv_safe is True
+
+    tsv_fmt = get_formatter("tsv", csv_safe=True)
+    assert isinstance(tsv_fmt, TsvFormatter)
+    assert tsv_fmt.csv_safe is True
+
 
 def test_get_formatter_invalid() -> None:
     """Verify get_formatter raises UnsupportedFormatError on unsupported format."""

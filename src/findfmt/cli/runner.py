@@ -11,11 +11,7 @@ from typing import TYPE_CHECKING, TextIO, cast
 import typer
 
 from findfmt.cli.config import build_traversal_config
-from findfmt.cli.signals import (
-    handle_broken_pipe,
-    install_signal_handlers,
-    trap_cli_signals,
-)
+from findfmt.cli.signals import handle_broken_pipe, install_signal_handlers, trap_cli_signals
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.i18n import _, set_locale
 from findfmt.summary import write_summary
@@ -191,6 +187,7 @@ def _build_formatter_kwargs(  # noqa: PLR0913
         "hyperlink": config.hyperlink,
         "hyperlink_schema": config.hyperlink_schema,
         "hyperlink_authority": config.hyperlink_authority,
+        "csv_safe": config.csv_safe,
     }
     if effective_format == OutputFormat.HTML:
         _append_html_kwargs(
@@ -247,6 +244,7 @@ def execute_findfmt(  # noqa: PLR0913
     hyperlink_schema: str = "file://",
     hyperlink_authority: str | None = None,
     table_style: str | None = None,
+    csv_safe: bool = False,
     absolute: bool = False,
     relative: bool = False,
     print0: bool,
@@ -310,6 +308,7 @@ def execute_findfmt(  # noqa: PLR0913
         output: Destination file path for redirected output.
         tree: Whether tree view was explicitly requested.
         table_style: Optional table border style name.
+        csv_safe: Whether to neutralize spreadsheet formula injection in CSV/TSV output.
         absolute: Whether to emit absolute paths.
         relative: Whether to prepend input search path prefix to relative paths.
         print0: Whether to delimit output with NUL characters.
@@ -430,6 +429,7 @@ def execute_findfmt(  # noqa: PLR0913
         hyperlink=hyperlink,
         hyperlink_schema=hyperlink_schema,
         hyperlink_authority=hyperlink_authority,
+        csv_safe=csv_safe,
         locale=locale,
     )
 

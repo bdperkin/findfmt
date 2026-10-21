@@ -58,6 +58,7 @@ _BOOL_KEYS: dict[str, tuple[str, bool]] = {
     "json": ("json", False),
     "xml": ("xml", False),
     "no_links": ("no_links", False),
+    "csv_safe": ("csv_safe", False),
 }
 
 _STR_LIST_KEYS: dict[str, str] = {

@@ -14,9 +14,11 @@ from findfmt.formatters.base import (
     write_stream_safe,
 )
 from findfmt.formatters.delimited import (
+    FORMULA_TRIGGER_CHARS,
     CsvFormatter,
     CsvTableFormatter,
     TsvFormatter,
+    sanitize_csv_cell,
 )
 from findfmt.formatters.html_formatter import HtmlFormatter
 from findfmt.formatters.markup import (
@@ -39,6 +41,7 @@ from findfmt.formatters.visual import (
 from findfmt.formatters.xml_formatter import XmlFormatter
 
 __all__ = [
+    "FORMULA_TRIGGER_CHARS",
     "TABLE_FIELD_NAMES",
     "CsvFormatter",
     "CsvTableFormatter",
@@ -60,6 +63,7 @@ __all__ = [
     "XmlFormatter",
     "YamlFormatter",
     "get_formatter",
+    "sanitize_csv_cell",
     "write_stream_safe",
 ]
 
@@ -240,6 +244,7 @@ def _create_delimited_formatter(
         Delimited formatter instance or None if not matched.
     """
     lineterminator = "\0" if record_delimiter == "\0" else "\n"
+    csv_safe = bool(kwargs.get("csv_safe", False))
 
     if fmt_str == OutputFormat.CSV.value:
         csv_delim = kwargs.get("delimiter", ",")
@@ -254,17 +259,27 @@ def _create_delimited_formatter(
             delimiter=delim_str,
             quoting=quoting_int,
             lineterminator=lineterminator,
+            csv_safe=csv_safe,
         )
 
     if fmt_str == OutputFormat.TSV.value:
-        return TsvFormatter(absolute=absolute, lineterminator=lineterminator)
+        return TsvFormatter(
+            absolute=absolute,
+            lineterminator=lineterminator,
+            csv_safe=csv_safe,
+        )
 
     if fmt_str == OutputFormat.CSV_TABLE.value:
         style = kwargs.get("table_style", "rounded")
         style_str = style if isinstance(style, str) else "rounded"
         color_raw = kwargs.get("force_color")
         color = color_raw if isinstance(color_raw, bool) else None
-        return CsvTableFormatter(absolute=absolute, table_style=style_str, force_color=color)
+        return CsvTableFormatter(
+            absolute=absolute,
+            table_style=style_str,
+            force_color=color,
+            csv_safe=csv_safe,
+        )
 
     return None
 

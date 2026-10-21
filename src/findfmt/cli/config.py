@@ -200,6 +200,7 @@ def build_traversal_config(  # noqa: PLR0913
     hyperlink: bool = False,
     hyperlink_schema: str = "file://",
     hyperlink_authority: str | None = None,
+    csv_safe: bool = False,
     locale: str | None = None,
 ) -> TraversalConfig:
     """Build and validate TraversalConfig from CLI options.
@@ -263,6 +264,7 @@ def build_traversal_config(  # noqa: PLR0913
         hyperlink: Whether to emit OSC 8 terminal hyperlinks for paths.
         hyperlink_schema: URI schema for terminal hyperlinks.
         hyperlink_authority: Optional URI authority component for terminal hyperlinks.
+        csv_safe: Whether to neutralize spreadsheet formula injection in CSV/TSV output.
         locale: Optional display locale override string.
 
     Returns:
@@ -347,5 +349,6 @@ def build_traversal_config(  # noqa: PLR0913
         hyperlink=hyperlink,
         hyperlink_schema=hyperlink_schema,
         hyperlink_authority=hyperlink_authority,
+        csv_safe=csv_safe,
         locale=locale,
     )

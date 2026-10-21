@@ -154,6 +154,7 @@ def test_validate_and_convert_config_full(tmp_path: Path):
         "sort": "size",
         "reverse": True,
         "gitignore_file": "/tmp/custom.gitignore",
+        "csv_safe": True,
     }
     converted = validate_and_convert_config(raw, p)
     assert converted["output_format"] == OutputFormat.TABLE
@@ -169,6 +170,7 @@ def test_validate_and_convert_config_full(tmp_path: Path):
     assert converted["sort"] == "size"
     assert converted["reverse"] is True
     assert converted["gitignore_file"] == Path("/tmp/custom.gitignore")
+    assert converted["csv_safe"] is True
 
 
 def test_validate_and_convert_config_unknown_key(tmp_path: Path):

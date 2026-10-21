@@ -199,3 +199,17 @@ def test_quote_flag_forces_masking_when_piped_and_literal_on_tty(
     assert res_tty_literal.exit_code == 0
     assert "bad\x07file.txt" in res_tty_literal.stdout
     assert "\x07" in res_tty_literal.stdout
+
+
+def test_cli_csv_safe_tsv_and_csv(tmp_path: Path) -> None:
+    """Verify CLI --csv-safe neutralizes formula triggers for both CSV and TSV."""
+    (tmp_path / "=formula.txt").write_text("data", encoding="utf-8")
+    runner = CliRunner()
+
+    res_csv = runner.invoke(app, ["-f", "csv", "--csv-safe", str(tmp_path)])
+    assert res_csv.exit_code == 0
+    assert "'=formula.txt" in res_csv.stdout
+
+    res_tsv = runner.invoke(app, ["-f", "tsv", "--csv-safe", str(tmp_path)])
+    assert res_tsv.exit_code == 0
+    assert "'=formula.txt" in res_tsv.stdout

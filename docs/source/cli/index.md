@@ -108,12 +108,15 @@ level, sorting each group by active criteria.
 
 - `ipynb`: Jupyter Notebook (`.ipynb`) format pre-populated with data analysis code cells.
 
-- `csv`: RFC 4180 compliant comma-separated values with header row.
+- `csv`: RFC 4180 compliant comma-separated values with header row. When consuming CSV in
+  spreadsheet applications, consider passing `--csv-safe` to neutralize spreadsheet formula
+  injection risks.
 
 - `csv-table`: Aligned ASCII or Unicode table constructed directly from CSV schema for terminal
   review.
 
-- `tsv`: Tab-separated values optimized for Unix shell pipelines (`awk`, `cut`).
+- `tsv`: Tab-separated values optimized for Unix shell pipelines (`awk`, `cut`). Pass `--csv-safe`
+  to neutralize formula injection triggers if importing into spreadsheets.
 
 - `markdown` (or `md`): GitHub Flavored Markdown (GFM) column-aligned table with alignment
   indicators.
@@ -156,6 +159,11 @@ plain text.
 `--table-style STYLE` : Configure table border styles for `table`, `csv-table`, and `rst` formats
 (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`).
 Defaults to `rounded`.
+
+`--csv-safe / --no-csv-safe` : Neutralize spreadsheet formula injection by prefixing cells beginning
+with `=`, `+`, `-`, `@`, TAB (`\t`), or CR (`\r`) with a single quote (`'`). Useful when exporting
+file listings to Microsoft Excel, LibreOffice Calc, or Google Sheets where leading characters can
+trigger dynamic data exchange (DDE) or formula execution.
 
 `--pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on interactive
 terminals when output line count exceeds terminal height. Applies to formatted file listings,

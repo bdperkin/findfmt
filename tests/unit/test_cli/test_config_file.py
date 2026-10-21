@@ -268,3 +268,14 @@ def test_get_diagnostics_with_context_meta_config():
 
     diag = get_diagnostics(ctx=ctx)
     assert f"Configuration: {p}" in diag
+
+
+def test_cli_config_file_csv_safe(tmp_path: Path):
+    cfg = tmp_path / "findfmt.toml"
+    cfg.write_text("csv_safe = true\nformat = 'csv'\n", encoding="utf-8")
+    (tmp_path / "=evil.csv").write_text("payload", encoding="utf-8")
+
+    runner = CliRunner()
+    res = runner.invoke(app, ["--config", str(cfg), str(tmp_path)])
+    assert res.exit_code == 0
+    assert "'=evil.csv" in res.stdout

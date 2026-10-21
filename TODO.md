@@ -321,6 +321,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#333](https://github.com/bdperkin/findfmt/issues/333)** - fix(format): Markdown output does
   not escape raw HTML in filenames (Closed: 2026-10-20 via PR
   [#410](https://github.com/bdperkin/findfmt/pull/410))
+- [x] **[#339](https://github.com/bdperkin/findfmt/issues/339)** - feat(format): add --csv-safe to
+  neutralise spreadsheet formula injection (Closed: 2026-10-20 via PR
+  [#411](https://github.com/bdperkin/findfmt/pull/411))
 
 ______________________________________________________________________
 
@@ -330,11 +333,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#339](https://github.com/bdperkin/findfmt/issues/339)** - feat(format): add --csv-safe to
-  neutralise spreadsheet formula injection *(Epic:
-  [[Epic] Formatter Integrity: Encoding Robustness, Stream Sanitization & Format Parity](https://github.com/bdperkin/findfmt/issues/384)
-  | Milestone: v1.0.2)* - **Rationale:** High security ROI; simple prefix escaping neutralizes
-  spreadsheet formula injection in CSV/TSV outputs.
 - [ ] **[#368](https://github.com/bdperkin/findfmt/issues/368)** - [CLI] Ensure atomic file output
   for -o/--output flag using temporary file and atomic replace *(Epic:
   [[Epic] CLI Exit Code Contract, Status Code Flags, and Atomic Output Writing](https://github.com/bdperkin/findfmt/issues/347)

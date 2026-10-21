@@ -171,6 +171,7 @@ class TraversalConfig:
         hyperlink: Whether to emit OSC 8 terminal hyperlinks for paths.
         hyperlink_schema: URI schema for terminal hyperlinks.
         hyperlink_authority: Optional URI authority component for terminal hyperlinks.
+        csv_safe: Whether to neutralize spreadsheet formula injection in CSV/TSV output.
         locale: Optional locale string for translations and formatting.
     """
 
@@ -229,4 +230,5 @@ class TraversalConfig:
     hyperlink: bool = False
     hyperlink_schema: str = "file://"
     hyperlink_authority: str | None = None
+    csv_safe: bool = False
     locale: str | None = None

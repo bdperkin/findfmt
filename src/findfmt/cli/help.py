@@ -19,6 +19,7 @@ __all__ = [
     "HELP_COLOR",
     "HELP_CONFIG",
     "HELP_CP437",
+    "HELP_CSV_SAFE",
     "HELP_CTIME",
     "HELP_DEVICE",
     "HELP_DIAGNOSTICS",
@@ -164,6 +165,10 @@ HELP_TREE = _("Render output in a hierarchical directory tree (equivalent to --f
 HELP_TABLE_STYLE = _(
     "Border style for table, csv-table, or rst output (e.g. rounded, simple, "
     "minimal, double, heavy, markdown, ascii, cp437, square, grid).",
+)
+HELP_CSV_SAFE = _(
+    "Prefix formula trigger characters (=, +, -, @, TAB, CR) in CSV/TSV cells "
+    "with a single quote to prevent spreadsheet formula injection.",
 )
 HELP_PAGER = _("Enable or disable interactive paging (defaults to auto-paging on TTY).")
 HELP_NO_INDENT = _(

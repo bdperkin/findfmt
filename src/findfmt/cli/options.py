@@ -23,6 +23,7 @@ __all__ = [
     "OptColor",
     "OptConfig",
     "OptCp437",
+    "OptCsvSafe",
     "OptCtime",
     "OptDevice",
     "OptDiagnostics",
@@ -256,6 +257,10 @@ OptHyperlinkAuthority = Annotated[
 OptTableStyle = Annotated[
     str | None,
     typer.Option("--table-style", rich_help_panel=_PO, help=h.HELP_TABLE_STYLE),
+]
+OptCsvSafe = Annotated[
+    bool,
+    typer.Option("--csv-safe/--no-csv-safe", rich_help_panel=_PO, help=h.HELP_CSV_SAFE),
 ]
 OptPager = Annotated[
     bool | None,
