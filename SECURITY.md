@@ -75,23 +75,32 @@ mitigations implemented in `findfmt`.
   shebang extraction strictly reads a bounded buffer chunk of at most 512 bytes (`f.readline(512)`).
   Filename identification heuristics bypass disk reads entirely for known file types.
 
-#### 3.2.2. Special Files & Device Nodes
+#### 3.2.2. Special Files, Named Pipes (FIFOs), & TOCTOU FIFO Swapping
 
 - **Threat Vector**: Encountering named pipes (FIFOs), character devices (`/dev/random`,
   `/dev/zero`), UNIX domain sockets, or block devices could block execution indefinitely on read
-  calls without an active writer.
+  calls without an active writer. Furthermore, a TOCTOU race where a regular file is replaced with a
+  named pipe between directory discovery and file inspection could cause the process to hang
+  indefinitely waiting for a pipe writer.
 - **Mitigation**: Directory scanning inspects directory entries using `os.DirEntry.is_file()` and
   `os.DirEntry.is_dir()`, which evaluate to `False` for FIFOs, device nodes, and sockets.
-  Additionally, `extract_shebang` and `classify_file` explicitly check `path.is_file()` prior to
-  opening any file descriptor, guaranteeing that `findfmt` never blocks on unwritten FIFOs or
-  unbounded device streams.
+  Additionally, `extract_shebang` and `classify_file` explicitly open files using non-blocking I/O
+  flags (`os.O_NONBLOCK | os.O_RDONLY`). After descriptor acquisition, `findfmt` performs an
+  `os.fstat(fd)` check and verifies `stat.S_ISREG(st.st_mode)`. If the target is identified as a
+  FIFO or non-regular node, it is immediately handled safely without blocking or hanging.
 
-#### 3.2.3. Regular Expression & Pattern Safety (ReDoS)
+#### 3.2.3. Regular Expression & Pattern Safety (ReDoS Prevention)
 
-- **Threat Vector**: User-supplied glob patterns or complex `.gitignore` rules could induce
-  exponential backtracking in regular expression engines.
-- **Mitigation**: `findfmt` utilizes `pathspec` to compile `.gitignore` rules into linear-time
-  matching automata, mitigating catastrophic backtracking risks.
+- **Threat Vector**: User-supplied glob patterns, complex `.gitignore` rules, or crafted terminal
+  escape sequences in filenames could induce exponential or quadratic backtracking in regular
+  expression engines, causing Denial of Service (ReDoS).
+- **Mitigation**: `findfmt` mitigates catastrophic backtracking through multi-layered defensive
+  measures:
+  1. Utilizes `pathspec` to compile `.gitignore` rules into linear-time matching automata.
+  2. Bounded linear-time regular expressions for ANSI CSI, OSC, and C1-OSC terminal escape sequences
+     (`_ANSI_ESCAPE_RE` unified across `utils.strings`, `terminal`, and `utils.hyperlinks`). The
+     C1-OSC pattern eliminates nested quantified character classes, guaranteeing $O(N)$ linear-time
+     sanitization even on repetitive control sequences (e.g., 50,000+ repetitive `\x9d` bytes).
 
 ### 3.3. Terminal Presentation & Injection Attacks (CWE-150)
 
@@ -105,6 +114,19 @@ mitigations implemented in `findfmt`.
   expansion. In addition, `-q` / `--hide-control-chars` masks control characters with `?` and `-Q` /
   `--quote-name` safely wraps paths in double quotes with backslash escaping to protect terminal
   emulators against control injection.
+
+#### 3.3.2. Unicode Bidirectional (BiDi) Override Masking & Trojan Source Defense
+
+- **Threat Vector**: Untrusted filenames containing Unicode bidirectional formatting controls
+  (category `Cf`, including U+202E Right-to-Left Override, U+2066–U+2069 isolates, and U+200E/U+200F
+  directional marks) can visually reverse filenames or extensions in terminal displays (Trojan
+  Source attacks, e.g. displaying `payload.exe` visually as `payload_exe.png`).
+- **Mitigation**: In interactive TTY display mode, `findfmt` automatically masks all Unicode `Cf`
+  bidirectional control characters with `?` via `mask_control_characters()`, neutralizing visual
+  reordering spoofing while preserving legitimate non-`Cf` right-to-left scripts (such as Arabic and
+  Hebrew). When output is piped, or when literal modes (`-N` / `--literal` or `-0` / `--print0`) are
+  explicitly requested, raw byte preservation is maintained for downstream pipeline
+  interoperability.
 
 ### 3.4. Supply Chain & Dependency Hygiene
 

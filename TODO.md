@@ -902,8 +902,8 @@ Note: Architectural initiatives tracking decomposed subtasks.
 - [ ] **[#336](https://github.com/bdperkin/findfmt/issues/336)** - [Epic] Traversal Engine
   Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety *(Milestone:
   Future Features)*
-- [ ] **[#338](https://github.com/bdperkin/findfmt/issues/338)** - [Epic] Security Hardening:
-  Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety *(Milestone: Future Features)*
+- [x] **[#338](https://github.com/bdperkin/findfmt/issues/338)** - [Epic] Security Hardening:
+  Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety *(Milestone: v1.0.2)*
 - [ ] **[#344](https://github.com/bdperkin/findfmt/issues/344)** - [Epic] CI Pipeline Determinism,
   Packaging Smoke Tests, and Tooling Alignment *(Milestone: Future Features)*
 - [ ] **[#346](https://github.com/bdperkin/findfmt/issues/346)** - [Epic] CLI Documentation
