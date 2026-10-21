@@ -13,7 +13,12 @@ else:  # pragma: no cover
 from findfmt.exceptions import UnsupportedTableStyleError
 from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter, write_stream_safe
 from findfmt.formatters.delimited import file_to_record
-from findfmt.utils.strings import mask_control_characters, strip_ansi_escapes
+from findfmt.utils.strings import (
+    cell_width,
+    mask_control_characters,
+    pad_to_cell_width,
+    strip_ansi_escapes,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Sequence
@@ -73,14 +78,8 @@ def escape_rst_cell(cell: str) -> str:
 
 
 def _pad_cell(cell: str, width: int, alignment: str) -> str:
-    """Pad a cell string according to its alignment specification."""
-    if alignment == "center":
-        return cell.center(width)
-
-    if alignment == "right":
-        return cell.rjust(width)
-
-    return cell.ljust(width)
+    """Pad a cell string according to its alignment specification respecting terminal cell width."""
+    return pad_to_cell_width(cell, width, align=alignment)
 
 
 def _make_markdown_separator(width: int, alignment: str) -> str:
@@ -95,12 +94,12 @@ def _make_markdown_separator(width: int, alignment: str) -> str:
 
 
 def _compute_markdown_col_widths(rows: Sequence[Sequence[str]]) -> list[int]:
-    """Calculate column widths for a GFM table."""
+    """Calculate column widths for a GFM table respecting terminal cell width."""
     min_widths = [5 if align == "center" else 4 for align in _MARKDOWN_ALIGNMENTS]
     widths: list[int] = []
     for idx, header in enumerate(TABLE_FIELD_NAMES):
-        max_data = max((len(r[idx]) for r in rows), default=0)
-        widths.append(max(len(header), min_widths[idx], max_data))
+        max_data = max((cell_width(r[idx]) for r in rows), default=0)
+        widths.append(max(cell_width(header), min_widths[idx], max_data))
 
     return widths
 
@@ -165,18 +164,27 @@ def _format_rst_grid(
     rows: Sequence[Sequence[str]],
     col_widths: Sequence[int],
 ) -> str:
-    """Render a reStructuredText grid table."""
+    """Render a reStructuredText grid table respecting terminal cell width."""
     row_border = "+" + "+".join("-" * (w + 2) for w in col_widths) + "+"
     head_border = "+" + "+".join("=" * (w + 2) for w in col_widths) + "+"
 
     header_line = (
-        "| " + " | ".join(h.ljust(w) for h, w in zip(headers, col_widths, strict=True)) + " |"
+        "| "
+        + " | ".join(
+            pad_to_cell_width(h, w, align="left") for h, w in zip(headers, col_widths, strict=True)
+        )
+        + " |"
     )
 
     lines = [row_border, header_line, head_border]
     for row in rows:
         row_line = (
-            "| " + " | ".join(cell.ljust(w) for cell, w in zip(row, col_widths, strict=True)) + " |"
+            "| "
+            + " | ".join(
+                pad_to_cell_width(cell, w, align="left")
+                for cell, w in zip(row, col_widths, strict=True)
+            )
+            + " |"
         )
         lines.append(row_line)
         lines.append(row_border)
@@ -192,13 +200,18 @@ def _format_rst_simple(
     rows: Sequence[Sequence[str]],
     col_widths: Sequence[int],
 ) -> str:
-    """Render a reStructuredText simple table."""
+    """Render a reStructuredText simple table respecting terminal cell width."""
     border = " ".join("=" * w for w in col_widths)
-    header_line = " ".join(h.ljust(w) for h, w in zip(headers, col_widths, strict=True))
+    header_line = " ".join(
+        pad_to_cell_width(h, w, align="left") for h, w in zip(headers, col_widths, strict=True)
+    )
 
     lines = [border, header_line, border]
     for row in rows:
-        row_line = " ".join(cell.ljust(w) for cell, w in zip(row, col_widths, strict=True))
+        row_line = " ".join(
+            pad_to_cell_width(cell, w, align="left")
+            for cell, w in zip(row, col_widths, strict=True)
+        )
         lines.append(row_line)
 
     lines.append(border)
@@ -231,7 +244,7 @@ class RstFormatter(Formatter):
         ]
 
         col_widths = [
-            max(len(header), max((len(r[idx]) for r in rows), default=0), 1)
+            max(cell_width(header), max((cell_width(r[idx]) for r in rows), default=0), 1)
             for idx, header in enumerate(TABLE_FIELD_NAMES)
         ]
 

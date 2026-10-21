@@ -10,10 +10,12 @@ from findfmt.utils.hyperlinks import (
 )
 from findfmt.utils.strings import (
     DEFAULT_TIME_FORMAT,
+    cell_width,
     format_display_path,
     format_timestamp,
     get_classification_indicator,
     mask_control_characters,
+    pad_to_cell_width,
     quote_filename,
     strip_ansi_escapes,
 )
@@ -21,6 +23,7 @@ from findfmt.utils.strings import (
 __all__ = [
     "DEFAULT_TIME_FORMAT",
     "build_file_uri",
+    "cell_width",
     "format_display_path",
     "format_hyperlink",
     "format_osc8_link",
@@ -28,6 +31,7 @@ __all__ = [
     "format_timestamp",
     "get_classification_indicator",
     "mask_control_characters",
+    "pad_to_cell_width",
     "quote_filename",
     "strip_ansi_escapes",
 ]

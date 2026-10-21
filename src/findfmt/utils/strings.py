@@ -10,6 +10,7 @@ import unicodedata
 from typing import TYPE_CHECKING
 
 import rich.markup
+from rich.cells import cell_len
 
 from findfmt.i18n import get_current_locale
 
@@ -44,15 +45,78 @@ _URI_FORBIDDEN_CHARS = {
 
 __all__ = [
     "DEFAULT_TIME_FORMAT",
+    "cell_width",
     "format_display_path",
     "format_osc8_link",
     "format_timestamp",
     "get_classification_indicator",
     "mask_control_characters",
+    "pad_to_cell_width",
     "quote_filename",
     "resolve_time_format",
     "strip_ansi_escapes",
 ]
+
+
+def strip_ansi_escapes(text: str) -> str:
+    """Strip ANSI escape sequences (CSI, OSC, and 8-bit C1 sequences) from text.
+
+    Args:
+        text: Input string potentially containing ANSI escape sequences.
+
+    Returns:
+        String with all recognized ANSI escape sequences removed.
+    """
+    return _ANSI_ESCAPE_RE.sub("", text)
+
+
+def cell_width(text: str) -> int:
+    """Calculate the terminal monospace cell display width of a string.
+
+    Accounts for ANSI escape sequences (which occupy 0 display cells) and
+    East Asian full-width/double-width characters (which occupy 2 display cells).
+
+    Args:
+        text: String whose display width is to be measured.
+
+    Returns:
+        Total number of terminal display cells occupied by the string.
+    """
+    clean_text = strip_ansi_escapes(text)
+    return cell_len(clean_text)
+
+
+def pad_to_cell_width(
+    text: str,
+    width: int,
+    align: str = "left",
+    fillchar: str = " ",
+) -> str:
+    """Pad a string to target cell width respecting double-width CJK characters.
+
+    Args:
+        text: Input string to pad.
+        width: Desired display width in terminal cells.
+        align: Alignment direction ('left', 'right', or 'center').
+        fillchar: Single-width character used for padding (defaults to ' ').
+
+    Returns:
+        Padded string with target cell width.
+    """
+    current_width = cell_width(text)
+    padding = max(0, width - current_width)
+    if padding == 0:
+        return text
+
+    if align == "center":
+        left_pad = padding // 2
+        right_pad = padding - left_pad
+        return f"{fillchar * left_pad}{text}{fillchar * right_pad}"
+
+    if align == "right":
+        return f"{fillchar * padding}{text}"
+
+    return f"{text}{fillchar * padding}"
 
 
 def format_osc8_link(text: str, uri: str) -> str:
@@ -67,18 +131,6 @@ def format_osc8_link(text: str, uri: str) -> str:
     """
     clean_uri = "".join(c for c in uri if c not in _URI_FORBIDDEN_CHARS)
     return f"\033]8;;{clean_uri}\033\\{text}\033]8;;\033\\"
-
-
-def strip_ansi_escapes(text: str) -> str:
-    """Strip ANSI escape sequences (CSI, OSC, and 8-bit C1 sequences) from text.
-
-    Args:
-        text: Input string potentially containing ANSI escape sequences.
-
-    Returns:
-        String with all recognized ANSI escape sequences removed.
-    """
-    return _ANSI_ESCAPE_RE.sub("", text)
 
 
 def mask_control_characters(text: str) -> str:

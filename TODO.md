@@ -339,7 +339,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#230](https://github.com/bdperkin/findfmt/issues/230)** - fix(format): audit and enforce
+- [x] **[#230](https://github.com/bdperkin/findfmt/issues/230)** - fix(format): audit and enforce
   cell-width alignment for CJK double-width characters across formatters *(Epic:
   [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
   Milestone: v1.0.2)* - **Rationale:** Terminal formatting fix; enforcing wcwidth cell measurement
