@@ -45,10 +45,6 @@ jobs:
         run: uv run vulture src
       - name: Run Codespell (Spelling)
         run: uv run codespell
-      - name: Populate Global Gitignore to Verify Hermeticity
-        run: |
-          mkdir -p ~/.config/git
-          echo '*' > ~/.config/git/ignore
       - name: Verify Complete Quality Suite
         run: uv run python tools/verify_quality.py
   packaging-smoke-test:
