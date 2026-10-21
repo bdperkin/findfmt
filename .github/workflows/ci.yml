@@ -111,6 +111,45 @@ jobs:
           '@
           .\smoke_env\Scripts\python.exe -c $code
         if: runner.os == 'Windows'
+  dependency-smoke-matrix:
+    name: Dependency Smoke Matrix (${{ matrix.resolution }} - ${{ matrix.prerelease }})
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - resolution: lowest-direct
+            prerelease: disallow
+          - resolution: highest
+            prerelease: allow
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884  # v10.3.0
+        with:
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
+        with:
+          python-version: '3.14'
+      - name: Create Clean Virtual Environment
+        run: uv venv smoke_env
+      - name: Install Dependencies (${{ matrix.resolution }} / ${{ matrix.prerelease }})
+        run: |
+          uv pip install --python smoke_env --group test -e . \
+            --resolution ${{ matrix.resolution }} \
+            --prerelease ${{ matrix.prerelease }}
+      - name: Run Pytest
+        run: ./smoke_env/bin/pytest
+      - name: Capture Dependency Tree on Failure
+        if: failure()
+        run: |
+          echo "### Dependency Tree (${{ matrix.resolution }} / ${{ matrix.prerelease }})" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          uv pip tree --python smoke_env >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
   test-matrix:
     name: Test (${{ matrix.os }} - Python ${{ matrix.python-version }})
     needs: quality-gate

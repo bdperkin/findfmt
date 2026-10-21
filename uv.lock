@@ -658,6 +658,8 @@ dev = [
     { name = "babel" },
     { name = "codespell" },
     { name = "deptry" },
+    { name = "docutils", version = "0.21.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "docutils", version = "0.22.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "furo" },
     { name = "hatchling" },
     { name = "interrogate" },
@@ -715,6 +717,9 @@ lint = [
     { name = "yamllint" },
 ]
 test = [
+    { name = "docutils", version = "0.21.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "docutils", version = "0.22.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "hatchling" },
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "pytest-mock" },
@@ -724,10 +729,10 @@ test = [
 requires-dist = [
     { name = "identify", specifier = ">=2.6" },
     { name = "pathspec", specifier = ">=0.12" },
-    { name = "pyyaml", specifier = ">=6" },
-    { name = "rich", specifier = ">=13" },
+    { name = "pyyaml", specifier = ">=6.0.1" },
+    { name = "rich", specifier = ">=13.8.0" },
     { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0.1" },
-    { name = "typer", specifier = ">=0.12" },
+    { name = "typer", specifier = ">=0.16.0" },
     { name = "typing-extensions", marker = "python_full_version < '3.12'", specifier = ">=4" },
 ]
 
@@ -736,6 +741,7 @@ dev = [
     { name = "babel", specifier = ">=2.14" },
     { name = "codespell", specifier = ">=2.3" },
     { name = "deptry", specifier = ">=0.20" },
+    { name = "docutils", specifier = ">=0.20" },
     { name = "furo", specifier = ">=2024.8.6" },
     { name = "hatchling", specifier = ">=1.25" },
     { name = "interrogate", specifier = ">=1.7" },
@@ -783,6 +789,8 @@ lint = [
     { name = "yamllint", specifier = ">=1.35" },
 ]
 test = [
+    { name = "docutils", specifier = ">=0.20" },
+    { name = "hatchling", specifier = ">=1.25" },
     { name = "pytest", specifier = ">=8" },
     { name = "pytest-cov", specifier = ">=5" },
     { name = "pytest-mock", specifier = ">=3.14" },

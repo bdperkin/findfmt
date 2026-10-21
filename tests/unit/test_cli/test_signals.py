@@ -16,7 +16,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 import typer
 import typer.core
-from click.utils import _PacifyFlushWrapper
 from typer.testing import CliRunner
 
 from findfmt.cli import (
@@ -381,6 +380,13 @@ def test_entrypoints_invoke_with_defaults_typer_exit():
         mock_get_cmd.return_value = mock_cmd
         code = _invoke_with_defaults("findfmt", {}, argv=["."])
         assert code == 42
+
+
+class _PacifyFlushWrapper:
+    """Mock stream wrapper simulating Click/Typer's internal PacifyFlushWrapper naming."""
+
+    def __init__(self, stream: object) -> None:
+        self.stream = stream
 
 
 def test_findfmt_command_main_click_pacify_flush_standalone():

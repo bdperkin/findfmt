@@ -348,7 +348,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#428](https://github.com/bdperkin/findfmt/issues/428)** - ci(deps): add curated dependency
+- [x] **[#428](https://github.com/bdperkin/findfmt/issues/428)** - ci(deps): add curated dependency
   resolution smoke matrix to PR workflow *(Epic:
   [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
   | Milestone: v1.0.6)* - **Rationale:** High CI quality ROI; enforces declared dependency minimums

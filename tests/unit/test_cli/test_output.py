@@ -9,7 +9,10 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from typing_extensions import override
+if sys.version_info >= (3, 12):  # pragma: no cover
+    from typing import override
+else:  # pragma: no cover
+    from typing_extensions import override
 
 if TYPE_CHECKING:
     from typing import TextIO

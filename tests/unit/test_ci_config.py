@@ -1,8 +1,14 @@
 """Tests for CI workflows and Dependabot configuration."""
 
 import fnmatch
+import sys
 from pathlib import Path
 from typing import Any
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib  # type: ignore[no-redef]
 
 import yaml
 
@@ -136,3 +142,85 @@ def test_dependabot_pip_groups() -> None:
 
     assert "production-dependencies" in groups
     assert groups["production-dependencies"].get("dependency-type") == "production"
+
+
+def _load_ci_workflow() -> dict[str, Any]:
+    """Load and parse .github/workflows/ci.yml."""
+    ci_path = _repo_root() / ".github" / "workflows" / "ci.yml"
+    assert ci_path.is_file(), f"Missing CI workflow at {ci_path}"
+    with ci_path.open(encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    assert isinstance(data, dict), "CI workflow must be a YAML mapping"
+    return data
+
+
+def test_ci_dependency_smoke_matrix_structure() -> None:
+    """Validate dependency smoke matrix job configuration in CI workflow."""
+    ci = _load_ci_workflow()
+    jobs = ci.get("jobs", {})
+    assert "dependency-smoke-matrix" in jobs, "dependency-smoke-matrix job must be present in CI"
+
+    job = jobs["dependency-smoke-matrix"]
+    assert job.get("runs-on") == "ubuntu-latest"
+    assert job.get("needs") == "quality-gate"
+
+    strategy = job.get("strategy", {})
+    assert strategy.get("fail-fast") is False
+
+    matrix = strategy.get("matrix", {})
+    includes = matrix.get("include", [])
+    assert len(includes) == 2, "Smoke matrix should define exactly two curated combinations"
+
+    combinations = {(inc.get("resolution"), inc.get("prerelease")) for inc in includes}
+    expected = {("lowest-direct", "disallow"), ("highest", "allow")}
+    assert combinations == expected, f"Expected {expected}, got {combinations}"
+
+
+def test_ci_dependency_smoke_matrix_steps() -> None:
+    """Validate dependency smoke matrix steps, cache usage, and diagnostics."""
+    ci = _load_ci_workflow()
+    job = ci["jobs"]["dependency-smoke-matrix"]
+    steps = job.get("steps", [])
+    assert len(steps) >= 5, "Expected setup, env creation, install, test, and diagnostic steps"
+
+    uv_step = next(s for s in steps if "astral-sh/setup-uv" in s.get("uses", ""))
+    assert uv_step.get("with", {}).get("enable-cache") is True, "setup-uv must enable cache sharing"
+
+    install_step = next(s for s in steps if "Install Dependencies" in s.get("name", ""))
+    install_run = install_step.get("run", "")
+    assert "--resolution ${{ matrix.resolution }}" in install_run
+    assert "--prerelease ${{ matrix.prerelease }}" in install_run
+    assert "--group test" in install_run
+
+    test_step = next(s for s in steps if "Run Pytest" in s.get("name", ""))
+    assert "pytest" in test_step.get("run", "")
+
+    diag_step = next(s for s in steps if "Capture Dependency Tree" in s.get("name", ""))
+    assert diag_step.get("if") == "failure()"
+    assert "uv pip tree" in diag_step.get("run", "")
+
+
+def test_pyproject_dependency_minimums() -> None:
+    """Validate declared dependency minimums match verified working floors."""
+    pyproject_path = _repo_root() / "pyproject.toml"
+    with pyproject_path.open("rb") as f:
+        data = tomllib.load(f)
+
+    deps = data.get("project", {}).get("dependencies", [])
+    dep_dict: dict[str, str] = {}
+    for dep in deps:
+        name = dep.split(";")[0].strip()
+        for op in (">=", "=="):
+            if op in name:
+                pkg, ver = name.split(op, 1)
+                dep_dict[pkg.strip()] = ver.strip()
+
+    assert dep_dict.get("pyyaml") == "6.0.1", "pyyaml floor must be >=6.0.1 for Python 3.12+ builds"
+    assert dep_dict.get("rich") == "13.8", "rich floor must be >=13.8 for tree guide support"
+    assert dep_dict.get("typer") == "0.16", "typer floor must be >=0.16 for Click compatibility"
+
+    test_deps = data.get("dependency-groups", {}).get("test", [])
+    test_dep_names = {d.split(";")[0].split(">=")[0].split("==")[0].strip() for d in test_deps}
+    assert "docutils" in test_dep_names, "docutils must be in test dependency group"
+    assert "hatchling" in test_dep_names, "hatchling must be in test dependency group"
