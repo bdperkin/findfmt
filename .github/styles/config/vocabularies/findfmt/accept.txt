@@ -126,3 +126,7 @@
 (?i)tracebacks
 (?i)discoverability
 (?i)semver
+(?i)metacharacter
+(?i)metacharacters
+(?i)ci
+(?i)dependabot

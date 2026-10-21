@@ -7,6 +7,43 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-21
+
+### Security
+
+- *(security)* Complete Security Hardening Epic covering terminal sanitization, ReDoS prevention,
+  filesystem FIFO safety, and threat model documentation (#338, #422).
+- *(classifier)* Prevent infinite hang during file type classification when regular files are
+  swapped for FIFOs/named pipes (#363, #404).
+- *(format)* Mask Unicode bidirectional control/override characters (`U+202A`–`U+202E`,
+  `U+2066`–`U+2069`) in TTY mode to prevent Trojan Source visual spoofing (#362, #403).
+- *(format)* Eliminate quadratic ReDoS vulnerability in C1-OSC terminal escape regex by strictly
+  bounding inner characters to linear-time evaluation (#361, #402).
+- *(format)* Neutralize spreadsheet formula injection by prefixing formula trigger characters (`=`,
+  `+`, `-`, `@`, `\t`, `\r`) with single quotes via `--csv-safe` flag (#339, #411, #412).
+- *(format)* Escape raw HTML metacharacters (`<`, `>`, `&`) in Markdown output table and list
+  formatters (#333, #410).
+
+### Features
+
+- *(cli)* Ensure atomic file output for `-o`/`--output` flag using staging temporary files and
+  atomic filesystem replacement (#368, #413, #414).
+- *(i18n)* Add canonical gettext translation catalogs and Sphinx-intl localized documentation
+  support for English (`en`) (#214, #421).
+
+### Bug Fixes
+
+- *(format)* Audit and enforce cell-width alignment for CJK double-width characters and emoji across
+  table and tree formatters (#230, #420).
+
+### CI/CD & Dependencies
+
+- *(ci)* Configure Dependabot groups for `codeql-action` and package ecosystems (#415, #416).
+- *(deps)* Bump `astral-sh/setup-uv` from 5.4.2 to 10.3.0 (#419).
+- *(deps)* Bump actions group across GitHub Actions workflows (#418).
+- *(deps)* Bump codeql-action group (#417).
+- *(deps)* Bump `codecov/codecov-action` from 5.5.5 to 7.1.1 (#405).
+
 ## [1.0.1] - 2026-10-20
 
 ### Features
@@ -358,4 +395,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [0.9.0]: https://github.com/bdperkin/findfmt/compare/v0.8.0...v0.9.0
 [1.0.0]: https://github.com/bdperkin/findfmt/compare/v0.9.0...v1.0.0
 [1.0.1]: https://github.com/bdperkin/findfmt/compare/v1.0.0...v1.0.1
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.0.1...HEAD
+[1.0.2]: https://github.com/bdperkin/findfmt/compare/v1.0.1...v1.0.2
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.0.2...HEAD
