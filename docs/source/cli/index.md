@@ -154,7 +154,9 @@ prefixed with `BASEHREF` (equivalent to `--format html`).
 `--nolinks / --no-nolinks` : Suppress hyperlink anchors in HTML output, rendering paths as styled
 plain text.
 
-`-o, --output PATH` : Send command output directly to a file rather than standard output.
+`-o, --output PATH` : Send command output directly to a file rather than standard output. Writes
+atomically using a temporary file in the destination directory to ensure destination files are never
+left partially written or corrupted if execution is interrupted.
 
 `--table-style STYLE` : Configure table border styles for `table`, `csv-table`, and `rst` formats
 (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`).

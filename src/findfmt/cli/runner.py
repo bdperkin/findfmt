@@ -6,14 +6,13 @@ import io
 import sys
 from collections import Counter
 from pathlib import Path  # noqa: TC003
-from typing import TYPE_CHECKING, TextIO, cast
-
-import typer
+from typing import TYPE_CHECKING, TextIO
 
 from findfmt.cli.config import build_traversal_config
+from findfmt.cli.output_sink import OutputSink, open_output_sink, reconfigure_surrogateescape
 from findfmt.cli.signals import handle_broken_pipe, install_signal_handlers, trap_cli_signals
 from findfmt.formatters import OutputFormat, get_formatter
-from findfmt.i18n import _, set_locale
+from findfmt.i18n import set_locale
 from findfmt.summary import write_summary
 from findfmt.terminal import PagerController, is_color_enabled
 from findfmt.traversal import find_files
@@ -68,31 +67,16 @@ def _deliver_output(  # noqa: PLR0913
 
 def _reconfigure_surrogateescape(stream: TextIO) -> None:
     """Ensure text stream uses surrogateescape to avoid UnicodeEncodeError on raw POSIX paths."""
-    reconfigure = getattr(stream, "reconfigure", None)
-    if callable(reconfigure):
-        reconfigure(errors="surrogateescape")
+    reconfigure_surrogateescape(stream)
 
 
 def _open_output_sink(
     output: Path | None,
     fallback: TextIO | None,
-) -> tuple[TextIO, TextIO | None]:
-    """Open destination output file if specified or return fallback stream."""
-    if output is None:
-        target = fallback if fallback is not None else cast("TextIO", sys.stdout)
-        _reconfigure_surrogateescape(target)
-        return target, None
-
-    try:
-        out_file = output.open("w", encoding="utf-8", errors="surrogateescape")
-    except OSError as e:
-        typer.echo(
-            _("Error opening output file '{path}': {error}").format(path=output, error=e),
-            err=True,
-        )
-        raise typer.Exit(code=1) from e
-    else:
-        return out_file, out_file
+) -> tuple[TextIO, OutputSink | None]:
+    """Open destination output sink or return fallback stream."""
+    sink = open_output_sink(output, fallback)
+    return sink.stream, sink if output is not None else None
 
 
 def _resolve_effective_format(
@@ -273,7 +257,7 @@ def execute_findfmt(  # noqa: PLR0913
     hide_control_chars: bool = False,
     literal: bool = False,
     quote_name: bool = False,
-    find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]] = find_files,
+    find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]] | None = None,
     pager: bool | None = None,
     stream: TextIO | None = None,
     pager_controller: PagerController | None = None,
@@ -437,9 +421,9 @@ def execute_findfmt(  # noqa: PLR0913
     match_count = total_bytes = 0
     delimiter = "\0" if config.null_delimited else "\n"
 
-    _reconfigure_surrogateescape(sys.stdout)
-    target_stream, out_file = _open_output_sink(output, stream)
-    _reconfigure_surrogateescape(target_stream)
+    reconfigure_surrogateescape(sys.stdout)
+    sink = open_output_sink(output, stream)
+    target_stream = sink.stream
     pager_ctrl = pager_controller or PagerController(
         pager=pager,
         stream=target_stream,
@@ -470,10 +454,12 @@ def execute_findfmt(  # noqa: PLR0913
         **formatter_kwargs,
     )
 
+    actual_find_files = find_files_func or find_files
+
     def _matched_files() -> Iterable[FileInfo]:
         """Yield matched files while accumulating frequency statistics."""
         nonlocal match_count, total_bytes
-        for file_info in find_files_func(config):
+        for file_info in actual_find_files(config):
             match_count += 1
             if config.show_summary:
                 tag_counter.update(file_info.tags)
@@ -491,9 +477,9 @@ def execute_findfmt(  # noqa: PLR0913
                 pager=pager,
                 custom_controller=pager_controller is not None,
             )
+            sink.commit()
         finally:
-            if out_file is not None:
-                out_file.close()
+            sink.close()
 
         if config.show_summary:
             write_summary(match_count, tag_counter, total_bytes=total_bytes, force_color=color)

@@ -186,7 +186,7 @@ def test_deliver_output_broken_pipe():
 
 
 def test_execute_findfmt_keyboard_interrupt(tmp_path: Path):
-    """Verify execute_findfmt catches KeyboardInterrupt and closes sink files."""
+    """Verify execute_findfmt catches KeyboardInterrupt, closes sink, and leaves no partial file."""
     out_file = tmp_path / "out.txt"
 
     def _interrupted_find(_config: TraversalConfig) -> Iterable[FileInfo]:
@@ -211,7 +211,8 @@ def test_execute_findfmt_keyboard_interrupt(tmp_path: Path):
         )
 
     assert exc.value.exit_code == 130
-    assert out_file.exists()
+    assert not out_file.exists()
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_execute_findfmt_summary_broken_pipe(tmp_path: Path):

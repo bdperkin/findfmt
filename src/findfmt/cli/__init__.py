@@ -19,6 +19,7 @@ from findfmt.cli.help import (
     known_tags_callback,
 )
 from findfmt.cli.main import app, findfmt, show_config_callback
+from findfmt.cli.output_sink import OutputSink, open_output_sink
 from findfmt.cli.pager import FindfmtCommand, display_with_pager
 from findfmt.cli.runner import execute_findfmt
 from findfmt.cli.signals import (
@@ -48,6 +49,7 @@ from findfmt.terminal import PagerController
 
 __all__ = [
     "FindfmtCommand",
+    "OutputSink",
     "PagerController",
     "app",
     "build_traversal_config",
@@ -77,6 +79,7 @@ __all__ = [
     "main_findfmt0",
     "main_findshebang",
     "main_findsummary",
+    "open_output_sink",
     "resolve_and_load_config",
     "show_config_callback",
     "trap_cli_signals",

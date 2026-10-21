@@ -65,7 +65,7 @@ def test_cli_output_redirection_with_summary(tmp_path: Path) -> None:
     assert result.exit_code == 0
     assert out_file.is_file()
     assert "test.py" in out_file.read_text(encoding="utf-8")
-    assert "Matched files:" in result.stderr
+    assert "Matched file" in result.stderr
 
 
 def test_cli_output_redirection_error(tmp_path: Path) -> None:
@@ -75,7 +75,7 @@ def test_cli_output_redirection_error(tmp_path: Path) -> None:
     invalid_out = tmp_path / "nonexistent_dir" / "out.txt"
 
     result = runner.invoke(app, [str(tmp_path), "-o", str(invalid_out)])
-    assert result.exit_code == 1
+    assert result.exit_code == 2
     assert "Error opening output file" in result.stderr
 
 

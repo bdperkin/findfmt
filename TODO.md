@@ -324,6 +324,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#339](https://github.com/bdperkin/findfmt/issues/339)** - feat(format): add --csv-safe to
   neutralise spreadsheet formula injection (Closed: 2026-10-20 via PR
   [#411](https://github.com/bdperkin/findfmt/pull/411))
+- [x] **[#368](https://github.com/bdperkin/findfmt/issues/368)** - [CLI] Ensure atomic file output
+  for -o/--output flag using temporary file and atomic replace (Closed: 2026-10-20 via PR
+  [#413](https://github.com/bdperkin/findfmt/pull/413))
 
 ______________________________________________________________________
 
@@ -333,11 +336,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#368](https://github.com/bdperkin/findfmt/issues/368)** - [CLI] Ensure atomic file output
-  for -o/--output flag using temporary file and atomic replace *(Epic:
-  [[Epic] CLI Exit Code Contract, Status Code Flags, and Atomic Output Writing](https://github.com/bdperkin/findfmt/issues/347)
-  | Milestone: v1.0.2)* - **Rationale:** High reliability ROI; temporary file write and atomic
-  replace prevents corrupted files on process crash.
 - [ ] **[#230](https://github.com/bdperkin/findfmt/issues/230)** - fix(format): audit and enforce
   cell-width alignment for CJK double-width characters across formatters *(Epic:
   [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
