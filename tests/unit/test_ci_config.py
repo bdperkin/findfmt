@@ -224,3 +224,27 @@ def test_pyproject_dependency_minimums() -> None:
     test_dep_names = {d.split(";")[0].split(">=")[0].split("==")[0].strip() for d in test_deps}
     assert "docutils" in test_dep_names, "docutils must be in test dependency group"
     assert "hatchling" in test_dep_names, "hatchling must be in test dependency group"
+
+
+def test_ci_hermetic_git_ignore_step() -> None:
+    """Validate that CI jobs populate ~/.config/git/ignore before running pytest."""
+    ci = _load_ci_workflow()
+    jobs = ci.get("jobs", {})
+
+    qg_steps = jobs["quality-gate"]["steps"]
+    qg_step_names = [s.get("name", "") for s in qg_steps]
+    assert any("Hermeticity" in name for name in qg_step_names), (
+        "quality-gate must include a step verifying git hermeticity"
+    )
+
+    tm_steps = jobs["test-matrix"]["steps"]
+    tm_step_names = [s.get("name", "") for s in tm_steps]
+    assert any("Hermeticity" in name for name in tm_step_names), (
+        "test-matrix must include a step verifying git hermeticity"
+    )
+
+    dsm_steps = jobs["dependency-smoke-matrix"]["steps"]
+    dsm_step_names = [s.get("name", "") for s in dsm_steps]
+    assert any("Hermeticity" in name for name in dsm_step_names), (
+        "dependency-smoke-matrix must include a step verifying git hermeticity"
+    )

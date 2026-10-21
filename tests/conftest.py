@@ -26,6 +26,16 @@ def compile_locale_catalogs_for_tests() -> None:
             compile_po_to_mo(po_file, mo_file)
 
 
+@pytest.fixture(autouse=True)
+def isolate_git_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Isolate test execution from developer's global and user git configuration and ignores."""
+    monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+
+
 @pytest.fixture
 def sample_repo(tmp_path: Path) -> Path:
     """Create a populated mock repository with gitignore, scripts, and various file types."""

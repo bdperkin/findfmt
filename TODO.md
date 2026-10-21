@@ -353,7 +353,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
   | Milestone: v1.0.6)* - **Rationale:** High CI quality ROI; enforces declared dependency minimums
   and tests upstream pre-release compatibility directly on PRs.
-- [ ] **[#326](https://github.com/bdperkin/findfmt/issues/326)** - test: make the suite hermetic
+- [x] **[#326](https://github.com/bdperkin/findfmt/issues/326)** - test: make the suite hermetic
   against the developer's global git config *(Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.0.5)* - **Rationale:** High developer experience ROI; conftest autouse fixture
