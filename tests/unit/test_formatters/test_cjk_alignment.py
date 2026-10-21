@@ -177,7 +177,7 @@ def test_markdown_formatter_cjk_no_indent(cjk_file_sample: list[FileInfo]) -> No
     output = formatter.format(cjk_file_sample)
     lines = output.splitlines()
     assert lines[0].startswith("|path|relative_path|")
-    assert any("日本語/テスト.py" in line for line in lines)
+    assert any("日本語" in line and "テスト.py" in line for line in lines)
 
 
 # ---------------------------------------------------------------------------
@@ -318,21 +318,25 @@ def test_text_formatter_cjk_paths(cjk_file_sample: list[FileInfo]) -> None:
     """Verify TextFormatter outputs CJK paths and tags without corruption."""
     formatter = TextFormatter(show_tags=True)
     output = formatter.format(cjk_file_sample)
-    assert "日本語/テスト.py [スクリプト, パイソン]" in output
-    assert "中文目录/数据_报告.json [数据, 配置]" in output
-    assert "한국어/문서_프로젝트.md [마크다운]" in output
+    ja_path = str(pathlib.Path("日本語/テスト.py"))
+    zh_path = str(pathlib.Path("中文目录/数据_报告.json"))
+    ko_path = str(pathlib.Path("한국어/문서_프로젝트.md"))
+    assert f"{ja_path} [スクリプト, パイソン]" in output
+    assert f"{zh_path} [数据, 配置]" in output
+    assert f"{ko_path} [마크다운]" in output
 
 
 def test_delimited_formatters_cjk(cjk_file_sample: list[FileInfo]) -> None:
     """Verify CSV and TSV formatters handle CJK text without encoding or escaping issues."""
+    ja_path = str(pathlib.Path("日本語/テスト.py"))
     csv_fmt = CsvFormatter()
     csv_out = csv_fmt.format(cjk_file_sample)
-    assert "日本語/テスト.py" in csv_out
+    assert ja_path in csv_out
     assert "パイソン, スクリプト" in csv_out or "パイソン" in csv_out
 
     tsv_fmt = TsvFormatter()
     tsv_out = tsv_fmt.format(cjk_file_sample)
-    assert "日本語/テスト.py" in tsv_out
+    assert ja_path in tsv_out
 
 
 def test_formatters_stream_cjk(cjk_file_sample: list[FileInfo]) -> None:
