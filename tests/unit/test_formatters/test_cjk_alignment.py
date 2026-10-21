@@ -8,7 +8,12 @@ import pathlib
 import pytest
 from rich.cells import cell_len
 
-from findfmt.formatters.delimited import CsvFormatter, CsvTableFormatter, TsvFormatter
+from findfmt.formatters.delimited import (
+    CsvFormatter,
+    CsvTableFormatter,
+    TsvFormatter,
+    escape_tsv_cell,
+)
 from findfmt.formatters.markup import MarkdownFormatter, RstFormatter
 from findfmt.formatters.text import TextFormatter
 from findfmt.formatters.tree import RichTreeFormatter
@@ -336,7 +341,7 @@ def test_delimited_formatters_cjk(cjk_file_sample: list[FileInfo]) -> None:
 
     tsv_fmt = TsvFormatter()
     tsv_out = tsv_fmt.format(cjk_file_sample)
-    assert ja_path in tsv_out
+    assert escape_tsv_cell(ja_path) in tsv_out
 
 
 def test_formatters_stream_cjk(cjk_file_sample: list[FileInfo]) -> None:
