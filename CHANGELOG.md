@@ -39,6 +39,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### CI/CD & Dependencies
 
 - *(ci)* Configure Dependabot groups for `codeql-action` and package ecosystems (#415, #416).
+- *(deps)* Bump `virtualenv` from 21.14.5 to 21.14.12 addressing GHSA-vxj4-q4g9-crj7.
 - *(deps)* Bump `astral-sh/setup-uv` from 5.4.2 to 10.3.0 (#419).
 - *(deps)* Bump actions group across GitHub Actions workflows (#418).
 - *(deps)* Bump codeql-action group (#417).

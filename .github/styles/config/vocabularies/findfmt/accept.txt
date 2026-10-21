@@ -130,3 +130,4 @@
 (?i)metacharacters
 (?i)ci
 (?i)dependabot
+(?i)virtualenv
