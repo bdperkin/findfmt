@@ -151,20 +151,20 @@ def test_locale_aware_numbers_and_sizes() -> None:
     """Verify format_size, format_size_binary, and format_size_si format decimal separators."""
     # Under C / POSIX, period decimal separator
     with override_locale("C"):
-        assert format_size_binary(1536) == "1.5 K"
+        assert format_size_binary(1536) == "1.5 KiB"
         assert format_size_si(1500) == "1.5 kB"
-        assert format_size(1536, human_readable=True) == "1.5 K"
+        assert format_size(1536, human_readable=True) == "1.5 KiB"
         assert format_size(1500, si=True) == "1.5 kB"
-        assert format_size(1536 * 1024) == "1.5 MB"
+        assert format_size(1536 * 1024) == "1.5 MiB"
 
     # Under German locale (if installed), comma decimal separator
     try:
         locale.setlocale(locale.LC_NUMERIC, "de_DE.utf8")
-        assert format_size_binary(1536) == "1,5 K"
+        assert format_size_binary(1536) == "1,5 KiB"
         assert format_size_si(1500) == "1,5 kB"
-        assert format_size(1536, human_readable=True) == "1,5 K"
+        assert format_size(1536, human_readable=True) == "1,5 KiB"
         assert format_size(1500, si=True) == "1,5 kB"
-        assert format_size(1536 * 1024) == "1,5 MB"
+        assert format_size(1536 * 1024) == "1,5 MiB"
     except (locale.Error, ValueError, OSError):
         pass
     finally:
@@ -421,14 +421,14 @@ def test_summary_panel_total_bytes_localized() -> None:
     with override_locale("fr"):
         panel = format_summary_panel(15, Counter({"python": 10}), total_bytes=bytes_12_4_mb)
         render_text = str(panel.renderable)
-        assert "12,4 Mo" in render_text
+        assert "12,4 Mio" in render_text
         assert "Taille totale :" in render_text
 
     # In German
     with override_locale("de"):
         panel_de = format_summary_panel(15, Counter({"python": 10}), total_bytes=bytes_12_4_mb)
         render_text_de = str(panel_de.renderable)
-        assert "12,4 MB" in render_text_de
+        assert "12,4 MiB" in render_text_de
         assert "Gesamtgröße:" in render_text_de
 
     # In Spanish

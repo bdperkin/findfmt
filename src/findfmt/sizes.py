@@ -17,7 +17,7 @@ __all__ = [
     "format_size_si",
 ]
 
-BINARY_UNITS: tuple[str, ...] = ("B", "K", "M", "G", "T", "P", "E")
+BINARY_UNITS: tuple[str, ...] = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
 SI_UNITS: tuple[str, ...] = ("B", "kB", "MB", "GB", "TB", "PB", "EB")
 
 _IEC_BASE = 1024
@@ -28,12 +28,12 @@ _KIB, _MIB, _GIB = 1024, 1024 * 1024, 1024 * 1024 * 1024
 
 _TRANSLATABLE_UNITS: tuple[str, ...] = (
     _("B"),
-    _("K"),
-    _("M"),
-    _("G"),
-    _("T"),
-    _("P"),
-    _("E"),
+    _("KiB"),
+    _("MiB"),
+    _("GiB"),
+    _("TiB"),
+    _("PiB"),
+    _("EiB"),
     _("kB"),
     _("MB"),
     _("GB"),
@@ -41,6 +41,12 @@ _TRANSLATABLE_UNITS: tuple[str, ...] = (
     _("PB"),
     _("EB"),
     _("KB"),
+    _("K"),
+    _("M"),
+    _("G"),
+    _("T"),
+    _("P"),
+    _("E"),
 )
 
 
@@ -57,13 +63,13 @@ def format_size_bytes(size_bytes: int) -> str:
 
 
 def format_size_binary(size_bytes: int) -> str:
-    """Format byte count using IEC binary units (powers of 1024: K, M, G, T, P, E).
+    """Format byte count using IEC binary units (powers of 1024: KiB, MiB, GiB, TiB, PiB, EiB).
 
     Args:
         size_bytes: Size in integer bytes.
 
     Returns:
-        Formatted binary size string (e.g., '1.0 K', '2.5 M').
+        Formatted binary size string (e.g., '1.0 KiB', '2.5 MiB').
     """
     if size_bytes < _IEC_BASE:
         return format_size_bytes(size_bytes)
@@ -109,7 +115,7 @@ def format_size(
 
     Args:
         size_bytes: File size in integer bytes.
-        human_readable: Whether to format using binary units (powers of 1024: K, M, G).
+        human_readable: Whether to format using binary units (powers of 1024: KiB, MiB, GiB).
         si: Whether to format using SI decimal units (powers of 1000: kB, MB, GB).
         exact: Whether to format using exact bytes.
 
@@ -125,13 +131,7 @@ def format_size(
     if exact or size_bytes < _KIB:
         return format_size_bytes(size_bytes)
 
-    if size_bytes < _MIB:
-        return f"{format_number(size_bytes / _KIB, 1)} {_('KB')}"
-
-    if size_bytes < _GIB:
-        return f"{format_number(size_bytes / _MIB, 1)} {_('MB')}"
-
-    return f"{format_number(size_bytes / _GIB, 1)} {_('GB')}"
+    return format_size_binary(size_bytes)
 
 
 def _get_root_file_size(root: Path, *, follow_symlinks: bool) -> int:

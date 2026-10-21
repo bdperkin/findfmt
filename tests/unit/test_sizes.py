@@ -36,15 +36,15 @@ def test_format_size_binary() -> None:
     assert format_size_binary(0) == "0 B"
     assert format_size_binary(512) == "512 B"
     assert format_size_binary(1023) == "1023 B"
-    assert format_size_binary(1024) == "1.0 K"
-    assert format_size_binary(1536) == "1.5 K"
-    assert format_size_binary(1024**2) == "1.0 M"
-    assert format_size_binary(1024**3) == "1.0 G"
-    assert format_size_binary(1024**4) == "1.0 T"
-    assert format_size_binary(1024**5) == "1.0 P"
-    assert format_size_binary(1024**6) == "1.0 E"
+    assert format_size_binary(1024) == "1.0 KiB"
+    assert format_size_binary(1536) == "1.5 KiB"
+    assert format_size_binary(1024**2) == "1.0 MiB"
+    assert format_size_binary(1024**3) == "1.0 GiB"
+    assert format_size_binary(1024**4) == "1.0 TiB"
+    assert format_size_binary(1024**5) == "1.0 PiB"
+    assert format_size_binary(1024**6) == "1.0 EiB"
     # Over max unit
-    assert format_size_binary(1024**7) == "1024.0 E"
+    assert format_size_binary(1024**7) == "1024.0 EiB"
 
 
 def test_format_size_si() -> None:
@@ -69,36 +69,48 @@ def test_format_size_dispatch() -> None:
     # exact
     assert format_size(1024, exact=True) == "1024 B"
     # human_readable
-    assert format_size(1024, human_readable=True) == "1.0 K"
+    assert format_size(1024, human_readable=True) == "1.0 KiB"
     # si
     assert format_size(1000, si=True) == "1.0 kB"
     # default
     assert format_size(500) == "500 B"
-    assert format_size(1024) == "1.0 KB"
-    assert format_size(1024 * 1024 * 1024) == "1.0 GB"
+    assert format_size(1024) == "1.0 KiB"
+    assert format_size(1024 * 1024 * 1024) == "1.0 GiB"
     # Default unit overflow
-    assert format_size(1024**4) == "1024.0 GB"
+    assert format_size(1024**7) == "1024.0 EiB"
+
+
+def test_format_size_units_are_binary_labels() -> None:
+    """Verify format_size and format_size_binary use standard IEC binary units."""
+    assert format_size(1536) == "1.5 KiB"
+    assert format_size(1536) == format_size_binary(1536)
+    assert format_size(1024) == "1.0 KiB"
+    assert format_size(1024**2) == "1.0 MiB"
+    assert format_size(1024**3) == "1.0 GiB"
+    assert format_size(1024**4) == "1.0 TiB"
+    assert format_size(1024**5) == "1.0 PiB"
+    assert format_size(1024**6) == "1.0 EiB"
 
 
 def test_localized_size_formatting() -> None:
     """Verify format_size, format_size_bytes, and units respect regional locales."""
-    # French: comma decimal separator, Mo/Ko unit names, octets 'o'
+    # French: comma decimal separator, Mio/Kio unit names, octets 'o'
     with override_locale("fr"):
-        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 Mo"
-        assert format_size(int(1.5 * 1024)) == "1,5 Ko"
-        assert format_size(int(2.5 * 1024 * 1024 * 1024)) == "2,5 Go"
+        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 Mio"
+        assert format_size(int(1.5 * 1024)) == "1,5 Kio"
+        assert format_size(int(2.5 * 1024 * 1024 * 1024)) == "2,5 Gio"
         assert format_size_bytes(1048576) == "1048576 o"
         assert format_integer(1048576, grouping=True) in ("1\u202f048\u202f576", "1 048 576")
 
-    # German: comma decimal separator, MB/KB unit names, 'B'
+    # German: comma decimal separator, MiB/KiB unit names, 'B'
     with override_locale("de"):
-        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 MB"
+        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 MiB"
         assert format_size_bytes(1048576) == "1048576 B"
         assert format_integer(1048576, grouping=True) == "1.048.576"
 
     # Spanish: period-separated thousands, comma decimal
     with override_locale("es"):
-        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 MB"
+        assert format_size(int(12.4 * 1024 * 1024)) == "12,4 MiB"
         assert format_size_bytes(1048576) == "1048576 B"
         assert format_integer(1048576, grouping=True) == "1.048.576"
 
@@ -250,7 +262,7 @@ def test_format_metadata_parts_size() -> None:
 
     # Binary human readable
     parts_h = format_metadata_parts(info, show_size=True, human_readable=True)
-    assert parts_h == ["2.0 K"]
+    assert parts_h == ["2.0 KiB"]
 
     # SI metric
     parts_si = format_metadata_parts(info, show_size=True, show_si=True)
@@ -270,7 +282,7 @@ def test_text_formatter_sizes() -> None:
     assert fmt_exact.format(files).strip() == "[1024 B] app.py"
 
     fmt_bin = TextFormatter(show_size=True, human_readable=True)
-    assert fmt_bin.format(files).strip() == "[1.0 K] app.py"
+    assert fmt_bin.format(files).strip() == "[1.0 KiB] app.py"
 
     fmt_si = TextFormatter(show_size=True, show_si=True)
     assert fmt_si.format(files).strip() == "[1.0 kB] app.py"
@@ -291,7 +303,7 @@ def test_rich_table_formatter_sizes() -> None:
 
     fmt_bin = RichTableFormatter(show_size=True, human_readable=True)
     out_bin = fmt_bin.format(files)
-    assert "2.0 K" in out_bin
+    assert "2.0 KiB" in out_bin
 
     fmt_si = RichTableFormatter(show_size=True, show_si=True)
     out_si = fmt_si.format(files)
@@ -320,7 +332,7 @@ def test_rich_tree_formatter_sizes(tmp_path: Path) -> None:
     # Human readable tree with accumulated sizes
     fmt_du = RichTreeFormatter(show_size=True, human_readable=True, accumulate_size=True)
     out_du = fmt_du.format(files)
-    assert "1.0 K" in out_du
+    assert "1.0 KiB" in out_du
 
 
 def test_cli_size_options(tmp_path: Path) -> None:

@@ -196,7 +196,9 @@ HELP_GROUP = _("Print the group name, or GID if group name is unavailable, of th
 HELP_INODES = _("Print filesystem inode number (st_ino).")
 HELP_DEVICE = _("Print filesystem device number (st_dev).")
 HELP_SIZE = _("Print file size in bytes.")
-HELP_HUMAN_READABLE = _("Print file sizes in human-readable binary format (e.g. 1K, 234M, 2G).")
+HELP_HUMAN_READABLE = _(
+    "Print file sizes in human-readable binary format (e.g. 1KiB, 234MiB, 2GiB).",
+)
 HELP_SI = _("Print file sizes in human-readable SI metric format (e.g. 1kB, 234MB, 2GB).")
 HELP_DU = _("Report directory size as the recursive sum of all child files and subdirectories.")
 HELP_MTIME = _("Print the date and time of the last modification (st_mtime).")

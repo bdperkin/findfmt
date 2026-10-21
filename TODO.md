@@ -368,7 +368,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.0.5)* - **Rationale:** High release safety ROI; fetch-depth: 0 checkout ensures
   VCS tag versioning is accurate across all jobs.
-- [ ] **[#352](https://github.com/bdperkin/findfmt/issues/352)** - [Core] Align format_size
+- [x] **[#352](https://github.com/bdperkin/findfmt/issues/352)** - [Core] Align format_size
   base-1024 unit labels to binary standards *(Epic:
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
   Milestone: v1.0.4)* - **Rationale:** Low effort quick win; standardizes base-1024 binary units to

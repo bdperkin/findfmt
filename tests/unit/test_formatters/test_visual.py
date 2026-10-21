@@ -59,12 +59,12 @@ def sample_files() -> list[FileInfo]:
 
 
 def test_format_size() -> None:
-    """Verify format_size scaling across byte, KB, MB, and GB thresholds."""
+    """Verify format_size scaling across byte, KiB, MiB, and GiB thresholds."""
     assert format_size(100) == "100 B"
-    assert format_size(1024) == "1.0 KB"
-    assert format_size(1536) == "1.5 KB"
-    assert format_size(1048576) == "1.0 MB"
-    assert format_size(1073741824) == "1.0 GB"
+    assert format_size(1024) == "1.0 KiB"
+    assert format_size(1536) == "1.5 KiB"
+    assert format_size(1048576) == "1.0 MiB"
+    assert format_size(1073741824) == "1.0 GiB"
 
 
 def test_format_tag_badge() -> None:
@@ -128,7 +128,7 @@ def test_rich_table_formatter_rendering(sample_files: list[FileInfo]) -> None:
     assert str(sample_files[0].relative_path) in output
     assert str(sample_files[1].relative_path) in output
     assert "README.md" in output
-    assert "1.5 KB" in output
+    assert "1.5 KiB" in output
     assert "text/x-python" in output
 
     buf = io.StringIO()
