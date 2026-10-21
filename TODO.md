@@ -2,8 +2,8 @@
 
 # Project TODO & Implementation Roadmap
 
-> **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-19
-> **Tracking:** 95 Closed Issues | 133 Actionable Open Tasks | 35 Active Umbrella Epics
+> **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-21
+> **Tracking:** 109 Closed Issues | 125 Actionable Open Tasks | 35 Active Umbrella Epics
 
 ______________________________________________________________________
 
@@ -330,6 +330,15 @@ Note: Ordered chronologically by completion date.
 - [x] **[#415](https://github.com/bdperkin/findfmt/issues/415)** - [CI] Configure Dependabot
   dependency groups for codeql-action and package ecosystem updates (Closed: 2026-10-21 via PR
   [#416](https://github.com/bdperkin/findfmt/pull/416))
+- [x] **[#230](https://github.com/bdperkin/findfmt/issues/230)** - fix(format): audit and enforce
+  cell-width alignment for CJK double-width characters across formatters (Closed: 2026-10-21 via PR
+  [#420](https://github.com/bdperkin/findfmt/pull/420))
+- [x] **[#214](https://github.com/bdperkin/findfmt/issues/214)** - feat(i18n): add language support
+  for English (en) (~1.46 billion) (Closed: 2026-10-21 via PR
+  [#421](https://github.com/bdperkin/findfmt/pull/421))
+- [x] **[#338](https://github.com/bdperkin/findfmt/issues/338)** - [Epic] Security Hardening:
+  Terminal Sanitization, ReDoS Prevention, and Filesystem FIFO Safety (Closed: 2026-10-21 via PR
+  [#422](https://github.com/bdperkin/findfmt/pull/422))
 
 ______________________________________________________________________
 
@@ -339,16 +348,11 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [x] **[#230](https://github.com/bdperkin/findfmt/issues/230)** - fix(format): audit and enforce
-  cell-width alignment for CJK double-width characters across formatters *(Epic:
-  [[Epic] Infrastructure & Architecture Issues](https://github.com/bdperkin/findfmt/issues/276) |
-  Milestone: v1.0.2)* - **Rationale:** Terminal formatting fix; enforcing wcwidth cell measurement
-  prevents table and tree misalignment for double-width CJK text.
-- [x] **[#214](https://github.com/bdperkin/findfmt/issues/214)** - feat(i18n): add language support
-  for English (en) (~1.46 billion) *(Epic:
-  [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
-  | Milestone: v1.0.2)* - **Rationale:** Core catalog foundation; establishes canonical English
-  catalogs and explicit locale overrides.
+- [ ] **[#428](https://github.com/bdperkin/findfmt/issues/428)** - ci(deps): add curated dependency
+  resolution smoke matrix to PR workflow *(Epic:
+  [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
+  | Milestone: v1.0.6)* - **Rationale:** High CI quality ROI; enforces declared dependency minimums
+  and tests upstream pre-release compatibility directly on PRs.
 - [ ] **[#326](https://github.com/bdperkin/findfmt/issues/326)** - test: make the suite hermetic
   against the developer's global git config *(Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
@@ -550,6 +554,22 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 - [ ] **[#360](https://github.com/bdperkin/findfmt/issues/360)** - [CI] Align tool versions across
   pre-commit and uv.lock, and schedule docs linkcheck *(Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
+  | Milestone: v1.0.6)*
+- [ ] **[#426](https://github.com/bdperkin/findfmt/issues/426)** - ci(deps): evaluate matrix tooling
+  orchestration and define pruned resolution parameter matrix *(Epic:
+  [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
+  | Milestone: v1.0.5)*
+- [ ] **[#427](https://github.com/bdperkin/findfmt/issues/427)** - tools(deps): implement local
+  dependency resolution matrix runner with failure diagnostics *(Epic:
+  [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
+  | Milestone: v1.0.5)*
+- [ ] **[#429](https://github.com/bdperkin/findfmt/issues/429)** - ci(deps): create exhaustive
+  scheduled and dispatch dependency resolution matrix workflow *(Epic:
+  [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
+  | Milestone: v1.0.6)*
+- [ ] **[#430](https://github.com/bdperkin/findfmt/issues/430)** - docs(deps): document dependency
+  matrix testing and bound troubleshooting in contributing guide *(Epic:
+  [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
   | Milestone: v1.0.6)*
 - [ ] **[#309](https://github.com/bdperkin/findfmt/issues/309)** - feat(docs): investigate
   expandable hierarchical heading navigation in Sphinx left sidebar *(Epic:
@@ -930,3 +950,5 @@ Note: Architectural initiatives tracking decomposed subtasks.
   Release Automation & Dependency Verification *(Milestone: Future Features)*
 - [ ] **[#386](https://github.com/bdperkin/findfmt/issues/386)** - [Epic] CLI Architecture, Terminal
   Interactivity & Execution Ergonomics *(Milestone: Future Features)*
+- [ ] **[#425](https://github.com/bdperkin/findfmt/issues/425)** - [Epic] Exhaustive Dependency
+  Resolution Matrix Testing via uv in CI and Tooling *(Milestone: Future Features)*
