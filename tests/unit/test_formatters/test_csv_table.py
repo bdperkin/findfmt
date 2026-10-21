@@ -12,6 +12,7 @@ from typer.testing import CliRunner
 from findfmt.cli import app
 from findfmt.formatters import (
     FORMULA_TRIGGER_CHARS,
+    CsvFormatter,
     CsvTableFormatter,
     JsonlFormatter,
     OutputFormat,
@@ -280,3 +281,11 @@ def test_cli_csv_safe_flag(tmp_path: Path) -> None:
     res_safe = runner.invoke(app, ["--format", "csv", "--csv-safe", str(tmp_path)])
     assert res_safe.exit_code == 0
     assert "'=evil.csv" in res_safe.stdout
+
+
+def test_csv_formatter_crlf_terminator(sample_files: list[FileInfo]) -> None:
+    """Verify CsvFormatter emits CRLF records directly when lineterminator is CRLF."""
+    formatter = CsvFormatter(lineterminator="\r\n")
+    out = formatter.format(sample_files)
+    assert out.endswith("\r\n")
+    assert "\r\n" in out

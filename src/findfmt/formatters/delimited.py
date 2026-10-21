@@ -165,17 +165,35 @@ class CsvFormatter(Formatter):
         if callable(reconfigure):
             reconfigure(errors="surrogateescape")
 
-        writer = csv.writer(
-            stream,
-            delimiter=self.delimiter,
-            quoting=cast("_QuotingType", self.quoting),
-            lineterminator=self.lineterminator,
-        )
-        writer.writerow(TABLE_FIELD_NAMES)
-        for file_info in files:
-            writer.writerow(
-                file_to_record(file_info, absolute=self.absolute, csv_safe=self.csv_safe),
+        if self.lineterminator == "\r\n":
+            writer = csv.writer(
+                stream,
+                delimiter=self.delimiter,
+                quoting=cast("_QuotingType", self.quoting),
+                lineterminator=self.lineterminator,
             )
+            writer.writerow(TABLE_FIELD_NAMES)
+            for file_info in files:
+                writer.writerow(
+                    file_to_record(file_info, absolute=self.absolute, csv_safe=self.csv_safe),
+                )
+        else:
+            row_buf = io.StringIO()
+            writer = csv.writer(
+                row_buf,
+                delimiter=self.delimiter,
+                quoting=cast("_QuotingType", self.quoting),
+                lineterminator="\r\n",
+            )
+            writer.writerow(TABLE_FIELD_NAMES)
+            write_stream_safe(stream, row_buf.getvalue()[:-2] + self.lineterminator)
+            for file_info in files:
+                row_buf.seek(0)
+                row_buf.truncate(0)
+                writer.writerow(
+                    file_to_record(file_info, absolute=self.absolute, csv_safe=self.csv_safe),
+                )
+                write_stream_safe(stream, row_buf.getvalue()[:-2] + self.lineterminator)
 
         stream.flush()
 

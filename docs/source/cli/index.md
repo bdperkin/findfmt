@@ -162,8 +162,8 @@ Defaults to `rounded`.
 
 `--csv-safe / --no-csv-safe` : Neutralize spreadsheet formula injection by prefixing cells beginning
 with `=`, `+`, `-`, `@`, TAB (`\t`), or CR (`\r`) with a single quote (`'`). Useful when exporting
-file listings to Microsoft Excel, LibreOffice Calc, or Google Sheets where leading characters can
-trigger dynamic data exchange (DDE) or formula execution.
+file listings to spreadsheet applications where leading characters can trigger dynamic data exchange
+(DDE) or formula execution.
 
 `--pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on interactive
 terminals when output line count exceeds terminal height. Applies to formatted file listings,
