@@ -363,7 +363,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.0.5)* - **Rationale:** High build determinism ROI; enforcing --locked flag on all
   uv sync steps ensures reproducible CI runs.
-- [ ] **[#357](https://github.com/bdperkin/findfmt/issues/357)** - [CI] Configure full-history
+- [x] **[#357](https://github.com/bdperkin/findfmt/issues/357)** - [CI] Configure full-history
   fetch-depth (fetch-depth: 0) for release and version-sensitive jobs *(Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.0.5)* - **Rationale:** High release safety ROI; fetch-depth: 0 checkout ensures

@@ -282,3 +282,36 @@ def test_ci_uses_locked_sync() -> None:
                         )
 
     assert sync_steps_found >= 5, f"Expected at least 5 uv sync steps, found {sync_steps_found}"
+
+
+def test_version_sensitive_checkouts_fetch_full_history() -> None:
+    """Validate that version-sensitive workflows configure fetch-depth: 0 on actions/checkout."""
+    workflows_dir = _repo_root() / ".github" / "workflows"
+
+    version_sensitive_jobs = [
+        (workflows_dir / "ci.yml", "packaging-smoke-test"),
+        (workflows_dir / "docs.yml", "build"),
+        (workflows_dir / "release.yml", "build-distributions"),
+        (workflows_dir / "release.yml", "verify-release"),
+    ]
+
+    for wf_path, job_name in version_sensitive_jobs:
+        assert wf_path.is_file(), f"Missing workflow file: {wf_path}"
+        with wf_path.open(encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        job = data.get("jobs", {}).get(job_name)
+        assert job is not None, f"Job {job_name} not found in {wf_path.name}"
+
+        steps = job.get("steps", [])
+        checkout_step = next(
+            (s for s in steps if "actions/checkout" in s.get("uses", "")),
+            None,
+        )
+        assert checkout_step is not None, f"Checkout step missing in {wf_path.name}:{job_name}"
+
+        with_cfg = checkout_step.get("with", {})
+        assert with_cfg.get("fetch-depth") == 0, (
+            f"Job {job_name} in {wf_path.name} must set fetch-depth: 0 for actions/checkout, "
+            f"got {with_cfg.get('fetch-depth')}"
+        )
