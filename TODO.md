@@ -318,6 +318,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#363](https://github.com/bdperkin/findfmt/issues/363)** - [Security] Prevent infinite hang
   during file classification when target is swapped for a FIFO (Closed: 2026-10-20 via PR
   [#404](https://github.com/bdperkin/findfmt/pull/404))
+- [x] **[#333](https://github.com/bdperkin/findfmt/issues/333)** - fix(format): Markdown output does
+  not escape raw HTML in filenames (Closed: 2026-10-20 via PR
+  [#410](https://github.com/bdperkin/findfmt/pull/410))
 
 ______________________________________________________________________
 
@@ -327,11 +330,6 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#333](https://github.com/bdperkin/findfmt/issues/333)** - fix(format): Markdown output does
-  not escape raw HTML in filenames *(Epic:
-  [[Epic] Formatter Integrity: Encoding Robustness, Stream Sanitization & Format Parity](https://github.com/bdperkin/findfmt/issues/384)
-  | Milestone: v1.0.2)* - **Rationale:** High security ROI; escaping raw HTML in filenames prevents
-  injection in generated Markdown documentation.
 - [ ] **[#339](https://github.com/bdperkin/findfmt/issues/339)** - feat(format): add --csv-safe to
   neutralise spreadsheet formula injection *(Epic:
   [[Epic] Formatter Integrity: Encoding Robustness, Stream Sanitization & Format Parity](https://github.com/bdperkin/findfmt/issues/384)

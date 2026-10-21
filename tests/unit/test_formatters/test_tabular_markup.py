@@ -186,6 +186,59 @@ def test_markdown_formatter_empty() -> None:
     assert len(lines) == 2
 
 
+@pytest.mark.parametrize(
+    ("filename", "expected_entity", "forbidden_chars"),
+    [
+        ("<img src=x onerror=alert(1)>.txt", "&lt;img src=x onerror=alert(1)&gt;.txt", ("<", ">")),
+        ("a&b.txt", "a&amp;b.txt", ("&",)),
+        ("x>y.txt", "x&gt;y.txt", (">",)),
+    ],
+)
+def test_markdown_escapes_html(
+    filename: str,
+    expected_entity: str,
+    forbidden_chars: tuple[str, ...],
+) -> None:
+    """Verify Markdown table output escapes HTML metacharacters into entities."""
+    file_info = FileInfo(
+        path=Path(f"/workspace/project/{filename}"),
+        relative_path=Path(filename),
+        tags=frozenset({"test"}),
+    )
+    formatter = MarkdownFormatter(absolute=False)
+    output = formatter.format([file_info])
+
+    assert expected_entity in output
+
+    lines = output.strip().split("\n")
+    row_line = lines[2]
+    for char in forbidden_chars:
+        if char == "<":
+            assert "<" not in row_line.replace("&lt;", "")
+        elif char == ">":
+            assert ">" not in row_line.replace("&gt;", "")
+        elif char == "&":
+            assert "&" not in (
+                row_line.replace("&amp;", "").replace("&lt;", "").replace("&gt;", "")
+            )
+
+
+def test_markdown_escaped_output_renders_safely() -> None:
+    """Verify rendered Markdown output contains no raw HTML elements."""
+    markdown_it = pytest.importorskip("markdown_it")
+    file_info = FileInfo(
+        path=Path("/workspace/project/<img src=x onerror=alert(1)>.txt"),
+        relative_path=Path("<img src=x onerror=alert(1)>.txt"),
+        tags=frozenset({"test"}),
+    )
+    formatter = MarkdownFormatter(absolute=False)
+    output = formatter.format([file_info])
+
+    md = markdown_it.MarkdownIt()
+    rendered_html = md.render(output)
+    assert "<img" not in rendered_html
+
+
 def _publish_html(rst_text: str) -> bytes:
     """Publish RST text to HTML bytes, handling docutils version differences."""
     try:

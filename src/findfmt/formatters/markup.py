@@ -41,10 +41,13 @@ _MARKDOWN_ALIGNMENTS: tuple[str, ...] = (
 
 
 def escape_markdown_cell(cell: str) -> str:
-    """Escape special characters in a Markdown table cell."""
+    """Escape special characters, HTML metacharacters, and controls in a Markdown table cell."""
     clean = strip_ansi_escapes(cell)
     escaped = (
-        clean.replace("\\", "\\\\")
+        clean.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\\", "\\\\")
         .replace("|", "\\|")
         .replace("`", "\\`")
         .replace("\t", " ")
