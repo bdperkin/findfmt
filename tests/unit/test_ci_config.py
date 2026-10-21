@@ -246,3 +246,39 @@ def test_ci_hermetic_git_ignore_step() -> None:
     assert dsm_hermetic_idx < dsm_pytest_idx, (
         "Hermeticity step must precede pytest in dependency-smoke-matrix"
     )
+
+
+def test_ci_uses_locked_sync() -> None:
+    """Validate that every uv sync step across all workflow files includes --locked."""
+    workflows_dir = _repo_root() / ".github" / "workflows"
+    workflow_files = sorted(workflows_dir.glob("*.yml")) + sorted(workflows_dir.glob("*.yaml"))
+    assert len(workflow_files) > 0, "No workflow files found"
+
+    sync_steps_found = 0
+    for wf_path in workflow_files:
+        with wf_path.open(encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        if not isinstance(data, dict):
+            continue
+
+        jobs = data.get("jobs", {})
+        for job_name, job_data in jobs.items():
+            if not isinstance(job_data, dict):
+                continue
+
+            steps = job_data.get("steps", [])
+            for step in steps:
+                if not isinstance(step, dict):
+                    continue
+
+                run_cmd = step.get("run", "")
+                for line in run_cmd.splitlines():
+                    if "uv sync" in line:
+                        sync_steps_found += 1
+                        assert "--locked" in line, (
+                            f"Step {step.get('name', 'unnamed')} in {wf_path.name}:{job_name} "
+                            f"executes uv sync without --locked: {line}"
+                        )
+
+    assert sync_steps_found >= 5, f"Expected at least 5 uv sync steps, found {sync_steps_found}"

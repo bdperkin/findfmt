@@ -358,7 +358,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.0.5)* - **Rationale:** High developer experience ROI; conftest autouse fixture
   isolates test suite from host git configuration.
-- [ ] **[#356](https://github.com/bdperkin/findfmt/issues/356)** - [CI] Enforce --locked flag on all
+- [x] **[#356](https://github.com/bdperkin/findfmt/issues/356)** - [CI] Enforce --locked flag on all
   uv sync workflow invocations *(Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.0.5)* - **Rationale:** High build determinism ROI; enforcing --locked flag on all

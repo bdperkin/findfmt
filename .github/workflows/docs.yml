@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: '3.14'
       - name: Install Dependencies
-        run: uv sync --all-groups
+        run: uv sync --locked --all-groups
       - name: Build All Sphinx Formats (Strict)
         run: make -C docs clean html dirhtml singlehtml epub man latex text texinfo
           htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck changes gettext
