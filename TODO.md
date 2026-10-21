@@ -378,7 +378,7 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] CLI Exit Code Contract, Status Code Flags, and Atomic Output Writing](https://github.com/bdperkin/findfmt/issues/347)
   | Milestone: v1.0.4)* - **Rationale:** High utility CLI win; provides standard grep-like exit
   status code 1 for zero matches without overhead.
-- [ ] **[#373](https://github.com/bdperkin/findfmt/issues/373)** - [CLI] Align console wrapper
+- [x] **[#373](https://github.com/bdperkin/findfmt/issues/373)** - [CLI] Align console wrapper
   entrypoint exit code mapping for SystemExit exceptions *(Epic:
   [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)
   | Milestone: v1.0.4)* - **Rationale:** Low effort quick fix; aligns SystemExit string argument

@@ -108,6 +108,19 @@ def _extract_first_positional(args: Sequence[str]) -> tuple[str | None, list[str
     return first_pos, remaining
 
 
+def _handle_system_exit(exc: SystemExit) -> int:
+    """Map SystemExit to an integer exit status code."""
+    from findfmt.cli.signals import is_broken_pipe_wrapper
+
+    if exc.code == 1 and (is_broken_pipe_wrapper(sys.stdout) or is_broken_pipe_wrapper(sys.stderr)):
+        return 0
+
+    if isinstance(exc.code, int):
+        return exc.code
+
+    return 0 if exc.code is None else 1
+
+
 def _invoke_with_defaults(
     info_name: str,
     defaults: dict[str, Any],
@@ -128,7 +141,6 @@ def _invoke_with_defaults(
     from findfmt.cli import app
     from findfmt.cli.signals import (
         install_signal_handlers,
-        is_broken_pipe_wrapper,
         trap_cli_signals,
     )
 
@@ -148,12 +160,7 @@ def _invoke_with_defaults(
                 obj={"argv": args_list if args_list is not None else list(sys.argv[1:])},
             )
     except SystemExit as exc:
-        if exc.code == 1 and (
-            is_broken_pipe_wrapper(sys.stdout) or is_broken_pipe_wrapper(sys.stderr)
-        ):
-            return 0
-
-        return exc.code if isinstance(exc.code, int) else 0
+        return _handle_system_exit(exc)
     except typer.Exit as exc:
         return exc.exit_code
 

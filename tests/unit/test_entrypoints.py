@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import runpy
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -200,3 +200,19 @@ def test_wrapper_default_overrides(sample_repo: Path, capsys: pytest.CaptureFixt
     assert main_findfilemime(["--no-list-tags", str(sample_repo)]) == 0
     captured = capsys.readouterr()
     assert "[" not in captured.out
+
+
+def test_systemexit_string_maps_to_1():
+    """Verify wrapper entrypoint maps SystemExit with message string to exit code 1."""
+    with patch("typer.main.get_command") as mock_get_cmd:
+        mock_cmd = MagicMock()
+        mock_cmd.main.side_effect = SystemExit("fatal error")
+        mock_get_cmd.return_value = mock_cmd
+        assert main(["."]) == 1
+        assert main_findfiles(["."]) == 1
+
+    with patch("typer.main.get_command") as mock_get_cmd:
+        mock_cmd = MagicMock()
+        mock_cmd.main.side_effect = SystemExit(None)
+        mock_get_cmd.return_value = mock_cmd
+        assert main(["."]) == 0
