@@ -36,7 +36,7 @@ substring.
 
 `-d, --dirs-only` : List directories only, suppressing regular file entries.
 
-`-l, --follow-links, --follow-symlinks / --no-follow-links, --no-follow-links` (alias:
+`-l, --follow-links, --follow-symlinks / --no-follow-links, --no-follow-symlinks` (alias:
 `--symlinks / --no-symlinks`) : Follow directory symlinks with cycle and loop detection.
 
 `-x, --one-file-system` : Confine traversal to the filesystem device of the starting directory.
