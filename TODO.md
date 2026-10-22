@@ -393,16 +393,16 @@ Note: Sorted by Value:Effort ratio, independent of strict milestone/epic orderin
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
   Milestone: v1.0.3)* - **Rationale:** Low effort parser fix; robust arrow partitioning preserves
   symlink filenames containing '->' delimiters.
-- [ ] **[#335](https://github.com/bdperkin/findfmt/issues/335)** - build: remove the Python 3.15
-  classifier until the 3.15 CI job is gating *(Epic:
+- [ ] **[#335](https://github.com/bdperkin/findfmt/issues/335)** - ci: make the Python 3.15 CI job
+  gating and add a non-gating Python 3.16 job *(Epic:
   [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)
-  | Milestone: v1.0.6)* - **Rationale:** Trivial metadata hygiene; removes premature Python 3.15
-  classifier until CI matrix job is gating.
+  | Milestone: v1.0.6)* - **Rationale:** Low effort CI fix; makes every advertised Python version
+  (3.11-3.15) gating and adds early-warning 3.16-dev coverage without a classifier.
 - [ ] **[#349](https://github.com/bdperkin/findfmt/issues/349)** - chore: fix PyPI summary typo and
-  add a nox/multi-Python local runner *(Epic:
+  add a multi-Python local runner (evaluate nox, tox, Hatch, uv) *(Epic:
   [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)
   | Milestone: v1.0.6)* - **Rationale:** Developer experience quick win; fixes PyPI summary typo and
-  provides local multi-Python testing runner.
+  evaluates nox, tox, Hatch, and uv before adding a local multi-Python testing runner.
 - [ ] **[#364](https://github.com/bdperkin/findfmt/issues/364)** - [Docs] Correct inaccurate and
   duplicated CLI option flags across documentation guides and README *(Epic:
   [[Epic] CLI Documentation Accuracy, Dynamic --help-all Generation, and Option Validation](https://github.com/bdperkin/findfmt/issues/346)
