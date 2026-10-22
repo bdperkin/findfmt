@@ -41,7 +41,7 @@ mitigations implemented in `findfmt`.
 - **Threat Vector**: Malicious or accidental recursive symbolic directory structures (e.g.,
   `dir/loop -> dir`) can cause unbounded recursion, stack overflow (`RecursionError`), or heap
   exhaustion during deep filesystem traversal.
-- **Mitigation**: When `--follow-symlinks` (`-L`) is active, `findfmt` tracks canonical directory
+- **Mitigation**: When `--follow-symlinks` (`-l`) is active, `findfmt` tracks canonical directory
   paths via `visited_dirs: set[Path]` initialized with the resolved traversal root. Each candidate
   subdirectory's canonical target (`subdir.resolve()`) is checked prior to descent. If already
   visited, traversal immediately skips the entry, breaking cyclic graphs and avoiding duplicate
