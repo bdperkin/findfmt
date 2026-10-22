@@ -400,8 +400,8 @@ sub-issues. Respect `Blocked by` links when picking up work.
   lowest-direct dependency job required and verify floors on the minimum interpreter *(Rank: 4 |
   Epic:
   [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)
-  | Milestone: v1.0.6)* - **Value:** High | **Effort:** S - **Rationale:** Nearly done; make the
-  existing job required.
+  | Milestone: v1.0.6)* - **Value:** High | **Effort:** S - **Rationale:** Job is now a required
+  check; remaining: run floors on the minimum interpreter and re-verify rich/pathspec/identify.
 - [ ] **[#327](https://github.com/bdperkin/findfmt/issues/327)** - ci(release): workflow_dispatch
   ignores the "tag" input and can publish a .devN build to PyPI *(Rank: 5 | Epic:
   [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)

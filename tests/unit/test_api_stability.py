@@ -252,3 +252,10 @@ def test_py_typed_marker_present() -> None:
     py_typed = pkg_root / "py.typed"
     assert py_typed.exists(), "PEP 561 marker py.typed is missing from findfmt package"
     assert py_typed.is_file(), "PEP 561 marker py.typed is not a regular file"
+
+
+def test_project_description_has_no_typos() -> None:
+    """The PyPI summary must not run the leading article into the next word (#443)."""
+    pyproject = (Path(__file__).resolve().parents[2] / "pyproject.toml").read_text(encoding="utf-8")
+    assert "A.gitignore" not in pyproject
+    assert "A .gitignore-aware" in pyproject

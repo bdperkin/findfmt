@@ -9,7 +9,7 @@ requires = [
 [project]
 name = "findfmt"
 description = """\
-  A.gitignore-aware file discovery and classification suite that locates files by content format, shebang, and MIME \
+  A .gitignore-aware file discovery and classification suite that locates files by content format, shebang, and MIME \
   tag for automated linting, formatting, and CI pipelines.\
   """
 readme = "README.md"
