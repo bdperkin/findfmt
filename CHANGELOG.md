@@ -18,9 +18,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Security
 
 - *(deps)* Update dev-only dependencies to resolve security advisories: `virtualenv` 21.14.13
-  (GHSA-cx6f-vjhg-g3cc), `setuptools` 84.2.1 (GHSA-xmj3-9gf7-h52w), and `filelock` 4.2.4
-  (GHSA-v4x8-3wr5-3wq8, GHSA-9vhv-jxww-xfm5, GHSA-567q-5qvw-pf92, GHSA-2g95-wg33-c5x2,
-  GHSA-jqc4-5cvw-7w85, GHSA-crv4-6mhj-j5jh). The `filelock` fixes require Python 3.11+ (#441).
+  (`GHSA-cx6f-vjhg-g3cc`), `setuptools` 84.2.1 (`GHSA-xmj3-9gf7-h52w`), and `filelock` 4.2.4
+  (`GHSA-v4x8-3wr5-3wq8`, `GHSA-9vhv-jxww-xfm5`, `GHSA-567q-5qvw-pf92`, `GHSA-2g95-wg33-c5x2`,
+  `GHSA-jqc4-5cvw-7w85`, `GHSA-crv4-6mhj-j5jh`). The `filelock` fixes require Python 3.11+ (#441).
 
 ## [1.0.2] - 2026-10-21
 
