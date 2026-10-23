@@ -5,6 +5,8 @@ from __future__ import annotations
 import ast
 import io
 import json
+import sys
+import types
 from pathlib import Path
 
 import pytest
@@ -231,3 +233,122 @@ def test_yaml_formatter_no_indent(sample_files: list[FileInfo]) -> None:
     parsed = yaml.safe_load(output)
     assert len(parsed) == len(sample_files)
     assert fmt.indent == 0
+
+
+class _FakeFrame:
+    """Minimal stand-in for ``pandas.DataFrame`` used to exec generated cells."""
+
+    def __init__(self, records: object) -> None:
+        """Store the records passed to the stub constructor.
+
+        Args:
+            records: Value handed to ``DataFrame(...)`` by the generated cell.
+        """
+        self.records = records
+
+    def head(self) -> object:
+        """Return the stored records, mirroring ``DataFrame.head()``.
+
+        Returns:
+            The records supplied at construction time.
+        """
+        return self.records
+
+
+def _exec_manifest_cell(
+    monkeypatch: pytest.MonkeyPatch, files: list[FileInfo]
+) -> dict[str, object]:
+    """Execute the generated ipynb manifest cell with pandas stubbed out.
+
+    Args:
+        monkeypatch: Pytest monkeypatch fixture used to stub ``pandas``.
+        files: Records rendered into the notebook.
+
+    Returns:
+        Namespace produced by executing the manifest cell.
+    """
+    notebook = json.loads(IpynbFormatter().format(files))
+    source = "".join(notebook["cells"][1]["source"])
+    monkeypatch.setitem(sys.modules, "pandas", types.SimpleNamespace(DataFrame=_FakeFrame))
+    namespace: dict[str, object] = {}
+    exec(compile(source, "<ipynb-manifest-cell>", "exec"), namespace)
+    return namespace
+
+
+def test_ipynb_code_cell_executes(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify the generated manifest cell runs and preserves JSON nulls and booleans."""
+    files = [
+        FileInfo(
+            path=Path("/workspace/project/data.json"),
+            relative_path=Path("data.json"),
+            tags=frozenset({"json", "text"}),
+            shebang=None,
+            mime_type="application/json",
+            is_executable=False,
+            is_symlink=True,
+            symlink_target=None,
+            size_bytes=256,
+        ),
+        FileInfo(
+            path=Path("/workspace/project/run.sh"),
+            relative_path=Path("run.sh"),
+            tags=frozenset({"shell", "text"}),
+            shebang="#!/bin/sh",
+            mime_type="text/x-shellscript",
+            is_executable=True,
+            is_symlink=False,
+            symlink_target=None,
+            size_bytes=64,
+        ),
+    ]
+
+    namespace = _exec_manifest_cell(monkeypatch, files)
+
+    assert namespace["FILES"] == [f.to_dict() for f in files]
+
+
+def test_ipynb_is_valid_nbformat() -> None:
+    """Verify the generated notebook passes nbformat validation when installed."""
+    nbformat = pytest.importorskip("nbformat")
+
+    files = [
+        FileInfo(
+            path=Path("/workspace/project/main.py"),
+            relative_path=Path("main.py"),
+            tags=frozenset({"python", "text"}),
+            is_executable=True,
+            size_bytes=1024,
+        )
+    ]
+
+    nbformat.validate(json.loads(IpynbFormatter().format(files)))
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        'triple"quote.py',
+        "triple'quote.py",
+        "mixed'''\"\"\".py",
+        "back\\slash.py",
+    ],
+)
+def test_ipynb_manifest_quoting_fallbacks(monkeypatch: pytest.MonkeyPatch, name: str) -> None:
+    """Verify awkward file names still yield parseable, executable manifest cells."""
+    files = [
+        FileInfo(
+            path=Path("/workspace/project") / name,
+            relative_path=Path(name),
+            tags=frozenset({"text"}),
+            is_executable=False,
+            size_bytes=1,
+        )
+    ]
+
+    notebook = json.loads(IpynbFormatter().format(files))
+    source = "".join(notebook["cells"][1]["source"])
+    ast.parse(source)
+
+    namespace = _exec_manifest_cell(monkeypatch, files)
+
+    assert namespace["FILES"] == [f.to_dict() for f in files]

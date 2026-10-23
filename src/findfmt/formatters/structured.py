@@ -176,6 +176,23 @@ class YamlFormatter(Formatter):
         )
 
 
+def _json_string_literal(payload: str) -> str:
+    r"""Embed a JSON payload as a raw Python string literal.
+
+    ``json.dumps`` escapes every double quote, so a raw triple-quoted literal can never
+    be terminated early by the payload; the payload also always ends with ``]``, so the
+    literal never ends on a backslash. The result can therefore be spliced into generated
+    Python source and handed to ``json.loads`` without any quoting analysis.
+
+    Args:
+        payload: JSON text produced by :func:`json.dumps`.
+
+    Returns:
+        Raw triple-quoted Python string literal containing ``payload``.
+    """
+    return f'r"""{payload}"""'
+
+
 class IpynbFormatter(Formatter):
     """Jupyter Notebook v4 JSON serializer pre-populated with analysis code."""
 
@@ -218,9 +235,10 @@ class IpynbFormatter(Formatter):
                 "metadata": {},
                 "outputs": [],
                 "source": (
+                    "import json\n"
                     "import pandas as pd\n\n"
                     "# Discovered files manifest\n"
-                    f"FILES = {manifest_literal}\n\n"
+                    f"FILES = json.loads({_json_string_literal(manifest_literal)})\n\n"
                     "# Ingest into pandas DataFrame\n"
                     "df = pd.DataFrame(FILES)\n\n"
                     "# Optional: Ingest into polars DataFrame\n"
