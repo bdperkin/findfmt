@@ -256,7 +256,8 @@ class _FakeFrame:
 
 
 def _exec_manifest_cell(
-    monkeypatch: pytest.MonkeyPatch, files: list[FileInfo]
+    monkeypatch: pytest.MonkeyPatch,
+    files: list[FileInfo],
 ) -> dict[str, object]:
     """Execute the generated ipynb manifest cell with pandas stubbed out.
 
@@ -318,7 +319,7 @@ def test_ipynb_is_valid_nbformat() -> None:
             tags=frozenset({"python", "text"}),
             is_executable=True,
             size_bytes=1024,
-        )
+        ),
     ]
 
     nbformat.validate(json.loads(IpynbFormatter().format(files)))
@@ -342,7 +343,7 @@ def test_ipynb_manifest_quoting_fallbacks(monkeypatch: pytest.MonkeyPatch, name:
             tags=frozenset({"text"}),
             is_executable=False,
             size_bytes=1,
-        )
+        ),
     ]
 
     notebook = json.loads(IpynbFormatter().format(files))
