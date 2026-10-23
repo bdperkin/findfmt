@@ -182,11 +182,19 @@ def _sort_file_infos(files: list[FileInfo], config: TraversalConfig) -> list[Fil
 
         if config.sort_by in (SortKey.TIME, SortKey.MTIME, SortKey.CTIME):
             try:
-                mtime = f.path.stat().st_mtime if f.path.exists() else 0.0
+                stat_result = f.path.stat() if f.path.exists() else None
             except OSError:
-                mtime = 0.0
+                stat_result = None
 
-            return (mtime, name)
+            if stat_result is None:
+                return (0.0, name)
+
+            # CTIME sorts on status-change time; TIME/MTIME sort on modification time.
+            # Note: on Windows st_ctime is the creation time, not the status-change time.
+            timestamp = (
+                stat_result.st_ctime if config.sort_by == SortKey.CTIME else stat_result.st_mtime
+            )
+            return (timestamp, name)
 
         if config.sort_by == SortKey.SIZE:
             return (f.size_bytes, name)

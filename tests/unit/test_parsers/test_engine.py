@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -212,3 +213,37 @@ def test_ingest_from_file_flat_and_outline(tmp_path: Path) -> None:
     cfg_dirs = TraversalConfig(from_file="-", dirs_only=True, root_paths=(tmp_path,))
     results_dirs = list(ingest_from_file(cfg_dirs, input_stream=stream_dirs))
     assert [f.relative_path.name for f in results_dirs] == ["parent", "subdir"]
+
+
+def test_sort_file_infos_ctime_uses_status_change_time(tmp_path: Path) -> None:
+    """Verify CTIME sorts on st_ctime while TIME and MTIME keep using st_mtime."""
+    file_a = tmp_path / "a.txt"
+    file_b = tmp_path / "b.txt"
+    file_a.write_text("a")
+    file_b.write_text("b")
+
+    info_a = classify_file_offline(file_a, relative_path=Path("a.txt"))
+    info_b = classify_file_offline(file_b, relative_path=Path("b.txt"))
+
+    # os.stat_result tuple order: mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime.
+    # a.txt is older by mtime but newer by ctime; b.txt is the inverse.
+    stats = {
+        "a.txt": os.stat_result((0, 0, 0, 1, 0, 0, 1, 1000.0, 1000.0, 2000.0)),
+        "b.txt": os.stat_result((0, 0, 0, 1, 0, 0, 1, 2000.0, 2000.0, 1000.0)),
+    }
+
+    def _fake_stat(self: Path, *, follow_symlinks: bool = True) -> os.stat_result:
+        assert follow_symlinks is True
+        return stats[self.name]
+
+    with patch.object(Path, "stat", _fake_stat):
+        # Time keys default to descending order (newest first), so CTIME must yield
+        # a.txt (ctime 2000) before b.txt (ctime 1000) -- the inverse of the mtime order.
+        cfg_ctime = TraversalConfig(sort_by=SortKey.CTIME)
+        sorted_ctime = _sort_file_infos([info_b, info_a], cfg_ctime)
+        assert [f.relative_path.name for f in sorted_ctime] == ["a.txt", "b.txt"]
+
+        for sort_key in (SortKey.TIME, SortKey.MTIME):
+            cfg_mtime = TraversalConfig(sort_by=sort_key)
+            sorted_mtime = _sort_file_infos([info_b, info_a], cfg_mtime)
+            assert [f.relative_path.name for f in sorted_mtime] == ["b.txt", "a.txt"]
