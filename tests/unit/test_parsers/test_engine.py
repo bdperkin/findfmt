@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import io
+import os
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -189,6 +190,42 @@ def test_sort_file_infos(tmp_path: Path) -> None:
     cfg_ff = TraversalConfig(files_first=True)
     res_ff = _sort_file_infos([dir_info, info1], cfg_ff)
     assert res_ff[0] == info1
+
+
+def test_sort_file_infos_ctime_reads_st_ctime(tmp_path: Path) -> None:
+    """Verify SortKey.CTIME reads st_ctime rather than st_mtime."""
+    first = tmp_path / "aaa.txt"
+    second = tmp_path / "bbb.txt"
+    first.write_text("1")
+    second.write_text("2")
+
+    info_first = classify_file_offline(first, relative_path=Path("aaa.txt"))
+    info_second = classify_file_offline(second, relative_path=Path("bbb.txt"))
+    infos = [info_second, info_first]
+
+    # mtime and ctime are deliberately opposed so the two keys disagree.
+    stamps = {"aaa.txt": (200.0, 100.0), "bbb.txt": (100.0, 200.0)}
+
+    def fake_stat(self: Path, *_args: object, **_kwargs: object) -> MagicMock:
+        mtime, ctime = stamps[self.name]
+        result = MagicMock(spec=os.stat_result)
+        result.st_mtime = mtime
+        result.st_ctime = ctime
+        return result
+
+    with patch.object(Path, "stat", autospec=True, side_effect=fake_stat):
+        # Time-based keys sort newest-first by default, so the larger stamp leads.
+        cfg_ctime = TraversalConfig(sort_by=SortKey.CTIME)
+        sorted_ctime = _sort_file_infos(infos, cfg_ctime)
+        assert [f.relative_path.name for f in sorted_ctime] == ["bbb.txt", "aaa.txt"]
+
+        cfg_mtime = TraversalConfig(sort_by=SortKey.MTIME)
+        sorted_mtime = _sort_file_infos(infos, cfg_mtime)
+        assert [f.relative_path.name for f in sorted_mtime] == ["aaa.txt", "bbb.txt"]
+
+        cfg_time = TraversalConfig(sort_by=SortKey.TIME)
+        sorted_time = _sort_file_infos(infos, cfg_time)
+        assert [f.relative_path.name for f in sorted_time] == ["aaa.txt", "bbb.txt"]
 
 
 def test_ingest_from_file_flat_and_outline(tmp_path: Path) -> None:

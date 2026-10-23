@@ -168,7 +168,11 @@ def _read_lines(from_file: str | None, stream: TextIO | None = None) -> list[str
 
 
 def _sort_file_infos(files: list[FileInfo], config: TraversalConfig) -> list[FileInfo]:
-    """Sort FileInfo objects according to TraversalConfig criteria and grouping."""
+    """Sort FileInfo objects according to TraversalConfig criteria and grouping.
+
+    Sorting by ``SortKey.CTIME`` reads ``st_ctime``, which is the inode status
+    change time on POSIX but the file creation time on Windows.
+    """
     if config.sort_by == SortKey.NONE:
         return files
 
@@ -181,12 +185,15 @@ def _sort_file_infos(files: list[FileInfo], config: TraversalConfig) -> list[Fil
             return (natural_sort_key(name, ignore_case=config.ignore_case),)
 
         if config.sort_by in (SortKey.TIME, SortKey.MTIME, SortKey.CTIME):
+            # st_ctime is the inode status change time on POSIX and the file
+            # creation time on Windows; see the note on _sort_file_infos.
+            time_attr = "st_ctime" if config.sort_by == SortKey.CTIME else "st_mtime"
             try:
-                mtime = f.path.stat().st_mtime if f.path.exists() else 0.0
+                timestamp = getattr(f.path.stat(), time_attr) if f.path.exists() else 0.0
             except OSError:
-                mtime = 0.0
+                timestamp = 0.0
 
-            return (mtime, name)
+            return (timestamp, name)
 
         if config.sort_by == SortKey.SIZE:
             return (f.size_bytes, name)
