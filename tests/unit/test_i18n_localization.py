@@ -365,7 +365,7 @@ def test_sync_system_locale_all_candidates_fail(monkeypatch: pytest.MonkeyPatch)
 
 def test_timestamp_localization_and_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
     """Verify timestamp formatting respects nl_langinfo and falls back across platforms."""
-    ts = dt.datetime(2026, 10, 20, 14, 30, 0, tzinfo=dt.timezone.utc).timestamp()
+    ts = dt.datetime(2026, 10, 20, 14, 30, 0, tzinfo=dt.UTC).timestamp()
 
     # C / POSIX default
     with override_locale("C"):
@@ -481,7 +481,7 @@ def test_resolve_time_format_exceptions_and_value_error(monkeypatch: pytest.Monk
     mock_date = MagicMock()
     mock_date.strftime.side_effect = [ValueError("Invalid format"), "fallback_time"]
     mock_dt = MagicMock()
-    mock_dt.timezone.utc = dt.timezone.utc
+    mock_dt.timezone.utc = dt.UTC
     mock_dt.fromtimestamp.return_value.astimezone.return_value = mock_date
     monkeypatch.setattr(findfmt.utils.strings.dt, "datetime", mock_dt)
 

@@ -275,7 +275,7 @@ def format_timestamp(ts: float | None, fmt: str | None = None) -> str:
 
     time_fmt = resolve_time_format(fmt)
     try:
-        date_obj = dt.datetime.fromtimestamp(ts, tz=dt.timezone.utc).astimezone()
+        date_obj = dt.datetime.fromtimestamp(ts, tz=dt.UTC).astimezone()
         try:
             return date_obj.strftime(time_fmt)
         except ValueError:

@@ -116,7 +116,7 @@
     <!-- Metadata Bottom Info -->
     <g transform="translate(0, 275)">
       <text x="0" y="16" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" font-weight="500">
-        github.com/bdperkin/findfmt  •  MIT Licensed  •  Python 3.10+
+        github.com/bdperkin/findfmt  •  MIT Licensed  •  Python 3.11+
       </text>
     </g>
   </g>

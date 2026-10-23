@@ -182,7 +182,7 @@ mitigations implemented in `findfmt`.
 - **Mitigation**: Direct pushes to `main` are strictly blocked using GitHub branch protection rules
   enforced for all users including administrators (`enforce_admins: true`). Every change requires a
   feature branch and a Pull Request. All CI matrix checks (multi-platform tests across Python
-  3.10–3.14 on Linux, macOS, and Windows, 100% statement and branch coverage, strict static typing,
+  3.11–3.14 on Linux, macOS, and Windows, 100% statement and branch coverage, strict static typing,
   and linters) must pass before a merge can occur. For solo maintainer development, changesets are
   audited and verified via isolated feature branches and squash-merged to preserve linear history;
   external contributions require mandatory maintainer code review and approval.

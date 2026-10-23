@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-class OutputFormat(str, enum.Enum):
+class OutputFormat(enum.StrEnum):
     """Supported output serialization formats."""
 
     TEXT = "text"

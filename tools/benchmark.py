@@ -10,7 +10,7 @@ import sys
 import tempfile
 import time
 import tracemalloc
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -461,7 +461,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         report = BenchmarkReport(
-            datetime.now(timezone.utc).isoformat(),
+            datetime.now(UTC).isoformat(),
             get_version(),
             platform.python_version(),
             f"{platform.system()}-{platform.machine()}",

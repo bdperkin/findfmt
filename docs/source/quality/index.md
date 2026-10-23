@@ -26,7 +26,7 @@ topology baselines and regression testing procedures.
 
 ## 3. Python Runtime Compatibility
 
-`findfmt` officially supports Python 3.10 through 3.15, with automated CI matrices testing Ubuntu,
+`findfmt` officially supports Python 3.11 through 3.15, with automated CI matrices testing Ubuntu,
 macOS, and Windows. See the complete analysis and version matrix:
 
 ```{toctree}

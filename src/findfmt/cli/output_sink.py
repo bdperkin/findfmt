@@ -9,12 +9,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, TextIO, cast
-
-if sys.version_info >= (3, 11):  # pragma: no cover
-    from typing import Self
-else:  # pragma: no cover
-    from typing_extensions import Self
+from typing import TYPE_CHECKING, Self, TextIO, cast
 
 import typer
 

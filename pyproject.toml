@@ -28,7 +28,7 @@ license = { text = "MIT" }
 authors = [
   { name = "Brandon Perkins", email = "bdperkin@gmail.com" },
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
@@ -36,7 +36,6 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -52,7 +51,6 @@ dependencies = [
   "pathspec>=1.0.1",
   "pyyaml>=6.0.1",
   "rich>=13.8",
-  "tomli>=2.0.1; python_version<'3.11'",
   "typer>=0.16",
   "typing-extensions>=4; python_version<'3.12'",
 ]
@@ -127,7 +125,7 @@ build.targets.sdist.include = [
 build.targets.sdist.artifacts = [ "*.mo" ]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 100
 src = [ "src", "tests", "tools" ]
 lint.select = [ "ALL" ]
@@ -183,7 +181,7 @@ whitelist-regex = []
 
 [tool.deptry]
 extend_exclude = [ "docs", "tests", "tools" ]
-per_rule_ignores = { DEP002 = [ "tomli", "typing-extensions" ] }
+per_rule_ignores = { DEP002 = [ "typing-extensions" ] }
 known_first_party = [ "findfmt" ]
 
 [tool.vulture]

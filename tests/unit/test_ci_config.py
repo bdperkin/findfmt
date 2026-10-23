@@ -1,14 +1,9 @@
 """Tests for CI workflows and Dependabot configuration."""
 
 import fnmatch
-import sys
+import tomllib
 from pathlib import Path
 from typing import Any
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib  # type: ignore[no-redef]
 
 import yaml
 
@@ -315,3 +310,71 @@ def test_version_sensitive_checkouts_fetch_full_history() -> None:
             f"Job {job_name} in {wf_path.name} must set fetch-depth: 0 for actions/checkout, "
             f"got {with_cfg.get('fetch-depth')}"
         )
+
+
+MINIMUM_PYTHON = (3, 11)
+
+
+def _load_pyproject() -> dict[str, Any]:
+    """Load and parse pyproject.toml."""
+    with (_repo_root() / "pyproject.toml").open("rb") as f:
+        return tomllib.load(f)
+
+
+def _minor_version(version: str) -> tuple[int, int]:
+    """Parse a ``3.X`` or ``3.X-dev`` version string into a ``(major, minor)`` tuple."""
+    major, minor = version.split("-", 1)[0].split(".")[:2]
+    return int(major), int(minor)
+
+
+def test_requires_python_minimum_is_3_11() -> None:
+    """Validate the declared minimum Python version is 3.11 (Python 3.10 is EOL)."""
+    assert _load_pyproject()["project"]["requires-python"] == ">=3.11"
+
+
+def test_no_python_classifiers_below_minimum() -> None:
+    """Validate no ``Programming Language :: Python :: 3.X`` classifier is below the minimum."""
+    prefix = "Programming Language :: Python :: 3."
+    classifiers = _load_pyproject()["project"]["classifiers"]
+    versions = [c.removeprefix("Programming Language :: Python :: ") for c in classifiers]
+    below = [
+        v
+        for c, v in zip(classifiers, versions, strict=True)
+        if c.startswith(prefix) and v[2:].isdigit() and _minor_version(v) < MINIMUM_PYTHON
+    ]
+    assert not below, f"Classifiers below Python {MINIMUM_PYTHON}: {below}"
+
+
+def test_ci_matrix_excludes_eol_python() -> None:
+    """Validate the CI test matrix runs no Python version below the minimum."""
+    matrix = _load_ci_workflow()["jobs"]["test-matrix"]["strategy"]["matrix"]
+    versions = [str(v) for v in matrix["python-version"]]
+    versions += [str(e["python-version"]) for e in matrix.get("include", [])]
+    assert versions, "test-matrix must define python-version entries"
+    below = [v for v in versions if _minor_version(v) < MINIMUM_PYTHON]
+    assert not below, f"CI matrix includes Python versions below {MINIMUM_PYTHON}: {below}"
+
+
+def test_tomli_not_a_dependency() -> None:
+    """Validate tomli is not declared anywhere now that tomllib is always available."""
+    data = _load_pyproject()
+
+    def _names(specs: list[Any]) -> set[str]:
+        return {
+            s.split(";")[0].split(">=")[0].split("==")[0].strip().lower()
+            for s in specs
+            if isinstance(s, str)
+        }
+
+    assert "tomli" not in _names(data["project"]["dependencies"])
+    for group, specs in data.get("dependency-groups", {}).items():
+        assert "tomli" not in _names(specs), f"tomli found in dependency group {group!r}"
+
+    ignores = data["tool"]["deptry"].get("per_rule_ignores", {})
+    for rule, packages in ignores.items():
+        assert "tomli" not in packages, f"tomli found in deptry {rule} ignores"
+
+
+def test_ruff_target_matches_requires_python() -> None:
+    """Validate ruff's target version matches the minimum supported Python."""
+    assert _load_pyproject()["tool"]["ruff"]["target-version"] == "py311"

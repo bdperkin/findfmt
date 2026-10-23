@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 __all__ = ["FileInfo", "SortKey", "TraversalConfig"]
 
 
-class SortKey(str, Enum):
+class SortKey(StrEnum):
     """Sort criteria keys for directory traversal."""
 
     NAME = "name"

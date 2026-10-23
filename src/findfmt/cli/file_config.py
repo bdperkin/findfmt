@@ -4,14 +4,9 @@ from __future__ import annotations
 
 import os
 import platform
-import sys
+import tomllib
 from pathlib import Path
 from typing import Any
-
-if sys.version_info >= (3, 11):  # pragma: no cover
-    import tomllib
-else:  # pragma: no cover
-    import tomli as tomllib  # type: ignore[no-redef]
 
 import typer
 

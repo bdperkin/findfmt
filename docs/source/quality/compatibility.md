@@ -8,25 +8,25 @@ ______________________________________________________________________
 
 ## 1. Compatibility Overview & Runtime Matrix
 
-`findfmt` enforces `requires-python = ">=3.10"`. The runtime compatibility status across modern and
+`findfmt` enforces `requires-python = ">=3.11"`. The runtime compatibility status across modern and
 legacy Python interpreters is summarized below:
 
-| Python Version |  Release / EOL Status  | Tested on Fedora 44 | Build & CLI Execution | Test Suite & 100% Coverage | Compatibility Verdict & Primary Rationale                                                                                                              |
-| :------------: | :--------------------: | :-----------------: | :-------------------: | :------------------------: | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
-|    **3.6**     |     EOL (Dec 2021)     |    Yes (3.6.15)     |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and `typer>=0.12` drop 3.6; lacks runtime PEP 604 type support.                     |
-|    **3.7**     |     EOL (Jun 2023)     |         N/A         |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and `typer>=0.12` drop 3.7.                                                         |
-|    **3.8**     |     EOL (Oct 2024)     |         N/A         |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6.2` drops 3.8; lacks standard library `typing.Annotated`.                             |
-|    **3.9**     |     EOL (Oct 2025)     |    Yes (3.9.25)     |        Blocked        |            N/A             | **Unsupported**: `@dataclass(slots=True)` raises `TypeError`; `identify>=2.6.16` and `typer>=0.24` require `>=3.10`; runtime PEP 604 reflection fails. |
-|    **3.10**    | Security (to Oct 2026) |    Yes (3.10.21)    |      **Passed**       |         **Passed**         | **Supported (Minimum)**: Baseline runtime; `@dataclass(slots=True)` and PEP 604 supported; requires `tomli` shim for TOML config parsing.              |
-|    **3.11**    |   Bugfix / Security    |    Yes (3.11.16)    |      **Passed**       |         **Passed**         | **Supported**: Native `tomllib` available; exceptional performance and stability.                                                                      |
-|    **3.12**    |   Bugfix / Security    |    Yes (3.12.14)    |      **Passed**       |         **Passed**         | **Supported**: Full native support; standard CI testing target.                                                                                        |
-|    **3.13**    |   Current Mainstream   |    Yes (3.13.15)    |      **Passed**       |         **Passed**         | **Supported**: Primary local development target; wheel smoke-test target.                                                                              |
-|    **3.14**    |    Certified Modern    |    Yes (3.14.7)     |      **Passed**       |         **Passed**         | **Supported (Certified)**: Primary CI quality gate target; PyPI Trove classifier active; 100% statement and branch coverage.                           |
-|    **3.15**    | Preview / Dev (rc/dev) |   Yes (3.15.0rc2)   |      **Passed**       |         **Passed**         | **Supported (Preview)**: Validated against 3.15.0rc2 and CI `3.15-dev`; PyPI Trove classifier active; 100% statement and branch coverage.              |
+| Python Version |  Release / EOL Status  | Tested on Fedora 44 | Build & CLI Execution | Test Suite & 100% Coverage | Compatibility Verdict & Primary Rationale                                                                                                                                       |
+| :------------: | :--------------------: | :-----------------: | :-------------------: | :------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|    **3.6**     |     EOL (Dec 2021)     |    Yes (3.6.15)     |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and `typer>=0.12` drop 3.6; lacks runtime PEP 604 type support.                                              |
+|    **3.7**     |     EOL (Jun 2023)     |         N/A         |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and `typer>=0.12` drop 3.7.                                                                                  |
+|    **3.8**     |     EOL (Oct 2024)     |         N/A         |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6.2` drops 3.8; lacks standard library `typing.Annotated`.                                                      |
+|    **3.9**     |     EOL (Oct 2025)     |    Yes (3.9.25)     |        Blocked        |            N/A             | **Unsupported**: `@dataclass(slots=True)` raises `TypeError`; `identify>=2.6.16` and `typer>=0.24` require `>=3.10`; runtime PEP 604 reflection fails.                          |
+|    **3.10**    |     EOL (Oct 2026)     |    Yes (3.10.21)    |        Blocked        |            N/A             | **Unsupported**: Reached EOL on 2026-10-01; required the `tomli` and `typing_extensions.Self` shims; security fixes for dependencies such as `filelock` no longer support 3.10. |
+|    **3.11**    | Security (to Oct 2027) |    Yes (3.11.16)    |      **Passed**       |         **Passed**         | **Supported (Minimum)**: Baseline runtime; native `tomllib` (PEP 680) and `typing.Self` (PEP 673); `typing.override` (PEP 698) still comes from `typing-extensions`.            |
+|    **3.12**    |   Bugfix / Security    |    Yes (3.12.14)    |      **Passed**       |         **Passed**         | **Supported**: Full native support; standard CI testing target.                                                                                                                 |
+|    **3.13**    |   Current Mainstream   |    Yes (3.13.15)    |      **Passed**       |         **Passed**         | **Supported**: Primary local development target; wheel smoke-test target.                                                                                                       |
+|    **3.14**    |    Certified Modern    |    Yes (3.14.7)     |      **Passed**       |         **Passed**         | **Supported (Certified)**: Primary CI quality gate target; PyPI Trove classifier active; 100% statement and branch coverage.                                                    |
+|    **3.15**    | Preview / Dev (rc/dev) |   Yes (3.15.0rc2)   |      **Passed**       |         **Passed**         | **Supported (Preview)**: Validated against 3.15.0rc2 and CI `3.15-dev`; PyPI Trove classifier active; 100% statement and branch coverage.                                       |
 
 ______________________________________________________________________
 
-## 2. Minimum Python Version Analysis (3.6 – 3.9)
+## 2. Minimum Python Version Analysis (3.6 – 3.10)
 
 ### 2.1. Upstream Dependency Ecosystem Floors
 
@@ -72,9 +72,15 @@ A critical factor in determining the minimum supported runtime is the upstream d
 
 3. **Standard Library Configuration Parsing**:
 
-   - Python 3.11+ includes `tomllib` in the standard library.
-   - Python 3.10 is cleanly supported using the conditional dependency
-     `tomli>=2.0.1; python_version<'3.11'`.
+   - Python 3.11+ includes `tomllib` (PEP 680) in the standard library, so `findfmt` imports it
+     directly. The `tomli` shim that Python 3.10 required has been removed.
+
+4. **`typing.Self` (PEP 673)**:
+
+   - Python 3.11+ provides `typing.Self`, which `findfmt` uses for context-manager return types. The
+     `typing_extensions.Self` fallback that Python 3.10 required has been removed.
+   - `typing.override` (PEP 698) only arrived in Python 3.12, so `typing-extensions` remains a
+     dependency on Python 3.11.
 
 ### 2.3. Tooling and Linter Floors
 
@@ -90,13 +96,16 @@ The project's verification suite relies on modern developer tooling:
 - Python 3.7 reached EOL in June 2023.
 - Python 3.8 reached EOL in October 2024.
 - Python 3.9 reached EOL in October 2025.
-- Python 3.10 is the oldest currently maintained Python version receiving security updates (through
-  October 2026).
+- Python 3.10 reached EOL on October 1, 2026.
+- Python 3.11 is the oldest currently maintained Python version receiving security updates (through
+  October 2027).
 
 Supporting Python < 3.10 would require downgrading data models, discarding `slots=True`, introducing
 verbose `typing.Union` constructs, and freezing dependencies to outdated versions with unpatched
-vulnerabilities. Therefore, maintaining `requires-python = ">=3.10"` is technically sound and
-necessary.
+vulnerabilities. Python 3.10 itself no longer receives security fixes, and dependencies have started
+shipping security fixes only for Python 3.11+ (for example, `filelock` 4.2.1). Supporting it would
+also keep the `tomli` and `typing_extensions.Self` shims alive. Therefore,
+`requires-python = ">=3.11"` is technically sound and necessary.
 
 ______________________________________________________________________
 
@@ -134,7 +143,7 @@ Automated verification runs across all certified runtimes and operating systems:
 ```yaml
 matrix:
   os: [ubuntu-latest, macos-latest, windows-latest]
-  python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+  python-version: ['3.11', '3.12', '3.13', '3.14']
   include:
     - os: ubuntu-latest
       python-version: 3.15-dev

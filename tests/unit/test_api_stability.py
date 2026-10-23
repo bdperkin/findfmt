@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import ast
+import enum
 import importlib
+import re
 from pathlib import Path
 
 import pytest
 
 import findfmt
+from findfmt.cli.file_config import _format_toml_value
 from findfmt.exceptions import (
     FindFmtError,
     InvalidSortCriteriaError,
@@ -259,3 +262,27 @@ def test_project_description_has_no_typos() -> None:
     pyproject = (Path(__file__).resolve().parents[2] / "pyproject.toml").read_text(encoding="utf-8")
     assert "A.gitignore" not in pyproject
     assert "A .gitignore-aware" in pyproject
+
+
+def test_no_pre_311_version_guards() -> None:
+    """Verify no ``sys.version_info`` guard targets Python 3.11 or older (3.11 is the minimum)."""
+    guard = re.compile(r"version_info\s*[<>]=?\s*\(\s*3\s*,\s*(\d+)\s*\)")
+    root = Path(__file__).resolve().parents[2]
+    offenders = [
+        f"{path.relative_to(root)}:{lineno}"
+        for top in ("src", "tests", "tools")
+        for path in sorted((root / top).rglob("*.py"))
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
+        if (match := guard.search(line)) and int(match.group(1)) <= 11
+    ]
+    assert not offenders, f"Obsolete Python <= 3.11 version guards: {offenders}"
+
+
+@pytest.mark.parametrize("enum_cls", [findfmt.SortKey, findfmt.OutputFormat])
+def test_public_str_enums_stringify_to_value(enum_cls: type[enum.StrEnum]) -> None:
+    """Verify public string enums render as their value in str(), format() and TOML output."""
+    for member in enum_cls:
+        assert str(member) == member.value
+        assert f"{member}" == member.value
+        assert _format_toml_value(member) == f'"{member.value}"'
+        assert enum_cls(member.value) is member

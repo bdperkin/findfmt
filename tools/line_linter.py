@@ -4,14 +4,10 @@ from __future__ import annotations
 
 import argparse
 import sys
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
 
 import pathspec
 
