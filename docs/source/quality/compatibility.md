@@ -141,7 +141,9 @@ ______________________________________________________________________
 Automated verification runs across all certified runtimes and operating systems. Every advertised
 version (3.11–3.15) is a gating job on all three operating systems. The next feature release runs as
 an experimental `3.16-dev` job: it may use pre-release interpreters, never blocks a merge, skips the
-Codecov upload, and is not advertised with a Trove classifier.
+Codecov upload, and is not advertised with a Trove classifier. Until a 3.16 build is available on
+the runners, the job reports a warning and skips the test run instead of falling back to the
+runner's default Python.
 
 ```yaml
 matrix:

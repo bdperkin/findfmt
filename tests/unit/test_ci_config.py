@@ -443,3 +443,32 @@ def test_next_python_ci_job_is_non_gating() -> None:
         assert "!matrix.experimental" in str(upload.get("if", "")), (
             f"Step {upload.get('name')!r} must skip Codecov uploads for experimental entries"
         )
+
+
+def test_test_matrix_never_falls_back_to_system_python() -> None:
+    """Validate matrix jobs test the interpreter setup-python installed, never the runner's default.
+
+    When an experimental interpreter (e.g. ``3.16-dev``) has no runner build yet, setup-python fails
+    under ``continue-on-error``; without these guards uv silently tests the system Python instead.
+    """
+    steps = {step.get("name"): step for step in _test_matrix_job()["steps"]}
+    assert steps["Set up Python"].get("id") == "setup-python"
+
+    install = steps["Install Dependencies"]
+    assert (
+        install.get("env", {}).get("UV_PYTHON") == "${{ steps.setup-python.outputs.python-path }}"
+    )
+
+    succeeded = "${{ steps.setup-python.outcome == 'success' }}"
+    for name in (
+        "Install Dependencies",
+        "Populate Global Gitignore to Verify Hermeticity",
+        "Run Pytest with 100% Coverage Enforcement",
+    ):
+        assert steps[name].get("if") == succeeded, f"Step {name!r} must require a successful setup"
+
+    reporters = [
+        s for s in steps.values() if s.get("if") == "${{ steps.setup-python.outcome != 'success' }}"
+    ]
+    assert len(reporters) == 1, "test-matrix must report when the requested Python is unavailable"
+    assert "::warning" in reporters[0]["run"]

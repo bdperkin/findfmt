@@ -178,19 +178,36 @@ jobs:
         with:
           enable-cache: true
       - name: Set up Python
+        id: setup-python
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
           python-version: ${{ matrix.python-version }}
           allow-prereleases: ${{ matrix.experimental || false }}
         continue-on-error: ${{ matrix.experimental || false }}
+      # Experimental entries can request interpreters that have no runner build yet. Report that
+      # instead of silently testing the runner's system Python under the experimental job name.
+      - name: Report Unavailable Python Interpreter
+        if: ${{ steps.setup-python.outcome != 'success' }}
+        shell: bash
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
+        run: |
+          echo "::warning title=Python ${PYTHON_VERSION} unavailable::No Python ${PYTHON_VERSION} build is available on this runner yet; dependency installation and tests were skipped."
+          echo "Python ${PYTHON_VERSION} was not tested: no runner build is available yet." >> "$GITHUB_STEP_SUMMARY"
       - name: Install Dependencies
+        if: ${{ steps.setup-python.outcome == 'success' }}
+        env:
+          # Pin uv to the interpreter installed above so no job falls back to the system Python.
+          UV_PYTHON: ${{ steps.setup-python.outputs.python-path }}
         run: uv sync --locked --all-groups
         continue-on-error: ${{ matrix.experimental || false }}
       - name: Populate Global Gitignore to Verify Hermeticity
+        if: ${{ steps.setup-python.outcome == 'success' }}
         run: |
           uv run python -c "from pathlib import Path; p = Path.home() / '.config' / 'git'; p.mkdir(parents=True, exist_ok=True); (p / 'ignore').write_text('*\n', encoding='utf-8')"
         continue-on-error: ${{ matrix.experimental || false }}
       - name: Run Pytest with 100% Coverage Enforcement
+        if: ${{ steps.setup-python.outcome == 'success' }}
         run: uv run pytest
         continue-on-error: ${{ matrix.experimental || false }}
       - name: Upload Coverage to Codecov
