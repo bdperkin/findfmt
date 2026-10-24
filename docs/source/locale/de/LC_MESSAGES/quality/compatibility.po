@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 01:04-0400\n"
+"POT-Creation-Date: 2026-10-24 01:21-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -565,4 +565,89 @@ msgid ""
 "classifier. Until a 3.16 build is available on the runners, the job "
 "reports a warning and skips the test run instead of falling back to the "
 "runner's default Python."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:163 0e8569a187a64e25b91753601ecc76ba
+msgid "5. Python Version Support Lifecycle"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:165 311892be3d714153af1e537346f36f65
+msgid ""
+"`findfmt` supports every CPython feature release from the oldest version "
+"still receiving security fixes to the newest stable release, and tests "
+"the next release early without advertising it. Each change below is "
+"guarded by `tests/unit/test_python_support_policy.py`, so a partial "
+"update fails CI."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:170 1219c5721be3492c999f2534cfbad33f
+msgid "5.1. When the Oldest Version Reaches End of Life"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:172 e9b528298b694804a63dc3f0317e490b
+msgid ""
+"Raise `requires-python` in `pyproject.toml`, remove the old Trove "
+"classifier, and raise ruff's `target-version`. Re-lock with `uv lock` and"
+" regenerate `.clusterfuzzlite/requirements.txt`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:174 c5ca13896a1e4032960c3d32e1502785
+msgid ""
+"Remove the version from the `test-matrix` in `.github/workflows/ci.yml`, "
+"and remove compatibility code that only the old version needed "
+"(`sys.version_info` guards and fallback imports)."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:176 d1754bd3e1184eb08433765fcef28a94
+msgid ""
+"**Just before merging**, remove the three `Test (<os> - Python <old>)` "
+"required status checks from branch protection on `main`. Otherwise the "
+"pull request waits for checks that no longer run."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:179 131d222179534f6781b6581907409cf9
+msgid ""
+"Update the supported range in this guide, `docs/source/quality/index.md`,"
+" `CONTRIBUTING.md`, `SECURITY.md`, and `assets/social-preview.svg` (then "
+"regenerate the PNG), regenerate the documentation catalogs (`make -C docs"
+" intl-update`), and record the change as breaking in the changelog. "
+"Python 3.10 was dropped this way in #441."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:184 b14d3717413e4f7daa7e3bac7002879d
+msgid "5.2. When a New Version Is Released"
+msgstr ""
+
+#: ../../source/quality/compatibility.md:186 d2844daef95b4b9c8da915930dd194df
+msgid ""
+"Move the version from the experimental `<version>-dev` matrix entry into "
+"the gating `python-version` list, and point the experimental entry at the"
+" next feature release."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:188 dbea25a3de9741648de69b22630b52b2
+msgid ""
+"Add the new Trove classifier and raise `pyproject-fmt --max-supported-"
+"python` in `.pre-commit-config.yaml`."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:190 5cbeeeadfd464ed1a9a9f516a99c0784
+msgid ""
+"Move the single-interpreter jobs (quality gate, documentation, release, "
+"and packaging smoke test) to the new version once the toolchain passes on"
+" it. Update the container image when matching `uv` builder and Python "
+"runtime images exist for the same Debian release."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:193 93ecc3f6572e45eeb49986d0519674fe
+msgid ""
+"**After the new jobs report green**, add the three `Test (<os> - Python "
+"<new>)` checks to the required status checks on `main`. Never require the"
+" experimental job."
+msgstr ""
+
+#: ../../source/quality/compatibility.md:195 de9682f16b0f48dd91e9da3594fdb8d4
+msgid ""
+"Update the docs as in step 4 of §5.1. Python 3.15 was added this way in "
+"#335 and #440."
 msgstr ""

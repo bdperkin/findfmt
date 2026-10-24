@@ -249,3 +249,56 @@ def test_dockerfile_stages_share_python_and_debian_release() -> None:
         f"builder {builder.groups()} and runtime {runtime.groups()} must match"
     )
     assert builder.group(1) in _classifier_versions(), "container Python must be supported"
+
+
+ALL_PLATFORMS = {"ubuntu-latest", "macos-latest", "windows-latest"}
+EN_DASH = "\u2013"  # the docs write ranges as "3.11\u20133.15"
+
+
+def _supported_range() -> tuple[str, str]:
+    """Return the supported ``(minimum, maximum)`` versions from requires-python and classifiers."""
+    minimum = str(_load_pyproject()["project"]["requires-python"]).removeprefix(">=")
+    return minimum, max(_classifier_versions(), key=_minor_version)
+
+
+def test_classifiers_are_exactly_the_supported_range() -> None:
+    """Validate the classifiers cover every minor from requires-python to the maximum (#442)."""
+    minimum, maximum = _supported_range()
+    expected = [f"3.{m}" for m in range(_minor_version(minimum)[1], _minor_version(maximum)[1] + 1)]
+    assert sorted(_classifier_versions(), key=_minor_version) == expected
+
+
+def test_every_supported_version_runs_on_all_platforms() -> None:
+    """Validate the gating matrix pairs every supported version with Linux, macOS, and Windows."""
+    matrix = _test_matrix_job()["strategy"]["matrix"]
+    assert set(matrix["os"]) == ALL_PLATFORMS
+    assert not matrix.get("exclude"), "test-matrix must not exclude supported combinations"
+    assert set(_classifier_versions()) <= {str(v) for v in matrix["python-version"]}
+
+
+def test_test_matrix_runs_on_every_pull_request() -> None:
+    """Validate the matrix, including the 3.16-dev preview, runs on every pull request to main."""
+    workflow = _load_ci_workflow()
+    triggers = workflow.get("on", workflow.get(True))  # PyYAML loads a bare `on:` key as True
+    assert "main" in triggers["pull_request"]["branches"]
+    job = workflow["jobs"]["test-matrix"]
+    assert "if" not in job, "test-matrix must not be conditional"
+    assert job.get("needs") == "quality-gate"
+
+
+def test_docs_state_the_supported_range() -> None:
+    """Validate user-facing docs and the social preview card state the supported range."""
+    minimum, maximum = _supported_range()
+    expected = {
+        "docs/source/quality/index.md": f"Python {minimum} through {maximum}",
+        "docs/source/quality/compatibility.md": f'requires-python = ">={minimum}"',
+        "CONTRIBUTING.md": f"Python {minimum}{EN_DASH}{maximum}",
+        "SECURITY.md": f"{minimum}{EN_DASH}{maximum} on Linux",
+        "assets/social-preview.svg": f"Python {minimum}+",
+    }
+    stale = {
+        path: text
+        for path, text in expected.items()
+        if text not in (_repo_root() / path).read_text(encoding="utf-8")
+    }
+    assert not stale, f"Docs do not state the supported range: {stale}"
