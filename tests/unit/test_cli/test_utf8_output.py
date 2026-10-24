@@ -12,13 +12,13 @@ TEXT = "╭─ 日本.txt → a.txt ─╮\n"
 
 
 def _stream(encoding: str = "cp1252") -> io.TextIOWrapper:
-    return io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors="surrogateescape")
+    return io.TextIOWrapper(io.BytesIO(), encoding=encoding, errors="surrogateescape", newline="")
 
 
 def test_windows_code_page_streams_switch_to_utf8() -> None:
     """A cp1252 stream on Windows is reconfigured to UTF-8 and keeps its error handler."""
     raw = io.BytesIO()
-    stream = io.TextIOWrapper(raw, encoding="cp1252", errors="surrogateescape")
+    stream = io.TextIOWrapper(raw, encoding="cp1252", errors="surrogateescape", newline="")
     with pytest.raises(UnicodeEncodeError):
         stream.write(TEXT)
 
