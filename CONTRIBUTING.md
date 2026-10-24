@@ -155,7 +155,7 @@ git commit -s -m "feat: add support for MIME categories"
    vale *.md docs/
    ```
 4. **Code Review & Quality Gates**:
-   - Every PR triggers our full automated CI suite (Linux, macOS, Windows across Python 3.11–3.14,
+   - Every PR triggers our full automated CI suite (Linux, macOS, Windows across Python 3.11–3.15,
      100% test and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL,
      ClusterFuzzLite, Vale prose linting, and dependency review). All status checks must pass before
      merging.

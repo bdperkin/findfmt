@@ -378,3 +378,68 @@ def test_tomli_not_a_dependency() -> None:
 def test_ruff_target_matches_requires_python() -> None:
     """Validate ruff's target version matches the minimum supported Python."""
     assert _load_pyproject()["tool"]["ruff"]["target-version"] == "py311"
+
+
+NON_GATING_EXPR = "${{ matrix.experimental || false }}"
+NEXT_PYTHON_DEV = "3.16-dev"
+
+
+def _test_matrix_job() -> dict[str, Any]:
+    """Return the ``test-matrix`` job from ci.yml."""
+    return _load_ci_workflow()["jobs"]["test-matrix"]
+
+
+def _classifier_versions() -> list[str]:
+    """Return the ``3.X`` versions advertised by ``Programming Language :: Python`` classifiers."""
+    prefix = "Programming Language :: Python :: "
+    return [
+        c.removeprefix(prefix)
+        for c in _load_pyproject()["project"]["classifiers"]
+        if c.startswith(prefix + "3.") and c.removeprefix(prefix)[2:].isdigit()
+    ]
+
+
+def test_classifiers_match_required_ci_matrix() -> None:
+    """Validate every advertised Python version runs in CI as a gating, non-experimental job."""
+    job = _test_matrix_job()
+    matrix = job["strategy"]["matrix"]
+    experimental = {
+        str(e["python-version"]) for e in matrix.get("include", []) if e.get("experimental")
+    }
+    gating = {str(v) for v in matrix["python-version"]} - experimental
+
+    assert "continue-on-error" not in job, "test-matrix must not set job-level continue-on-error"
+    for step in job["steps"]:
+        if "continue-on-error" in step:
+            assert step["continue-on-error"] == NON_GATING_EXPR, (
+                f"Step {step.get('name')!r} may only continue on error for experimental entries"
+            )
+
+    missing = [v for v in _classifier_versions() if v not in gating]
+    assert not missing, f"Advertised Python versions without a gating CI job: {missing}"
+
+
+def test_next_python_ci_job_is_non_gating() -> None:
+    """Validate the next Python release runs as a non-gating preview job and is not advertised."""
+    job = _test_matrix_job()
+    previews = [
+        e
+        for e in job["strategy"]["matrix"].get("include", [])
+        if str(e.get("python-version")) == NEXT_PYTHON_DEV
+    ]
+    assert len(previews) == 1, f"test-matrix must include exactly one {NEXT_PYTHON_DEV} entry"
+    assert previews[0].get("experimental") is True, f"{NEXT_PYTHON_DEV} must be experimental"
+    assert "3.16" not in _classifier_versions(), "Python 3.16 must not be advertised yet"
+
+    steps = {step.get("name"): step for step in job["steps"]}
+    setup = steps["Set up Python"]
+    assert setup.get("continue-on-error") == NON_GATING_EXPR
+    assert setup["with"].get("allow-prereleases") == NON_GATING_EXPR, (
+        "Pre-release interpreters must only be allowed for experimental entries"
+    )
+    uploads = [s for name, s in steps.items() if name and "Codecov" in name]
+    assert uploads, "test-matrix must upload coverage to Codecov"
+    for upload in uploads:
+        assert "!matrix.experimental" in str(upload.get("if", "")), (
+            f"Step {upload.get('name')!r} must skip Codecov uploads for experimental entries"
+        )

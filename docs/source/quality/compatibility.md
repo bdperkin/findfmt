@@ -22,7 +22,7 @@ legacy Python interpreters is summarized below:
 |    **3.12**    |   Bugfix / Security    |    Yes (3.12.14)    |      **Passed**       |         **Passed**         | **Supported**: Full native support; standard CI testing target.                                                                                                                 |
 |    **3.13**    |   Current Mainstream   |    Yes (3.13.15)    |      **Passed**       |         **Passed**         | **Supported**: Primary local development target; wheel smoke-test target.                                                                                                       |
 |    **3.14**    |    Certified Modern    |    Yes (3.14.7)     |      **Passed**       |         **Passed**         | **Supported (Certified)**: Primary CI quality gate target; PyPI Trove classifier active; 100% statement and branch coverage.                                                    |
-|    **3.15**    | Preview / Dev (rc/dev) |   Yes (3.15.0rc2)   |      **Passed**       |         **Passed**         | **Supported (Preview)**: Validated against 3.15.0rc2 and CI `3.15-dev`; PyPI Trove classifier active; 100% statement and branch coverage.                                       |
+|    **3.15**    | Preview / Dev (rc/dev) |   Yes (3.15.0rc2)   |      **Passed**       |         **Passed**         | **Supported (Preview)**: Validated against 3.15.0rc2; gating CI on Linux, macOS, and Windows; PyPI Trove classifier active; 100% statement and branch coverage.                 |
 
 ______________________________________________________________________
 
@@ -130,22 +130,25 @@ Python 3.15 is validated and certified for development and preview:
 - **Local Testing**: Verified under Fedora 44 with `CPython 3.15.0rc2`.
 - **Test Suite Pass**: 91 of 91 unit and integration tests pass with 100.00% statement and branch
   coverage with zero deprecation warnings.
-- **CI Test Matrix**: Runs as an experimental builder on `ubuntu-latest` with
-  `python-version: 3.15-dev`.
+- **CI Test Matrix**: Runs as a gating `python-version: '3.15'` job on `ubuntu-latest`,
+  `macos-latest`, and `windows-latest`, and uploads coverage like the other supported versions.
 - **Trove Classifier**: Officially published on PyPI as `Programming Language :: Python :: 3.15`.
 
 ______________________________________________________________________
 
 ## 4. Multi-Platform CI Matrix
 
-Automated verification runs across all certified runtimes and operating systems:
+Automated verification runs across all certified runtimes and operating systems. Every advertised
+version (3.11–3.15) is a gating job on all three operating systems. The next feature release runs as
+an experimental `3.16-dev` job: it may use pre-release interpreters, never blocks a merge, skips the
+Codecov upload, and is not advertised with a Trove classifier.
 
 ```yaml
 matrix:
   os: [ubuntu-latest, macos-latest, windows-latest]
-  python-version: ['3.11', '3.12', '3.13', '3.14']
+  python-version: ['3.11', '3.12', '3.13', '3.14', '3.15']
   include:
     - os: ubuntu-latest
-      python-version: 3.15-dev
+      python-version: 3.16-dev
       experimental: true
 ```
