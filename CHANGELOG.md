@@ -7,6 +7,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+Upgrading from 1.0.x? See
+[Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html) for what changes and
+what to do.
+
 ### Breaking Changes
 
 - *(build)* Dropped support for Python 3.10 (EOL 2026-10-01); the minimum supported version is now
@@ -14,6 +18,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - *(api)* `SortKey` and `OutputFormat` are now `enum.StrEnum` subclasses, so `str()`, `format()`,
   and f-strings render a member's value (`"size"`) instead of `"SortKey.SIZE"`. Equality with
   strings, hashing, JSON output, CLI help, and configuration handling are unchanged (#441).
+- *(format)* Human-readable sizes use IEC binary unit labels: CLI `-h` output changes from `1.5 K`
+  to `1.5 KiB`, and `findfmt.sizes.format_size()` from `1.5 KB` to `1.5 KiB`. Values are unchanged
+  (#352).
+- *(cli)* Wrapper commands (`findfiles`, `findfilefmt`, `findfilemime`, `findfmt0`, `findshebang`,
+  `findsummary`) exit with status 1 instead of 0 when they stop with an error that carries a message
+  (#373).
+
+### Features
+
+- *(cli)* Add `--exit-status` to exit with status 1 when no files match (#367).
 
 ### CI/CD & Packaging
 

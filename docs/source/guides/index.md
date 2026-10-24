@@ -6,6 +6,7 @@ This section provides tutorials and guides for installing, configuring, and depl
 :maxdepth: 2
 
 installation
+upgrading
 quickstart
 configuration
 ci_integration

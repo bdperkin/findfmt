@@ -306,6 +306,7 @@ ______________________________________________________________________
 - [Accessibility Statement](https://github.com/bdperkin/findfmt/blob/main/ACCESSIBILITY.md)
 - [Changelog](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md)
 - [Documentation & User Guides](https://bdperkin.github.io/findfmt)
+- [Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html)
 
 ## 7. License
 
