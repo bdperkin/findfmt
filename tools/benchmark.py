@@ -390,11 +390,14 @@ def _collect_metrics(
     for top in selected_topologies:
         for tier in selected_tiers:
             target_files = args.files if args.files is not None else TIER_FILE_COUNTS[tier]
-            td = tempfile.TemporaryDirectory(prefix=f"findfmt_bench_{tier}_{top}_")
-            if not args.keep_temp:
+            if args.keep_temp:  # mkdtemp has no finalizer, so the tree survives (#489)
+                root_path = Path(tempfile.mkdtemp(prefix=f"findfmt_bench_{tier}_{top}_"))
+                sys.stderr.write(f"Keeping benchmark tree: {root_path}\n")
+            else:
+                td = tempfile.TemporaryDirectory(prefix=f"findfmt_bench_{tier}_{top}_")
                 cleanups.append(td)
+                root_path = Path(td.name)
 
-            root_path = Path(td.name)
             _, total_dirs = generate_synthetic_tree(
                 root_path,
                 target_files,

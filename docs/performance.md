@@ -211,6 +211,9 @@ uv run python tools/benchmark.py --topology deep --files 5000
 
 # Benchmark real-world monorepo topology with ignored dependencies
 uv run python tools/benchmark.py --topology real-world
+
+# Keep the generated tree on disk for inspection (its path is printed to stderr)
+uv run python tools/benchmark.py --topology deep --files 5000 --keep-temp
 ```
 
 ### 5.4. Formatter Comparison & Classification
