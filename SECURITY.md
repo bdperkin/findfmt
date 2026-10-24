@@ -154,20 +154,37 @@ mitigations implemented in `findfmt`.
   scripts to modify repositories, create tags, or access secrets.
 - **Mitigation**: All GitHub Actions workflows configure default `permissions: contents: read`.
   Elevated permissions (such as `id-token: write`) are strictly confined to release jobs utilizing
-  ephemeral OpenID Connect (OIDC) tokens for PyPI Trusted Publishing.
+  ephemeral OpenID Connect (OIDC) tokens for PyPI Trusted Publishing and for signing the container
+  image's provenance attestation.
 
 #### 3.5.2. OIDC Trusted Publisher Environment Scoping
 
 - **Threat Vector**: Unconstrained OIDC trusted publishers allow workflows executing from arbitrary
   environments or untrusted branches to mint PyPI and TestPyPI release tokens.
 - **Mitigation**: OpenID Connect (OIDC) trusted publishers on PyPI and TestPyPI are strictly
-  constrained to dedicated GitHub environments (`pypi` and `testpypi`). Only the two publish jobs in
-  `.github/workflows/release.yml` request `id-token: write`, and each runs in one of these
-  environments. The environments' deployment policies only admit `v*.*.*` tags, so a workflow run
-  from a branch cannot deploy to them or mint a publication token. The release workflow also fails
-  unless it runs on the requested tag and the built version matches it.
+  constrained to dedicated GitHub environments (`pypi` and `testpypi`). The two publish jobs in
+  `.github/workflows/release.yml` each run in one of these environments. The only other job that
+  requests `id-token: write` is the container job, which uses it to sign its build provenance
+  attestation. It runs outside both environments, so its token cannot publish to PyPI. The
+  environments' deployment policies only admit `v*.*.*` tags, so a workflow run from a branch cannot
+  deploy to them or mint a publication token. The release workflow also fails unless it runs on the
+  requested tag and the built version matches it.
 
-#### 3.5.3. Multi-Tier Secret Scanning & Static Analysis
+#### 3.5.3. Container Image Provenance
+
+- **Threat Vector**: A container image built separately from the release could carry different code
+  or dependencies than the published package, or ship build tooling that widens its attack surface.
+- **Mitigation**: The release image installs the exact wheel published to PyPI, with dependencies at
+  the versions pinned in `uv.lock`, into a virtual environment. The runtime stage copies only that
+  environment, so the image contains no `uv` or build tooling, and it runs as an unprivileged user.
+  The release workflow checks that the image reports the release version before pushing it, then
+  publishes an SBOM, build provenance, and a signed attestation, which `gh attestation verify`
+  checks:
+  ```bash
+  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.1.0 --owner bdperkin
+  ```
+
+#### 3.5.4. Multi-Tier Secret Scanning & Static Analysis
 
 - **Threat Vector**: Accidental inclusion of API keys, private certificates, or credentials in git
   history.

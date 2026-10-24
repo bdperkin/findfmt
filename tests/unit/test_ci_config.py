@@ -285,6 +285,7 @@ def test_version_sensitive_checkouts_fetch_full_history() -> None:
 
     version_sensitive_jobs = [
         (workflows_dir / "ci.yml", "packaging-smoke-test"),
+        (workflows_dir / "ci.yml", "container-smoke-test"),
         (workflows_dir / "docs.yml", "build"),
         (workflows_dir / "release.yml", "build-distributions"),
         (workflows_dir / "release.yml", "verify-release"),
@@ -389,7 +390,11 @@ def test_release_container_semver_tags_use_release_tag() -> None:
 
 
 def test_release_oidc_is_confined_to_tag_publish_jobs() -> None:
-    """Validate only the two publish jobs can mint OIDC tokens, each in its environment (#495)."""
+    """Validate which release jobs can mint OIDC tokens (#495, #328).
+
+    The two PyPI publish jobs each run in their tag-scoped environment. The container job needs a
+    token only to sign its provenance attestation, and never runs a PyPI publish step.
+    """
     workflow = _load_release_workflow()
     triggers = workflow.get("on", workflow.get(True))  # PyYAML loads a bare `on:` key as True
     assert triggers["push"] == {"tags": ["v*.*.*"]}
@@ -399,6 +404,9 @@ def test_release_oidc_is_confined_to_tag_publish_jobs() -> None:
         for name, job in workflow["jobs"].items()
         if job.get("permissions", {}).get("id-token") == "write"
     }
-    assert minting == {"publish-testpypi": "testpypi", "publish-pypi": "pypi"}
+    assert minting == {"publish-testpypi": "testpypi", "publish-pypi": "pypi", "containerize": None}
+    container_steps = workflow["jobs"]["containerize"]["steps"]
+    assert not any("gh-action-pypi-publish" in str(s.get("uses")) for s in container_steps)
+    assert "publish-pypi" in workflow["jobs"]["containerize"]["needs"]
     needs = workflow["jobs"]["publish-pypi"]["needs"]
     assert "publish-testpypi" in needs, "TestPyPI must be published before production PyPI"

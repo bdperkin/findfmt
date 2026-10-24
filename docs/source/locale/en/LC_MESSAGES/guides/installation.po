@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 16:09-0400\n"
+"POT-Creation-Date: 2026-10-24 18:04-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -19,11 +19,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/guides/installation.md:1 dfd769cb38a844c8ad13cb6d9a20a25f
+#: ../../source/guides/installation.md:1 788f93453eec4396a5aa997b5c8df8e9
 msgid "Installation"
 msgstr ""
 
-#: ../../source/guides/installation.md:3 0636ab41942947e99aef59f6e9eb6e91
+#: ../../source/guides/installation.md:3 a4e07ed036cd4e4189c488334c654368
 msgid ""
 "`findfmt` supports multiple installation methods across Linux, macOS, "
 "Windows, and containerized environments. It requires Python 3.11 or newer"
@@ -31,154 +31,167 @@ msgid ""
 "series with `findfmt<1.1`; see [Upgrading to findfmt 1.1](upgrading.md)."
 msgstr ""
 
-#: ../../source/guides/installation.md:7 7e18eae988e74077b09f94210587ec7b
+#: ../../source/guides/installation.md:7 b8d6de3459924aa9b681cdd0d0c48fba
 msgid "1. Installation Methods"
 msgstr ""
 
-#: ../../source/guides/installation.md:9 e0c91af714004891bddf53e83fcd07c0
+#: ../../source/guides/installation.md:9 b3207a2cf9ee45e4ac9bd00529e0929e
 msgid "1.1. Standalone Execution with `uvx` (Recommended)"
 msgstr ""
 
-#: ../../source/guides/installation.md:11 cc91290c6fa648d686d3530df63b9139
+#: ../../source/guides/installation.md:11 ff38487bb4744ed2ba33a3aec7569bed
 msgid ""
 "Run `findfmt` immediately without an explicit installation step using "
 "`uvx`:"
 msgstr ""
 
-#: ../../source/guides/installation.md:18 5661aee27f194b52b7b617255d3ee680
+#: ../../source/guides/installation.md:18 c977decbad2d48369dc17a2d6b41b787
 msgid "1.2. Isolated User Installation with `uv`"
 msgstr ""
 
-#: ../../source/guides/installation.md:20 e07cfbf225724f7eb5599f354b686fe1
+#: ../../source/guides/installation.md:20 53adca65d426462c8ee388dc5fcf8d6b
 msgid "Install `findfmt` into an isolated user tool environment managed by `uv`:"
 msgstr ""
 
-#: ../../source/guides/installation.md:26 20bae8c68dfc4e778a0fca37c4b5ee5d
+#: ../../source/guides/installation.md:26 e7c5d91b61e64f72861a2b8f150ddec4
 msgid "Upgrade to the latest release at any time:"
 msgstr ""
 
-#: ../../source/guides/installation.md:32 e2410149797749b585f5c0494dfcbcb2
+#: ../../source/guides/installation.md:32 30a6de9e3ed7442388527803fd213964
 msgid "1.3. Isolated User Installation with `pipx`"
 msgstr ""
 
-#: ../../source/guides/installation.md:34 010b2179c55b495cb8de5cc1567b8884
+#: ../../source/guides/installation.md:34 69f1e25be90a4818910e85127dc03b1e
 msgid "Install `findfmt` as an isolated application using `pipx`:"
 msgstr ""
 
-#: ../../source/guides/installation.md:41 00f72418d7514b7f8a02df263302a119
+#: ../../source/guides/installation.md:41 f685c18fd7094c49a4b62933e1c9b550
 msgid "1.4. Project Dependency with `uv` or `pip`"
 msgstr ""
 
-#: ../../source/guides/installation.md:43 4e29bf21c9c647749553257a0681b3ea
+#: ../../source/guides/installation.md:43 adb13b6335e54e8989ce11f11b1882b6
 msgid "Add `findfmt` as a project dependency in a managed virtual environment:"
 msgstr ""
 
-#: ../../source/guides/installation.md:53 fc83d13c615947518feb24b512fb1e24
+#: ../../source/guides/installation.md:53 d272d63b5b58463ebfef89223b8f7db2
 msgid "1.5. Container Image via GitHub Container Registry"
 msgstr ""
 
-#: ../../source/guides/installation.md:55 2b97d586e2d34df988e046bd9e3b60bf
+#: ../../source/guides/installation.md:55 61b441f42db8455cbac2a86502871f6c
 msgid ""
 "Pre-built minimal container images are published to the GitHub Container "
 "Registry (`ghcr.io`):"
 msgstr ""
 
-#: ../../source/guides/installation.md:61 bd3c83558da6472cbc5a5b2e8f14848d
+#: ../../source/guides/installation.md:61 ee0db1a9b13c45b5b3fe8057c928734c
+msgid ""
+"Each image installs the same wheel as the PyPI release, reports that "
+"version, and carries a signed build provenance attestation (from 1.1.0). "
+"To verify an image before using it:"
+msgstr ""
+
+#: ../../source/guides/installation.md:68 43523f2058f04ba69f36fa466f07d858
+msgid ""
+"To build the image yourself, build a wheel first; the image installs it "
+"from `dist/`:"
+msgstr ""
+
+#: ../../source/guides/installation.md:75 22775fe4e30f4f8da0527d7b55dd6ca5
 msgid "1.6. Source Installation"
 msgstr ""
 
-#: ../../source/guides/installation.md:63 1b98474e4ef04b18af912a856ba3c6dd
+#: ../../source/guides/installation.md:77 2c25c0245a924239b49f363a6ebd8079
 msgid "For local development or building from source:"
 msgstr ""
 
-#: ../../source/guides/installation.md:72 7a5aabe958124a728601173e869f6dac
+#: ../../source/guides/installation.md:86 ef3fed372efa443db21538febc708c36
 msgid "2. Platform Notes"
 msgstr ""
 
-#: ../../source/guides/installation.md:74 aa0e08502cf9405a88e9bc71758e05d1
+#: ../../source/guides/installation.md:88 1dd8b2285a2547979ef6dee409a2623f
 msgid "2.1. Linux"
 msgstr ""
 
-#: ../../source/guides/installation.md:76 d1ad0202bb9c4feba67bdc9c91bb1717
+#: ../../source/guides/installation.md:90 58f8b53fc71242ee8eb759f5ae8d8130
 msgid ""
 "`findfmt` is compatible with all modern Linux distributions across "
 "`x86_64`, `aarch64`, and `armv7l` architectures:"
 msgstr ""
 
-#: ../../source/guides/installation.md:79 2069847d3c524197a86f7bd02b80c560
+#: ../../source/guides/installation.md:93 55b140df692f4c1498216120c781c8d0
 msgid ""
 "**Library Compatibility**: Works seamlessly on both `glibc`-based "
 "distributions (Ubuntu, Debian, Fedora, openSUSE, Arch) and `musl`-based "
 "distributions (Alpine Linux)."
 msgstr ""
 
-#: ../../source/guides/installation.md:82 aa42cc0d8c19431f88eb2525d2995219
+#: ../../source/guides/installation.md:96 4cdea29308b843c28179bdef3dcf958b
 msgid ""
 "**User Binary PATH**: When installing via `uv tool install` or `pipx`, "
 "ensure `~/.local/bin` is present in your shell `PATH`:"
 msgstr ""
 
-#: ../../source/guides/installation.md:89 c06d8c8e874748e784db46845945f0f5
+#: ../../source/guides/installation.md:103 ca94f54ffce0486ab4ae94d5879b976f
 msgid ""
 "**Paging Support**: Terminal paging automatically leverages your system "
 "`PAGER` or `LESS` environment settings when output exceeds the terminal "
 "window height."
 msgstr ""
 
-#: ../../source/guides/installation.md:92 15ba4a6191dd4842804b96eb0809f7c6
+#: ../../source/guides/installation.md:106 9bf7675c83b149888cf003c0d54e6b30
 msgid "2.2. macOS"
 msgstr ""
 
-#: ../../source/guides/installation.md:94 305fbb67d36042c088820d198d94e716
+#: ../../source/guides/installation.md:108 d20de7682fab4e728fb2398544de1cf2
 msgid ""
 "`findfmt` supports macOS 12 (Monterey) and later across both Apple "
 "Silicon (`arm64`) and Intel (`x86_64`) hardware:"
 msgstr ""
 
-#: ../../source/guides/installation.md:97 40dd750e36b94b5e97a07353aafe360b
+#: ../../source/guides/installation.md:111 8b089ad761c340de8ae956ad30a3419a
 msgid ""
 "**Terminal Emulators**: Native macOS Terminal.app and third-party "
 "emulators such as iTerm2 support ANSI color styling and clickable OSC 8 "
 "terminal hyperlinks (`--hyperlink`)."
 msgstr ""
 
-#: ../../source/guides/installation.md:100 3da912b71c194556a692a6735673925e
+#: ../../source/guides/installation.md:114 2e2dc84194a5463d94bb0d8752ce6091
 msgid ""
 "**File System Case-Sensitivity**: macOS defaults to APFS case-preserving "
 "but case-insensitive semantics. Pattern searches (`-P`, `-I`) evaluate "
 "patterns strictly unless `--ignore-case` is specified."
 msgstr ""
 
-#: ../../source/guides/installation.md:104 fb8bb57db1e1486ab4386235daa11bbf
+#: ../../source/guides/installation.md:118 aa46f2727b1a4844b9aa3703b306d71e
 msgid ""
 "**Homebrew Python**: Ensure that `uv` or `pipx` references your preferred"
 " Python installation:"
 msgstr ""
 
-#: ../../source/guides/installation.md:111 f2aef43d95924ea989c0d12aae3dfc3a
+#: ../../source/guides/installation.md:125 f664bc159dac4d21ab15fa77e1b20e07
 msgid "2.3. Windows & Windows Subsystem for Linux (WSL)"
 msgstr ""
 
-#: ../../source/guides/installation.md:113 36e9da73be5f4b138c25bfeeb2b4d61a
+#: ../../source/guides/installation.md:127 1540f6d7c5bf462c8a20ae0159f4443b
 msgid ""
 "`findfmt` executes natively on Windows 10/11 and within Windows Subsystem"
 " for Linux (WSL/WSL2):"
 msgstr ""
 
-#: ../../source/guides/installation.md:115 c44800cae2bb4fc09da29853720f840c
+#: ../../source/guides/installation.md:129 56ea437f482d43f2927c93f1c7aa2475
 msgid ""
 "**Native Windows Execution**: Run `findfmt` within PowerShell, Command "
 "Prompt, or Windows Terminal:"
 msgstr ""
 
-#: ../../source/guides/installation.md:123 3245af0176ab410db235cb5ff50ffabc
+#: ../../source/guides/installation.md:137 53b807f8c9a646cba7470ac325698794
 msgid ""
 "**Path Separators**: Both forward slashes (`/`) and backslashes (`\\`) "
 "are recognized in path arguments. Output listings adhere to POSIX style "
 "for cross-platform script consistency."
 msgstr ""
 
-#: ../../source/guides/installation.md:126 173b1e4b67644fc7823f2fda4a4d9f20
+#: ../../source/guides/installation.md:140 cc7ac12e2e8c4baf9543081df006f841
 msgid ""
 "**Symbolic Link Permissions**: Following directory symlinks (`-l` or "
 "`--follow-links`) on native Windows requires either Windows Developer "
@@ -186,35 +199,35 @@ msgid ""
 "Windows security policies."
 msgstr ""
 
-#: ../../source/guides/installation.md:130 4b0fc6953b864ab8859094fda217aa8f
+#: ../../source/guides/installation.md:144 7494eba46e3a47259003aa0d7aedda9c
 msgid ""
 "**Windows Subsystem for Linux (WSL2)**: For workflows tightly coupled "
 "with Unix pipes and shell scripts, running `findfmt` inside WSL2 provides"
 " native Linux filesystem performance and POSIX semantics."
 msgstr ""
 
-#: ../../source/guides/installation.md:134 723d5bbbee104602bd21b3f79d7389e2
+#: ../../source/guides/installation.md:148 4518d22f9a4240df84f47b807706ba60
 msgid "2.4. Docker & Container Environments"
 msgstr ""
 
-#: ../../source/guides/installation.md:136 1537c16481584c44a73a66da39ee179d
+#: ../../source/guides/installation.md:150 d8d2831e601c41eead92b3630140d578
 msgid ""
 "When executing `findfmt` within containerized pipelines, mount your "
 "project directory into the container workspace:"
 msgstr ""
 
-#: ../../source/guides/installation.md:153 eb35d272a3f64a5987edbd9e2a311b5c
+#: ../../source/guides/installation.md:167 c18e2823c3174cc49f2b2aae9d9bbdeb
 msgid ""
 "[!TIP] Mount project source directories with the read-only flag (`:ro` or"
 " `:ro,Z` for container volume labels) to guarantee that discovery "
 "operations cannot mutate repository files."
 msgstr ""
 
-#: ../../source/guides/installation.md:156 84cf1d5464cb4089b18e7ab57339ee98
+#: ../../source/guides/installation.md:170 6300e94195ec413eb4c987d58bd3e93f
 msgid "3. Verification & Diagnostics"
 msgstr ""
 
-#: ../../source/guides/installation.md:158 ea7a65fe8f864feca5a112bc3e39eaeb
+#: ../../source/guides/installation.md:172 9cea517892bd41e4884e07940c7bd53f
 msgid ""
 "Verify that your installation is functioning and display runtime "
 "diagnostic information:"

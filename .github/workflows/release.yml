@@ -141,19 +141,43 @@ jobs:
           prerelease: false
   containerize:
     name: Build & Publish Container to GHCR
-    needs: publish-pypi
+    needs: [build-distributions, publish-pypi]
     runs-on: ubuntu-latest
     permissions:
-      packages: write
       contents: read
+      packages: write
+      # Sigstore signing of the image's build provenance attestation (#328).
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
         with:
           ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
+      - name: Download Distribution Artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: dist
+          path: dist
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4
+      - name: Build Image for Verification
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7
+        with:
+          context: .
+          file: Dockerfile
+          load: true
+          tags: findfmt:verify
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Verify Image Version and Contents
+        run: |
+          expected="findfmt ${RELEASE_TAG#v}"
+          actual="$(docker run --rm findfmt:verify --version)"
+          echo "$actual"
+          test "$actual" = "$expected"
+          docker run --rm --entrypoint sh findfmt:verify -c '! command -v uv && ! command -v uvx'
       - name: Log in to GitHub Container Registry (GHCR)
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f  # v4
         with:
@@ -170,6 +194,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}},value=${{ env.RELEASE_TAG }}
             type=raw,value=latest
       - name: Build and Push Docker Image
+        id: push
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7
         with:
           context: .
@@ -177,5 +202,13 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          provenance: mode=max
+          sbom: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-name: ghcr.io/bdperkin/findfmt
+          subject-digest: ${{ steps.push.outputs.digest }}
+          push-to-registry: true

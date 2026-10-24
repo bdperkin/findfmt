@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.0.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 16:55-0400\n"
+"POT-Creation-Date: 2026-10-24 18:04-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -19,109 +19,109 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/security.md:1 c03f0797870a4dc0a6fcca3948d7a118
+#: ../../source/security.md:1 9e71b8474320458189843ac87fc78a01
 msgid "Security Policy"
 msgstr ""
 
-#: ../../../SECURITY.md:21 1fa58a6ed386423e83b5e76d9d8ef954
+#: ../../../SECURITY.md:21 e0e8a949147f44928170a7b9143b5bb0
 msgid "1. Supported Versions"
 msgstr ""
 
-#: ../../../SECURITY.md:23 27aa4233053545cba1c62cc351888018
+#: ../../../SECURITY.md:23 e23ef835a9f1466185e69cef08055d31
 msgid ""
 "Only the latest release of `findfmt` is actively supported with security "
 "updates."
 msgstr ""
 
-#: ../../source/security.md:3 a5fe47085440416da11f5633feedbd5c
+#: ../../source/security.md:3 c6631da240c840bda044737e9fc2ba50
 msgid "Version"
 msgstr ""
 
-#: ../../source/security.md:3 2e7d8ebb5a024070b36d47b025332ead
+#: ../../source/security.md:3 ec2db893d1144da0bf453aa213d88027
 msgid "Supported"
 msgstr ""
 
-#: ../../source/security.md:3 ff6ee34205a54275aca6aa32d7e554b9
+#: ../../source/security.md:3 cdddb69d8cbe43afaf1136213bc5a62e
 msgid "0.8.x"
 msgstr ""
 
-#: ../../source/security.md:3 26e2933e04f14098af0f8cb8a4d7ecf6
+#: ../../source/security.md:3 7e4836dd3f4144b98978eb9d7a2216eb
 msgid ":white_check_mark:"
 msgstr ""
 
-#: ../../source/security.md:3 b26cf418360748c6a9517c855a441c81
+#: ../../source/security.md:3 1eca5489c0d240c39a9f84a9f61e88a0
 msgid "< 0.8.0"
 msgstr ""
 
-#: ../../source/security.md:3 6a4b0fba789f44e59c04585b1462bd47
+#: ../../source/security.md:3 15acb9bac62c4e69b3695b86bfd5d475
 msgid ":x:"
 msgstr ""
 
-#: ../../../SECURITY.md:30 a98d477561d24a6c830f64679c1c863b
+#: ../../../SECURITY.md:30 c1b11b80dcb64927b89b4c13b95eb362
 msgid "2. Reporting a Vulnerability"
 msgstr ""
 
-#: ../../../SECURITY.md:32 fec3458420594a439a7b6437d53cd8b6
+#: ../../../SECURITY.md:32 d365613465514550b7bad1b96f66ff80
 msgid ""
 "We take the security of `findfmt` seriously. If you discover a security "
 "vulnerability:"
 msgstr ""
 
-#: ../../../SECURITY.md:34 b0cbdb123f794c0a80c606e17822e336
+#: ../../../SECURITY.md:34 076e889cc7ec40f18807f4d21bfbe4b2
 msgid ""
 "**Private Vulnerability Reporting**: Please submit a report through "
 "[GitHub Private Vulnerability "
 "Reporting](https://github.com/bdperkin/findfmt/security/advisories/new)."
 msgstr ""
 
-#: ../../../SECURITY.md:36 54b9c4a6471c46e8b6c32ebbdd0c27c5
+#: ../../../SECURITY.md:36 2ce6ff42726c4ce8b73a42334a60f533
 msgid ""
 "**Email**: If you are unable to use GitHub Advisories, email "
 "`bdperkin@gmail.com` with the subject `[SECURITY] findfmt vulnerability "
 "report`."
 msgstr ""
 
-#: ../../../SECURITY.md:39 d64c76d0673c4d2d944e9b13d1ea61ea
+#: ../../../SECURITY.md:39 69e2194b9e63480687c54557393ddfdb
 msgid "Please include:"
 msgstr ""
 
-#: ../../../SECURITY.md:41 1cde206614ec4d88b4098fb5573389bf
+#: ../../../SECURITY.md:41 bcddf703494346d798b3e7f330c70d9c
 msgid "A description of the issue and potential impact."
 msgstr ""
 
-#: ../../../SECURITY.md:42 a920894cd0654df889cfc7e199135c2b
+#: ../../../SECURITY.md:42 19f48f3226a54ce3bd493454e8656401
 msgid "Steps to reproduce or proof-of-concept code."
 msgstr ""
 
-#: ../../../SECURITY.md:43 7e99bb6d6d5d4af4b52f7bf5a62ff284
+#: ../../../SECURITY.md:43 803731aaa3bb484380846f443a57d817
 msgid "Any suggested fixes or mitigations."
 msgstr ""
 
-#: ../../../SECURITY.md:45 98ed09a7e5164434998dc2378318eeb6
+#: ../../../SECURITY.md:45 f57019c3d40649bd9bcd867dfd313491
 msgid ""
 "We will acknowledge receipt within 48 hours and work with you to "
 "coordinate a disclosure and patch release."
 msgstr ""
 
-#: ../../../SECURITY.md:50 5db5a7980e3040a28064dc954b427c90
+#: ../../../SECURITY.md:50 6b7a5342fbd34067a898b20042d88623
 msgid "3. Security Threat Model & Audit Report"
 msgstr ""
 
-#: ../../../SECURITY.md:52 e23c5750243a4bab827c040d48006b2e
+#: ../../../SECURITY.md:52 7c9c5fa69cbb46659a0690d05e33619c
 msgid ""
 "This section documents the formal security architecture, threat vectors "
 "analyzed, and defensive mitigations implemented in `findfmt`."
 msgstr ""
 
-#: ../../../SECURITY.md:55 ce6a4c5e14954100a0a3674a0cc0b02a
+#: ../../../SECURITY.md:55 b8791504345b4e8f960f5b89a6fdd5ce
 msgid "3.1. Filesystem Traversal & Path Security"
 msgstr ""
 
-#: ../../../SECURITY.md:57 e910359b93854c8e8b330e41b65f7e9a
+#: ../../../SECURITY.md:57 6925c948a3fa4032a0ee4ff0cfa9156a
 msgid "3.1.1. Symlink Loops & Resource Exhaustion (DoS)"
 msgstr ""
 
-#: ../../../SECURITY.md:59 13692e5ec0794b0b8193be52b9ca13cb
+#: ../../../SECURITY.md:59 9eeca9da93df4e2fbbebd9807c7f0f9c
 msgid ""
 "**Threat Vector**: Malicious or accidental recursive symbolic directory "
 "structures (e.g., `dir/loop -> dir`) can cause unbounded recursion, stack"
@@ -129,7 +129,7 @@ msgid ""
 "traversal."
 msgstr ""
 
-#: ../../../SECURITY.md:62 416f513d186e479b872e79582e77d578
+#: ../../../SECURITY.md:62 a563b9c7581c481ca4c852f81c19e133
 msgid ""
 "**Mitigation**: When `--follow-symlinks` (`-l`) is active, `findfmt` "
 "tracks canonical directory paths via `visited_dirs: set[Path]` "
@@ -139,18 +139,18 @@ msgid ""
 "breaking cyclic graphs and avoiding duplicate processing."
 msgstr ""
 
-#: ../../../SECURITY.md:68 7dc947ec0a2e4d8ebb66b5befff1aa8a
+#: ../../../SECURITY.md:68 d968fbf670cd473d88f68e6569e22416
 msgid "3.1.2. Arbitrary Path Traversal & Boundary Containment"
 msgstr ""
 
-#: ../../../SECURITY.md:70 666ed423a1ae41de867be61cd49be89c
+#: ../../../SECURITY.md:70 aa1dc9ba0488464f9deef86ffcc24751
 msgid ""
 "**Threat Vector**: Ingested paths or nested `.gitignore` files could "
 "attempt directory traversal outside intended directory boundaries (e.g., "
 "path traversal sequences `../../`)."
 msgstr ""
 
-#: ../../../SECURITY.md:72 da8a1dafa2574fd7aa7ebe7c7bd3faa0
+#: ../../../SECURITY.md:72 1e2a9d0c35a546b887da5facf1ffd508
 msgid ""
 "**Mitigation**: All path comparisons and exclude rules verify boundary "
 "alignment using `entry_path.is_relative_to(base_dir)` and "
@@ -158,18 +158,18 @@ msgid ""
 "configured root paths."
 msgstr ""
 
-#: ../../../SECURITY.md:76 3887e8979a8b415893b14cada16d1358
+#: ../../../SECURITY.md:76 06c379635b304a6abc01726157eaaebc
 msgid "3.1.3. TOCTOU (Time-of-Check to Time-of-Use) Resiliency"
 msgstr ""
 
-#: ../../../SECURITY.md:78 92afa1da862a48dfb7893b2426ec0c23
+#: ../../../SECURITY.md:78 e363ff92e8e847c096ee0a3de0e861f2
 msgid ""
 "**Threat Vector**: Asynchronous filesystem modifications occurring "
 "between directory scanning and file inspection (e.g., a file is deleted, "
 "renamed, or unlinked) could raise uncaught filesystem exceptions."
 msgstr ""
 
-#: ../../../SECURITY.md:81 ce09043818f043328e618cfceff1ce4d
+#: ../../../SECURITY.md:81 dd144fb912704d989169b8ae859949bd
 msgid ""
 "**Mitigation**: All stat, scan, and read operations in `traversal.py` and"
 " `classifier.py` are resiliently wrapped in guarded exception blocks "
@@ -178,22 +178,22 @@ msgid ""
 "engine."
 msgstr ""
 
-#: ../../../SECURITY.md:86 264509a00a504e1f8e99f28c565105b2
+#: ../../../SECURITY.md:86 3cdadffee7594f76ab2c1836e9a525fe
 msgid "3.2. File Inspection & Content Engine Security"
 msgstr ""
 
-#: ../../../SECURITY.md:88 91464e8c49394f0ca324c10a98699cf8
+#: ../../../SECURITY.md:88 19e0a98428d34be58e6e371ae9b5ca62
 msgid "3.2.1. Bounded Content Reads"
 msgstr ""
 
-#: ../../../SECURITY.md:90 b28fbe912e184651a7f041e870cd899e
+#: ../../../SECURITY.md:90 c31cdc64eb1a4975bf22f594501356d8
 msgid ""
 "**Threat Vector**: Reading untrusted, multi-gigabyte or stream-backed "
 "files into memory to inspect shebangs or content signatures can trigger "
 "out-of-memory (OOM) denial-of-service conditions."
 msgstr ""
 
-#: ../../../SECURITY.md:92 3616e769b91c4495b29123189d059384
+#: ../../../SECURITY.md:92 0665fce383f347998a3ea2d44066ae0a
 msgid ""
 "**Mitigation**: Content inspection in `classifier.py` never reads entire "
 "files. Interpreter shebang extraction strictly reads a bounded buffer "
@@ -201,11 +201,11 @@ msgid ""
 "heuristics bypass disk reads entirely for known file types."
 msgstr ""
 
-#: ../../../SECURITY.md:96 8d52f21c67304d0a86367ef4f20ae5e2
+#: ../../../SECURITY.md:96 1b46f1f782364ae5a6c354f3b4b8e741
 msgid "3.2.2. Special Files, Named Pipes (FIFOs), & TOCTOU FIFO Swapping"
 msgstr ""
 
-#: ../../../SECURITY.md:98 4ed09955d01c4144b7a88594ce09e453
+#: ../../../SECURITY.md:98 521a74f46ac64e1ea63f4342ae892b81
 msgid ""
 "**Threat Vector**: Encountering named pipes (FIFOs), character devices "
 "(`/dev/random`, `/dev/zero`), UNIX domain sockets, or block devices could"
@@ -215,7 +215,7 @@ msgid ""
 "process to hang indefinitely waiting for a pipe writer."
 msgstr ""
 
-#: ../../../SECURITY.md:103 291faec3511947a187717e141b02bd64
+#: ../../../SECURITY.md:103 4a427e3e5296453586963bb9b8041c9e
 msgid ""
 "**Mitigation**: Directory scanning inspects directory entries using "
 "`os.DirEntry.is_file()` and `os.DirEntry.is_dir()`, which evaluate to "
@@ -228,11 +228,11 @@ msgid ""
 "hanging."
 msgstr ""
 
-#: ../../../SECURITY.md:110 f5e4c682a84046468639e60c97c94d4c
+#: ../../../SECURITY.md:110 c61654364eca42eea444ef9e343015c0
 msgid "3.2.3. Regular Expression & Pattern Safety (ReDoS Prevention)"
 msgstr ""
 
-#: ../../../SECURITY.md:112 f545a389300f432daf931cd251355e2f
+#: ../../../SECURITY.md:112 3f992e48585d474b8324af24b6ec9185
 msgid ""
 "**Threat Vector**: User-supplied glob patterns, complex `.gitignore` "
 "rules, or crafted terminal escape sequences in filenames could induce "
@@ -240,19 +240,19 @@ msgid ""
 "causing Denial of Service (ReDoS)."
 msgstr ""
 
-#: ../../../SECURITY.md:115 ceffb815b8cf44d8a50b0efdc13eb002
+#: ../../../SECURITY.md:115 e3a890f7082e48ac83ac58bd46857b5f
 msgid ""
 "**Mitigation**: `findfmt` mitigates catastrophic backtracking through "
 "multi-layered defensive measures:"
 msgstr ""
 
-#: ../../../SECURITY.md:117 6047ac89e2fe473485475a784edd68c3
+#: ../../../SECURITY.md:117 bd8b755f918d4281908dcee388cd3c4b
 msgid ""
 "Utilizes `pathspec` to compile `.gitignore` rules into linear-time "
 "matching automata."
 msgstr ""
 
-#: ../../../SECURITY.md:118 bdbe7348aa7a47e99a519ac464d945fc
+#: ../../../SECURITY.md:118 8b74c713b7bb4eda8364a09056e0e0b7
 msgid ""
 "Bounded linear-time regular expressions for ANSI CSI, OSC, and C1-OSC "
 "terminal escape sequences (`_ANSI_ESCAPE_RE` unified across "
@@ -262,15 +262,15 @@ msgid ""
 "50,000+ repetitive `\\x9d` bytes)."
 msgstr ""
 
-#: ../../../SECURITY.md:123 9ea6d038c07e4aa7b27ada214eab33ce
+#: ../../../SECURITY.md:123 6b4483088d8b47d79ac6cc5297f7a813
 msgid "3.3. Terminal Presentation & Injection Attacks (CWE-150)"
 msgstr ""
 
-#: ../../../SECURITY.md:125 dffed69ce126481089c24fde0882bc41
+#: ../../../SECURITY.md:125 9eb11c5728ce4e95b5fee79f577fbcdf
 msgid "3.3.1. ANSI Escape Sequence Injection"
 msgstr ""
 
-#: ../../../SECURITY.md:127 393c26516b8d469d9c2ebf2995fe5a77
+#: ../../../SECURITY.md:127 de6b414d13c2452a84ba76523e6598ae
 msgid ""
 "**Threat Vector**: Files named with terminal control characters or ANSI "
 "escape sequences (e.g., `\\033[2J`, carriage returns, bell codes) can "
@@ -278,7 +278,7 @@ msgid ""
 "rendered to an interactive terminal emulator."
 msgstr ""
 
-#: ../../../SECURITY.md:130 99842a648a254772a577fc44feffa538
+#: ../../../SECURITY.md:130 f448e100567b4e37acbb3d3309e6b34c
 msgid ""
 "**Mitigation**: `findfmt` provides `-0` / `--print0` to delimit paths "
 "with NUL (`\\0`) bytes, ensuring safe ingestion by downstream tools such "
@@ -288,13 +288,13 @@ msgid ""
 "escaping to protect terminal emulators against control injection."
 msgstr ""
 
-#: ../../../SECURITY.md:136 3ab4e43ba18b4263a2361f3f99fb6072
+#: ../../../SECURITY.md:136 efc68cac0dfd4e97920d6dd12f87aafe
 msgid ""
 "3.3.2. Unicode Bidirectional (BiDi) Override Masking & Trojan Source "
 "Defense"
 msgstr ""
 
-#: ../../../SECURITY.md:138 76fc704a78b041cb802b3a51f80ca84f
+#: ../../../SECURITY.md:138 639e4de63ec14df7a6bc0229f1386a34
 msgid ""
 "**Threat Vector**: Untrusted filenames containing Unicode bidirectional "
 "formatting controls (category `Cf`, including U+202E Right-to-Left "
@@ -304,7 +304,7 @@ msgid ""
 "`payload_exe.png`)."
 msgstr ""
 
-#: ../../../SECURITY.md:142 426f040d528045d4a438703417f4f1a6
+#: ../../../SECURITY.md:142 b0231f0e737a418585436d77220378b5
 msgid ""
 "**Mitigation**: In interactive TTY display mode, `findfmt` automatically "
 "masks all Unicode `Cf` bidirectional control characters with `?` via "
@@ -315,22 +315,22 @@ msgid ""
 "preservation is maintained for downstream pipeline interoperability."
 msgstr ""
 
-#: ../../../SECURITY.md:149 ac6018d3437746ca9a58648c55bd10b5
+#: ../../../SECURITY.md:149 a867601d18df41378e4e7bb372bd3237
 msgid "3.4. Supply Chain & Dependency Hygiene"
 msgstr ""
 
-#: ../../../SECURITY.md:151 62fbc816bf654a87994cb060cf3c9232
+#: ../../../SECURITY.md:151 6a4b00d86dc14b6a94d3656870957b18
 msgid "3.4.1. Automated Vulnerability Audits"
 msgstr ""
 
-#: ../../../SECURITY.md:153 cde04e12378943229f76640a62f608ea
+#: ../../../SECURITY.md:153 b7cf49dbccad4ff9bd0c090b2ebe5a34
 msgid ""
 "**Threat Vector**: Known Common Vulnerabilities and Exposures (CVEs) in "
 "transitive dependencies could introduce vulnerabilities into the "
 "toolchain."
 msgstr ""
 
-#: ../../../SECURITY.md:155 f5e241427a294830b3144f8dfe3fdc9a
+#: ../../../SECURITY.md:155 38d8900eb4e54433867954f92ae12e1b
 msgid ""
 "**Mitigation**: Continuous dependency vulnerability scanning is "
 "integrated into the primary verification quality gate via `uv audit "
@@ -338,17 +338,17 @@ msgid ""
 " dependencies against the Python Packaging Advisory Database."
 msgstr ""
 
-#: ../../../SECURITY.md:159 0e89144be13140868754972874dc874a
+#: ../../../SECURITY.md:159 65b019043f974dcd846dff34a16f27d1
 msgid "3.4.2. Absence of Dangerous Shell Executions"
 msgstr ""
 
-#: ../../../SECURITY.md:161 6ba499e0b0934ac28faf01339d03fb0a
+#: ../../../SECURITY.md:161 c78241ed69744285a569ad16fbaf9cc6
 msgid ""
 "**Threat Vector**: Executing untrusted system commands or shells "
 "(`os.system`, `shell=True`) can lead to command injection."
 msgstr ""
 
-#: ../../../SECURITY.md:163 79cdbb0692064e06819897ed51386f7c
+#: ../../../SECURITY.md:163 f587ef766de04e6c8cc0ec360c15f958
 msgid ""
 "**Mitigation**: The `findfmt` runtime contains zero invocations of "
 "`os.system` or shell-based subprocesses. All path operations and "
@@ -356,84 +356,111 @@ msgid ""
 "`pathlib` primitives."
 msgstr ""
 
-#: ../../../SECURITY.md:167 9f5f425859f94739ab650a7e0bff9b61
+#: ../../../SECURITY.md:167 00fff1efb32b463685c93778eb1ce3a6
 msgid "3.5. GitHub Actions & CI/CD Hardening"
 msgstr ""
 
-#: ../../../SECURITY.md:169 af908bfb88394906be97794ded807fd1
+#: ../../../SECURITY.md:169 993c5c4508664f6791f5393350bb8f03
 msgid "3.5.1. Principle of Least Privilege"
 msgstr ""
 
-#: ../../../SECURITY.md:171 124ae9a46ea04cd0b456a06ce0eedf73
+#: ../../../SECURITY.md:171 90f65b1ae5234d669e33f5be24b42032
 msgid ""
 "**Threat Vector**: Over-permissioned GitHub Actions tokens can allow "
 "compromised dependencies or scripts to modify repositories, create tags, "
 "or access secrets."
 msgstr ""
 
-#: ../../../SECURITY.md:173 cf01141d930d41f280170daab771075c
+#: ../../../SECURITY.md:173 c3d950c959794071b18dc73087eacc1d
 msgid ""
 "**Mitigation**: All GitHub Actions workflows configure default "
 "`permissions: contents: read`. Elevated permissions (such as `id-token: "
 "write`) are strictly confined to release jobs utilizing ephemeral OpenID "
-"Connect (OIDC) tokens for PyPI Trusted Publishing."
+"Connect (OIDC) tokens for PyPI Trusted Publishing and for signing the "
+"container image's provenance attestation."
 msgstr ""
 
-#: ../../../SECURITY.md:177 adf4dc3fff8a4361805dadc6d1a2921a
+#: ../../../SECURITY.md:178 f99a81a0e2e94620a8f0548ee5a2f031
 msgid "3.5.2. OIDC Trusted Publisher Environment Scoping"
 msgstr ""
 
-#: ../../../SECURITY.md:179 fccee04826154670bd172944fb1b5526
+#: ../../../SECURITY.md:180 0fee4268d5674b949c352a0245836e9a
 msgid ""
 "**Threat Vector**: Unconstrained OIDC trusted publishers allow workflows "
 "executing from arbitrary environments or untrusted branches to mint PyPI "
 "and TestPyPI release tokens."
 msgstr ""
 
-#: ../../../SECURITY.md:181 9cb20c1df5544bcd95f43f905b26aadc
+#: ../../../SECURITY.md:182 28f7361aa96648d99f4150fd47420819
 msgid ""
 "**Mitigation**: OpenID Connect (OIDC) trusted publishers on PyPI and "
 "TestPyPI are strictly constrained to dedicated GitHub environments "
-"(`pypi` and `testpypi`). Only the two publish jobs in "
-"`.github/workflows/release.yml` request `id-token: write`, and each runs "
-"in one of these environments. The environments' deployment policies only "
-"admit `v*.*.*` tags, so a workflow run from a branch cannot deploy to "
-"them or mint a publication token. The release workflow also fails unless "
-"it runs on the requested tag and the built version matches it."
+"(`pypi` and `testpypi`). The two publish jobs in "
+"`.github/workflows/release.yml` each run in one of these environments. "
+"The only other job that requests `id-token: write` is the container job, "
+"which uses it to sign its build provenance attestation. It runs outside "
+"both environments, so its token cannot publish to PyPI. The environments'"
+" deployment policies only admit `v*.*.*` tags, so a workflow run from a "
+"branch cannot deploy to them or mint a publication token. The release "
+"workflow also fails unless it runs on the requested tag and the built "
+"version matches it."
 msgstr ""
 
-#: ../../../SECURITY.md:188 55c8c4f97e414f26927548be5544f8ea
-msgid "3.5.3. Multi-Tier Secret Scanning & Static Analysis"
+#: ../../../SECURITY.md:191 510adf02abde4d11896cf8018ee94159
+msgid "3.5.3. Container Image Provenance"
 msgstr ""
 
-#: ../../../SECURITY.md:190 3dcf1e2e5b2c49f4a4ac6bcbff605a1f
+#: ../../../SECURITY.md:193 aaafd86bcffb4cdd912a7f79282d97a0
+msgid ""
+"**Threat Vector**: A container image built separately from the release "
+"could carry different code or dependencies than the published package, or"
+" ship build tooling that widens its attack surface."
+msgstr ""
+
+#: ../../../SECURITY.md:195 4ebc1cbb6cfe4962b3ac231d9efe2383
+msgid ""
+"**Mitigation**: The release image installs the exact wheel published to "
+"PyPI, with dependencies at the versions pinned in `uv.lock`, into a "
+"virtual environment. The runtime stage copies only that environment, so "
+"the image contains no `uv` or build tooling, and it runs as an "
+"unprivileged user. The release workflow checks that the image reports the"
+" release version before pushing it, then publishes an SBOM, build "
+"provenance, and a signed attestation, which `gh attestation verify` "
+"checks:"
+msgstr ""
+
+#: ../../../SECURITY.md:205 c872ba2094904efa9d7e37f0fcb27062
+msgid "3.5.4. Multi-Tier Secret Scanning & Static Analysis"
+msgstr ""
+
+#: ../../../SECURITY.md:207 ee8376eb9f41419698255f413fdab2e7
 msgid ""
 "**Threat Vector**: Accidental inclusion of API keys, private "
 "certificates, or credentials in git history."
 msgstr ""
 
-#: ../../../SECURITY.md:192 812a5c29618e4a2b9bb6031887215b6a
+#: ../../../SECURITY.md:209 6f49a2f2b4a642f0865fcd58752321bc
 msgid ""
 "**Mitigation**: Every commit and pull request is verified against "
 "`detect-secrets`, `detect-private-key`, `GitGuardian` "
 "(`.gitguardian.yaml`), and GitHub CodeQL semantic analysis."
 msgstr ""
 
-#: ../../../SECURITY.md:195 398862104efb44fcba1d85dbc739c971
+#: ../../../SECURITY.md:212 b56edee41aeb4d36ac74595cbb415e40
 msgid "3.6. Supply Chain Governance & OpenSSF Scorecard Posture"
 msgstr ""
 
-#: ../../../SECURITY.md:197 0fdba61b64ea4e74a88a09e31cf66afe
+#: ../../../SECURITY.md:214 5c08a3e146fe49ed91a8f617e49e439e
 msgid "3.6.1. Branch Protection & Mandatory Code Review (CodeReviewID)"
 msgstr ""
 
-#: ../../../SECURITY.md:199 c3fe34fabba545f49b9fdafd27ad8a61
+#: ../../../SECURITY.md:216 ff68138d45934072a5d52b4a61a56f32
 msgid ""
 "**Threat Vector**: Unreviewed, malicious, or erroneous commits pushed "
 "directly to primary release branches bypass automated verification gates."
 msgstr ""
 
-#: ../../../SECURITY.md:201 39363d308c9442fb90aa0a96315d21dd
+#: ../../../SECURITY.md:218 f46bf4206a39446096c11bac198ee982
 #, python-format
 msgid ""
 "**Mitigation**: Direct pushes to `main` are strictly blocked using GitHub"
@@ -448,17 +475,17 @@ msgid ""
 "review and approval."
 msgstr ""
 
-#: ../../../SECURITY.md:209 68f6678aa9a7491d932199fd423f356a
+#: ../../../SECURITY.md:226 464e3860bf29464b85d615a9c458cbd0
 msgid "3.6.2. OpenSSF Best Practices Program (CIIBestPracticesID)"
 msgstr ""
 
-#: ../../../SECURITY.md:211 62a47b19708444f9998d287225e12460
+#: ../../../SECURITY.md:228 b8b0c39f20ee44358d6d589d5820b476
 msgid ""
 "**Threat Vector**: Inconsistent open-source development and security "
 "practices."
 msgstr ""
 
-#: ../../../SECURITY.md:212 8dbec7b087cd4883adbe946faf58b977
+#: ../../../SECURITY.md:229 08776dd162e34f52bcf2ab23e759049b
 msgid ""
 "**Mitigation**: The `findfmt` project is enrolled in the OpenSSF Best "
 "Practices Program ([Project "
@@ -468,24 +495,24 @@ msgid ""
 "reporting procedures, and strict test coverage."
 msgstr ""
 
-#: ../../../SECURITY.md:217 a62afad9f731461f9255fe680c4e6a52
+#: ../../../SECURITY.md:234 3eb9e7da30314afa9e836dcaa6b665b6
 msgid "3.6.3. Continuous Fuzz Testing Architecture & ClusterFuzzLite (FuzzingID)"
 msgstr ""
 
-#: ../../../SECURITY.md:219 191c64b569334b929cd7bc3d5937e292
+#: ../../../SECURITY.md:236 1811ab1424fa4db68bcb722d70a878e8
 msgid ""
 "**Threat Vector**: Maliciously crafted inputs, corrupted file headers, "
 "truncated shebang sequences, or nested cyclic filesystem structures "
 "triggering unhandled edge cases or unexpected interpreter crashes."
 msgstr ""
 
-#: ../../../SECURITY.md:222 2e9f51371e5f4f4790feae0b1d583e42
+#: ../../../SECURITY.md:239 7930d545dc274409b9fe3ad8a782c7ed
 msgid ""
 "**Mitigation**: Continuous fuzz testing is actively deployed using "
 "Google's **ClusterFuzzLite** and **Atheris**:"
 msgstr ""
 
-#: ../../../SECURITY.md:224 73326e814e7b453abd64fab79b70d484
+#: ../../../SECURITY.md:241 6fd296cee4034965822b6fe0233be9c7
 msgid ""
 "**Classification Engine Fuzzing** (`tests/fuzz/fuzz_classifier.py`): "
 "Continuous coverage-guided fuzz testing targeting `classify_file`, "
@@ -493,7 +520,7 @@ msgid ""
 "sequences, corrupted headers, and synthetic files."
 msgstr ""
 
-#: ../../../SECURITY.md:227 4509e7bcc953421a88d3957ce8da6523
+#: ../../../SECURITY.md:244 e6a2895075724c8dbd5c0dbc8399c139
 msgid ""
 "**Traversal Engine Fuzzing** (`tests/fuzz/fuzz_traversal.py`): Automated "
 "fuzzing of complex directory trees with irregular permission bits, "
@@ -501,7 +528,7 @@ msgid ""
 "nestings to verify bounded traversal invariants."
 msgstr ""
 
-#: ../../../SECURITY.md:230 54c9873261b941d6af504669ca17279b
+#: ../../../SECURITY.md:247 a96ce4fd50714578846a15b879fb7537
 msgid ""
 "**Continuous CI Integration**: Deployed via `.clusterfuzzlite/` "
 "configuration and automated GitHub Actions workflow "
@@ -510,17 +537,17 @@ msgid ""
 "#48](https://github.com/bdperkin/findfmt/security/code-scanning/48))."
 msgstr ""
 
-#: ../../../SECURITY.md:235 6402c38db8fd4d3bad6c6fb0ae63a151
+#: ../../../SECURITY.md:252 3c8a3a3e5f7a4721bcc38339ff215ecf
 msgid "3.6.4. Active Maintenance & Release Hygiene (MaintainedID)"
 msgstr ""
 
-#: ../../../SECURITY.md:237 d76f90b22ef14ff2a29cbe779109c3c0
+#: ../../../SECURITY.md:254 f9bcbaba372148ad9c26e9d4d1079d49
 msgid ""
 "**Threat Vector**: Abandoned dependencies or unmaintained libraries "
 "failing to address upstream security advisories."
 msgstr ""
 
-#: ../../../SECURITY.md:239 627d407f2ddd4c25810de08a3f00415f
+#: ../../../SECURITY.md:256 33386ede521344328085ec1c3ead136d
 msgid ""
 "**Mitigation**: `findfmt` follows Semantic Versioning with automated "
 "multi-platform CI, scheduled weekly dependency security audits (`uv "
