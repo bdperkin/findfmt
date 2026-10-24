@@ -223,3 +223,7 @@ input is a `vMAJOR.MINOR.PATCH` tag, the workflow runs on that tag, and the chec
 that tag, and it fails before any upload unless the built wheel and sdist both carry the tag's
 version (`tools/verify_release_version.py`). TestPyPI uploads skip files that already exist, so a
 failed release can be re-run; production PyPI uploads do not, so a duplicate upload fails loudly.
+The container image is built from the same wheel (the `dist` artifact), and the workflow checks that
+it reports the release version before pushing it to GHCR with an SBOM and a signed provenance
+attestation. CI's container smoke test builds and runs the image on every pull request; run it
+locally with `FINDFMT_CONTAINER_TESTS=1 uv run pytest tests/integration/test_container.py --no-cov`.

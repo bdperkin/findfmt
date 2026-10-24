@@ -12,7 +12,9 @@
 .coverage
 coverage.xml
 htmlcov
-dist
+# dist/ holds the wheel the image installs (#328); only wheels are sent.
+dist/*
+!dist/*.whl
 build
 docs/_build
 *.egg-info

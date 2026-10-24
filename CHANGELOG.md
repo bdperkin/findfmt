@@ -65,6 +65,12 @@ what to do.
   Windows; the quality gate, documentation build, release, and wheel smoke test run on 3.15. A
   non-gating `3.16-dev` job gives early warning for the next release (#335, #440).
 - *(docker)* The container image now runs Python 3.14 (was 3.13), still on Debian bookworm (#440).
+- *(docker)* The container image installs the release wheel (the same one published to PyPI), so
+  `findfmt --version` reports the release version instead of `1.0.2.dev0`. Dependencies are
+  installed from `uv.lock`, and the image no longer ships `uv`. Releases verify the image's version
+  before pushing it and publish an SBOM, build provenance, and a signed attestation. A new CI job
+  builds and tests the image on every pull request. To build it locally, run `uv build --wheel`
+  first (#328).
 - *(release)* The release workflow always builds the requested tag (also when re-run via
   `workflow_dispatch`), refuses anything but a `vMAJOR.MINOR.PATCH` tag, verifies that the built
   wheel and sdist carry the tag's version before publishing, no longer skips duplicate production

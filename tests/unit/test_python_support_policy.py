@@ -188,7 +188,7 @@ MAXIMUM_PYTHON = "3.15"
 # Jobs that run on a single interpreter: they track the supported maximum. The dependency smoke
 # matrix is excluded on purpose; it verifies dependency floors and is owned by #325.
 SINGLE_VERSION_JOBS = {
-    "ci.yml": ("quality-gate",),
+    "ci.yml": ("quality-gate", "container-smoke-test"),
     "docs.yml": ("build",),
     "release.yml": ("verify-release", "build-distributions"),
 }
@@ -229,8 +229,8 @@ def test_single_version_jobs_use_max_supported_python() -> None:
 def test_dockerfile_stages_share_python_and_debian_release() -> None:
     """Validate both Dockerfile stages are digest-pinned to one supported Python and Debian release.
 
-    The builder installs into /usr/local and the runtime copies it verbatim, so the interpreter and
-    the Debian release (glibc) must match across stages.
+    The builder creates a virtual environment on /usr/local/bin/python3 and the runtime copies it
+    verbatim (#328), so the interpreter and the Debian release (glibc) must match across stages.
     """
     text = (_repo_root() / "Dockerfile").read_text(encoding="utf-8")
     builder = re.search(

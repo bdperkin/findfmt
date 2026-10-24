@@ -58,6 +58,20 @@ Pre-built minimal container images are published to the GitHub Container Registr
 docker pull ghcr.io/bdperkin/findfmt:latest
 ```
 
+Each image installs the same wheel as the PyPI release, reports that version, and carries a signed
+build provenance attestation (from 1.1.0). To verify an image before using it:
+
+```bash
+gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.1.0 --owner bdperkin
+```
+
+To build the image yourself, build a wheel first; the image installs it from `dist/`:
+
+```bash
+uv build --wheel
+docker build -t findfmt .
+```
+
 ### 1.6. Source Installation
 
 For local development or building from source:
