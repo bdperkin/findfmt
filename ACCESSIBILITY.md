@@ -17,10 +17,9 @@ The `findfmt` CLI is designed from the ground up for compatibility with terminal
 assistive tooling:
 
 - **Screen Reader Compatibility**: Verified for predictable speech output on standard terminal
-  emulators across Linux ([Orca](https://help.gnome.org/users/orca/stable/)), macOS
-  ([VoiceOver](https://www.apple.com/accessibility/mac/vision/)), and Windows
-  ([NVDA](https://www.nvaccess.org/) and
-  [JAWS](https://www.freedomscientific.com/products/software/jaws/)).
+  emulators across Linux ([Orca](https://help.gnome.org/orca/)), macOS
+  ([VoiceOver](https://www.apple.com/accessibility/features/?vision)), and Windows
+  ([NVDA](https://www.nvaccess.org/) and [JAWS](https://vispero.com/jaws-screen-reader-software/)).
 - **Stream-Oriented Plain Text**: CLI output emits linear, deterministic text streams to `stdout`
   and error diagnostics to `stderr` without ANSI escape codes, cursor jumps, or animated spinners in
   standard execution modes.

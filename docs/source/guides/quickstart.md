@@ -2,6 +2,7 @@
 
 `findfmt` identifies files by format, shebang pattern, and MIME type rather than relying strictly on
 filename extensions. This guide demonstrates common discovery, filtering, and reporting workflows.
+It runs on Python 3.11 through 3.15; see [Installation](installation.md) for requirements.
 
 ## 1. Installation & Direct Execution
 

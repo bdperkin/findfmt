@@ -50,6 +50,10 @@ ______________________________________________________________________
 
 ## 2. Installation
 
+`findfmt` requires Python 3.11 or newer and is tested on Python 3.11 through 3.15 on Linux, macOS,
+and Windows. On Python 3.10, pin the 1.0 series with `findfmt<1.1`; see
+[Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html).
+
 ### 2.1. With `uv` (Recommended)
 
 Run directly with `uvx`:
@@ -220,6 +224,9 @@ ______________________________________________________________________
 | `--all-tags` / `--no-all-tags`                         | Require match against all include tags (AND logic)                                                                                     |
 | `--shebang INTERPRETER`                                | Match shebang interpreter name or pattern                                                                                              |
 | `--no-ignore` / `--ignore`                             | Toggle respecting `.gitignore` files                                                                                                   |
+| `--gitignore-file PATH`                                | Apply a specific external ignore file across the traversal scope                                                                       |
+| `--from-file, --fromfile PATH`                         | Read paths or directory listings from a file, or standard input with `-`                                                               |
+| `--offline`                                            | Classify paths from `--from-file` input without inspecting the local filesystem                                                        |
 | `--hidden` / `--no-hidden`                             | Toggle inspecting hidden files and directories                                                                                         |
 | `-d, --dirs-only`                                      | List directories only, suppressing regular file entries                                                                                |
 | `-l, --follow-links` / `--no-follow-links`             | Follow directory symlinks with loop detection                                                                                          |
@@ -231,13 +238,18 @@ ______________________________________________________________________
 | `-I, --exclude-pattern PATTERN`                        | Exclude files against wildcard or glob pattern (supports multiple `-I` and `\|`)                                                       |
 | `--ignore-case` / `--no-ignore-case`                   | Apply case-insensitive pattern matching across `-P` and `-I`                                                                           |
 | `--match-dirs` / `--no-match-dirs`                     | Match directories against patterns; matched directories inherit to child files                                                         |
+| `--sort CRITERIA`                                      | Sort entries by `name`, `version`, `time`/`mtime`, `ctime`, `size`, or `none`                                                          |
+| `-U, --unsorted`                                       | Yield entries in raw filesystem order (equivalent to `--sort=none`)                                                                    |
+| `--dirsfirst, --group-directories-first`               | Group directories before files within each directory level                                                                             |
+| `--filesfirst`                                         | Group regular files before directories within each directory level                                                                     |
+| `-r, --reverse`                                        | Reverse the sort order (for example, oldest or smallest first)                                                                         |
 | `-p, --permissions` / `--no-permissions`               | Print file type and permissions in standard `ls -l` format                                                                             |
 | `-u, --user` / `--no-user`                             | Print file owner username (or numeric UID)                                                                                             |
 | `-g, --group` / `--no-group`                           | Print file owner group name (or numeric GID)                                                                                           |
 | `--inodes` / `--no-inodes`                             | Print filesystem inode number (`st_ino`)                                                                                               |
 | `--device` / `--no-device`                             | Print filesystem device number (`st_dev`)                                                                                              |
 | `--size` / `--no-size`                                 | Print file size in bytes (`st_size`)                                                                                                   |
-| `-h, --human-readable` / `--no-human-readable`         | Print sizes in human-readable format with binary IEC units (`K`, `M`, `G`, `T`)                                                        |
+| `-h, --human-readable` / `--no-human-readable`         | Print sizes in human-readable format with binary IEC units (`KiB`, `MiB`, `GiB`, `TiB`)                                                |
 | `--si` / `--no-si`                                     | Print sizes in human-readable format with SI metric units (`kB`, `MB`, `GB`, `TB`)                                                     |
 | `--du, --accumulate-size` / `--no-du`                  | Recursively calculate and accumulate directory disk usage sizes                                                                        |
 | `-D, --mtime` / `--no-mtime`                           | Print date and time of last modification (`st_mtime`)                                                                                  |
@@ -248,6 +260,15 @@ ______________________________________________________________________
 | `-N, --literal` / `--no-literal`                       | Print non-printable characters literally without masking                                                                               |
 | `-Q, --quote-name` / `--no-quote-name`                 | Enclose filenames in double quotes (`"..."`) with backslash escaping                                                                   |
 | `-f, --format FORMAT`                                  | Output format (`text`, `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`, `xml`, `html`) |
+| `-J, --json` / `--no-json`                             | Render output as structured JSON records (equivalent to `--format json`)                                                               |
+| `-X, --xml` / `--no-xml`                               | Render output as a hierarchical XML document (equivalent to `--format xml`)                                                            |
+| `-H, --html BASEHREF`                                  | Render output as an HTML5 document with hyperlinks prefixed by `BASEHREF`                                                              |
+| `--intro PATH`                                         | Prepend a custom HTML fragment file before the listing in HTML mode                                                                    |
+| `--outro PATH`                                         | Append a custom HTML fragment file after the listing in HTML mode                                                                      |
+| `-T, --title TITLE`                                    | Set the document `<title>` and `<h1>` heading for HTML output                                                                          |
+| `--nolinks` / `--no-nolinks`                           | Render paths as plain text instead of hyperlinks in HTML output                                                                        |
+| `-o, --output PATH`                                    | Write output to a file (atomically) instead of standard output                                                                         |
+| `--csv-safe` / `--no-csv-safe`                         | Neutralize spreadsheet formula injection in CSV and TSV cells                                                                          |
 | `--tree` / `--no-tree`                                 | Toggle hierarchical directory tree view (equivalent to `--format tree`)                                                                |
 | `--table-style STYLE`                                  | Border style (`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`)                       |
 | `--pager` / `--no-pager`                               | Toggle interactive paging (auto-pages on TTY when lines exceed terminal height)                                                        |
@@ -257,9 +278,13 @@ ______________________________________________________________________
 | `-C, --color` / `-n, --no-color`                       | Force enable or disable ANSI color output across all output channels                                                                   |
 | `--absolute`, `--full-path` / `--no-absolute`          | Toggle absolute vs relative output paths                                                                                               |
 | `--relative`, `--relative-path` / `--no-relative`      | Prepend input search path prefix to relative output paths                                                                              |
+| `--hyperlink` / `--no-hyperlink`                       | Wrap paths in OSC 8 terminal hyperlink escape sequences                                                                                |
+| `--hyperlink-schema SCHEMA`                            | URI schema prefix for terminal hyperlinks (default `file://`)                                                                          |
+| `--hyperlink-authority AUTHORITY`                      | Authority or hostname component for terminal hyperlinks                                                                                |
 | `--list-tags` / `--no-list-tags`                       | Display identified classification and MIME tags alongside paths                                                                        |
 | `-s, --summary` / `--no-summary`                       | Output summary frequency statistics to `stderr`                                                                                        |
 | `-0, --print0` / `--no-print0`                         | Delimit paths with a NUL (`\0`) byte for `xargs -0`                                                                                    |
+| `--exit-status` / `--no-exit-status`                   | Exit with status 1 when no files match (default: exit 0)                                                                               |
 | `--config PATH`                                        | Path to a custom user configuration file overriding default settings                                                                   |
 | `--no-config`                                          | Suppress discovery and loading of any configuration file                                                                               |
 | `--show-config`                                        | Display active configuration file and resolved configuration settings                                                                  |
@@ -268,6 +293,7 @@ ______________________________________________________________________
 | `-v, -V, --version`                                    | Display version (`--verbose` adds runtime diagnostics)                                                                                 |
 | `--diagnostics`                                        | Display runtime environment diagnostics and exit                                                                                       |
 | `--help-all`                                           | Display comprehensive manual, env vars, and exit codes                                                                                 |
+| `--help`                                               | Display the categorized help summary and exit                                                                                          |
 | `-- [PATHS...]`                                        | POSIX terminator: treat following tokens strictly as paths                                                                             |
 
 ______________________________________________________________________
