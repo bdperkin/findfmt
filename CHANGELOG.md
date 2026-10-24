@@ -48,7 +48,7 @@ what to do.
   policy (#364), and list `--csv-safe` in `--help-all` (#494).
 - *(i18n)* Regenerate the documentation translation catalogs, drop obsolete entries on update, and
   guard catalogs against missing pages (#469).
-- *(quality)* Document the Python version support lifecycle runbook (#442), and use
+- *(quality)* Document the Python version support lifecycle procedure (#442), and use
   `--show-diff-on-failure` in every documented `pre-commit run --all-files` (#476).
 - *(api)* Document the public API stability policy, and pin the public API in a snapshot test so
   changes are caught in review (#493).
