@@ -22,13 +22,13 @@ Within the 1.x line:
 - Public names are not removed or renamed without a deprecation period.
 - Existing calls keep working: new parameters are optional, and are added at the end or as
   keyword-only parameters.
-- Enum members keep their names and values, and comparisons with those values keep working.
+- Enumeration members keep their names and values, and comparisons with those values keep working.
 - Exception classes keep their place in the `FindFmtError` hierarchy.
 
 ### 2.1. Pass Arguments by Keyword
 
-Some public callables take many parameters, and their positional order is not guaranteed. Pass
-arguments to these by keyword:
+Some public functions and classes take many parameters, and their positional order is not
+guaranteed. Pass arguments to these by keyword:
 
 - **`TraversalConfig`**: 1.0.2 inserted `csv_safe` in the middle of its fields.
 - **CLI command callbacks** such as `findfmt.cli.findfmt`: Click always calls them by keyword, and
@@ -49,7 +49,7 @@ changelog and explained in [Upgrading to findfmt 1.1](../guides/upgrading.md):
 ## 3. How Changes Are Caught
 
 `tools/api_surface.py` records every public name with its kind and, where meaningful, its signature,
-class members, or enum values. The committed snapshot `tests/unit/api_surface.json` pins that
+class members, or enumeration values. The committed snapshot `tests/unit/api_surface.json` pins that
 surface, and `tests/unit/test_api_surface.py` fails when the API changes. The failure lists the
 added, removed, and changed names.
 

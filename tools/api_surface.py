@@ -20,6 +20,7 @@ import json
 import pkgutil
 import re
 import sys
+import types
 import typing
 from pathlib import Path
 from typing import Any
@@ -56,12 +57,44 @@ def _class_signature(cls: type) -> str:
     return f"inherited from {owner.__module__}.{owner.__qualname__}"
 
 
+# Concrete platform flavours of pathlib.Path (PosixPath on Linux/macOS, WindowsPath on Windows).
+_PATH_FLAVOURS = {"PosixPath": "Path", "WindowsPath": "Path"}
+
+
+def _public_module(module: str) -> str:
+    """Drop private components from a module path (``pathlib._local`` -> ``pathlib``)."""
+    return ".".join(part for part in module.split(".") if not part.startswith("_"))
+
+
+def _qualified_name(cls: type) -> str:
+    """Return ``module.Qualname`` without private module components or platform path flavours.
+
+    ``pathlib.Path`` lives in ``pathlib._local`` on Python 3.13 only, and paths are ``PosixPath``
+    or ``WindowsPath`` depending on the platform, so both are canonicalized.
+    """
+    module = _public_module(cls.__module__)
+    name = (
+        _PATH_FLAVOURS.get(cls.__qualname__, cls.__qualname__)
+        if module == "pathlib"
+        else cls.__qualname__
+    )
+    return name if module == "builtins" else f"{module}.{name}"
+
+
 def _type_name(tp: object) -> str:
-    """Return a version-stable, address-free name for a type or type expression."""
+    """Return a version- and platform-stable, address-free name for a type or type expression."""
+    if tp is type(None):
+        return "None"
+
     if isinstance(tp, type):
-        return (
-            tp.__qualname__ if tp.__module__ == "builtins" else f"{tp.__module__}.{tp.__qualname__}"
-        )
+        return _qualified_name(tp)
+
+    origin, args = typing.get_origin(tp), typing.get_args(tp)
+    if origin in (typing.Union, types.UnionType):
+        return " | ".join(_type_name(arg) for arg in args)
+
+    if origin is not None and args:
+        return f"{_type_name(origin)}[{', '.join(_type_name(arg) for arg in args)}]"
 
     return re.sub(r" at 0x[0-9a-f]+", "", repr(tp))
 
@@ -101,7 +134,12 @@ def _describe(obj: object) -> dict[str, Any]:
         return {"kind": "type alias", "value": _alias(obj)}
 
     if (inspect.isroutine(obj) or isinstance(obj, type)) and not _is_own(obj):
-        return {"kind": "re-export", "origin": f"{obj.__module__}.{obj.__qualname__}"}
+        origin = (
+            _qualified_name(obj)
+            if isinstance(obj, type)
+            else f"{_public_module(obj.__module__)}.{obj.__qualname__}"
+        )
+        return {"kind": "re-export", "origin": origin}
 
     if isinstance(obj, type):
         return _describe_type(obj)
@@ -112,7 +150,7 @@ def _describe(obj: object) -> dict[str, Any]:
     if inspect.ismodule(obj):
         return {"kind": "module"}
 
-    return {"kind": "data", "type": f"{type(obj).__module__}.{type(obj).__qualname__}"}
+    return {"kind": "data", "type": _qualified_name(type(obj))}
 
 
 def surface() -> dict[str, dict[str, Any]]:

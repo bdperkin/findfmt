@@ -204,7 +204,7 @@
   },
   "__version__": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "build_file_uri": {
    "kind": "function",
@@ -642,299 +642,299 @@
  "findfmt.cli.help": {
   "APP_HELP": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "CLI_EPILOG": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_ABSOLUTE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_ALL_TAGS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_ANSI_LINES": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_CLASSIFY": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_COLOR": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_CONFIG": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_CP437": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_CSV_SAFE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_CTIME": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_DEVICE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_DIAGNOSTICS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_DIRS_FIRST": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_DIRS_ONLY": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_DU": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_EXCLUDE_PATTERN": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_EXCLUDE_TAGS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_EXIT_STATUS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_FILES_FIRST": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_FILE_LIMIT": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_FOLLOW_SYMLINKS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_FORMAT": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_FROM_FILE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_GITIGNORE_FILE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_GROUP": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_HELP_ALL": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_HIDDEN": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_HIDE_CONTROL_CHARS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_HTML": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_HUMAN_READABLE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_IGNORE_CASE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_INODES": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_INTRO": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_KNOWN_TAGS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_LIST_TAGS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_LITERAL": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_LOCALE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_MATCH_DIRS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_MAX_DEPTH": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_MTIME": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_NO_CONFIG": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_NO_IGNORE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_NO_INDENT": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_NO_LINKS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_OFFLINE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_ONE_FILE_SYSTEM": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_OUTPUT": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_OUTRO": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_PAGER": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_PATHS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_PATTERN": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_PERMISSIONS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_PRINT0": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_PRUNE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_QUOTE_NAME": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_RELATIVE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_REVERSE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_SHEBANG": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_SHOW_CONFIG": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_SI": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_SIZE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_SORT": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_SUMMARY": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_TABLE_STYLE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_TAGS": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_TIME_FORMAT": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_TITLE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_TREE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_UNSORTED": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_USER": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_VERBOSE": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_VERSION": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "HELP_XML": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "get_help_all": {
    "kind": "function",
@@ -1551,7 +1551,7 @@
   },
   "FORMULA_TRIGGER_CHARS": {
    "kind": "data",
-   "type": "builtins.tuple"
+   "type": "tuple"
   },
   "Formatter": {
    "kind": "class",
@@ -1659,7 +1659,7 @@
   },
   "TABLE_FIELD_NAMES": {
    "kind": "data",
-   "type": "builtins.tuple"
+   "type": "tuple"
   },
   "TextFormatter": {
    "kind": "class",
@@ -1740,7 +1740,7 @@
  "findfmt.formatters.badges": {
   "TAG_COLOR_MAP": {
    "kind": "data",
-   "type": "builtins.dict"
+   "type": "dict"
   },
   "format_tag_badge": {
    "kind": "function",
@@ -1783,7 +1783,7 @@
   },
   "TABLE_FIELD_NAMES": {
    "kind": "data",
-   "type": "builtins.tuple"
+   "type": "tuple"
   },
   "UnsupportedFormatError": {
    "bases": [
@@ -1820,7 +1820,7 @@
   },
   "FORMULA_TRIGGER_CHARS": {
    "kind": "data",
-   "type": "builtins.tuple"
+   "type": "tuple"
   },
   "TsvFormatter": {
    "kind": "class",
@@ -1851,7 +1851,7 @@
   },
   "TREE_GUIDE_SETS": {
    "kind": "data",
-   "type": "builtins.dict"
+   "type": "dict"
   },
   "resolve_tree_guides": {
    "kind": "function",
@@ -1972,7 +1972,7 @@
  "findfmt.formatters.visual": {
   "RICH_BOX_STYLES": {
    "kind": "data",
-   "type": "builtins.dict"
+   "type": "dict"
   },
   "RichTableFormatter": {
    "kind": "class",
@@ -2028,11 +2028,11 @@
  "findfmt.i18n": {
   "DEFAULT_DOMAIN": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "DEFAULT_LOCALE_DIR": {
    "kind": "data",
-   "type": "pathlib.PosixPath"
+   "type": "pathlib.Path"
   },
   "_": {
    "kind": "function",
@@ -2308,11 +2308,11 @@
  "findfmt.sizes": {
   "BINARY_UNITS": {
    "kind": "data",
-   "type": "builtins.tuple"
+   "type": "tuple"
   },
   "SI_UNITS": {
    "kind": "data",
-   "type": "builtins.tuple"
+   "type": "tuple"
   },
   "calculate_accumulated_sizes": {
    "kind": "function",
@@ -2705,11 +2705,11 @@
  "findfmt.traversal.tags": {
   "GENERIC_TAGS": {
    "kind": "data",
-   "type": "builtins.frozenset"
+   "type": "frozenset"
   },
   "INTERPRETER_TAGS": {
    "kind": "data",
-   "type": "builtins.frozenset"
+   "type": "frozenset"
   },
   "can_skip_file_by_tags": {
    "kind": "function",
@@ -2719,7 +2719,7 @@
  "findfmt.utils": {
   "DEFAULT_TIME_FORMAT": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "build_file_uri": {
    "kind": "function",
@@ -2791,7 +2791,7 @@
  "findfmt.utils.strings": {
   "DEFAULT_TIME_FORMAT": {
    "kind": "data",
-   "type": "builtins.str"
+   "type": "str"
   },
   "cell_width": {
    "kind": "function",

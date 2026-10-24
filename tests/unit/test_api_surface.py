@@ -14,6 +14,7 @@ from tools import api_surface
 from tools.api_surface import SNAPSHOT, _describe, main, surface
 
 REGENERATE = "uv run python tools/api_surface.py --write"
+_T = typing.TypeVar("_T")
 
 
 def _summarize(expected: dict[str, Any], actual: dict[str, Any]) -> str:
@@ -73,7 +74,7 @@ def test_describe_kinds(monkeypatch: pytest.MonkeyPatch) -> None:
     assert own["members"]["method"] == "(self, *, flag: 'bool' = False) -> 'bool'"
     assert _describe(_Own().method)["kind"] == "function"
     assert _describe(types) == {"kind": "module"}
-    assert _describe(42) == {"kind": "data", "type": "builtins.int"}
+    assert _describe(42) == {"kind": "data", "type": "int"}
     assert _describe(len) == {"kind": "function", "signature": "(obj, /)"}
 
 
@@ -159,3 +160,34 @@ def test_stability_policy_is_in_the_api_docs() -> None:
     policy = (api_docs / "stability.md").read_text(encoding="utf-8")
     assert REGENERATE.removeprefix("uv run ") in policy
     assert "tests/unit/api_surface.json" in policy
+
+
+@pytest.mark.parametrize(
+    ("module", "qualname", "expected"),
+    [
+        ("pathlib._local", "WindowsPath", "pathlib.Path"),  # Windows on Python 3.13
+        ("pathlib", "PosixPath", "pathlib.Path"),  # Linux/macOS on 3.12 and 3.14+
+        ("pathlib._local", "Path", "pathlib.Path"),  # Python 3.13 module layout
+        ("rich.box", "Box", "rich.box.Box"),
+        ("builtins", "str", "str"),
+    ],
+)
+def test_type_names_are_platform_and_version_stable(
+    module: str,
+    qualname: str,
+    expected: str,
+) -> None:
+    """Type names drop private modules and path flavours, so the snapshot matches everywhere."""
+    cls = type(qualname, (), {"__module__": module, "__qualname__": qualname})
+    assert api_surface._qualified_name(cls) == expected  # noqa: SLF001
+
+
+def test_type_expressions_are_built_from_their_parts() -> None:
+    """Unions, generics, and None render from canonical parts rather than version-specific reprs."""
+    type_name = api_surface._type_name  # noqa: SLF001
+    assert type_name(Path | None) == "pathlib.Path | None"
+    assert type_name(typing.Optional[Path]) == "pathlib.Path | None"  # noqa: UP045
+    assert type_name(list[Path]) == "list[pathlib.Path]"
+    assert type_name(type(None)) == "None"
+    assert type_name(_T) == "~_T"
+    assert _describe(json.dumps) == {"kind": "re-export", "origin": "json.dumps"}

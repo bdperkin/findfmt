@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.0.3.dev26+g37b35fbfa.d20261024\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 13:53-0400\n"
+"POT-Creation-Date: 2026-10-24 15:07-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -77,8 +77,8 @@ msgstr ""
 
 #: ../../source/api/stability.md:25 7d225474d9204ce6a3b4ea1fd7e9de26
 msgid ""
-"Enum members keep their names and values, and comparisons with those "
-"values keep working."
+"Enumeration members keep their names and values, and comparisons with "
+"those values keep working."
 msgstr ""
 
 #: ../../source/api/stability.md:26 b65d5477430541199b16faa7db9f5dae
@@ -91,8 +91,8 @@ msgstr ""
 
 #: ../../source/api/stability.md:30 02947aa8ddd3465c9af6c5a18e31a22a
 msgid ""
-"Some public callables take many parameters, and their positional order is"
-" not guaranteed. Pass arguments to these by keyword:"
+"Some public functions and classes take many parameters, and their "
+"positional order is not guaranteed. Pass arguments to these by keyword:"
 msgstr ""
 
 #: ../../source/api/stability.md:33 65fe27b785d24d9aa666c9488bdc67c8
@@ -143,8 +143,8 @@ msgstr ""
 #: ../../source/api/stability.md:51 3ef51d79459442b092a9225bab4cf6b2
 msgid ""
 "`tools/api_surface.py` records every public name with its kind and, where"
-" meaningful, its signature, class members, or enum values. The committed "
-"snapshot `tests/unit/api_surface.json` pins that surface, and "
+" meaningful, its signature, class members, or enumeration values. The "
+"committed snapshot `tests/unit/api_surface.json` pins that surface, and "
 "`tests/unit/test_api_surface.py` fails when the API changes. The failure "
 "lists the added, removed, and changed names."
 msgstr ""
