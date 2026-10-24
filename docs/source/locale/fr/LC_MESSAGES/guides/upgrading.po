@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.0.3.dev26+g37b35fbfa.d20261024\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 13:06-0400\n"
+"POT-Creation-Date: 2026-10-24 13:15-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -78,7 +78,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/guides/upgrading.md 66053bcc34f940e083af8fb84528cc5a
-msgid "Python API users who stringify these enums"
+msgid "Python API users who turn these members into strings"
 msgstr ""
 
 #: ../../source/guides/upgrading.md 6a84eab7ddf54b8b947357425e89f36a
@@ -149,39 +149,39 @@ msgid ""
 "guide](../quality/compatibility.md) for the full support policy."
 msgstr ""
 
-#: ../../source/guides/upgrading.md:34 5757b72d33924578b241939f6056f059
+#: ../../source/guides/upgrading.md:36 5757b72d33924578b241939f6056f059
 msgid "3. Human-Readable Sizes Use IEC Binary Units"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:36 3ad9860c688a4f57a553ac307f210cd8
+#: ../../source/guides/upgrading.md:38 3ad9860c688a4f57a553ac307f210cd8
 msgid ""
 "Sizes are calculated in powers of 1024, and the labels now say so (#352)."
 " The numbers are unchanged; only the unit labels differ."
 msgstr ""
 
-#: ../../source/guides/upgrading.md:39 f6801ae8d3a8441597c5f0ddb7a334a4
+#: ../../source/guides/upgrading.md:41 f6801ae8d3a8441597c5f0ddb7a334a4
 msgid ""
 "On the command line, `-h` / `--human-readable` output changes from "
 "single-letter units to IEC labels:"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:52 1e5a7512f964410a874d6e55b4e869ef
+#: ../../source/guides/upgrading.md:54 1e5a7512f964410a874d6e55b4e869ef
 msgid ""
 "In the Python API, `findfmt.sizes.format_size()` changes from `KB`/`MB` "
 "to `KiB`/`MiB`, matching `format_size_binary()`:"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:61 8de9485cd7874b4f881793560fd9bc1b
+#: ../../source/guides/upgrading.md:63 8de9485cd7874b4f881793560fd9bc1b
 msgid ""
 "If you parse sizes with a regular expression, accept the new labels, for "
 "example `(\\d+(?:\\.\\d+)?) ?([KMGTP]i?B?|B)`."
 msgstr ""
 
-#: ../../source/guides/upgrading.md:64 e7f76c46a3404bbfaa7c3fff666cb83f
+#: ../../source/guides/upgrading.md:66 e7f76c46a3404bbfaa7c3fff666cb83f
 msgid "4. `SortKey` and `OutputFormat` Render as Their Value"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:66 fa9e6eab46994498bd85cc40150ef6d2
+#: ../../source/guides/upgrading.md:68 fa9e6eab46994498bd85cc40150ef6d2
 #, python-format
 msgid ""
 "`findfmt.SortKey` and `findfmt.OutputFormat` are now `enum.StrEnum` "
@@ -189,7 +189,7 @@ msgid ""
 "formatting return the member's value instead of the class-qualified name:"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:77 ef6b909ed7624bedac27f485c412fa59
+#: ../../source/guides/upgrading.md:79 ef6b909ed7624bedac27f485c412fa59
 #, python-brace-format
 msgid ""
 "Comparisons with strings, hashing, `repr()`, JSON output, CLI help, and "
@@ -198,11 +198,11 @@ msgid ""
 "`f\"{type(member).__name__}.{member.name}\"`."
 msgstr ""
 
-#: ../../source/guides/upgrading.md:81 135589f336994158bc2456f8f3d8b301
+#: ../../source/guides/upgrading.md:83 135589f336994158bc2456f8f3d8b301
 msgid "5. Wrapper Commands Exit Non-Zero on Errors"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:83 22cd3b9ef97841d38a7df2a457aba131
+#: ../../source/guides/upgrading.md:85 22cd3b9ef97841d38a7df2a457aba131
 msgid ""
 "The wrapper commands (`findfiles`, `findfilefmt`, `findfilemime`, "
 "`findfmt0`, `findshebang`, and `findsummary`) now exit with status 1 when"
@@ -212,28 +212,28 @@ msgid ""
 "runs still exit with status 0."
 msgstr ""
 
-#: ../../source/guides/upgrading.md:88 c63328ca76ab4ee7bd0340b2a2f7cc75
+#: ../../source/guides/upgrading.md:90 c63328ca76ab4ee7bd0340b2a2f7cc75
 msgid ""
 "If a script ran a wrapper command and ignored its exit status, treat a "
 "non-zero status as a failure."
 msgstr ""
 
-#: ../../source/guides/upgrading.md:90 e3c1f0bcdd3f4c95a9d8511eec703409
+#: ../../source/guides/upgrading.md:92 e3c1f0bcdd3f4c95a9d8511eec703409
 msgid "6. New: `--exit-status` for Scripts"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:92 2a6af9e4b447496baea04fa8b1462c0c
+#: ../../source/guides/upgrading.md:94 2a6af9e4b447496baea04fa8b1462c0c
 msgid ""
 "`findfmt` still exits with status 0 when nothing matches. Pass the new "
 "`--exit-status` option to get `grep`-style behavior, where no matches "
 "means exit status 1 (#367):"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:101 8b4e48604fa54060a3f64bab80e0ef84
+#: ../../source/guides/upgrading.md:103 8b4e48604fa54060a3f64bab80e0ef84
 msgid "7. Platform Support"
 msgstr ""
 
-#: ../../source/guides/upgrading.md:103 35c4b43edaea488b96c1589a5c28eb40
+#: ../../source/guides/upgrading.md:105 35c4b43edaea488b96c1589a5c28eb40
 msgid ""
 "Python 3.15 is now fully supported and required to pass CI on Linux, "
 "macOS, and Windows, and the container image (`ghcr.io/bdperkin/findfmt`) "

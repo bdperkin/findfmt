@@ -6,14 +6,14 @@ scripts, or use the Python API, read the sections that apply to you.
 
 ## 1. Summary of Changes
 
-| Change                                                                                 | Who is affected                            | What to do                                                      |
-| :------------------------------------------------------------------------------------- | :----------------------------------------- | :-------------------------------------------------------------- |
-| Python 3.10 support dropped; the minimum is Python 3.11 (#441)                         | Users and CI jobs on Python 3.10           | Upgrade Python, or pin `findfmt<1.1`                            |
-| Human-readable sizes use IEC binary unit labels (`KiB`, `MiB`) (#352)                  | Anyone parsing sizes from output           | Update parsers; the values are unchanged                        |
-| `SortKey` and `OutputFormat` render as their value in `str()` and f-strings (#441)     | Python API users who stringify these enums | Use the member or `.value`; comparisons with strings still work |
-| Wrapper commands exit with status 1 when an error carries a message (#373)             | Scripts that run the wrapper commands      | Treat a non-zero status as failure                              |
-| New `--exit-status` option: exit with status 1 when nothing matches (#367)             | Shell scripts (opt-in)                     | Optional                                                        |
-| Python 3.15 is supported and tested; the container image runs Python 3.14 (#335, #440) | Everyone                                   | No action needed                                                |
+| Change                                                                                 | Who is affected                                      | What to do                                                      |
+| :------------------------------------------------------------------------------------- | :--------------------------------------------------- | :-------------------------------------------------------------- |
+| Python 3.10 support dropped; the minimum is Python 3.11 (#441)                         | Users and CI jobs on Python 3.10                     | Upgrade Python, or pin `findfmt<1.1`                            |
+| Human-readable sizes use IEC binary unit labels (`KiB`, `MiB`) (#352)                  | Anyone parsing sizes from output                     | Update parsers; the values are unchanged                        |
+| `SortKey` and `OutputFormat` render as their value in `str()` and f-strings (#441)     | Python API users who turn these members into strings | Use the member or `.value`; comparisons with strings still work |
+| Wrapper commands exit with status 1 when an error carries a message (#373)             | Scripts that run the wrapper commands                | Treat a non-zero status as failure                              |
+| New `--exit-status` option: exit with status 1 when nothing matches (#367)             | Shell scripts (opt-in)                               | Optional                                                        |
+| Python 3.15 is supported and tested; the container image runs Python 3.14 (#335, #440) | Everyone                                             | No action needed                                                |
 
 ## 2. Python 3.10 Is No Longer Supported
 
