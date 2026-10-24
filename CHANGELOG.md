@@ -29,8 +29,27 @@ what to do.
 
 - *(cli)* Add `--exit-status` to exit with status 1 when no files match (#367).
 
+### Bug Fixes
+
+- *(traversal)* Preserve significant leading whitespace and escaped trailing whitespace in
+  `.gitignore` patterns, matching git (#354).
+- *(parsers)* Sort `--from-file` entries by status-change time for `--sort ctime` instead of
+  modification time (#462).
+- *(format)* `-f ipynb` notebooks run: the manifest cell loads its data with `json.loads` (#330).
+- *(packaging)* Correct the "A.gitignore-aware" typo in the PyPI summary (#443).
+- *(benchmark)* `tools/benchmark.py --keep-temp` keeps the generated tree instead of deleting it
+  (#489).
+
 ### Documentation
 
+- *(guides)* Add the "Upgrading to 1.1" guide (#499), state the supported Python range in the
+  README, installation guide, and quickstart, and complete the README CLI options table (#494).
+- *(cli)* Correct symlink flag references in the configuration guide, CLI reference, and security
+  policy (#364), and list `--csv-safe` in `--help-all` (#494).
+- *(i18n)* Regenerate the documentation translation catalogs, drop obsolete entries on update, and
+  guard catalogs against missing pages (#469).
+- *(quality)* Document the Python version support lifecycle procedure (#442), and use
+  `--show-diff-on-failure` in every documented `pre-commit run --all-files` (#476).
 - *(api)* Document the public API stability policy, and pin the public API in a snapshot test so
   changes are caught in review (#493).
 - *(cli)* Correct the exit-code tables in `--help-all` and the CLI reference: no matches exits 0
@@ -47,6 +66,10 @@ what to do.
   wheel and sdist carry the tag's version before publishing, no longer skips duplicate production
   PyPI uploads, and tags dispatched container images with the release version instead of only
   `latest` (#327).
+- *(ci)* Run `uv sync --locked` everywhere (#356), fetch full history for version-sensitive jobs
+  (#357), add a dependency-resolution smoke matrix to pull requests (#428), make the test suite
+  hermetic against the developer's global git config (#326), and guard the supported Python range
+  with policy tests (#442).
 
 ### Security
 

@@ -283,6 +283,7 @@ def get_help_all() -> str:
         "  --hyperlink-schema <schema>   URI schema prefix (default: file://).\n"
         "  --hyperlink-authority <auth>  URI authority override (e.g. localhost).\n"
         "  --output, -o <path>           Send command output directly to a file.\n"
+        "  --csv-safe / --no-csv-safe    Neutralize spreadsheet formulas in CSV/TSV cells.\n"
         "  --tree / --no-tree            Render output in hierarchical tree view.\n"
         "  --table-style <style>         Border style (rounded, cp437, ascii, etc.).\n"
         "  --pager / --no-pager          Enable or disable interactive paging.\n"

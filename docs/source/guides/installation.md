@@ -1,7 +1,8 @@
 # Installation
 
 `findfmt` supports multiple installation methods across Linux, macOS, Windows, and containerized
-environments.
+environments. It requires Python 3.11 or newer and is tested on Python 3.11 through 3.15. On Python
+3.10, pin the 1.0 series with `findfmt<1.1`; see [Upgrading to findfmt 1.1](upgrading.md).
 
 ## 1. Installation Methods
 

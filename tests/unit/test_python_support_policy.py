@@ -295,6 +295,9 @@ def test_docs_state_the_supported_range() -> None:
         "CONTRIBUTING.md": f"Python {minimum}{EN_DASH}{maximum}",
         "SECURITY.md": f"{minimum}{EN_DASH}{maximum} on Linux",
         "assets/social-preview.svg": f"Python {minimum}+",
+        "README.md": f"Python {minimum} through {maximum}",
+        "docs/source/guides/installation.md": f"Python {minimum} through {maximum}",
+        "docs/source/guides/quickstart.md": f"Python {minimum} through {maximum}",
     }
     stale = {
         path: text

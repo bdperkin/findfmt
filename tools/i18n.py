@@ -19,6 +19,7 @@ except ImportError:
 
 DEFAULT_DOMAIN = "findfmt"
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_EMPTY_MSGSTR = re.compile(r'#~ msgstr(?:\[\d+\])? ""')
 DEFAULT_SOURCE_DIR = PROJECT_ROOT / "src" / "findfmt"
 DEFAULT_LOCALE_DIR = PROJECT_ROOT / "src" / "findfmt" / "locale"
 DEFAULT_POT_FILE = DEFAULT_LOCALE_DIR / f"{DEFAULT_DOMAIN}.pot"
@@ -249,6 +250,28 @@ def init_catalog(
     return 0
 
 
+def prune_untranslated_obsolete(po_path: Path) -> int:
+    """Drop obsolete ``#~`` entries without a translation; translated ones are kept.
+
+    Args:
+        po_path: PO catalog to prune in place.
+
+    Returns:
+        Number of obsolete entries removed.
+    """
+    blocks = po_path.read_text(encoding="utf-8").split("\n\n")
+    kept = []
+    for block in blocks:
+        lines = block.strip("\n").splitlines()
+        first = next((i for i, line in enumerate(lines) if line.startswith("#~ msgstr")), None)
+        empty = first is not None and all(_EMPTY_MSGSTR.fullmatch(ln) for ln in lines[first:])
+        if not (empty and all(line.startswith("#") for line in lines)):
+            kept.append(block)
+
+    po_path.write_text("\n\n".join(kept), encoding="utf-8")
+    return len(blocks) - len(kept)
+
+
 def update_catalogs(
     pot_file: Path = DEFAULT_POT_FILE,
     locale_dir: Path = DEFAULT_LOCALE_DIR,
@@ -279,6 +302,7 @@ def update_catalogs(
         if proc.returncode == 0:
             for po_path in locale_dir.glob(f"*/LC_MESSAGES/{domain}.po"):
                 _sanitize_po_locations(po_path, root=PROJECT_ROOT)
+                prune_untranslated_obsolete(po_path)
 
         return proc.returncode
 
@@ -292,6 +316,7 @@ def update_catalogs(
                 return proc.returncode
 
             _sanitize_po_locations(po_path, root=PROJECT_ROOT)
+            prune_untranslated_obsolete(po_path)
 
         return 0
 
