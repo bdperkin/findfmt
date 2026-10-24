@@ -1,0 +1,180 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 1.0.3.dev26+g37b35fbfa.d20261024\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-24 15:07-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/api/stability.md:1 17214666ac414ede90bc6a46b2455dff
+msgid "API Stability Policy"
+msgstr ""
+
+#: ../../source/api/stability.md:3 302af3debf434458835641b6d51ee673
+msgid ""
+"`findfmt` follows [Semantic Versioning "
+"2.0.0](https://semver.org/spec/v2.0.0.html). This page defines what the "
+"public Python API is, what stays compatible within the 1.x line, and how "
+"changes are caught before release."
+msgstr ""
+
+#: ../../source/api/stability.md:7 d32b770f0e51441fbb822cb3be0fae82
+msgid "1. What Is Public"
+msgstr ""
+
+#: ../../source/api/stability.md:9 56ca9da369594f05bd143a868c403f06
+msgid ""
+"The public API is every name listed in the `__all__` of the `findfmt` "
+"package and its submodules. Everything else is internal and may change in"
+" any release:"
+msgstr ""
+
+#: ../../source/api/stability.md:12 2956e1ab5ec74730b4ecf856dbd1a11f
+msgid "names that start with an underscore, or are not listed in `__all__`;"
+msgstr ""
+
+#: ../../source/api/stability.md:13 f4ce700d357647d6b3dccff25acc1c51
+msgid "the `tools/` and `tests/` directories."
+msgstr ""
+
+#: ../../source/api/stability.md:15 3f200e09a4554ab298c1f7585973482e
+msgid ""
+"Command-line options, configuration keys, environment variables, and "
+"[exit codes](../cli/index.md) are covered by the same compatibility "
+"promise as the Python API."
+msgstr ""
+
+#: ../../source/api/stability.md:18 f24cc5b3bdd44af6935862c4e3e38fd1
+msgid "2. Compatibility Within 1.x"
+msgstr ""
+
+#: ../../source/api/stability.md:20 549d302d497347ebb0cdda17737b4515
+msgid "Within the 1.x line:"
+msgstr ""
+
+#: ../../source/api/stability.md:22 c7f5509df3fb400e93f1f68b578e687d
+msgid "Public names are not removed or renamed without a deprecation period."
+msgstr ""
+
+#: ../../source/api/stability.md:23 99208c8edae64c3b9b9662f429c2e137
+msgid ""
+"Existing calls keep working: new parameters are optional, and are added "
+"at the end or as keyword-only parameters."
+msgstr ""
+
+#: ../../source/api/stability.md:25 7d225474d9204ce6a3b4ea1fd7e9de26
+msgid ""
+"Enumeration members keep their names and values, and comparisons with "
+"those values keep working."
+msgstr ""
+
+#: ../../source/api/stability.md:26 b65d5477430541199b16faa7db9f5dae
+msgid "Exception classes keep their place in the `FindFmtError` hierarchy."
+msgstr ""
+
+#: ../../source/api/stability.md:28 cf8e386591e8474bac84cb621e29f884
+msgid "2.1. Pass Arguments by Keyword"
+msgstr ""
+
+#: ../../source/api/stability.md:30 02947aa8ddd3465c9af6c5a18e31a22a
+msgid ""
+"Some public functions and classes take many parameters, and their "
+"positional order is not guaranteed. Pass arguments to these by keyword:"
+msgstr ""
+
+#: ../../source/api/stability.md:33 65fe27b785d24d9aa666c9488bdc67c8
+msgid ""
+"**`TraversalConfig`**: 1.0.2 inserted `csv_safe` in the middle of its "
+"fields."
+msgstr ""
+
+#: ../../source/api/stability.md:34 e8277ff421ba42b991c6db81d0a89f58
+msgid ""
+"**CLI command callbacks** such as `findfmt.cli.findfmt`: Click always "
+"calls them by keyword, and 1.1 inserted `exit_status` in the middle of "
+"the signature."
+msgstr ""
+
+#: ../../source/api/stability.md:37 46473f2f6c154585a7709f555d6e3d2a
+msgid ""
+"Version 2.0 will make these parameters keyword-only "
+"([#504](https://github.com/bdperkin/findfmt/issues/504))."
+msgstr ""
+
+#: ../../source/api/stability.md:40 cd46eb47a6f644ec9073c8e820346c58
+msgid "2.2. Documented Exceptions in 1.1"
+msgstr ""
+
+#: ../../source/api/stability.md:42 b1abbc0a78074268a2c79abbe1479522
+msgid ""
+"1.1 changes two things that 1.0.x users can notice. Both are listed as "
+"breaking changes in the changelog and explained in [Upgrading to findfmt "
+"1.1](../guides/upgrading.md):"
+msgstr ""
+
+#: ../../source/api/stability.md:45 5f618861c38b422397600638c54ba62c
+msgid "Python 3.10 is no longer supported."
+msgstr ""
+
+#: ../../source/api/stability.md:46 edf5ad60e9204cc0becc6768fbce3e75
+msgid ""
+"`SortKey` and `OutputFormat` are `enum.StrEnum` subclasses, so `str()` "
+"and f-strings return a member's value. Member names, values, and "
+"comparisons are unchanged."
+msgstr ""
+
+#: ../../source/api/stability.md:49 e8f94c0a56864f1aa642b980fbe02a94
+msgid "3. How Changes Are Caught"
+msgstr ""
+
+#: ../../source/api/stability.md:51 3ef51d79459442b092a9225bab4cf6b2
+msgid ""
+"`tools/api_surface.py` records every public name with its kind and, where"
+" meaningful, its signature, class members, or enumeration values. The "
+"committed snapshot `tests/unit/api_surface.json` pins that surface, and "
+"`tests/unit/test_api_surface.py` fails when the API changes. The failure "
+"lists the added, removed, and changed names."
+msgstr ""
+
+#: ../../source/api/stability.md:56 86851bfd5518453da557d7e9437c254f
+msgid "To make an intentional API change:"
+msgstr ""
+
+#: ../../source/api/stability.md:58 5ba14f4add424f9b8fab5cd50735e371
+msgid "Regenerate the snapshot with `uv run python tools/api_surface.py --write`."
+msgstr ""
+
+#: ../../source/api/stability.md:59 f614e37b955446d3b82f8984ff89a1d1
+msgid ""
+"Record the change in `CHANGELOG.md`, and add it to the upgrade notes if "
+"it can break callers."
+msgstr ""
+
+#: ../../source/api/stability.md:61 099c52a4581f469a9b9677f5a810b2ab
+msgid "4. API Changes in 1.1"
+msgstr ""
+
+#: ../../source/api/stability.md:63 2aaf2f82b4f848949cea8ea6d8c8a451
+msgid ""
+"Compared with 1.0.0, 1.1 removes no public names and adds 20, including "
+"helpers for CSV formula-injection safety, `--exit-status`, atomic output "
+"files, and terminal cell widths. Signature changes add only optional or "
+"keyword-only parameters, apart from the positional-order cases in §2.1. "
+"Compared with the latest 1.0.x release (1.0.2), 1.1 adds 2 names (both "
+"for `--exit-status`) and changes the two `StrEnum` classes, the CLI "
+"command callbacks, and `execute_findfmt` (a new keyword-only "
+"`exit_status` parameter)."
+msgstr ""

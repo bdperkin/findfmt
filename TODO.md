@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 132 Closed Issues | 144 Actionable Open Tasks | 35 Active Umbrella Epics **Last
+> **Tracking:** 133 Closed Issues | 144 Actionable Open Tasks | 35 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release)
@@ -410,6 +410,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#499](https://github.com/bdperkin/findfmt/issues/499)** - docs(release): add v1.1.0 upgrade
   and migration notes (Closed: 2026-10-24 via PR
   [#503](https://github.com/bdperkin/findfmt/pull/503))
+- [x] **[#493](https://github.com/bdperkin/findfmt/issues/493)** - refactor(api): API surface
+  stability & public contract verification for v1.1.0 (Closed: 2026-10-24 via PR
+  [#505](https://github.com/bdperkin/findfmt/pull/505))
 
 ______________________________________________________________________
 
@@ -517,74 +520,67 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Parent: [#229](https://github.com/bdperkin/findfmt/issues/229) | Milestone: v1.5.1)* -
   **Value:** Medium | **Effort:** S - **Rationale:** Locks in RTL behaviour cheaply; guards the
   Urdu/Arabic releases.
-- [ ] **[#493](https://github.com/bdperkin/findfmt/issues/493)** - refactor(api): API surface
-  stability & public contract verification for v1.1.0 *(Rank: 17 | Epic:
-  [[Epic] v1.1.0 Release Readiness](https://github.com/bdperkin/findfmt/issues/492) | Milestone:
-  v1.1.0)* - **Value:** High | **Effort:** M - **Rationale:** Verifies the public API changed only
-  where intended since v1.0.0 (Python 3.11 baseline, `StrEnum` stringification) and that every
-  change is documented.
 - [ ] **[#494](https://github.com/bdperkin/findfmt/issues/494)** - docs(sphinx): documentation &
-  discoverability polish for v1.1.0 *(Rank: 18 | Epic:
+  discoverability polish for v1.1.0 *(Rank: 17 | Epic:
   [[Epic] v1.1.0 Release Readiness](https://github.com/bdperkin/findfmt/issues/492) | Milestone:
   v1.1.0)* - **Value:** High | **Effort:** M - **Rationale:** Keeps CLI help, man page, Sphinx
   reference, and install docs in step with 1.1.0's new options and the 3.11–3.15 support range.
 - [ ] **[#495](https://github.com/bdperkin/findfmt/issues/495)** - sec(packaging): packaging,
-  distribution & supply chain security verification for v1.1.0 *(Rank: 19 | Epic:
+  distribution & supply chain security verification for v1.1.0 *(Rank: 18 | Epic:
   [[Epic] v1.1.0 Release Readiness](https://github.com/bdperkin/findfmt/issues/492) | Milestone:
   v1.1.0)* - **Value:** High | **Effort:** M - **Rationale:** Release supply-chain gate: metadata,
   artifacts, container version, OIDC publishing, and branch protection. Includes
   [#328](https://github.com/bdperkin/findfmt/issues/328);
   [#327](https://github.com/bdperkin/findfmt/issues/327) is complete.
 - [ ] **[#496](https://github.com/bdperkin/findfmt/issues/496)** - test(audit): final smoke testing
-  & edge-case quality audit for v1.1.0 *(Rank: 20 | Epic:
+  & edge-case quality audit for v1.1.0 *(Rank: 19 | Epic:
   [[Epic] v1.1.0 Release Readiness](https://github.com/bdperkin/findfmt/issues/492) | Milestone:
   v1.1.0)* - **Value:** High | **Effort:** M - **Rationale:** Installed-wheel smoke tests on Python
   3.11 and 3.15 across all three OSes, plus the behavior changes since v1.0.0.
 - [ ] **[#498](https://github.com/bdperkin/findfmt/issues/498)** - chore(release): prepare and
-  publish v1.1.0 *(Rank: 21 | Epic:
+  publish v1.1.0 *(Rank: 20 | Epic:
   [[Epic] v1.1.0 Release Readiness](https://github.com/bdperkin/findfmt/issues/492) | Milestone:
   v1.1.0)* - **Value:** High | **Effort:** M - **Rationale:** Cuts and publishes 1.1.0. Blocked by
-  [#493](https://github.com/bdperkin/findfmt/issues/493),
   [#494](https://github.com/bdperkin/findfmt/issues/494),
   [#495](https://github.com/bdperkin/findfmt/issues/495),
   [#496](https://github.com/bdperkin/findfmt/issues/496),
   [#497](https://github.com/bdperkin/findfmt/issues/497),
   [#328](https://github.com/bdperkin/findfmt/issues/328).
 - [ ] **[#304](https://github.com/bdperkin/findfmt/issues/304)** - feat(i18n): design and implement
-  Python format placeholder & variable protection validation for AI translation *(Rank: 22 | Epic:
+  Python format placeholder & variable protection validation for AI translation *(Rank: 21 | Epic:
   [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
   | Milestone: v1.1.1)* - **Value:** High | **Effort:** M - **Rationale:** Protects existing human
   catalogs now; independent of AI.
 - [ ] **[#320](https://github.com/bdperkin/findfmt/issues/320)** - fix(traversal): missing or
-  unreadable paths are silently skipped with exit 0 *(Rank: 23 | Epic:
+  unreadable paths are silently skipped with exit 0 *(Rank: 22 | Epic:
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
   | Milestone: v1.1.1)* - **Value:** High | **Effort:** M - **Rationale:** Silent exit 0 on missing
   paths breaks scripts and CI.
 - [ ] **[#323](https://github.com/bdperkin/findfmt/issues/323)** - fix(traversal): align global
-  gitignore discovery with git (drop ~/.gitignore, use repo cwd, stop at repo root) *(Rank: 24 |
+  gitignore discovery with git (drop ~/.gitignore, use repo cwd, stop at repo root) *(Rank: 23 |
   Epic:
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
   | Milestone: v1.1.2)* - **Value:** High | **Effort:** M - **Rationale:** Global gitignore
   discovery diverges from git. Blocked by [#322](https://github.com/bdperkin/findfmt/issues/322).
 - [ ] **[#319](https://github.com/bdperkin/findfmt/issues/319)** - fix(cli): wrapper entry points
-  misparse value options; findfilefmt -o x tag truncates a file named "tag" *(Rank: 25 | Epic:
+  misparse value options; findfilefmt -o x tag truncates a file named "tag" *(Rank: 24 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
   | Milestone: v1.2.0)* - **Value:** High | **Effort:** M - **Rationale:** Wrapper commands
   mis-parse common options; can create stray files.
 - [ ] **[#451](https://github.com/bdperkin/findfmt/issues/451)** - fix(i18n): defer locale
-  initialisation so "import findfmt" does not change process locale *(Rank: 26 | Epic:
+  initialisation so "import findfmt" does not change process locale *(Rank: 25 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
   | Parent: [#324](https://github.com/bdperkin/findfmt/issues/324) | Milestone: v1.2.0)* -
   **Value:** High | **Effort:** M - **Rationale:** Silent library-side behaviour change for
   embedders; high value.
 - [ ] **[#372](https://github.com/bdperkin/findfmt/issues/372)** - [Core] Replace recursive
-  directory traversal and size calculation with iterative depth-safe implementations *(Rank: 27 |
+  directory traversal and size calculation with iterative depth-safe implementations *(Rank: 26 |
   Epic:
   [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)
   | Milestone: v1.2.1)* - **Value:** High | **Effort:** M - **Rationale:** Deep trees silently
   return zero results.
 - [ ] **[#463](https://github.com/bdperkin/findfmt/issues/463)** - fix(parsers): confine --from-file
-  paths to the traversal root unless explicitly allowed *(Rank: 28 | Epic:
+  paths to the traversal root unless explicitly allowed *(Rank: 27 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
   | Parent: [#334](https://github.com/bdperkin/findfmt/issues/334) | Milestone: v1.2.2)* -
   **Value:** High | **Effort:** M - **Rationale:** Security hardening for untrusted input lists.
@@ -592,315 +588,322 @@ sub-issues. Respect `Blocked by` links when picking up work.
 ### 2.2. Medium Priority / Core Deliverables
 
 - [ ] **[#328](https://github.com/bdperkin/findfmt/issues/328)** - build(docker): image reports
-  1.0.0.dev0, ignores uv.lock, ships uv, and lacks provenance *(Rank: 29 | Epic:
+  1.0.0.dev0, ignores uv.lock, ships uv, and lacks provenance *(Rank: 28 | Epic:
   [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)
   | Milestone: v1.1.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Container
   reproducibility and supply chain. Unblocked by
   [#327](https://github.com/bdperkin/findfmt/issues/327).
 - [ ] **[#303](https://github.com/bdperkin/findfmt/issues/303)** - feat(i18n): benchmark and
   evaluate open-source Python gettext AI translators (gettext-translator, pytlai,
-  auto-gettext-translator) *(Rank: 30 | Epic:
+  auto-gettext-translator) *(Rank: 29 | Epic:
   [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
   | Milestone: v1.1.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Evaluation prerequisite
   for the AI translation chain.
 - [ ] **[#341](https://github.com/bdperkin/findfmt/issues/341)** - fix(format): consistent
-  broken-pipe exit codes and respect --sort/--reverse in tree/HTML/XML *(Rank: 31 | Epic:
+  broken-pipe exit codes and respect --sort/--reverse in tree/HTML/XML *(Rank: 30 | Epic:
   [[Epic] Formatter Integrity: Encoding Robustness, Stream Sanitization & Format Parity](https://github.com/bdperkin/findfmt/issues/384)
   | Milestone: v1.1.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Inconsistent
   broken-pipe exits break pipelines.
 - [ ] **[#221](https://github.com/bdperkin/findfmt/issues/221)** - feat(i18n): add language support
-  for Spanish (es) (~559 million) *(Rank: 32 | Epic:
+  for Spanish (es) (~559 million) *(Rank: 31 | Epic:
   [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
   | Milestone: v1.1.2)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Spanish (`es`, ~559 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#337](https://github.com/bdperkin/findfmt/issues/337)** - perf(traversal): eliminate
-  redundant per-file syscalls and double classification under --prune *(Rank: 33 | Epic:
+  redundant per-file syscalls and double classification under --prune *(Rank: 32 | Epic:
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
   | Milestone: v1.1.2)* - **Value:** Medium | **Effort:** M - **Rationale:** Rescoped to syscall
   reduction; quadratic prune already fixed. Blocked by
   [#345](https://github.com/bdperkin/findfmt/issues/345),
   [#321](https://github.com/bdperkin/findfmt/issues/321).
 - [ ] **[#426](https://github.com/bdperkin/findfmt/issues/426)** - ci(deps): evaluate matrix tooling
-  orchestration and define pruned resolution parameter matrix *(Rank: 34 | Epic:
+  orchestration and define pruned resolution parameter matrix *(Rank: 33 | Epic:
   [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
   | Milestone: v1.1.2)* - **Value:** Medium | **Effort:** M - **Rationale:** ADR that drives
   [#349](https://github.com/bdperkin/findfmt/issues/349),
   [#427](https://github.com/bdperkin/findfmt/issues/427) and
   [#429](https://github.com/bdperkin/findfmt/issues/429).
 - [ ] **[#306](https://github.com/bdperkin/findfmt/issues/306)** - feat(i18n): integrate AI
-  translation command into developer tooling (tools/i18n.py translate) *(Rank: 35 | Epic:
+  translation command into developer tooling (tools/i18n.py translate) *(Rank: 34 | Epic:
   [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
   | Milestone: v1.1.4)* - **Value:** Medium | **Effort:** M - **Rationale:** Integrates the chosen
   translator into tools/i18n.py. Blocked by [#305](https://github.com/bdperkin/findfmt/issues/305),
   [#304](https://github.com/bdperkin/findfmt/issues/304).
 - [ ] **[#427](https://github.com/bdperkin/findfmt/issues/427)** - tools(deps): implement local
-  dependency resolution matrix runner with failure diagnostics *(Rank: 36 | Epic:
+  dependency resolution matrix runner with failure diagnostics *(Rank: 35 | Epic:
   [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
   | Milestone: v1.1.4)* - **Value:** Medium | **Effort:** M - **Rationale:** Local matrix runner;
   shares tooling with [#349](https://github.com/bdperkin/findfmt/issues/349). Blocked by
   [#426](https://github.com/bdperkin/findfmt/issues/426).
 - [ ] **[#429](https://github.com/bdperkin/findfmt/issues/429)** - ci(deps): create exhaustive
-  scheduled and dispatch dependency resolution matrix workflow *(Rank: 37 | Epic:
+  scheduled and dispatch dependency resolution matrix workflow *(Rank: 36 | Epic:
   [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
   | Milestone: v1.1.4)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled exhaustive
   matrix. Blocked by [#426](https://github.com/bdperkin/findfmt/issues/426).
 - [ ] **[#215](https://github.com/bdperkin/findfmt/issues/215)** - feat(i18n): add language support
-  for German (de) (~133 million) *(Rank: 38 | Epic:
+  for German (de) (~133 million) *(Rank: 37 | Epic:
   [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
   | Milestone: v1.1.5)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for German (`de`, ~133 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#222](https://github.com/bdperkin/findfmt/issues/222)** - feat(i18n): add language support
-  for French (fr) (~310 million) *(Rank: 39 | Epic:
+  for French (fr) (~310 million) *(Rank: 38 | Epic:
   [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
   | Milestone: v1.1.5)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for French (`fr`, ~310 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#228](https://github.com/bdperkin/findfmt/issues/228)** - feat(i18n): add language support
-  for Japanese (ja) (~123 million) *(Rank: 40 | Epic:
+  for Japanese (ja) (~123 million) *(Rank: 39 | Epic:
   [[Epic] Add Language Support: Japonic & Koreanic (~205 Million)](https://github.com/bdperkin/findfmt/issues/205)
   | Milestone: v1.1.5)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Japanese (`ja`, ~123 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#329](https://github.com/bdperkin/findfmt/issues/329)** - fix(cli): invalid --table-style
-  and other domain errors print full tracebacks *(Rank: 41 | Epic:
+  and other domain errors print full tracebacks *(Rank: 40 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
   | Milestone: v1.2.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for this language; extends reach of the CLI to a large speaker base.
 - [ ] **[#453](https://github.com/bdperkin/findfmt/issues/453)** - refactor(cli): move CLI-only
   modules (diagnostics, entrypoints, summary, terminal) under findfmt.cli with compatibility shims
-  *(Rank: 42 | Epic:
+  *(Rank: 41 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
   | Parent: [#324](https://github.com/bdperkin/findfmt/issues/324) | Milestone: v1.2.0)* -
   **Value:** Medium | **Effort:** M - **Rationale:** Completes the core/CLI split; medium effort and
   risk.
 - [ ] **[#310](https://github.com/bdperkin/findfmt/issues/310)** - feat(config): provide sample
-  config.toml, annotated reference configuration, and --generate-config CLI option *(Rank: 43 |
+  config.toml, annotated reference configuration, and --generate-config CLI option *(Rank: 42 |
   Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
   | Milestone: v1.3.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Depends on the
   layered-config work. Blocked by [#455](https://github.com/bdperkin/findfmt/issues/455).
 - [ ] **[#455](https://github.com/bdperkin/findfmt/issues/455)** - feat(config): merge user and
-  project config layers and discover pyproject.toml up to the VCS root *(Rank: 44 | Epic:
+  project config layers and discover pyproject.toml up to the VCS root *(Rank: 43 | Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
   | Parent: [#332](https://github.com/bdperkin/findfmt/issues/332) | Milestone: v1.3.0)* -
   **Value:** Medium | **Effort:** M - **Rationale:** Core of the layered-config feature.
 - [ ] **[#292](https://github.com/bdperkin/findfmt/issues/292)** - refactor(types): resolve Ty
-  truthiness-test-of-none-union diagnostics to upgrade past v0.0.84 *(Rank: 45 | Epic:
+  truthiness-test-of-none-union diagnostics to upgrade past v0.0.84 *(Rank: 44 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
   | Milestone: v1.3.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Unblocks Ty upgrades;
   mechanical but spread over 23 files.
 - [ ] **[#216](https://github.com/bdperkin/findfmt/issues/216)** - feat(i18n): add language support
-  for Chinese - China / Mandarin (zh_CN) (~1.14 billion) *(Rank: 46 | Epic:
+  for Chinese - China / Mandarin (zh_CN) (~1.14 billion) *(Rank: 45 | Epic:
   [[Epic] Add Language Support: Sino-Tibetan (~1.42 Billion)](https://github.com/bdperkin/findfmt/issues/198)
   | Milestone: v1.5.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Chinese - China / Mandarin (`zh_CN`, ~1.14 billion); extends reach of the CLI to a
   large speaker base.
 - [ ] **[#217](https://github.com/bdperkin/findfmt/issues/217)** - feat(i18n): add language support
-  for Hindi (hi) (~610 million) *(Rank: 47 | Epic:
+  for Hindi (hi) (~610 million) *(Rank: 46 | Epic:
   [[Epic] Add Language Support: Indo-Aryan (~1.39 Billion)](https://github.com/bdperkin/findfmt/issues/199)
   | Milestone: v1.5.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Hindi (`hi`, ~610 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#218](https://github.com/bdperkin/findfmt/issues/218)** - feat(i18n): add language support
-  for Bengali (bn) (~273 million) *(Rank: 48 | Epic:
+  for Bengali (bn) (~273 million) *(Rank: 47 | Epic:
   [[Epic] Add Language Support: Indo-Aryan (~1.39 Billion)](https://github.com/bdperkin/findfmt/issues/199)
   | Milestone: v1.5.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Bengali (`bn`, ~273 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#219](https://github.com/bdperkin/findfmt/issues/219)** - feat(i18n): add language support
-  for Urdu (ur) (~232 million) *(Rank: 49 | Epic:
+  for Urdu (ur) (~232 million) *(Rank: 48 | Epic:
   [[Epic] Add Language Support: Indo-Aryan (~1.39 Billion)](https://github.com/bdperkin/findfmt/issues/199)
   | Milestone: v1.5.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Urdu (`ur`, ~232 million); extends reach of the CLI to a large speaker base. Blocked
   by [#449](https://github.com/bdperkin/findfmt/issues/449).
 - [ ] **[#223](https://github.com/bdperkin/findfmt/issues/223)** - feat(i18n): add language support
-  for Portuguese (pt) (~264 million) *(Rank: 50 | Epic:
+  for Portuguese (pt) (~264 million) *(Rank: 49 | Epic:
   [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
   | Milestone: v1.5.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Portuguese (`pt`, ~264 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#449](https://github.com/bdperkin/findfmt/issues/449)** - fix(format): correct Rich table
-  and tree width and alignment for mixed RTL/LTR cell content *(Rank: 51 | Epic:
+  and tree width and alignment for mixed RTL/LTR cell content *(Rank: 50 | Epic:
   [[Epic] i18n Platform Infrastructure: RTL/BiDi Rendering & Multilingual Documentation Builds](https://github.com/bdperkin/findfmt/issues/276)
   | Parent: [#229](https://github.com/bdperkin/findfmt/issues/229) | Milestone: v1.5.1)* -
   **Value:** Medium | **Effort:** M - **Rationale:** Required before RTL catalogs (ur, ar) ship.
   Blocked by [#448](https://github.com/bdperkin/findfmt/issues/448).
 - [ ] **[#225](https://github.com/bdperkin/findfmt/issues/225)** - feat(i18n): add language support
-  for Arabic (ar) (~370 million) *(Rank: 52 | Epic:
+  for Arabic (ar) (~370 million) *(Rank: 51 | Epic:
   [[Epic] Add Language Support: Afroasiatic (~480 Million)](https://github.com/bdperkin/findfmt/issues/201)
   | Milestone: v1.5.2)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Arabic (`ar`, ~370 million); extends reach of the CLI to a large speaker base. Blocked
   by [#449](https://github.com/bdperkin/findfmt/issues/449).
 - [ ] **[#226](https://github.com/bdperkin/findfmt/issues/226)** - feat(i18n): add language support
-  for Russian (ru) (~255 million) *(Rank: 53 | Epic:
+  for Russian (ru) (~255 million) *(Rank: 52 | Epic:
   [[Epic] Add Language Support: Slavic (~415 Million)](https://github.com/bdperkin/findfmt/issues/202)
   | Milestone: v1.5.2)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Russian (`ru`, ~255 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#227](https://github.com/bdperkin/findfmt/issues/227)** - feat(i18n): add language support
-  for Indonesian (id) (~199 million) *(Rank: 54 | Epic:
+  for Indonesian (id) (~199 million) *(Rank: 53 | Epic:
   [[Epic] Add Language Support: Austronesian (~295 Million)](https://github.com/bdperkin/findfmt/issues/203)
   | Milestone: v1.5.2)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Indonesian (`id`, ~199 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#220](https://github.com/bdperkin/findfmt/issues/220)** - feat(i18n): add language support
-  for Punjabi (pa) (~125 million) *(Rank: 55 | Epic:
+  for Punjabi (pa) (~125 million) *(Rank: 54 | Epic:
   [[Epic] Add Language Support: Indo-Aryan (~1.39 Billion)](https://github.com/bdperkin/findfmt/issues/199)
   | Milestone: v1.6.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Punjabi (`pa`, ~125 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#224](https://github.com/bdperkin/findfmt/issues/224)** - feat(i18n): add language support
-  for Portuguese - Brazil (pt_BR) (~208 million (subset of total Portuguese)) *(Rank: 56 | Epic:
+  for Portuguese - Brazil (pt_BR) (~208 million (subset of total Portuguese)) *(Rank: 55 | Epic:
   [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
   | Milestone: v1.6.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Portuguese - Brazil (`pt_BR`, ~208 million (subset of total Portuguese); extends reach
   of the CLI to a large speaker base.
 - [ ] **[#246](https://github.com/bdperkin/findfmt/issues/246)** - feat(i18n): add language support
-  for Italian (it) (~68 million) *(Rank: 57 | Epic:
+  for Italian (it) (~68 million) *(Rank: 56 | Epic:
   [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
   | Milestone: v1.6.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Italian (`it`, ~68 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#258](https://github.com/bdperkin/findfmt/issues/258)** - feat(i18n): add language support
-  for Korean (ko) (~82 million) *(Rank: 58 | Epic:
+  for Korean (ko) (~82 million) *(Rank: 57 | Epic:
   [[Epic] Add Language Support: Japonic & Koreanic (~205 Million)](https://github.com/bdperkin/findfmt/issues/205)
   | Milestone: v1.6.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Korean (`ko`, ~82 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#261](https://github.com/bdperkin/findfmt/issues/261)** - feat(i18n): add language support
-  for Turkish (tr) (~90 million) *(Rank: 59 | Epic:
+  for Turkish (tr) (~90 million) *(Rank: 58 | Epic:
   [[Epic] Add Language Support: Turkic (~165 Million)](https://github.com/bdperkin/findfmt/issues/207)
   | Milestone: v1.6.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Turkish (`tr`, ~90 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#267](https://github.com/bdperkin/findfmt/issues/267)** - feat(i18n): add language support
-  for Vietnamese (vi) (~86 million) *(Rank: 60 | Epic:
+  for Vietnamese (vi) (~86 million) *(Rank: 59 | Epic:
   [[Epic] Add Language Support: All Other (~200 Million)](https://github.com/bdperkin/findfmt/issues/211)
   | Milestone: v1.6.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
   catalog for Vietnamese (`vi`, ~86 million); extends reach of the CLI to a large speaker base.
 - [ ] **[#296](https://github.com/bdperkin/findfmt/issues/296)** - feat(packaging): investigate
-  Briefcase configuration and feasibility for findfmt console application *(Rank: 61 | Epic:
+  Briefcase configuration and feasibility for findfmt console application *(Rank: 60 | Epic:
   [[Epic] Investigate BeeWare Briefcase for Native Standalone Binary & Console Application Distribution](https://github.com/bdperkin/findfmt/issues/301)
   | Milestone: v1.7.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Prerequisite
   feasibility study for the Briefcase chain.
 - [ ] **[#300](https://github.com/bdperkin/findfmt/issues/300)** - docs(packaging): document
-  standalone binary installation options and Briefcase evaluation trade-offs *(Rank: 62 | Epic:
+  standalone binary installation options and Briefcase evaluation trade-offs *(Rank: 61 | Epic:
   [[Epic] Investigate BeeWare Briefcase for Native Standalone Binary & Console Application Distribution](https://github.com/bdperkin/findfmt/issues/301)
   | Milestone: v1.7.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Decision gate for the
   whole Briefcase chain.
 - [ ] **[#321](https://github.com/bdperkin/findfmt/issues/321)** - fix(traversal): symlinks are
-  omitted by default and misclassified/mis-pathed with -l *(Rank: 63 | Epic:
+  omitted by default and misclassified/mis-pathed with -l *(Rank: 62 | Epic:
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
   | Milestone: v1.2.1)* - **Value:** High | **Effort:** L - **Rationale:** Symlink handling produces
   wrong paths and duplicate entries.
 - [ ] **[#497](https://github.com/bdperkin/findfmt/issues/497)** - chore(repo): re-upload the GitHub
-  social preview card for Python 3.11+ *(Rank: 64 | Epic:
+  social preview card for Python 3.11+ *(Rank: 63 | Epic:
   [[Epic] v1.1.0 Release Readiness](https://github.com/bdperkin/findfmt/issues/492) | Milestone:
   v1.1.0)* - **Value:** Low | **Effort:** S - **Rationale:** Manual settings upload so shared links
   show the "Python 3.11+" card.
 - [ ] **[#343](https://github.com/bdperkin/findfmt/issues/343)** - fix(format): --cp437 writes
-  Latin-1 code points, which show as mojibake *(Rank: 65 | Epic:
+  Latin-1 code points, which show as mojibake *(Rank: 64 | Epic:
   [[Epic] Formatter Integrity: Encoding Robustness, Stream Sanitization & Format Parity](https://github.com/bdperkin/findfmt/issues/384)
   | Milestone: v1.1.1)* - **Value:** Low | **Effort:** S - **Rationale:** Small encoding fix.
 - [ ] **[#305](https://github.com/bdperkin/findfmt/issues/305)** - feat(i18n): formulate domain
-  context prompt engineering and ngettext pluralization rules for AI translation *(Rank: 66 | Epic:
+  context prompt engineering and ngettext pluralization rules for AI translation *(Rank: 65 | Epic:
   [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
   | Milestone: v1.1.2)* - **Value:** Low | **Effort:** S - **Rationale:** Small; only one plural
   msgid today. Blocked by [#304](https://github.com/bdperkin/findfmt/issues/304),
   [#303](https://github.com/bdperkin/findfmt/issues/303).
 - [ ] **[#353](https://github.com/bdperkin/findfmt/issues/353)** - [Tests] Tighten coverage pragmas
-  and eliminate reachable/dead code pragmas *(Rank: 67 | Epic:
+  and eliminate reachable/dead code pragmas *(Rank: 66 | Epic:
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
   Milestone: v1.1.2)* - **Value:** Low | **Effort:** S - **Rationale:** Small coverage hygiene.
 - [ ] **[#359](https://github.com/bdperkin/findfmt/issues/359)** - [Tests] Complete pyproject.toml
-  test dependency group and isolate catalog compilation fixture *(Rank: 68 | Epic:
+  test dependency group and isolate catalog compilation fixture *(Rank: 67 | Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.1.2)* - **Value:** Low | **Effort:** S - **Rationale:** Small test-isolation fix.
 - [ ] **[#358](https://github.com/bdperkin/findfmt/issues/358)** - [Packaging] Expand packaging
-  smoke matrix to build and verify sdist installations *(Rank: 69 | Epic:
+  smoke matrix to build and verify sdist installations *(Rank: 68 | Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.1.3)* - **Value:** Low | **Effort:** S - **Rationale:** Small CI addition.
 - [ ] **[#360](https://github.com/bdperkin/findfmt/issues/360)** - [CI] Align tool versions across
-  pre-commit and uv.lock, and schedule docs linkcheck *(Rank: 70 | Epic:
+  pre-commit and uv.lock, and schedule docs linkcheck *(Rank: 69 | Epic:
   [[Epic] CI Pipeline Determinism, Packaging Smoke Tests, and Tooling Alignment](https://github.com/bdperkin/findfmt/issues/344)
   | Milestone: v1.1.3)* - **Value:** Low | **Effort:** S - **Rationale:** Prevents tool-version
   drift.
 - [ ] **[#430](https://github.com/bdperkin/findfmt/issues/430)** - docs(deps): document dependency
-  matrix testing and bound troubleshooting in contributing guide *(Rank: 71 | Epic:
+  matrix testing and bound troubleshooting in contributing guide *(Rank: 70 | Epic:
   [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
   | Milestone: v1.1.4)* - **Value:** Low | **Effort:** S - **Rationale:** Docs for the matrix
   tooling. Blocked by [#429](https://github.com/bdperkin/findfmt/issues/429),
   [#427](https://github.com/bdperkin/findfmt/issues/427).
 - [ ] **[#351](https://github.com/bdperkin/findfmt/issues/351)** - [Core] Remove test-only traversal
-  aliases and unused \_load_active_specs; review findfmt.traversal public \_\_all\_\_ *(Rank: 72 |
+  aliases and unused \_load_active_specs; review findfmt.traversal public \_\_all\_\_ *(Rank: 71 |
   Epic:
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
   Milestone: v1.2.1)* - **Value:** Low | **Effort:** S - **Rationale:** Small API hygiene cleanup.
 - [ ] **[#366](https://github.com/bdperkin/findfmt/issues/366)** - [CLI] Validate numeric CLI
-  parameters (min=0) and clarify misleading option help descriptions *(Rank: 73 | Epic:
+  parameters (min=0) and clarify misleading option help descriptions *(Rank: 72 | Epic:
   [[Epic] CLI Documentation Accuracy, Dynamic --help-all Generation, and Option Validation](https://github.com/bdperkin/findfmt/issues/346)
   | Milestone: v1.2.1)* - **Value:** Low | **Effort:** S - **Rationale:** Small validation fix.
 - [ ] **[#355](https://github.com/bdperkin/findfmt/issues/355)** - [Core] Fix symlink parser
-  handling of filenames containing arrow ('->') delimiters *(Rank: 74 | Epic:
+  handling of filenames containing arrow ('->') delimiters *(Rank: 73 | Epic:
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
   Milestone: v1.2.2)* - **Value:** Low | **Effort:** S - **Rationale:** Edge-case parser fix.
 - [ ] **[#458](https://github.com/bdperkin/findfmt/issues/458)** - feat(config): show value
-  provenance (default/config/env/CLI) in --show-config *(Rank: 75 | Epic:
+  provenance (default/config/env/CLI) in --show-config *(Rank: 74 | Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
   | Parent: [#332](https://github.com/bdperkin/findfmt/issues/332) | Milestone: v1.3.0)* -
   **Value:** Low | **Effort:** S - **Rationale:** Debuggability nicety once layering exists.
 - [ ] **[#302](https://github.com/bdperkin/findfmt/issues/302)** - feat(docs): replace top-left
-  Sphinx sidebar logo with high-resolution square icon *(Rank: 76 | Epic:
+  Sphinx sidebar logo with high-resolution square icon *(Rank: 75 | Epic:
   [[Epic] Documentation Architecture, Sphinx Navigation & Project Branding](https://github.com/bdperkin/findfmt/issues/379)
   | Milestone: v1.3.1)* - **Value:** Low | **Effort:** S - **Rationale:** Tiny docs polish; good
   first issue.
 - [ ] **[#311](https://github.com/bdperkin/findfmt/issues/311)** - refactor(config): investigate
-  consolidating standalone repository configuration files into pyproject.toml *(Rank: 77 | Epic:
+  consolidating standalone repository configuration files into pyproject.toml *(Rank: 76 | Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
   | Milestone: v1.3.1)* - **Value:** Low | **Effort:** S - **Rationale:** Low ROI; mostly not
   feasible.
 - [ ] **[#312](https://github.com/bdperkin/findfmt/issues/312)** - docs(readme): audit and expand
-  high-value status, security, and metadata badges in README and documentation header *(Rank: 78 |
+  high-value status, security, and metadata badges in README and documentation header *(Rank: 77 |
   Epic:
   [[Epic] Documentation Architecture, Sphinx Navigation & Project Branding](https://github.com/bdperkin/findfmt/issues/379)
   | Milestone: v1.3.1)* - **Value:** Low | **Effort:** S - **Rationale:** Small docs task; badge
   list already mostly done.
 - [ ] **[#313](https://github.com/bdperkin/findfmt/issues/313)** - chore(pre-commit): configure
-  yamlfix formatting rules in pyproject.toml *(Rank: 79 | Epic:
+  yamlfix formatting rules in pyproject.toml *(Rank: 78 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
   | Milestone: v1.3.1)* - **Value:** Low | **Effort:** S - **Rationale:** Small config task;
   prerequisite for [#314](https://github.com/bdperkin/findfmt/issues/314).
 - [ ] **[#471](https://github.com/bdperkin/findfmt/issues/471)** - ci(pre-commit): enable
-  check-hooks-apply and manual-stage identity meta hooks *(Rank: 80 | Epic:
+  check-hooks-apply and manual-stage identity meta hooks *(Rank: 79 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
   | Milestone: v1.3.2)* - **Value:** Low | **Effort:** S - **Rationale:** `check-hooks-apply`
   currently fails on `check-symlinks` (no tracked symlinks); remove that hook in the same PR.
 - [ ] **[#474](https://github.com/bdperkin/findfmt/issues/474)** - ci(pre-commit): add gitlint
-  commit-msg hook for title/body length and message structure *(Rank: 81 | Epic:
+  commit-msg hook for title/body length and message structure *(Rank: 80 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
   | Milestone: v1.3.2)* - **Value:** Low | **Effort:** S - **Rationale:** Tuned config flags 21/100
   recent commits (91 with defaults). Enforcement is local only and upstream is barely maintained.
   Title limit follows [#314](https://github.com/bdperkin/findfmt/issues/314).
 - [ ] **[#445](https://github.com/bdperkin/findfmt/issues/445)** - feat(cli): add --ignore-file /
-  --ignore-type options and matching config keys *(Rank: 82 | Epic:
+  --ignore-type options and matching config keys *(Rank: 81 | Epic:
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
   | Parent: [#111](https://github.com/bdperkin/findfmt/issues/111) | Milestone: v1.4.1)* -
   **Value:** Low | **Effort:** S - **Rationale:** Small wiring task once the abstraction exists.
   Blocked by [#444](https://github.com/bdperkin/findfmt/issues/444).
 - [ ] **[#447](https://github.com/bdperkin/findfmt/issues/447)** - feat(traversal): add
   gitignore-dialect presets for .eslintignore, .prettierignore, .npmignore, and .stylelintignore
-  *(Rank: 83 | Epic:
+  *(Rank: 82 | Epic:
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
   | Parent: [#111](https://github.com/bdperkin/findfmt/issues/111) | Milestone: v1.4.1)* -
   **Value:** Low | **Effort:** S - **Rationale:** Cheap once the abstraction exists; reuses the
   gitignore dialect. Blocked by [#444](https://github.com/bdperkin/findfmt/issues/444).
 - [ ] **[#374](https://github.com/bdperkin/findfmt/issues/374)** - [CLI] v2.0: Reserve -h short flag
-  exclusively for --help and deprecate for --human-readable *(Rank: 84 | Epic:
+  exclusively for --help and deprecate for --human-readable *(Rank: 83 | Epic:
   [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
   | Milestone: v1.7.1)* - **Value:** Low | **Effort:** S - **Rationale:** v2.0 prep.
 - [ ] **[#375](https://github.com/bdperkin/findfmt/issues/375)** - [CLI] v2.0: Rename
-  double-negative --nolinks/--no-nolinks to positive --links/--no-links flag *(Rank: 85 | Epic:
+  double-negative --nolinks/--no-nolinks to positive --links/--no-links flag *(Rank: 84 | Epic:
   [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
   | Milestone: v1.7.1)* - **Value:** Low | **Effort:** S - **Rationale:** v2.0 prep.
 - [ ] **[#376](https://github.com/bdperkin/findfmt/issues/376)** - [CLI] v2.0: Disambiguate -v and
-  -V CLI flags with distinct semantics *(Rank: 86 | Epic:
+  -V CLI flags with distinct semantics *(Rank: 85 | Epic:
   [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
   | Milestone: v1.7.1)* - **Value:** Low | **Effort:** S - **Rationale:** v2.0 prep.
 - [ ] **[#377](https://github.com/bdperkin/findfmt/issues/377)** - [Core] v2.0: Remove deprecated
-  top-level main\_\* entry points and _ helper exports from findfmt package root *(Rank: 87 | Epic:
+  top-level main\_\* entry points and _ helper exports from findfmt package root *(Rank: 86 | Epic:
   [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
   | Milestone: v1.7.1)* - **Value:** Low | **Effort:** S - **Rationale:** v2.0 removal of shims
   introduced by [#324](https://github.com/bdperkin/findfmt/issues/324). Blocked by
   [#452](https://github.com/bdperkin/findfmt/issues/452).
+- [ ] **[#504](https://github.com/bdperkin/findfmt/issues/504)** - refactor(api)!: make
+  TraversalConfig and CLI command callback parameters keyword-only (v2.0) *(Rank: 87 | Epic:
+  [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
+  | Milestone: v1.7.1)* - **Value:** Low | **Effort:** S - **Rationale:** Enforces the keyword-only
+  policy from the 1.1 API audit ([#493](https://github.com/bdperkin/findfmt/issues/493)):
+  `TraversalConfig` gained a field mid-order in 1.0.2 and the CLI callback in 1.1. Breaking, so 2.0
+  only.
 - [ ] **[#331](https://github.com/bdperkin/findfmt/issues/331)** - perf(cli): TTY output is fully
   buffered for the pager, so nothing streams *(Rank: 88 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
@@ -1263,8 +1266,7 @@ Note: Each epic's milestone equals the latest milestone among its open sub-issue
 linked natively on GitHub.
 
 - [ ] **[#492](https://github.com/bdperkin/findfmt/issues/492)** - [Epic] v1.1.0 Release Readiness
-  *(Milestone: v1.1.0 | Open sub-issues: 6)* -
-  [#493](https://github.com/bdperkin/findfmt/issues/493),
+  *(Milestone: v1.1.0 | Open sub-issues: 5)* -
   [#494](https://github.com/bdperkin/findfmt/issues/494),
   [#495](https://github.com/bdperkin/findfmt/issues/495),
   [#496](https://github.com/bdperkin/findfmt/issues/496),
@@ -1373,11 +1375,12 @@ linked natively on GitHub.
   [#300](https://github.com/bdperkin/findfmt/issues/300)
 - [ ] **[#350](https://github.com/bdperkin/findfmt/issues/350)** - [Epic] v2.0 Breaking CLI Cleanups
   (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing) *(Milestone: v1.7.1 | Open
-  sub-issues: 5)* - [#374](https://github.com/bdperkin/findfmt/issues/374),
+  sub-issues: 6)* - [#374](https://github.com/bdperkin/findfmt/issues/374),
   [#375](https://github.com/bdperkin/findfmt/issues/375),
   [#376](https://github.com/bdperkin/findfmt/issues/376),
   [#377](https://github.com/bdperkin/findfmt/issues/377),
-  [#378](https://github.com/bdperkin/findfmt/issues/378)
+  [#378](https://github.com/bdperkin/findfmt/issues/378),
+  [#504](https://github.com/bdperkin/findfmt/issues/504)
 - [ ] **[#197](https://github.com/bdperkin/findfmt/issues/197)** - [Epic] Add Language Support:
   Germanic (~1.83 Billion) *(Milestone: Future Features | Open sub-issues: 4)* -
   [#215](https://github.com/bdperkin/findfmt/issues/215),
@@ -1479,7 +1482,7 @@ v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 
 | Milestone       | Theme                                                                                                                                  | Open Issues |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.0          | Python 3.11–3.15 Support Lifecycle, Behavior Fixes & Release Readiness (API, docs, packaging, audit, migration notes)                  | 8           |
+| v1.1.0          | Python 3.11–3.15 Support Lifecycle, Behavior Fixes & Release Readiness (API, docs, packaging, audit, migration notes)                  | 7           |
 | v1.1.1          | Output Correctness & Exit-Code Contract: ipynb/cp437 fixes, Broken-Pipe Parity, Config-Default Bug, Translation Placeholder Validation | 9           |
 | v1.1.2          | Test Determinism & Hermeticity: Deterministic Perf Counters, Coverage Hygiene, Dependency-Matrix ADR (+ Spanish catalog)               | 8           |
 | v1.1.3          | Release Safety & Packaging Hygiene: Tag-Pinned Releases, Reproducible Container, Required Floor Checks, 3.15 Gating                    | 6           |
@@ -1498,5 +1501,5 @@ v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 | v1.5.2          | Tier 2 Localizations (ar, ru, id)                                                                                                      | 3           |
 | v1.6.0          | Tier 3 Localizations (pa, pt_BR, it, ko, tr, vi)                                                                                       | 7           |
 | v1.7.0          | Native Standalone Binary Distribution Evaluation (BeeWare Briefcase) — gated on #300 decision                                          | 6           |
-| v1.7.1          | v2.0 Transition Prep: Deprecation Warnings & Breaking CLI Cleanups                                                                     | 6           |
+| v1.7.1          | v2.0 Transition Prep: Deprecation Warnings & Breaking CLI Cleanups                                                                     | 7           |
 | Future Features | Future feature enhancements and unplanned capabilities deferred beyond the scheduled roadmap.                                          | 48          |
