@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 129 Closed Issues | 146 Actionable Open Tasks | 36 Active Umbrella Epics **Last
+> **Tracking:** 130 Closed Issues | 146 Actionable Open Tasks | 35 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release)
@@ -401,6 +401,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#469](https://github.com/bdperkin/findfmt/issues/469)** - docs(i18n): regenerate locale
   catalogs after symlink flag corrections in #467 (Closed: 2026-10-24 via PR
   [#500](https://github.com/bdperkin/findfmt/pull/500))
+- [x] **[#442](https://github.com/bdperkin/findfmt/issues/442)** - [Epic] Python Version Support
+  Lifecycle: 3.11–3.15 Supported, 3.16 Preview (Closed: 2026-10-24 via PR
+  [#501](https://github.com/bdperkin/findfmt/pull/501))
 
 ______________________________________________________________________
 
@@ -1265,9 +1268,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are
 linked natively on GitHub.
 
-- [ ] **[#442](https://github.com/bdperkin/findfmt/issues/442)** - [Epic] Python Version Support
-  Lifecycle: 3.11–3.15 Supported, 3.16 Preview *(Milestone: v1.1.0 | Open sub-issues: 0)* - none
-  (all sub-issues complete)
 - [ ] **[#492](https://github.com/bdperkin/findfmt/issues/492)** - [Epic] v1.1.0 Release Readiness
   *(Milestone: v1.1.0 | Open sub-issues: 7)* -
   [#493](https://github.com/bdperkin/findfmt/issues/493),
@@ -1487,7 +1487,7 @@ v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 
 | Milestone       | Theme                                                                                                                                  | Open Issues |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.0          | Python 3.11–3.15 Support Lifecycle, Behavior Fixes & Release Readiness (API, docs, packaging, audit, migration notes)                  | 11          |
+| v1.1.0          | Python 3.11–3.15 Support Lifecycle, Behavior Fixes & Release Readiness (API, docs, packaging, audit, migration notes)                  | 10          |
 | v1.1.1          | Output Correctness & Exit-Code Contract: ipynb/cp437 fixes, Broken-Pipe Parity, Config-Default Bug, Translation Placeholder Validation | 9           |
 | v1.1.2          | Test Determinism & Hermeticity: Deterministic Perf Counters, Coverage Hygiene, Dependency-Matrix ADR (+ Spanish catalog)               | 8           |
 | v1.1.3          | Release Safety & Packaging Hygiene: Tag-Pinned Releases, Reproducible Container, Required Floor Checks, 3.15 Gating                    | 6           |

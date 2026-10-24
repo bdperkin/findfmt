@@ -157,3 +157,37 @@ matrix:
       python-version: 3.16-dev
       experimental: true
 ```
+
+______________________________________________________________________
+
+## 5. Python Version Support Lifecycle
+
+`findfmt` supports every CPython feature release from the oldest version still receiving security
+fixes to the newest stable release, and tests the next release early without advertising it. Each
+change below is guarded by `tests/unit/test_python_support_policy.py`, so a partial update fails CI.
+
+### 5.1. When the Oldest Version Reaches End of Life
+
+1. Raise `requires-python` in `pyproject.toml`, remove the old Trove classifier, and raise ruff's
+   `target-version`. Re-lock with `uv lock` and regenerate `.clusterfuzzlite/requirements.txt`.
+2. Remove the version from the `test-matrix` in `.github/workflows/ci.yml`, and remove compatibility
+   code that only the old version needed (`sys.version_info` guards and fallback imports).
+3. **Just before merging**, remove the three `Test (<os> - Python <old>)` required status checks
+   from branch protection on `main`. Otherwise the pull request waits for checks that no longer run.
+4. Update the supported range in this guide, `docs/source/quality/index.md`, `CONTRIBUTING.md`,
+   `SECURITY.md`, and `assets/social-preview.svg` (then regenerate the PNG), regenerate the
+   documentation catalogs (`make -C docs intl-update`), and record the change as breaking in the
+   changelog. Python 3.10 was dropped this way in #441.
+
+### 5.2. When a New Version Is Released
+
+1. Move the version from the experimental `<version>-dev` matrix entry into the gating
+   `python-version` list, and point the experimental entry at the next feature release.
+2. Add the new Trove classifier and raise `pyproject-fmt --max-supported-python` in
+   `.pre-commit-config.yaml`.
+3. Move the single-interpreter jobs (quality gate, documentation, release, and packaging smoke test)
+   to the new version once the toolchain passes on it. Update the container image when matching `uv`
+   builder and Python runtime images exist for the same Debian release.
+4. **After the new jobs report green**, add the three `Test (<os> - Python <new>)` checks to the
+   required status checks on `main`. Never require the experimental job.
+5. Update the docs as in step 4 of §5.1. Python 3.15 was added this way in #335 and #440.
