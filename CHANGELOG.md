@@ -15,6 +15,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and f-strings render a member's value (`"size"`) instead of `"SortKey.SIZE"`. Equality with
   strings, hashing, JSON output, CLI help, and configuration handling are unchanged (#441).
 
+### CI/CD & Packaging
+
+- *(ci)* Python 3.15 is the supported maximum and now gates every merge on Linux, macOS, and
+  Windows; the quality gate, documentation build, release, and wheel smoke test run on 3.15. A
+  non-gating `3.16-dev` job gives early warning for the next release (#335, #440).
+- *(docker)* The container image now runs Python 3.14 (was 3.13), still on Debian bookworm (#440).
+
 ### Security
 
 - *(deps)* Update dev-only dependencies to resolve security advisories: `virtualenv` 21.14.13

@@ -2,7 +2,7 @@
 
 This document defines the formal Python runtime compatibility matrix for `findfmt`, detailing
 verified runtimes, dependency constraints, language-level requirements, and technical justifications
-across Python 3.6 through 3.15.
+across Python 3.6 through 3.16.
 
 ______________________________________________________________________
 
@@ -11,18 +11,19 @@ ______________________________________________________________________
 `findfmt` enforces `requires-python = ">=3.11"`. The runtime compatibility status across modern and
 legacy Python interpreters is summarized below:
 
-| Python Version |  Release / EOL Status  | Tested on Fedora 44 | Build & CLI Execution | Test Suite & 100% Coverage | Compatibility Verdict & Primary Rationale                                                                                                                                       |
-| :------------: | :--------------------: | :-----------------: | :-------------------: | :------------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|    **3.6**     |     EOL (Dec 2021)     |    Yes (3.6.15)     |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and `typer>=0.12` drop 3.6; lacks runtime PEP 604 type support.                                              |
-|    **3.7**     |     EOL (Jun 2023)     |         N/A         |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and `typer>=0.12` drop 3.7.                                                                                  |
-|    **3.8**     |     EOL (Oct 2024)     |         N/A         |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6.2` drops 3.8; lacks standard library `typing.Annotated`.                                                      |
-|    **3.9**     |     EOL (Oct 2025)     |    Yes (3.9.25)     |        Blocked        |            N/A             | **Unsupported**: `@dataclass(slots=True)` raises `TypeError`; `identify>=2.6.16` and `typer>=0.24` require `>=3.10`; runtime PEP 604 reflection fails.                          |
-|    **3.10**    |     EOL (Oct 2026)     |    Yes (3.10.21)    |        Blocked        |            N/A             | **Unsupported**: Reached EOL on 2026-10-01; required the `tomli` and `typing_extensions.Self` shims; security fixes for dependencies such as `filelock` no longer support 3.10. |
-|    **3.11**    | Security (to Oct 2027) |    Yes (3.11.16)    |      **Passed**       |         **Passed**         | **Supported (Minimum)**: Baseline runtime; native `tomllib` (PEP 680) and `typing.Self` (PEP 673); `typing.override` (PEP 698) still comes from `typing-extensions`.            |
-|    **3.12**    |   Bugfix / Security    |    Yes (3.12.14)    |      **Passed**       |         **Passed**         | **Supported**: Full native support; standard CI testing target.                                                                                                                 |
-|    **3.13**    |   Current Mainstream   |    Yes (3.13.15)    |      **Passed**       |         **Passed**         | **Supported**: Primary local development target; wheel smoke-test target.                                                                                                       |
-|    **3.14**    |    Certified Modern    |    Yes (3.14.7)     |      **Passed**       |         **Passed**         | **Supported (Certified)**: Primary CI quality gate target; PyPI Trove classifier active; 100% statement and branch coverage.                                                    |
-|    **3.15**    | Preview / Dev (rc/dev) |   Yes (3.15.0rc2)   |      **Passed**       |         **Passed**         | **Supported (Preview)**: Validated against 3.15.0rc2; gating CI on Linux, macOS, and Windows; PyPI Trove classifier active; 100% statement and branch coverage.                 |
+| Python Version |  Release / EOL Status  | Tested on Fedora 44 | Build & CLI Execution | Test Suite & 100% Coverage | Compatibility Verdict & Primary Rationale                                                                                                                                         |
+| :------------: | :--------------------: | :-----------------: | :-------------------: | :------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|    **3.6**     |     EOL (Dec 2021)     |    Yes (3.6.15)     |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and `typer>=0.12` drop 3.6; lacks runtime PEP 604 type support.                                                |
+|    **3.7**     |     EOL (Jun 2023)     |         N/A         |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6` and `typer>=0.12` drop 3.7.                                                                                    |
+|    **3.8**     |     EOL (Oct 2024)     |         N/A         |        Blocked        |            N/A             | **Unsupported**: Missing `@dataclass(slots=True)`; `identify>=2.6.2` drops 3.8; lacks standard library `typing.Annotated`.                                                        |
+|    **3.9**     |     EOL (Oct 2025)     |    Yes (3.9.25)     |        Blocked        |            N/A             | **Unsupported**: `@dataclass(slots=True)` raises `TypeError`; `identify>=2.6.16` and `typer>=0.24` require `>=3.10`; runtime PEP 604 reflection fails.                            |
+|    **3.10**    |     EOL (Oct 2026)     |    Yes (3.10.21)    |        Blocked        |            N/A             | **Unsupported**: Reached EOL on 2026-10-01; required the `tomli` and `typing_extensions.Self` shims; security fixes for dependencies such as `filelock` no longer support 3.10.   |
+|    **3.11**    | Security (to Oct 2027) |    Yes (3.11.16)    |      **Passed**       |         **Passed**         | **Supported (Minimum)**: Baseline runtime; native `tomllib` (PEP 680) and `typing.Self` (PEP 673); `typing.override` (PEP 698) still comes from `typing-extensions`.              |
+|    **3.12**    |   Bugfix / Security    |    Yes (3.12.14)    |      **Passed**       |         **Passed**         | **Supported**: Full native support; standard CI testing target.                                                                                                                   |
+|    **3.13**    |   Bugfix / Security    |    Yes (3.13.15)    |      **Passed**       |         **Passed**         | **Supported**: Full native support; gating CI on Linux, macOS, and Windows.                                                                                                       |
+|    **3.14**    |         Bugfix         |    Yes (3.14.8)     |      **Passed**       |         **Passed**         | **Supported**: Container image runtime (`python:3.14-slim-bookworm`); gating CI on Linux, macOS, and Windows.                                                                     |
+|    **3.15**    |    Current (Bugfix)    |    Yes (3.15.0)     |      **Passed**       |         **Passed**         | **Supported (Maximum)**: Primary target for the CI quality gate, docs build, release, and wheel smoke test; gating CI on Linux, macOS, and Windows; PyPI Trove classifier active. |
+|    **3.16**    |   Future (Oct 2027)    |         N/A         |          N/A          |       Non-gating CI        | **Not advertised (Preview)**: Experimental `3.16-dev` CI job that never blocks a merge; no Trove classifier until 3.16.0 ships and is certified.                                  |
 
 ______________________________________________________________________
 
@@ -109,30 +110,32 @@ also keep the `tomli` and `typing_extensions.Self` shims alive. Therefore,
 
 ______________________________________________________________________
 
-## 3. Modern & Future Python Certification (3.14 – 3.15)
+## 3. Modern & Future Python Certification (3.15 – 3.16)
 
-### 3.1. Python 3.14 Certification
+### 3.1. Python 3.15 Certification
 
-Python 3.14 is certified as a tier-1 supported runtime:
+Python 3.15 is the maximum supported version and a certified tier-1 runtime:
 
-- **CI Quality Gate**: Serves as the primary Python version for the `quality-gate` workflow in
-  GitHub Actions.
-- **Test Suite Pass**: 91 of 91 unit and integration tests pass with 100.00% statement and branch
-  coverage.
-- **CLI Verification**: Built distribution wheels install and execute all entry points without
-  warnings.
-- **Trove Classifier**: Officially published on PyPI as `Programming Language :: Python :: 3.14`.
-
-### 3.2. Python 3.15 Preview / Dev Certification
-
-Python 3.15 is validated and certified for development and preview:
-
-- **Local Testing**: Verified under Fedora 44 with `CPython 3.15.0rc2`.
-- **Test Suite Pass**: 91 of 91 unit and integration tests pass with 100.00% statement and branch
-  coverage with zero deprecation warnings.
+- **CI Quality Gate**: Serves as the Python version for the `quality-gate`, documentation build,
+  release verification and build, and packaging smoke-test jobs in GitHub Actions.
 - **CI Test Matrix**: Runs as a gating `python-version: '3.15'` job on `ubuntu-latest`,
   `macos-latest`, and `windows-latest`, and uploads coverage like the other supported versions.
-- **Trove Classifier**: Officially published on PyPI as `Programming Language :: Python :: 3.15`.
+- **Local Testing**: Verified under Fedora 44 with `CPython 3.15.0`: all 904 unit and integration
+  tests pass with 100.00% statement and branch coverage, including with `DeprecationWarning` treated
+  as an error. The full quality gate (`tools/verify_quality.py`) and the strict Sphinx build also
+  pass.
+- **Trove Classifier**: Officially published on PyPI as `Programming Language :: Python :: 3.15`,
+  and `pyproject-fmt --max-supported-python` is set to `3.15`.
+
+### 3.2. Python 3.16 Preview
+
+Python 3.16 (first release scheduled for October 2027) is tracked only as a preview that gives early
+warning:
+
+- **CI Test Matrix**: Runs as an experimental `3.16-dev` job on `ubuntu-latest` that may use
+  pre-release interpreters, never blocks a merge, and skips the Codecov upload. Until a 3.16 build
+  is available on the runners, the job reports a warning and skips the test run.
+- **Trove Classifier**: Not published until Python 3.16.0 is released and certified.
 
 ______________________________________________________________________
 
