@@ -310,3 +310,77 @@ def test_version_sensitive_checkouts_fetch_full_history() -> None:
             f"Job {job_name} in {wf_path.name} must set fetch-depth: 0 for actions/checkout, "
             f"got {with_cfg.get('fetch-depth')}"
         )
+
+
+RELEASE_TAG_EXPR = "${{ inputs.tag || github.ref_name }}"
+RELEASE_REF_EXPR = "${{ inputs.tag || github.ref }}"
+
+
+def _load_release_workflow() -> dict[str, Any]:
+    """Load and parse .github/workflows/release.yml."""
+    with (_repo_root() / ".github" / "workflows" / "release.yml").open(encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    assert isinstance(data, dict), "Release workflow must be a YAML mapping"
+    return data
+
+
+def _step(job: dict[str, Any], uses: str) -> dict[str, Any]:
+    """Return the single step in ``job`` that uses the given action."""
+    steps = [s for s in job["steps"] if uses in str(s.get("uses", ""))]
+    assert len(steps) == 1, f"expected exactly one {uses} step"
+    return steps[0]
+
+
+def test_release_checkout_uses_tag_input() -> None:
+    """Validate every release checkout builds the requested tag, not the branch (#327)."""
+    workflow = _load_release_workflow()
+    assert workflow["env"]["RELEASE_TAG"] == RELEASE_TAG_EXPR
+    checkouts = {
+        name: _step(job, "actions/checkout")
+        for name, job in workflow["jobs"].items()
+        if any("actions/checkout" in str(s.get("uses", "")) for s in job["steps"])
+    }
+    assert set(checkouts) == {"verify-release", "build-distributions", "containerize"}
+    for name, step in checkouts.items():
+        assert step["with"].get("ref") == RELEASE_REF_EXPR, f"{name} must check out the tag"
+        assert step["with"].get("fetch-depth") == 0, f"{name} needs full history for hatch-vcs"
+
+
+def test_release_validates_tag_before_quality_gate() -> None:
+    """Validate the release fails fast unless the checkout is exactly the requested vX.Y.Z tag."""
+    steps = _load_release_workflow()["jobs"]["verify-release"]["steps"]
+    names = [s.get("name") for s in steps]
+    check = steps[names.index("Verify Release Tag")]
+    assert "tools/verify_release_version.py" in check["run"]
+    assert "git rev-parse" in check["run"], "the checked-out commit must be the tag's commit"
+    assert names.index("Verify Release Tag") < names.index("Verify Complete Quality Suite")
+
+
+def test_release_verifies_built_version_before_publishing() -> None:
+    """Validate the built wheel and sdist versions are checked against the tag before upload."""
+    steps = _load_release_workflow()["jobs"]["build-distributions"]["steps"]
+    names = [s.get("name") for s in steps]
+    check = steps[names.index("Verify Built Version Matches Release Tag")]
+    assert 'tools/verify_release_version.py --tag "$RELEASE_TAG" --dist dist' in check["run"]
+    assert names.index("Build Distributions via uv") < names.index(
+        "Verify Built Version Matches Release Tag",
+    )
+    assert names.index("Verify Built Version Matches Release Tag") < names.index(
+        "Upload Distribution Artifacts",
+    )
+
+
+def test_release_pypi_step_has_no_skip_existing() -> None:
+    """Validate a duplicate production PyPI upload fails loudly instead of being skipped."""
+    publish = _step(_load_release_workflow()["jobs"]["publish-pypi"], "pypa/gh-action-pypi-publish")
+    assert not publish.get("with", {}).get("skip-existing", False)
+
+
+def test_release_container_semver_tags_use_release_tag() -> None:
+    """Validate container semver tags come from the release tag (not only ``latest``)."""
+    meta = _step(_load_release_workflow()["jobs"]["containerize"], "docker/metadata-action")
+    semver = [line for line in meta["with"]["tags"].splitlines() if "type=semver" in line]
+    assert len(semver) == 2
+    for line in semver:
+        assert "value=${{ env.RELEASE_TAG }}" in line, line

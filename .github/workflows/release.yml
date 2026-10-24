@@ -11,6 +11,9 @@ on:
         type: string
 permissions:
   contents: read
+env:
+  # The tag being released: the workflow_dispatch input, or the pushed tag (#327).
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
 jobs:
   verify-release:
     name: Verify Release Quality Gate
@@ -19,6 +22,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
         with:
+          ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
       - name: Install uv
         uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884  # v10.3.0
@@ -28,6 +32,10 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7
         with:
           python-version: '3.15'
+      - name: Verify Release Tag
+        run: |
+          python tools/verify_release_version.py --tag "$RELEASE_TAG"
+          test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")"
       - name: Install dependencies
         run: uv sync --locked --all-groups
       - name: Verify Complete Quality Suite
@@ -42,6 +50,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
         with:
+          ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
       - name: Install uv
         uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884  # v10.3.0
@@ -55,6 +64,8 @@ jobs:
         run: uv sync --locked --all-groups
       - name: Build Distributions via uv
         run: uv build
+      - name: Verify Built Version Matches Release Tag
+        run: python tools/verify_release_version.py --tag "$RELEASE_TAG" --dist dist
       - name: Verify Distribution Packages with Twine
         run: uv run twine check --strict dist/*
       - name: Generate Changelog with git-cliff
@@ -88,6 +99,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33  # release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+          # Allows re-running a release that failed after the TestPyPI upload.
           skip-existing: true
   publish-pypi:
     name: Publish to Production PyPI
@@ -106,8 +118,6 @@ jobs:
           path: dist
       - name: Publish to PyPI (OIDC Trusted Publishing)
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33  # release/v1
-        with:
-          skip-existing: true
   create-github-release:
     name: Create GitHub Release
     needs: [build-distributions, publish-pypi]
@@ -137,6 +147,9 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069  # v4
       - name: Log in to GitHub Container Registry (GHCR)
@@ -151,8 +164,8 @@ jobs:
         with:
           images: ghcr.io/bdperkin/findfmt
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}},value=${{ env.RELEASE_TAG }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ env.RELEASE_TAG }}
             type=raw,value=latest
       - name: Build and Push Docker Image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc  # v7

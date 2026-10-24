@@ -173,3 +173,24 @@ git commit -s -m "feat: add support for MIME categories"
      validated through GitHub Actions CI prior to squash-merging.
 5. **Linear History**: All pull requests are merged using GitHub Squash & Merge to maintain a clean,
    linear commit history.
+
+## 7. Release Process (Maintainers)
+
+Releases are built and published by `.github/workflows/release.yml`. The version comes from the git
+tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MINOR.PATCH` tag:
+
+1. Merge the release-preparation pull request (changelog, docs) and confirm CI is green on `main`.
+2. Tag the release commit and push the tag, which starts the workflow:
+   ```bash
+   git tag -a v1.1.0 -m "findfmt 1.1.0"
+   git push origin v1.1.0
+   ```
+3. To re-run a release for an existing tag, use **Actions → Release & Publish → Run workflow** and
+   enter the tag (for example `v1.1.0`). The workflow checks out that tag, not the branch it was
+   started from.
+
+The workflow refuses to publish a mismatched build. It fails before the quality gate unless the
+input is a `vMAJOR.MINOR.PATCH` tag and the checked-out commit is that tag, and it fails before any
+upload unless the built wheel and sdist both carry the tag's version
+(`tools/verify_release_version.py`). TestPyPI uploads skip files that already exist, so a failed
+release can be re-run; production PyPI uploads do not, so a duplicate upload fails loudly.
