@@ -1,0 +1,243 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 1.0.3.dev26+g37b35fbfa.d20261024\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-24 13:06-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guides/upgrading.md:1 157d1444f37d43719acffd42514d6f75
+msgid "Upgrading to findfmt 1.1"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:3 8eb491580d564933acc4e0d4f89c75f5
+msgid ""
+"`findfmt` 1.1 is a minor release with a few intentional, visible changes "
+"since 1.0.x. Most users only need to check the Python version they run "
+"on. If you parse `findfmt` output, call it from scripts, or use the "
+"Python API, read the sections that apply to you."
+msgstr ""
+
+#: ../../source/guides/upgrading.md:7 52cf49cb96cf4617904036ee6c180af2
+msgid "1. Summary of Changes"
+msgstr ""
+
+#: ../../source/guides/upgrading.md ac24a27738194dbf849671df76faa138
+msgid "Change"
+msgstr ""
+
+#: ../../source/guides/upgrading.md ab499fb315fd409f9bc4ec6fbc10b221
+msgid "Who is affected"
+msgstr ""
+
+#: ../../source/guides/upgrading.md b4cb6481c10640be805e5ef4f66cd2ca
+msgid "What to do"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 33ed67019ea2432b9b055ad412658ccc
+msgid "Python 3.10 support dropped; the minimum is Python 3.11 (#441)"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 7380eda36ba94903bc21028714f3e90b
+msgid "Users and CI jobs on Python 3.10"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 3b9143cb88ac4ddbab0f3cecd8dcf017
+msgid "Upgrade Python, or pin `findfmt<1.1`"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 0b37f69fcf7c4160bf1e3e5e7be0c2fb
+msgid "Human-readable sizes use IEC binary unit labels (`KiB`, `MiB`) (#352)"
+msgstr ""
+
+#: ../../source/guides/upgrading.md bd5da7a23fe5448784d24f344b9e7c47
+msgid "Anyone parsing sizes from output"
+msgstr ""
+
+#: ../../source/guides/upgrading.md e6ef078f23424f259c9cfe938e6bb042
+msgid "Update parsers; the values are unchanged"
+msgstr ""
+
+#: ../../source/guides/upgrading.md c7e6f005dd594cdc8a9f33935bb4335b
+msgid ""
+"`SortKey` and `OutputFormat` render as their value in `str()` and "
+"f-strings (#441)"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 66053bcc34f940e083af8fb84528cc5a
+msgid "Python API users who stringify these enums"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 6a84eab7ddf54b8b947357425e89f36a
+msgid "Use the member or `.value`; comparisons with strings still work"
+msgstr ""
+
+#: ../../source/guides/upgrading.md e9c9279b66e044bc93cb0858772afe6f
+msgid "Wrapper commands exit with status 1 when an error carries a message (#373)"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 5aa2f12ee6d54bcb8afc6469c472abec
+msgid "Scripts that run the wrapper commands"
+msgstr ""
+
+#: ../../source/guides/upgrading.md b2733221078a4d78837c5b952717309c
+msgid "Treat a non-zero status as failure"
+msgstr ""
+
+#: ../../source/guides/upgrading.md a50c911f9caa4c47b00d08781fb26a8a
+msgid "New `--exit-status` option: exit with status 1 when nothing matches (#367)"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 0741ccfdd0a446778b7731bf95ba6542
+msgid "Shell scripts (opt-in)"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 0d2b19e667294219835f69600aade343
+msgid "Optional"
+msgstr ""
+
+#: ../../source/guides/upgrading.md 01af26c84725489da94d30d260024390
+msgid ""
+"Python 3.15 is supported and tested; the container image runs Python 3.14"
+" (#335, #440)"
+msgstr ""
+
+#: ../../source/guides/upgrading.md e58c77c8f22b416ca26cac6d8ee430d1
+msgid "Everyone"
+msgstr ""
+
+#: ../../source/guides/upgrading.md c062c2ced1e64125bf6dfca2f91cdc3e
+msgid "No action needed"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:18 d6c5c6d6b2084317b509f6b69fa7e208
+msgid "2. Python 3.10 Is No Longer Supported"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:20 9606ecfeaf374bb8963efb126052d859
+msgid ""
+"Python 3.10 reached end of life on 2026-10-01. `findfmt` 1.1 requires "
+"Python 3.11 or newer and is tested on Python 3.11 through 3.15 on Linux, "
+"macOS, and Windows (#441)."
+msgstr ""
+
+#: ../../source/guides/upgrading.md:23 99ac14670dd2466b846994d1fd063fdb
+msgid ""
+"On Python 3.10, installers keep selecting the latest compatible 1.0.x "
+"release, because 1.1 declares `requires-python = \">=3.11\"`. To make "
+"that explicit, pin the 1.0 series:"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:31 9a94b9a48fda4b2a8e5279d6ef7bb0b1
+msgid ""
+"Only the latest release receives fixes (see the [security "
+"policy](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)), so "
+"upgrade Python when you can. See the [compatibility "
+"guide](../quality/compatibility.md) for the full support policy."
+msgstr ""
+
+#: ../../source/guides/upgrading.md:34 5757b72d33924578b241939f6056f059
+msgid "3. Human-Readable Sizes Use IEC Binary Units"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:36 3ad9860c688a4f57a553ac307f210cd8
+msgid ""
+"Sizes are calculated in powers of 1024, and the labels now say so (#352)."
+" The numbers are unchanged; only the unit labels differ."
+msgstr ""
+
+#: ../../source/guides/upgrading.md:39 f6801ae8d3a8441597c5f0ddb7a334a4
+msgid ""
+"On the command line, `-h` / `--human-readable` output changes from "
+"single-letter units to IEC labels:"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:52 1e5a7512f964410a874d6e55b4e869ef
+msgid ""
+"In the Python API, `findfmt.sizes.format_size()` changes from `KB`/`MB` "
+"to `KiB`/`MiB`, matching `format_size_binary()`:"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:61 8de9485cd7874b4f881793560fd9bc1b
+msgid ""
+"If you parse sizes with a regular expression, accept the new labels, for "
+"example `(\\d+(?:\\.\\d+)?) ?([KMGTP]i?B?|B)`."
+msgstr ""
+
+#: ../../source/guides/upgrading.md:64 e7f76c46a3404bbfaa7c3fff666cb83f
+msgid "4. `SortKey` and `OutputFormat` Render as Their Value"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:66 fa9e6eab46994498bd85cc40150ef6d2
+#, python-format
+msgid ""
+"`findfmt.SortKey` and `findfmt.OutputFormat` are now `enum.StrEnum` "
+"subclasses (#441). As a result, `str()`, `format()`, f-strings, and `%s` "
+"formatting return the member's value instead of the class-qualified name:"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:77 ef6b909ed7624bedac27f485c412fa59
+#, python-brace-format
+msgid ""
+"Comparisons with strings, hashing, `repr()`, JSON output, CLI help, and "
+"configuration handling are unchanged, so `SortKey.SIZE == \"size\"` is "
+"still true. If you relied on the old text, build it explicitly: "
+"`f\"{type(member).__name__}.{member.name}\"`."
+msgstr ""
+
+#: ../../source/guides/upgrading.md:81 135589f336994158bc2456f8f3d8b301
+msgid "5. Wrapper Commands Exit Non-Zero on Errors"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:83 22cd3b9ef97841d38a7df2a457aba131
+msgid ""
+"The wrapper commands (`findfiles`, `findfilefmt`, `findfilemime`, "
+"`findfmt0`, `findshebang`, and `findsummary`) now exit with status 1 when"
+" they stop with an error that carries a message instead of a numeric "
+"status (#373). Previously they exited with status 0 in that case, hiding "
+"the failure. The `findfmt` command itself is not affected, and normal "
+"runs still exit with status 0."
+msgstr ""
+
+#: ../../source/guides/upgrading.md:88 c63328ca76ab4ee7bd0340b2a2f7cc75
+msgid ""
+"If a script ran a wrapper command and ignored its exit status, treat a "
+"non-zero status as a failure."
+msgstr ""
+
+#: ../../source/guides/upgrading.md:90 e3c1f0bcdd3f4c95a9d8511eec703409
+msgid "6. New: `--exit-status` for Scripts"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:92 2a6af9e4b447496baea04fa8b1462c0c
+msgid ""
+"`findfmt` still exits with status 0 when nothing matches. Pass the new "
+"`--exit-status` option to get `grep`-style behavior, where no matches "
+"means exit status 1 (#367):"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:101 8b4e48604fa54060a3f64bab80e0ef84
+msgid "7. Platform Support"
+msgstr ""
+
+#: ../../source/guides/upgrading.md:103 35c4b43edaea488b96c1589a5c28eb40
+msgid ""
+"Python 3.15 is now fully supported and required to pass CI on Linux, "
+"macOS, and Windows, and the container image (`ghcr.io/bdperkin/findfmt`) "
+"runs on Python 3.14 (#335, #440). No action is needed. For everything "
+"else in this release, see the "
+"[changelog](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md)."
+msgstr ""
