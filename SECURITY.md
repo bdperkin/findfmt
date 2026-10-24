@@ -161,10 +161,11 @@ mitigations implemented in `findfmt`.
 - **Threat Vector**: Unconstrained OIDC trusted publishers allow workflows executing from arbitrary
   environments or untrusted branches to mint PyPI and TestPyPI release tokens.
 - **Mitigation**: OpenID Connect (OIDC) trusted publishers on PyPI and TestPyPI are strictly
-  constrained to dedicated GitHub environments (`pypi` and `testpypi`). Only release workflows
-  explicitly associated with these environments in `.github/workflows/release.yml` can mint
-  short-lived publication tokens, eliminating ambient privilege and scoping credentials to verified
-  release jobs.
+  constrained to dedicated GitHub environments (`pypi` and `testpypi`). Only the two publish jobs in
+  `.github/workflows/release.yml` request `id-token: write`, and each runs in one of these
+  environments. The environments' deployment policies only admit `v*.*.*` tags, so a workflow run
+  from a branch cannot deploy to them or mint a publication token. The release workflow also fails
+  unless it runs on the requested tag and the built version matches it.
 
 #### 3.5.3. Multi-Tier Secret Scanning & Static Analysis
 

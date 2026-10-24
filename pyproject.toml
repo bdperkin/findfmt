@@ -112,6 +112,7 @@ version.source = "vcs"
 version.fallback-version = "1.0.2.dev0"
 build.hooks.custom.path = "tools/hatch_build.py"
 build.targets.wheel.packages = [ "src/findfmt" ]
+build.targets.wheel.exclude = [ "*.po", "*.pot" ]
 build.targets.wheel.artifacts = [ "*.mo" ]
 build.targets.sdist.include = [
   "/src",
@@ -122,7 +123,7 @@ build.targets.sdist.include = [
   "LICENSE",
   "pyproject.toml",
 ]
-build.targets.sdist.artifacts = [ "*.mo" ]
+build.targets.sdist.artifacts = [ "/src/findfmt/locale/*/LC_MESSAGES/*.mo" ]
 
 [tool.ruff]
 target-version = "py311"

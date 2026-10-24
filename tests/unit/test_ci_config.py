@@ -354,6 +354,8 @@ def test_release_validates_tag_before_quality_gate() -> None:
     check = steps[names.index("Verify Release Tag")]
     assert "tools/verify_release_version.py" in check["run"]
     assert "git rev-parse" in check["run"], "the checked-out commit must be the tag's commit"
+    # The publishing environments only deploy v*.*.* tags, so a dispatch must run on the tag (#495).
+    assert 'test "$GITHUB_REF" = "refs/tags/${RELEASE_TAG}"' in check["run"]
     assert names.index("Verify Release Tag") < names.index("Verify Complete Quality Suite")
 
 
@@ -384,3 +386,19 @@ def test_release_container_semver_tags_use_release_tag() -> None:
     assert len(semver) == 2
     for line in semver:
         assert "value=${{ env.RELEASE_TAG }}" in line, line
+
+
+def test_release_oidc_is_confined_to_tag_publish_jobs() -> None:
+    """Validate only the two publish jobs can mint OIDC tokens, each in its environment (#495)."""
+    workflow = _load_release_workflow()
+    triggers = workflow.get("on", workflow.get(True))  # PyYAML loads a bare `on:` key as True
+    assert triggers["push"] == {"tags": ["v*.*.*"]}
+    assert workflow["permissions"] == {"contents": "read"}
+    minting = {
+        name: job.get("environment", {}).get("name")
+        for name, job in workflow["jobs"].items()
+        if job.get("permissions", {}).get("id-token") == "write"
+    }
+    assert minting == {"publish-testpypi": "testpypi", "publish-pypi": "pypi"}
+    needs = workflow["jobs"]["publish-pypi"]["needs"]
+    assert "publish-testpypi" in needs, "TestPyPI must be published before production PyPI"
