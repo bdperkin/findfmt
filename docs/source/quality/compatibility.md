@@ -129,7 +129,8 @@ Python 3.15 is the maximum supported version and a certified tier-1 runtime:
 
 ### 3.2. Python 3.16 Preview
 
-Python 3.16 (first release scheduled for October 2027) is tracked as an early-warning preview only:
+Python 3.16 (first release scheduled for October 2027) is tracked only as a preview that gives early
+warning:
 
 - **CI Test Matrix**: Runs as an experimental `3.16-dev` job on `ubuntu-latest` that may use
   pre-release interpreters, never blocks a merge, and skips the Codecov upload. Until a 3.16 build
