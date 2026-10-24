@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"POT-Creation-Date: 2026-10-24 01:04-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -19,32 +19,32 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/quality/performance.md:1 e3d4c5a42702470f8737a04af20cbe10
+#: ../../source/quality/performance.md:1 572543f0e9f649b2ad8274c603446f7e
 msgid "Performance Architecture & Benchmarks"
 msgstr ""
 
-#: ../../performance.md:43 020f56c3bc5d4a108af9c73e951cc5de
+#: ../../performance.md:43 539af3ac3309414eb669ca5c8ccf0ced
 msgid ""
 "This document outlines the performance characteristics, benchmarking "
 "architecture, and baseline performance metrics for `findfmt`."
 msgstr ""
 
-#: ../../performance.md:48 2e69c71e1fe74b1eb7c4894b4a00804e
+#: ../../performance.md:48 5af88830549341d6b1cd1ea30c95c67f
 msgid "1. Performance Goals & Architecture"
 msgstr ""
 
-#: ../../performance.md:50 79d08367bbd54d96bd14b0c255f48bdd
+#: ../../performance.md:50 a539897b9ac448e58fa42b3c1562e3fb
 msgid ""
 "`findfmt` is engineered to deliver high-throughput filesystem traversal "
 "and intelligent content classification across large codebases and "
 "monorepos (>100,000 files)."
 msgstr ""
 
-#: ../../performance.md:53 ab73f4650916499a98bcb04e940cc982
+#: ../../performance.md:53 e9d98967fa124f24b1d718f5ffd26921
 msgid "The performance model focuses on three primary metrics:"
 msgstr ""
 
-#: ../../performance.md:55 e84a10701d8a4a89a7834e1bfaf73658
+#: ../../performance.md:55 25c0d188251b41148f73e32f560f6c88
 msgid ""
 "**Traversal Throughput (files/sec and dirs/sec)**: Maximizing file "
 "discovery and content inspection throughput across large repository "
@@ -52,7 +52,7 @@ msgid ""
 "specifications."
 msgstr ""
 
-#: ../../performance.md:59 3f5993cf6b1c4ba1930a4c04672a297a
+#: ../../performance.md:59 a6cccd9f7e514c16baaa3fc93c690aa8
 msgid ""
 "**Latency to First Yielded Result (TTFR)**: Measuring first-byte "
 "responsiveness (in milliseconds) from execution start until the first "
@@ -60,28 +60,28 @@ msgid ""
 "interactive subshells."
 msgstr ""
 
-#: ../../performance.md:63 6815b2d21ef146dfb9f41773da55a659
+#: ../../performance.md:63 fb7cca85e2f34d29a3fd236498dcaf51
 msgid ""
 "**Peak Heap Memory Footprint**: Tracking peak heap memory allocation "
 "using Python's `tracemalloc` standard library to ensure low, bounded "
 "memory usage during multi-level directory traversal."
 msgstr ""
 
-#: ../../performance.md:68 6976eb518e73423fbc5baf73c74a199a
+#: ../../performance.md:68 f7d17cc0d1b64a0b89e0eab8abb35d83
 msgid "2. Core Optimization Vectors"
 msgstr ""
 
-#: ../../performance.md:70 dae62ac953cf404bbe2bd4db435b739a
+#: ../../performance.md:70 a1f39672c8b2480da051de8f575c659f
 msgid ""
 "The traversal and classification pipeline incorporates several targeted "
 "optimizations to maximize throughput across large repository hierarchies:"
 msgstr ""
 
-#: ../../performance.md:73 a6b12e5f988848cd80888fd31a17c05a
+#: ../../performance.md:73 79f971b7f4d84d1d8bcaae7d7ba8418e
 msgid "2.1. Redundant Syscalls & `Path.resolve()` Elimination"
 msgstr ""
 
-#: ../../performance.md:75 911c341d3f274696b3cbf9358ceb84c8
+#: ../../performance.md:75 79d44d5265cf43369a4b5dc4d0229d6e
 msgid ""
 "Earlier implementations resolved relative paths by invoking "
 "`Path.resolve()` on every discovered file. In deep directory structures, "
@@ -89,7 +89,7 @@ msgid ""
 "`stat` system calls."
 msgstr ""
 
-#: ../../performance.md:79 3db1b3f7d4724bb6b8e4ddd9ab930eb6
+#: ../../performance.md:79 39419acba25a4224b03796b32b1ae9c6
 msgid ""
 "`findfmt` optimizes this by computing directory-relative paths with "
 "`os.path.relpath()` and prefix operations derived from pre-computed root "
@@ -98,30 +98,30 @@ msgid ""
 "resolution overhead."
 msgstr ""
 
-#: ../../performance.md:84 dff56ee5737a4612b19051eeae86a680
+#: ../../performance.md:84 1bb1ba364f08462392c3d1647c8304cb
 msgid "2.2. `DirEntry` Metadata Preservation & Single-Buffer Content Reads"
 msgstr ""
 
-#: ../../performance.md:86 b80c6bac96f84c40a700584962ebc82e
+#: ../../performance.md:86 cc44d1e8e6ab453ea5d7c987844e138e
 msgid ""
 "Python's `os.scandir()` yields `os.DirEntry` objects whose cached file "
 "type (`is_file`, `is_dir`, `is_symlink`) and `stat()` attributes are "
 "populated directly from the operating system's directory stream."
 msgstr ""
 
-#: ../../performance.md:90 60f7429dc6ad498e9f4d07f6620ab85d
+#: ../../performance.md:90 dc9c60190b6143b18d9e7b0f958c2e3e
 msgid ""
 "`findfmt` preserves and forwards `os.DirEntry` instances throughout "
 "traversal and classification:"
 msgstr ""
 
-#: ../../performance.md:92 cf248e18f91b4cd9b37bc603e7431c4a
+#: ../../performance.md:92 dca61913b5a44ecfb304113c9f6c359a
 msgid ""
 "**Zero-Stat Verification**: Avoids secondary `os.stat()` syscalls by "
 "reusing cached entry metadata."
 msgstr ""
 
-#: ../../performance.md:94 ea1942e1edf148d19db06a702c536011
+#: ../../performance.md:94 d874d40328e64ca882acd94608e5296f
 msgid ""
 "**Single-Buffer Content Inspection**: When content inspection is required"
 " (for shebang or MIME detection), `findfmt` reads an initial buffer (the "
@@ -130,98 +130,98 @@ msgid ""
 "eliminating duplicate `open()` and `read()` syscalls on candidate files."
 msgstr ""
 
-#: ../../performance.md:99 5c79a1aa858a4e3b8e44cb5decaaabcc
+#: ../../performance.md:99 794e31d7d74249468be83c6d1266529e
 msgid "2.3. Zero-Allocation Gitignore Rule Matching Hot Loop"
 msgstr ""
 
-#: ../../performance.md:101 c55f2471b69044528dc7c0e60f1d7be0
+#: ../../performance.md:101 8a793eaa32b54f05a5b4cafec4694404
 msgid "In traversal loops evaluating multiple active `.gitignore` specifications:"
 msgstr ""
 
-#: ../../performance.md:103 2898b9e72655423596766f708366febe
+#: ../../performance.md:103 3fe76b93580b4bcbbcf3cd4281de761b
 msgid ""
 "Path operations avoid redundant `Path.is_relative_to()` and "
 "`Path.relative_to()` allocations."
 msgstr ""
 
-#: ../../performance.md:104 2731795865434286b8223611c24ca3ce
+#: ../../performance.md:104 34aa986789074f17bf8b6e9ebbc6bc71
 msgid ""
 "Relative path representations are passed as normalized strings, "
 "leveraging fast string prefix matching to evaluate directory boundaries "
 "and pruning rules."
 msgstr ""
 
-#: ../../performance.md:107 d81e0ba18fb140ac8e7c672d1338188c
+#: ../../performance.md:107 5338cc76111346118c322c9d7fa5aba4
 msgid "2.4. Fast-Path Filter Short-Circuiting"
 msgstr ""
 
-#: ../../performance.md:109 8ef376dee7004cf8ae761001bbe1516d
+#: ../../performance.md:109 65e46aa71487438783df7efa57712b6e
 msgid "When specific tags are requested (for example, `--tag python`):"
 msgstr ""
 
-#: ../../performance.md:111 3d118dc3bebb4e26bacd77ccdb7fa9c9
+#: ../../performance.md:111 65fe5343e6de423887712d95e9d0e2ca
 msgid ""
 "`can_skip_file_by_tags()` inspects the filename extension before opening "
 "the file."
 msgstr ""
 
-#: ../../performance.md:112 8e400b242f0f4bf69a7ef7c3ab03d8e2
+#: ../../performance.md:112 8a1ac2bbb5204f5b9e1ebd5c66552b8e
 msgid ""
 "If an extension definitively excludes the requested tags and indicates no"
 " executable shebang is possible (such as known binary formats or fixed "
 "non-script extensions), the file read is bypassed entirely."
 msgstr ""
 
-#: ../../performance.md:118 4468a5dfb1fa4094ba061ce9869b74f2
+#: ../../performance.md:118 729c3431cc344522bc73631c2f73b40e
 msgid "3. Parallel Batch Execution & Concurrency Analysis"
 msgstr ""
 
-#: ../../performance.md:120 0ace72e8d2c04f0ab637e2101788808d
+#: ../../performance.md:120 39b313d1c345425f931fa7f8b8f46733
 msgid ""
 "Parallelizing the content-inspection phase using "
 "`concurrent.futures.ThreadPoolExecutor` was evaluated against the "
 "streaming generator architecture on modern multi-core NVMe systems."
 msgstr ""
 
-#: ../../performance.md:123 7c530932045d427f94fcd05f647cd4f2
+#: ../../performance.md:123 10fcd39f6b8b420f8a50134e0fbddd58
 msgid "3.1. ThreadPoolExecutor vs. Streaming Generator Benchmarks"
 msgstr ""
 
-#: ../../performance.md:125 64f2fb4ea52b4c108d40c8c69ccdd919
+#: ../../performance.md:125 a28d514a78774e4d8912cbe89fa79147
 msgid ""
 "Empirical profiling evaluated a 4-worker `ThreadPoolExecutor` against the"
 " sequential streaming generator across a test suite of 1,000 files:"
 msgstr ""
 
-#: ../../performance.md:128 11cae5cc5d984f26a7edb99939316cff
+#: ../../performance.md:128 604aa6d6f78e42e1bc6c8f36c62c38a2
 msgid ""
 "**Sequential Streaming Generator**: Processed 1,000 files in 0.0584 "
 "seconds (~17,131 files/second)."
 msgstr ""
 
-#: ../../performance.md:130 e6d0ccd6d6914719881dc0c22307b12e
+#: ../../performance.md:130 146bcd52c4184fa2bcc1795aa59083e3
 msgid ""
 "**ThreadPoolExecutor (4 Workers)**: Processed 1,000 files in 0.1076 "
 "seconds (~9,295 files/second)."
 msgstr ""
 
-#: ../../performance.md:132 3815f583818a4d7fa9c8acb3c2cb7ec9
+#: ../../performance.md:132 256da27c56844e558f4c6bcdf8934507
 msgid ""
 "Multi-threading introduced an approximate 1.84x slowdown compared to the "
 "single-threaded implementation."
 msgstr ""
 
-#: ../../performance.md:135 ab07455df26e4ce59da0f76cbf50ead3
+#: ../../performance.md:135 045a1eca527a469a987f323ded9f91f0
 msgid "3.2. Concurrency Trade-Off Rationale"
 msgstr ""
 
-#: ../../performance.md:137 137c7e8d39f7462f92c716a1683d823f
+#: ../../performance.md:137 ceb31747e1e043aca8062eef7b4a25d7
 msgid ""
 "Several architectural factors explain why single-threaded traversal "
 "outperforms thread pools for local filesystem inspection in Python:"
 msgstr ""
 
-#: ../../performance.md:140 ec00e43ac24b4e84bd6883545851e041
+#: ../../performance.md:140 33adfbb9e7cb40b68d827bde3a09a5d0
 msgid ""
 "**OS Page Cache & SSD Latency**: Reading initial file buffers (2 KB) from"
 " modern NVMe storage and operating system page caches executes in "
@@ -229,7 +229,7 @@ msgid ""
 " costs."
 msgstr ""
 
-#: ../../performance.md:143 3e565fffc5ff49889229aafea69fa5bf
+#: ../../performance.md:143 7d2ea91a1f1f4591ba1e81e7425c7b6a
 msgid ""
 "**GIL Contention & Dispatch Overhead**: Submitting tasks to thread pools,"
 " queuing futures, context switching, and Global Interpreter Lock (GIL) "
@@ -237,7 +237,7 @@ msgid ""
 "cost of reading small file headers sequentially."
 msgstr ""
 
-#: ../../performance.md:146 694f29b9918b4c9fb35feece31016156
+#: ../../performance.md:146 5ebc8b2800af49df96e42d0f9fac862f
 msgid ""
 "**Time-to-First-Result (TTFR) Degradation**: Batch thread dispatching "
 "chunks results, delaying initial yields. The single-threaded generator "
@@ -246,72 +246,72 @@ msgid ""
 "`head`."
 msgstr ""
 
-#: ../../performance.md:150 25dc2eda33b74b558e49c1a928706e92
+#: ../../performance.md:150 66830b9ca0094749b5eceb39c2171fb0
 msgid ""
 "**Bounded Memory Guarantees**: A pure generator maintains constant "
 "memory, whereas parallel thread pools accumulate collections of pending "
 "futures and buffers."
 msgstr ""
 
-#: ../../performance.md:153 850721251e7040a798210a550aa494ad
+#: ../../performance.md:153 5dc5809df24b41d5a19ca344dfb48922
 msgid ""
 "Based on these empirical results, `findfmt` retains its single-threaded "
 "streaming generator design as the optimal performance architecture."
 msgstr ""
 
-#: ../../performance.md:158 5764f83cf4bd4e46bfdaa1c9093504dd
+#: ../../performance.md:158 555324dee32c4a7a9b98bc882ac40b82
 msgid "4. Automated Benchmark Harness (`tools/benchmark.py`)"
 msgstr ""
 
-#: ../../performance.md:160 e78e171cf3fe426887d9d5141c54433d
+#: ../../performance.md:160 0e6d924a181b436ebd178e2bd39e99f6
 msgid ""
 "The repository includes a dedicated, automated benchmark suite at "
 "`tools/benchmark.py` that generates reproducible synthetic datasets and "
 "measures traversal performance across standard tiers."
 msgstr ""
 
-#: ../../performance.md:163 0e65d72bb1bc49b29e9e48ffbaf21eb1
+#: ../../performance.md:163 46d2383125fb476cbe403efb2f5bbb74
 msgid "4.1. Tiered Datasets"
 msgstr ""
 
-#: ../../performance.md:165 2ca099a67a0c44a7a6c2fa5c849c9529
+#: ../../performance.md:165 a98c7d7b15224d3ba837fac108feabf3
 msgid ""
 "The harness supports three standardized dataset tiers alongside custom "
 "directory targeting:"
 msgstr ""
 
-#: ../../performance.md:167 5866eef8025f42899e2b1a89c1fb5393
+#: ../../performance.md:167 be213fec606b4583a9fbc7ce5541004c
 msgid ""
 "**Small Tier (\\<1,000 files)**: Generates approximately 800 files across"
 " nested directories with `.gitignore` exclusion rules. Designed for fast "
 "local feedback (\\<1 second execution)."
 msgstr ""
 
-#: ../../performance.md:170 2707b181c6f347fe9134a596b2137344
+#: ../../performance.md:170 c2fe90fca6b447d3a3912c12c5527f02
 msgid ""
 "**Medium Tier (10,000–50,000 files)**: Generates approximately 12,000 "
 "files across multiple package subtrees, simulating standard enterprise "
 "codebases."
 msgstr ""
 
-#: ../../performance.md:173 a0836b287b484b43bcd6947ee5aaa6d7
+#: ../../performance.md:173 f9f8dd4f33b9410c9effa1aae5d68a2f
 msgid ""
 "**Monorepo Tier (>100,000 files)**: Stress test dataset simulating large "
 "monorepo structures with deep hierarchies and mixed file types."
 msgstr ""
 
-#: ../../performance.md:176 fdf2da7fb8254564a4a5ce470b96d1c5
+#: ../../performance.md:176 2eef738718534a5eaaeaee1b06ac93d7
 msgid ""
 "**Custom Directory Target (`-d, --target-dir`)**: Benchmarks real-world "
 "directory trees directly, such as the `findfmt` repository or user-"
 "specified projects."
 msgstr ""
 
-#: ../../performance.md:179 8341dbd3d1594517bba18b1d03d03704
-msgid "4.2. Deterministic Reproducibility"
+#: ../../performance.md:179 1f71f0c9624e4d7785cbe9b2d0150206
+msgid "4.1.1. Deterministic Reproducibility"
 msgstr ""
 
-#: ../../performance.md:181 49084567a38b426485fbfffd96efcbe7
+#: ../../performance.md:181 bba25e03e78c4e87ad0c57208ffe66bd
 msgid ""
 "Synthetic trees are generated deterministically using a fixed random seed"
 " (`--seed 42` by default). The generator constructs realistic directory "
@@ -321,226 +321,638 @@ msgid ""
 "specifications."
 msgstr ""
 
-#: ../../performance.md:188 dc435bcbb1fc44c797a658352d0dd71a
+#: ../../performance.md:186 3dcc5afc55b44ba09b4014916b1ec004
+msgid "4.2. Filesystem Topologies"
+msgstr ""
+
+#: ../../performance.md:188 63833346feee44d899b7e5f130376012
+msgid ""
+"To model realistic disk structures, the benchmark harness supports "
+"representative topologies via `--topology` (`-T`):"
+msgstr ""
+
+#: ../../performance.md:191 0b40f3ddabb7408cb3e32f7bddd804ae
+msgid ""
+"**Standard (`standard`)**: A balanced multi-tier package tree (60 "
+"directories) simulating a typical project directory hierarchy."
+msgstr ""
+
+#: ../../performance.md:193 dce0fcb5f4fc4174a04e20cca0019e88
+msgid ""
+"**Flat (`flat`)**: A single directory containing all generated files (for"
+" example, 10,000 files in one folder), isolating raw directory stream "
+"parsing throughput from recursive traversal overhead."
+msgstr ""
+
+#: ../../performance.md:195 ca489b13e62247f2afc833433b2783af
+msgid ""
+"**Deep (`deep`)**: A deeply nested hierarchy (20 levels of nesting with a"
+" branching factor of 2), testing recursion depth limits, call-stack "
+"efficiency, and path concatenation overhead."
+msgstr ""
+
+#: ../../performance.md:197 489eb37956b84edcb6c0948284fe6d33
+msgid ""
+"**Real-World Monorepo (`real-world`)**: A realistic monorepo topology "
+"featuring multiple sub-projects alongside massive ignored directories "
+"(`node_modules/`, `.venv/`, `dist/`, `build/`) containing thousands of "
+"excluded files, verifying early `.gitignore` directory pruning efficiency"
+" in $O(1)$ time."
+msgstr ""
+
+#: ../../performance.md:202 eb7ab94267024281851924eae1326d75
+msgid "4.3. Output Formatters & Classification Modes"
+msgstr ""
+
+#: ../../performance.md:204 82c5f162d41c4e85bf5c152c2f25b197
+msgid ""
+"The harness benchmarks output formatting throughput, streaming "
+"efficiency, and Time-to-First-Result (TTFR) latency via `--format` (`-F`)"
+" and `--list-tags`:"
+msgstr ""
+
+#: ../../performance.md:207 47a8eeeb384145629c5cea0aab1210b7
+msgid ""
+"**Streaming Formats (`text`, `jsonl`, `tsv`, `csv`)**: Streams entries "
+"lazily directly to the sink without buffering matching inventories into "
+"RAM, maintaining bounded $O(1)$ heap overhead."
+msgstr ""
+
+#: ../../performance.md:209 8ae68582de6a44c4b2df7878323c54f4
+msgid ""
+"**Buffered Formats (`json`, `tree`, `table`)**: Ingests all matching "
+"records before building structured trees or serialized tabular "
+"representations."
+msgstr ""
+
+#: ../../performance.md:211 b3dd372c2b934eb2b32c6002768fe233
+msgid ""
+"**Tag & MIME Inspection (`--list-tags`)**: Measures content inspection "
+"overhead when resolving MIME classifications and tag metadata across "
+"discovered files."
+msgstr ""
+
+#: ../../performance.md:216 ebe7046ab70d44429288e9e38f21d625
 msgid "5. Command-Line Interface & Usage"
 msgstr ""
 
-#: ../../performance.md:190 33535e1f098147848074c34982d6a893
+#: ../../performance.md:218 a8591a49602e4609a8942bb1a1d9b9ec
 msgid "5.1. Basic Execution"
 msgstr ""
 
-#: ../../performance.md:192 ad806e173fba4aefbd6caa81a115e7a1
+#: ../../performance.md:220 89b46ba242a64dff8d4b4b9952a978d7
 msgid "Execute the default benchmark suite on the small tier:"
 msgstr ""
 
-#: ../../performance.md:198 15b95185fb064740b01089d1500401b6
+#: ../../performance.md:226 b4cb19cc5d0c4902b945ccd67d62bcf2
 msgid "5.2. Tier Selection & File Overrides"
 msgstr ""
 
-#: ../../performance.md:200 bfba728bf75d4c6c86a6b188b4382b01
+#: ../../performance.md:228 8b42d499a54b40c980752490b544ab13
 msgid "Run specific or all dataset tiers:"
 msgstr ""
 
-#: ../../performance.md:213 bb08adcdd82e4823b8ebefd99c23f600
-msgid "5.3. Benchmarking Existing Directories"
+#: ../../performance.md:241 ba0ffe0c0f7949eebe5c17499bd4ae3b
+msgid "5.3. Topology Benchmarking"
 msgstr ""
 
-#: ../../performance.md:215 2e353664a34f40d1ac955370e29e0b3e
+#: ../../performance.md:243 0182cfa629a1454792835c7dc7d461ea
+msgid "Benchmark specific filesystem topologies:"
+msgstr ""
+
+#: ../../performance.md:259 7722dc5aa51142d49742a2ff0b996877
+msgid "5.4. Formatter Comparison & Classification"
+msgstr ""
+
+#: ../../performance.md:261 135caaa12c94468d93d576e0eefe81a7
+msgid "Compare streaming vs buffered output formats:"
+msgstr ""
+
+#: ../../performance.md:271 5377d39f8eef4e1e8e07e9d66d3ee862
+msgid "5.5. Benchmarking Existing Directories"
+msgstr ""
+
+#: ../../performance.md:273 feff0d3c85ba451b8c18b283368a48e0
 msgid "Benchmark an existing repository or directory path:"
 msgstr ""
 
-#: ../../performance.md:221 39239ac16bc74592b8fd7c0ea8f70516
-msgid "5.4. Multiple Iterations & Warmup"
+#: ../../performance.md:279 3231a44304c44e8484fd6b30702497a9
+msgid "5.6. Multiple Iterations & Warmup"
 msgstr ""
 
-#: ../../performance.md:223 9fa476afa58b462e8db4e5b5a3efc879
+#: ../../performance.md:281 2ec475a7fe64491d8f767f9ce46a42ca
 msgid "Execute multiple iterations with warmup runs to compute averaged metrics:"
 msgstr ""
 
-#: ../../performance.md:229 97a39ce228654fc8a50710915357a691
-msgid "5.5. Baseline Recording & Regression Tracking"
+#: ../../performance.md:287 f27988368898449a89045ea8f6de25af
+msgid "5.7. Baseline Recording & Regression Tracking"
 msgstr ""
 
-#: ../../performance.md:231 3bcde933ca224db1a67b46b2e2e0ba78
+#: ../../performance.md:289 1f28c807a27f41afa60449af969caa6d
 msgid "Save baseline metrics to a JSON report:"
 msgstr ""
 
-#: ../../performance.md:237 c6b3d277a46143d4b4014a1cb8735e75
+#: ../../performance.md:295 bc080d59c8e44e72bff939637f7da1e6
 msgid "Compare current performance against a recorded baseline:"
 msgstr ""
 
-#: ../../performance.md:243 86fc403aa5894deabb83693afe7dc385
+#: ../../performance.md:301 bf31181c6d0545f5893caa225040d862
 msgid ""
 "Fail execution if throughput degrades beyond an allowable percentage "
 "threshold:"
 msgstr ""
 
-#: ../../performance.md:249 1c36bed0193d4d93be460304388e7d73
-msgid "5.6. Machine-Readable JSON Output"
+#: ../../performance.md:307 a66793529d744d818c506862bc577fca
+msgid "5.8. Machine-Readable JSON Output"
 msgstr ""
 
-#: ../../performance.md:251 45c1dd68694b40728bd0cfe273c8778e
+#: ../../performance.md:309 ea2279dc15f84b62a3c3ab62a6438c75
 msgid ""
 "Emit JSON directly to stdout or export to a file for CI regression "
 "tracking:"
 msgstr ""
 
-#: ../../performance.md:263 04ebdf77a82045ca85ae3faac8e44061
-msgid "6. Baseline Performance Metrics"
+#: ../../performance.md:321 ee30f6946053469a90a7a641ec44f971
+msgid "6. Official v1.0.0 Baseline Performance Metrics"
 msgstr ""
 
-#: ../../performance.md:265 297a19fb27f044ec9d95c2011949ba63
+#: ../../performance.md:323 7b0adec13d9b4245a186bd5166cbb90b
 msgid ""
-"The following baseline metrics were recorded on an x86_64 Linux "
-"environment (Python 3.13):"
+"The canonical v1.0.0 baselines were recorded on an x86_64 Linux "
+"environment (CPython 3.13.15, Linux 6.12+):"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 0f3ace6fd27d43f3a585076ec2e08cde
-msgid "Benchmark Tier"
+#: ../../performance.md:326 9f425e3c08d54bc9ba4b13dc83196c58
+msgid "6.1. Filesystem Topology Baselines"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 6ab2229420824207ac3f2e91368ebb5e
-msgid "Total Files"
+#: ../../source/quality/performance.md:3 a5fa77ce414e4239b4a08106f18040bf
+msgid "Topology / Benchmark Tier"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 f109724268b54a26b65cd41db5263bba
+#: ../../source/quality/performance.md:3 fc5b400116ba43b095400eddbf1c3b14
+msgid "Matched Files"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 619cf63e03224efb8369e67c0879b457
 msgid "Traversed Directories"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 a4c35e135ff64bfebf8cb026113dba2a
+#: ../../source/quality/performance.md:3 0fd1bffdf3ed4597a09a8611864465a9
+#: 7021f67b76bd40689af960b5608b77a6
 msgid "Duration (s)"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 b02f2a2a1d134eaab228baee46820f56
+#: ../../source/quality/performance.md:3 009a857dd41346959b9731db5a1f006a
+#: 8e8d7ad4f3ff4fb59bce01cf87afa8b9
 msgid "Throughput (files/s)"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 f2ef90ef51ea4a9faa2c2d683b573445
-msgid "Dirs/sec"
-msgstr ""
-
-#: ../../source/quality/performance.md:3 1bed1ba56c484d4d8c869da3f9120b06
+#: ../../source/quality/performance.md:3 607dcde397964974bc8754e3541b055e
+#: b2a59fe492ee46e69be881ce4828fd4f
 msgid "TTFR Latency (ms)"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 a6aa554958b64377b570843dcc4c350b
+#: ../../source/quality/performance.md:3 8c61dd10b90947d2b6f0bb0c7832d99a
+#: a68066d1c0c543c1b554b8074e02a882
 msgid "Peak Heap (MB)"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 c97d5e47c7b34fa9ba516f403f801b4c
-msgid "**Small**"
+#: ../../source/quality/performance.md:3 dd0b4ce897164daeb70380363cfe26c0
+msgid "**Standard Small (800 files)**"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 52ca79705a2f42ac864ee4f9ca0e03a7
+#: ../../source/quality/performance.md:3 bb4609709d1e47ceb2f9908b2c6e758e
 msgid "518"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 016338eabee449b6883eb89af24258fe
-#: 18792898199b45d5b080b6a2ffe005f2
+#: ../../source/quality/performance.md:3 4a15c1a7b04042d5b74e6d9981e84a1c
+#: f1d48765de7c4186b065cea17e697b75
 msgid "60"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 a168455b20a547d389b99794fa1b24e9
-msgid "0.2240 s"
+#: ../../source/quality/performance.md:3 879437b7249147ca94f5085955dc268b
+msgid "0.1785 s"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 5ed800acb5c343008983c06aacda4ec4
-msgid "2,312.6 f/s"
+#: ../../source/quality/performance.md:3 00c65e35a49347cebc6a29d3d6bc5a7b
+msgid "2,902.4 f/s"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 3e09757227b044d0b9cbc1e7ec50a863
-msgid "267.9"
+#: ../../source/quality/performance.md:3 8722283c932a4ebdb211737aa9dc4c41
+msgid "3.87 ms"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 d39c3b14c2bb4481976dca3fa90afbed
-msgid "22.15 ms"
+#: ../../source/quality/performance.md:3 06ab693404874212b2d6bd191c79b0ac
+msgid "0.09 MB"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 ea592f2840fd40bf8bd3a205303f76d6
-msgid "0.41 MB"
+#: ../../source/quality/performance.md:3 d0f3823d4d344b079e90307ba59ce1fa
+msgid "**Standard Medium (12k files)**"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 73bbed86b606497191db9a9a62fa117e
-msgid "**Medium**"
-msgstr ""
-
-#: ../../source/quality/performance.md:3 19dd2122bd77490dbf9e9e2e5164da63
+#: ../../source/quality/performance.md:3 79b10c7379724397bda47d9756fdeb2b
 msgid "7,901"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 aef5e68ec3924972a903b6b9bdfad14c
-msgid "5.1981 s"
+#: ../../source/quality/performance.md:3 079a698ff8474acbbe9e064e8dfdfa42
+msgid "2.4989 s"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 1b1bd9d41cf748939a266ac2ccd61871
-msgid "1,520.0 f/s"
+#: ../../source/quality/performance.md:3 867b40305d1a41d19cb616d7d8f33573
+msgid "3,162.0 f/s"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 6a1700e1048544019aaada5ac2f8d16c
-msgid "11.5"
+#: ../../source/quality/performance.md:3 f2e236c02526444bbcaf5d77f62704b3
+msgid "10.24 ms"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 413249cb02f9476dbf5788e56e2e92e8
-msgid "39.30 ms"
+#: ../../source/quality/performance.md:3 fd4e6ebba6344915bc9656009d76f153
+msgid "0.71 MB"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 a4cfd2481b9f4429935d34b4641098c5
-msgid "2.90 MB"
+#: ../../source/quality/performance.md:3 27db68b2309a490d9dda20d80d7508b5
+msgid "**Flat (10k files in 1 dir)**"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 6559b5d402a04fba91fb2a65a1295930
-msgid "**findfmt Repo**"
+#: ../../source/quality/performance.md:3 d0246e275f724ed89ac08b3b4e4ca07f
+msgid "8,261"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 52ea61837672482aa96e703107f41015
-msgid "154"
+#: ../../source/quality/performance.md:3 ebce1e442cc946a0b5d5668c01b6a424
+msgid "0"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 e094afad049c4e2fb227cddffcbc70ee
-msgid "1,846"
+#: ../../source/quality/performance.md:3 6c693fbbb5954a6297257ef44c4db4d3
+msgid "2.3497 s"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 338800fc7722481d9b5cd195bbbf8eff
-msgid "0.1084 s"
+#: ../../source/quality/performance.md:3 89a9a108ad9746d7bdd242855a223a4a
+msgid "3,522.9 f/s"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 11cf3cf205774e9883921700bc3346d6
-msgid "1,420.8 f/s"
+#: ../../source/quality/performance.md:3 89e89659f37e43bba4ba6a9d1bebbd83
+msgid "348.84 ms"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 2d93a09bd63e4cc685edc1f93b63c107
-msgid "17,031.5"
+#: ../../source/quality/performance.md:3 54be7e43908249d0934eb25785af1b4a
+msgid "11.94 MB"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 02e1838b1c1e420fb9e4ccc3c02f3436
-msgid "39.06 ms"
+#: ../../source/quality/performance.md:3 0b7e63b880044db89694b8a807899483
+msgid "**Deep (20 levels, 5k files)**"
 msgstr ""
 
-#: ../../source/quality/performance.md:3 780bd048bc7641f3aa02ca1a8d453d36
-msgid "0.47 MB"
+#: ../../source/quality/performance.md:3 9d0bb3bc905549558dd95c879ca41990
+msgid "4,119"
 msgstr ""
 
-#: ../../performance.md:275 f69d4a90098344d0926d35178cde60f0
+#: ../../source/quality/performance.md:3 30b24da5ffef46ffb2a2503b4d67ec0e
+msgid "286"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 93a8d4457b5940ef9419d4e16dd89016
+msgid "3.4016 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 d1e74977720448448166f032e8a5b6d4
+msgid "1,211.8 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 adaf3a5a0c1340359c6e8ced598df24a
+msgid "3.68 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 33611f64555d415987c15e06e55cfb4a
+msgid "0.57 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 5ebc22e6f71a419d923f941865fc6224
+msgid "**Real-World Monorepo (Ignored)**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 ab47c98db7304142896e6d0f48241c5f
+msgid "826"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 12fa1038df744b3cb2b3a26b894e97a7
+msgid "35"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 f054c3711f524650be8b540ce6e6216a
+msgid "0.3734 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 ed4a87ebbe5a4adda3442d6b13a1835f
+msgid "2,213.1 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 c6d9db7cbf0a41799aae199d0324c721
+msgid "5.93 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 4be80d18c3a14a409198b30d436960f2
+msgid "0.19 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 288ced3a36304525999895f4bc920abf
+msgid "**findfmt Repository**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 9053a2920c79414da7c1f0c36e4edf29
+msgid "233"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 37fa7ad2557c46dba8ca5dcb26a65edb
+msgid "1,933"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 13285d0f35e0484882bdd008feb7cb50
+msgid "0.1575 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 890a45bc77ba48a28e81f6e1b0f6c589
+msgid "1,480.3 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 2cd691d1347f44bba292d68258dca650
+msgid "9.24 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 380e1b5695b34ab69a0c23c1210262ee
+msgid "0.13 MB"
+msgstr ""
+
+#: ../../performance.md:337 f7c765c37d8342bfaf5434eb9ddcd08b
+msgid ""
+"*Note: In the Real-World Monorepo benchmark, 5,000+ files located in "
+"`node_modules/` and `.venv/` were pruned in $O(1)$ time at the directory "
+"root level, completing in 0.37 seconds.*"
+msgstr ""
+
+#: ../../performance.md:340 2aaac8d0f4384a31920376e7aa10e536
+msgid ""
+"6.2. Output Formatter & Classification Performance (Medium Tier, 7,901 "
+"Files)"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 85be8d3b1b6348c1a07aa491799cd3a7
+msgid "Formatter / Mode"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 4b8ea60ba717403ba4962840802c77ac
+msgid "Category"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 97df1d905219410c9182cffc48d82742
+msgid "Memory Scaling"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 5a2c3f4ae81149aaaf8c23c66a27559b
+msgid "**Raw Traversal**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 24e6b6f41ba84254a1f396a59db1d866
+msgid "Engine"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 83c1af497c7f4545aee8a4685fd3f61c
+msgid "2.5437 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 a5aded7094db418db4a06f66d1df5ed6
+msgid "3,106.1 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 74076675b5fa424b81f389f0fee02505
+msgid "24.75 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 ee0ab4b4c6a646baa1e9e09c9e4e80d0
+msgid "2.89 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 2ed227a4aaea446cb71e071fb2314d79
+#: 307415e4ded545798ac3c5f16be277ef 5c71ad9e35b34a76a7a1cee8b6f63d50
+#: 8dc7f31a28d64daf9341d43987a01232 9d5010a17eff45f1bc1b534a221f7dad
+#: 9e3e3d19341b4d8d8739aadfd7a5b7ec
+msgid "$O(1)$ Bounded"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 5e84f7f11d7541d0a75e68514f8f34c6
+msgid "**Text (`text`)**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 0ad6eb01ede14faaa2ec649876c1074b
+#: 2962ccea1af44d24b7b530ab91a16c86 bbcd30bb8a424d97975f5630320c7d24
+#: d381a9340ea740b89327839734af1c5d
+msgid "Streaming"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 1d85cd0168a646ae994a60e3cf5b380c
+msgid "2.6332 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 854a208db21740eca35fbdacb27786d4
+msgid "3,000.6 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 5148462ed5eb4a238ae608ede20a3435
+msgid "11.07 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 194f2582929e4083b4d644d81059cb2a
+#: d0c2d97289f34458a627d93edfacd693 ddae882af2314eb49281b92d21e46859
+#: e2b81c63c4844034a68b77d8886088dd
+msgid "0.72 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 f3b28aeda541414587569837a35f8772
+msgid "**JSONL (`jsonl`)**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 30b6a884f9b349c4b5f6cbfd4a585660
+msgid "3.1472 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 d46b2c025d67486f80e82a87ddf4ddda
+msgid "2,510.4 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 7592eda2f49f4e68974f7715c323a473
+msgid "10.43 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 925f732797f54444a35f144d6860f888
+msgid "**TSV (`tsv`)**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 7196f11ac4a0421bb890ec70e54979ca
+msgid "2.5570 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 4fb052ab87a540cca2c156dd1bbf88d2
+msgid "3,089.9 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 d3326bb6cd2b44e69d6801e6307c7303
+msgid "0.02 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 05793dbdbe5c42e990bb1f628f111c5b
+msgid "**CSV (`csv`)**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 799eda145d024917a1f768cebd449314
+msgid "2.5785 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 d89fcc7b33af40bca9c53bf2d81bd32b
+msgid "3,064.2 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 cd7c8a08f3ba480fb50daec4172d2d95
+msgid "0.04 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 d2d4d1c5d09b4fd7b044475a8971cc3f
+msgid "0.84 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 dbedaa877d0742279e9609d173966762
+msgid "**JSON (`json`)**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 3b385f72a37e4f289f28d750811de2d7
+#: 584846dca6334d0dbe2af1bb6d6d624b c53ed3b41118403ba239efee94ab6b2e
+msgid "Buffered"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 475f0b22266e4f569e85876694abaac6
+msgid "2.9981 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 4b03547748fe4109930293f32ae7751a
+msgid "2,635.3 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 5af2b2cad9ab4f1ca931251841eaabcb
+msgid "2,997.77 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 59cf1c8f1e394baea6f42c82b0d248f6
+msgid "15.25 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 2792a8ed26604d1284c6ace8548c2bb7
+#: 3949f19cf67c420f83f44fffa51780c4 d4557b9dda6e41a1927186afdffa83f2
+msgid "$O(N)$ Linear"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 0eed3b285d164787a8f5412bf658bdeb
+msgid "**Tree (`tree`)**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 797e221f524a45f1804a10139e9b6844
+msgid "16.3280 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 e36fb8dfb04547f39f699bc5ed01f830
+msgid "483.9 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 fc6483484cd24f3282cb197eae8d5062
+msgid "16,265.90 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 a357ce81cb164e32afc39136273e372a
+msgid "36.30 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 b301aeb39252499188cec747a00c6faf
+msgid "**Table (`table`)**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 c639bd95b64e48bab522b809a7a03433
+msgid "57.7142 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 2f208e81f0aa4bd183178aaf3400856a
+msgid "136.9 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 351933e84db541af87df5967e1b9bc26
+msgid "57,581.79 ms"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 a2e4f19ed16b4c6692505899b126b589
+msgid "64.80 MB"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 9f907894ca4844a6b2903df1a83fa35c
+msgid "**Text + Tags**"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 e769be88e4ad4957b4e641b70ccf1c8f
+msgid "Classified"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 273f991463b948b2864cd2cdfd14ab63
+msgid "3.5339 s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 1a340c54c82641f7a55b1a86932526cc
+msgid "2,235.8 f/s"
+msgstr ""
+
+#: ../../source/quality/performance.md:3 36afe5390e444a6ea5a83d0a2ead4c85
+msgid "14.60 ms"
+msgstr ""
+
+#: ../../performance.md:356 70558a33fcfe4287bf051ea91671c862
 msgid "7. Regression Testing in CI"
 msgstr ""
 
-#: ../../performance.md:277 c03bdb3a22bc4f8591ce664dffa1b398
+#: ../../performance.md:358 4d510f7ce66a4966a7e15ebc9df12947
 msgid ""
-"The benchmarking harness supports automated regression detection in "
-"continuous integration:"
+"The benchmarking harness and automated test suite ensure continuous "
+"regression protection:"
 msgstr ""
 
-#: ../../performance.md:279 403a5112e543402b97d5ab834f4b32d6
-msgid "Baselines are established and preserved as versioned JSON artifacts."
-msgstr ""
-
-#: ../../performance.md:280 44e3d5de4d1a45e3bd3dd4b3ed1af4b9
+#: ../../performance.md:360 69efca14b029402a8c61aaff6d2fbb86
 msgid ""
-"Pull requests execute `tools/benchmark.py --baseline <baseline.json> "
-"--threshold <pct>`."
+"Canonical v1.0.0 baselines are committed and versioned at "
+"`tests/fixtures/v1_baseline.json`."
 msgstr ""
 
-#: ../../performance.md:281 25f8d09f29454182ba8d1fc6e3823cd2
+#: ../../performance.md:361 0af1db8416a14884ad44b4b5e5c434ac
+msgid ""
+"Automated integration tests in "
+"`tests/integration/test_performance_baselines.py` continuously assert "
+"that:"
+msgstr ""
+
+#: ../../performance.md:363 2dd1cc0b784941949d56a7b398d0af67
+msgid ""
+"Streaming formatters (`text`, `jsonl`, `tsv`, `csv`) maintain bounded "
+"$O(1)$ heap memory."
+msgstr ""
+
+#: ../../performance.md:364 eba62a92296443b3adc7f4aa7ffabcba
+msgid ""
+"Early `.gitignore` pruning bounds traversal time and memory when skipping"
+" massive directory trees."
+msgstr ""
+
+#: ../../performance.md:366 a74c065106094ce2a4def1ca1df1b88b
+msgid "Continuous multi-run traversals exhibit zero unbounded memory leaks."
+msgstr ""
+
+#: ../../performance.md:367 ffdae2ba29fd40ea8076abdb6e154261
+msgid "Pull requests can execute regression checks via:"
+msgstr ""
+
+#: ../../performance.md:373 0cbb9aa06d2f4f0ebf9cb7a5b29cd0d3
 msgid ""
 "If throughput degrades by more than the specified threshold percentage, "
 "the tool emits a comparison table and exits with non-zero status code "

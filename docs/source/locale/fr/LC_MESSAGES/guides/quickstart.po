@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"POT-Creation-Date: 2026-10-24 01:04-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -19,60 +19,442 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/guides/quickstart.md:1 5cce5463ebde4d48bc9a282e0ef8eee3
+#: ../../source/guides/quickstart.md:1 27ba32ce98ae4596b386802b8d7dea51
 msgid "Quickstart"
 msgstr ""
 
-#: ../../source/guides/quickstart.md:3 8ad947953e1f48bfa8d0e21b65d84a14
-msgid "1. Basic File Discovery"
+#: ../../source/guides/quickstart.md:3 7fdb709989ca4b11a19b9a4f6a888775
+msgid ""
+"`findfmt` identifies files by format, shebang pattern, and MIME type "
+"rather than relying strictly on filename extensions. This guide "
+"demonstrates common discovery, filtering, and reporting workflows."
 msgstr ""
 
-#: ../../source/guides/quickstart.md:5 5d249dd3fafb48b788c3b4dc88d21c3c
-msgid "Find all Python files in the current repository, honoring `.gitignore`:"
+#: ../../source/guides/quickstart.md:6 7692d1c265984436b507934ba1ae4ae1
+msgid "1. Installation & Direct Execution"
 msgstr ""
 
-#: ../../source/guides/quickstart.md:11 195b6ea4d46c4f14b06fd3633099df41
-msgid "2. Shebang-Based Discovery"
+#: ../../source/guides/quickstart.md:8 8c2f2038a6624058bf85ea06aaf866df
+msgid "1.1. Standalone Execution with `uvx`"
 msgstr ""
 
-#: ../../source/guides/quickstart.md:13 2c6ba09ffd9f4a3e8985b88b088ed5c9
-msgid "Find all executable scripts invoking bash or python via shebang:"
+#: ../../source/guides/quickstart.md:10 ea02518fc5f14f7b9e6d90dcc7039488
+msgid ""
+"Execute `findfmt` immediately without an explicit installation step using"
+" `uvx`:"
 msgstr ""
 
-#: ../../source/guides/quickstart.md:20 9c33b54ff25d493b9737d037ab82b495
-msgid "3. Listing Identified Tags"
+#: ../../source/guides/quickstart.md:17 805b7470192e423398e01b407decf09f
+msgid "1.2. Global User Tool Installation"
 msgstr ""
 
-#: ../../source/guides/quickstart.md:22 3b846008b0894aaf9a1dd2626a2d2420
-msgid "Inspect all classification tags assigned to files:"
+#: ../../source/guides/quickstart.md:19 9fcf084dc73a49ac8e025bcf4f5b4b79
+msgid ""
+"Install `findfmt` globally into an isolated user environment using `uv "
+"tool install`:"
 msgstr ""
 
-#: ../../source/guides/quickstart.md:28 ac753c603b674ab4b3f05fc21cdbe5c3
+#: ../../source/guides/quickstart.md:25 9d3bf72479f54ef595b26648a91cfe2a
+msgid "Upgrade to the latest version at any time:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:31 2934ff60460a49a0a3d3ca4054598c00
+msgid "1.3. Project Dependency"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:33 a0f5125efd4b45bfb790e75f4d68b51c
+msgid "Add `findfmt` as a dependency to your managed Python project:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:43 f3db24d922254fd39bbd08efd326a70b
+msgid "2. Basic File Discovery & Tag Matching"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:45 9f94b654b642478bbb02ab65072ada23
+msgid "2.1. Single Tag Matching"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:47 3b2a59bd2a314f4bad977faf68619de0
+msgid "Discover files by format tag, honoring `.gitignore` rules automatically:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:58 e7247f1848404bf4bb2c3cd89c5ae991
+msgid "2.2. Multiple Tags (OR Condition)"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:60 2a94b6e10f114f2ab9bee5b79f202799
+msgid ""
+"Match files that contain *any* of the specified tags by providing "
+"multiple `-t` flags or a comma-separated list:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:69 d30a3ff02ebd4a1fb8a84c964a0346b5
+msgid "2.3. Conjunction Matching (AND Condition)"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:71 00e7dfdd93134c638f70171443475223
+msgid ""
+"Require matching files to satisfy *all* specified tags simultaneously "
+"using `--all-tags`:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:78 e63cae0361e74c44875336076bc7f7bb
+msgid "2.4. Tag Exclusion"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:80 5db3eaa782bd43c4873c59111c3ff88c
+msgid "Exclude files containing specific tags using `-e` or `--exclude-tag`:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:87 91b63c5e47f74eae9aff277178844df1
+msgid "2.5. Listing Detected Tags"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:89 04f65d93598044a795b22f3d6a89db30
+msgid "Inspect the complete list of tags assigned to each file:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:95 3e0e0c6416334f55825a08ce3a945d5d
 msgid "Sample output:"
 msgstr ""
 
-#: ../../source/guides/quickstart.md:35 5122da09146f44129ef144a536a03ae8
-msgid "4. Pipelining with `xargs`"
+#: ../../source/guides/quickstart.md:102 7e849db585914fdcbb31daf068f06477
+msgid "3. Shebang Detection & Interpreters"
 msgstr ""
 
-#: ../../source/guides/quickstart.md:37 19bc21d53631470a84763032b8d539fe
-msgid "Safely pipe matching files with NUL delimiters:"
-msgstr ""
-
-#: ../../source/guides/quickstart.md:44 27e948d22bc04be3811f498bd4e55d9a
-msgid "5. Display Summary Statistics"
-msgstr ""
-
-#: ../../source/guides/quickstart.md:46 a224e43a98ce407d898f2dfbd5e7a426
-msgid "Print matching frequencies and top detected tags to stderr:"
-msgstr ""
-
-#: ../../source/guides/quickstart.md:52 da6a0fb753534f02bb4726b8c4349343
-msgid "6. Inspecting File Metadata"
-msgstr ""
-
-#: ../../source/guides/quickstart.md:54 035b8d16ea5e4a72a96322c404348e26
+#: ../../source/guides/quickstart.md:104 39b8556e2b8c44af90a0fac880edc256
 msgid ""
-"Inspect file permissions, ownership, sizes, timestamps, and "
-"classification indicators:"
+"`findfmt` inspects the initial line of executable files for `#!` shebang "
+"declarations. This enables discovering scripts that omit file extensions "
+"(such as `bin/deploy` or `scripts/runner`):"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:118 dd8460b2e0314221ad5e35a5ac1aee9d
+msgid "Use the `findshebang` command wrapper for convenient shebang queries:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:125 64e603d22842481a99fd24cdb02dba1a
+msgid "4. MIME Tag Classification & Prefix Filtering"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:127 33e1f70026bc45c4a4340c0c39f69eaa
+msgid ""
+"Files analyzed by `findfmt` receive specific MIME classification tags "
+"prefixed with `mime:`:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:136 77013e0d635b41a3a40e00db3040d6e8
+msgid ""
+"Use the `findfilemime` wrapper to display detected MIME tags for all "
+"files across the repository:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:142 495ec50cea004ac59a4697bfba0b492d
+msgid "4.1. Offline Mode"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:144 8ce202e512b84ef7badbbd4323a0f671
+msgid ""
+"When running in environments where file contents cannot or should not be "
+"read from disk (e.g. analyzing remote directory manifests or when "
+"filesystem reads must be avoided), enable `--offline`:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:151 fdd6e787587d4b9abe1743035c5c6469
+msgid ""
+"Offline mode classifies files strictly through filename and extension "
+"heuristics."
+msgstr ""
+
+#: ../../source/guides/quickstart.md:153 40e66da122d846f2baa56faff9d60c8f
+msgid "5. Wildcard, Pattern, and Traversal Controls"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:155 3422c90b725f44f5af31670b85ccce19
+msgid "5.1. Glob Patterns and Alternations"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:157 126ad373794d43b0a6f9246d2807a538
+msgid ""
+"Filter files by filename pattern using `-P` (`--pattern`), supporting "
+"alternation via `|`:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:170 3c511e0bd9f84707b6f6a9f29d6168b5
+msgid "5.2. Directory Inheritance & Filtering"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:172 c18656da676d4aec8470fbdcb5ea3c6b
+msgid ""
+"Match directory names and inherit matching status across child entries "
+"with `--match-dirs`:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:179 c35109dbe14b46b4b591e47157ae962d
+msgid "Restrict traversal to directory entries only using `-d` (`--dirs-only`):"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:185 62319170f4624d16889507333a1d654e
+msgid "5.3. Maximum Traversal Depth"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:187 53e65a7d3dd44ef6bd2913f92b58e9a1
+msgid "Limit directory descent level using `-L` (`--max-depth`):"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:194 a3048094abad421eb6e2e9147fb5e163
+msgid "5.4. Ignore Rules & External Ignore Files"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:196 8eb4f481d2db409785e462d33074ec81
+msgid ""
+"By default, `findfmt` honors `.gitignore` and `.git/info/exclude`. You "
+"can customize this behavior:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:206 97adcaf2e68b4a27ba4574da34249228
+msgid "6. File Metadata & Attribute Inspection"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:208 4347a508e1d44b1d94cd45d43c9a454d
+msgid "Inspect detailed filesystem attributes alongside discovered files:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:227 72ab0985750a4c699351fd0339fd0e2c
+msgid "6.1. Clickable Terminal Hyperlinks"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:229 3c3e66b957ae4194a08c894bdede07e6
+msgid ""
+"On modern terminal emulators supporting OSC 8 escape sequences (such as "
+"iTerm2, Windows Terminal, and VS Code), enable interactive click-to-open "
+"navigation:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:240 62388c73099041cead7e997a21c4b370
+msgid "7. Directory Disk Usage & Tree View"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:242 a43ae9d65d3949fa952763df27d1f046
+msgid "Render files in a visual hierarchy with disk usage accumulation:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:255 40437511b7a6486bbab186d7cacce2ba
+msgid "8. Multi-Format Serialization Suite"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:257 b1f17bfac85f4c2aaa25fc38161d36d7
+msgid ""
+"`findfmt` supports 14 output serialization formats for terminal "
+"visualization, documentation, and automation pipelines:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:260 fd13de9da1a74858aea4ad531b159ceb
+msgid "8.1. Line & Streaming Formats"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:262 4f472a91f1b54cd380e7dc99595269bd
+msgid "Stream paths and lightweight records for high-throughput Unix pipelines:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:272 5b6ace773157466ca89fffbbbbb90bbc
+msgid "8.2. Structured Data Documents"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:274 aef48c371ff24ef7a722708e92172a06
+msgid ""
+"Generate structured documents for configuration, machine ingestion, and "
+"data analysis:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:287 7536954c120f4633b91eb36bedf00c75
+msgid "8.3. Delimited Tabular Formats"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:289 f17461c570384384894ac84ef30b34f8
+msgid ""
+"Export delimited records for shell tools (`awk`, `cut`) and spreadsheet "
+"analysis:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:299 4b4628c922b74633abb31f7f8214b564
+msgid "8.4. Visual & Documentation Tables"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:301 b6c3b177e2b2421dbcd810808b647c25
+msgid "Render formatted tables in terminals or generate documentation includes:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:317 d1e67aeb97a543ef9a43b6a7c1e8a403
+msgid "8.5. Hierarchical Documents"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:319 99c84c8c7c50452796abff72ee0f23ff
+msgid "Represent project structures as trees and markup documents:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:332 da0064ce50894b0d8468277fdbf7c6ac
+msgid "9. Pipelining & Automation"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:334 80818a6b0b824471833999b0bafb5bc7
+msgid "`findfmt` integrates seamlessly into automated shell pipelines:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:336 24ee50ffd74a4abdacb59d98afe6ebd2
+msgid "9.1. Pipe-Safe Execution with `xargs`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:338 130080198ebc44929a2ee5cf00733d24
+msgid ""
+"Safely handle filenames containing spaces, newlines, or quotes by "
+"delimiting paths with NUL bytes:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:348 81fcec274b07413cb1f85755418fd809
+msgid ""
+"The `findfmt0` shortcut wrapper automatically enables `--print0` and "
+"includes hidden files:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:354 8cb2df462c984efa92332a070a65a984
+msgid "9.2. JSON Filtering with `jq`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:356 046c137d78fd408299f53c842d6a08ef
+msgid "Process deterministic metadata records using `jq`:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:366 22adfafa0bbe44aba91b5a2942bc3687
+msgid "9.3. Match Summaries"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:368 90c62ef3b9334fab9c80a0178c136972
+msgid ""
+"Print match statistics and tag frequency counts directly to standard "
+"error:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:374 b902ca6e8f7d45fd802ce8499754b771
+msgid "Or use the `findsummary` wrapper shortcut:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:380 df95a38201974dd79726d6625ccfcbb5
+msgid "10. Programmatic Python Library Usage"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:382 fcf00586b45c41f7b0a643ece1e2083e
+msgid ""
+"Integrate `findfmt` directly into Python tools, test suites, and "
+"automation scripts:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:384 e4c143b35512429b9dfa62cc39e06222
+msgid "10.1. Basic Discovery & FileInfo Inspection"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:386 ba42f7b6f368496e804e8fde0ca01e74
+msgid "Query files and inspect detected metadata attributes:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:409 60cedacac3be453786a44e1765c8991d
+msgid "10.2. Output Formatting with Built-In Serializers"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:411 86c28239859a4ada99176a58155d1aae
+msgid "Render results programmatically into any supported format:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:424 ba092b988c984ce4bb2817bdb7359039
+msgid "11. Command Wrappers Reference"
+msgstr ""
+
+#: ../../source/guides/quickstart.md:426 d2dcab2528ba480e9b36aa5ce837af2e
+msgid ""
+"The following specialized wrappers provide convenient shortcuts for "
+"common workflows:"
+msgstr ""
+
+#: ../../source/guides/quickstart.md d098eb21a99d4aa78871e7a79c12ecf3
+msgid "Wrapper Command"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 06df12d5b0ad4ba6a8b28b44dc957f37
+msgid "Equivalent Invocation"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 960997541b2b4aa2a907e0d7b8633963
+msgid "Primary Purpose"
+msgstr ""
+
+#: ../../source/guides/quickstart.md f8b6bc6a333e4fff8fc971ba4ef4a552
+msgid "`findfiles [PATHS...]`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md f040f2472ca54173bab83ad431d84635
+msgid "`findfmt --hidden`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md ecc20468772e4c439c02a442a64492ec
+msgid "Discover all files including hidden files respecting `.gitignore`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 000a7f6ddb4445e2a2dc2a2063bc2a47
+msgid "`findfilemime [PATHS...]`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 7d6344fc2fef4e6ea5bce32f7815d5dd
+msgid "`findfmt --hidden --list-tags`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 7d1e2464646b41f0aa81d525ba536323
+msgid "List files with detected format and MIME tags"
+msgstr ""
+
+#: ../../source/guides/quickstart.md e0751a278b0b43c4b2f90d381c20f110
+msgid "`findfilefmt [TAG] [PATHS...]`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md ee188dc9c13b4597ab372823b02689a7
+msgid "`findfmt --hidden --tag TAG`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 05d8d817fc0c4c47bfd55ef4dc72bdbb
+msgid "Filter files by format tag"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 9bec5af4793d49fa8400a8307a3f6d44
+msgid "`findshebang [INTERP] [PATHS...]`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md a4f02e4665a244ad8643ede9bd3ab1bb
+msgid "`findfmt --hidden --shebang INTERP`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md c084a26e470443168643af396e7bba09
+msgid "Discover executable scripts by shebang pattern"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 8562267457eb44c986757aefcdd3f777
+msgid "`findfmt0 [PATHS...]`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 90198fac4cd347a1896b1212f1ef4bbf
+msgid "`findfmt --hidden --print0`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 2ab49b5d74a34e6590812a567180898c
+msgid "Produce NUL-delimited paths for `xargs -0`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 9aeb08018ee444b7929e0a934a1d53fb
+msgid "`findsummary [PATHS...]`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md 56eeec0b04c640aa86f1b2de69772214
+msgid "`findfmt --hidden --summary`"
+msgstr ""
+
+#: ../../source/guides/quickstart.md c43681123c1a40f68281f84ddd812897
+msgid "Print match frequencies and top tags to stderr"
 msgstr ""

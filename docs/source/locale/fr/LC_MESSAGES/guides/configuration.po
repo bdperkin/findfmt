@@ -1,0 +1,817 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 1.0.3.dev20+g4c93cc2a7.d20261024\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-24 01:04-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: fr\n"
+"Language-Team: fr <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guides/configuration.md:1 e4cbb8f4fad64869b46ed5452ef6c78a
+msgid "Configuration"
+msgstr ""
+
+#: ../../source/guides/configuration.md:3 9c0b6d0b50804f7f87d12593b7b803d5
+msgid ""
+"`findfmt` supports flexible, structured configuration loading through "
+"standard TOML files. This enables setting persistent personal defaults or"
+" project-level standards for output formatting, visual styling, traversal"
+" boundaries, and tag filtering."
+msgstr ""
+
+#: ../../source/guides/configuration.md:9 ccdbff68c35e4ceea1fd39e65741ef24
+msgid "1. Configuration Resolution Hierarchy"
+msgstr ""
+
+#: ../../source/guides/configuration.md:11 6967b9cc962f48088d48b97064e1228d
+msgid ""
+"When `findfmt` executes, it determines effective settings according to a "
+"strict six-tier hierarchy where higher-priority sources override lower-"
+"priority sources:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:14 200b62746dfc4eebbeb73473a3f1ca29
+msgid ""
+"**Explicit CLI arguments and flags** (Highest Priority): Direct options "
+"passed on the command line (e.g. `--format table`, `--no-hidden`, `-t "
+"python`) always override environment variables and file settings."
+msgstr ""
+
+#: ../../source/guides/configuration.md:17 6173cbe8557e4c29aa6789c1f6c4dfe0
+msgid ""
+"**Environment Variables**: System environment settings such as "
+"`NO_COLOR`, `CLICOLOR`, `CLICOLOR_FORCE`, `LANGUAGE`, and `LC_*` override"
+" file defaults."
+msgstr ""
+
+#: ../../source/guides/configuration.md:19 332dd082d41e4b1086b5a960c5532e22
+msgid ""
+"**Explicit Configuration File**: A custom configuration path specified "
+"via `--config <path>` or the `FINDFMT_CONFIG` environment variable."
+msgstr ""
+
+#: ../../source/guides/configuration.md:21 e32503c50e6948d191a1c40a270fe3a4
+msgid ""
+"**Standard User Configuration Path**: User-level configuration located at"
+" `$XDG_CONFIG_HOME/findfmt/config.toml` (or "
+"`~/.config/findfmt/config.toml` on POSIX systems; "
+"`%APPDATA%\\findfmt\\config.toml` on Windows)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:24 ee8fc648d97b4584941f5354b88483a4
+msgid ""
+"**Project Local Configuration**: A `pyproject.toml` file containing a "
+"`[tool.findfmt]` table located in the current working directory."
+msgstr ""
+
+#: ../../source/guides/configuration.md:26 c0ff918431854ac0b1a565cd04aeefd5
+msgid ""
+"**Built-in Defaults** (Lowest Priority): Factory default options (`format"
+" = \"text\"`, `color = \"auto\"`, `pager = \"auto\"`, etc.)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:30 15053bdbec2d4b7cbbc445ab45741689
+msgid ""
+"Passing `--no-config` on the command line or setting "
+"`FINDFMT_CONFIG=\"\"` completely suppresses discovery and loading of "
+"configuration files, forcing `findfmt` to rely strictly on built-in "
+"defaults and command-line flags."
+msgstr ""
+
+#: ../../source/guides/configuration.md:37 f9f9ebb670954b01a20ac047bc1d5191
+msgid "2. Configuration Inspection"
+msgstr ""
+
+#: ../../source/guides/configuration.md:39 998c2f309599472a8c38924bd620539e
+msgid "To inspect the currently active configuration file and resolved settings:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:45 ae883b5f9f6b441987c19b8a2cbdd4c1
+msgid ""
+"When custom options are loaded, `findfmt` outputs the active path and "
+"effective configuration table:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:57 766553c4e91d4e7ca85834edb459ae95
+msgid "To view configuration status as part of general system diagnostics:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:65 b108f4c93fad4dacb9ae037db6325c06
+msgid "3. Configuration File Formats"
+msgstr ""
+
+#: ../../source/guides/configuration.md:67 b00aa90affe847b99dca1aaae9902ea9
+msgid ""
+"`findfmt` natively parses configuration using standard TOML. "
+"Configuration can be defined either in a standalone `config.toml` file or"
+" embedded inside a repository's `pyproject.toml`."
+msgstr ""
+
+#: ../../source/guides/configuration.md:70 7da06b84bcc648fc90b0d3ecbf5eaa65
+msgid "3.1. Standalone `config.toml`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:72 61bca44d03a84b439ccddbebaf8b33f6
+msgid ""
+"A standalone file can place options at top level or under a "
+"`[tool.findfmt]` table:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:105 589427a4bd1542099bc4f7c9aade8e28
+msgid "3.2. Project Configuration (`pyproject.toml`)"
+msgstr ""
+
+#: ../../source/guides/configuration.md:107 2f29150679b7449f8ebeaeab8082e56c
+msgid ""
+"In repositories managed by modern Python tooling (`uv`, `hatch`, `flit`, "
+"`poetry`), `findfmt` reads the `[tool.findfmt]` table:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:125 9a31d8c8b4f54c9dabffd7e2e242faee
+msgid "4. Configuration Schema Reference"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 803e328ff5db4ae8980591b216dfa6be
+msgid "Setting"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 23da2ac17fef45cca064bf373aca7ab8
+msgid "Type"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 4dddd8291e74499db5c6ee6aefd1ac0f
+msgid "CLI Equivalent"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 6eebc1e51ea94045bd53982efbb89a90
+msgid "Description"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 3fbfe3b555e64d3e9f041202e2fb9796
+msgid "Default"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 c8f56449c05e4ab5bf35d85132a3f4e3
+msgid "`format`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 221e0c0bc88b4d319492a1ce214a771f
+#: 45c3e714c1fe4d9ebbf6ed0075aa7b1c 81d9840013f2438aba07f80b6842a515
+#: d6f4aa364c844fa1a5b6dc105e2f8e1f de3486f02b6a4bb59c49967c9c21df9a
+#: f6c519f31c744bc58c25cf3f492c2521
+msgid "string"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 c9ced05abbab4a41849d8b556ba9cb41
+msgid "`-f, --format`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 a239098d1b1843aca608ce1be4d35e57
+msgid ""
+"Output serialization format (`text`, `table`, `tree`, `json`, `yaml`, "
+"`csv`, `tsv`, `xml`, `html`, `markdown`, `rst`, `jsonl`, `csv-table`)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 1431cde4c6854f95ad3a4c83ca87c44a
+msgid "`\"text\"`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 a086550d5c6141e89b05d4194b227123
+msgid "`csv_safe`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 06d520dbfd1f4914bff19ffd3771bed1
+#: 1064b2dc71584264895a4b8a8ebcfbdd 1f66fbc81e8d46ba828b509811f921fa
+#: 2b4e63ad51d343d4be16debc4297da02 2e5f450866a3485aae8b81eaa720fd77
+#: 333355e197934e77b549011d39a98dde 38bb8c4a922b46a9bf4f1e12fe6fbc30
+#: 3bb7d12d3c6645609cba1f9fabfd58e4 4e6ca9921d6441a09cb9f3213dd1cc2e
+#: 53082f0dc24848c1b5a374a507201ddc 5ad6a6a7e83f4f79ba27a03d8fb0cc85
+#: 5e35a99ba3084965a247d9b8ed5731d7 66fdf33d1bd0453c98b4f134b2e95f5b
+#: 84d76505eeaa499c83366a90bb583309 91bca73cd1604f9994c0cf56cf4dbd87
+#: 997b5065120e4c1eb510e3d772ab8a6d a3e91cfd06f9415188786f53f94df91b
+#: a6928eb57b8f43499c78790ea8bfca3c aa20f0b24f924475a064c61596b34ef4
+#: aa6ea2dc0e304df0915429e28232cabf b2ad92df46514ffe9d6a0e2b089c310f
+#: be8816bf0f334519b3381313278bcddb c2360e378e0849fe88dacef6ccc26fab
+#: d253ca37499b4f96b85fb944e2450a69 d7fc875c1773485fa8198bd73d5dfc2e
+#: dbe7cc573d004708a51cb2fce2281a9b e207a35c9016475bbe60b379f10fa826
+#: eb6ebff4cd704ee39d5c2aa2a3eadc66 f0f1c39fc0b744d59f0db13aa3f8f555
+#: fd8ff4e1af8543cca4c166cecd8e12dc
+msgid "bool"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 9e1d11253d9e4a759fcf20422f15d3bc
+msgid "`--csv-safe / --no-csv-safe`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 962035151cd74aaf8aef8206c6096fdb
+msgid ""
+"Prefix formula triggers in CSV/TSV cells with single quote to prevent "
+"spreadsheet formula injection."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 270856ae700f479eb9f0cfa9c90d91d9
+#: 31585649b4774e74bdb632877da62c82 3461d29221fb45c9b22138bde0ab460c
+#: 34b952b65f964b46ae4ec3cd8c412e3e 3eb4cfcaee954a8cb93315ac50aa1909
+#: 495274058443435bb6cda466bea45e3c 59e57fed4b9e47fbac7b7198eeeb01f5
+#: 5f9a14b6866048ad91a85f46f62fbc95 62ebc17e7f25408ab5e39297c5dcba73
+#: 891cad6ecd844adcb8bcd26be18b2e7a 8eac95feb3424b329e07d7acdec6c177
+#: 938c8aa120d5422392a881ad3120323c 94ed6d9d01b845c7bacfaa354cdbd511
+#: 964d2111190f4ac98973b04d89e293d9 9d030e889ee746d0888815b667b83076
+#: b0242f043cfd4742819f7009a426ad3c b159b515edf745c899805c697fa629bb
+#: b5b13cbad6144003a92d6d40006ccf70 bcd8204972f342b69e1801cf08f56d15
+#: c8b938b33ff74f3fb2f4c27a04f8dd1a c9d46fd3c91e4c3ea2b9ab653ca86ecb
+#: d261cca3a0c848c18eb1ca34848694c6 d6c08dc33a5a477a91d665e025e284b4
+#: d6c9cb242f3e42319cad4cd698514409 df5a3c1d63e142a389b13a25ba431531
+#: ed60bad1cb65455198edec0d859fc31d fd68f9cdb4aa466c919ca4ec701cc83a
+#: fe1725b30cb847a9b1aff4011c2424e3 ffc8d027965e4d998a331a3bb545767b
+msgid "`false`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 3c5e6be26fd54330b6e2fefc2996cced
+msgid "`table_style`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 03c321d4217a4feb854e476ad850c8e5
+msgid "`--table-style`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 4d7096e76559425687a431980ed16ab8
+msgid "Table border style (`rounded`, `grid`, `ascii`, `minimal`, etc.)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 a5eafaf9bb9f434c95867929936ec342
+#: a69f1e6239dd4512ab8fef306eef608a a89a1c1f090e4806ace0b0c5081e2b9f
+#: ad64954c6db2400f9a157f35061a0668 ad9a92b6d7df4a96824a46d537c1d77a
+#: f790e2d3d2f3437eb1bc0df276742479
+msgid "`None`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 3c4d7c671bf6495491e0b50680200df0
+msgid "`color`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 adc82bfc0c2342cfaedbfd38b7860cde
+#: c1ac765e05f4457288f34dd659f2a5ac
+msgid "string / bool"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 a920870246b749879bfb450fff4f9242
+msgid "`-C / -n`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 33cd4429271d42259a34e9ecd906ad79
+msgid "Color policy: `\"auto\"`, `\"always\"`, `\"never\"`, or boolean."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 4847269cdf6f48cc9f1813f29a629e6d
+#: 5ccc1edf0b444bfdbbb006420aa695dc
+msgid "`\"auto\"`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 19a1cd4192bf4a3d8390ac379130ca3a
+msgid "`pager`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 e9dd0f29b4fd46f799a58eeaae45453f
+msgid "`--pager / --no-pager`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 f8ba610f8159460ab701fc76a3ceaa68
+msgid "Terminal paging policy: `\"auto\"`, `\"always\"`, `\"never\"`, or boolean."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 8beeb75deb374f02beb3a2b4ab06f78f
+msgid "`hidden`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 d62e6c940c4f4fe191f2134794b9fbd4
+msgid "`-a, --all / --no-all`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 8cbbcb05b93041cea03926acf325894d
+msgid "Include dotfiles and hidden directories in traversal."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 3dcc7472a51b478ab6d3e3b07415b5cb
+msgid "`ignore`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 9937d25dbadc4b43a27b91eda20b2674
+msgid "`--no-ignore / --ignore`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 40873d502f564233b63069f8000dad38
+msgid ""
+"Respect `.gitignore` and global gitignore rules (`true` to honor, `false`"
+" to disable)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 41a080f9942f45a1b8db1c90e31380c5
+msgid "`true`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 fb975d52de7d4fc8844426d00f976e52
+msgid "`tags`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 4147211e537147d99a41d9e984de51a5
+#: 8ec94b799d8144cc8d8faaedbf336292 a1091ba77f35488fa79f614fe3a3d112
+#: d3ef0729ba6c4a6c81334a1f3e4065aa
+msgid "list[str] / str"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 957c33d878eb4b4a8d3367243f8f0403
+msgid "`-t, --tag`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 3b8a304389de4320afba515155d6d144
+msgid "Default tag inclusions."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 1436eb383d2040158c7314f4abfe7728
+#: 4123431d7dbd4026ba63f564f1cf6171 5064a3d84b36486ab0a544938aa7d74f
+#: 72b49dbbcc854e36a6b2d9ac3244f0b3
+msgid "`[]`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 a9074260587642659487f87a9bac3370
+msgid "`exclude_tags`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 fad56386272a450bb8efb9e9c25718df
+msgid "`-e, --exclude-tag`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 84c1e8724a2d41e4bc38ca955d1dc763
+msgid "Default tag exclusions."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 6663f59bc1fc4b7eaceeb06a5b438755
+msgid "`all_tags`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 d7c28a99311e4db4af7872b071419b86
+msgid "`--all-tags`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 e950bb1017144454977922ad32988f98
+msgid "Require all specified tags to match rather than any tag."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 eacb65e8cb6543eca1361d75ccf8b890
+msgid "`sort`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 e40a387e5b324b9aa20ebc228dad290f
+msgid "`--sort`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 8d1daaa7717d457883574ce02586eedc
+msgid "Sort key criterion (`name`, `size`, `mtime`, `ctime`, `version`, `none`)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 bd64cc417ec44e0d8a3cd8ed1f799014
+msgid "`\"name\"`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 c525043a5a054804b78e92ac93fd29f3
+msgid "`reverse`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 e8f0a42ff4fc4480a2371e4a25d14bc0
+msgid "`-r, --reverse`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 51cc84c08d204f9288cd5e6e63aedced
+msgid "Reverse sort ordering."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 61f79dca00a54da2b588d93cfbb657c8
+msgid "`dirs_first`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 9e80c76d80c9424590719838b8a083c4
+msgid "`--dirsfirst`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 f0d8d35692844fc9a9e15a2a4549022c
+msgid "Group directories before files."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 ed58b2b9612b4a10b3dfffa5fab346f1
+msgid "`files_first`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 8c0ef6fd721144efaa9d10588945e7a9
+msgid "`--filesfirst`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 5d6f8998ef47442588e14c31ac4c11ce
+msgid "Group files before directories."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 84ebb6e849fc4cf09cffd33dc33b2335
+msgid "`follow_symlinks`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 a7cf4ca6295d419d9f2fcd78b49a4a81
+msgid "`-l, --follow-links / --follow-symlinks`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 08dcb87dc33e4dc082fc74c2eca4103d
+msgid "Follow directory symlinks during traversal."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 ab0785193f1247768734e235c62fea39
+msgid "`dirs_only`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 b2aef769bc61407d8ea38ed46b24a24a
+msgid "`-d, --dirs-only`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 36f8d5db641c444fa52f35fb2acf6ff4
+msgid "Emit directories only and suppress files."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 2b2837c611fc4451a7fce9fe53defda1
+msgid "`max_depth`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 52a4ab17150647a3b04672affad81fda
+#: efd498b79f8841debf3bfcaa9a96ca39
+msgid "int"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 41cc83714424404aa64bfd4063f5b029
+msgid "`-L, --max-depth`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 f92297c8e377497f88b35141eefa7314
+msgid "Maximum directory descent depth limit."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 12438d75233b498ea9293fc6f52de172
+msgid "`file_limit`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 aba5d635205b4ba896f6c9cb6a3d59cc
+msgid "`--filelimit`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 f6e901581f7c48a996e7fcea714c921f
+msgid "Directory entry count threshold."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 1e1b239632e04f28bf1dc69cad5a52e2
+msgid "`prune`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 31df5b639717443cbee5ecd93eb959f2
+msgid "`--prune`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 9f2febdff4614ed19acab4b315d14047
+msgid "Omit directories containing zero matching items."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 4675dda650154174bbf2f9d017a846f3
+msgid "`pattern`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 cc1bfaa06fdb44cc8f6c9ba97e9d1c75
+msgid "`-P, --pattern`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 25adc8c364204e59ba819a29ffbd168b
+msgid "Wildcard filename include patterns."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 024c458d8aa747ec9dc5084d7c384cc9
+msgid "`exclude_pattern`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 e46c7a2659374fb1b02ac583caa6fe9e
+msgid "`-I, --exclude-pattern`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 503af7e0be2e4c9b896d584a497656b8
+msgid "Wildcard filename exclude patterns."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 01403f959f1a4d6892a6722408e7f754
+msgid "`ignore_case`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 9a63bfc701b04b869990a29065ded181
+msgid "`--ignore-case`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 06e4e56b47fb4ce887674ff56519565e
+msgid "Case-insensitive pattern matching."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 58ae58c8e4574a70adbcb3912c1c252c
+msgid "`match_dirs`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 660780f3a05e414b9b29cf2c828a35ca
+msgid "`--match-dirs`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 b76ce2c384c44f7a8cd19011615754aa
+msgid "Inherit pattern matches to subdirectories."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 d17d66554c194863a308ffafc0c88089
+msgid "`shebang`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 3306a9c903a9464fae25e3942acf6d06
+msgid "`--shebang`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 08fe7e0694a143abbaa44fed80b31ae4
+msgid "Interpreter shebang pattern filter."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 2011cbea7ba74bf98255508a1d6d2663
+msgid "`absolute`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 71042c98182b4b69b1ab0561224a3731
+msgid "`--absolute`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 df829dfcbc6b44babcfaa5b6387d390d
+msgid "Output absolute paths instead of relative paths."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 8633faf7ea844d7e98e4b0f43b3470cf
+msgid "`relative`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 01c3dc6a7add41c59e7250c633699839
+msgid "`--relative`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 9e9743311ec6486391996338c5b6e202
+msgid "Prepend search prefix to relative paths."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 b9e1ffe2ad2640dfa5490362bc3548d9
+msgid "`print0`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 5e8ab780859149dc9d60b756aa801381
+msgid "`-0, --print0`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 115f702adc1940d8829d9365f2044138
+msgid "Delimit paths with NUL (`\\0`) character for `xargs -0`."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 cbe8cbbaad934a92a17c2611244feb2e
+msgid "`list_tags`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 b012341d25094f509bad2efb9857663b
+msgid "`--list-tags`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 84ebd28861d0444b8b9d17fc6a7c0948
+msgid "Display detected format and content tags."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 4d0bf88aea414a4cb8d2ea9d0ce6db09
+msgid "`summary`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 22096e64f0954f319751f77fe63bfbe4
+msgid "`-s, --summary`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 9b655fdbf05e417e847d214883471461
+msgid "Print match count statistics to stderr."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 95e95ae22ef24c1ebc526ea20349a9cb
+msgid "`exit_status`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 1f336859e9424f83b0a1bf84637beb8f
+msgid "`--exit-status`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 25adb36666e546aba673e4d3462e9b05
+msgid "Exit with code 1 if no matching files are found."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 75b533d8803b44efb07c28d58e04b3bd
+msgid "`permissions`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 f36030ae48fc43f8808c609f1071cc5f
+msgid "`-p, --permissions`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 b6a064fd716a4671a0398f0f216f59f1
+msgid "Format file permissions in `ls -l` style."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 98dc921787954e859a6805829e4cc1fe
+msgid "`user`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 e653eb6545b34d0897618759d8b50ca7
+msgid "`-u, --user`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 d84adc97b8bd4d609f3b5afef75cba3f
+msgid "Display file owner username or UID."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 c180ef5a28984dfe853bcded6d59d504
+msgid "`group`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 cf89bf6413f9411f81b2254b91c8235f
+msgid "`-g, --group`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 cad16e3be802465899defb0e81f85b58
+msgid "Display file group name or GID."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 3a1144d7881a47a6b914e77bc4f76b2d
+msgid "`size`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 18a3a2fc1291431580ea3398454dad02
+msgid "`--size`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 998f6276630840638ec764ab9240053f
+msgid "Print file size in bytes."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 2a18823d0a2f400ba71c7894729011e8
+msgid "`human_readable`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 d0248e9ceaba47e8bfcc806f16cd56a5
+msgid "`-h, --human-readable`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 6099588e366e45dc9665197b45fb1319
+msgid "Format file sizes using binary units (KiB, MiB)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 cccf660a31f04e3ba56d96b10f86b6ae
+msgid "`si`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 e18862097593466db42ce0e7dbf642be
+msgid "`--si`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 d657d865012240798f4bce313204287c
+msgid "Format file sizes using SI metric units (kB, MB)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 fb7822638dfd4b2d90767b1a021757dc
+msgid "`du`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 bf8709c8b22c4008a05dbe02774b08f2
+msgid "`--du`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 010d998fb1cf4869ac6d7213c3c966f7
+msgid "Accumulate recursive directory disk usage."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 4b9320a88bec4b20b6fea6b890dad8d0
+msgid "`mtime`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 b1b8546bc7c343f68d172cc1e966faf2
+msgid "`-D, --mtime`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 58021a0796a74adb8721402514384816
+msgid "Display file last modification date and time."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 1a7bf37c1c264bbeadf3fe600d653765
+msgid "`ctime`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 d50bf76ff3714af19c026f39299a9610
+msgid "`--ctime`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 415ad37f7c8f4c28881e0c61291fa6d0
+msgid "Display last file status change date and time."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 6ad61e13860f4945a396b317a28effb2
+msgid "`time_format`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 f7497190e36746838daff20bc1bca917
+msgid "`--time-format`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 d198217347a947f19737ac7761b68d91
+msgid "Custom strftime syntax format string."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 62b354ade6f64979a9fd214e6950ed3d
+msgid "`classify`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 647a2a0705ed4db3af4ad05a5bb8fae4
+msgid "`-F, --classify`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 77e8995625c84b3a9ea372c30fc4e02c
+msgid "Append file type indicators (`/`, `*`, `@`, etc.)."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 f4bfe15c1df04d6281d3d07b4db1c628
+msgid "`quote_name`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 14d3df5cc50a4012b52b9f1eec7f1d9e
+msgid "`-Q, --quote-name`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 da93dc7039e444bf81c824f0b51b56e8
+msgid "Enclose filenames in double quotes."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 6d379fe5fb194630885a9e2f7f06927b
+msgid "`hyperlink`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 4833a24d7ecb442d99914a30b220725f
+msgid "`--hyperlink`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 dcac2fc541c743c7a4ce68e05413ef1b
+msgid "Render paths as OSC 8 terminal hyperlinks."
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 45a7eb78f80b4e12b6d90842baf0d93c
+msgid "`locale`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 ba1983ec679b4f5db196fff4db1a94a3
+msgid "`--locale`"
+msgstr ""
+
+#: ../../source/guides/configuration.md:29 9252c434c39d4d01a5e7bbdc8d5ca39a
+msgid "Default display and translation locale."
+msgstr ""
+
+#: ../../source/guides/configuration.md:176 5dfb0f396fdf4b3faad239ed9465a208
+msgid "5. Troubleshooting & Diagnostics"
+msgstr ""
+
+#: ../../source/guides/configuration.md:178 600c3d67e44d497c91f8d08e300ca129
+msgid ""
+"**Syntax Errors**: If a configuration file contains invalid TOML syntax, "
+"`findfmt` displays an informative syntax error and exits with code `2`:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:183 5874a183d4924669bb8f9ace78e6cba5
+msgid ""
+"**Unknown Keys**: If an unsupported or misspelled key is provided, "
+"`findfmt` rejects the configuration:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:188 8206dc301ced47bfbaf3cca4ad4dc6f9
+msgid ""
+"**Type Mismatches**: Supplying an unexpected type (e.g., a string where a"
+" boolean is required) triggers a clear validation error:"
+msgstr ""
+
+#: ../../source/guides/configuration.md:193 ba77c6b0647b43a78c5664e7133632be
+msgid ""
+"**Bypassing Configuration**: In scripts or CI environments where "
+"deterministic, clean-room behavior is required regardless of existing "
+"user configurations, supply `--no-config`:"
+msgstr ""
