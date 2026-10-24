@@ -410,3 +410,19 @@ def test_release_oidc_is_confined_to_tag_publish_jobs() -> None:
     assert "publish-pypi" in workflow["jobs"]["containerize"]["needs"]
     needs = workflow["jobs"]["publish-pypi"]["needs"]
     assert "publish-testpypi" in needs, "TestPyPI must be published before production PyPI"
+
+
+def test_release_notes_come_from_the_changelog() -> None:
+    """Validate the GitHub Release uses the curated CHANGELOG.md section, checked early (#498)."""
+    jobs = _load_release_workflow()["jobs"]
+    verify = next(
+        s for s in jobs["verify-release"]["steps"] if s.get("name") == "Verify Release Tag"
+    )
+    assert 'tools/release_notes.py --tag "$RELEASE_TAG"' in verify["run"]
+    build = jobs["build-distributions"]
+    notes = next(s for s in build["steps"] if s.get("id") == "notes")
+    assert 'python tools/release_notes.py --tag "$RELEASE_TAG"' in notes["run"]
+    assert build["outputs"]["release_body"] == "${{ steps.notes.outputs.content }}"
+    assert not any("git-cliff" in str(s.get("uses")) for s in build["steps"])
+    release = _step(jobs["create-github-release"], "softprops/action-gh-release")
+    assert release["with"]["body"] == "${{ needs.build-distributions.outputs.release_body }}"
