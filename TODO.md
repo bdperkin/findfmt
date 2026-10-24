@@ -836,7 +836,7 @@ sub-issues. Respect `Blocked by` links when picking up work.
   --show-diff-on-failure to every pre-commit run --all-files invocation *(Rank: 81 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
   | Milestone: v1.2.2)* - **Value:** Low | **Effort:** S - **Rationale:** Docs-only change to four
-  `pre-commit run --all-files` invocations; good first issue.
+  `pre-commit run --all-files --show-diff-on-failure` invocations; good first issue.
 - [ ] **[#445](https://github.com/bdperkin/findfmt/issues/445)** - feat(cli): add --ignore-file /
   --ignore-type options and matching config keys *(Rank: 82 | Epic:
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)

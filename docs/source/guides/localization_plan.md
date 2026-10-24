@@ -391,5 +391,5 @@ Run the automated verification suite:
 uv run python tools/verify_quality.py
 
 # Verify pre-commit hooks (including check-no-absolute-locale-paths)
-uv run pre-commit run --all-files
+uv run pre-commit run --all-files --show-diff-on-failure
 ```

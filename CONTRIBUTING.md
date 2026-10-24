@@ -85,8 +85,10 @@ All pull requests must satisfy our quality gate before merging:
   ```
 - **Pre-Commit Quality Suite**: Run all 25+ pre-commit hooks across the repository:
   ```bash
-  uv run pre-commit run --all-files
+  uv run pre-commit run --all-files --show-diff-on-failure
   ```
+  The flag prints the diff when hooks modify files. Stage the fixes and run the command again.
+  Include `--show-diff-on-failure` in new automated invocations of `pre-commit run --all-files`.
 - **100% Test Coverage**: Every line and branch must be covered.
   ```bash
   uv run pytest
@@ -148,7 +150,7 @@ git commit -s -m "feat: add support for MIME categories"
 3. **Local Verification**: Ensure all tests, typing, and quality gates pass locally before opening a
    PR:
    ```bash
-   uv run pre-commit run --all-files
+   uv run pre-commit run --all-files --show-diff-on-failure
    uv run python tools/verify_quality.py
    vale *.md docs/
    ```
