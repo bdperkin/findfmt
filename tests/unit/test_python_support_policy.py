@@ -188,7 +188,7 @@ MAXIMUM_PYTHON = "3.15"
 # Jobs that run on a single interpreter: they track the supported maximum. The dependency smoke
 # matrix is excluded on purpose; it verifies dependency floors and is owned by #325.
 SINGLE_VERSION_JOBS = {
-    "ci.yml": ("quality-gate", "packaging-smoke-test"),
+    "ci.yml": ("quality-gate",),
     "docs.yml": ("build",),
     "release.yml": ("verify-release", "build-distributions"),
 }
@@ -305,3 +305,16 @@ def test_docs_state_the_supported_range() -> None:
         if text not in (_repo_root() / path).read_text(encoding="utf-8")
     }
     assert not stale, f"Docs do not state the supported range: {stale}"
+
+
+def test_wheel_smoke_test_covers_minimum_and_maximum_python() -> None:
+    """Validate the installed wheel is smoke-tested on the supported extremes on every OS (#496)."""
+    minimum, maximum = _supported_range()
+    job = _load_ci_workflow()["jobs"]["packaging-smoke-test"]
+    matrix = job["strategy"]["matrix"]
+    assert set(matrix["os"]) == ALL_PLATFORMS
+    assert [str(v) for v in matrix["python-version"]] == [minimum, maximum]
+    runs = "\n".join(str(step.get("run", "")) for step in job["steps"])
+    assert "tools/smoke_wheel.py --wheel dist/*.whl" in runs
+    below = f"3.{_minor_version(minimum)[1] - 1}"
+    assert f"--python {below}" in runs, "the job must check pip refuses the unsupported Python"
