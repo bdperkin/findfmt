@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import codecs
 import contextlib
 import inspect
 import io
+import os
 import sys
 from typing import TYPE_CHECKING, Any, Literal, TextIO, cast
 
@@ -27,7 +29,7 @@ from findfmt.cli.signals import (
 from findfmt.terminal import PagerController, get_console, is_color_enabled
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
     from types import FrameType
 
     from rich.pager import Pager
@@ -39,6 +41,42 @@ __all__ = [
     "resolve_color_flag",
     "resolve_pager_flag",
 ]
+
+
+def _is_utf8(stream: object) -> bool:
+    """Return whether a text stream already encodes as UTF-8 (under any alias)."""
+    try:
+        return codecs.lookup(getattr(stream, "encoding", None) or "utf-8").name == "utf-8"
+    except LookupError:
+        return False
+
+
+def _ensure_utf8_output(
+    streams: Sequence[object] | None = None,
+    *,
+    env: Mapping[str, str] | None = None,
+    platform: str = sys.platform,
+) -> None:
+    """Write UTF-8 to redirected standard streams on Windows, as Python 3.15 does (#496).
+
+    Before Python 3.15 (PEP 686), Windows encodes redirected output with the ANSI code page, such
+    as cp1252, which cannot encode help-panel borders or most non-Latin file names. An explicit
+    ``PYTHONIOENCODING`` or ``PYTHONUTF8=0`` is respected. Elsewhere, the locale encoding is the
+    terminal's real encoding and is left unchanged.
+
+    Args:
+        streams: Streams to check (defaults to ``sys.stdout`` and ``sys.stderr``).
+        env: Environment variable mapping override.
+        platform: Platform identifier override.
+    """
+    mapping = os.environ if env is None else env
+    if platform != "win32" or "PYTHONIOENCODING" in mapping or mapping.get("PYTHONUTF8") == "0":
+        return
+
+    for stream in (sys.stdout, sys.stderr) if streams is None else streams:
+        reconfigure = getattr(stream, "reconfigure", None)
+        if callable(reconfigure) and not _is_utf8(stream):
+            reconfigure(encoding="utf-8", errors=getattr(stream, "errors", None) or "strict")
 
 
 def _extract_from_context(ctx: object | None) -> list[str] | None:
@@ -356,6 +394,7 @@ class FindfmtCommand(typer.core.TyperCommand):
         **extra: Any,
     ) -> Any:
         """Execute command with graceful Unix signal and broken pipe handling."""
+        _ensure_utf8_output()
         install_signal_handlers()
         try:
             with trap_cli_signals(standalone_mode=standalone_mode):

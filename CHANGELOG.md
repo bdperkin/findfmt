@@ -37,6 +37,10 @@ what to do.
   modification time (#462).
 - *(format)* `-f ipynb` notebooks run: the manifest cell loads its data with `json.loads` (#330).
 - *(packaging)* Correct the "A.gitignore-aware" typo in the PyPI summary (#443).
+- *(cli)* On Windows with Python 3.11–3.14, piped or redirected output no longer fails with
+  `UnicodeEncodeError` when it contains characters the ANSI code page (such as cp1252) cannot
+  encode, such as the `--help` panel borders or non-Latin file names. findfmt writes UTF-8, as
+  Python 3.15 does by default, unless `PYTHONIOENCODING` or `PYTHONUTF8=0` is set (#496).
 - *(benchmark)* `tools/benchmark.py --keep-temp` keeps the generated tree instead of deleting it
   (#489).
 
