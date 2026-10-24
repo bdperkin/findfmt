@@ -59,7 +59,7 @@ body:
       value: |
         - OS: [e.g. Linux / macOS / Windows]
         - Architecture: [e.g. x86_64 / arm64]
-        - Python version: [e.g. 3.12.2]
+        - Python version: [e.g. 3.15.1]
         - findfmt version: [run `findfmt --version`]
     validations:
       required: true
