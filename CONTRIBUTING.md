@@ -186,17 +186,33 @@ Releases are built and published by `.github/workflows/release.yml`. The version
 tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MINOR.PATCH` tag:
 
 1. Merge the release-preparation pull request (changelog, docs) and confirm CI is green on `main`.
-2. Tag the release commit and push the tag, which starts the workflow:
+2. Check the distributions locally. `twine` must report no warnings, and the wheel must hold only
+   the `findfmt` package (with `py.typed` and the compiled `*.mo` catalogs) and its metadata:
+   ```bash
+   uv build --clear
+   uvx twine check --strict dist/*
+   unzip -l dist/*.whl
+   ```
+3. Tag the release commit and push the tag, which starts the workflow:
    ```bash
    git tag -a v1.1.0 -m "findfmt 1.1.0"
    git push origin v1.1.0
    ```
-3. To re-run a release for an existing tag, use **Actions → Release & Publish → Run workflow** and
-   enter the tag (for example `v1.1.0`). The workflow checks out that tag, not the branch it was
-   started from.
+4. The workflow publishes to TestPyPI before production PyPI, so the TestPyPI upload is the dry run:
+   if it fails, nothing reaches PyPI. Once the release is out, confirm that TestPyPI lists the new
+   version and that PyPI installs it (don't install from TestPyPI, which would also take the
+   dependencies from there):
+   ```bash
+   curl -s https://test.pypi.org/pypi/findfmt/1.1.0/json | jq -r .info.version
+   uvx --from findfmt==1.1.0 findfmt --version
+   ```
+5. To re-run a release for an existing tag, start the workflow **on the tag**: choose the tag in
+   **Actions → Release & Publish → Run workflow → Use workflow from**, and enter the same tag (for
+   example `v1.1.0`), or run `gh workflow run release.yml --ref v1.1.0 -f tag=v1.1.0`. The `pypi`
+   and `testpypi` environments only deploy `v*.*.*` tags, so a run started from a branch fails.
 
 The workflow refuses to publish a mismatched build. It fails before the quality gate unless the
-input is a `vMAJOR.MINOR.PATCH` tag and the checked-out commit is that tag, and it fails before any
-upload unless the built wheel and sdist both carry the tag's version
-(`tools/verify_release_version.py`). TestPyPI uploads skip files that already exist, so a failed
-release can be re-run; production PyPI uploads do not, so a duplicate upload fails loudly.
+input is a `vMAJOR.MINOR.PATCH` tag, the workflow runs on that tag, and the checked-out commit is
+that tag, and it fails before any upload unless the built wheel and sdist both carry the tag's
+version (`tools/verify_release_version.py`). TestPyPI uploads skip files that already exist, so a
+failed release can be re-run; production PyPI uploads do not, so a duplicate upload fails loudly.

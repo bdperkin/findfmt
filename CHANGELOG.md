@@ -70,6 +70,9 @@ what to do.
   (#357), add a dependency-resolution smoke matrix to pull requests (#428), make the test suite
   hermetic against the developer's global git config (#326), and guard the supported Python range
   with policy tests (#442).
+- *(packaging)* The wheel no longer ships the `*.po`/`*.pot` catalog sources (only the compiled
+  `*.mo` catalogs, which are all it reads), and the sdist no longer picks up `*.mo` files built
+  under `docs/` (#495).
 
 ### Security
 
@@ -77,6 +80,9 @@ what to do.
   (`GHSA-cx6f-vjhg-g3cc`), `setuptools` 84.2.1 (`GHSA-xmj3-9gf7-h52w`), and `filelock` 4.2.4
   (`GHSA-v4x8-3wr5-3wq8`, `GHSA-9vhv-jxww-xfm5`, `GHSA-567q-5qvw-pf92`, `GHSA-2g95-wg33-c5x2`,
   `GHSA-jqc4-5cvw-7w85`, `GHSA-crv4-6mhj-j5jh`). The `filelock` fixes require Python 3.11+ (#441).
+- *(release)* The `pypi` and `testpypi` deployment environments only admit `v*.*.*` tags, and the
+  release workflow fails unless it runs on the requested tag, so a branch can't mint a PyPI
+  publishing token (#495).
 
 ## [1.0.2] - 2026-10-21
 

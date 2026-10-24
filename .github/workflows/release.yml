@@ -35,6 +35,8 @@ jobs:
       - name: Verify Release Tag
         run: |
           python tools/verify_release_version.py --tag "$RELEASE_TAG"
+          # The pypi/testpypi environments only deploy v*.*.* tags; dispatch on the tag itself (#495).
+          test "$GITHUB_REF" = "refs/tags/${RELEASE_TAG}"
           test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")"
       - name: Install dependencies
         run: uv sync --locked --all-groups
