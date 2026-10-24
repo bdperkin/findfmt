@@ -236,5 +236,5 @@ mitigations implemented in `findfmt`.
 - **Threat Vector**: Abandoned dependencies or unmaintained libraries failing to address upstream
   security advisories.
 - **Mitigation**: `findfmt` follows Semantic Versioning with automated multi-platform CI, scheduled
-  weekly dependency security audits (`uv audit`), automated CodeQL scanning, and automated changelog
-  generation via `git-cliff`.
+  weekly dependency security audits (`uv audit`), automated CodeQL scanning, and a curated changelog
+  whose section for each version becomes that release's GitHub Release notes.

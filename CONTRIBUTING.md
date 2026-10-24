@@ -185,7 +185,11 @@ git commit -s -m "feat: add support for MIME categories"
 Releases are built and published by `.github/workflows/release.yml`. The version comes from the git
 tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MINOR.PATCH` tag:
 
-1. Merge the release-preparation pull request (changelog, docs) and confirm CI is green on `main`.
+1. Merge the release-preparation pull request and confirm CI is green on `main`. It turns the
+   CHANGELOG `[Unreleased]` entries into a `## [X.Y.Z] - YYYY-MM-DD` section, adds the comparison
+   link, and raises `version.fallback-version` to `X.Y.Z.dev0`. That section becomes the GitHub
+   Release notes (`tools/release_notes.py`), and the workflow fails before building anything if it
+   is missing. `uvx git-cliff --unreleased --tag vX.Y.Z` drafts entries from the commit history.
 2. Check the distributions locally. `twine` must report no warnings, and the wheel must hold only
    the `findfmt` package (with `py.typed` and the compiled `*.mo` catalogs) and its metadata:
    ```bash

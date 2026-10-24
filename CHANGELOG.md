@@ -7,9 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Upgrading from 1.0.x? See
-[Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html) for what changes and
-what to do.
+## [1.1.0] - 2026-10-24
+
+findfmt 1.1.0 requires Python 3.11 or newer; Python 3.10 users should pin `findfmt<1.1`. Upgrading
+from 1.0.x? See [Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html) for
+what changes and what to do.
 
 ### Breaking Changes
 
@@ -76,6 +78,9 @@ what to do.
   wheel and sdist carry the tag's version before publishing, no longer skips duplicate production
   PyPI uploads, and tags dispatched container images with the release version instead of only
   `latest` (#327).
+- *(release)* GitHub Release notes now come from the version's CHANGELOG section instead of
+  generated commit summaries, and the release fails before building anything if that section is
+  missing (#498).
 - *(ci)* Run `uv sync --locked` everywhere (#356), fetch full history for version-sensitive jobs
   (#357), add a dependency-resolution smoke matrix to pull requests (#428), make the test suite
   hermetic against the developer's global git config (#326), and guard the supported Python range
@@ -488,4 +493,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.0.0]: https://github.com/bdperkin/findfmt/compare/v0.9.0...v1.0.0
 [1.0.1]: https://github.com/bdperkin/findfmt/compare/v1.0.0...v1.0.1
 [1.0.2]: https://github.com/bdperkin/findfmt/compare/v1.0.1...v1.0.2
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.0.2...HEAD
+[1.1.0]: https://github.com/bdperkin/findfmt/compare/v1.0.2...v1.1.0
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.0...HEAD
