@@ -7,4 +7,5 @@ traversal engines.
 :maxdepth: 2
 
 findfmt
+stability
 ```

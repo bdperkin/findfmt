@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 01:04-0400\n"
+"POT-Creation-Date: 2026-10-24 13:53-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -781,105 +781,118 @@ msgid "7. Exit Status"
 msgstr ""
 
 #: ../../source/cli/index.md:344 9e71fc4c29e7447d8c1127a6f5d17863
-msgid "`0`: Success (matching files found, or help/version/diagnostics queried)."
+msgid ""
+"`0`: Success, including runs where no files match, and help, version, or "
+"diagnostics queries."
 msgstr ""
 
-#: ../../source/cli/index.md:345 79f81c935bc14ec189eede93b54a5c36
-msgid "`1`: Runtime traversal, classification, or filesystem I/O error."
+#: ../../source/cli/index.md:345 7890e36f30eb4e2185d490bdf13827e3
+msgid ""
+"`1`: Runtime traversal, classification, or filesystem I/O error, or no "
+"matching files when `--exit-status` is given."
 msgstr ""
 
-#: ../../source/cli/index.md:346 5ff39e51ce0d4c32ae3456f20511e4cb
+#: ../../source/cli/index.md:347 5ff39e51ce0d4c32ae3456f20511e4cb
 msgid "`2`: Invalid command-line arguments or syntax error."
 msgstr ""
 
-#: ../../source/cli/index.md:348 a9a7f156ba334bccb04b14bd35533ac1
+#: ../../source/cli/index.md:349 2826016a6d474717a4a188ec0300ba48
+msgid ""
+"Pass `--exit-status` for `grep`-style scripting, where \"nothing "
+"matched\" should be a failure. The command wrappers (`findfiles`, "
+"`findfilefmt`, `findfilemime`, `findfmt0`, `findshebang`, `findsummary`) "
+"use the same codes and exit with status 1 when they stop with an error "
+"message."
+msgstr ""
+
+#: ../../source/cli/index.md:353 a9a7f156ba334bccb04b14bd35533ac1
 msgid "8. Examples"
 msgstr ""
 
-#: ../../source/cli/index.md:350 3e30ae028dc04f8baf6630e12f60646d
+#: ../../source/cli/index.md:355 3e30ae028dc04f8baf6630e12f60646d
 msgid ""
 "`findfmt` integrates smoothly with automated Unix pipelines, linters, "
 "data processing utilities, and documentation generators."
 msgstr ""
 
-#: ../../source/cli/index.md:353 2b57aa381d04464cae8a4738df849ba0
+#: ../../source/cli/index.md:358 2b57aa381d04464cae8a4738df849ba0
 msgid "8.1. Safe Command Execution with `xargs`"
 msgstr ""
 
-#: ../../source/cli/index.md:355 48bef28242964d7fb41ec2435bd05bf4
+#: ../../source/cli/index.md:360 48bef28242964d7fb41ec2435bd05bf4
 msgid ""
 "Safely pipe matching file paths to linters or formatters using NUL "
 "delimiters (`-0` / `--print0`):"
 msgstr ""
 
-#: ../../source/cli/index.md:365 1a659363fc7642d68c4bf2ee6e197791
+#: ../../source/cli/index.md:370 1a659363fc7642d68c4bf2ee6e197791
 msgid "8.2. JSON Filtering with `jq`"
 msgstr ""
 
-#: ../../source/cli/index.md:367 b57d646df10042cbb3047c4e2c6c9b4c
+#: ../../source/cli/index.md:372 b57d646df10042cbb3047c4e2c6c9b4c
 msgid "Process deterministic metadata records using `jq`:"
 msgstr ""
 
-#: ../../source/cli/index.md:377 9e309f5a7d0f448aabe3c33593ddbda4
+#: ../../source/cli/index.md:382 9e309f5a7d0f448aabe3c33593ddbda4
 msgid "8.3. Delimited Data Processing with `csvkit`"
 msgstr ""
 
-#: ../../source/cli/index.md:379 b46ed6d507d64fd9a4062d7dad82c2b9
+#: ../../source/cli/index.md:384 b46ed6d507d64fd9a4062d7dad82c2b9
 msgid "Inspect and slice CSV records with `csvkit`:"
 msgstr ""
 
-#: ../../source/cli/index.md:389 790d75bcfacb41afaf75bb283353d6f2
+#: ../../source/cli/index.md:394 790d75bcfacb41afaf75bb283353d6f2
 msgid "8.4. Sphinx Documentation Inclusion"
 msgstr ""
 
-#: ../../source/cli/index.md:391 9411da287fc34ec78d795f34f5e42d17
+#: ../../source/cli/index.md:396 9411da287fc34ec78d795f34f5e42d17
 msgid ""
 "Export tables directly into documentation build directories for Sphinx "
 "inclusion:"
 msgstr ""
 
-#: ../../source/cli/index.md:401 dcefd7c548214db9bdbbc5b4f7a04bd8
+#: ../../source/cli/index.md:406 dcefd7c548214db9bdbbc5b4f7a04bd8
 msgid "8.5. HTML Documentation Export with Templating"
 msgstr ""
 
-#: ../../source/cli/index.md:403 eca4cb8aaa20404e889444b47414cbd5
+#: ../../source/cli/index.md:408 eca4cb8aaa20404e889444b47414cbd5
 msgid ""
 "Generate a semantic HTML document tree with customized headers, footers, "
 "and hyperlinks:"
 msgstr ""
 
-#: ../../source/cli/index.md:414 daa3e3ddf30d4bd3a76954739c4bdccf
+#: ../../source/cli/index.md:419 daa3e3ddf30d4bd3a76954739c4bdccf
 msgid "8.6. Terminal Navigation with Clickable Hyperlinks"
 msgstr ""
 
-#: ../../source/cli/index.md:416 2415c86e14654016a3744862e714a06c
+#: ../../source/cli/index.md:421 2415c86e14654016a3744862e714a06c
 msgid ""
 "Navigate directory structures directly in modern terminal emulators using"
 " OSC 8 escape sequences:"
 msgstr ""
 
-#: ../../source/cli/index.md:426 bbcd2e0fab08450ca0a65f66d277dbdb
+#: ../../source/cli/index.md:431 bbcd2e0fab08450ca0a65f66d277dbdb
 msgid "8.7. Structured Document and Streaming Exports"
 msgstr ""
 
-#: ../../source/cli/index.md:428 0169963b024b4bf38dc2daa5c9aee18b
+#: ../../source/cli/index.md:433 0169963b024b4bf38dc2daa5c9aee18b
 msgid ""
 "Stream or serialize metadata records in line-delimited JSON, YAML, or XML"
 " formats:"
 msgstr ""
 
-#: ../../source/cli/index.md:441 90e06d99356240c1aa186a67e09c3ac0
+#: ../../source/cli/index.md:446 90e06d99356240c1aa186a67e09c3ac0
 msgid "9. See Also"
 msgstr ""
 
-#: ../../source/cli/index.md:443 20ab2bc7e7ac43cf882eb807a5062f65
+#: ../../source/cli/index.md:448 20ab2bc7e7ac43cf882eb807a5062f65
 msgid "`find(1)`, `xargs(1)`, `file(1)`"
 msgstr ""
 
-#: ../../source/cli/index.md:444 7453905a4fc5466e8b79682a2d665b35
+#: ../../source/cli/index.md:449 7453905a4fc5466e8b79682a2d665b35
 msgid "Documentation: <https://bdperkin.github.io/findfmt>"
 msgstr ""
 
-#: ../../source/cli/index.md:445 1335c17af223450da90a210890d19d08
+#: ../../source/cli/index.md:450 1335c17af223450da90a210890d19d08
 msgid "Repository & Bug Tracker: <https://github.com/bdperkin/findfmt>"
 msgstr ""

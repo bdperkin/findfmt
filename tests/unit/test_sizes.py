@@ -363,3 +363,14 @@ def test_cli_size_options(tmp_path: Path) -> None:
     # --du with --tree
     res_du_tree = runner.invoke(app, [str(tmp_path), "--du", "--tree"])
     assert res_du_tree.exit_code == 0
+
+
+def test_translatable_units_are_exactly_the_produced_units() -> None:
+    """Only unit labels the formatters can emit are marked for translation (#493).
+
+    #352 moved base-1024 sizes to IEC labels, leaving ``KB`` and single-letter units translatable
+    but never produced.
+    """
+    from findfmt import sizes  # noqa: PLC0415
+
+    assert set(sizes._TRANSLATABLE_UNITS) == set(sizes.BINARY_UNITS) | set(sizes.SI_UNITS)  # noqa: SLF001

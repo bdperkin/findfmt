@@ -1,0 +1,2837 @@
+{
+ "findfmt": {
+  "FileInfo": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, path: 'Path', relative_path: 'Path', tags: 'frozenset[str]' = <factory>, shebang: 'str | None' = None, mime_type: 'str | None' = None, is_executable: 'bool' = False, is_symlink: 'bool' = False, symlink_target: 'str | None' = None, size_bytes: 'int' = 0, permissions_str: 'str | None' = None, owner_user: 'str | None' = None, owner_group: 'str | None' = None, inode: 'int | None' = None, device: 'int | None' = None, accumulated_size: 'int | None' = None, mtime: 'float | None' = None, ctime: 'float | None' = None, indicator: 'str | None' = None) -> None",
+    "accumulated_size": "attribute",
+    "ctime": "attribute",
+    "device": "attribute",
+    "indicator": "attribute",
+    "inode": "attribute",
+    "is_executable": "attribute",
+    "is_symlink": "attribute",
+    "mime_type": "attribute",
+    "mtime": "attribute",
+    "owner_group": "attribute",
+    "owner_user": "attribute",
+    "path": "attribute",
+    "permissions_str": "attribute",
+    "relative_path": "attribute",
+    "shebang": "attribute",
+    "size_bytes": "attribute",
+    "symlink_target": "attribute",
+    "tags": "attribute",
+    "to_dict": "(self, *, absolute: 'bool' = False) -> 'dict[str, Any]'"
+   },
+   "signature": "(path: 'Path', relative_path: 'Path', tags: 'frozenset[str]' = <factory>, shebang: 'str | None' = None, mime_type: 'str | None' = None, is_executable: 'bool' = False, is_symlink: 'bool' = False, symlink_target: 'str | None' = None, size_bytes: 'int' = 0, permissions_str: 'str | None' = None, owner_user: 'str | None' = None, owner_group: 'str | None' = None, inode: 'int | None' = None, device: 'int | None' = None, accumulated_size: 'int | None' = None, mtime: 'float | None' = None, ctime: 'float | None' = None, indicator: 'str | None' = None) -> None"
+  },
+  "FindFmtError": {
+   "bases": [
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "Formatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False) -> 'None'"
+  },
+  "InvalidSortCriteriaError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "OutputFormat": {
+   "bases": [
+    "StrEnum"
+   ],
+   "kind": "enum",
+   "members": {
+    "CSV": "csv",
+    "CSV_TABLE": "csv-table",
+    "HTML": "html",
+    "IPYNB": "ipynb",
+    "JSON": "json",
+    "JSONL": "jsonl",
+    "MARKDOWN": "markdown",
+    "MD": "md",
+    "NDJSON": "ndjson",
+    "RST": "rst",
+    "TABLE": "table",
+    "TEXT": "text",
+    "TREE": "tree",
+    "TSV": "tsv",
+    "XML": "xml",
+    "YAML": "yaml"
+   }
+  },
+  "ParserError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "SortKey": {
+   "bases": [
+    "StrEnum"
+   ],
+   "kind": "enum",
+   "members": {
+    "CTIME": "ctime",
+    "MTIME": "mtime",
+    "NAME": "name",
+    "NONE": "none",
+    "SIZE": "size",
+    "TIME": "time",
+    "VERSION": "version"
+   }
+  },
+  "TraversalConfig": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, root_paths: 'tuple[Path, ...]' = <factory>, include_tags: 'frozenset[str]' = <factory>, exclude_tags: 'frozenset[str]' = <factory>, all_tags: 'bool' = False, shebang_filter: 'str | None' = None, respect_gitignore: 'bool' = True, gitignore_file: 'Path | None' = None, include_hidden: 'bool' = False, follow_symlinks: 'bool' = False, dirs_only: 'bool' = False, one_file_system: 'bool' = False, max_depth: 'int | None' = None, file_limit: 'int | None' = None, prune_empty: 'bool' = False, include_patterns: 'tuple[str, ...]' = (), exclude_patterns: 'tuple[str, ...]' = (), ignore_case: 'bool' = False, match_dirs: 'bool' = False, relative_paths: 'bool' = True, relative_prefix: 'bool' = False, null_delimited: 'bool' = False, show_tags: 'bool' = False, show_summary: 'bool' = False, output_format: 'str' = 'text', sort_by: 'SortKey' = <SortKey.NAME: 'name'>, reverse_sort: 'bool' = False, dirs_first: 'bool' = False, files_first: 'bool' = False, from_file: 'str | None' = None, offline: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, base_href: 'str | None' = None, intro_file: 'Path | None' = None, outro_file: 'Path | None' = None, html_title: 'str | None' = None, no_links: 'bool' = False, xml: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None, csv_safe: 'bool' = False, locale: 'str | None' = None) -> None",
+    "accumulate_size": "attribute",
+    "all_tags": "attribute",
+    "base_href": "attribute",
+    "classify": "attribute",
+    "csv_safe": "attribute",
+    "dirs_first": "attribute",
+    "dirs_only": "attribute",
+    "exclude_patterns": "attribute",
+    "exclude_tags": "attribute",
+    "file_limit": "attribute",
+    "files_first": "attribute",
+    "follow_symlinks": "attribute",
+    "from_file": "attribute",
+    "gitignore_file": "attribute",
+    "hide_control_chars": "attribute",
+    "html_title": "attribute",
+    "human_readable": "attribute",
+    "hyperlink": "attribute",
+    "hyperlink_authority": "attribute",
+    "hyperlink_schema": "attribute",
+    "ignore_case": "attribute",
+    "include_hidden": "attribute",
+    "include_patterns": "attribute",
+    "include_tags": "attribute",
+    "intro_file": "attribute",
+    "literal": "attribute",
+    "locale": "attribute",
+    "match_dirs": "attribute",
+    "max_depth": "attribute",
+    "no_links": "attribute",
+    "null_delimited": "attribute",
+    "offline": "attribute",
+    "one_file_system": "attribute",
+    "output_format": "attribute",
+    "outro_file": "attribute",
+    "prune_empty": "attribute",
+    "quote_name": "attribute",
+    "relative_paths": "attribute",
+    "relative_prefix": "attribute",
+    "respect_gitignore": "attribute",
+    "reverse_sort": "attribute",
+    "root_paths": "attribute",
+    "shebang_filter": "attribute",
+    "show_ctime": "attribute",
+    "show_device": "attribute",
+    "show_group": "attribute",
+    "show_inodes": "attribute",
+    "show_mtime": "attribute",
+    "show_permissions": "attribute",
+    "show_si": "attribute",
+    "show_size": "attribute",
+    "show_summary": "attribute",
+    "show_tags": "attribute",
+    "show_user": "attribute",
+    "sort_by": "attribute",
+    "time_format": "attribute",
+    "xml": "attribute"
+   },
+   "signature": "(root_paths: 'tuple[Path, ...]' = <factory>, include_tags: 'frozenset[str]' = <factory>, exclude_tags: 'frozenset[str]' = <factory>, all_tags: 'bool' = False, shebang_filter: 'str | None' = None, respect_gitignore: 'bool' = True, gitignore_file: 'Path | None' = None, include_hidden: 'bool' = False, follow_symlinks: 'bool' = False, dirs_only: 'bool' = False, one_file_system: 'bool' = False, max_depth: 'int | None' = None, file_limit: 'int | None' = None, prune_empty: 'bool' = False, include_patterns: 'tuple[str, ...]' = (), exclude_patterns: 'tuple[str, ...]' = (), ignore_case: 'bool' = False, match_dirs: 'bool' = False, relative_paths: 'bool' = True, relative_prefix: 'bool' = False, null_delimited: 'bool' = False, show_tags: 'bool' = False, show_summary: 'bool' = False, output_format: 'str' = 'text', sort_by: 'SortKey' = <SortKey.NAME: 'name'>, reverse_sort: 'bool' = False, dirs_first: 'bool' = False, files_first: 'bool' = False, from_file: 'str | None' = None, offline: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, base_href: 'str | None' = None, intro_file: 'Path | None' = None, outro_file: 'Path | None' = None, html_title: 'str | None' = None, no_links: 'bool' = False, xml: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None, csv_safe: 'bool' = False, locale: 'str | None' = None) -> None"
+  },
+  "TraversalError": {
+   "bases": [
+    "FindFmtError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "UnsupportedBoxStyleError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "UnsupportedFormatError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "UnsupportedTableStyleError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "_": {
+   "kind": "function",
+   "signature": "(message: 'str') -> 'str'"
+  },
+  "__version__": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "build_file_uri": {
+   "kind": "function",
+   "signature": "(path: 'PurePath | str', *, schema: 'str' = 'file://', authority: 'str | None' = None) -> 'str'"
+  },
+  "calculate_accumulated_sizes": {
+   "kind": "function",
+   "signature": "(root: 'Path', *, follow_symlinks: 'bool' = False, include_hidden: 'bool' = True, visited: 'set[Path] | None' = None) -> 'dict[Path, int]'"
+  },
+  "classify_file": {
+   "kind": "function",
+   "signature": "(path: 'Path', root_path: 'Path | None' = None, prefix: 'Path | None' = None, accumulated_size: 'int | None' = None, *, entry: 'os.DirEntry[str] | None' = None) -> 'FileInfo'"
+  },
+  "detect_locale": {
+   "kind": "function",
+   "signature": "(env: 'Mapping[str, str] | None' = None) -> 'str'"
+  },
+  "detect_locales": {
+   "kind": "function",
+   "signature": "(env: 'Mapping[str, str] | None' = None) -> 'list[str]'"
+  },
+  "extract_metadata": {
+   "kind": "function",
+   "signature": "(stat_result: 'os.stat_result | None') -> 'tuple[str | None, str | None, str | None, int | None, int | None]'"
+  },
+  "find_files": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig') -> 'Iterator[FileInfo]'"
+  },
+  "format_display_path": {
+   "kind": "function",
+   "signature": "(path_str: 'str', *, quote_name: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, indicator: 'str | None' = None, hyperlink: 'bool' = False, uri: 'str | None' = None, escape_markup: 'bool' = False) -> 'str'"
+  },
+  "format_hyperlink": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str', *, rich_markup: 'bool' = False) -> 'str'"
+  },
+  "format_osc8_link": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str') -> 'str'"
+  },
+  "format_permissions": {
+   "kind": "function",
+   "signature": "(mode: 'int') -> 'str'"
+  },
+  "format_rich_link": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str') -> 'str'"
+  },
+  "format_size": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int', *, human_readable: 'bool' = False, si: 'bool' = False, exact: 'bool' = False) -> 'str'"
+  },
+  "format_size_binary": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int') -> 'str'"
+  },
+  "format_size_bytes": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int') -> 'str'"
+  },
+  "format_size_si": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int') -> 'str'"
+  },
+  "format_timestamp": {
+   "kind": "function",
+   "signature": "(ts: 'float | None', fmt: 'str | None' = None) -> 'str'"
+  },
+  "get_classification_indicator": {
+   "kind": "function",
+   "signature": "(*, is_dir: 'bool' = False, is_symlink: 'bool' = False, is_executable: 'bool' = False, stat_result: 'os.stat_result | None' = None) -> 'str | None'"
+  },
+  "get_current_locale": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "get_current_translation": {
+   "kind": "function",
+   "signature": "() -> 'gettext.NullTranslations'"
+  },
+  "get_formatter": {
+   "kind": "function",
+   "signature": "(format_type: 'OutputFormat | str', *, absolute: 'bool' = False, show_tags: 'bool' = False, delimiter: 'str | None' = None, **kwargs: 'object') -> 'Formatter'"
+  },
+  "get_known_tags": {
+   "kind": "function",
+   "signature": "() -> 'frozenset[str]'"
+  },
+  "get_version": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "main": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfilefmt": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfilemime": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfiles": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfmt0": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findshebang": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findsummary": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "mask_control_characters": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  },
+  "ngettext": {
+   "kind": "function",
+   "signature": "(singular: 'str', plural: 'str', n: 'int') -> 'str'"
+  },
+  "override_locale": {
+   "kind": "function",
+   "signature": "(locale_name: 'str | None', localedir: 'Path | str | None' = None, domain: 'str' = 'findfmt') -> 'Generator[str, None, None]'"
+  },
+  "quote_filename": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  },
+  "reset_locale": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "set_locale": {
+   "kind": "function",
+   "signature": "(locale_name: 'str | None' = None, localedir: 'Path | str | None' = None, domain: 'str' = 'findfmt') -> 'str'"
+  },
+  "strip_ansi_escapes": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  },
+  "traverse_directory": {
+   "kind": "function",
+   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None) -> 'Iterator[FileInfo]'"
+  }
+ },
+ "findfmt.classifier": {
+  "classify_file": {
+   "kind": "function",
+   "signature": "(path: 'Path', root_path: 'Path | None' = None, prefix: 'Path | None' = None, accumulated_size: 'int | None' = None, *, entry: 'os.DirEntry[str] | None' = None) -> 'FileInfo'"
+  },
+  "compute_relative_prefix": {
+   "kind": "function",
+   "signature": "(root: 'Path') -> 'Path | None'"
+  },
+  "extract_shebang": {
+   "kind": "function",
+   "signature": "(path: 'Path') -> 'str | None'"
+  },
+  "extract_shebang_from_buffer": {
+   "kind": "function",
+   "signature": "(buffer: 'bytes') -> 'str | None'"
+  },
+  "get_known_tags": {
+   "kind": "function",
+   "signature": "() -> 'frozenset[str]'"
+  }
+ },
+ "findfmt.cli": {
+  "FindfmtCommand": {
+   "kind": "class",
+   "members": {
+    "format_help": "(self, ctx: '_click.Context', formatter: '_click.HelpFormatter') -> 'None'",
+    "main": "(self, args: 'Sequence[str] | None' = None, prog_name: 'str | None' = None, complete_var: 'str | None' = None, standalone_mode: 'bool' = True, windows_expand_args: 'bool' = True, **extra: 'Any') -> 'Any'",
+    "make_context": "(self, info_name: 'str | None', args: 'list[str]', parent: '_click.Context | None' = None, **extra: 'Any') -> '_click.Context'"
+   },
+   "signature": "inherited from typer.core.TyperCommand"
+  },
+  "OutputSink": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, stream: 'TextIO', *, temp_path: 'Path | None' = None, target_path: 'Path | None' = None) -> 'None'",
+    "cleanup_uncommitted": "(self) -> 'None'",
+    "close": "(self) -> 'None'",
+    "commit": "(self) -> 'None'",
+    "is_closed": "attribute",
+    "is_committed": "attribute"
+   },
+   "signature": "(stream: 'TextIO', *, temp_path: 'Path | None' = None, target_path: 'Path | None' = None) -> 'None'"
+  },
+  "PagerController": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, console: 'Console | None' = None, pager_impl: 'Pager | None' = None, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'None'",
+    "display": "(self, content: 'str') -> 'None'",
+    "should_page": "(self, line_count: 'int') -> 'bool'"
+   },
+   "signature": "(*, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, console: 'Console | None' = None, pager_impl: 'Pager | None' = None, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'None'"
+  },
+  "app": {
+   "kind": "data",
+   "type": "typer.main.Typer"
+  },
+  "build_traversal_config": {
+   "kind": "function",
+   "signature": "(paths: 'list[Path] | None', tags: 'list[str] | None', exclude_tags: 'list[str] | None', *, all_tags: 'bool', shebang: 'str | None', no_ignore: 'bool', gitignore_file: 'Path | None' = None, hidden: 'bool', follow_symlinks: 'bool', dirs_only: 'bool', one_file_system: 'bool', max_depth: 'int | None', file_limit: 'int | None', prune: 'bool', pattern: 'list[str] | None', exclude_pattern: 'list[str] | None', ignore_case: 'bool', match_dirs: 'bool', absolute: 'bool', relative: 'bool', print0: 'bool', list_tags: 'bool', summary: 'bool', output_format: 'OutputFormat | str', sort: 'str | None' = None, reverse: 'bool' = False, unsorted: 'bool' = False, dirs_first: 'bool' = False, files_first: 'bool' = False, from_file: 'str | None' = None, offline: 'bool' = False, permissions: 'bool' = False, user: 'bool' = False, group: 'bool' = False, inodes: 'bool' = False, device: 'bool' = False, size: 'bool' = False, human_readable: 'bool' = False, si: 'bool' = False, du: 'bool' = False, mtime: 'bool' = False, ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, tree: 'bool' = False, xml: 'bool' = False, html: 'str | None' = None, json: 'bool' = False, intro: 'Path | None' = None, outro: 'Path | None' = None, title: 'str | None' = None, no_links: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None, csv_safe: 'bool' = False, locale: 'str | None' = None) -> 'TraversalConfig'"
+  },
+  "diagnostics_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "display_with_pager": {
+   "kind": "function",
+   "signature": "(content: 'str', *, ctx: 'object' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, pager_impl: 'Pager | None' = None, force_color: 'bool | None' = None) -> 'None'"
+  },
+  "execute_findfmt": {
+   "kind": "function",
+   "signature": "(*, paths: 'list[Path] | None', tags: 'list[str] | None', exclude_tags: 'list[str] | None', all_tags: 'bool', shebang: 'str | None', no_ignore: 'bool', gitignore_file: 'Path | None' = None, hidden: 'bool', follow_symlinks: 'bool', dirs_only: 'bool' = False, one_file_system: 'bool' = False, max_depth: 'int | None' = None, file_limit: 'int | None' = None, prune: 'bool' = False, pattern: 'list[str] | None' = None, exclude_pattern: 'list[str] | None' = None, ignore_case: 'bool' = False, match_dirs: 'bool' = False, output_format: 'OutputFormat', output: 'Path | None' = None, tree: 'bool' = False, xml: 'bool' = False, html: 'str | None' = None, json: 'bool' = False, intro: 'Path | None' = None, outro: 'Path | None' = None, title: 'str | None' = None, no_links: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None, table_style: 'str | None' = None, csv_safe: 'bool' = False, absolute: 'bool' = False, relative: 'bool' = False, print0: 'bool', list_tags: 'bool', summary: 'bool', exit_status: 'bool' = False, sort: 'str | None' = None, reverse: 'bool' = False, unsorted: 'bool' = False, dirs_first: 'bool' = False, files_first: 'bool' = False, from_file: 'str | None' = None, offline: 'bool' = False, permissions: 'bool' = False, user: 'bool' = False, group: 'bool' = False, size: 'bool' = False, human_readable: 'bool' = False, si: 'bool' = False, du: 'bool' = False, inodes: 'bool' = False, device: 'bool' = False, mtime: 'bool' = False, ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, find_files_func: 'Callable[[TraversalConfig], Iterable[FileInfo]] | None' = None, pager: 'bool | None' = None, stream: 'TextIO | None' = None, pager_controller: 'PagerController | None' = None, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False, color: 'bool | None' = None, locale: 'str | None' = None) -> 'None'"
+  },
+  "find_config_file": {
+   "kind": "function",
+   "signature": "(explicit_path: 'Path | str | None' = None, *, no_config: 'bool' = False, cwd: 'Path | None' = None) -> 'tuple[Path | None, bool]'"
+  },
+  "findfmt": {
+   "kind": "function",
+   "signature": "(paths: 'OptPaths' = None, tags: 'OptTags' = None, exclude_tags: 'OptExcludeTags' = None, all_tags: 'OptAllTags' = False, pattern: 'OptPattern' = None, exclude_pattern: 'OptExcludePattern' = None, ignore_case: 'OptIgnoreCase' = False, match_dirs: 'OptMatchDirs' = False, shebang: 'OptShebang' = None, no_ignore: 'OptNoIgnore' = False, gitignore_file: 'OptGitignoreFile' = None, from_file: 'OptFromFile' = None, offline: 'OptOffline' = False, hidden: 'OptHidden' = False, follow_symlinks: 'OptFollowSymlinks' = False, dirs_only: 'OptDirsOnly' = False, one_file_system: 'OptOneFileSystem' = False, max_depth: 'OptMaxDepth' = None, file_limit: 'OptFileLimit' = None, prune: 'OptPrune' = False, sort: 'OptSort' = None, reverse: 'OptReverse' = False, unsorted: 'OptUnsorted' = False, dirs_first: 'OptDirsFirst' = False, files_first: 'OptFilesFirst' = False, output_format: 'OptOutputFormat' = <OutputFormat.TEXT: 'text'>, output: 'OptOutput' = None, tree: 'OptTree' = False, json: 'OptJson' = False, xml: 'OptXml' = False, html: 'OptHtml' = None, intro: 'OptIntro' = None, outro: 'OptOutro' = None, title: 'OptTitle' = None, no_links: 'OptNoLinks' = False, hyperlink: 'OptHyperlink' = False, hyperlink_schema: 'OptHyperlinkSchema' = 'file://', hyperlink_authority: 'OptHyperlinkAuthority' = None, table_style: 'OptTableStyle' = None, csv_safe: 'OptCsvSafe' = False, pager: 'OptPager' = None, no_indent: 'OptNoIndent' = False, ansi_lines: 'OptAnsiLines' = False, cp437: 'OptCp437' = False, color: 'OptColor' = None, absolute: 'OptAbsolute' = False, relative: 'OptRelative' = False, permissions: 'OptPermissions' = False, user: 'OptUser' = False, group: 'OptGroup' = False, size: 'OptSize' = False, human_readable: 'OptHumanReadable' = False, si: 'OptSi' = False, du: 'OptDu' = False, inodes: 'OptInodes' = False, device: 'OptDevice' = False, mtime: 'OptMtime' = False, ctime: 'OptCtime' = False, time_format: 'OptTimeFormat' = None, classify: 'OptClassify' = False, hide_control_chars: 'OptHideControlChars' = False, literal: 'OptLiteral' = False, quote_name: 'OptQuoteName' = False, print0: 'OptPrint0' = False, list_tags: 'OptListTags' = False, summary: 'OptSummary' = False, exit_status: 'OptExitStatus' = False, known_tags: 'OptKnownTags' = False, verbose: 'OptVerbose' = False, diagnostics: 'OptDiagnostics' = False, version: 'OptVersion' = None, help_all: 'OptHelpAll' = False, locale: 'OptLocale' = None, config: 'OptConfig' = None, no_config: 'OptNoConfig' = False, show_config: 'OptShowConfig' = False) -> 'None'"
+  },
+  "format_config_dump": {
+   "kind": "function",
+   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+  },
+  "get_active_config_data": {
+   "kind": "function",
+   "signature": "() -> 'dict[str, object]'"
+  },
+  "get_active_config_path": {
+   "kind": "function",
+   "signature": "() -> 'Path | None'"
+  },
+  "get_diagnostics": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | None' = None) -> 'str'"
+  },
+  "get_git_version": {
+   "kind": "function",
+   "signature": "() -> 'str | None'"
+  },
+  "get_help_all": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "get_version": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "handle_broken_pipe": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO | None' = None) -> 'None'"
+  },
+  "handle_keyboard_interrupt": {
+   "kind": "function",
+   "signature": "() -> 'None'"
+  },
+  "help_all_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "install_signal_handlers": {
+   "kind": "function",
+   "signature": "() -> 'None'"
+  },
+  "is_broken_pipe_wrapper": {
+   "kind": "function",
+   "signature": "(stream: 'object | None') -> 'bool'"
+  },
+  "known_tags_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "load_toml_config": {
+   "kind": "function",
+   "signature": "(path: 'Path', *, is_explicit: 'bool') -> 'dict[str, Any]'"
+  },
+  "main": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfilefmt": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfilemime": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfiles": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfmt0": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findshebang": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findsummary": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "open_output_sink": {
+   "kind": "function",
+   "signature": "(output: 'Path | str | None', fallback: 'TextIO | None' = None) -> 'OutputSink'"
+  },
+  "resolve_and_load_config": {
+   "kind": "function",
+   "signature": "(explicit_path: 'Path | str | None' = None, *, no_config: 'bool' = False, cwd: 'Path | None' = None) -> 'tuple[Path | None, dict[str, Any]]'"
+  },
+  "show_config_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "trap_cli_signals": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO | None' = None, *, standalone_mode: 'bool' = False) -> 'Iterator[None]'"
+  },
+  "validate_and_convert_config": {
+   "kind": "function",
+   "signature": "(raw_data: 'dict[str, Any]', path: 'Path') -> 'dict[str, Any]'"
+  },
+  "validate_cli_options": {
+   "kind": "function",
+   "signature": "(*, gitignore_file: 'Path | None', sort: 'str | None', unsorted: 'bool', dirs_first: 'bool', files_first: 'bool', from_file: 'str | None' = None, intro: 'Path | None' = None, outro: 'Path | None' = None, tree: 'bool' = False, xml: 'bool' = False, html: 'str | None' = None, json: 'bool' = False) -> 'SortKey'"
+  },
+  "version_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  }
+ },
+ "findfmt.cli.config": {
+  "build_traversal_config": {
+   "kind": "function",
+   "signature": "(paths: 'list[Path] | None', tags: 'list[str] | None', exclude_tags: 'list[str] | None', *, all_tags: 'bool', shebang: 'str | None', no_ignore: 'bool', gitignore_file: 'Path | None' = None, hidden: 'bool', follow_symlinks: 'bool', dirs_only: 'bool', one_file_system: 'bool', max_depth: 'int | None', file_limit: 'int | None', prune: 'bool', pattern: 'list[str] | None', exclude_pattern: 'list[str] | None', ignore_case: 'bool', match_dirs: 'bool', absolute: 'bool', relative: 'bool', print0: 'bool', list_tags: 'bool', summary: 'bool', output_format: 'OutputFormat | str', sort: 'str | None' = None, reverse: 'bool' = False, unsorted: 'bool' = False, dirs_first: 'bool' = False, files_first: 'bool' = False, from_file: 'str | None' = None, offline: 'bool' = False, permissions: 'bool' = False, user: 'bool' = False, group: 'bool' = False, inodes: 'bool' = False, device: 'bool' = False, size: 'bool' = False, human_readable: 'bool' = False, si: 'bool' = False, du: 'bool' = False, mtime: 'bool' = False, ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, tree: 'bool' = False, xml: 'bool' = False, html: 'str | None' = None, json: 'bool' = False, intro: 'Path | None' = None, outro: 'Path | None' = None, title: 'str | None' = None, no_links: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None, csv_safe: 'bool' = False, locale: 'str | None' = None) -> 'TraversalConfig'"
+  },
+  "find_config_file": {
+   "kind": "function",
+   "signature": "(explicit_path: 'Path | str | None' = None, *, no_config: 'bool' = False, cwd: 'Path | None' = None) -> 'tuple[Path | None, bool]'"
+  },
+  "format_config_dump": {
+   "kind": "function",
+   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+  },
+  "get_active_config_data": {
+   "kind": "function",
+   "signature": "() -> 'dict[str, object]'"
+  },
+  "get_active_config_path": {
+   "kind": "function",
+   "signature": "() -> 'Path | None'"
+  },
+  "load_toml_config": {
+   "kind": "function",
+   "signature": "(path: 'Path', *, is_explicit: 'bool') -> 'dict[str, Any]'"
+  },
+  "reset_active_config": {
+   "kind": "function",
+   "signature": "() -> 'None'"
+  },
+  "resolve_and_load_config": {
+   "kind": "function",
+   "signature": "(explicit_path: 'Path | str | None' = None, *, no_config: 'bool' = False, cwd: 'Path | None' = None) -> 'tuple[Path | None, dict[str, Any]]'"
+  },
+  "validate_and_convert_config": {
+   "kind": "function",
+   "signature": "(raw_data: 'dict[str, Any]', path: 'Path') -> 'dict[str, Any]'"
+  },
+  "validate_cli_options": {
+   "kind": "function",
+   "signature": "(*, gitignore_file: 'Path | None', sort: 'str | None', unsorted: 'bool', dirs_first: 'bool', files_first: 'bool', from_file: 'str | None' = None, intro: 'Path | None' = None, outro: 'Path | None' = None, tree: 'bool' = False, xml: 'bool' = False, html: 'str | None' = None, json: 'bool' = False) -> 'SortKey'"
+  }
+ },
+ "findfmt.cli.config_schema": {
+  "validate_and_convert_config": {
+   "kind": "function",
+   "signature": "(raw_data: 'dict[str, Any]', path: 'Path') -> 'dict[str, Any]'"
+  }
+ },
+ "findfmt.cli.file_config": {
+  "extract_config_args": {
+   "kind": "function",
+   "signature": "(args: 'list[str]') -> 'tuple[str | None, bool, bool]'"
+  },
+  "find_config_file": {
+   "kind": "function",
+   "signature": "(explicit_path: 'Path | str | None' = None, *, no_config: 'bool' = False, cwd: 'Path | None' = None) -> 'tuple[Path | None, bool]'"
+  },
+  "format_config_dump": {
+   "kind": "function",
+   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+  },
+  "get_active_config_data": {
+   "kind": "function",
+   "signature": "() -> 'dict[str, object]'"
+  },
+  "get_active_config_path": {
+   "kind": "function",
+   "signature": "() -> 'Path | None'"
+  },
+  "load_toml_config": {
+   "kind": "function",
+   "signature": "(path: 'Path', *, is_explicit: 'bool') -> 'dict[str, Any]'"
+  },
+  "reset_active_config": {
+   "kind": "function",
+   "signature": "() -> 'None'"
+  },
+  "resolve_and_load_config": {
+   "kind": "function",
+   "signature": "(explicit_path: 'Path | str | None' = None, *, no_config: 'bool' = False, cwd: 'Path | None' = None) -> 'tuple[Path | None, dict[str, Any]]'"
+  },
+  "validate_and_convert_config": {
+   "kind": "function",
+   "signature": "(raw_data: 'dict[str, Any]', path: 'Path') -> 'dict[str, Any]'"
+  }
+ },
+ "findfmt.cli.help": {
+  "APP_HELP": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "CLI_EPILOG": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_ABSOLUTE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_ALL_TAGS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_ANSI_LINES": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_CLASSIFY": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_COLOR": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_CONFIG": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_CP437": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_CSV_SAFE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_CTIME": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_DEVICE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_DIAGNOSTICS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_DIRS_FIRST": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_DIRS_ONLY": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_DU": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_EXCLUDE_PATTERN": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_EXCLUDE_TAGS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_EXIT_STATUS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_FILES_FIRST": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_FILE_LIMIT": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_FOLLOW_SYMLINKS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_FORMAT": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_FROM_FILE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_GITIGNORE_FILE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_GROUP": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_HELP_ALL": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_HIDDEN": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_HIDE_CONTROL_CHARS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_HTML": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_HUMAN_READABLE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_IGNORE_CASE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_INODES": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_INTRO": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_KNOWN_TAGS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_LIST_TAGS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_LITERAL": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_LOCALE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_MATCH_DIRS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_MAX_DEPTH": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_MTIME": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_NO_CONFIG": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_NO_IGNORE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_NO_INDENT": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_NO_LINKS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_OFFLINE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_ONE_FILE_SYSTEM": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_OUTPUT": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_OUTRO": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_PAGER": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_PATHS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_PATTERN": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_PERMISSIONS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_PRINT0": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_PRUNE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_QUOTE_NAME": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_RELATIVE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_REVERSE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_SHEBANG": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_SHOW_CONFIG": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_SI": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_SIZE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_SORT": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_SUMMARY": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_TABLE_STYLE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_TAGS": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_TIME_FORMAT": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_TITLE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_TREE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_UNSORTED": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_USER": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_VERBOSE": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_VERSION": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "HELP_XML": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "get_help_all": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "help_all_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "known_tags_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  }
+ },
+ "findfmt.cli.main": {
+  "FindfmtCommand": {
+   "kind": "class",
+   "members": {
+    "format_help": "(self, ctx: '_click.Context', formatter: '_click.HelpFormatter') -> 'None'",
+    "main": "(self, args: 'Sequence[str] | None' = None, prog_name: 'str | None' = None, complete_var: 'str | None' = None, standalone_mode: 'bool' = True, windows_expand_args: 'bool' = True, **extra: 'Any') -> 'Any'",
+    "make_context": "(self, info_name: 'str | None', args: 'list[str]', parent: '_click.Context | None' = None, **extra: 'Any') -> '_click.Context'"
+   },
+   "signature": "inherited from typer.core.TyperCommand"
+  },
+  "PagerController": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, console: 'Console | None' = None, pager_impl: 'Pager | None' = None, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'None'",
+    "display": "(self, content: 'str') -> 'None'",
+    "should_page": "(self, line_count: 'int') -> 'bool'"
+   },
+   "signature": "(*, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, console: 'Console | None' = None, pager_impl: 'Pager | None' = None, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'None'"
+  },
+  "app": {
+   "kind": "data",
+   "type": "typer.main.Typer"
+  },
+  "diagnostics_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "find_files": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig') -> 'Iterator[FileInfo]'"
+  },
+  "findfmt": {
+   "kind": "function",
+   "signature": "(paths: 'OptPaths' = None, tags: 'OptTags' = None, exclude_tags: 'OptExcludeTags' = None, all_tags: 'OptAllTags' = False, pattern: 'OptPattern' = None, exclude_pattern: 'OptExcludePattern' = None, ignore_case: 'OptIgnoreCase' = False, match_dirs: 'OptMatchDirs' = False, shebang: 'OptShebang' = None, no_ignore: 'OptNoIgnore' = False, gitignore_file: 'OptGitignoreFile' = None, from_file: 'OptFromFile' = None, offline: 'OptOffline' = False, hidden: 'OptHidden' = False, follow_symlinks: 'OptFollowSymlinks' = False, dirs_only: 'OptDirsOnly' = False, one_file_system: 'OptOneFileSystem' = False, max_depth: 'OptMaxDepth' = None, file_limit: 'OptFileLimit' = None, prune: 'OptPrune' = False, sort: 'OptSort' = None, reverse: 'OptReverse' = False, unsorted: 'OptUnsorted' = False, dirs_first: 'OptDirsFirst' = False, files_first: 'OptFilesFirst' = False, output_format: 'OptOutputFormat' = <OutputFormat.TEXT: 'text'>, output: 'OptOutput' = None, tree: 'OptTree' = False, json: 'OptJson' = False, xml: 'OptXml' = False, html: 'OptHtml' = None, intro: 'OptIntro' = None, outro: 'OptOutro' = None, title: 'OptTitle' = None, no_links: 'OptNoLinks' = False, hyperlink: 'OptHyperlink' = False, hyperlink_schema: 'OptHyperlinkSchema' = 'file://', hyperlink_authority: 'OptHyperlinkAuthority' = None, table_style: 'OptTableStyle' = None, csv_safe: 'OptCsvSafe' = False, pager: 'OptPager' = None, no_indent: 'OptNoIndent' = False, ansi_lines: 'OptAnsiLines' = False, cp437: 'OptCp437' = False, color: 'OptColor' = None, absolute: 'OptAbsolute' = False, relative: 'OptRelative' = False, permissions: 'OptPermissions' = False, user: 'OptUser' = False, group: 'OptGroup' = False, size: 'OptSize' = False, human_readable: 'OptHumanReadable' = False, si: 'OptSi' = False, du: 'OptDu' = False, inodes: 'OptInodes' = False, device: 'OptDevice' = False, mtime: 'OptMtime' = False, ctime: 'OptCtime' = False, time_format: 'OptTimeFormat' = None, classify: 'OptClassify' = False, hide_control_chars: 'OptHideControlChars' = False, literal: 'OptLiteral' = False, quote_name: 'OptQuoteName' = False, print0: 'OptPrint0' = False, list_tags: 'OptListTags' = False, summary: 'OptSummary' = False, exit_status: 'OptExitStatus' = False, known_tags: 'OptKnownTags' = False, verbose: 'OptVerbose' = False, diagnostics: 'OptDiagnostics' = False, version: 'OptVersion' = None, help_all: 'OptHelpAll' = False, locale: 'OptLocale' = None, config: 'OptConfig' = None, no_config: 'OptNoConfig' = False, show_config: 'OptShowConfig' = False) -> 'None'"
+  },
+  "get_diagnostics": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | None' = None) -> 'str'"
+  },
+  "get_git_version": {
+   "kind": "function",
+   "signature": "() -> 'str | None'"
+  },
+  "get_help_all": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "get_version": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "help_all_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "known_tags_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "main": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "show_config_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "version_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  }
+ },
+ "findfmt.cli.options": {
+  "OptAbsolute": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptAllTags": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptAnsiLines": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptClassify": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptColor": {
+   "kind": "type alias",
+   "value": "Annotated[bool | None, ...]"
+  },
+  "OptConfig": {
+   "kind": "type alias",
+   "value": "Annotated[pathlib.Path | None, ...]"
+  },
+  "OptCp437": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptCsvSafe": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptCtime": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptDevice": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptDiagnostics": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptDirsFirst": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptDirsOnly": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptDu": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptExcludePattern": {
+   "kind": "type alias",
+   "value": "Annotated[list[str] | None, ...]"
+  },
+  "OptExcludeTags": {
+   "kind": "type alias",
+   "value": "Annotated[list[str] | None, ...]"
+  },
+  "OptExitStatus": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptFileLimit": {
+   "kind": "type alias",
+   "value": "Annotated[int | None, ...]"
+  },
+  "OptFilesFirst": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptFollowSymlinks": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptFromFile": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptGitignoreFile": {
+   "kind": "type alias",
+   "value": "Annotated[pathlib.Path | None, ...]"
+  },
+  "OptGroup": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptHelpAll": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptHidden": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptHideControlChars": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptHtml": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptHumanReadable": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptHyperlink": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptHyperlinkAuthority": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptHyperlinkSchema": {
+   "kind": "type alias",
+   "value": "Annotated[str, ...]"
+  },
+  "OptIgnoreCase": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptInodes": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptIntro": {
+   "kind": "type alias",
+   "value": "Annotated[pathlib.Path | None, ...]"
+  },
+  "OptJson": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptKnownTags": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptListTags": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptLiteral": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptLocale": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptMatchDirs": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptMaxDepth": {
+   "kind": "type alias",
+   "value": "Annotated[int | None, ...]"
+  },
+  "OptMtime": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptNoConfig": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptNoIgnore": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptNoIndent": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptNoLinks": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptOffline": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptOneFileSystem": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptOutput": {
+   "kind": "type alias",
+   "value": "Annotated[pathlib.Path | None, ...]"
+  },
+  "OptOutputFormat": {
+   "kind": "type alias",
+   "value": "Annotated[findfmt.formatters.base.OutputFormat, ...]"
+  },
+  "OptOutro": {
+   "kind": "type alias",
+   "value": "Annotated[pathlib.Path | None, ...]"
+  },
+  "OptPager": {
+   "kind": "type alias",
+   "value": "Annotated[bool | None, ...]"
+  },
+  "OptPaths": {
+   "kind": "type alias",
+   "value": "Annotated[list[pathlib.Path] | None, ...]"
+  },
+  "OptPattern": {
+   "kind": "type alias",
+   "value": "Annotated[list[str] | None, ...]"
+  },
+  "OptPermissions": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptPrint0": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptPrune": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptQuoteName": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptRelative": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptReverse": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptShebang": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptShowConfig": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptSi": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptSize": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptSort": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptSummary": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptTableStyle": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptTags": {
+   "kind": "type alias",
+   "value": "Annotated[list[str] | None, ...]"
+  },
+  "OptTimeFormat": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptTitle": {
+   "kind": "type alias",
+   "value": "Annotated[str | None, ...]"
+  },
+  "OptTree": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptUnsorted": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptUser": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptVerbose": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "OptVersion": {
+   "kind": "type alias",
+   "value": "Annotated[bool | None, ...]"
+  },
+  "OptXml": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
+  },
+  "help_all_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "known_tags_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "show_config_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  }
+ },
+ "findfmt.cli.output_sink": {
+  "OutputSink": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, stream: 'TextIO', *, temp_path: 'Path | None' = None, target_path: 'Path | None' = None) -> 'None'",
+    "cleanup_uncommitted": "(self) -> 'None'",
+    "close": "(self) -> 'None'",
+    "commit": "(self) -> 'None'",
+    "is_closed": "attribute",
+    "is_committed": "attribute"
+   },
+   "signature": "(stream: 'TextIO', *, temp_path: 'Path | None' = None, target_path: 'Path | None' = None) -> 'None'"
+  },
+  "open_output_sink": {
+   "kind": "function",
+   "signature": "(output: 'Path | str | None', fallback: 'TextIO | None' = None) -> 'OutputSink'"
+  },
+  "reconfigure_surrogateescape": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO') -> 'None'"
+  }
+ },
+ "findfmt.cli.pager": {
+  "FindfmtCommand": {
+   "kind": "class",
+   "members": {
+    "format_help": "(self, ctx: '_click.Context', formatter: '_click.HelpFormatter') -> 'None'",
+    "main": "(self, args: 'Sequence[str] | None' = None, prog_name: 'str | None' = None, complete_var: 'str | None' = None, standalone_mode: 'bool' = True, windows_expand_args: 'bool' = True, **extra: 'Any') -> 'Any'",
+    "make_context": "(self, info_name: 'str | None', args: 'list[str]', parent: '_click.Context | None' = None, **extra: 'Any') -> '_click.Context'"
+   },
+   "signature": "inherited from typer.core.TyperCommand"
+  },
+  "display_with_pager": {
+   "kind": "function",
+   "signature": "(content: 'str', *, ctx: 'object' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, pager_impl: 'Pager | None' = None, force_color: 'bool | None' = None) -> 'None'"
+  },
+  "resolve_color_flag": {
+   "kind": "function",
+   "signature": "(ctx: 'object' = None, *, args: 'Sequence[str] | None' = None) -> 'bool | None'"
+  },
+  "resolve_pager_flag": {
+   "kind": "function",
+   "signature": "(ctx: 'object' = None, *, args: 'Sequence[str] | None' = None) -> 'bool | None'"
+  }
+ },
+ "findfmt.cli.runner": {
+  "execute_findfmt": {
+   "kind": "function",
+   "signature": "(*, paths: 'list[Path] | None', tags: 'list[str] | None', exclude_tags: 'list[str] | None', all_tags: 'bool', shebang: 'str | None', no_ignore: 'bool', gitignore_file: 'Path | None' = None, hidden: 'bool', follow_symlinks: 'bool', dirs_only: 'bool' = False, one_file_system: 'bool' = False, max_depth: 'int | None' = None, file_limit: 'int | None' = None, prune: 'bool' = False, pattern: 'list[str] | None' = None, exclude_pattern: 'list[str] | None' = None, ignore_case: 'bool' = False, match_dirs: 'bool' = False, output_format: 'OutputFormat', output: 'Path | None' = None, tree: 'bool' = False, xml: 'bool' = False, html: 'str | None' = None, json: 'bool' = False, intro: 'Path | None' = None, outro: 'Path | None' = None, title: 'str | None' = None, no_links: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None, table_style: 'str | None' = None, csv_safe: 'bool' = False, absolute: 'bool' = False, relative: 'bool' = False, print0: 'bool', list_tags: 'bool', summary: 'bool', exit_status: 'bool' = False, sort: 'str | None' = None, reverse: 'bool' = False, unsorted: 'bool' = False, dirs_first: 'bool' = False, files_first: 'bool' = False, from_file: 'str | None' = None, offline: 'bool' = False, permissions: 'bool' = False, user: 'bool' = False, group: 'bool' = False, size: 'bool' = False, human_readable: 'bool' = False, si: 'bool' = False, du: 'bool' = False, inodes: 'bool' = False, device: 'bool' = False, mtime: 'bool' = False, ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, find_files_func: 'Callable[[TraversalConfig], Iterable[FileInfo]] | None' = None, pager: 'bool | None' = None, stream: 'TextIO | None' = None, pager_controller: 'PagerController | None' = None, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False, color: 'bool | None' = None, locale: 'str | None' = None) -> 'None'"
+  }
+ },
+ "findfmt.cli.signals": {
+  "handle_broken_pipe": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO | None' = None) -> 'None'"
+  },
+  "handle_keyboard_interrupt": {
+   "kind": "function",
+   "signature": "() -> 'None'"
+  },
+  "install_signal_handlers": {
+   "kind": "function",
+   "signature": "() -> 'None'"
+  },
+  "is_broken_pipe_wrapper": {
+   "kind": "function",
+   "signature": "(stream: 'object | None') -> 'bool'"
+  },
+  "trap_cli_signals": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO | None' = None, *, standalone_mode: 'bool' = False) -> 'Iterator[None]'"
+  }
+ },
+ "findfmt.diagnostics": {
+  "diagnostics_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "get_diagnostics": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | None' = None) -> 'str'"
+  },
+  "get_git_version": {
+   "kind": "function",
+   "signature": "() -> 'str | None'"
+  },
+  "get_version": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "show_config_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "version_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  }
+ },
+ "findfmt.entrypoints": {
+  "main": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfilefmt": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfilemime": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfiles": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfmt0": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findshebang": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findsummary": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  }
+ },
+ "findfmt.exceptions": {
+  "FindFmtError": {
+   "bases": [
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "InvalidSortCriteriaError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "ParserError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "TraversalError": {
+   "bases": [
+    "FindFmtError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "UnsupportedBoxStyleError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "UnsupportedFormatError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "UnsupportedTableStyleError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  }
+ },
+ "findfmt.formatters": {
+  "CsvFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, delimiter: 'str' = ',', quoting: 'int' = 0, lineterminator: 'str' = '\\n', csv_safe: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, delimiter: 'str' = ',', quoting: 'int' = 0, lineterminator: 'str' = '\\n', csv_safe: 'bool' = False) -> 'None'"
+  },
+  "CsvTableFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, table_style: 'str' = 'rounded', console_width: 'int | None' = None, force_color: 'bool | None' = None, csv_safe: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, table_style: 'str' = 'rounded', console_width: 'int | None' = None, force_color: 'bool | None' = None, csv_safe: 'bool' = False) -> 'None'"
+  },
+  "FORMULA_TRIGGER_CHARS": {
+   "kind": "data",
+   "type": "builtins.tuple"
+  },
+  "Formatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False) -> 'None'"
+  },
+  "HtmlFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, base_href: 'str | None' = None, title: 'str | None' = None, intro: 'str | None' = None, intro_file: 'Path | None' = None, outro: 'str | None' = None, outro_file: 'Path | None' = None, no_links: 'bool' = False, no_indent: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, base_href: 'str | None' = None, title: 'str | None' = None, intro: 'str | None' = None, intro_file: 'Path | None' = None, outro: 'str | None' = None, outro_file: 'Path | None' = None, no_links: 'bool' = False, no_indent: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False) -> 'None'"
+  },
+  "IpynbFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'"
+   },
+   "signature": "(*, absolute: 'bool' = False) -> 'None'"
+  },
+  "JsonFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, indent: 'int | None' = 2, no_indent: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'"
+   },
+   "signature": "(*, absolute: 'bool' = False, indent: 'int | None' = 2, no_indent: 'bool' = False) -> 'None'"
+  },
+  "JsonlFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "format_item": "(self, file_info: 'FileInfo') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False) -> 'None'"
+  },
+  "MarkdownFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, no_indent: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, no_indent: 'bool' = False) -> 'None'"
+  },
+  "OutputFormat": {
+   "bases": [
+    "StrEnum"
+   ],
+   "kind": "enum",
+   "members": {
+    "CSV": "csv",
+    "CSV_TABLE": "csv-table",
+    "HTML": "html",
+    "IPYNB": "ipynb",
+    "JSON": "json",
+    "JSONL": "jsonl",
+    "MARKDOWN": "markdown",
+    "MD": "md",
+    "NDJSON": "ndjson",
+    "RST": "rst",
+    "TABLE": "table",
+    "TEXT": "text",
+    "TREE": "tree",
+    "TSV": "tsv",
+    "XML": "xml",
+    "YAML": "yaml"
+   }
+  },
+  "RichTableFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, table_style: 'str' = 'rounded', console_width: 'int | None' = None, force_color: 'bool | None' = None, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, table_style: 'str' = 'rounded', console_width: 'int | None' = None, force_color: 'bool | None' = None, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'"
+  },
+  "RichTreeFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, console_width: 'int | None' = None, force_color: 'bool | None' = None, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, console_width: 'int | None' = None, force_color: 'bool | None' = None, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'"
+  },
+  "RstFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, table_style: 'str' = 'grid') -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, table_style: 'str' = 'grid') -> 'None'"
+  },
+  "TABLE_FIELD_NAMES": {
+   "kind": "data",
+   "type": "builtins.tuple"
+  },
+  "TextFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, show_tags: 'bool' = False, delimiter: 'str' = '\\n', show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "format_item": "(self, file_info: 'FileInfo') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, show_tags: 'bool' = False, delimiter: 'str' = '\\n', show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'"
+  },
+  "TsvFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, lineterminator: 'str' = '\\n', csv_safe: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, lineterminator: 'str' = '\\n', csv_safe: 'bool' = False) -> 'None'"
+  },
+  "UnsupportedBoxStyleError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "UnsupportedFormatError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "UnsupportedTableStyleError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "XmlFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, no_indent: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, no_indent: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False) -> 'None'"
+  },
+  "YamlFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, indent: 'int' = 2, no_indent: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'"
+   },
+   "signature": "(*, absolute: 'bool' = False, indent: 'int' = 2, no_indent: 'bool' = False) -> 'None'"
+  },
+  "get_formatter": {
+   "kind": "function",
+   "signature": "(format_type: 'OutputFormat | str', *, absolute: 'bool' = False, show_tags: 'bool' = False, delimiter: 'str | None' = None, **kwargs: 'object') -> 'Formatter'"
+  },
+  "sanitize_csv_cell": {
+   "kind": "function",
+   "signature": "(cell: 'str') -> 'str'"
+  },
+  "write_stream_safe": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO', content: 'str') -> 'None'"
+  }
+ },
+ "findfmt.formatters.badges": {
+  "TAG_COLOR_MAP": {
+   "kind": "data",
+   "type": "builtins.dict"
+  },
+  "format_tag_badge": {
+   "kind": "function",
+   "signature": "(tag: 'str') -> 'str'"
+  }
+ },
+ "findfmt.formatters.base": {
+  "Formatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False) -> 'None'"
+  },
+  "OutputFormat": {
+   "bases": [
+    "StrEnum"
+   ],
+   "kind": "enum",
+   "members": {
+    "CSV": "csv",
+    "CSV_TABLE": "csv-table",
+    "HTML": "html",
+    "IPYNB": "ipynb",
+    "JSON": "json",
+    "JSONL": "jsonl",
+    "MARKDOWN": "markdown",
+    "MD": "md",
+    "NDJSON": "ndjson",
+    "RST": "rst",
+    "TABLE": "table",
+    "TEXT": "text",
+    "TREE": "tree",
+    "TSV": "tsv",
+    "XML": "xml",
+    "YAML": "yaml"
+   }
+  },
+  "TABLE_FIELD_NAMES": {
+   "kind": "data",
+   "type": "builtins.tuple"
+  },
+  "UnsupportedFormatError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "write_stream_safe": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO', content: 'str') -> 'None'"
+  }
+ },
+ "findfmt.formatters.delimited": {
+  "CsvFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, delimiter: 'str' = ',', quoting: 'int' = 0, lineterminator: 'str' = '\\n', csv_safe: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, delimiter: 'str' = ',', quoting: 'int' = 0, lineterminator: 'str' = '\\n', csv_safe: 'bool' = False) -> 'None'"
+  },
+  "CsvTableFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, table_style: 'str' = 'rounded', console_width: 'int | None' = None, force_color: 'bool | None' = None, csv_safe: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, table_style: 'str' = 'rounded', console_width: 'int | None' = None, force_color: 'bool | None' = None, csv_safe: 'bool' = False) -> 'None'"
+  },
+  "FORMULA_TRIGGER_CHARS": {
+   "kind": "data",
+   "type": "builtins.tuple"
+  },
+  "TsvFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, lineterminator: 'str' = '\\n', csv_safe: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, lineterminator: 'str' = '\\n', csv_safe: 'bool' = False) -> 'None'"
+  },
+  "escape_tsv_cell": {
+   "kind": "function",
+   "signature": "(cell: 'str') -> 'str'"
+  },
+  "file_to_record": {
+   "kind": "function",
+   "signature": "(file_info: 'FileInfo', *, absolute: 'bool', csv_safe: 'bool' = False) -> 'tuple[str, str, str, str, str, str, str, str]'"
+  },
+  "sanitize_csv_cell": {
+   "kind": "function",
+   "signature": "(cell: 'str') -> 'str'"
+  }
+ },
+ "findfmt.formatters.glyphs": {
+  "CP437_BOX": {
+   "kind": "data",
+   "type": "rich.box.Box"
+  },
+  "TREE_GUIDE_SETS": {
+   "kind": "data",
+   "type": "builtins.dict"
+  },
+  "resolve_tree_guides": {
+   "kind": "function",
+   "signature": "(*, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False) -> 'tuple[str, str, str, str]'"
+  }
+ },
+ "findfmt.formatters.html_formatter": {
+  "HtmlFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, base_href: 'str | None' = None, title: 'str | None' = None, intro: 'str | None' = None, intro_file: 'Path | None' = None, outro: 'str | None' = None, outro_file: 'Path | None' = None, no_links: 'bool' = False, no_indent: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, base_href: 'str | None' = None, title: 'str | None' = None, intro: 'str | None' = None, intro_file: 'Path | None' = None, outro: 'str | None' = None, outro_file: 'Path | None' = None, no_links: 'bool' = False, no_indent: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False) -> 'None'"
+  }
+ },
+ "findfmt.formatters.markup": {
+  "MarkdownFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, no_indent: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, no_indent: 'bool' = False) -> 'None'"
+  },
+  "RstFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, table_style: 'str' = 'grid') -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, table_style: 'str' = 'grid') -> 'None'"
+  },
+  "UnsupportedTableStyleError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "escape_markdown_cell": {
+   "kind": "function",
+   "signature": "(cell: 'str') -> 'str'"
+  },
+  "escape_rst_cell": {
+   "kind": "function",
+   "signature": "(cell: 'str') -> 'str'"
+  }
+ },
+ "findfmt.formatters.structured": {
+  "IpynbFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'"
+   },
+   "signature": "(*, absolute: 'bool' = False) -> 'None'"
+  },
+  "JsonFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, indent: 'int | None' = 2, no_indent: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'"
+   },
+   "signature": "(*, absolute: 'bool' = False, indent: 'int | None' = 2, no_indent: 'bool' = False) -> 'None'"
+  },
+  "JsonlFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "format_item": "(self, file_info: 'FileInfo') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False) -> 'None'"
+  },
+  "YamlFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, indent: 'int' = 2, no_indent: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'"
+   },
+   "signature": "(*, absolute: 'bool' = False, indent: 'int' = 2, no_indent: 'bool' = False) -> 'None'"
+  },
+  "escape_surrogates": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  }
+ },
+ "findfmt.formatters.text": {
+  "TextFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, show_tags: 'bool' = False, delimiter: 'str' = '\\n', show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "format_item": "(self, file_info: 'FileInfo') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, show_tags: 'bool' = False, delimiter: 'str' = '\\n', show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'"
+  }
+ },
+ "findfmt.formatters.tree": {
+  "RichTreeFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, console_width: 'int | None' = None, force_color: 'bool | None' = None, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, console_width: 'int | None' = None, force_color: 'bool | None' = None, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'"
+  }
+ },
+ "findfmt.formatters.visual": {
+  "RICH_BOX_STYLES": {
+   "kind": "data",
+   "type": "builtins.dict"
+  },
+  "RichTableFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, table_style: 'str' = 'rounded', console_width: 'int | None' = None, force_color: 'bool | None' = None, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, table_style: 'str' = 'rounded', console_width: 'int | None' = None, force_color: 'bool | None' = None, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'"
+  },
+  "RichTreeFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, console_width: 'int | None' = None, force_color: 'bool | None' = None, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, console_width: 'int | None' = None, force_color: 'bool | None' = None, no_indent: 'bool' = False, ansi_lines: 'bool' = False, cp437: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None) -> 'None'"
+  },
+  "UnsupportedBoxStyleError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "format_size": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int', *, human_readable: 'bool' = False, si: 'bool' = False, exact: 'bool' = False) -> 'str'"
+  },
+  "format_summary_panel": {
+   "kind": "function",
+   "signature": "(match_count: 'int', tag_counter: 'Counter[str]', *, total_bytes: 'int | None' = None) -> 'Panel'"
+  },
+  "format_tag_badge": {
+   "kind": "function",
+   "signature": "(tag: 'str') -> 'str'"
+  }
+ },
+ "findfmt.formatters.xml_formatter": {
+  "XmlFormatter": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, absolute: 'bool' = False, no_indent: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False) -> 'None'",
+    "format": "(self, files: 'Iterable[FileInfo]') -> 'str'",
+    "stream": "(self, files: 'Iterable[FileInfo]', stream: 'TextIO') -> 'None'"
+   },
+   "signature": "(*, absolute: 'bool' = False, no_indent: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False) -> 'None'"
+  }
+ },
+ "findfmt.i18n": {
+  "DEFAULT_DOMAIN": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "DEFAULT_LOCALE_DIR": {
+   "kind": "data",
+   "type": "pathlib.PosixPath"
+  },
+  "_": {
+   "kind": "function",
+   "signature": "(message: 'str') -> 'str'"
+  },
+  "detect_locale": {
+   "kind": "function",
+   "signature": "(env: 'Mapping[str, str] | None' = None) -> 'str'"
+  },
+  "detect_locales": {
+   "kind": "function",
+   "signature": "(env: 'Mapping[str, str] | None' = None) -> 'list[str]'"
+  },
+  "format_integer": {
+   "kind": "function",
+   "signature": "(value: 'int', *, grouping: 'bool' = False) -> 'str'"
+  },
+  "format_number": {
+   "kind": "function",
+   "signature": "(value: 'float', decimals: 'int' = 1, *, grouping: 'bool' = False) -> 'str'"
+  },
+  "get_current_locale": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "get_current_translation": {
+   "kind": "function",
+   "signature": "() -> 'gettext.NullTranslations'"
+  },
+  "locale_callback": {
+   "kind": "function",
+   "signature": "(value: 'str | None') -> 'str | None'"
+  },
+  "ngettext": {
+   "kind": "function",
+   "signature": "(singular: 'str', plural: 'str', n: 'int') -> 'str'"
+  },
+  "override_locale": {
+   "kind": "function",
+   "signature": "(locale_name: 'str | None', localedir: 'Path | str | None' = None, domain: 'str' = 'findfmt') -> 'Generator[str, None, None]'"
+  },
+  "reset_locale": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "set_locale": {
+   "kind": "function",
+   "signature": "(locale_name: 'str | None' = None, localedir: 'Path | str | None' = None, domain: 'str' = 'findfmt') -> 'str'"
+  }
+ },
+ "findfmt.metadata": {
+  "clear_metadata_cache": {
+   "kind": "function",
+   "signature": "() -> 'None'"
+  },
+  "extract_metadata": {
+   "kind": "function",
+   "signature": "(stat_result: 'os.stat_result | None') -> 'tuple[str | None, str | None, str | None, int | None, int | None]'"
+  },
+  "format_metadata_parts": {
+   "kind": "function",
+   "signature": "(file_info: 'FileInfo', *, show_inodes: 'bool' = False, show_device: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None) -> 'list[str]'"
+  },
+  "format_permissions": {
+   "kind": "function",
+   "signature": "(mode: 'int') -> 'str'"
+  },
+  "resolve_group_name": {
+   "kind": "function",
+   "signature": "(gid: 'int') -> 'str'"
+  },
+  "resolve_user_name": {
+   "kind": "function",
+   "signature": "(uid: 'int') -> 'str'"
+  }
+ },
+ "findfmt.models": {
+  "FileInfo": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, path: 'Path', relative_path: 'Path', tags: 'frozenset[str]' = <factory>, shebang: 'str | None' = None, mime_type: 'str | None' = None, is_executable: 'bool' = False, is_symlink: 'bool' = False, symlink_target: 'str | None' = None, size_bytes: 'int' = 0, permissions_str: 'str | None' = None, owner_user: 'str | None' = None, owner_group: 'str | None' = None, inode: 'int | None' = None, device: 'int | None' = None, accumulated_size: 'int | None' = None, mtime: 'float | None' = None, ctime: 'float | None' = None, indicator: 'str | None' = None) -> None",
+    "accumulated_size": "attribute",
+    "ctime": "attribute",
+    "device": "attribute",
+    "indicator": "attribute",
+    "inode": "attribute",
+    "is_executable": "attribute",
+    "is_symlink": "attribute",
+    "mime_type": "attribute",
+    "mtime": "attribute",
+    "owner_group": "attribute",
+    "owner_user": "attribute",
+    "path": "attribute",
+    "permissions_str": "attribute",
+    "relative_path": "attribute",
+    "shebang": "attribute",
+    "size_bytes": "attribute",
+    "symlink_target": "attribute",
+    "tags": "attribute",
+    "to_dict": "(self, *, absolute: 'bool' = False) -> 'dict[str, Any]'"
+   },
+   "signature": "(path: 'Path', relative_path: 'Path', tags: 'frozenset[str]' = <factory>, shebang: 'str | None' = None, mime_type: 'str | None' = None, is_executable: 'bool' = False, is_symlink: 'bool' = False, symlink_target: 'str | None' = None, size_bytes: 'int' = 0, permissions_str: 'str | None' = None, owner_user: 'str | None' = None, owner_group: 'str | None' = None, inode: 'int | None' = None, device: 'int | None' = None, accumulated_size: 'int | None' = None, mtime: 'float | None' = None, ctime: 'float | None' = None, indicator: 'str | None' = None) -> None"
+  },
+  "SortKey": {
+   "bases": [
+    "StrEnum"
+   ],
+   "kind": "enum",
+   "members": {
+    "CTIME": "ctime",
+    "MTIME": "mtime",
+    "NAME": "name",
+    "NONE": "none",
+    "SIZE": "size",
+    "TIME": "time",
+    "VERSION": "version"
+   }
+  },
+  "TraversalConfig": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, root_paths: 'tuple[Path, ...]' = <factory>, include_tags: 'frozenset[str]' = <factory>, exclude_tags: 'frozenset[str]' = <factory>, all_tags: 'bool' = False, shebang_filter: 'str | None' = None, respect_gitignore: 'bool' = True, gitignore_file: 'Path | None' = None, include_hidden: 'bool' = False, follow_symlinks: 'bool' = False, dirs_only: 'bool' = False, one_file_system: 'bool' = False, max_depth: 'int | None' = None, file_limit: 'int | None' = None, prune_empty: 'bool' = False, include_patterns: 'tuple[str, ...]' = (), exclude_patterns: 'tuple[str, ...]' = (), ignore_case: 'bool' = False, match_dirs: 'bool' = False, relative_paths: 'bool' = True, relative_prefix: 'bool' = False, null_delimited: 'bool' = False, show_tags: 'bool' = False, show_summary: 'bool' = False, output_format: 'str' = 'text', sort_by: 'SortKey' = <SortKey.NAME: 'name'>, reverse_sort: 'bool' = False, dirs_first: 'bool' = False, files_first: 'bool' = False, from_file: 'str | None' = None, offline: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, base_href: 'str | None' = None, intro_file: 'Path | None' = None, outro_file: 'Path | None' = None, html_title: 'str | None' = None, no_links: 'bool' = False, xml: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None, csv_safe: 'bool' = False, locale: 'str | None' = None) -> None",
+    "accumulate_size": "attribute",
+    "all_tags": "attribute",
+    "base_href": "attribute",
+    "classify": "attribute",
+    "csv_safe": "attribute",
+    "dirs_first": "attribute",
+    "dirs_only": "attribute",
+    "exclude_patterns": "attribute",
+    "exclude_tags": "attribute",
+    "file_limit": "attribute",
+    "files_first": "attribute",
+    "follow_symlinks": "attribute",
+    "from_file": "attribute",
+    "gitignore_file": "attribute",
+    "hide_control_chars": "attribute",
+    "html_title": "attribute",
+    "human_readable": "attribute",
+    "hyperlink": "attribute",
+    "hyperlink_authority": "attribute",
+    "hyperlink_schema": "attribute",
+    "ignore_case": "attribute",
+    "include_hidden": "attribute",
+    "include_patterns": "attribute",
+    "include_tags": "attribute",
+    "intro_file": "attribute",
+    "literal": "attribute",
+    "locale": "attribute",
+    "match_dirs": "attribute",
+    "max_depth": "attribute",
+    "no_links": "attribute",
+    "null_delimited": "attribute",
+    "offline": "attribute",
+    "one_file_system": "attribute",
+    "output_format": "attribute",
+    "outro_file": "attribute",
+    "prune_empty": "attribute",
+    "quote_name": "attribute",
+    "relative_paths": "attribute",
+    "relative_prefix": "attribute",
+    "respect_gitignore": "attribute",
+    "reverse_sort": "attribute",
+    "root_paths": "attribute",
+    "shebang_filter": "attribute",
+    "show_ctime": "attribute",
+    "show_device": "attribute",
+    "show_group": "attribute",
+    "show_inodes": "attribute",
+    "show_mtime": "attribute",
+    "show_permissions": "attribute",
+    "show_si": "attribute",
+    "show_size": "attribute",
+    "show_summary": "attribute",
+    "show_tags": "attribute",
+    "show_user": "attribute",
+    "sort_by": "attribute",
+    "time_format": "attribute",
+    "xml": "attribute"
+   },
+   "signature": "(root_paths: 'tuple[Path, ...]' = <factory>, include_tags: 'frozenset[str]' = <factory>, exclude_tags: 'frozenset[str]' = <factory>, all_tags: 'bool' = False, shebang_filter: 'str | None' = None, respect_gitignore: 'bool' = True, gitignore_file: 'Path | None' = None, include_hidden: 'bool' = False, follow_symlinks: 'bool' = False, dirs_only: 'bool' = False, one_file_system: 'bool' = False, max_depth: 'int | None' = None, file_limit: 'int | None' = None, prune_empty: 'bool' = False, include_patterns: 'tuple[str, ...]' = (), exclude_patterns: 'tuple[str, ...]' = (), ignore_case: 'bool' = False, match_dirs: 'bool' = False, relative_paths: 'bool' = True, relative_prefix: 'bool' = False, null_delimited: 'bool' = False, show_tags: 'bool' = False, show_summary: 'bool' = False, output_format: 'str' = 'text', sort_by: 'SortKey' = <SortKey.NAME: 'name'>, reverse_sort: 'bool' = False, dirs_first: 'bool' = False, files_first: 'bool' = False, from_file: 'str | None' = None, offline: 'bool' = False, show_permissions: 'bool' = False, show_user: 'bool' = False, show_group: 'bool' = False, show_inodes: 'bool' = False, show_device: 'bool' = False, show_size: 'bool' = False, human_readable: 'bool' = False, show_si: 'bool' = False, accumulate_size: 'bool' = False, show_mtime: 'bool' = False, show_ctime: 'bool' = False, time_format: 'str | None' = None, classify: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, quote_name: 'bool' = False, base_href: 'str | None' = None, intro_file: 'Path | None' = None, outro_file: 'Path | None' = None, html_title: 'str | None' = None, no_links: 'bool' = False, xml: 'bool' = False, hyperlink: 'bool' = False, hyperlink_schema: 'str' = 'file://', hyperlink_authority: 'str | None' = None, csv_safe: 'bool' = False, locale: 'str | None' = None) -> None"
+  }
+ },
+ "findfmt.parsers": {
+  "ParsedEntry": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, path_str: 'str', is_symlink: 'bool' = False, symlink_target: 'str | None' = None, is_dir: 'bool' = False) -> None",
+    "is_dir": "attribute",
+    "is_symlink": "attribute",
+    "path_str": "attribute",
+    "symlink_target": "attribute"
+   },
+   "signature": "(path_str: 'str', is_symlink: 'bool' = False, symlink_target: 'str | None' = None, is_dir: 'bool' = False) -> None"
+  },
+  "ParserError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "classify_file_offline": {
+   "kind": "function",
+   "signature": "(path: 'Path', *, relative_path: 'Path', is_symlink: 'bool' = False, symlink_target: 'str | None' = None) -> 'FileInfo'"
+  },
+  "detect_input_format": {
+   "kind": "function",
+   "signature": "(lines: 'list[str]') -> 'str'"
+  },
+  "ingest_from_file": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig', input_stream: 'TextIO | None' = None) -> 'Iterator[FileInfo]'"
+  },
+  "parse_flat_listing": {
+   "kind": "function",
+   "signature": "(lines: 'Iterable[str]') -> 'Iterator[ParsedEntry]'"
+  },
+  "parse_symlink_target": {
+   "kind": "function",
+   "signature": "(token: 'str') -> 'tuple[str, bool, str | None]'"
+  },
+  "parse_tab_outline": {
+   "kind": "function",
+   "signature": "(lines: 'Iterable[str]') -> 'Iterator[ParsedEntry]'"
+  }
+ },
+ "findfmt.parsers.engine": {
+  "classify_file_offline": {
+   "kind": "function",
+   "signature": "(path: 'Path', *, relative_path: 'Path', is_symlink: 'bool' = False, symlink_target: 'str | None' = None) -> 'FileInfo'"
+  },
+  "detect_input_format": {
+   "kind": "function",
+   "signature": "(lines: 'list[str]') -> 'str'"
+  },
+  "ingest_from_file": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig', input_stream: 'TextIO | None' = None) -> 'Iterator[FileInfo]'"
+  }
+ },
+ "findfmt.parsers.flat_parser": {
+  "ParsedEntry": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, path_str: 'str', is_symlink: 'bool' = False, symlink_target: 'str | None' = None, is_dir: 'bool' = False) -> None",
+    "is_dir": "attribute",
+    "is_symlink": "attribute",
+    "path_str": "attribute",
+    "symlink_target": "attribute"
+   },
+   "signature": "(path_str: 'str', is_symlink: 'bool' = False, symlink_target: 'str | None' = None, is_dir: 'bool' = False) -> None"
+  },
+  "parse_flat_listing": {
+   "kind": "function",
+   "signature": "(lines: 'Iterable[str]') -> 'Iterator[ParsedEntry]'"
+  }
+ },
+ "findfmt.parsers.symlink_parser": {
+  "parse_symlink_target": {
+   "kind": "function",
+   "signature": "(token: 'str') -> 'tuple[str, bool, str | None]'"
+  }
+ },
+ "findfmt.parsers.tab_parser": {
+  "parse_tab_outline": {
+   "kind": "function",
+   "signature": "(lines: 'Iterable[str]') -> 'Iterator[ParsedEntry]'"
+  }
+ },
+ "findfmt.sizes": {
+  "BINARY_UNITS": {
+   "kind": "data",
+   "type": "builtins.tuple"
+  },
+  "SI_UNITS": {
+   "kind": "data",
+   "type": "builtins.tuple"
+  },
+  "calculate_accumulated_sizes": {
+   "kind": "function",
+   "signature": "(root: 'Path', *, follow_symlinks: 'bool' = False, include_hidden: 'bool' = True, visited: 'set[Path] | None' = None) -> 'dict[Path, int]'"
+  },
+  "format_size": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int', *, human_readable: 'bool' = False, si: 'bool' = False, exact: 'bool' = False) -> 'str'"
+  },
+  "format_size_binary": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int') -> 'str'"
+  },
+  "format_size_bytes": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int') -> 'str'"
+  },
+  "format_size_si": {
+   "kind": "function",
+   "signature": "(size_bytes: 'int') -> 'str'"
+  }
+ },
+ "findfmt.summary": {
+  "parse_tag_arguments": {
+   "kind": "function",
+   "signature": "(tag_args: 'Sequence[str] | None') -> 'frozenset[str]'"
+  },
+  "write_summary": {
+   "kind": "function",
+   "signature": "(match_count: 'int', tag_counter: 'Counter[str]', *, total_bytes: 'int | None' = None, stream: 'TextIO | None' = None, force_color: 'bool | None' = None) -> 'None'"
+  }
+ },
+ "findfmt.terminal": {
+  "PagerController": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, console: 'Console | None' = None, pager_impl: 'Pager | None' = None, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'None'",
+    "display": "(self, content: 'str') -> 'None'",
+    "should_page": "(self, line_count: 'int') -> 'bool'"
+   },
+   "signature": "(*, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, console: 'Console | None' = None, pager_impl: 'Pager | None' = None, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'None'"
+  },
+  "get_console": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO | None' = None, *, env: 'Mapping[str, str] | None' = None, width: 'int | None' = None, force_color: 'bool | None' = None) -> 'Console'"
+  },
+  "get_terminal_height": {
+   "kind": "function",
+   "signature": "(fallback: 'int' = 24) -> 'int'"
+  },
+  "is_color_enabled": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO | None' = None, *, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'bool'"
+  },
+  "should_use_pager": {
+   "kind": "function",
+   "signature": "(output_lines: 'int', *, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None) -> 'bool'"
+  },
+  "strip_ansi": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  }
+ },
+ "findfmt.traversal": {
+  "InvalidSortCriteriaError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "PatternMatcher": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, include_patterns: 'tuple[str, ...]' = (), exclude_patterns: 'tuple[str, ...]' = (), *, ignore_case: 'bool' = False, match_dirs: 'bool' = False) -> 'None'",
+    "from_config": "attribute",
+    "matches_dir": "(self, path: 'Path | str', *, base_root: 'Path | None' = None) -> 'bool'",
+    "matches_file": "(self, path: 'Path | str', *, base_root: 'Path | None' = None, inherited_match: 'bool' = False) -> 'bool'",
+    "should_exclude": "(self, path: 'Path | str', *, is_dir: 'bool', base_root: 'Path | None' = None) -> 'bool'",
+    "should_inherit_match": "(self, dir_path: 'Path | str', *, base_root: 'Path | None' = None, parent_inherited: 'bool' = False) -> 'bool'",
+    "to_posix": "(self, path: 'Path | str', base_root: 'Path | None') -> 'tuple[str, str]'"
+   },
+   "signature": "(include_patterns: 'tuple[str, ...]' = (), exclude_patterns: 'tuple[str, ...]' = (), *, ignore_case: 'bool' = False, match_dirs: 'bool' = False) -> 'None'"
+  },
+  "TraversalError": {
+   "bases": [
+    "FindFmtError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "create_pattern_matcher": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig') -> 'PatternMatcher'"
+  },
+  "find_files": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig') -> 'Iterator[FileInfo]'"
+  },
+  "is_path_ignored": {
+   "kind": "function",
+   "signature": "(entry_path: 'Path', *, is_dir: 'bool', specs: 'tuple[tuple[Path, PathSpecType], ...]') -> 'bool'"
+  },
+  "load_custom_gitignore_spec": {
+   "kind": "function",
+   "signature": "(path: 'Path | str | None') -> 'PathSpecType | None'"
+  },
+  "load_git_exclude_spec": {
+   "kind": "function",
+   "signature": "(root: 'Path') -> 'PathSpecType | None'"
+  },
+  "load_gitignore_spec": {
+   "kind": "function",
+   "signature": "(directory: 'Path') -> 'PathSpecType | None'"
+  },
+  "load_global_gitignore_spec": {
+   "kind": "function",
+   "signature": "(spec_file: 'Path | None' = None) -> 'PathSpecType | None'"
+  },
+  "matches_filter": {
+   "kind": "function",
+   "signature": "(file_info: 'FileInfo', config: 'TraversalConfig', *, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False) -> 'bool'"
+  },
+  "natural_sort_key": {
+   "kind": "function",
+   "signature": "(name: 'str', *, ignore_case: 'bool' = False) -> 'tuple[tuple[_SortChunk, ...], str]'"
+  },
+  "resolve_sort_key": {
+   "kind": "function",
+   "signature": "(value: 'str | SortKey | None', *, unsorted: 'bool' = False) -> 'SortKey'"
+  },
+  "should_skip_dir": {
+   "kind": "function",
+   "signature": "(dir_name: 'str', *, include_hidden: 'bool') -> 'bool'"
+  },
+  "sort_directory_entries": {
+   "kind": "function",
+   "signature": "(entries: 'list[os.DirEntry[str]]', config: 'TraversalConfig') -> 'list[os.DirEntry[str]]'"
+  },
+  "traverse_directory": {
+   "kind": "function",
+   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None) -> 'Iterator[FileInfo]'"
+  }
+ },
+ "findfmt.traversal.boundaries": {
+  "can_skip_file_by_tags": {
+   "kind": "function",
+   "signature": "(filename: 'str', config: 'TraversalConfig', *, is_executable: 'bool | None' = None) -> 'bool'"
+  },
+  "check_depth_limit": {
+   "kind": "function",
+   "signature": "(current_depth: 'int', max_depth: 'int | None') -> 'bool'"
+  },
+  "check_device_boundary": {
+   "kind": "function",
+   "signature": "(path: 'Path', root_dev: 'int | None') -> 'bool'"
+  },
+  "check_file_limit": {
+   "kind": "function",
+   "signature": "(count: 'int', file_limit: 'int | None') -> 'bool'"
+  },
+  "filter_directory_entry": {
+   "kind": "function",
+   "signature": "(entry: 'os.DirEntry[str]', config: 'TraversalConfig', specs: 'tuple[tuple[Path, PathSpecType], ...]', root_dev: 'int | None', *, matcher: 'PatternMatcher | None' = None, base_root: 'Path | None' = None) -> 'tuple[Path, bool] | None'"
+  },
+  "has_matching_descendants": {
+   "kind": "function",
+   "signature": "(directory: 'Path', config: 'TraversalConfig', specs: 'tuple[tuple[Path, PathSpecType], ...]', *, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, base_root: 'Path | None' = None, visited: 'set[tuple[int, int]] | None' = None, memo: 'dict[tuple[int, int], bool] | None' = None) -> 'bool'"
+  },
+  "init_visited_dirs": {
+   "kind": "function",
+   "signature": "(root: 'Path', *, follow_symlinks: 'bool', visited: 'set[Path] | None') -> 'set[Path] | None'"
+  },
+  "matches_filter": {
+   "kind": "function",
+   "signature": "(file_info: 'FileInfo', config: 'TraversalConfig', *, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False) -> 'bool'"
+  },
+  "resolve_active_specs": {
+   "kind": "function",
+   "signature": "(root: 'Path', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None', *, respect_gitignore: 'bool', gitignore_file: 'Path | None' = None) -> 'tuple[tuple[Path, PathSpecType], ...]'"
+  },
+  "resolve_device": {
+   "kind": "function",
+   "signature": "(root: 'Path', *, one_file_system: 'bool', root_dev: 'int | None') -> 'int | None'"
+  },
+  "should_skip_dir": {
+   "kind": "function",
+   "signature": "(dir_name: 'str', *, include_hidden: 'bool') -> 'bool'"
+  },
+  "should_skip_symlink_dir": {
+   "kind": "function",
+   "signature": "(subdir: 'Path', *, follow_symlinks: 'bool', visited: 'set[Path] | None') -> 'bool'"
+  },
+  "yield_matching_items": {
+   "kind": "function",
+   "signature": "(targets: 'Sequence[Path | tuple[Path, os.DirEntry[str]]]', config: 'TraversalConfig', specs: 'tuple[tuple[Path, PathSpecType], ...]', *, base_root: 'Path', prefix: 'Path | None', root_dev: 'int | None', current_depth: 'int', matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None) -> 'Iterator[FileInfo]'"
+  }
+ },
+ "findfmt.traversal.devices": {
+  "check_device_boundary": {
+   "kind": "function",
+   "signature": "(path: 'Path', root_dev: 'int | None') -> 'bool'"
+  },
+  "resolve_device": {
+   "kind": "function",
+   "signature": "(root: 'Path', *, one_file_system: 'bool', root_dev: 'int | None') -> 'int | None'"
+  }
+ },
+ "findfmt.traversal.engine": {
+  "find_files": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig') -> 'Iterator[FileInfo]'"
+  },
+  "load_custom_gitignore_spec": {
+   "kind": "function",
+   "signature": "(path: 'Path | str | None') -> 'PathSpecType | None'"
+  },
+  "load_git_exclude_spec": {
+   "kind": "function",
+   "signature": "(root: 'Path') -> 'PathSpecType | None'"
+  },
+  "load_gitignore_spec": {
+   "kind": "function",
+   "signature": "(directory: 'Path') -> 'PathSpecType | None'"
+  },
+  "load_global_gitignore_spec": {
+   "kind": "function",
+   "signature": "(spec_file: 'Path | None' = None) -> 'PathSpecType | None'"
+  },
+  "matches_filter": {
+   "kind": "function",
+   "signature": "(file_info: 'FileInfo', config: 'TraversalConfig', *, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False) -> 'bool'"
+  },
+  "should_skip_dir": {
+   "kind": "function",
+   "signature": "(dir_name: 'str', *, include_hidden: 'bool') -> 'bool'"
+  },
+  "traverse_directory": {
+   "kind": "function",
+   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None) -> 'Iterator[FileInfo]'"
+  }
+ },
+ "findfmt.traversal.filters": {
+  "matches_filter": {
+   "kind": "function",
+   "signature": "(file_info: 'FileInfo', config: 'TraversalConfig', *, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False) -> 'bool'"
+  }
+ },
+ "findfmt.traversal.ignore": {
+  "PathSpecType": {
+   "kind": "type alias",
+   "value": "typing.Any"
+  },
+  "find_git_repo_root": {
+   "kind": "function",
+   "signature": "(start_dir: 'Path') -> 'Path | None'"
+  },
+  "find_global_gitignore_path": {
+   "kind": "function",
+   "signature": "() -> 'Path | None'"
+  },
+  "is_path_ignored": {
+   "kind": "function",
+   "signature": "(entry_path: 'Path', *, is_dir: 'bool', specs: 'tuple[tuple[Path, PathSpecType], ...]') -> 'bool'"
+  },
+  "load_ancestor_specs": {
+   "kind": "function",
+   "signature": "(root: 'Path') -> 'tuple[tuple[Path, PathSpecType], ...]'"
+  },
+  "load_child_specs": {
+   "kind": "function",
+   "signature": "(child_dir: 'Path', active_specs: 'tuple[tuple[Path, PathSpecType], ...]') -> 'tuple[tuple[Path, PathSpecType], ...]'"
+  },
+  "load_custom_gitignore_spec": {
+   "kind": "function",
+   "signature": "(path: 'Path | str | None') -> 'PathSpecType | None'"
+  },
+  "load_git_exclude_spec": {
+   "kind": "function",
+   "signature": "(root: 'Path') -> 'PathSpecType | None'"
+  },
+  "load_gitignore_spec": {
+   "kind": "function",
+   "signature": "(directory: 'Path') -> 'PathSpecType | None'"
+  },
+  "load_global_gitignore_spec": {
+   "kind": "function",
+   "signature": "(spec_file: 'Path | None' = None) -> 'PathSpecType | None'"
+  },
+  "load_spec_file": {
+   "kind": "function",
+   "signature": "(spec_file: 'Path') -> 'PathSpecType | None'"
+  },
+  "resolve_active_specs": {
+   "kind": "function",
+   "signature": "(root: 'Path', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None', *, respect_gitignore: 'bool', gitignore_file: 'Path | None' = None) -> 'tuple[tuple[Path, PathSpecType], ...]'"
+  }
+ },
+ "findfmt.traversal.patterns": {
+  "PatternMatcher": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, include_patterns: 'tuple[str, ...]' = (), exclude_patterns: 'tuple[str, ...]' = (), *, ignore_case: 'bool' = False, match_dirs: 'bool' = False) -> 'None'",
+    "from_config": "attribute",
+    "matches_dir": "(self, path: 'Path | str', *, base_root: 'Path | None' = None) -> 'bool'",
+    "matches_file": "(self, path: 'Path | str', *, base_root: 'Path | None' = None, inherited_match: 'bool' = False) -> 'bool'",
+    "should_exclude": "(self, path: 'Path | str', *, is_dir: 'bool', base_root: 'Path | None' = None) -> 'bool'",
+    "should_inherit_match": "(self, dir_path: 'Path | str', *, base_root: 'Path | None' = None, parent_inherited: 'bool' = False) -> 'bool'",
+    "to_posix": "(self, path: 'Path | str', base_root: 'Path | None') -> 'tuple[str, str]'"
+   },
+   "signature": "(include_patterns: 'tuple[str, ...]' = (), exclude_patterns: 'tuple[str, ...]' = (), *, ignore_case: 'bool' = False, match_dirs: 'bool' = False) -> 'None'"
+  },
+  "compile_pattern_spec": {
+   "kind": "function",
+   "signature": "(patterns: 'Sequence[str] | tuple[str, ...]', *, ignore_case: 'bool' = False) -> 'pathspec.PathSpec[Any] | None'"
+  },
+  "create_pattern_matcher": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig') -> 'PatternMatcher'"
+  },
+  "matches_pattern_criteria": {
+   "kind": "function",
+   "signature": "(file_info: 'FileInfo', config: 'TraversalConfig', *, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False) -> 'bool'"
+  },
+  "split_pattern_alternations": {
+   "kind": "function",
+   "signature": "(pattern: 'str') -> 'list[str]'"
+  }
+ },
+ "findfmt.traversal.sorting": {
+  "InvalidSortCriteriaError": {
+   "bases": [
+    "FindFmtError",
+    "ValueError",
+    "Exception",
+    "BaseException"
+   ],
+   "kind": "exception"
+  },
+  "collect_directory_entries": {
+   "kind": "function",
+   "signature": "(root: 'Path', config: 'TraversalConfig') -> 'list[os.DirEntry[str]] | None'"
+  },
+  "get_entry_ctime": {
+   "kind": "function",
+   "signature": "(entry: 'os.DirEntry[str]', *, follow_symlinks: 'bool' = False) -> 'float'"
+  },
+  "get_entry_mtime": {
+   "kind": "function",
+   "signature": "(entry: 'os.DirEntry[str]', *, follow_symlinks: 'bool' = False) -> 'float'"
+  },
+  "get_entry_size": {
+   "kind": "function",
+   "signature": "(entry: 'os.DirEntry[str]', *, follow_symlinks: 'bool' = False) -> 'int'"
+  },
+  "get_sort_key_fn": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig') -> 'Callable[[os.DirEntry[str]], Any]'"
+  },
+  "is_reverse_sort": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig') -> 'bool'"
+  },
+  "natural_sort_key": {
+   "kind": "function",
+   "signature": "(name: 'str', *, ignore_case: 'bool' = False) -> 'tuple[tuple[_SortChunk, ...], str]'"
+  },
+  "resolve_sort_key": {
+   "kind": "function",
+   "signature": "(value: 'str | SortKey | None', *, unsorted: 'bool' = False) -> 'SortKey'"
+  },
+  "sort_directory_entries": {
+   "kind": "function",
+   "signature": "(entries: 'list[os.DirEntry[str]]', config: 'TraversalConfig') -> 'list[os.DirEntry[str]]'"
+  }
+ },
+ "findfmt.traversal.symlinks": {
+  "init_visited_dirs": {
+   "kind": "function",
+   "signature": "(root: 'Path', *, follow_symlinks: 'bool', visited: 'set[Path] | None') -> 'set[Path] | None'"
+  },
+  "should_skip_symlink_dir": {
+   "kind": "function",
+   "signature": "(subdir: 'Path', *, follow_symlinks: 'bool', visited: 'set[Path] | None') -> 'bool'"
+  }
+ },
+ "findfmt.traversal.tags": {
+  "GENERIC_TAGS": {
+   "kind": "data",
+   "type": "builtins.frozenset"
+  },
+  "INTERPRETER_TAGS": {
+   "kind": "data",
+   "type": "builtins.frozenset"
+  },
+  "can_skip_file_by_tags": {
+   "kind": "function",
+   "signature": "(filename: 'str', config: 'TraversalConfig', *, is_executable: 'bool | None' = None) -> 'bool'"
+  }
+ },
+ "findfmt.utils": {
+  "DEFAULT_TIME_FORMAT": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "build_file_uri": {
+   "kind": "function",
+   "signature": "(path: 'PurePath | str', *, schema: 'str' = 'file://', authority: 'str | None' = None) -> 'str'"
+  },
+  "cell_width": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'int'"
+  },
+  "format_display_path": {
+   "kind": "function",
+   "signature": "(path_str: 'str', *, quote_name: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, indicator: 'str | None' = None, hyperlink: 'bool' = False, uri: 'str | None' = None, escape_markup: 'bool' = False) -> 'str'"
+  },
+  "format_hyperlink": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str', *, rich_markup: 'bool' = False) -> 'str'"
+  },
+  "format_osc8_link": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str') -> 'str'"
+  },
+  "format_rich_link": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str') -> 'str'"
+  },
+  "format_timestamp": {
+   "kind": "function",
+   "signature": "(ts: 'float | None', fmt: 'str | None' = None) -> 'str'"
+  },
+  "get_classification_indicator": {
+   "kind": "function",
+   "signature": "(*, is_dir: 'bool' = False, is_symlink: 'bool' = False, is_executable: 'bool' = False, stat_result: 'os.stat_result | None' = None) -> 'str | None'"
+  },
+  "mask_control_characters": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  },
+  "pad_to_cell_width": {
+   "kind": "function",
+   "signature": "(text: 'str', width: 'int', align: 'str' = 'left', fillchar: 'str' = ' ') -> 'str'"
+  },
+  "quote_filename": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  },
+  "strip_ansi_escapes": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  }
+ },
+ "findfmt.utils.hyperlinks": {
+  "build_file_uri": {
+   "kind": "function",
+   "signature": "(path: 'PurePath | str', *, schema: 'str' = 'file://', authority: 'str | None' = None) -> 'str'"
+  },
+  "format_hyperlink": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str', *, rich_markup: 'bool' = False) -> 'str'"
+  },
+  "format_osc8_link": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str') -> 'str'"
+  },
+  "format_rich_link": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str') -> 'str'"
+  }
+ },
+ "findfmt.utils.strings": {
+  "DEFAULT_TIME_FORMAT": {
+   "kind": "data",
+   "type": "builtins.str"
+  },
+  "cell_width": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'int'"
+  },
+  "format_display_path": {
+   "kind": "function",
+   "signature": "(path_str: 'str', *, quote_name: 'bool' = False, hide_control_chars: 'bool' = False, literal: 'bool' = False, indicator: 'str | None' = None, hyperlink: 'bool' = False, uri: 'str | None' = None, escape_markup: 'bool' = False) -> 'str'"
+  },
+  "format_osc8_link": {
+   "kind": "function",
+   "signature": "(text: 'str', uri: 'str') -> 'str'"
+  },
+  "format_timestamp": {
+   "kind": "function",
+   "signature": "(ts: 'float | None', fmt: 'str | None' = None) -> 'str'"
+  },
+  "get_classification_indicator": {
+   "kind": "function",
+   "signature": "(*, is_dir: 'bool' = False, is_symlink: 'bool' = False, is_executable: 'bool' = False, stat_result: 'os.stat_result | None' = None) -> 'str | None'"
+  },
+  "mask_control_characters": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  },
+  "pad_to_cell_width": {
+   "kind": "function",
+   "signature": "(text: 'str', width: 'int', align: 'str' = 'left', fillchar: 'str' = ' ') -> 'str'"
+  },
+  "quote_filename": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  },
+  "resolve_time_format": {
+   "kind": "function",
+   "signature": "(fmt: 'str | None' = None) -> 'str'"
+  },
+  "strip_ansi_escapes": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
+  }
+ }
+}

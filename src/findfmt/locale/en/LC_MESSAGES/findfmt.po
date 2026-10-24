@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-10-21 17:45-0400\n"
+"POT-Creation-Date: 2026-10-24 13:56-0400\n"
 "PO-Revision-Date: 2026-10-21 11:38-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -30,7 +30,7 @@ msgstr "not found"
 msgid "none"
 msgstr "none"
 
-#: src/findfmt/entrypoints.py:189
+#: src/findfmt/entrypoints.py:196
 msgid ""
 "Find all files and directories, including hidden files respecting "
 ".gitignore."
@@ -38,7 +38,7 @@ msgstr ""
 "Find all files and directories, including hidden files respecting "
 ".gitignore."
 
-#: src/findfmt/entrypoints.py:208
+#: src/findfmt/entrypoints.py:215
 msgid ""
 "Find files and list detected format and MIME tags, including hidden files"
 " respecting .gitignore."
@@ -46,7 +46,7 @@ msgstr ""
 "Find files and list detected format and MIME tags, including hidden files"
 " respecting .gitignore."
 
-#: src/findfmt/entrypoints.py:237
+#: src/findfmt/entrypoints.py:244
 msgid ""
 "Find files by format tag, including hidden files respecting .gitignore.\n"
 "\n"
@@ -58,7 +58,7 @@ msgstr ""
 "Optionally provide TAG as the first positional argument (e.g. "
 "'findfilefmt python')."
 
-#: src/findfmt/entrypoints.py:266
+#: src/findfmt/entrypoints.py:273
 msgid ""
 "Find files by shebang interpreter pattern, including hidden files "
 "respecting .gitignore.\n"
@@ -72,7 +72,7 @@ msgstr ""
 "Optionally provide INTERPRETER as the first positional argument (e.g. "
 "'findshebang bash')."
 
-#: src/findfmt/entrypoints.py:288
+#: src/findfmt/entrypoints.py:295
 msgid ""
 "Find files and output NUL-delimited paths (--print0), including hidden "
 "files respecting .gitignore."
@@ -80,7 +80,7 @@ msgstr ""
 "Find files and output NUL-delimited paths (--print0), including hidden "
 "files respecting .gitignore."
 
-#: src/findfmt/entrypoints.py:308
+#: src/findfmt/entrypoints.py:315
 msgid ""
 "Find files and print summary statistics to stderr, including hidden files"
 " respecting .gitignore."
@@ -112,7 +112,7 @@ msgstr ""
 "Invalid sort criteria '{criteria}'. Choose from: name, version, time, "
 "mtime, ctime, size, none."
 
-#: src/findfmt/sizes.py:30 src/findfmt/sizes.py:62
+#: src/findfmt/sizes.py:30 src/findfmt/sizes.py:55
 msgid "B"
 msgstr "B"
 
@@ -163,34 +163,6 @@ msgstr "PB"
 #: src/findfmt/sizes.py:42
 msgid "EB"
 msgstr "EB"
-
-#: src/findfmt/sizes.py:43
-msgid "KB"
-msgstr "KB"
-
-#: src/findfmt/sizes.py:44
-msgid "K"
-msgstr "K"
-
-#: src/findfmt/sizes.py:45
-msgid "M"
-msgstr "M"
-
-#: src/findfmt/sizes.py:46
-msgid "G"
-msgstr "G"
-
-#: src/findfmt/sizes.py:47
-msgid "T"
-msgstr "T"
-
-#: src/findfmt/sizes.py:48
-msgid "P"
-msgstr "P"
-
-#: src/findfmt/sizes.py:49
-msgid "E"
-msgstr "E"
 
 #: src/findfmt/cli/config.py:45
 #, python-brace-format
@@ -259,31 +231,31 @@ msgstr "expected string, got {type_name}"
 msgid "Error: Unknown configuration key '{key}' in '{path}'."
 msgstr "Error: Unknown configuration key '{key}' in '{path}'."
 
-#: src/findfmt/cli/file_config.py:190
+#: src/findfmt/cli/file_config.py:185
 #, python-brace-format
 msgid "Error: Configuration file '{path}' not found."
 msgstr "Error: Configuration file '{path}' not found."
 
-#: src/findfmt/cli/file_config.py:202
+#: src/findfmt/cli/file_config.py:197
 #, python-brace-format
 msgid "Error: Invalid TOML in configuration file '{path}': {error}"
 msgstr "Error: Invalid TOML in configuration file '{path}': {error}"
 
-#: src/findfmt/cli/file_config.py:211
+#: src/findfmt/cli/file_config.py:206
 #, python-brace-format
 msgid "Error reading configuration file '{path}': {error}"
 msgstr "Error reading configuration file '{path}': {error}"
 
-#: src/findfmt/cli/file_config.py:290
+#: src/findfmt/cli/file_config.py:285
 msgid "(none)"
 msgstr "(none)"
 
-#: src/findfmt/cli/file_config.py:291
+#: src/findfmt/cli/file_config.py:286
 #, python-brace-format
 msgid "Active configuration: {path} (using built-in defaults)\n"
 msgstr "Active configuration: {path} (using built-in defaults)\n"
 
-#: src/findfmt/cli/file_config.py:295
+#: src/findfmt/cli/file_config.py:290
 #, python-brace-format
 msgid "Active configuration: {path}"
 msgstr "Active configuration: {path}"
@@ -937,10 +909,10 @@ msgid ""
 "overriding defaults.\n"
 "\n"
 "Exit Codes:\n"
-"  0                             Success: matching files found, or "
-"help/version queried.\n"
-"  1                             Runtime traversal or classification "
-"error.\n"
+"  0                             Success, even when no files match (see "
+"--exit-status).\n"
+"  1                             Runtime error, or no matches with --exit-"
+"status.\n"
 "  2                             Invalid command-line usage or invalid "
 "arguments.\n"
 "\n"
@@ -1131,10 +1103,10 @@ msgstr ""
 "overriding defaults.\n"
 "\n"
 "Exit Codes:\n"
-"  0                             Success: matching files found, or "
-"help/version queried.\n"
-"  1                             Runtime traversal or classification "
-"error.\n"
+"  0                             Success, even when no files match (see "
+"--exit-status).\n"
+"  1                             Runtime error, or no matches with --exit-"
+"status.\n"
 "  2                             Invalid command-line usage or invalid "
 "arguments.\n"
 "\n"
@@ -1166,7 +1138,7 @@ msgstr "Traversal Controls"
 msgid "Output Formatting"
 msgstr "Output Formatting"
 
-#: src/findfmt/cli/output_sink.py:105 src/findfmt/cli/output_sink.py:212
+#: src/findfmt/cli/output_sink.py:100 src/findfmt/cli/output_sink.py:207
 #, python-brace-format
 msgid "Error opening output file '{path}': {error}"
 msgstr "Error opening output file '{path}': {error}"
@@ -1245,3 +1217,24 @@ msgstr "Symlink"
 #: src/findfmt/formatters/visual.py:213
 msgid "Shebang"
 msgstr "Shebang"
+
+#~ msgid "KB"
+#~ msgstr "KB"
+
+#~ msgid "K"
+#~ msgstr "K"
+
+#~ msgid "M"
+#~ msgstr "M"
+
+#~ msgid "G"
+#~ msgstr "G"
+
+#~ msgid "T"
+#~ msgstr "T"
+
+#~ msgid "P"
+#~ msgstr "P"
+
+#~ msgid "E"
+#~ msgstr "E"

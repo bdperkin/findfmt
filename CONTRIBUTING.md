@@ -112,6 +112,12 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   vale *.md docs/
   ```
+- **Public API Snapshot**: `tests/unit/test_api_surface.py` fails when a name in any module's
+  `__all__` (or its signature) changes. For intentional changes, regenerate the snapshot and record
+  the change in `CHANGELOG.md` (see the API stability policy in the documentation):
+  ```bash
+  uv run python tools/api_surface.py --write
+  ```
 - **Localization Tooling & Message Catalogs**: If updating translatable strings or locale catalogs,
   extract and compile message catalogs:
   ```bash

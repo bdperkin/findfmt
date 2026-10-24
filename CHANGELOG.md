@@ -29,6 +29,13 @@ what to do.
 
 - *(cli)* Add `--exit-status` to exit with status 1 when no files match (#367).
 
+### Documentation
+
+- *(api)* Document the public API stability policy, and pin the public API in a snapshot test so
+  changes are caught in review (#493).
+- *(cli)* Correct the exit-code tables in `--help-all` and the CLI reference: no matches exits 0
+  unless `--exit-status` is given (#493).
+
 ### CI/CD & Packaging
 
 - *(ci)* Python 3.15 is the supported maximum and now gates every merge on Linux, macOS, and
