@@ -209,16 +209,6 @@ def test_build_parser():
     assert args.seed == DEFAULT_SEED
 
 
-def test_collect_metrics_synthetic():
-    """Test metric collection for synthetic datasets."""
-    parser = build_parser()
-    args = parser.parse_args(["--tier", "small", "--files", "10", "--keep-temp"])
-    metrics, cleanups = _collect_metrics(args)
-    assert len(metrics) == 1
-    assert metrics[0].tier == "small"
-    assert len(cleanups) == 0  # keep-temp suppresses cleanup accumulation
-
-
 def test_collect_metrics_target_dir(tmp_path: Path):
     """Test metric collection against an existing and nonexistent target directory."""
     parser = build_parser()

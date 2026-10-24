@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 126 Closed Issues | 141 Actionable Open Tasks | 35 Active Umbrella Epics **Last
+> **Tracking:** 127 Closed Issues | 141 Actionable Open Tasks | 35 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release)
@@ -392,6 +392,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#335](https://github.com/bdperkin/findfmt/issues/335)** - ci: make the Python 3.15 CI job
   gating and add a non-gating Python 3.16 job (Closed: 2026-10-24 via PR
   [#488](https://github.com/bdperkin/findfmt/pull/488))
+- [x] **[#489](https://github.com/bdperkin/findfmt/issues/489)** - fix(benchmark): --keep-temp
+  deletes the generated tree via the TemporaryDirectory finalizer (ResourceWarning) (Closed:
+  2026-10-24 via PR [#490](https://github.com/bdperkin/findfmt/pull/490))
 
 ______________________________________________________________________
 
