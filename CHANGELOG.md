@@ -21,6 +21,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   Windows; the quality gate, documentation build, release, and wheel smoke test run on 3.15. A
   non-gating `3.16-dev` job gives early warning for the next release (#335, #440).
 - *(docker)* The container image now runs Python 3.14 (was 3.13), still on Debian bookworm (#440).
+- *(release)* The release workflow always builds the requested tag (also when re-run via
+  `workflow_dispatch`), refuses anything but a `vMAJOR.MINOR.PATCH` tag, verifies that the built
+  wheel and sdist carry the tag's version before publishing, no longer skips duplicate production
+  PyPI uploads, and tags dispatched container images with the release version instead of only
+  `latest` (#327).
 
 ### Security
 
