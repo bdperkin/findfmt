@@ -193,6 +193,13 @@ tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MI
    uvx twine check --strict dist/*
    unzip -l dist/*.whl
    ```
+   CI's packaging smoke test installs the wheel on the minimum and maximum supported Python on
+   Linux, macOS, and Windows, runs `tools/smoke_wheel.py`, and checks that `pip` refuses Python
+   3.10. To repeat it locally:
+   ```bash
+   uv venv --python 3.11 /tmp/smoke && uv pip install --python /tmp/smoke dist/*.whl
+   /tmp/smoke/bin/python tools/smoke_wheel.py --wheel dist/*.whl
+   ```
 3. Tag the release commit and push the tag, which starts the workflow:
    ```bash
    git tag -a v1.1.0 -m "findfmt 1.1.0"

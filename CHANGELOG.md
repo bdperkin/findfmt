@@ -37,6 +37,10 @@ what to do.
   modification time (#462).
 - *(format)* `-f ipynb` notebooks run: the manifest cell loads its data with `json.loads` (#330).
 - *(packaging)* Correct the "A.gitignore-aware" typo in the PyPI summary (#443).
+- *(cli)* On Windows with Python 3.11–3.14, piped or redirected output no longer fails with
+  `UnicodeEncodeError` when it contains characters the ANSI code page (such as cp1252) cannot
+  encode, such as the `--help` panel borders or non-Latin file names. findfmt writes UTF-8, as
+  Python 3.15 does by default, unless `PYTHONIOENCODING` or `PYTHONUTF8=0` is set (#496).
 - *(benchmark)* `tools/benchmark.py --keep-temp` keeps the generated tree instead of deleting it
   (#489).
 
@@ -70,6 +74,10 @@ what to do.
   (#357), add a dependency-resolution smoke matrix to pull requests (#428), make the test suite
   hermetic against the developer's global git config (#326), and guard the supported Python range
   with policy tests (#442).
+- *(ci)* The packaging smoke test installs the built wheel on the minimum and maximum supported
+  Python (3.11 and 3.15) on Linux, macOS, and Windows, runs `tools/smoke_wheel.py` against it, and
+  checks that `pip` refuses to install it on Python 3.10. End-to-end tests cover every behavior
+  change since 1.0 (#496).
 - *(packaging)* The wheel no longer ships the `*.po`/`*.pot` catalog sources (only the compiled
   `*.mo` catalogs, which are all it reads), and the sdist no longer picks up `*.mo` files built
   under `docs/` (#495).
