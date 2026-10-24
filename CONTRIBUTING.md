@@ -118,6 +118,15 @@ All pull requests must satisfy our quality gate before merging:
   uv run python tools/i18n.py extract
   uv run python tools/i18n.py compile
   ```
+  The documentation has its own Sphinx catalogs under `docs/source/locale/`. After changing
+  documentation text, regenerate and check them:
+  ```bash
+  make -C docs intl-update   # extract strings and update every language's .po catalog
+  make -C docs html-all      # compile catalogs and build all languages
+  ```
+  `intl-update` drops obsolete `#~` entries (`--no-obsolete`). Changed paragraphs are kept and
+  marked fuzzy for review, but a translation whose source text was removed is deleted.
+  `tests/unit/test_docs_catalogs.py` fails when a page has no catalog in some language.
 
 ## 5. Commit Guidelines
 

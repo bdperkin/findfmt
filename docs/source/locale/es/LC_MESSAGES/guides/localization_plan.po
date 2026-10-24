@@ -1,0 +1,1748 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 1.0.3.dev20+g4c93cc2a7.d20261024\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-24 01:04-0400\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guides/localization_plan.md:1 9db468d76bbb457bad5144ed63d3d488
+msgid "Translation and Localization Plan (i18n & l10n)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:3 4abe5222fb754700ba550413cde5df91
+msgid ""
+"This document establishes the architecture, linguistic metadata, phased "
+"roadmap, and contribution workflow for internationalization (i18n) and "
+"localization (l10n) across `findfmt`."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:7 fff9666c561d481a839cb3ab9741781e
+msgid ""
+"All translation issues are aligned with the **Future Features** "
+"milestone. Active tracking issues and parent epics are cross-linked "
+"below."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:12 36ede5fa948f4b188d2fdeb6d0c8766e
+msgid "1. Core Architecture"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:14 34da867f8b6b474ba7df737e78e9cca3
+msgid ""
+"The `findfmt` internationalization architecture uses standard GNU gettext"
+" runtime protocols combined with custom Hatchling build hooks and Sphinx "
+"documentation tooling:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:17 bad5bb98d24246c1b1f313803d6cad66
+msgid ""
+"**Runtime Engine (`src/findfmt/i18n.py`)**: Wraps `gettext.translation()`"
+" with hierarchical fallback order: `LANGUAGE` → `LC_ALL` → `LC_MESSAGES` "
+"→ `LANG` → `C`. Provides `_()` for standard message strings and "
+"`ngettext()` for pluralized counts. Supports CLI runtime overrides via "
+"`--locale <locale>` and `--lang <locale>`."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:21 4b65d5cf2c5f49a8a022ec9123828b95
+msgid ""
+"**Maintenance Tooling (`tools/i18n.py`)**: Automates message extraction "
+"(`extract`), catalog initialization (`init <locale>`), updates "
+"(`update`), and compilation (`compile`). Enforces relative path location "
+"comments (`#: src/findfmt/...`) via `_sanitize_po_locations()` to ensure "
+"local build paths are never exposed."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:25 6745f8945e3e48c8b0397b4fa6e07c1a
+msgid ""
+"**Packaging Build Hook (`tools/hatch_build.py`)**: Compiles `.po` message"
+" catalogs under `src/findfmt/locale/*/LC_MESSAGES/*.po` into binary `.mo`"
+" catalogs during wheel and sdist packaging."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:28 21f7de1ad1db44888dd96cdf87e33734
+msgid ""
+"**Documentation Localization (`docs/source/locale/`)**: Integrates with "
+"Sphinx `gettext` and `sphinx-intl` to generate localized HTML sites and "
+"man pages."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:30 ed101ea5adbb4276b223fa2c10b97f4c
+#, python-format
+msgid ""
+"**Security & Quality Gates**: The pre-commit hook `check-no-absolute-"
+"locale-paths` rejects any absolute path location comments in `.po` files."
+" Test suites enforce 100% statement and branch coverage."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:36 7c9a1db4e3f6456eaf9583242f530864
+msgid "2. Implementation Phasing"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:38 c911c8a3f88148a498fffae0771f35cf
+msgid ""
+"Languages are organized into five strategic tiers based on speaker "
+"population, linguistic diversity, and script complexity:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a7f5102a984e4918895d657dbdf68aa2
+msgid "Tier"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 8d83a37e71e547008d30a6335c5dce04
+msgid "Speaker Threshold"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f2540505f36e4087bc0d120344d69733
+msgid "Scope & Objective"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 49244075bf4844cbb62132de377ad211
+#: bcb91e268805402cb25749d7936ad10f
+msgid "Status"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 d4007ed253cc46a9906d4a63109dec24
+msgid "**Tier 0: Baseline**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 22ee0c8111614b5482dba34233125ce7
+msgid "Core Starters"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 67ae061782d74a4c9093b0099ac0d46a
+msgid ""
+"English (`en`), German (`de`), Spanish (`es`), French (`fr`), Japanese "
+"(`ja`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 74de7f2838104ffb92c028d83382e400
+msgid "**Active / Initial Catalogs**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9b16493adc864cc3a7f03b2bccbf4093
+msgid "**Tier 1: High Reach**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1259ceb4908f4b80b58a8936ffc8ae02
+msgid "≥ 120 Million"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 8e6fea2ea95049698e9b996e53876ae6
+msgid "15 major global languages covering >6.5 billion aggregate speakers."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e811327214684957b3c0cb0cb7ddcc68
+msgid ""
+"**Tracked "
+"([#214](https://github.com/bdperkin/findfmt/issues/214)–[#228](https://github.com/bdperkin/findfmt/issues/228))**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 8d8849730956415fbaabde6d2d0cda1e
+msgid "**Tier 2: Medium Reach**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 06da91a3bd3449418afa293e65219c12
+msgid "10M – 120 Million"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 aaf01d7afa82463fa2206869296afade
+msgid "37 prominent national and regional languages across all global families."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a2d80a8f3ab04a8b888d78336720b08c
+msgid ""
+"**Tracked "
+"([#234](https://github.com/bdperkin/findfmt/issues/234)–[#270](https://github.com/bdperkin/findfmt/issues/270))**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 cb2f98db64e146f7bc9d284ae65d7868
+msgid "**Tier 3: Regional & Niche**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 094b015257444e49818b708d671f7f1c
+msgid "< 10 Million"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 743442c728834b12abf92865981a79e5
+msgid "Minority languages, regional dialects, and indigenous scripts."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c21ca0eee4cf4e5a9ac7d2435c5e452e
+#: cb0e517e8b964ae7ad72e62806f1b8f2
+msgid "**Planned under Epics**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 282fa79c15ea4c7abef7edabf44512d9
+msgid "**Tier 4: Special**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9bf87779820f46289fe404834163cb55
+msgid "Constructed & Extinct"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 99a4f803a0eb4e3cbf9b5535b0ef6ff8
+msgid ""
+"International auxiliary languages (Esperanto, Interlingua) and historical"
+" languages (Gothic)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:51 6cc5b1869db549479ec6365a15e24e68
+msgid "3. Infrastructure & Architecture Issues"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:53 26862f15457041af86c105645536d5cf
+msgid ""
+"To support global scripts, bidirectional rendering, and regional "
+"standards, five foundational infrastructure issues have been established:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:56 315d0280684e40d294481d4b1e747a5e
+msgid ""
+"**[#229: feat(i18n): implement right-to-left (RTL) and bidirectional "
+"(BiDi) terminal formatting "
+"support](https://github.com/bdperkin/findfmt/issues/229)** Enables visual"
+" bidirectional reordering (Unicode BiDi algorithm) for monospace table "
+"(`RichTableFormatter`) and tree (`RichTreeFormatter`) formatters when "
+"outputting Arabic (`ar`), Urdu (`ur`), Persian (`fa`), Hebrew (`he`), or "
+"Kurdish (`ku`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:60 4743fdf598ed4275b03d52fcea24457c
+msgid ""
+"**[#230: fix(format): audit and enforce cell-width alignment for CJK "
+"double-width characters across "
+"formatters](https://github.com/bdperkin/findfmt/issues/230)** Audits "
+"terminal column calculation to ensure full-width East Asian glyphs "
+"(Chinese `zh_CN`/`zh_TW`, Japanese `ja`, Korean `ko`) occupy two terminal"
+" cells using `wcwidth`/`cell_len` instead of string length."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:64 b8643816622a454da99420a6349f3a5d
+msgid ""
+"**[#231: feat(i18n): localize file sizes, numeric separators, and "
+"timestamps per regional locale "
+"standards](https://github.com/bdperkin/findfmt/issues/231)** Adapts "
+"decimal separators (`12.4 MB` vs `12,4 MB`), thousands separators, and "
+"date-time formats according to active `LC_NUMERIC` and `LC_TIME` "
+"settings."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:67 1fb9321aa7a14b999f5f1b3537cd5f90
+msgid ""
+"**[#232: test(i18n): create automated verification suite for complex "
+"multi-tier gettext pluralization "
+"rules](https://github.com/bdperkin/findfmt/issues/232)** Provides "
+"automated test fixtures verifying plural mapping for single-form, two-"
+"form, three-form Slavic, three-form Polish, and six-form Arabic rules in "
+"`findfmt.i18n.ngettext`."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:70 52149c2fb13540a6afe87870029fab1d
+msgid ""
+"**[#233: ci(docs): configure automated multilingual Sphinx documentation "
+"builds in CI pipeline](https://github.com/bdperkin/findfmt/issues/233)** "
+"Configures `.github/workflows/docs.yml` to compile and publish "
+"multilingual Sphinx documentation subdirectories (`docs/<locale>/`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:76 a368c139974340ac9bca0089e0dd581d
+msgid "4. Tier 1 Tracking Matrix (≥ 120M Speakers)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:78 13724f9be62044d7b6e9024b73bca65e
+msgid ""
+"Each Tier 1 language has an active GitHub sub-issue under the **Future "
+"Features** milestone attached to its parent epic:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1f8a91e050bd4b3d80f8aa22aba24094
+#: 4eb906ec43794eceb63463f5f0884dd7
+msgid "Locale Code"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 685628c0833342129e8d02611c3619fb
+#: 93a7967144814ce9996de56b9ed6b7e8
+msgid "Language Name"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 7c8fa91a5adc4a62bce834cf7196b048
+#: e4fb09b915ff4abfb3aba18b724b7c7d
+msgid "Language Family"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 17a5512deb6e45d3b80fb2e6e400045f
+#: fdaea7bd457b425299108702d73008cc
+msgid "Parent Epic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 dbe05c165db54b269d5139e155c2a45f
+#: f90b6994bfb945cb910ca55fac642ddb
+msgid "Sub-Issue"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 39879533fc7e44b892af4aa3f2803aa0
+#: ed99a72b91964863981ec91636795d07
+msgid "Speakers"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 081a20881e4d44aaaf1a40cc1d6e3a31
+#: b43388874e4f4670bdbd5261ab54b900
+msgid "Script"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a8495a14f197456e9dfa587cd3aaed5e
+#: de523d2f935049bcb76b3f168966ea38
+msgid "Text Dir"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b395aa0b2561415a82138c0f355b0622
+#: d9920251b1ff47628ce27a8cab36956c
+msgid "Plural Forms (`nplurals`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b37da6db0b0b4c5e9d0c8b095adb788e
+msgid "`en`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f3f2846459564d4d9a97502d8291a6db
+msgid "English"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 66a4321aa4fa4ff99361a3a6c534cd21
+#: 78f046bd0ed84ccf8b9beea6497cdb28 9fb7e71116aa4be889262f0bedff3ae6
+#: ca5925c28e4a49c597fda291c7732af7 fb1b7f303bb64cbc9727e655c6d9333d
+msgid "Germanic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1bb346dcefd346699c7e4f589a726e8c
+#: 5684022c43f54573912df6b8615f5fdb 5add7fb45fd84b7d93d6fac7506be049
+#: b1a516b89190472da11b2df2fc63279e f30535ac7dd94b779d20b2cb6935deb7
+msgid "[#197](https://github.com/bdperkin/findfmt/issues/197)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4b8be24d7e594fdd9c87e4b8dd683f16
+msgid "[#214](https://github.com/bdperkin/findfmt/issues/214)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9435a4932fcf4e7bab6b1b59b18fd30c
+msgid "~1.46 B"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 317f092a306943f9aca4db0b2df7fd91
+#: 345cbc77b56440bab39e74108c7473cb 3abe9ff4b60347ad8ca1f56da8564c72
+#: 414fe8c3cf704af3af29a65ebcfd1bcb 4dc22bb5a05648dbb75c08f8003de54c
+#: 593fc4dcacf14663917c918466e4b8c2 59f3117bf5c0406ca0cc162e05984fe3
+#: 5d91d88d51cb4cd0b527297046451c25 5dca8a5589e84eb6a4025d873023db1a
+#: 6bb22d26fa9a4ca4a1401f757caeddaf 708a94718dc4421f818ad6d6aa280953
+#: 7ffbb71d8c6a4b8b90f4a53cd267df95 8ad898449b26415c8a6636de34e0f869
+#: 9a7ffe1814dc440eac06991a2d131022 9dd98312feae4220a7f33919c8d13a27
+#: c4ae6399a906440dbdabf4458f72fcd1 c9d22ba9b80e459884538479729935da
+#: d532d5bf91384ab08f7d5cfea7f62739 f679649f4a344b57b0414cb84fbccb6b
+msgid "Latin"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0573b8090d0546bca412f165c814f7e2
+#: 15c7c9ee2fc24e58998fa62d25d83ad6 17c7602cb4924314bbb491e198d34cb2
+#: 1ec3cdbe766545cf8d6b54a2a6f1c86e 201fcf4bcf4c4f29abaad94b50ae34a2
+#: 214af5d3ea6c469eb0e6b48613182672 251a76b45ea74d54a5e53287e715d1cb
+#: 2682112684a74fdca36d23ff384f83f8 2fa730c45dfc42c08cefca1de4c76895
+#: 31782ff6d0134cd8b41f53e85be3185a 36ccc1bf5862464a97564f4c3be6158d
+#: 36e987e7ae2f4d5d83d4c4ef3e9978a8 38614f2b446f49ae8242c6ec4e09dfc1
+#: 399f80c6bc2048788a1b43daad7dad19 39dc9825f9d34fabaab7599c61574788
+#: 3d3aa8aebcf5474fa85a88cc04a03070 4c7707721635472ea93e23b0dcd368a4
+#: 4f6f2df670314f09a97524e5bd5fb402 5068493e7f7d4ec7a6b749e44d0feac5
+#: 5399db3b100e4befb1328e244d12321b 570e99c053d442719231efd6d0cac89b
+#: 6b3f41f765de4ed395360943b34d26db 775ffb2ddb5b4a058a75c45e1eddadca
+#: 7b9e79631dcb4112ab55e439e7a248b2 814b6a5c31d448b6b5efb77522e2dcb3
+#: 8fc86794923141ea807892a7fe2efd85 8fd2d4c1964b408bae704e5a9cbd8b7d
+#: 9cebffcaea5144d79a11a669658c3463 a2ccb362959148a4a91799d1cc0f1059
+#: a37936558ade43c4b777c70875becaaa a53da9c740694f67af4190a67575459f
+#: a7e6c09775f94f499f9468a5e31553a6 a8a440ca1beb466682b7e735ea728ff8
+#: a8c1a1482a6d45ef8b2053c1f7f50936 aaa20d274c6d47b8aa0c776c4357c443
+#: bcb10b182221435c8d945015e64fa3e7 bee4833ec04941e2afd6399351409da1
+#: c04f6da35b114945825d12aa2d503695 c0d669a14e3d478f91220863da0d4286
+#: ca1b35da11f54ed69253a3a7f4f9565e d50f958750ff40d6ba3552f2c186186e
+#: d523da0163e04764975f2cfc4cab63e0 e2ea7de1390a43f9950a408722415349
+#: efb21e874edb4836a8a7b4e3344cce07 efc4e1f415a0442584651502995b42a1
+#: f48f6f9a9ee649feaaf8507889601129 f63921023ca84fcaa79e217983338d36
+msgid "LTR"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 06fa6844e0ac428592a1bc8ecfb4ec81
+#: 1169d95553c94d6e9aa1d55710e4d1f7 2b44c15c2d3e4ce99a0068bc2339d872
+#: 37139fe44c384d4a8ef661b0df1d5491 4b2580bc9838408ea32158d9eb8739a6
+#: 56abb9f6d73a4e73beab53f855b0bf81 599637a790aa434f9024c833f198c8c0
+#: 70eae24c16164bb1962492fcc493c210 7b1441fe53a4477381a459cb95006e9b
+#: 7df18bbde92945f99cb10f5ceee8ab36 8181c80ecc6147b78c1096a2b4aad24b
+#: 85667015f0d2415d8f4d844ea510c2ea 891bd68df7e34112b37352358f557114
+#: 8f76da5cdfb7417e9beeb923adb31155 8fe2551178234a91a7bfafdbe3ed379f
+#: a46555b76263433c92b4c2073148cae8 a73e68e95b2e4b5ba1c2917bbf3a33df
+#: ae034197c203477fa853504dcc6e7f6d af6abc2e2b4748afb541aa0b03d39b9c
+#: b76b5237730043a6bd2519b99d33cfd1 bb3e2c5b75494b89a7887b72c5400793
+#: bc9d57485e9942f9b4997d235dc15f0a bd75e201e51e489eb1e7309b81c0f904
+#: be51e6394dfb4437bc754185c58d931b d4b0daa20a5244e792e18ef578867bfa
+#: d8fd349dddc14644bbe347a6117536da e615bcbfb2a541c3951575c79ff7e8bc
+#: f8e9973cac5241e5805cb12809032b81 fca03e6ed8704c5cbbf9c2e06f63028e
+msgid "2 (`n != 1`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 45e00394e42b4b81b0f2d8ae0f8deeb1
+msgid "Canonical Catalog Active"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 30eac61463684ff781fe20aec55d1625
+msgid "`de`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b74894639e3241d48e92fe7f199a4e4e
+msgid "German"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 aa411c4d5b9e4b769c798d2baa84ec9c
+msgid "[#215](https://github.com/bdperkin/findfmt/issues/215)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 21bc8e3963e045098ada7afcd58d2e09
+msgid "~133 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 6d2a8ceb25c847d2a40ffaa5414fefc6
+#: 7ec0c079ed3b40638e07b1c889fe539a e957faa9317d489aba341a847e21f007
+#: ed1716399eff447c84b04dbd3fd54609
+msgid "Starter Catalog Active"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c40c19f0d902458d99640d1cc16fb4e8
+msgid "`zh_CN`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1c23ff20c2584700afc79e2cd929dc24
+msgid "Chinese (China / Mandarin)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 6de14dbdf5c14a89b6058c8c39a97b4a
+#: 7da588d957c24335a488057be7bb1953 c7c8b6917d744d8cb70353c51954ab84
+msgid "Sino-Tibetan"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0a0d5f0874c147908f3bfc1e43f184eb
+#: cb4b86905c004f758c9bd4b093d1f774 d6418e07707e46b58863ce76ecdef4a6
+msgid "[#198](https://github.com/bdperkin/findfmt/issues/198)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 096b446a06c14d56afc9222db2c19045
+msgid "[#216](https://github.com/bdperkin/findfmt/issues/216)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e1468e7021a84ef2a0fb087f09934b58
+msgid "~1.14 B"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b2e90f26609c4036ba2c217b01ccb25b
+msgid "Simplified Han (`Hans`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 034cdecc8fbb469590ec7caf270fd72a
+#: 39ca1d73490d49338bc4d36f67babc05 3d9805b5e9434f4fb7c72cb495a7201c
+#: 3fb994aaccaa460686345219a0301470 41b8d2ab9d0741df928a07a89f3edbc0
+#: 52b940511c1a45b6927dfb01e5e82597 72e3574e71734d7d80909dcec43cfe08
+#: 764359b5be2f476886ba0ef3bdddd592 ba3ab000d2274780b24eec8447285270
+#: d0c593afbeb144e4ab221a9745ffc6fd d340eadd3cf1494f83745d19cfe405b8
+#: d940a8d33ac4446b871d9bcb44cac1df
+msgid "1 (`0`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 99b4a5218dcb410dbd14ff0a85a50a7e
+msgid "Issue [#216](https://github.com/bdperkin/findfmt/issues/216)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b48161a311ea4b8a9ddcf6c6a587e205
+msgid "`hi`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 462c63cd0c2740c8a9f3fa701863cda0
+msgid "Hindi"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 12b381031053435a9ca7bafa484e509c
+#: 5b489c8887ec448893f17ed91a7b63ef 725d00a5a07d43c7af205f8f6ea63ffe
+#: 879bb30c33eb4157bbe6b157b48297bc 9b6a94b5008945689bb2980caf057629
+#: 9bb69eaaf4744e7cb87c62b620f4e747 b51a04f3fb3e4e539193f33521033a72
+#: cdb667e729084c23a7d44fdec0ccc0c6 f14401d1023a4949b351800c1196762e
+#: f950b5745ecd4c8b8314c75c58699422 f9ef283c88cd4dc7a0a08b687df70f6f
+msgid "Indo-Aryan"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 23d01ebd7667409bbad89f7003bc31db
+#: 450344090d7c4addbc97f50d92ec92f2 8fdb9017f8d2406eac4cf2e8b54cd476
+#: 9a5401ed5414468bbe5978847daab975 a3237a6499fc440a91d6ff55db08552f
+#: a8f1b30aeec74fddb7d65031655c2c3d b489c2495be8410aa8fce29b945a0b01
+#: d1ab08667c37406491edced9f88dc875 d2fe6ea105c248d1a088ef664d1a41c6
+#: d5858c69823f46dd830cff1fdc50d97f e9159d729c2a45768374880c16779792
+msgid "[#199](https://github.com/bdperkin/findfmt/issues/199)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 d0e54e7a631e461ab4830f391accbe56
+msgid "[#217](https://github.com/bdperkin/findfmt/issues/217)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c0b041d59035459781967fdb043d1f22
+msgid "~610 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1daf3eacb9a84572b4572fd4168b5d62
+#: 7548fe13f10a4447a2972caa6e1a7a4a c7c3d62723794834ad879b83604fd12a
+msgid "Devanagari"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 7f897beab10c43958c22925aa05d859a
+msgid "Issue [#217](https://github.com/bdperkin/findfmt/issues/217)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fed8d08611ec4a079b532a4e10e8c6fd
+msgid "`bn`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4758ce576e4d471eace55ac44b04bdba
+#: e999ec5f61b143c0a43cb9928be02393
+msgid "Bengali"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e1ad1f4155f64b02a42d9128e7afbe68
+msgid "[#218](https://github.com/bdperkin/findfmt/issues/218)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 cd57989e0a3845308c5219d646b1806b
+msgid "~273 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 17c18b983ac84fb28e12d2297cd77aea
+msgid "Issue [#218](https://github.com/bdperkin/findfmt/issues/218)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a81f033d688d4ef4b94151da399fc01a
+msgid "`ur`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f107d97ce8494d5698496b284fcf3896
+msgid "Urdu"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4848eecb302c445a83b6ea5ff1cc444c
+msgid "[#219](https://github.com/bdperkin/findfmt/issues/219)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 36df137aec164d4b9f2e03f7ef0b16c7
+msgid "~232 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 58a6963b8cfe4c4f8665d60c0b10bcdb
+msgid "Perso-Arabic (Nastaliq)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 13e80b1e6cab430cafe50e8de6952cb5
+#: 23659d86a2b84e25afb4abd2ed060f66 3249623a6ae344bbaf76548465f44d19
+#: c90850a5378c407f939e1356105f279c
+msgid "**RTL**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 daee40a4cc774a25bd93579657af315f
+msgid "Issue [#219](https://github.com/bdperkin/findfmt/issues/219)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 14828394dae946bcbc2b3c893b98d63a
+msgid "`pa`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 80707bf40ea544f3902527217b246ac9
+msgid "Punjabi"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 70710c2d6d64443d91694e24b01e6bdf
+msgid "[#220](https://github.com/bdperkin/findfmt/issues/220)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0ff27fadaf454611ae15e01864c4735e
+msgid "~125 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a95c4df8210f44779d2ed57fd9bfea4b
+msgid "Gurmukhi / Shahmukhi"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 62156c325ad24877b863475d45e7b0d4
+msgid "Issue [#220](https://github.com/bdperkin/findfmt/issues/220)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 89be47a077564d069c73e7076d12ff42
+msgid "`es`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 3c5dafb2818146e1b69fb1b87c5799ca
+msgid "Spanish"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4914d6b8aa314c55b9b07ed1d2c2dc76
+#: 5550e2d9029b441db56054161675ba0c a3fa296d4c9942cbacaf7b2e7799c2cf
+#: a813de5bf60246f3985f356e615dbd2c bae75d0e6e89403895e8ae1f54b0911a
+#: c7d3d92cdee54ac29dd1ce3aa9b6fd21 d0279881f06949e7a647c390fca05ea8
+msgid "Romance"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 3f13722c9f214291bd6cbaffc0433046
+#: 5d4a1460787445139f65f2610a9c9ca0 5eef95ad1f0a4efa9d21f0c49db830f3
+#: e7284ba53e4641369ee68683284b4313 eb4e59fc16384e9ebdc15a779ea12e73
+#: f3f05600dd0f425bbb350c41cef322ba fc2af8e987da4f098505a33676f98273
+msgid "[#200](https://github.com/bdperkin/findfmt/issues/200)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 95190db911a24ff79b74f0a13135c71f
+msgid "[#221](https://github.com/bdperkin/findfmt/issues/221)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 8655ee653c624da9bacf54c32b041ead
+msgid "~559 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 aaa99f1f90584367886e0d1a436b34a3
+msgid "`fr`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c542eaac8d2740b8b5529201fe0435ee
+msgid "French"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f7c2ac89a8ce492ab2b45152e56ae930
+msgid "[#222](https://github.com/bdperkin/findfmt/issues/222)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 2ca2b56b097741a6b4a425d31a4f133b
+msgid "~310 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1c75525ef59046ce8cd1881e8eb406af
+#: 552d8ebc814f40b68a3d9caee7c375ce bae192e4387c4b8f933a5d77255f2ccc
+#: cd07bf969b9c47a193d34c133714048d e47af843939f44b3bc1f82bb208ca1b3
+msgid "2 (`n > 1`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 41288c80e42a40d49390735fb46506c8
+msgid "`pt`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 5e99c39d0db6498ab3e16781a0b8277c
+msgid "Portuguese (European)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c8406151df75465ea5bd5504a894e767
+msgid "[#223](https://github.com/bdperkin/findfmt/issues/223)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a90c34e62cbe4a01a429cb0b74842c49
+msgid "~264 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0db4a176e5f44a5a9ebc79b1ff6186e2
+msgid "Issue [#223](https://github.com/bdperkin/findfmt/issues/223)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 deb9495933ca40eba15526c08f41a84d
+msgid "`pt_BR`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 16c9495d3f214008916fe3122c6ea418
+msgid "Portuguese (Brazil)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0b8941a8450a4bacae820a4e87abef26
+msgid "[#224](https://github.com/bdperkin/findfmt/issues/224)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 5827ed78573d4f869de94f41b5d96512
+msgid "~208 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 cf13fabcaac24432af7290185ae8df87
+msgid "Issue [#224](https://github.com/bdperkin/findfmt/issues/224)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 7821bb4af87144939cde52ead0512600
+msgid "`ar`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4fb87629721f4cb78f0094c45570bbc4
+#: d35c7b434ff54f058a2d9e7f2cfa8369
+msgid "Arabic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 8ac96d73857b44678198694c8ffe021f
+#: cea70fed2b564886906dea4b97eca165
+msgid "Afroasiatic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 d9763e0cca6c41c19e64c7a0114e0625
+#: e6fdfc6f70814a399697f1ac244337f3
+msgid "[#201](https://github.com/bdperkin/findfmt/issues/201)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fa3aab2127f6494f9821e8d485b706d8
+msgid "[#225](https://github.com/bdperkin/findfmt/issues/225)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 35776c16c85d4adcb3644f806f91890d
+msgid "~370 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 739bda50137444708828270ca68d9b7a
+msgid "6 (zero, one, two, few, many, other)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b55cdcf155b245bfa636d9486ea4d975
+msgid "Issue [#225](https://github.com/bdperkin/findfmt/issues/225)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 61182dbf5b284106afef5edb28eb3ef1
+msgid "`ru`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 284a60f7759a4ed1a90f30ae59c98625
+msgid "Russian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 37464f638e4142ea9d8c7280968c3978
+#: 6d5d1557d51641399c68d5261c8ee41b 9d51690d822348968ca7c877f8048fb8
+#: e9f3482c37bc4670bbacd4c054a1e97d
+msgid "Slavic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 2d3ae5a6ce7844ba8f4f0e8da4b19d5d
+#: 91223825818b4745b16deeb409fab743 978d654f263f40269f70f46911a6bb45
+#: dc06d345c1b34648b8c5a9c93dbe723a
+msgid "[#202](https://github.com/bdperkin/findfmt/issues/202)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a963eea59d8e401aaa9203e69071a458
+msgid "[#226](https://github.com/bdperkin/findfmt/issues/226)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fa0bfe3816334648a616dacb41e4a872
+msgid "~255 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 17188a9360d343619aeff8c811bf229d
+#: 3727da44d7e24353a5dc00450fd549a2
+msgid "Cyrillic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9812d38877aa4ab2becbf8077fb1a7cc
+#: a4226c99bed44b52a7c0f5d865a43129
+msgid "3 (`Slavic`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 10d05238be974b15bf5d763f34cdcafd
+msgid "Issue [#226](https://github.com/bdperkin/findfmt/issues/226)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f9bdb495888847b4a822a93f0dc39f27
+msgid "`id`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 302cbff793e44343a32de9c8852a0ea3
+msgid "Indonesian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 ba4e7782cf2e422b8b9c142d1e761046
+#: e0cb8d48065449ed9b2f054e3b6a32fd
+msgid "Austronesian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 070b68eebe374ea199446f740efd6e1a
+#: ac7fd01c1e3349d988dac23290b1dab6
+msgid "[#203](https://github.com/bdperkin/findfmt/issues/203)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 07c1923496e34f49aafecf28f36f7307
+msgid "[#227](https://github.com/bdperkin/findfmt/issues/227)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4e1687a1f4d04fe7b720f997c1153840
+msgid "~199 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 6df7b820b8ec41d89fece8384aa1a975
+msgid "Issue [#227](https://github.com/bdperkin/findfmt/issues/227)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 79f6b70ec2c54f6781daa2b55ff8c7d3
+msgid "`ja`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b87d735ec40b45f3a5f5f14ce42c3a19
+msgid "Japanese"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0f653cb6ab6c41b9ac34b47cc7209b5b
+#: 65ee3aa683c14065ac599ad0487ae584
+msgid "Japonic & Koreanic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1c8bda47b9d24087bcd5bbe27b7faa62
+#: 4a6eab0392ee4fa79311aa51f2503035
+msgid "[#205](https://github.com/bdperkin/findfmt/issues/205)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 159a9b8c1f3d48a9ac62f539a7820914
+msgid "[#228](https://github.com/bdperkin/findfmt/issues/228)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c560f264f8a343cb9cf87127930e3278
+msgid "~123 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c3c6cd0f15154a6ca94e69d32723bce2
+msgid "Kanji / Kana"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:101
+#: bf5dd71d600842c8aead8816f5b3910b
+msgid "5. Tier 2 Tracking Matrix (10M – 120M Speakers)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:103
+#: f892989d64bf4a0489df4294704f0f0d
+msgid ""
+"Each Tier 2 language has an active GitHub sub-issue under the **Future "
+"Features** milestone attached to its parent epic:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e43c58e512de4e8399cb519dae59c41a
+msgid "`en_GB`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 72a58069e8064f009b473e73196058f3
+msgid "English (United Kingdom)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 60d53f47193b479ba9fa4a4f0d9f19cd
+msgid "[#234](https://github.com/bdperkin/findfmt/issues/234)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fe5f7269cb5242db9920825f326227e9
+msgid "~60 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 600d8d40d7d24353ac018b23c2a9a822
+msgid "`nl`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fba197e342fc499e89e721a509adc02b
+msgid "Dutch"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 6abdf9a4aa9548d69d522ee4ecf4a81d
+msgid "[#235](https://github.com/bdperkin/findfmt/issues/235)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9eadfde301ef40bf890ce239ec73fe2c
+#: ae0f59b5a12b4e2f840757b259f4a6b2
+msgid "~24 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4aaef7dcd2d74510ab369ce4c832884a
+msgid "`sv`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 17756f459dca4291a2da6f36d9f7bb97
+msgid "Swedish"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 6faec0b4cb5448b9b08180c3bb2140c5
+msgid "[#236](https://github.com/bdperkin/findfmt/issues/236)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 cac8e2de14f1450b8e1ed7f720c61372
+#: fa73c99905f64af6a2a31aee7830a7a2
+msgid "~10 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 ddd2e04da9964c17933a2fdb2aa56236
+msgid "`my`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 2fb62548b06d4618903457a1f3a35bd5
+msgid "Burmese"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fc036c757a7d49b9a71553a9f6d58b06
+msgid "[#237](https://github.com/bdperkin/findfmt/issues/237)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f96422781acf4fa1ba6512fd755de3ce
+msgid "~33 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c4840a3c8fde478898f287f5ae0ffbb4
+msgid "Myanmar"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4f12b963d23e41f8a66ce9aedb38771f
+msgid "`zh_TW`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c31b09ef5b684c77a2fab8c7989a2315
+msgid "Chinese (Taiwan / Traditional)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 836cf327026142d0925e8a55fc0ae0c7
+msgid "[#238](https://github.com/bdperkin/findfmt/issues/238)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 da7425848ee14093810241be308a6256
+msgid "~23 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 57d4b959e5484caeaf1ff6e0e6271e2c
+msgid "Traditional Han (`Hant`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 7b529cc3964045d09fc044202c33afa9
+msgid "`mr`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 dc5988b901124ae7ba100f13007320b5
+msgid "Marathi"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a2e35f2f2ed946d8a270102ab9835b04
+msgid "[#239](https://github.com/bdperkin/findfmt/issues/239)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 64935312055d43ef856c628ab2efc1eb
+msgid "~99 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 ad628b7491394efb85673a9653a017c7
+msgid "`gu`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 19261f79959242ff9a36161c7a13773b
+#: d8356784a4ad4ccba90feac2c98d0b60
+msgid "Gujarati"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 cf4b99b9bdbc4c5590b86c1c4944a4d1
+msgid "[#240](https://github.com/bdperkin/findfmt/issues/240)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 aa679573df1b4f0b9cec43d59cc79838
+msgid "~62 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 8fa4372b61c24aea80d240f46e782625
+msgid "`or`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 046612908b934c07a6fa4059495d1992
+#: 9d62f32d0c0b417484312cd7a0d869a2
+msgid "Odia"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b2f233742823469697a2e4e45e39121c
+msgid "[#241](https://github.com/bdperkin/findfmt/issues/241)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f7c2490e8b2a479a8c3cb0e12854c0a1
+msgid "~35 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 94ec254af7b64baa92681ef459fb2b72
+msgid "`mai`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 169e829ae3614e349e5226d11ca7a84d
+msgid "Maithili"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 835fa2eef7914375a27754910653197e
+msgid "[#242](https://github.com/bdperkin/findfmt/issues/242)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1c188a518f2b4e66843355cdd782f43f
+msgid "~34 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 2673f1ef6f6c4f3d8b3d47d518c52686
+msgid "Devanagari / Mithilakshar"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c32fb9cff6544d5eaacb8d62fd61f744
+msgid "`as`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 7ff35df298da4f99aa744201bf89e02d
+msgid "Assamese"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fde5d9a9fc0941979083a92ffd2d16a2
+msgid "[#243](https://github.com/bdperkin/findfmt/issues/243)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 3d1e80640084407485859047ee695aee
+#: f4166f0ca02846fc9f005f866d788c21
+msgid "~15 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9380924d92fc446ab4d05c3a78f061b1
+msgid "Bengali-Assamese"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 900c3f263d9f4eac8b397991df0ab30b
+msgid "`si`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c0531e490a3f4a42a55608cfaf21c665
+#: c89a2f1d887c48b0b01c0f6427b2a5f8
+msgid "Sinhala"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 6017b3db19b24e2fa8120ca756d95c5d
+msgid "[#244](https://github.com/bdperkin/findfmt/issues/244)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 6426f48f314449ce9c60515793411417
+msgid "~17 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 ca629839de0e4365938e9f17d897084b
+msgid "`ne`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 beb951a227d94508a85d7fd863e79b0d
+msgid "Nepali"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c4fa5b4b3fe94680843400b77bb6d5fc
+msgid "[#245](https://github.com/bdperkin/findfmt/issues/245)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 096e32ed5a5e4c0e8139cabeaf0bf675
+#: e76cebdb7eb84d51ae1a02c1f9eea95a
+msgid "~16 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1bce8fba6f3840e9b18e63fd22daffac
+msgid "`it`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 3319fb07c0cf488baa8a27d626938b97
+msgid "Italian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4c612c7d80c34351a663eef72401c252
+msgid "[#246](https://github.com/bdperkin/findfmt/issues/246)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 36a7f07959664ce1b02b6e0c58171d19
+msgid "~68 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 515aeb13181a42338922de38483ffe15
+msgid "`ro`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 38191e7cbc3c4289b9d0b11ba21a017b
+msgid "Romanian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 7e1dd1f8d5bf40c8ab959ebbe606d610
+msgid "[#247](https://github.com/bdperkin/findfmt/issues/247)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b5d4ecfa51ce4a89ae28d9b96f63d175
+msgid "3 (`n==1?0:(((n%100>19)|(n%100==0&&n!=0))?2:1))`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1bda92d90c1a41f1bea3ef9ebdefc55f
+msgid "`ca`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1b2255d12e2e42819005d44489647d3e
+msgid "Catalan"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 5db0a966a9a04ade893f1621921bcc24
+msgid "[#248](https://github.com/bdperkin/findfmt/issues/248)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 314e8a01c231472a917f436c04ed9d9c
+msgid "`am`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 d512cd3d783c4967a037f0d40d4aaaca
+msgid "Amharic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 838057cfee0c4ca4ba9ab384c142b875
+msgid "[#249](https://github.com/bdperkin/findfmt/issues/249)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 816dce7ed86d45eab6c1e665a8ebc23f
+msgid "~58 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 769e8d0d20f542cf9ec65179872d775e
+msgid "Ge'ez (Ethiopic)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 13bba2da1f8a4ea88cdcad2777c64b6a
+msgid "`pl`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 5a0b0e32889742e6bbc2f21bad120a51
+msgid "Polish"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f3fd8cb0599240269f129ef457062bf4
+msgid "[#250](https://github.com/bdperkin/findfmt/issues/250)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 69e2111222da4ee7aa3883eb34d02e23
+#: 936f6c7a6c834abfafc12be7db6db695 e65f218d0e5c45b08dbb3414162daa39
+msgid "~40 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 2b586e6ab60c41b891d8d3731511d97e
+msgid "3 (`Polish`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 12e9c264974a4fecbef90f68bc7d05f1
+msgid "`uk`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 8badff88c0f449d5ba7505b0c6ebc92b
+msgid "Ukrainian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 6c7938192d944f3c8a3f12800c5c93de
+msgid "[#251](https://github.com/bdperkin/findfmt/issues/251)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 18e0b2c2ab644a32a49512adb865b0e8
+msgid "`cs`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9cb30a66a3db45ad8e4ba30cd24a6833
+msgid "Czech"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fa20d826b65547a79d8e5856890a4b1a
+msgid "[#252](https://github.com/bdperkin/findfmt/issues/252)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 06b22ebd88bd4366a044aaa1b443a67b
+msgid "~10.7 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 169db3e42db946f1b6f16287310443b9
+msgid "3 (`Czech`)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 7b05bbeb71154789bb57014af5363440
+msgid "`ms`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9478c1295dab4180a5ebc317bfe612ed
+msgid "Malay"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 eb5c0c02b0e74fdb9525b1b7fdbe3c6e
+msgid "[#253](https://github.com/bdperkin/findfmt/issues/253)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 459251129ee742cdaf9e2993ffae8025
+#: 53ceb1c5f0fb498884f7431f9401bc8f a0072536d9194589ad8abdf1f75f2440
+msgid "~30 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 3340d1b5d7bb49478d956a3c14a028bd
+msgid "`te`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 585640ebcd804d2e9619c0294cfbc471
+#: b16baa57db5546a19d5a9a2415837873
+msgid "Telugu"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 3c058442fc584dd0bc74dd6cdb2cab76
+#: 5acad479a98d4d08b8430d8011136c58 9ac4a4c042654c6e9a05872dac56b86a
+#: d4521a2ce1c14f9994404bbdf2fe7f28
+msgid "Dravidian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 242b3d41b1b347a3809b4838f5128f2b
+#: a89285cb4f3d4f8a8ee74453896e3a1a f233aa4cf9584ae3913300e77a233642
+#: fad9778bea79408c913fda6a71fd5592
+msgid "[#204](https://github.com/bdperkin/findfmt/issues/204)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f5098e55026f4ccc9808503beab6aa4a
+msgid "[#254](https://github.com/bdperkin/findfmt/issues/254)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e8b3bd7fc8dc4f24bbc5db9c345ce8bb
+msgid "~96 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 27dd82dacdbe4f1d959a7a7d043cbe31
+msgid "`ta`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 ae486851ecf24762aac2c23ff509fe50
+#: d792a06356a040ea9745ea802fabdc79
+msgid "Tamil"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 faa89fcb185946d981ca0f5862988c2d
+msgid "[#255](https://github.com/bdperkin/findfmt/issues/255)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4561b9158756411a9caa48dd8bb24bb6
+msgid "~87 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1c3a83359a0d4bb588cd1ec7a04dfaeb
+msgid "`kn`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 440665bda47c4b30b657124ba5e118ec
+#: fffc206858c346f0bed6a2498a1f5f71
+msgid "Kannada"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c66f237e63e24e7d9a09cf1ea2678768
+msgid "[#256](https://github.com/bdperkin/findfmt/issues/256)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 bd7ed4c51ea84050bd07e7b6447c2f90
+msgid "~59 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 cfd41625329e45bb8d1d364a772af727
+msgid "`ml`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 43e583ec726641c7a5a1c5738724239a
+#: 58a3c59536734067b3d8c9269ed0bcc1
+msgid "Malayalam"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e90349a0b98549eaacaae9b6a5c7967c
+msgid "[#257](https://github.com/bdperkin/findfmt/issues/257)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e09db3d222d1408b985b83e6825eae89
+msgid "~38 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 799e2a2d45b84adc80c8f1e2eef6159d
+msgid "`ko`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 57c920f4b20d4f25a8b79a78c4ea0e55
+msgid "Korean"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b10e2b6e636c44eebcaea5293e066f47
+msgid "[#258](https://github.com/bdperkin/findfmt/issues/258)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 d36c70b9ad6245ea9d2f7721011a9bc1
+msgid "~82 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 3b37da9eb7694dab94889a64569905ea
+msgid "Hangul"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 13a834728a024a44909bfea0b43656d3
+msgid "`nqo`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 59a8151ad238450784d4604cbc239cfe
+msgid "N'Ko / Manding"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0fa265e05cdf4aab8eb9df52f3ca831d
+#: 83a82835e8d549d9abded1f065931bfb
+msgid "Niger–Congo"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1a6c463b9f95479f87771305c4693a82
+#: ef20f42252c94f1f87cf9defbd9977ce
+msgid "[#206](https://github.com/bdperkin/findfmt/issues/206)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fd3708c2ee4f4e3abcc21a1091a6ec57
+msgid "[#259](https://github.com/bdperkin/findfmt/issues/259)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 171cb56121d0477d84119858d5c0c6e4
+msgid "N'Ko"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0c002f2b87114697be61e7cba88334e2
+msgid "`zu`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 d567b17d40984e249f6fe30cbabfb44e
+msgid "Zulu"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f0670bb8d7dd42eab08bc92ac8f29efd
+msgid "[#260](https://github.com/bdperkin/findfmt/issues/260)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 07cab363a85d4019af5bfa102b4e1ade
+msgid "~14 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 18843c1d1e304a8985313bc5b69058f4
+msgid "`tr`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 fe8d2b381b9e4a40aac422cf1a4e4624
+msgid "Turkish"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 03776dda866348edb1079eb881aabae8
+#: ab6558448f1745ca9c5e7a9ae7980450
+msgid "Turkic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 399ef526226d47e88ee323cc53db8b30
+#: fd824634a09940ddac278e1fce008d20
+msgid "[#207](https://github.com/bdperkin/findfmt/issues/207)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f03353af12ea4e93b5bedfcda6f5cc25
+msgid "[#261](https://github.com/bdperkin/findfmt/issues/261)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4c69e05222d545edb3755d60a01f7df6
+msgid "~90 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 455740256ed7409b813bced3cb2c7795
+msgid "`kk`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 2ab48e7f7206495194e7b7042dcea19c
+msgid "Kazakh"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f228cf6c5a954a1e9d77f6d5fe393f19
+msgid "[#262](https://github.com/bdperkin/findfmt/issues/262)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b326e9212cd34199b90a58b71e423c14
+msgid "Cyrillic / Latin"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4cac89b8ed77468e83ef914f3950ae03
+msgid "`fa`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 264fb85365c744d7ba9c3383e0fba031
+msgid "Persian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4f9de218fe804774ac9394babf064652
+#: b40da55a956243f79498f804a218aa55
+msgid "Other Indo-European"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 54c908c8c33245de98c72de2a919bb4a
+#: b7e737dc4f334ffa92342c45ccb6a0cb
+msgid "[#208](https://github.com/bdperkin/findfmt/issues/208)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 18d7e447f5a24956991470f59e10d1a5
+msgid "[#263](https://github.com/bdperkin/findfmt/issues/263)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9a73b563dd0840cf895d642618813ad4
+msgid "~79 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 ebf16b3cfb014d8aaf996fdbfe418ebd
+msgid "Perso-Arabic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 84ffa0c7e7004874a54e19d94e44cca5
+msgid "`ku`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 705c99cfeb11414091626f7442528ee3
+msgid "Kurdish"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b7a81e5a0a73426c8cbc35f4f926c669
+msgid "[#264](https://github.com/bdperkin/findfmt/issues/264)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 32c57e2fb083433097fb21db793b91e7
+msgid "Latin / Perso-Arabic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 32295d256efe4368a74cdf9ea758ae17
+msgid "LTR / **RTL**"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 c734873f9e7e4905b50ab17fb2643f58
+msgid "`hu`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 8eee5dafa542484097bc06b9f02c9bc4
+msgid "Hungarian"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e717cf70e5aa478596c9f5d0f6e962b7
+msgid "Uralic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 b5b3e775278147228f701216624e9b58
+msgid "[#209](https://github.com/bdperkin/findfmt/issues/209)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 31a9432bc03f4f879f752a1206a61a81
+msgid "[#265](https://github.com/bdperkin/findfmt/issues/265)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 4747156293254f5bab6ead3d0674efa6
+#: cb542c49ae734aeab0d8da058b03b862
+msgid "~13 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 9677a1cde30543e88a597737e0477cec
+msgid "`el`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 167cf77e643e479e85d9ecff5173ef5d
+#: 1a495bd135f94c7696a20a97340d70bb
+msgid "Greek"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 99f69db472994a8893e7437d0bdf6505
+msgid "Hellenic"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1a21c606e9084e0e900abbd1f073c7d0
+msgid "[#210](https://github.com/bdperkin/findfmt/issues/210)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 d0b8bf5792464941ab41a8c2fc4aed8a
+msgid "[#266](https://github.com/bdperkin/findfmt/issues/266)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 228dffd024a34d9dac61e65657d17740
+msgid "`vi`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 0197d49ae6184c2eabcd11268c9db5fa
+msgid "Vietnamese"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 1f39eb11608c478298d48b78da617475
+#: 2a7e714b933246ee85827692cb823af3 a639e4f7c91b438185e2ecc45bc5e6ea
+#: d133785747894b83b092d1d9dcb22fd2
+msgid "All Other"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 2a9bb1406c1343c2ac6b90402fc8ba46
+#: 3225e260519f4b938942f5f8c8c712d1 6589889f4ff54a20a60bfba6d335ffe4
+#: 67a5e2f9a5a1460a999b4c4148099d09
+msgid "[#211](https://github.com/bdperkin/findfmt/issues/211)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e58b4b2c536746bfb8fa4993c1323ebf
+msgid "[#267](https://github.com/bdperkin/findfmt/issues/267)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 f1398918804542dc9addc55069b2ddb3
+msgid "~86 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 a14b78b1e39d45f9a18669f693236dda
+msgid "Latin (Quốc ngữ)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 dde5ec771d1e46f59c1b29c885a56efe
+msgid "`th`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 5dfee490442e4ff0aab0f491b9d4bcbe
+#: f8755bb5b280443ea7ddf84ce0f5b22d
+msgid "Thai"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 e3b6aa50e5d8468bb6c48b1fd04f22bc
+msgid "[#268](https://github.com/bdperkin/findfmt/issues/268)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 992419e9bff64430b9af60cf6e845527
+msgid "~61 M"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 56e45191ce4246a19d48710f3b8a03a6
+msgid "`lo`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 102eca4f354b4458a69ae897f70005b3
+#: 3fb67c0e799f43498fb6c27c32e0cc93
+msgid "Lao"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 64f3381ba73a4a2d893a2a51097e4c63
+msgid "[#269](https://github.com/bdperkin/findfmt/issues/269)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 ca2c741a20464350b0f26c6b49004e9e
+msgid "`km`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 391c6b5f8d1641b8ac065566c602ad18
+#: 5ce33ab959ef4c64a4651ca22497b0d1
+msgid "Khmer"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:6 43a78d9a9446417896c478844b322822
+msgid "[#270](https://github.com/bdperkin/findfmt/issues/270)"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:148
+#: f85a8d1c530344f69499926678b07446
+msgid "6. Language Family Catalog & Hierarchy"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:150
+#: 83ba339e68a54cc690c3bd45f42ed59b
+msgid ""
+"The 17 GitHub Epics organize all 52 active language sub-issues and "
+"subsequent phases:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:291
+#: a4dfb31446034709a102366aa0384157
+msgid "7. Developer Implementation Workflow"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:293
+#: f49f257aec594193ba417e79ae38110f
+msgid ""
+"Follow these steps when implementing support for a target locale "
+"`<locale>`:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:295
+#: eb7a089d9c954126a72e8293a7cd08e4
+msgid "7.1. Step 1: Initialize or Update Message Catalog"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:297
+#: d6f6c18c5edc49c5b02a2a97f78c1818
+msgid "Extract translatable strings and initialize the catalog:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:310
+#: 54aad18173354a1f8f84094302893fb5
+msgid ""
+"The catalog is created or updated at: "
+"`src/findfmt/locale/<locale>/LC_MESSAGES/findfmt.po`"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:312
+#: 86afba653d45403597740dcf6e72a782
+msgid "7.2. Step 2: Configure the Plural-Forms Header"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:314
+#: 76cf30fb2396479398989666b541a442
+msgid ""
+"Edit `src/findfmt/locale/<locale>/LC_MESSAGES/findfmt.po` and set the "
+"`Plural-Forms` header according to gettext standards:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:317
+#: 9050770054f0431bb1e4c0d506368d2c
+msgid ""
+"**Single Form (`nplurals=1; plural=0;`)**: Applicable to Chinese "
+"(`zh_CN`, `zh_TW`), Japanese (`ja`), Korean (`ko`), Indonesian (`id`), "
+"Malay (`ms`), Vietnamese (`vi`), Thai (`th`), Lao (`lo`), Burmese (`my`),"
+" Khmer (`km`), N'Ko (`nqo`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:320
+#: 5cc3886a51ff4c23b5cf30111f444db4
+msgid ""
+"**Two Forms (`nplurals=2; plural=(n != 1);`)**: Applicable to English "
+"(`en`, `en_GB`), German (`de`), Spanish (`es`), Italian (`it`), Catalan "
+"(`ca`), Dutch (`nl`), Swedish (`sv`), Greek (`el`), Hindi (`hi`), Bengali"
+" (`bn`), Urdu (`ur`), Punjabi (`pa`), Marathi (`mr`), Gujarati (`gu`), "
+"Odia (`or`), Telugu (`te`), Tamil (`ta`), Kannada (`kn`), Malayalam "
+"(`ml`), Zulu (`zu`), Hungarian (`hu`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:325
+#: e11a85eb20954d6283b835e9bf2361b7
+msgid ""
+"**French & Brazilian Portuguese (`nplurals=2; plural=(n > 1);`)**: "
+"Applicable where 0 and 1 take the singular form: French (`fr`), Brazilian"
+" Portuguese (`pt_BR`), Turkish (`tr`), Persian (`fa`), Amharic (`am`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:328
+#: 1a8c05101028420ead06e1670bf72e83
+msgid ""
+"**Slavic Three Forms (`nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : "
+"n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);`)**: Applicable "
+"to Russian (`ru`), Ukrainian (`uk`), Belarusian (`be`), Serbian (`sr`), "
+"Croatian (`hr`), Bosnian (`bs`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:332
+#: a3cd73e215e94f738264459a72689473
+msgid ""
+"**Polish Three Forms (`nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 "
+"&& (n%100<12 || n%100>14) ? 1 : 2);`)**: Applicable to Polish (`pl`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:335
+#: d2dd7aea9c594170b757248b85c35227
+msgid ""
+"**Czech Three Forms (`nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 "
+": 2;`)**: Applicable to Czech (`cs`), Slovak (`sk`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:337
+#: 850a4d81d82e4be7825d1e71411b8eda
+msgid ""
+"**Romanian Three Forms (`nplurals=3; "
+"plural=(n==1?0:(((n%100>19)||(n%100==0&&n!=0))?2:1));`)**: Applicable to "
+"Romanian (`ro`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:339
+#: 96eb4f568f394fecbda7ac0f9fe650c4
+msgid ""
+"**Arabic Six Forms (`nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 :"
+" n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);`)**: "
+"Applicable to Arabic (`ar`)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:343
+#: eb76d480c8e44de699f3c5fc942102b3
+msgid "7.3. Step 3: Translate Strings & Validate Format Placeholders"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:345
+#: 014acd95495e428085bfae32e2ffc649
+msgid ""
+"Translate all `msgid` entries into `msgstr` (or `msgstr[0]`, `msgstr[1]`,"
+" etc. for pluralized strings)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:347
+#: 19b420852bd349c888081d4e53780f69
+#, python-brace-format, python-format
+msgid ""
+"Ensure formatting placeholders (such as `{count}`, `{path}`, `%s`) are "
+"preserved verbatim."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:348
+#: 94f23678d4b842e2b1a88eba6d2d6e71
+msgid ""
+"Retain command-line arguments, option flags (`--tree`, `-t`, `-s`), and "
+"tag names without translation."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:350
+#: c70fd3c9b10e4c5083a676cd5862e45b
+msgid ""
+"Ensure all files are saved with UTF-8 encoding without byte-order marks "
+"(BOM)."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:352
+#: caa2de4dc962409b9ee97513e8eedb04
+msgid "7.4. Step 4: Compile Catalogs and Test Packaging"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:354
+#: 70e67fc0a5bc47fabaa6e63130df75c7
+msgid "Compile `.po` files to binary `.mo` format and verify wheel packaging:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:364
+#: a8f71e9f6e6a41a8baa0cc9d6d71fcd0
+msgid "7.5. Step 5: Add Unit & Integration Tests"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:366
+#: 762dc6fc46544163993e705a89001161
+msgid "Add test cases to `tests/unit/test_i18n_runtime.py` verifying:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:368
+#: 2731611180094a679d7a0a13d53b59e3
+msgid "Catalog loading via `override_locale(\"<locale>\")`."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:369
+#: 5bfbc68d0b3c4ae5a072a1656a099401
+msgid "Execution of the CLI with `--locale <locale>` or `--lang <locale>`."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:370
+#: 19a81c6b33b94059ae33cb02d5d0199b
+msgid "Boundary testing of singular and plural numbers."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:371
+#: 103b707f450941a085371aa48bdf0ebf
+msgid "Clean rendering without mojibake or string interpolation errors."
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:373
+#: e88fe0ce30fc4f7886fdeeebb5c0a737
+msgid "7.6. Step 6: Sphinx Documentation Localization"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:375
+#: a96f89e6d89f419d8d914f90f31f18d2
+msgid "Extract documentation strings and update language catalogs for Sphinx:"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:385
+#: 0006563250dd45ca8ebfdb8282433c63
+msgid "7.7. Step 7: Quality Verification Gates"
+msgstr ""
+
+#: ../../source/guides/localization_plan.md:387
+#: 6534e90d04004079b6c33f8aecc2d915
+msgid "Run the automated verification suite:"
+msgstr ""

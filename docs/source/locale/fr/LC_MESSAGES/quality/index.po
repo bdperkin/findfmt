@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-15 13:27-0400\n"
+"POT-Creation-Date: 2026-10-24 01:04-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -19,71 +19,82 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/quality/index.md:1 e430deac43ba4184bc6df0f68b379c4b
+#: ../../source/quality/index.md:1 83fc704fb5eb411eb3d4c5c75b69e2ad
 msgid "Quality Metrics & Architecture"
 msgstr ""
 
-#: ../../source/quality/index.md:3 5da440af6b444aed8c2c6193d97e9cfb
+#: ../../source/quality/index.md:3 d4cefc00098846d0b55b0def1025a05d
 msgid "`findfmt` is engineered under the strictest software quality standards."
 msgstr ""
 
-#: ../../source/quality/index.md:5 f31400fa0fbc4cb8b0793aeb02f26370
+#: ../../source/quality/index.md:5 e95457b3a5ee49aabbe7947ea44404b9
 msgid "1. Code Quality Standards"
 msgstr ""
 
-#: ../../source/quality/index.md:7 04541578e0b84a3cbd95d0595149dce2
+#: ../../source/quality/index.md:7 25f7eb0a494c454a94cda7f526789f20
 msgid ""
 "**100% Code Coverage**: Enforced through `pytest-cov` and Codecov CI "
 "checks."
 msgstr ""
 
-#: ../../source/quality/index.md:8 07579e16cc784a9f800ed61b598459c0
+#: ../../source/quality/index.md:8 e5ffdc0610d543e397dce947d4c0f6e9
 msgid ""
 "**Strict Static Typing**: Verified with `ty` in pedantic mode (`all = "
 "\"error\"`) and `pyproject.toml` configuration."
 msgstr ""
 
-#: ../../source/quality/index.md:10 e1f684795afa4ed0a20f0d8e4c13e5b6
+#: ../../source/quality/index.md:10 c16adc601a194e90930b0ae28a92d820
 msgid ""
 "**Ruff Strictness**: Formatted and linted using `ruff` with `ALL` rules "
 "selected."
 msgstr ""
 
-#: ../../source/quality/index.md:11 8dcde05fb10a4c24a2ab2e431d1d5131
+#: ../../source/quality/index.md:11 73fe35cf96124366ab7f55c7f4960e7b
 msgid "**Cyclomatic Complexity**: Monitored using `radon` and capped via `xenon`."
 msgstr ""
 
-#: ../../source/quality/index.md:12 84aee582cac143b8a4044b16983e1eda
+#: ../../source/quality/index.md:12 174172abc94f483181b8c6ab6df5939a
 #, python-format
 msgid ""
 "**Documentation Completeness**: Monitored via `interrogate` ensuring 100%"
 " docstring coverage."
 msgstr ""
 
-#: ../../source/quality/index.md:13 c7012f49c8154201ba24652e8645c4ec
+#: ../../source/quality/index.md:13 39c1ae3e69b247f69047b9475b6dd103
 msgid ""
 "**Prose & Style Linting**: Enforced on all Markdown documentation using "
 "Vale with Google and Proselint style standards."
 msgstr ""
 
-#: ../../source/quality/index.md:16 46a61ac1d2ed4ebaac1c64a21973b545
-msgid "2. Traversal Complexity Optimization"
+#: ../../source/quality/index.md:16 99d1fef3605f467a950610dd00f9a54a
+msgid "2. Traversal Complexity Optimization & Performance Baselines"
 msgstr ""
 
-#: ../../source/quality/index.md:18 b0e3bf59a4d1430db5e37d639eaa50ea
+#: ../../source/quality/index.md:18 effb3769e3d644f08caa26f5f63ab15a
 msgid ""
 "Repository traversal performs early pruning of `.gitignore` hierarchies "
 "to prevent recursing into expansive unneeded directory trees such as "
-"`node_modules`, `.venv`, or compilation artifact directories."
+"`node_modules`, `.venv`, or compilation artifact directories in $O(1)$ "
+"time."
 msgstr ""
 
-#: ../../source/quality/index.md:22 cdf2afb82fab429a9c8ad7b5a1335e95
+#: ../../source/quality/index.md:22 4fccc2132e7d4b3a8503177d3dd20dfc
+msgid ""
+"Official v1.0.0 benchmarks establish traversal throughput exceeding 3,000"
+" files/second on standard hierarchies and confirm bounded $O(1)$ memory "
+"usage across streaming output formatters (`text`, `jsonl`, `tsv`, `csv`)."
+" See [Performance Architecture & Benchmarks](performance.md) for full "
+"topology baselines and regression testing procedures."
+msgstr ""
+
+#: ../../source/quality/index.md:27 48237215a90e435f90cb13166a5112a8
 msgid "3. Python Runtime Compatibility"
 msgstr ""
 
-#: ../../source/quality/index.md:24 63147d538be5457fa75b652d537b8414
+#: ../../source/quality/index.md:29 b21cf5c70cd044c8b83c116737ab0b91
 msgid ""
-"`findfmt` officially supports Python 3.10 through 3.15, with automated CI"
-" matrices testing Ubuntu, macOS, and Windows. See the complete analysis "
-"and version matrix:"
+"`findfmt` officially supports Python 3.11 through 3.15, with automated CI"
+" matrices testing Ubuntu, macOS, and Windows. A non-gating `3.16-dev` job"
+" gives early warning for the next Python release. See the complete "
+"analysis and version matrix:"
 msgstr ""

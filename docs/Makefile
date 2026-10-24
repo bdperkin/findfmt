@@ -74,7 +74,7 @@ changes:
 	@$(SPHINXBUILD) -b changes -d "$(DOCTREEDIR)" "$(SOURCEDIR)" "$(BUILDDIR)/changes" $(SPHINXOPTS)
 
 intl-update: gettext
-	@$(SPHINXINTL) update -p "$(BUILDDIR)/gettext" -d "$(LOCALEDIR)" $(foreach lang,$(LANGUAGES),-l $(lang))
+	@$(SPHINXINTL) update --no-obsolete -p "$(BUILDDIR)/gettext" -d "$(LOCALEDIR)" $(foreach lang,$(LANGUAGES),-l $(lang))
 
 intl-build:
 	@$(SPHINXINTL) build -d "$(LOCALEDIR)"
