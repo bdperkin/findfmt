@@ -18,6 +18,7 @@ else:  # pragma: no cover
 import typer
 import typer.core
 from typer import rich_utils
+from typer.core import _click
 
 from findfmt.cli.file_config import extract_config_args, resolve_and_load_config
 from findfmt.cli.signals import (
@@ -33,7 +34,6 @@ if TYPE_CHECKING:
     from types import FrameType
 
     from rich.pager import Pager
-    from typer.core import _click
 
 __all__ = [
     "FindfmtCommand",
@@ -334,6 +334,8 @@ class FindfmtCommand(typer.core.TyperCommand):
     ) -> _click.Context:
         """Create Click execution context with injected configuration defaults.
 
+        Applies precedence: wrapper defaults < config file defaults < explicit CLI flags (#454).
+
         Args:
             info_name: Invoked command name.
             args: Command-line arguments.
@@ -361,12 +363,17 @@ class FindfmtCommand(typer.core.TyperCommand):
                 path, defaults = None, {}
 
         existing_defaults = extra.get("default_map")
-        merged_defaults = dict(defaults)
-        if isinstance(existing_defaults, dict):
-            merged_defaults.update(existing_defaults)
+        wrapper_defaults = dict(existing_defaults) if isinstance(existing_defaults, dict) else {}
+        merged_defaults = {**wrapper_defaults, **defaults}
 
         extra["default_map"] = merged_defaults
         ctx = super().make_context(info_name, args, parent=parent, **extra)
+        for key in wrapper_defaults:
+            if key not in defaults and (
+                ctx.get_parameter_source(key) is _click.core.ParameterSource.DEFAULT_MAP
+            ):
+                ctx.set_parameter_source(key, _click.core.ParameterSource.DEFAULT)
+
         ctx.meta["findfmt_config_path"] = path
         ctx.meta["findfmt_config_data"] = defaults
         return ctx

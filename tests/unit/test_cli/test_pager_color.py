@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import sys
+from pathlib import Path
 from typing import Any
 
 if sys.version_info >= (3, 12):  # pragma: no cover
@@ -15,7 +16,10 @@ import pytest
 import typer
 import typer.core
 from rich.pager import Pager
+from typer.core import _click
 
+from findfmt.cli import app
+from findfmt.cli.file_config import reset_active_config
 from findfmt.cli.pager import (
     FindfmtCommand,
     _capture_help_output,
@@ -193,3 +197,34 @@ def test_help_pager_preserves_color_on_dumb_term_when_forced() -> None:
     assert len(mock_pager.contents) == 1
     assert "\x1b[" in mock_pager.contents[0]
     assert "Usage: findfmt" in strip_ansi(mock_pager.contents[0])
+
+
+def test_make_context_parameter_source_tracking(tmp_path: Path) -> None:
+    """Verify make_context sets ParameterSource for wrapper, config, and CLI (#454)."""
+    reset_active_config()
+    cfg = tmp_path / "c.toml"
+    cfg.write_text("hidden = false\nmax_depth = 2\n", encoding="utf-8")
+    cmd = typer.main.get_command(app)
+
+    ctx_cfg = cmd.make_context(
+        "findfiles",
+        ["--config", str(cfg)],
+        default_map={"hidden": True, "list_tags": True},
+    )
+    assert ctx_cfg.params["hidden"] is False
+    assert ctx_cfg.get_parameter_source("hidden") is _click.core.ParameterSource.DEFAULT_MAP
+    assert ctx_cfg.params["list_tags"] is True
+    assert ctx_cfg.get_parameter_source("list_tags") is _click.core.ParameterSource.DEFAULT
+    assert ctx_cfg.params["max_depth"] == 2
+    assert ctx_cfg.get_parameter_source("max_depth") is _click.core.ParameterSource.DEFAULT_MAP
+
+    ctx_cli = cmd.make_context(
+        "findfiles",
+        ["--config", str(cfg), "--hidden", "--no-list-tags"],
+        default_map={"hidden": True, "list_tags": True},
+    )
+    assert ctx_cli.params["hidden"] is True
+    assert ctx_cli.get_parameter_source("hidden") is _click.core.ParameterSource.COMMANDLINE
+    assert ctx_cli.params["list_tags"] is False
+    assert ctx_cli.get_parameter_source("list_tags") is _click.core.ParameterSource.COMMANDLINE
+    reset_active_config()
