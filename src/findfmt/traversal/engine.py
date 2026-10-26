@@ -22,13 +22,11 @@ from findfmt.traversal.boundaries import (
     yield_matching_items,
 )
 from findfmt.traversal.ignore import (
-    is_path_ignored,
     load_child_specs,
     load_custom_gitignore_spec,
     load_git_exclude_spec,
     load_gitignore_spec,
     load_global_gitignore_spec,
-    load_spec_file,
 )
 from findfmt.traversal.patterns import create_pattern_matcher
 from findfmt.traversal.sorting import collect_directory_entries
@@ -45,9 +43,6 @@ if TYPE_CHECKING:
     PathSpecType = pathspec.PathSpec[Any]
 else:
     PathSpecType = Any
-
-_load_spec_file = load_spec_file
-_is_path_ignored = is_path_ignored
 
 __all__ = [
     "find_files",
