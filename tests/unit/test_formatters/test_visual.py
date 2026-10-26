@@ -7,7 +7,9 @@ from collections import Counter
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
+from findfmt.cli import app
 from findfmt.formatters.visual import (
     RICH_BOX_STYLES,
     RichTableFormatter,
@@ -253,17 +255,9 @@ def test_rich_formatters_metadata_populated_and_none() -> None:
         show_device=True,
     )
     table_out = table_fmt.format(files_with_meta)
-    assert "Inode" in table_out
-    assert "Device" in table_out
-    assert "Permissions" in table_out
-    assert "User" in table_out
-    assert "Group" in table_out
-    assert "-rw-r--r--" in table_out
-    assert "alice" in table_out
-    assert "users" in table_out
-    assert "12345" in table_out
-    assert "6789" in table_out
-    assert "-" in table_out
+    expected = ("Inode", "Device", "Permissions", "User", "Group", "-rw-r--r--", "alice", "users")
+    for token in (*expected, "12345", "6789", "-"):
+        assert token in table_out
 
     # Test RichTreeFormatter
     tree_fmt = RichTreeFormatter(
@@ -275,9 +269,30 @@ def test_rich_formatters_metadata_populated_and_none() -> None:
         show_device=True,
     )
     tree_out = tree_fmt.format(files_with_meta)
-    assert "-rw-r--r--" in tree_out
-    assert "alice" in tree_out
-    assert "users" in tree_out
-    assert "12345" in tree_out
-    assert "6789" in tree_out
+    for token in ("-rw-r--r--", "alice", "users", "12345", "6789"):
+        assert token in tree_out
+
     assert "[- - - - -]" in tree_out or "-" in tree_out
+
+
+@pytest.mark.parametrize("cli_flags", [["--sort", "size"], ["--reverse"], ["--dirsfirst"]])
+def test_tree_respects_sort_and_reverse(tmp_path: Path, cli_flags: list[str]) -> None:
+    """Verify tree format preserves --sort, --reverse, and --dirsfirst leaf order."""
+    (tmp_path / "alpha.txt").write_bytes(b"x" * 100)
+    (tmp_path / "beta.txt").write_bytes(b"x" * 10)
+    sub = tmp_path / "subdir"
+    sub.mkdir()
+    (sub / "gamma.txt").write_bytes(b"x" * 50)
+    runner = CliRunner()
+    text_res = runner.invoke(app, [str(tmp_path), "-f", "text", *cli_flags])
+    tree_res = runner.invoke(app, [str(tmp_path), "-f", "tree", *cli_flags])
+    assert text_res.exit_code == 0
+    assert tree_res.exit_code == 0
+    expected_order = [Path(line).name for line in text_res.stdout.splitlines() if line.strip()]
+    actual_order = [
+        name
+        for line in tree_res.stdout.splitlines()
+        for name in ("alpha.txt", "beta.txt", "gamma.txt")
+        if name in line
+    ]
+    assert actual_order == expected_order

@@ -383,10 +383,7 @@ class XmlFormatter(Formatter):
         Returns:
             Well-formed XML document string ending with a newline.
         """
-        sorted_files = sorted(
-            files,
-            key=lambda f: str(f.path if self.absolute else f.relative_path),
-        )
+        sorted_files = list(files)
 
         root = ET.Element("tree")
         if sorted_files:

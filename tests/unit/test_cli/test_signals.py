@@ -470,3 +470,27 @@ def test_is_broken_pipe_wrapper():
         pass
 
     assert is_broken_pipe_wrapper(FakePacifyFlushWrapper())
+
+
+@pytest.fixture(scope="module")
+def broken_pipe_tree(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Create a directory tree large enough to exceed OS pipe buffers across all formats."""
+    root = tmp_path_factory.mktemp("pipe_tree")
+    for i in range(350):
+        (root / f"entry_{i:04d}_{'x' * 180}.txt").write_text("data\n")
+
+    return root
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX signal tests")
+@pytest.mark.parametrize("fmt", [f.value for f in OutputFormat])
+def test_broken_pipe_exit_code_consistent(broken_pipe_tree: Path, fmt: str) -> None:
+    """Verify every output format exits with code 0 and empty stderr on broken pipe."""
+    cmd = [sys.executable, "-m", "findfmt", "-f", fmt, str(broken_pipe_tree)]
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    assert proc.stdout is not None
+    assert len(proc.stdout.read(1)) == 1
+    proc.stdout.close()
+    _, err = proc.communicate(timeout=10)
+    assert proc.returncode == 0
+    assert err == b""

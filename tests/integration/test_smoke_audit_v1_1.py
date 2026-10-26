@@ -152,3 +152,10 @@ def test_missing_paths_never_traceback(tmp_path: Path, fmt: str) -> None:
     """A missing path ends without a traceback in every format (exit code: #320)."""
     _run(str(tmp_path / "missing"), "-f", fmt)
     _run(str(tmp_path / "missing"), "--from-file", str(tmp_path / "missing.txt"), "-f", fmt)
+
+
+@pytest.mark.parametrize("fmt", ["tree", "html", "xml"])
+def test_tree_html_xml_respect_sort_and_reverse(tree: Path, fmt: str) -> None:
+    """Hierarchical formats preserve --sort and --reverse ordering (#341)."""
+    _, out = _run(str(tree), "-f", fmt, "--sort", "size", "--reverse")
+    assert out.index("script.py") < out.index("blob.bin")

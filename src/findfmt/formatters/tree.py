@@ -312,10 +312,7 @@ class RichTreeFormatter(Formatter):
 
     def _build_tree(self, files: Iterable[FileInfo]) -> Tree:
         """Construct a nested Rich Tree populated with directory branches and files."""
-        sorted_files = sorted(
-            files,
-            key=lambda f: str(f.path if self.absolute else f.relative_path),
-        )
+        sorted_files = list(files)
         tree = self._init_tree_root()
         dir_nodes: dict[tuple[str, ...], Tree] = {}
         dir_disk_paths: dict[tuple[str, ...], Path] = {}

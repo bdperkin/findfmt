@@ -222,3 +222,12 @@ def test_pager_controller_force_color_overrides() -> None:
     c_off = PagerController(pager=False, stream=tty, force_color=False)
     c_off.display("\x1b[32mDisabled\x1b[0m\n")
     assert tty.getvalue() == "Disabled\n"
+
+
+def test_get_console_broken_pipe_raises_broken_pipe_error() -> None:
+    """Verify get_console Console subclass raises BrokenPipeError instead of SystemExit(1)."""
+    console = get_console(io.StringIO())
+    with pytest.raises(BrokenPipeError):
+        console.on_broken_pipe()
+
+    assert console.quiet is True

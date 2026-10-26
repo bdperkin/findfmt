@@ -442,10 +442,7 @@ class HtmlFormatter(Formatter):
         Returns:
             Semantic HTML5 document string.
         """
-        sorted_files = sorted(
-            files,
-            key=lambda f: str(f.path if self.absolute else f.relative_path),
-        )
+        sorted_files = list(files)
 
         listing = ""
         if sorted_files:
