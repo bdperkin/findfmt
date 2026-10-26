@@ -23,7 +23,6 @@ from findfmt.traversal.boundaries import (
 )
 from findfmt.traversal.ignore import (
     is_path_ignored,
-    load_ancestor_specs,
     load_child_specs,
     load_custom_gitignore_spec,
     load_git_exclude_spec,
@@ -60,22 +59,6 @@ __all__ = [
     "should_skip_dir",
     "traverse_directory",
 ]
-
-
-def _load_active_specs(
-    root: Path,
-    active_specs: tuple[tuple[Path, PathSpecType], ...] | None,
-    *,
-    respect_gitignore: bool,
-) -> tuple[tuple[Path, PathSpecType], ...]:
-    """Load active gitignore specs for a directory from parent or ancestors."""
-    if not respect_gitignore:
-        return ()
-
-    if active_specs is None or not active_specs:
-        return load_ancestor_specs(root)
-
-    return load_child_specs(root, active_specs)
 
 
 def _scan_directory_entries(  # noqa: PLR0913
