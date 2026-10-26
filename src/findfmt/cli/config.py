@@ -285,7 +285,7 @@ def build_traversal_config(  # noqa: PLR0913
         json=json,
     )
 
-    root_paths = tuple(paths) if paths else (Path(),)
+    root_paths = tuple(paths or (Path(),))
     format_val = str(
         output_format.value if hasattr(output_format, "value") else output_format,
     )
@@ -308,8 +308,8 @@ def build_traversal_config(  # noqa: PLR0913
         max_depth=max_depth,
         file_limit=file_limit,
         prune_empty=prune,
-        include_patterns=tuple(pattern) if pattern else (),
-        exclude_patterns=tuple(exclude_pattern) if exclude_pattern else (),
+        include_patterns=tuple(pattern) if pattern is not None else (),
+        exclude_patterns=tuple(exclude_pattern) if exclude_pattern is not None else (),
         ignore_case=ignore_case,
         match_dirs=match_dirs,
         relative_paths=not absolute,

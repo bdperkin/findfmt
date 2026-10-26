@@ -98,8 +98,8 @@ def _format_file_label(  # noqa: PLR0913
         exact=show_size,
     )
     size_part = f" [green]{formatted_sz}[/]"
-    mime_val = rich.markup.escape(file_info.mime_type) if file_info.mime_type else ""
-    mime_part = f" [dim]{mime_val}[/]" if file_info.mime_type else ""
+    mime_val = rich.markup.escape(file_info.mime_type or "")
+    mime_part = f" [dim]{mime_val}[/]" if mime_val else ""
     return f"{prefix}📄 {display_name}{size_part}{tags_part}{mime_part}"
 
 

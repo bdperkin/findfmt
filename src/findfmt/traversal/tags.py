@@ -63,7 +63,7 @@ def _collect_possible_tags(
     """Collect possible tags from filename, MIME type, and interpreters."""
     mime_type, _ = mimetypes.guess_type(filename)
     mime_tags: set[str] = set()
-    if mime_type:
+    if mime_type is not None:
         mime_tags.add(f"mime:{mime_type}")
         mime_tags.add(mime_type.split("/", 1)[0])
 

@@ -77,7 +77,7 @@ def classify_file_offline(
         tags.add("symlink")
 
     mime_type, _ = mimetypes.guess_type(str_path)
-    if mime_type:
+    if mime_type is not None:
         tags.add(f"mime:{mime_type}")
         tags.add(mime_type.split("/", 1)[0])
 

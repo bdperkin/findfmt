@@ -130,7 +130,7 @@ def extract_messages(
     cmd_pot = _to_rel_path_str(pot_file) if cwd else str(pot_file)
 
     pybabel_bin = shutil.which("pybabel")
-    if pybabel_bin:
+    if pybabel_bin is not None:
         cmd = [
             pybabel_bin,
             "extract",
@@ -155,7 +155,7 @@ def extract_messages(
         return proc.returncode
 
     xgettext_bin = shutil.which("xgettext")
-    if xgettext_bin:
+    if xgettext_bin is not None:
         cmd = [
             xgettext_bin,
             "--language=Python",
@@ -209,7 +209,7 @@ def init_catalog(
     cmd_locale = _to_rel_path_str(locale_dir) if cwd else str(locale_dir)
 
     pybabel_bin = shutil.which("pybabel")
-    if pybabel_bin:
+    if pybabel_bin is not None:
         cmd = [pybabel_bin, "init", "-i", cmd_pot, "-d", cmd_locale, "-l", locale, "-D", domain]
         proc = subprocess.run(cmd, cwd=cwd, check=False)
         if proc.returncode == 0:
@@ -218,7 +218,7 @@ def init_catalog(
         return proc.returncode
 
     msginit_bin = shutil.which("msginit")
-    if msginit_bin:
+    if msginit_bin is not None:
         target_po.parent.mkdir(parents=True, exist_ok=True)
         cmd_target = _to_rel_path_str(target_po) if cwd else str(target_po)
         cmd = [
@@ -296,7 +296,7 @@ def update_catalogs(
     cmd_locale = _to_rel_path_str(locale_dir) if cwd else str(locale_dir)
 
     pybabel_bin = shutil.which("pybabel")
-    if pybabel_bin:
+    if pybabel_bin is not None:
         cmd = [pybabel_bin, "update", "-i", cmd_pot, "-d", cmd_locale, "-D", domain]
         proc = subprocess.run(cmd, cwd=cwd, check=False)
         if proc.returncode == 0:
@@ -307,7 +307,7 @@ def update_catalogs(
         return proc.returncode
 
     msgmerge_bin = shutil.which("msgmerge")
-    if msgmerge_bin:
+    if msgmerge_bin is not None:
         for po_path in locale_dir.glob(f"*/LC_MESSAGES/{domain}.po"):
             cmd_target = _to_rel_path_str(po_path) if cwd else str(po_path)
             cmd = [msgmerge_bin, "--update", cmd_target, cmd_pot]
@@ -341,12 +341,12 @@ def compile_catalogs(
         Exit code (0 for success, non-zero for failure).
     """
     pybabel_bin = shutil.which("pybabel")
-    if pybabel_bin:
+    if pybabel_bin is not None:
         cmd = [pybabel_bin, "compile", "-d", str(locale_dir), "-D", domain]
         return subprocess.run(cmd, check=False).returncode
 
     msgfmt_bin = shutil.which("msgfmt")
-    if msgfmt_bin:
+    if msgfmt_bin is not None:
         for po_path in locale_dir.glob(f"*/LC_MESSAGES/{domain}.po"):
             mo_path = po_path.with_suffix(".mo")
             proc = subprocess.run([msgfmt_bin, "-o", str(mo_path), str(po_path)], check=False)

@@ -7,6 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Bug Fixes
+
+- *(format)* XML output keeps the `mtime` and `ctime` attributes for files whose timestamp is the
+  Unix epoch (`0.0`) instead of dropping them (#513).
+
+### Changed
+
+- *(api)* `findfmt.cli.trap_cli_signals` is annotated as returning `Generator[None]` instead of
+  `Iterator[None]`, which ty deprecates for `@contextmanager`. Runtime behavior is unchanged (#513).
+
 ## [1.1.0] - 2026-10-24
 
 findfmt 1.1.0 requires Python 3.11 or newer; Python 3.10 users should pin `findfmt<1.1`. Upgrading

@@ -15,7 +15,7 @@ __all__ = ["matches_filter"]
 
 def _matches_shebang(shebang: str | None, filter_str: str | None) -> bool:
     """Check if file shebang satisfies the shebang filter criteria."""
-    return not filter_str or bool(shebang and filter_str in shebang)
+    return filter_str is None or not filter_str or bool(shebang and filter_str in shebang)
 
 
 def _matches_tags(tags: frozenset[str], config: TraversalConfig) -> bool:

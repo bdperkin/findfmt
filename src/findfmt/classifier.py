@@ -241,7 +241,7 @@ def _shebang_info(
         return None, set()
 
     shebang = extract_shebang_from_buffer(buffer) if buffer is not None else extract_shebang(path)
-    if not shebang:
+    if shebang is None:
         return None, set()
 
     parts = (
@@ -263,7 +263,9 @@ def _mime_info(str_path: str) -> tuple[str | None, set[str]]:
         Tuple containing MIME type string (or None) and set of MIME tags.
     """
     mime_type, _ = mimetypes.guess_type(str_path)
-    tags: set[str] = {f"mime:{mime_type}", mime_type.split("/", 1)[0]} if mime_type else set()
+    tags: set[str] = (
+        {f"mime:{mime_type}", mime_type.split("/", 1)[0]} if mime_type is not None else set()
+    )
     return mime_type, tags
 
 

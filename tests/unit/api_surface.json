@@ -538,7 +538,7 @@
   },
   "trap_cli_signals": {
    "kind": "function",
-   "signature": "(stream: 'TextIO | None' = None, *, standalone_mode: 'bool' = False) -> 'Iterator[None]'"
+   "signature": "(stream: 'TextIO | None' = None, *, standalone_mode: 'bool' = False) -> 'Generator[None]'"
   },
   "validate_and_convert_config": {
    "kind": "function",
@@ -1409,7 +1409,7 @@
   },
   "trap_cli_signals": {
    "kind": "function",
-   "signature": "(stream: 'TextIO | None' = None, *, standalone_mode: 'bool' = False) -> 'Iterator[None]'"
+   "signature": "(stream: 'TextIO | None' = None, *, standalone_mode: 'bool' = False) -> 'Generator[None]'"
   }
  },
  "findfmt.diagnostics": {

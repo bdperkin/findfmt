@@ -134,10 +134,7 @@ def test_write_stream_safe_buffer_fallback() -> None:
             super().__init__()
             self.buffer = io.BytesIO()
 
-        @property
-        @override
-        def encoding(self) -> str:
-            return "utf-8"
+        encoding = "utf-8"
 
         @override
         def write(self, s: str) -> int:

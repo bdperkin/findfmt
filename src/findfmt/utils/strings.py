@@ -167,6 +167,14 @@ def quote_filename(text: str) -> str:
     return f'"{escaped}"'
 
 
+def _wrap_osc8_link(text: str, uri: str, *, escape_markup: bool) -> str:
+    """Wrap text in an OSC 8 hyperlink, keeping a leading markup escape intact."""
+    if escape_markup and text.startswith("\\"):
+        return format_osc8_link(f"\\{text}", uri)
+
+    return format_osc8_link(text, uri)
+
+
 def format_display_path(  # noqa: PLR0913
     path_str: str,
     *,
@@ -204,17 +212,14 @@ def format_display_path(  # noqa: PLR0913
     if quote_name:
         result = quote_filename(result)
 
-    if indicator:
+    if indicator is not None:
         result = f"{result}{indicator}"
 
     if escape_markup:
         result = rich.markup.escape(result)
 
-    if hyperlink and uri:
-        if escape_markup and result.startswith("\\"):
-            result = format_osc8_link(f"\\{result}", uri)
-        else:
-            result = format_osc8_link(result, uri)
+    if hyperlink and uri is not None and uri:
+        result = _wrap_osc8_link(result, uri, escape_markup=escape_markup)
 
     return result
 
