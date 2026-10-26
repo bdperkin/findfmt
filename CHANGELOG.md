@@ -10,12 +10,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Bug Fixes
 
 - *(format)* XML output keeps the `mtime` and `ctime` attributes for files whose timestamp is the
-  Unix epoch (`0.0`) instead of dropping them (#PR).
+  Unix epoch (`0.0`) instead of dropping them (#513).
 
 ### Changed
 
 - *(api)* `findfmt.cli.trap_cli_signals` is annotated as returning `Generator[None]` instead of
-  `Iterator[None]`, which ty deprecates for `@contextmanager`. Runtime behavior is unchanged (#PR).
+  `Iterator[None]`, which ty deprecates for `@contextmanager`. Runtime behavior is unchanged (#513).
 
 ## [1.1.0] - 2026-10-24
 
