@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, patch
 
 from findfmt.models import FileInfo, TraversalConfig
 from findfmt.traversal.engine import (
-    _is_path_ignored,
     _scan_directory_entries,
     _traverse_single_root,
     find_files,
@@ -14,6 +13,7 @@ from findfmt.traversal.engine import (
     should_skip_dir,
     traverse_directory,
 )
+from findfmt.traversal.ignore import is_path_ignored
 from findfmt.traversal.patterns import create_pattern_matcher
 
 
@@ -125,7 +125,7 @@ def test_is_path_ignored_not_relative(tmp_path: Path):
     spec = load_gitignore_spec(tmp_path)
     assert spec is not None
     unrelated_path = Path("/other/unrelated/path.txt")
-    assert not _is_path_ignored(unrelated_path, is_dir=False, specs=((tmp_path, spec),))
+    assert not is_path_ignored(unrelated_path, is_dir=False, specs=((tmp_path, spec),))
 
 
 def test_scan_directory_entries_os_error(tmp_path: Path):
