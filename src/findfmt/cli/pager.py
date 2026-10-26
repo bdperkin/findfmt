@@ -18,7 +18,6 @@ else:  # pragma: no cover
 import typer
 import typer.core
 from typer import rich_utils
-from typer.core import _click
 
 from findfmt.cli.file_config import extract_config_args, resolve_and_load_config
 from findfmt.cli.signals import (
@@ -34,6 +33,7 @@ if TYPE_CHECKING:
     from types import FrameType
 
     from rich.pager import Pager
+    from typer.core import _click
 
 __all__ = [
     "FindfmtCommand",
@@ -369,10 +369,10 @@ class FindfmtCommand(typer.core.TyperCommand):
         extra["default_map"] = merged_defaults
         ctx = super().make_context(info_name, args, parent=parent, **extra)
         for key in wrapper_defaults:
-            if key not in defaults and (
-                ctx.get_parameter_source(key) is _click.core.ParameterSource.DEFAULT_MAP
-            ):
-                ctx.set_parameter_source(key, _click.core.ParameterSource.DEFAULT)
+            if key not in defaults:
+                source = ctx.get_parameter_source(key)
+                if source is not None and source.name == "DEFAULT_MAP":
+                    ctx.set_parameter_source(key, type(source)["DEFAULT"])
 
         ctx.meta["findfmt_config_path"] = path
         ctx.meta["findfmt_config_data"] = defaults

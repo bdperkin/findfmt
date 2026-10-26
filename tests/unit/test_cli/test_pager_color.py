@@ -16,7 +16,6 @@ import pytest
 import typer
 import typer.core
 from rich.pager import Pager
-from typer.core import _click
 
 from findfmt.cli import app
 from findfmt.cli.file_config import reset_active_config
@@ -212,11 +211,11 @@ def test_make_context_parameter_source_tracking(tmp_path: Path) -> None:
         default_map={"hidden": True, "list_tags": True},
     )
     assert ctx_cfg.params["hidden"] is False
-    assert ctx_cfg.get_parameter_source("hidden") is _click.core.ParameterSource.DEFAULT_MAP
+    assert getattr(ctx_cfg.get_parameter_source("hidden"), "name", None) == "DEFAULT_MAP"
     assert ctx_cfg.params["list_tags"] is True
-    assert ctx_cfg.get_parameter_source("list_tags") is _click.core.ParameterSource.DEFAULT
+    assert getattr(ctx_cfg.get_parameter_source("list_tags"), "name", None) == "DEFAULT"
     assert ctx_cfg.params["max_depth"] == 2
-    assert ctx_cfg.get_parameter_source("max_depth") is _click.core.ParameterSource.DEFAULT_MAP
+    assert getattr(ctx_cfg.get_parameter_source("max_depth"), "name", None) == "DEFAULT_MAP"
 
     ctx_cli = cmd.make_context(
         "findfiles",
@@ -224,7 +223,7 @@ def test_make_context_parameter_source_tracking(tmp_path: Path) -> None:
         default_map={"hidden": True, "list_tags": True},
     )
     assert ctx_cli.params["hidden"] is True
-    assert ctx_cli.get_parameter_source("hidden") is _click.core.ParameterSource.COMMANDLINE
+    assert getattr(ctx_cli.get_parameter_source("hidden"), "name", None) == "COMMANDLINE"
     assert ctx_cli.params["list_tags"] is False
-    assert ctx_cli.get_parameter_source("list_tags") is _click.core.ParameterSource.COMMANDLINE
+    assert getattr(ctx_cli.get_parameter_source("list_tags"), "name", None) == "COMMANDLINE"
     reset_active_config()
