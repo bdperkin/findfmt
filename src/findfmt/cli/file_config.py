@@ -107,13 +107,13 @@ def extract_config_args(
 def _get_standard_user_config_path() -> Path:
     """Determine the platform-standard path for the user configuration file."""
     if platform.system() == "Windows":
-        app_data = os.environ.get("APPDATA")
+        app_data = os.environ.get("APPDATA", "")
         if app_data:
             return Path(app_data) / "findfmt" / "config.toml"
 
         return Path.home() / "AppData" / "Roaming" / "findfmt" / "config.toml"
 
-    xdg_config_home = os.environ.get("XDG_CONFIG_HOME")
+    xdg_config_home = os.environ.get("XDG_CONFIG_HOME", "")
     if xdg_config_home:
         return Path(xdg_config_home) / "findfmt" / "config.toml"
 

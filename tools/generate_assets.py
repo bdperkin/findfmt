@@ -56,10 +56,10 @@ def find_converter() -> str:
     Raises:
         ConverterNotFoundError: If neither inkscape nor magick is found in PATH.
     """
-    if shutil.which("inkscape"):
+    if shutil.which("inkscape") is not None:
         return "inkscape"
 
-    if shutil.which("magick"):
+    if shutil.which("magick") is not None:
         return "magick"
 
     raise ConverterNotFoundError
@@ -117,7 +117,7 @@ def build_favicon_ico(png_layers: list[Path], output_ico: Path) -> None:
         output_ico: Destination path for favicon.ico.
     """
     magick = shutil.which("magick")
-    if not magick:
+    if magick is None:
         raise MagickNotFoundError
 
     output_ico.parent.mkdir(parents=True, exist_ok=True)
@@ -135,7 +135,7 @@ def optimize_png(png_path: Path, max_colors: int = 1024) -> None:
         max_colors: Maximum palette colors to retain.
     """
     magick = shutil.which("magick")
-    if not magick:
+    if magick is None:
         return
 
     cmd = [magick, str(png_path), "-colors", str(max_colors), str(png_path)]

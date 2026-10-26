@@ -204,8 +204,16 @@ class XmlFormatter(Formatter):
 
     def _apply_metadata_attrs(self, file_info: FileInfo, elem: ET.Element) -> None:
         """Populate optional metadata attributes on target XML element."""
-        mt = format_timestamp(file_info.mtime, self.time_format) if file_info.mtime else None
-        ct = format_timestamp(file_info.ctime, self.time_format) if file_info.ctime else None
+        mt = (
+            format_timestamp(file_info.mtime, self.time_format)
+            if file_info.mtime is not None
+            else None
+        )
+        ct = (
+            format_timestamp(file_info.ctime, self.time_format)
+            if file_info.ctime is not None
+            else None
+        )
         du = (
             self._format_size_val(file_info.accumulated_size)
             if file_info.accumulated_size is not None
@@ -233,7 +241,7 @@ class XmlFormatter(Formatter):
         elem.set("size", self._format_size_val(file_info.size_bytes))
         elem.set("executable", "true" if file_info.is_executable else "false")
         elem.set("symlink", "true" if file_info.is_symlink else "false")
-        if file_info.symlink_target:
+        if file_info.symlink_target is not None and file_info.symlink_target:
             elem.set("symlink_target", str(self._clean_val(file_info.symlink_target)))
 
         self._apply_metadata_attrs(file_info, elem)
@@ -242,11 +250,11 @@ class XmlFormatter(Formatter):
             tag_elem = ET.SubElement(elem, "tag")
             tag_elem.text = self._clean_val(tag)
 
-        if file_info.mime_type:
+        if file_info.mime_type is not None and file_info.mime_type:
             mime_elem = ET.SubElement(elem, "mime")
             mime_elem.text = self._clean_val(file_info.mime_type)
 
-        if file_info.shebang:
+        if file_info.shebang is not None and file_info.shebang:
             shebang_elem = ET.SubElement(elem, "shebang")
             shebang_elem.text = self._clean_val(file_info.shebang)
 

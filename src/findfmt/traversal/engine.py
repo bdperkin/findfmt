@@ -72,7 +72,7 @@ def _load_active_specs(
     if not respect_gitignore:
         return ()
 
-    if not active_specs:
+    if active_specs is None or not active_specs:
         return load_ancestor_specs(root)
 
     return load_child_specs(root, active_specs)

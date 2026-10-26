@@ -143,7 +143,7 @@ def _build_href(base_href: str | None, target_path: Path) -> str:
     ]
     quoted_path = "/".join(quoted_segments)
 
-    if not base_href:
+    if base_href is None or not base_href:
         return quoted_path
 
     if base_href.endswith("/"):
@@ -381,7 +381,7 @@ class HtmlFormatter(Formatter):
             )
 
         mime_part = ""
-        if file_info.mime_type:
+        if file_info.mime_type is not None and file_info.mime_type:
             mime_part = f' <span class="mime">{html.escape(file_info.mime_type)}</span>'
 
         return f"{tags_part}{mime_part}"
@@ -393,7 +393,7 @@ class HtmlFormatter(Formatter):
     ) -> str:
         """Render single directory or file entry line."""
         indicator = node.file_info.indicator if (self.classify and node.file_info) else None
-        if self.classify and node.is_dir and not indicator:
+        if self.classify and node.is_dir and (indicator is None or not indicator):
             indicator = "/"
 
         display_name = format_display_path(
@@ -467,8 +467,8 @@ class HtmlFormatter(Formatter):
             self._render_tree_lines(root_node, dir_sizes, lines)
             listing = "\n".join(lines)
 
-        intro_part = f"{self.intro}\n" if self.intro else ""
-        outro_part = f"{self.outro}\n" if self.outro else ""
+        intro_part = f"{self.intro}\n" if self.intro is not None and self.intro else ""
+        outro_part = f"{self.outro}\n" if self.outro is not None and self.outro else ""
 
         return HTML_TEMPLATE.format(
             title=html.escape(self.title),

@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, TextIO
 import typer
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
 
 __all__ = [
     "handle_broken_pipe",
@@ -89,7 +89,7 @@ def trap_cli_signals(
     stream: TextIO | None = None,
     *,
     standalone_mode: bool = False,
-) -> Iterator[None]:
+) -> Generator[None]:
     """Context manager to trap BrokenPipeError and KeyboardInterrupt cleanly.
 
     Args:

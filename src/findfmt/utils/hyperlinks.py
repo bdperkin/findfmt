@@ -59,7 +59,7 @@ def build_file_uri(
     sanitized_schema = _sanitize_uri_component(schema)
     scheme, rest_clean = _normalize_schema(sanitized_schema)
 
-    if authority:
+    if authority is not None and authority:
         sanitized_auth = _sanitize_uri_component(authority)
         if rest_clean:
             return f"{scheme}://{sanitized_auth}/{rest_clean}{quoted_path}"

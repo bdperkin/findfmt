@@ -48,7 +48,7 @@ def get_git_version() -> str | None:
         Git version string or None if git is not detected.
     """
     git_path = shutil.which("git")
-    if not git_path:
+    if git_path is None:
         return None
 
     try:

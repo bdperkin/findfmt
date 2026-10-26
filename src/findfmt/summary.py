@@ -27,7 +27,7 @@ def parse_tag_arguments(tag_args: Sequence[str] | None) -> frozenset[str]:
     Returns:
         frozenset of lowercase tag strings.
     """
-    if not tag_args:
+    if tag_args is None:
         return frozenset[str]()
 
     result: set[str] = set()

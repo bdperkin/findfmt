@@ -64,7 +64,7 @@ def detect_locale(env: Mapping[str, str] | None = None) -> str:
     """
     mapping = os.environ if env is None else env
     for var in ("LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
-        val = mapping.get(var)
+        val = mapping.get(var, "")
         if val:
             for part in val.split(":"):
                 cleaned = part.strip()
@@ -90,7 +90,7 @@ def detect_locales(env: Mapping[str, str] | None = None) -> list[str]:
     seen: set[str] = set()
 
     for var in ("LANGUAGE", "LC_ALL", "LC_MESSAGES", "LANG"):
-        val = mapping.get(var)
+        val = mapping.get(var, "")
         if val:
             for part in val.split(":"):
                 cleaned = part.strip()

@@ -83,7 +83,7 @@ def load_spec_file(spec_file: Path) -> PathSpecType | None:
 def _find_git_config_excludes_file() -> Path | None:
     """Find core.excludesFile from git config if available and existing."""
     git_path = shutil.which("git")
-    if not git_path:
+    if git_path is None:
         return None
 
     try:
@@ -105,7 +105,7 @@ def _find_git_config_excludes_file() -> Path | None:
 
 def _find_standard_global_gitignore() -> Path | None:
     """Find global gitignore from standard XDG or home directory paths."""
-    xdg_env = os.environ.get("XDG_CONFIG_HOME")
+    xdg_env = os.environ.get("XDG_CONFIG_HOME", "")
     if xdg_env:
         xdg_path = Path(xdg_env) / "git" / "ignore"
         if xdg_path.is_file():
@@ -240,18 +240,18 @@ def load_ancestor_specs(root: Path) -> tuple[tuple[Path, PathSpecType], ...]:
 
     specs: list[tuple[Path, PathSpecType]] = []
     global_spec = load_global_gitignore_spec()
-    if global_spec:
+    if global_spec is not None:
         base_dir = git_root if git_root is not None else resolved
         specs.append((base_dir, global_spec))
 
     if git_root is not None:
         git_exclude = load_git_exclude_spec(git_root)
-        if git_exclude:
+        if git_exclude is not None:
             specs.append((git_root, git_exclude))
 
     for directory in ancestors:
         spec = load_gitignore_spec(directory)
-        if spec:
+        if spec is not None:
             specs.append((directory, spec))
 
     return tuple(specs)
@@ -282,11 +282,11 @@ def load_child_specs(
 
     if is_nested_repo:
         git_exclude = load_git_exclude_spec(child_dir)
-        if git_exclude:
+        if git_exclude is not None:
             new_specs.append((child_dir, git_exclude))
 
     local_spec = load_gitignore_spec(child_dir)
-    if local_spec:
+    if local_spec is not None:
         new_specs.append((child_dir, local_spec))
 
     if new_specs:
@@ -350,7 +350,10 @@ def resolve_active_specs(
     if respect_gitignore:
         specs.extend(load_ancestor_specs(root))
 
-    if gitignore_file is not None and (custom_spec := load_custom_gitignore_spec(gitignore_file)):
+    if (
+        gitignore_file is not None
+        and (custom_spec := load_custom_gitignore_spec(gitignore_file)) is not None
+    ):
         specs.append((root, custom_spec))
 
     return tuple(specs)

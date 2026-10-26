@@ -268,7 +268,10 @@ def _report_violations(all_violations: Sequence[Violation]) -> int:
 
 def run_linter(files: Sequence[Path] | None, config: LinterConfig, root: Path) -> int:
     """Execute line length enforcement and print notices to stderr."""
-    targets = _filter_explicit_files(files, config, root) if files else discover_files(root, config)
+    explicit = files or ()
+    targets = (
+        _filter_explicit_files(explicit, config, root) if explicit else discover_files(root, config)
+    )
     all_violations: list[Violation] = []
     for target in targets:
         all_violations.extend(check_file(target, config))

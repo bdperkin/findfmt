@@ -253,8 +253,8 @@ class RichTableFormatter(Formatter):
             escape_markup=True,
         )
         row = [rich.markup.escape(c) for c in row]
-        mime_val = rich.markup.escape(file_info.mime_type) if file_info.mime_type else ""
-        shebang_val = rich.markup.escape(file_info.shebang) if file_info.shebang else ""
+        mime_val = rich.markup.escape(file_info.mime_type or "")
+        shebang_val = rich.markup.escape(file_info.shebang or "")
         row.extend(
             [
                 display_path,

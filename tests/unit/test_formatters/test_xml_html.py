@@ -187,6 +187,23 @@ def test_xml_formatter_directory_file_info() -> None:
     assert pkg_dir.attrib["indicator"] == "/"
 
 
+def test_xml_formatter_epoch_timestamps() -> None:
+    """Verify XmlFormatter keeps mtime and ctime attributes for a 0.0 (epoch) timestamp."""
+    file_info = FileInfo(
+        path=Path("/workspace/project/epoch.txt"),
+        relative_path=Path("epoch.txt"),
+        tags=frozenset({"text"}),
+        mtime=0.0,
+        ctime=0.0,
+    )
+    fmt = XmlFormatter()
+    parsed = ET.fromstring(fmt.format([file_info]))
+    file_elem = parsed.find(".//file")
+    assert file_elem is not None
+    assert "mtime" in file_elem.attrib
+    assert "ctime" in file_elem.attrib
+
+
 def test_xml_formatter_special_characters() -> None:
     """Verify XmlFormatter safely escapes XML special characters."""
     file_info = FileInfo(

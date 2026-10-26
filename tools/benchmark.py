@@ -120,7 +120,7 @@ def _run_single_traversal(  # noqa: PLR0913
     config = TraversalConfig(
         root_paths=(target_path,),
         respect_gitignore=True,
-        include_tags=frozenset([tag_filter]) if tag_filter else frozenset(),
+        include_tags=frozenset(filter(None, [tag_filter])),
     )
     tracemalloc.start()
     start_time = time.perf_counter()
