@@ -57,6 +57,22 @@ def test_wrapper_exit_status_and_errors(tree: Path, capsys: pytest.CaptureFixtur
     assert "Traceback" not in capsys.readouterr().err
 
 
+def test_wrapper_honors_config_over_wrapper_defaults(
+    tree: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Wrapper entry points honor config file overrides while CLI flags still win (#454)."""
+    (tree / ".secret").write_text("hidden\n", encoding="utf-8")
+    cfg = tree / "findfmt.toml"
+    cfg.write_text("hidden = false\n", encoding="utf-8")
+
+    assert main_findfiles(["--config", str(cfg), str(tree)]) == 0
+    assert ".secret" not in capsys.readouterr().out
+
+    assert main_findfiles(["--config", str(cfg), "--hidden", str(tree)]) == 0
+    assert ".secret" in capsys.readouterr().out
+
+
 def test_human_readable_sizes_use_iec_labels(tree: Path) -> None:
     """-h prints IEC binary labels, and --si keeps SI metric labels (#352)."""
     assert "[2.0 KiB] blob.bin" in _run(str(tree), "-h", "-l")[1]

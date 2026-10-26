@@ -22,6 +22,7 @@ from findfmt.cli.file_config import (
     reset_active_config,
 )
 from findfmt.diagnostics import get_diagnostics, show_config_callback
+from findfmt.entrypoints import main_findfiles
 from findfmt.formatters import OutputFormat
 
 
@@ -31,11 +32,6 @@ def _cleanup_config_state():
     reset_active_config()
     yield
     reset_active_config()
-
-
-# -----------------------------------------------------------------------------
-# 1. resolve_and_load_config & state retrieval tests
-# -----------------------------------------------------------------------------
 
 
 def test_resolve_and_load_config_none():
@@ -73,11 +69,6 @@ def test_resolve_and_load_config_active_state(tmp_path: Path):
     assert defaults["hidden"] is True
     assert get_active_config_path() == cfg
     assert get_active_config_data() == {"format": "tree", "hidden": True}
-
-
-# -----------------------------------------------------------------------------
-# 2. format_config_dump tests
-# -----------------------------------------------------------------------------
 
 
 def test_format_config_dump_none():
@@ -120,11 +111,6 @@ def test_format_toml_value():
     assert _format_toml_value("hello") == '"hello"'
     assert _format_toml_value(["a", "b"]) == '["a", "b"]'
     assert _format_toml_value([1, 2]) == "[1, 2]"
-
-
-# -----------------------------------------------------------------------------
-# 3. End-to-End CLI Integration tests via CliRunner
-# -----------------------------------------------------------------------------
 
 
 def test_cli_show_config_no_file():
@@ -287,3 +273,18 @@ def test_cli_config_file_exit_status(tmp_path: Path):
     runner = CliRunner()
     res = runner.invoke(app, ["--config", str(cfg), str(tmp_path), "-t", "nonexistent-tag"])
     assert res.exit_code == 1
+
+
+def test_wrapper_defaults_do_not_override_config(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """findfiles --config with hidden = false hides dotfiles, matching --show-config (#454)."""
+    cfg = tmp_path / "c.toml"
+    cfg.write_text("hidden = false\n", encoding="utf-8")
+    (tmp_path / "visible.txt").write_text("ok\n", encoding="utf-8")
+    (tmp_path / ".hid").write_text("secret\n", encoding="utf-8")
+    assert main_findfiles(["--config", str(cfg), str(tmp_path)]) == 0
+    assert ".hid" not in capsys.readouterr().out
+    assert main_findfiles(["--config", str(cfg), "--show-config"]) == 0
+    assert "hidden = false" in capsys.readouterr().out

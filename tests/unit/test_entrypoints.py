@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import runpy
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
+from findfmt.cli.file_config import reset_active_config
 from findfmt.entrypoints import (
     _consume_option,
     _extract_first_positional,
@@ -216,3 +218,42 @@ def test_systemexit_string_maps_to_1():
         mock_cmd.main.side_effect = SystemExit(None)
         mock_get_cmd.return_value = mock_cmd
         assert main(["."]) == 0
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        (main_findfiles, [], "hidden = false\n", ["--hidden"], ".config/settings.yaml"),
+        (main_findfilemime, [], "hidden = false\nlist_tags = false\n", ["--list-tags"], "["),
+        (main_findfilefmt, ["yaml"], "hidden = false\n", ["--hidden"], ".config/settings.yaml"),
+        (main_findshebang, ["bash"], "hidden = false\n", ["--hidden"], ".hidden.sh"),
+        (main_findfmt0, [], "hidden = false\nprint0 = false\n", ["--print0"], "\0"),
+        (main_findsummary, [], "hidden = false\nsummary = false\n", ["--summary"], "Matched"),
+    ],
+)
+def test_wrapper_config_and_cli_precedence(
+    sample_repo: Path,
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    case: tuple[Any, list[str], str, list[str], str],
+) -> None:
+    """Verify config file beats wrapper defaults and CLI flags beat config (#454)."""
+    wrapper, args, cfg_text, cli_flags, token = case
+    (sample_repo / ".hidden.sh").write_text("#!/bin/bash\necho hi\n", encoding="utf-8")
+    reset_active_config()
+    cfg = tmp_path / "c.toml"
+    cfg.write_text(cfg_text, encoding="utf-8")
+    assert wrapper([*args, "--config", str(cfg), str(sample_repo)]) == 0
+    captured = capsys.readouterr()
+    assert token not in (captured.out + captured.err).replace("\\", "/")
+
+    assert wrapper(["--config", str(cfg), "--show-config"]) == 0
+    show_out = capsys.readouterr().out
+    assert f"Active configuration: {cfg}" in show_out
+    for line in cfg_text.strip().splitlines():
+        assert line in show_out
+
+    assert wrapper([*args, "--config", str(cfg), *cli_flags, str(sample_repo)]) == 0
+    cli_captured = capsys.readouterr()
+    assert token in (cli_captured.out + cli_captured.err).replace("\\", "/")
+    reset_active_config()
