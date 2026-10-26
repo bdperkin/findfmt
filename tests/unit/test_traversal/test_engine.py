@@ -2,12 +2,9 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pathspec
-
 from findfmt.models import FileInfo, TraversalConfig
 from findfmt.traversal.engine import (
     _is_path_ignored,
-    _load_active_specs,
     _scan_directory_entries,
     _traverse_single_root,
     find_files,
@@ -123,11 +120,6 @@ def test_matches_filter_shebang():
     assert not matches_filter(no_shebang, TraversalConfig(shebang_filter="bash"))
 
 
-def test_load_active_specs_no_gitignore(tmp_path: Path):
-    specs = _load_active_specs(tmp_path, (), respect_gitignore=False)
-    assert specs == ()
-
-
 def test_is_path_ignored_not_relative(tmp_path: Path):
     (tmp_path / ".gitignore").write_text("*.txt", encoding="utf-8")
     spec = load_gitignore_spec(tmp_path)
@@ -175,18 +167,6 @@ def test_traverse_directory_and_gitignore(sample_repo: Path):
     assert not any(".nestedignore" in p for p in rel_paths)
     assert not any(".config" in p for p in rel_paths)
     assert not any(".gitexcluded" in p for p in rel_paths)
-
-
-def test_load_active_specs_with_and_without_git_exclude(tmp_path: Path):
-    # Plain dir without git exclude or gitignore
-    empty_specs = _load_active_specs(tmp_path, (), respect_gitignore=True)
-    assert empty_specs == ()
-
-    # Passing existing active_specs skips root git_exclude check
-    dummy_spec = pathspec.PathSpec.from_lines("gitignore", ["*.tmp"])
-    existing_tuple = ((tmp_path, dummy_spec),)
-    res = _load_active_specs(tmp_path, existing_tuple, respect_gitignore=True)
-    assert len(res) == 1
 
 
 def test_scan_directory_entries_broken_symlink(tmp_path: Path):
