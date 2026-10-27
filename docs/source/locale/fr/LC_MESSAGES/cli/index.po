@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 13:53-0400\n"
+"POT-Creation-Date: 2026-10-26 20:20-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -19,25 +19,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/cli/index.md:1 fd3cdd0866254bff90b1e154c991ae22
+#: ../../source/cli/index.md:1 4053809deb5e4d1782b206b976597a0d
 msgid "CLI Reference"
 msgstr ""
 
-#: ../../source/cli/index.md:3 705287ac1afd41d39447e235ded22f3b
+#: ../../source/cli/index.md:3 0160fd14c2534e0e949a978911d9e04f
 msgid ""
 "`findfmt` provides a Unix-style command-line interface with options for "
 "tagging, filtering, and output formatting."
 msgstr ""
 
-#: ../../source/cli/index.md:6 8297eed048a44b73a80b011265dd1e67
+#: ../../source/cli/index.md:6 e3a35f1a63204ec2b06c5d24d2be6464
 msgid "1. Synopsis"
 msgstr ""
 
-#: ../../source/cli/index.md:13 f48bffa9e17342e1a42ed38b122d8efc
+#: ../../source/cli/index.md:13 81cfc83c9cd141ec88832af66b0c0d6f
 msgid "2. Description"
 msgstr ""
 
-#: ../../source/cli/index.md:15 9f8beb83a9524178a6750504c04dd461
+#: ../../source/cli/index.md:15 765ae9a935404683b0146e0a7aee8e9d
 msgid ""
 "`findfmt` is a high-performance, `.gitignore`-aware file discovery and "
 "classification suite. It locates files by content format, shebang, and "
@@ -46,113 +46,113 @@ msgid ""
 "terminal review."
 msgstr ""
 
-#: ../../source/cli/index.md:20 223f8ea92d764c8f889b321af76fc360
+#: ../../source/cli/index.md:20 e67652e2617f4fdb9c5f19753fd62635
 msgid "3. Options"
 msgstr ""
 
-#: ../../source/cli/index.md:22 8175570853ed402ebd94b7b1c7d5112e
+#: ../../source/cli/index.md:22 a5165eccd8944cb78136c5806fdfcfb4
 msgid "3.1. Tag Filtering"
 msgstr ""
 
-#: ../../source/cli/index.md:24 24029d2048504b049b5a126e1aa76db3
+#: ../../source/cli/index.md:24 8872b6fde8e1487eb571d0e515f1ca4a
 msgid ""
 "`-t, --type, --tag TAG` : Filter files by tag (e.g. `python`, `yaml`, "
 "`json`, `shell`, `executable`). Can be specified multiple times or comma-"
 "separated (`-t python,shell`)."
 msgstr ""
 
-#: ../../source/cli/index.md:27 6b57b1e5470841d49049e83be9baa064
+#: ../../source/cli/index.md:27 bd7aaa244ba94a91b96a6a1a529eeb76
 msgid "`-e, --exclude, --exclude-tag TAG` : Exclude files matching this tag."
 msgstr ""
 
-#: ../../source/cli/index.md:29 2a5a3768bd114c79b3112507a01d1b21
+#: ../../source/cli/index.md:29 a711480b800e4d868c02fd35059a6d58
 msgid ""
 "`--all-tags / --no-all-tags` : Require matching files to contain **all** "
 "specified include tags rather than at least one (`--no-all-tags` disables"
 " this requirement)."
 msgstr ""
 
-#: ../../source/cli/index.md:32 709befd6cd49470495de48b32d56824a
+#: ../../source/cli/index.md:32 f2801fb7b8f44d678e85a7bdb1ad2e15
 msgid ""
 "`--shebang INTERPRETER` : Filter files whose shebang line contains the "
 "specified interpreter name or substring."
 msgstr ""
 
-#: ../../source/cli/index.md:35 7693492843d34bf6a9fc487a6bd34604
+#: ../../source/cli/index.md:35 62c6a235fd624f96be15482f42ba96cd
 msgid "3.2. Traversal Controls"
 msgstr ""
 
-#: ../../source/cli/index.md:37 dff0521ee74749eea45415f2afab3f22
+#: ../../source/cli/index.md:37 10f47d9791564c5ab3ac23238570248d
 msgid ""
 "`-d, --dirs-only` : List directories only, suppressing regular file "
 "entries."
 msgstr ""
 
-#: ../../source/cli/index.md:39 b9f8715053e5404ba18221a737460bd3
+#: ../../source/cli/index.md:39 0850a9bb60a8404c86b55397e9c1cbe4
 msgid ""
 "`-l, --follow-links, --follow-symlinks / --no-follow-links, --no-follow-"
 "symlinks` (alias: `--symlinks / --no-symlinks`) : Follow directory "
 "symlinks with cycle and loop detection."
 msgstr ""
 
-#: ../../source/cli/index.md:42 564cae48e430492181a26926b451a6cd
+#: ../../source/cli/index.md:42 524e2571a76e4310a75d0b89879af8c8
 msgid ""
 "`-x, --one-file-system` : Confine traversal to the filesystem device of "
 "the starting directory."
 msgstr ""
 
-#: ../../source/cli/index.md:44 f7b50f921125474ebf5ba0dcc81b1605
+#: ../../source/cli/index.md:44 17efd32f25024502b1a766ad45c8fcff
 msgid ""
 "`-L, --max-depth LEVEL` : Restrict directory traversal descent to a "
 "maximum depth level."
 msgstr ""
 
-#: ../../source/cli/index.md:46 2c7e1ae82e14491298b410b375bc4903
+#: ../../source/cli/index.md:46 85df2754d0cb48e687375fcbc21267e9
 msgid ""
 "`--filelimit LIMIT` : Skip directories whose immediate child entry count "
 "exceeds this threshold."
 msgstr ""
 
-#: ../../source/cli/index.md:48 2dd3e5db94cf46d79d00144cc52f32dd
+#: ../../source/cli/index.md:48 a7df19db9817450ea49e9f13f9a68b6f
 msgid ""
 "`--prune` : Omit empty directories and directories containing zero "
 "matching files from output."
 msgstr ""
 
-#: ../../source/cli/index.md:50 14fd4b796a3e40c383441b880aada823
+#: ../../source/cli/index.md:50 843038cb0ef1424086c59f2e8f3d1aa4
 msgid ""
 "`-P, --pattern, --include-pattern PATTERN` : List only files matching the"
 " wildcard or glob expression. Supports multiple `-P` flags and `|` "
 "alternation (e.g. `*.py|*.md`)."
 msgstr ""
 
-#: ../../source/cli/index.md:53 b3e17a5cf4a046cd951b527e87dcd7a8
+#: ../../source/cli/index.md:53 e41e992180c44fdbb47cef7ccdfe8978
 msgid ""
 "`-I, --exclude-pattern PATTERN` : Omit files and directories matching the"
 " wildcard or glob expression. Supports multiple `-I` flags and `|` "
 "alternation (e.g. `*.tmp|*.bak`)."
 msgstr ""
 
-#: ../../source/cli/index.md:56 e6bd00f1c00344fea1676670483abf6d
+#: ../../source/cli/index.md:56 fe3ca07fa9bb4ce8b2b3bf28d51d604d
 msgid ""
 "`--ignore-case / --no-ignore-case` : Apply case-insensitive matching "
 "across `-P` and `-I` patterns."
 msgstr ""
 
-#: ../../source/cli/index.md:58 d8b2b492e76243f095727fc05187cd1b
+#: ../../source/cli/index.md:58 c46c6633114046acb926225be83421b1
 msgid ""
 "`--match-dirs, --matchdirs / --no-match-dirs, --no-matchdirs` : Match "
 "directory names against patterns. If a directory matches, pattern "
 "restrictions are disabled for its children."
 msgstr ""
 
-#: ../../source/cli/index.md:61 9a6a45f5a6f04057a58f75a5fac814aa
+#: ../../source/cli/index.md:61 1e4f54277c2041edb5c2e8888b34d599
 msgid ""
 "`--gitignore-file PATH` : Apply a specific external ignore file across "
 "the traversal scope."
 msgstr ""
 
-#: ../../source/cli/index.md:63 6d03cdafb0884c59a6189e1445cc4272
+#: ../../source/cli/index.md:63 ee2ea71ea45b448ea4772c3d3c6bc00e
 msgid ""
 "`--from-file, --fromfile PATH` : Ingest directory listings and path "
 "structures from an external file or standard input (`-`) instead of "
@@ -161,7 +161,7 @@ msgid ""
 " with automatic hierarchy and symlink (`link -> target`) detection."
 msgstr ""
 
-#: ../../source/cli/index.md:68 02eecc3d33ef47eb8607a7bca25d90ee
+#: ../../source/cli/index.md:68 6e844aae7d57452c9c1dac5e40c694bb
 msgid ""
 "`--offline` : Enforce offline classification without inspecting the local"
 " filesystem. Identifies file formats and types strictly via extension and"
@@ -169,196 +169,196 @@ msgid ""
 "manifests or containers without raising filesystem IO errors."
 msgstr ""
 
-#: ../../source/cli/index.md:72 3732d44316cb4adba7aa2536aff87866
+#: ../../source/cli/index.md:72 6eaa38aa33c94d82a3fe6753b82839fd
 msgid ""
 "`--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or "
 "`.git/info/exclude`. Use `--ignore` to restore `.gitignore` honoring."
 msgstr ""
 
-#: ../../source/cli/index.md:75 75d01261a8084066987d5a38d9903c4e
+#: ../../source/cli/index.md:75 89f642eb0fc84757a7de4069acc1920a
 msgid ""
 "`-a, --all / --no-all` (alias: `--hidden / --no-hidden`) : Traverse "
 "hidden files and directories (names starting with `.`). Use `--no-all` or"
 " `--no-hidden` to exclude hidden paths."
 msgstr ""
 
-#: ../../source/cli/index.md:78 1d4ed11fb0f74e059710ccf9b968d718
+#: ../../source/cli/index.md:78 283ec601c9f249fb8da1a7594c909cb2
 msgid ""
 "`--sort CRITERIA` : Sort entries by criteria: `name` (default), `version`"
 " (natural numbers), `time` (or `mtime`, newest first), `ctime` (status "
 "change, newest first), `size` (largest first), or `none` (unsorted)."
 msgstr ""
 
-#: ../../source/cli/index.md:82 d5ec11b6c8d74cfc8169e763a3bc0429
+#: ../../source/cli/index.md:82 f30888e905694bd6a9fedc3d30ea24f2
 msgid ""
 "`-r, --reverse` : Invert active sort order (e.g. oldest first for time, "
 "smallest first for size, reverse alphabetical for name)."
 msgstr ""
 
-#: ../../source/cli/index.md:85 01e3c1ccf0c44ca8bef3e02645416e25
+#: ../../source/cli/index.md:85 17463ae910a94877bed3cb1c7a66b24e
 msgid ""
 "`-U, --unsorted` : Do not sort entries; yield files in raw filesystem "
 "order (equivalent to `--sort=none`). Bypasses sorting overhead and memory"
 " buffering for massive trees."
 msgstr ""
 
-#: ../../source/cli/index.md:88 5118c1b1f16b4919b50f0ee6eef65b28
+#: ../../source/cli/index.md:88 c7e7adf4cbf24208a761ac2d137bd740
 msgid ""
 "`--dirsfirst, --group-directories-first` : Group all directories before "
 "files within each directory level, sorting each group by active criteria."
 msgstr ""
 
-#: ../../source/cli/index.md:91 0b117e0943b646179c2a62053026173a
+#: ../../source/cli/index.md:91 41676bdd13d94ad3a28cce6fc5b67c84
 msgid ""
 "`--filesfirst` : Group all regular files before directories within each "
 "directory level."
 msgstr ""
 
-#: ../../source/cli/index.md:93 35c5015243ad4195833b12d8ff847e68
+#: ../../source/cli/index.md:93 6a4764ee4fef4a9ba7b3c3b270f33792
 msgid "3.3. Output Controls"
 msgstr ""
 
-#: ../../source/cli/index.md:95 3550c3d0e8ec4c32a7f157aff604b243
+#: ../../source/cli/index.md:95 b407f787568d4a30bcd9d0587970d494
 msgid ""
 "`-f, --format FORMAT` : Choose the output serialization format (`text`, "
 "`json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, "
 "`rst`, `table`, `tree`, `xml`, `html`). Defaults to `text`."
 msgstr ""
 
-#: ../../source/cli/index.md:99 3414d8a3f30e4593b68ac0afe6b36a29
+#: ../../source/cli/index.md:99 7e2659b1b41c489cb834b1892e1c35e5
 msgid "`text`: Standard line-oriented or NUL-delimited plain text paths."
 msgstr ""
 
-#: ../../source/cli/index.md:101 4fb7d4f193af42b2b2e2ceeb8bc7bdf0
+#: ../../source/cli/index.md:101 7ecddc8b609746ee8ea8f84feefa53cb
 msgid ""
 "`json`: Deterministic JSON array of file objects with full metadata "
 "attributes."
 msgstr ""
 
-#: ../../source/cli/index.md:103 ed821dab4f154b23aabdd067894169ed
+#: ../../source/cli/index.md:103 51c7092ff3ce44b18b88d12944adc7de
 msgid "`jsonl`: Line-delimited JSON (NDJSON) records for streaming pipelines."
 msgstr ""
 
-#: ../../source/cli/index.md:105 3d511c86ccb4469385833f2f5d1a8da7
+#: ../../source/cli/index.md:105 067160cddcc84ef58a011f7fdf27997c
 msgid "`ndjson`: Alias for `jsonl` line-delimited JSON stream."
 msgstr ""
 
-#: ../../source/cli/index.md:107 efba23ad7cc744d59cb0c4bc07baa8c6
+#: ../../source/cli/index.md:107 d167b155f3674806b35036277ee529af
 msgid "`yaml`: Clean, readable block-style YAML document."
 msgstr ""
 
-#: ../../source/cli/index.md:109 97889f64b64f4908947c1e839974c1a0
+#: ../../source/cli/index.md:109 ca7aae0c06084b209020f2810b4adf9d
 msgid ""
 "`ipynb`: Jupyter Notebook (`.ipynb`) format pre-populated with data "
 "analysis code cells."
 msgstr ""
 
-#: ../../source/cli/index.md:111 f72434e43a394039a54a5a3d938b84bc
+#: ../../source/cli/index.md:111 bddcacc489334c798dd2f6050d9749f4
 msgid ""
 "`csv`: RFC 4180 compliant comma-separated values with header row. When "
 "consuming CSV in spreadsheet applications, consider passing `--csv-safe` "
 "to neutralize spreadsheet formula injection risks."
 msgstr ""
 
-#: ../../source/cli/index.md:115 eeb703fd52834e5999f74b9e6dec64c6
+#: ../../source/cli/index.md:115 1e4441e68f1b4b158dbcb576436bf01f
 msgid ""
 "`csv-table`: Aligned ASCII or Unicode table constructed directly from CSV"
 " schema for terminal review."
 msgstr ""
 
-#: ../../source/cli/index.md:118 4ba5f2f90f594776930e562287f5a716
+#: ../../source/cli/index.md:118 13ff002b2e0d4ea0afdb0103c800f523
 msgid ""
 "`tsv`: Tab-separated values optimized for Unix shell pipelines (`awk`, "
 "`cut`). Pass `--csv-safe` to neutralize formula injection triggers if "
 "importing into spreadsheets."
 msgstr ""
 
-#: ../../source/cli/index.md:121 75828681504c4658b8bd8b519b3da184
+#: ../../source/cli/index.md:121 9928ab08fd214c64a6588ae181d9c543
 msgid ""
 "`markdown` (or `md`): GitHub Flavored Markdown (GFM) column-aligned table"
 " with alignment indicators."
 msgstr ""
 
-#: ../../source/cli/index.md:124 8c928ea63b604f309dd0a2321a59fdc4
+#: ../../source/cli/index.md:124 b3e9a64ad2744fe18a17dbf078010ac0
 msgid ""
 "`rst`: reStructuredText grid or simple table format compatible with "
 "Sphinx `.. include::` directives."
 msgstr ""
 
-#: ../../source/cli/index.md:127 58d242b354364b45994f77032760cec9
+#: ../../source/cli/index.md:127 6aa7d10a266d4264b26ea1ac4a752296
 msgid ""
 "`table`: Rich styled terminal table with colorful badges for tags, sizes,"
 " and MIME types."
 msgstr ""
 
-#: ../../source/cli/index.md:129 2d6cabad546b4bb0a6175d532e32d74b
+#: ../../source/cli/index.md:129 0770ea4b5f5c480b915475a9c7dbc9a6
 msgid ""
 "`tree`: Hierarchical directory tree rendering files within their "
 "directory branches."
 msgstr ""
 
-#: ../../source/cli/index.md:131 fbabe25860eb49379b47ec9727a336fa
+#: ../../source/cli/index.md:131 9066bf7488f8408f8f1a8e88f0046219
 msgid ""
 "`xml`: Well-formed hierarchical XML document capturing directories, "
 "files, tags, and metadata attributes."
 msgstr ""
 
-#: ../../source/cli/index.md:134 06168e25c5bc42c39030597a8d6b89c5
+#: ../../source/cli/index.md:134 f440dd9bf78544458660cfa2f01653ff
 msgid ""
 "`html`: Semantic, accessible HTML5 document with styled directory tree "
 "and hyperlinks."
 msgstr ""
 
-#: ../../source/cli/index.md:136 03d25261c14247cb823874ff27d9ff44
+#: ../../source/cli/index.md:136 ef48637dd2df4ca5a10ecac9c1ac94ff
 msgid ""
 "`--tree / --no-tree` : Render output in a hierarchical directory tree "
 "(equivalent to `--format tree`)."
 msgstr ""
 
-#: ../../source/cli/index.md:139 501f650d7dc94f819319df84f801d246
+#: ../../source/cli/index.md:139 ffd6a21c0fd7449a860fd9a8986bb109
 msgid ""
 "`-J, --json / --no-json` : Render output as structured JSON records "
 "(equivalent to `--format json`)."
 msgstr ""
 
-#: ../../source/cli/index.md:141 85cb982e61554af39bb3987525ae3823
+#: ../../source/cli/index.md:141 b9eac7a316764e0c9ab7a99f0fca76e2
 msgid ""
 "`-X, --xml / --no-xml` : Render output as a hierarchical XML document "
 "(equivalent to `--format xml`)."
 msgstr ""
 
-#: ../../source/cli/index.md:144 e564f51eb13b4d3484d3d8a7edd8b650
+#: ../../source/cli/index.md:144 f3cfb0c8c71c4bbbbe7ba6dd961c93e3
 msgid ""
 "`-H, --html BASEHREF` : Render output as a semantic HTML5 document with "
 "clickable hyperlinks prefixed with `BASEHREF` (equivalent to `--format "
 "html`)."
 msgstr ""
 
-#: ../../source/cli/index.md:147 354fb62914d542de819f19bbb62d5168
+#: ../../source/cli/index.md:147 45d13d40dc0a4ac380d44db5d5452781
 msgid ""
 "`--intro PATH` : Prepend custom HTML fragment file before the directory "
 "listing in HTML mode."
 msgstr ""
 
-#: ../../source/cli/index.md:149 a443705482f34af884d173af1ce0a501
+#: ../../source/cli/index.md:149 9ef9eca55b45448080e5f3c25d0753de
 msgid ""
 "`--outro PATH` : Append custom HTML fragment file after the directory "
 "listing in HTML mode."
 msgstr ""
 
-#: ../../source/cli/index.md:151 39f99fb2855d47bcae8188b580504632
+#: ../../source/cli/index.md:151 c120e95141ba42b697f8d476f64abe3a
 msgid ""
 "`-T, --title TITLE` : Configure document `<title>` and `<h1>` heading for"
 " HTML output (defaults to `Directory Tree`)."
 msgstr ""
 
-#: ../../source/cli/index.md:154 a1f3d746e4ce45ca9efb4ea9bcab333e
+#: ../../source/cli/index.md:154 e017041d7b724f8c89b34af1ddf0baa9
 msgid ""
 "`--nolinks / --no-nolinks` : Suppress hyperlink anchors in HTML output, "
 "rendering paths as styled plain text."
 msgstr ""
 
-#: ../../source/cli/index.md:157 bebf2d36fb57484fa146e6c00f794701
+#: ../../source/cli/index.md:157 209e227eeed045e8aee25c7e18cf0bc0
 msgid ""
 "`-o, --output PATH` : Send command output directly to a file rather than "
 "standard output. Writes atomically using a temporary file in the "
@@ -366,7 +366,7 @@ msgid ""
 "partially written or corrupted if execution is interrupted."
 msgstr ""
 
-#: ../../source/cli/index.md:161 2770ea71d9ff48a59f03dc2ad998ee9e
+#: ../../source/cli/index.md:161 8a8880f38bd843b197b77972621d6eab
 msgid ""
 "`--table-style STYLE` : Configure table border styles for `table`, `csv-"
 "table`, and `rst` formats (`rounded`, `simple`, `minimal`, `double`, "
@@ -374,7 +374,7 @@ msgid ""
 "`rounded`."
 msgstr ""
 
-#: ../../source/cli/index.md:165 f9f8e90ef4ab4a71b3e8b2376f10c81c
+#: ../../source/cli/index.md:165 9867dd4bbd4747d586b99790f0aa24e1
 msgid ""
 "`--csv-safe / --no-csv-safe` : Neutralize spreadsheet formula injection "
 "by prefixing cells beginning with `=`, `+`, `-`, `@`, TAB (`\\t`), or CR "
@@ -383,7 +383,7 @@ msgid ""
 "data exchange (DDE) or formula execution."
 msgstr ""
 
-#: ../../source/cli/index.md:170 226bcd65b3654ca38d2822b8f628bf07
+#: ../../source/cli/index.md:170 ce91bbc76ada4ed590b92a29bd39a925
 msgid ""
 "`--pager / --no-pager` : Control interactive terminal paging. Defaults to"
 " auto-paging on interactive terminals when output line count exceeds "
@@ -392,88 +392,88 @@ msgid ""
 "automatically when piped or redirected."
 msgstr ""
 
-#: ../../source/cli/index.md:175 b75a2b3dcc934679814457b5e602b10c
+#: ../../source/cli/index.md:175 1663c975c6fd4dc1b0ed88469fe8f141
 msgid ""
 "`-i, --no-indent / --indent` : Omit branch indentation characters in tree"
 " format and strip extraneous whitespace and padding in structured "
 "formats."
 msgstr ""
 
-#: ../../source/cli/index.md:178 e7ad2bf22188451890fb587c54177cb9
+#: ../../source/cli/index.md:178 952613e07cf94c7891a765a289497814
 msgid ""
 "`-A, --ansi-lines / --no-ansi-lines` : Use ANSI/VT100 alternate character"
 " set line drawing escapes (`\\033(0...`) for tree indentation lines."
 msgstr ""
 
-#: ../../source/cli/index.md:181 4dea9dc7b10749edbf0d1f6a9fcab81e
+#: ../../source/cli/index.md:181 f5f45f6910ea43fab456b3df57c7518f
 msgid ""
 "`-S, --cp437 / --no-cp437` : Use Code Page 437 (IBM-PC) console graphics "
 "characters for tree indentation lines."
 msgstr ""
 
-#: ../../source/cli/index.md:184 1ca17bec2aca4086852ff0e3dc093a4b
+#: ../../source/cli/index.md:184 c85584ba4d7c4b0f839ca3c990238f11
 msgid ""
 "`-C, --color / -n, --no-color` : Force enable or disable ANSI color "
 "styling across all output channels unconditionally."
 msgstr ""
 
-#: ../../source/cli/index.md:187 e5d0db9169f2463a80ecf2bbb5896504
+#: ../../source/cli/index.md:187 a51c42291c9a4959add77a64998de400
 msgid ""
 "`--absolute, --full-path / --no-absolute, --no-full-path` : Output "
 "absolute filesystem paths rather than relative paths."
 msgstr ""
 
-#: ../../source/cli/index.md:190 e6332a9767be451581d07b42ff17fb6f
+#: ../../source/cli/index.md:190 107dd470e9e1424fbfbe1d704aa6622e
 msgid ""
 "`--relative, --relative-path / --no-relative, --no-relative-path` : "
 "Prepend input search path prefix to relative output paths rather than "
 "stripping the traversal root."
 msgstr ""
 
-#: ../../source/cli/index.md:193 eda5927b173447878a7ea02c9f38822e
+#: ../../source/cli/index.md:193 afd7c5bcae7e41cfb6b3c9bd75bbb517
 msgid ""
 "`-p, --permissions / --no-permissions` : Print file type and permissions "
 "in standard `ls -l` format (e.g. `-rw-r--r--`, `drwxr-xr-x`)."
 msgstr ""
 
-#: ../../source/cli/index.md:196 6a996884b22443b79f46624e0c6212fa
+#: ../../source/cli/index.md:196 5e4f99e370d04f878f86a824711c91cb
 msgid ""
 "`-u, --user / --no-user` : Print file owner username, falling back to "
 "numeric UID if username is unresolvable."
 msgstr ""
 
-#: ../../source/cli/index.md:199 cd6a57ddbb6342cc8451f1395fa8a6aa
+#: ../../source/cli/index.md:199 55120aa2afe245b18a994cf364fe8fb1
 msgid ""
 "`-g, --group / --no-group` : Print file owner group name, falling back to"
 " numeric GID if group name is unresolvable."
 msgstr ""
 
-#: ../../source/cli/index.md:202 83e6af23dceb4618866a07eb8cf77e44
+#: ../../source/cli/index.md:202 e15cd64af2c343ee9a35eec80362c0bb
 msgid "`--inodes / --no-inodes` : Print filesystem inode number (`st_ino`)."
 msgstr ""
 
-#: ../../source/cli/index.md:204 7f00f48f7ae74a388f7ea2cd78ee113a
+#: ../../source/cli/index.md:204 f9387e4624aa4a5ead6b3bd12b83f570
 msgid "`--device / --no-device` : Print filesystem device number (`st_dev`)."
 msgstr ""
 
-#: ../../source/cli/index.md:206 8d9975ee71cf4cc4a27c6a08fec105c4
+#: ../../source/cli/index.md:206 cd5b531f282f4e51a7cfa9b745b882cb
 msgid "`--size / --no-size` : Print file size in bytes (`st_size`)."
 msgstr ""
 
-#: ../../source/cli/index.md:208 b08f266224c34e53a8bb08fe36f31d13
+#: ../../source/cli/index.md:208 5c9306a8cd3c4f4797510f70535e411d
 msgid ""
 "`-h, --human-readable / --no-human-readable` : Print sizes in human-"
 "readable format with IEC/binary unit prefixes (`K`, `M`, `G`, `T`, `P`, "
 "`E`) using powers of 1024."
 msgstr ""
 
-#: ../../source/cli/index.md:211 7b3c9a9b3545472db8488dd534664509
+#: ../../source/cli/index.md:211 a482ce1dfb204b46af0dea2c932c2ce0
 msgid ""
 "`--si / --no-si` : Print sizes in human-readable format with SI unit "
 "prefixes (`kB`, `MB`, `GB`, `TB`, `PB`, `EB`) using powers of 1000."
 msgstr ""
 
-#: ../../source/cli/index.md:214 1ad635e671fe40b79fa34b3c869171b4
+#: ../../source/cli/index.md:214 0c35acc2b79842e18546b176326a51bf
 msgid ""
 "`--du, --accumulate-size / --no-du, --no-accumulate-size` : Recursively "
 "calculate and accumulate directory disk usage sizes across all contained "
@@ -482,52 +482,52 @@ msgid ""
 "with their total accumulated sizes."
 msgstr ""
 
-#: ../../source/cli/index.md:219 122c85bb896c44f0b82764e9205b81d6
+#: ../../source/cli/index.md:219 4f0dde9718c74d898b150106eeabe147
 msgid ""
 "`-D, --mtime / --no-mtime` : Print the date and time of the last "
 "modification (`st_mtime`)."
 msgstr ""
 
-#: ../../source/cli/index.md:221 45360af1ecc54743b903a7998bb442f6
+#: ../../source/cli/index.md:221 a3b1c7c7b0334fd08b8bf643286f8dfe
 msgid ""
 "`--ctime / --no-ctime` : Print the date and time of the last status "
 "change (`st_ctime`)."
 msgstr ""
 
-#: ../../source/cli/index.md:223 d9cb49fee9ba4e7281e65a38ec7e3016
+#: ../../source/cli/index.md:223 7c6a667c67004fcc93e6ba128dd7c104
 msgid ""
 "`--time-format, --timefmt FORMAT` : Specify custom date and time output "
 "format using `strftime` syntax (implies `-D` unless `--ctime` is "
 "explicitly specified)."
 msgstr ""
 
-#: ../../source/cli/index.md:226 e8b4f21c690e438996c59fa1450fef55
+#: ../../source/cli/index.md:226 00da7c21b7d14ea19190bfdc78c964c9
 msgid ""
 "`-F, --classify / --no-classify` : Append a file classification indicator"
 " character to each filename (`*` for executable, `/` for directory, `@` "
 "for symbolic link, `=` for socket, `|` for FIFO, `>` for door)."
 msgstr ""
 
-#: ../../source/cli/index.md:230 46c2c2d323c8443cb4750ac525899f1f
+#: ../../source/cli/index.md:230 497ffd77806e45d2bfd80280c1b831a8
 msgid ""
 "`-q, --hide-control-chars / --no-hide-control-chars` : Replace non-"
 "printable control characters in filenames with question marks (`?`)."
 msgstr ""
 
-#: ../../source/cli/index.md:233 8f4ed12cf4cf490d97a4100942786911
+#: ../../source/cli/index.md:233 084a72126fa14c828ab81effcb3cfcbd
 msgid ""
 "`-N, --literal / --no-literal` : Print non-printable control characters "
 "literally as raw bytes without masking."
 msgstr ""
 
-#: ../../source/cli/index.md:236 e8eb9107fa714f81b569e2cc759b0001
+#: ../../source/cli/index.md:236 a9957ac9b837475cb1d3d4440097a6d0
 msgid ""
 "`-Q, --quote-name / --no-quote-name` : Enclose filenames in double quotes"
 " (`\"...\"`), escaping any embedded double quotes (`\\\"`) and "
 "backslashes (`\\\\`)."
 msgstr ""
 
-#: ../../source/cli/index.md:239 5ca857c184544433a0a5722a50ab0d3b
+#: ../../source/cli/index.md:239 1fc4c36121434c5b89b3f1f6fe8106e2
 msgid ""
 "`--hyperlink / --no-hyperlink` : Wrap rendered file and directory paths "
 "in standard OSC 8 terminal hyperlink escape sequences "
@@ -535,7 +535,7 @@ msgid ""
 "open navigation in modern terminal emulators."
 msgstr ""
 
-#: ../../source/cli/index.md:243 d9f16e25fd2f457496df9b74b2360aa2
+#: ../../source/cli/index.md:243 b8e91d5ea97e4056981f90a7982b4cde
 msgid ""
 "`--hyperlink-schema SCHEMA` : Custom URI schema prefix for terminal "
 "hyperlinks (defaults to `file://`). Supports standard local file schemes "
@@ -543,75 +543,75 @@ msgid ""
 " or `subl://`."
 msgstr ""
 
-#: ../../source/cli/index.md:247 41575758307a4c5c8c1f7f70969efa57
+#: ../../source/cli/index.md:247 58a2b504e9ed4853b8311f6e2ab663a9
 msgid ""
 "`--hyperlink-authority AUTHORITY` : Optional authority or hostname "
 "component for terminal hyperlinks (e.g., `localhost` or remote "
 "workstation hostnames)."
 msgstr ""
 
-#: ../../source/cli/index.md:250 d54d967c9abb4fe7bf356857299e0c87
+#: ../../source/cli/index.md:250 a9674ef0efaa46c787fc8c0307f58897
 msgid ""
 "`-0, --print0 / --no-print0` : Delimit paths with a NUL (`\\0`) byte "
 "instead of a newline for safe consumption by `xargs -0`."
 msgstr ""
 
-#: ../../source/cli/index.md:253 7c2d328f5bdf4d96b2cf23193fa31974
+#: ../../source/cli/index.md:253 d800e6574572474a83086dbeef1ebcd5
 msgid ""
 "`--list-tags / --no-list-tags` : Print identified format and content tags"
 " alongside each matched path."
 msgstr ""
 
-#: ../../source/cli/index.md:256 5900eb7cac7743188e51b33fb73b0500
+#: ../../source/cli/index.md:256 0b8eb8763bcc4788ad1fbfd72f4250d9
 msgid ""
 "`-s, --summary / --no-summary` : Print summary match statistics and top "
 "format tags to `stderr`."
 msgstr ""
 
-#: ../../source/cli/index.md:258 69e9d85ca73f4a5b935a2a0d281d1cb8
+#: ../../source/cli/index.md:258 95e90692a7824629ba33be5ec29e7e93
 msgid ""
 "`--exit-status / --no-exit-status` : Exit with status code 1 if no "
 "matching files are found (returns code 0 when one or more matches are "
 "found)."
 msgstr ""
 
-#: ../../source/cli/index.md:261 c9c30a6132384821b9109b4463e26b1c
+#: ../../source/cli/index.md:261 f648513c015e4bc781037160e158eb4a
 msgid "3.4. Information & Diagnostics"
 msgstr ""
 
-#: ../../source/cli/index.md:263 ce737a0dac5d45d19b24a99fe18f1e39
+#: ../../source/cli/index.md:263 e0fbed3e2ca7471d83d4605f18478116
 msgid ""
 "`--config PATH` : Path to a custom user configuration file overriding "
 "default settings."
 msgstr ""
 
-#: ../../source/cli/index.md:265 ae118f496bc24d95900bfcde5f2ff819
+#: ../../source/cli/index.md:265 47c3712acedb418eb099e0c1445595ee
 msgid ""
 "`--no-config` : Suppress discovery and loading of any configuration file,"
 " enforcing built-in factory defaults."
 msgstr ""
 
-#: ../../source/cli/index.md:268 debc5b470ac34a54bbeea656fbca8854
+#: ../../source/cli/index.md:268 de40fad5be9042b6bee39a312d886473
 msgid ""
 "`--show-config` : Display the active configuration file and resolved "
 "configuration settings, then exit immediately."
 msgstr ""
 
-#: ../../source/cli/index.md:271 8c1b0078b415418abfdaabfb7fa45e4b
+#: ../../source/cli/index.md:271 e044a8ec8abb49ccb22d56e20d85f226
 msgid ""
 "`--known-tags` : List all tags supported by the classifier engine and "
 "exit immediately (routed through the interactive pager on TTY sessions "
 "exceeding terminal height)."
 msgstr ""
 
-#: ../../source/cli/index.md:274 87e5750697db490bb6dbcaa5daea5083
+#: ../../source/cli/index.md:274 3db0c75bb73348d0b9a077cd3969f0dc
 msgid ""
 "`--locale, --lang LOCALE` : Set display language and locale for console "
 "messages, help descriptions, and diagnostic outputs (e.g. `en_US`, `es`, "
 "`fr`, `de`, `ja`, or `C` for raw untranslated strings)."
 msgstr ""
 
-#: ../../source/cli/index.md:277 b8647ca75c6449f4941bf626bb66aa38
+#: ../../source/cli/index.md:277 f9c9f930297447218d17c40d909faa95
 msgid ""
 "`-v, -V, --version` : Display the version of `findfmt` and exit. When "
 "combined with `--verbose`, prints runtime environment diagnostics (Python"
@@ -619,141 +619,141 @@ msgid ""
 "pager when exceeding terminal height."
 msgstr ""
 
-#: ../../source/cli/index.md:281 3a47fa111b684f6c8775cdeadfe92e30
+#: ../../source/cli/index.md:281 dd923d0f4ff247f0842eba262d0574fb
 msgid ""
 "`--verbose` : Enable verbose diagnostic output when paired with "
 "`--version`."
 msgstr ""
 
-#: ../../source/cli/index.md:283 e5f253fcf7524845a0ef2da1fca6f5d9
+#: ../../source/cli/index.md:283 60ca89ea15a4494698cf1a03026879e2
 msgid ""
 "`--diagnostics` : Display runtime environment diagnostics and exit "
 "immediately (routed through the interactive pager on TTY sessions "
 "exceeding terminal height)."
 msgstr ""
 
-#: ../../source/cli/index.md:286 249ee690b84f4c78b4bf9f777aca3873
+#: ../../source/cli/index.md:286 d21d1885bfc64be79c632bc157dd2c71
 msgid ""
 "`--help-all` : Display the comprehensive CLI manual, environment "
 "variables, and exit codes (routed through the interactive pager on TTY "
 "sessions exceeding terminal height)."
 msgstr ""
 
-#: ../../source/cli/index.md:289 e380f9aa749d46fa8d41dafb27401128
+#: ../../source/cli/index.md:289 d95dba09d439487fb6f0d2ea17a09798
 msgid ""
 "`--help` : Show the categorized help message and exit (automatically "
 "routed through the interactive pager on TTY sessions exceeding terminal "
 "height)."
 msgstr ""
 
-#: ../../source/cli/index.md:292 d54b5466ce7d41148211be73b11f1ae7
+#: ../../source/cli/index.md:292 f782bf90a5874c88a831ee625ae8dfb8
 msgid "4. Command Wrappers & Aliases"
 msgstr ""
 
-#: ../../source/cli/index.md:294 331763ba5ef94b168a7ef20019742f07
+#: ../../source/cli/index.md:294 60f9f599e5b7432d99f236765749e372
 msgid ""
 "In addition to `findfmt`, several specialized command-line entry points "
 "are provided to streamline common workflows:"
 msgstr ""
 
-#: ../../source/cli/index.md:297 0ad912c99d2c40fa8a3948b76bc731b5
+#: ../../source/cli/index.md:297 1009315b90fb424598271b0bcb6036bd
 msgid ""
 "**`findfiles [PATHS...]`** : Traverse all files and directories including"
 " hidden files (`.*`), respecting `.gitignore` (equivalent to `findfmt "
 "--hidden`). Negate with `--no-hidden`."
 msgstr ""
 
-#: ../../source/cli/index.md:299 87c19f550ddc4d14b0aea4dbeb46dcca
+#: ../../source/cli/index.md:299 31a93ee8e32e48ee87c55095c2cee4d6
 msgid ""
 "**`findfilemime [PATHS...]`** : List matched paths alongside their "
 "detected MIME and format tags, including hidden files (equivalent to "
 "`findfmt --hidden --list-tags`). Negate with `--no-list-tags`."
 msgstr ""
 
-#: ../../source/cli/index.md:302 87be4e4e8ef6446d8136b2c6b3ecfea3
+#: ../../source/cli/index.md:302 208108d51a8946a4bed3f9a9e294d941
 msgid ""
 "**`findfilefmt [TAG] [PATHS...]`** : Locate files matching a format tag "
 "(e.g. `findfilefmt python`), including hidden files (equivalent to "
 "`findfmt --hidden --tag [TAG]`)."
 msgstr ""
 
-#: ../../source/cli/index.md:304 271b2b4b8ef74a929da32a2fb01eabd3
+#: ../../source/cli/index.md:304 fe4ef66a89ff47e38753a31ac309199b
 msgid ""
 "**`findshebang [INTERPRETER] [PATHS...]`** : Discover scripts by shebang "
 "interpreter pattern (e.g. `findshebang bash`), including hidden files "
 "(equivalent to `findfmt --hidden --shebang [INTERPRETER]`)."
 msgstr ""
 
-#: ../../source/cli/index.md:307 38d6c9f00ffa442dbb3de4620d426eb3
+#: ../../source/cli/index.md:307 575df47b283449c0b193ede4c7f9d1ba
 msgid ""
 "**`findfmt0 [PATHS...]`** : Produce NUL-delimited output for pipe-safe "
 "consumption with `xargs -0`, including hidden files (equivalent to "
 "`findfmt --hidden --print0`). Negate with `--no-print0`."
 msgstr ""
 
-#: ../../source/cli/index.md:310 e49a148f7d3441278876519e0f878d0c
+#: ../../source/cli/index.md:310 c230de517dfa43f886a0406a4644042d
 msgid ""
 "**`findsummary [PATHS...]`** : Print format tag frequency statistics "
 "directly to `stderr`, including hidden files (equivalent to `findfmt "
 "--hidden --summary`). Negate with `--no-summary`."
 msgstr ""
 
-#: ../../source/cli/index.md:313 94f5935ad6cf432192a11fa7984d19d2
+#: ../../source/cli/index.md:313 df13cd1d01f04505b2766528cbe04a03
 msgid "5. POSIX Option Terminator (--)"
 msgstr ""
 
-#: ../../source/cli/index.md:315 6367b279146844f7a2385f294e1ae91e
+#: ../../source/cli/index.md:315 62e85d512295425ab64fcb04722be88c
 msgid ""
 "A standalone double-dash (`--`) halts option processing per POSIX "
 "Guideline 10. All subsequent tokens are treated strictly as positional "
 "filesystem paths, even if their names begin with a hyphen:"
 msgstr ""
 
-#: ../../source/cli/index.md:323 7530659d9d0f428ca45e545982fb1fdf
+#: ../../source/cli/index.md:323 85a966761ecc41a990c486e7d92b56b9
 msgid "6. Environment"
 msgstr ""
 
-#: ../../source/cli/index.md:325 992a4056cbe44eb091e520fc07088bc0
+#: ../../source/cli/index.md:325 0bb4aac945ab43b99972c1ff84fd2bc6
 msgid ""
 "`NO_COLOR`: When set to any value, colored output is suppressed per [no-"
 "color.org](https://no-color.org)."
 msgstr ""
 
-#: ../../source/cli/index.md:327 9f3d3969ae8d4e53b3f1d8b0f54daf04
+#: ../../source/cli/index.md:327 f36d3a76dd7d4111981d816a54a2d354
 msgid ""
 "`CLICOLOR`: When set to `0`, ANSI color codes are disabled; when `1`, "
 "colors are enabled."
 msgstr ""
 
-#: ../../source/cli/index.md:328 d8f355c9e147402ab7e8ea17f1014119
+#: ../../source/cli/index.md:328 93b609bbca384d8985f8078eac9c6ac7
 msgid ""
 "`CLICOLOR_FORCE`: When non-zero, forces color output even when redirected"
 " or piped."
 msgstr ""
 
-#: ../../source/cli/index.md:329 df6ca11798264a04b94e16ca2fc63f29
+#: ../../source/cli/index.md:329 3a54484108d04edc8819e1b2560603b1
 msgid ""
 "`LANGUAGE`: POSIX language lookup order (colon-separated list of locale "
 "codes, e.g. `es_ES:es:en`)."
 msgstr ""
 
-#: ../../source/cli/index.md:331 2286cd87e3224d4099915b904e48c393
+#: ../../source/cli/index.md:331 47b5241870244ced9f604408f00ce506
 msgid ""
 "`LC_ALL`: Highest-precedence locale override overriding all other `LC_*` "
 "variables."
 msgstr ""
 
-#: ../../source/cli/index.md:332 7866ee98e5d245989ebf009c6bab1d78
+#: ../../source/cli/index.md:332 8fe01012555e42ac9d565ded6666d4ff
 msgid ""
 "`LC_MESSAGES`: Localization category determining message translation "
 "catalog selection."
 msgstr ""
 
-#: ../../source/cli/index.md:333 35c3e87051544efd8c14714ce6572eb4
+#: ../../source/cli/index.md:333 5da44a83ee404d02a32f9930b75cc1a6
 msgid "`LANG`: Default system fallback locale identifier."
 msgstr ""
 
-#: ../../source/cli/index.md:334 4ce2cf895e624dfe9fbf4c6a8aa6b796
+#: ../../source/cli/index.md:334 91d6bc7646d542468f3db96fddf788fa
 msgid ""
 "`FINDFMT_CONFIG`: Path to a custom user configuration file overriding "
 "defaults. When unset, `findfmt` checks "
@@ -764,135 +764,165 @@ msgid ""
 "details."
 msgstr ""
 
-#: ../../source/cli/index.md:338 b5270c015a9b4b33bb3047cecc5f12b9
+#: ../../source/cli/index.md:338 95fef361ebcf4e129c7031281d99cd2b
 msgid ""
 "`XDG_CONFIG_HOME`: Configuration directory root used to resolve "
 "`$XDG_CONFIG_HOME/findfmt/config.toml` and `$XDG_CONFIG_HOME/git/ignore`."
 msgstr ""
 
-#: ../../source/cli/index.md:340 b1a9b7719b9546679eb85bdcb8440ed8
+#: ../../source/cli/index.md:340 e90ef26bf3b442928a907d7ad8d271c5
 msgid ""
 "`PATHEXT`: Semicolon-delimited list of executable file extensions on "
 "Windows."
 msgstr ""
 
-#: ../../source/cli/index.md:342 f84039c93a3b464ea18759fc105e797a
+#: ../../source/cli/index.md:342 4a418e11189448eea89884d298256e39
 msgid "7. Exit Status"
 msgstr ""
 
-#: ../../source/cli/index.md:344 9e71fc4c29e7447d8c1127a6f5d17863
-msgid ""
-"`0`: Success, including runs where no files match, and help, version, or "
-"diagnostics queries."
+#: ../../source/cli/index.md:8 26e046f0bec54c04b36f554873fe7b5d
+msgid "Code"
 msgstr ""
 
-#: ../../source/cli/index.md:345 7890e36f30eb4e2185d490bdf13827e3
+#: ../../source/cli/index.md:8 4928e660cd824f00aa2ce062272ef26b
+msgid "Meaning"
+msgstr ""
+
+#: ../../source/cli/index.md:8 075b4bc475ee405a80bd05bcffe061f2
+msgid "`0`"
+msgstr ""
+
+#: ../../source/cli/index.md:8 020bf63e02f7437b90ca29fedcc38ed5
 msgid ""
-"`1`: Runtime traversal, classification, or filesystem I/O error, or no "
+"Success, including runs where no files match, help/version/diagnostics "
+"queries, and early pipeline termination (`SIGPIPE`)."
+msgstr ""
+
+#: ../../source/cli/index.md:8 023c587f17d14f229833bb6a107b3153
+msgid "`1`"
+msgstr ""
+
+#: ../../source/cli/index.md:8 46e62c2b2f714f0498194d527807ef1f
+msgid ""
+"Runtime traversal, classification, or filesystem I/O error, or no "
 "matching files when `--exit-status` is given."
 msgstr ""
 
-#: ../../source/cli/index.md:347 5ff39e51ce0d4c32ae3456f20511e4cb
-msgid "`2`: Invalid command-line arguments or syntax error."
+#: ../../source/cli/index.md:8 43bacc28940046d29426a8862687d42b
+msgid "`2`"
 msgstr ""
 
-#: ../../source/cli/index.md:349 2826016a6d474717a4a188ec0300ba48
+#: ../../source/cli/index.md:8 2911e2d5e2d94461b7425ac7895fb39a
+msgid ""
+"Invalid command-line arguments, conflicting options, or configuration "
+"file error."
+msgstr ""
+
+#: ../../source/cli/index.md:8 22eaf7434ed84cf388117ecb33f6b164
+msgid "`130`"
+msgstr ""
+
+#: ../../source/cli/index.md:8 3c8cf271c8fc4c769399ca4af00e3445
+msgid "Execution interrupted by `SIGINT` (`Ctrl+C`)."
+msgstr ""
+
+#: ../../source/cli/index.md:351 dde1385421f943f9bc2a3bc74074060a
 msgid ""
 "Pass `--exit-status` for `grep`-style scripting, where \"nothing "
 "matched\" should be a failure. The command wrappers (`findfiles`, "
 "`findfilefmt`, `findfilemime`, `findfmt0`, `findshebang`, `findsummary`) "
-"use the same codes and exit with status 1 when they stop with an error "
-"message."
+"follow the same exit-code contract across all status codes (`0`, `1`, "
+"`2`, and `130`)."
 msgstr ""
 
-#: ../../source/cli/index.md:353 a9a7f156ba334bccb04b14bd35533ac1
+#: ../../source/cli/index.md:355 60fe96038f7e4d5ea2fd89124dcbcd72
 msgid "8. Examples"
 msgstr ""
 
-#: ../../source/cli/index.md:355 3e30ae028dc04f8baf6630e12f60646d
+#: ../../source/cli/index.md:357 6c3398fb6bac4eb7b9f0158563754470
 msgid ""
 "`findfmt` integrates smoothly with automated Unix pipelines, linters, "
 "data processing utilities, and documentation generators."
 msgstr ""
 
-#: ../../source/cli/index.md:358 2b57aa381d04464cae8a4738df849ba0
+#: ../../source/cli/index.md:360 0e0ace95930c4919889b2c97ffc1e7e8
 msgid "8.1. Safe Command Execution with `xargs`"
 msgstr ""
 
-#: ../../source/cli/index.md:360 48bef28242964d7fb41ec2435bd05bf4
+#: ../../source/cli/index.md:362 57439e7ae4814bfbbaa32bacece8f261
 msgid ""
 "Safely pipe matching file paths to linters or formatters using NUL "
 "delimiters (`-0` / `--print0`):"
 msgstr ""
 
-#: ../../source/cli/index.md:370 1a659363fc7642d68c4bf2ee6e197791
+#: ../../source/cli/index.md:372 9a0d70a5874b4a3cb5032d7a90d54dda
 msgid "8.2. JSON Filtering with `jq`"
 msgstr ""
 
-#: ../../source/cli/index.md:372 b57d646df10042cbb3047c4e2c6c9b4c
+#: ../../source/cli/index.md:374 b62d76e4a3a0455882369026837954bb
 msgid "Process deterministic metadata records using `jq`:"
 msgstr ""
 
-#: ../../source/cli/index.md:382 9e309f5a7d0f448aabe3c33593ddbda4
+#: ../../source/cli/index.md:384 514558cc3e1e421883f7e4371100bd81
 msgid "8.3. Delimited Data Processing with `csvkit`"
 msgstr ""
 
-#: ../../source/cli/index.md:384 b46ed6d507d64fd9a4062d7dad82c2b9
+#: ../../source/cli/index.md:386 e2ae570d09394ec4bf4d9995ca20a5a6
 msgid "Inspect and slice CSV records with `csvkit`:"
 msgstr ""
 
-#: ../../source/cli/index.md:394 790d75bcfacb41afaf75bb283353d6f2
+#: ../../source/cli/index.md:396 d88d298b8523465fbb3de2b26d130872
 msgid "8.4. Sphinx Documentation Inclusion"
 msgstr ""
 
-#: ../../source/cli/index.md:396 9411da287fc34ec78d795f34f5e42d17
+#: ../../source/cli/index.md:398 c9796495362547408e3e804c49564cec
 msgid ""
 "Export tables directly into documentation build directories for Sphinx "
 "inclusion:"
 msgstr ""
 
-#: ../../source/cli/index.md:406 dcefd7c548214db9bdbbc5b4f7a04bd8
+#: ../../source/cli/index.md:408 9d8adba47a63424dafcd2e42cf00defe
 msgid "8.5. HTML Documentation Export with Templating"
 msgstr ""
 
-#: ../../source/cli/index.md:408 eca4cb8aaa20404e889444b47414cbd5
+#: ../../source/cli/index.md:410 c0b48f9087bd4d229d91ec9fa5c9595f
 msgid ""
 "Generate a semantic HTML document tree with customized headers, footers, "
 "and hyperlinks:"
 msgstr ""
 
-#: ../../source/cli/index.md:419 daa3e3ddf30d4bd3a76954739c4bdccf
+#: ../../source/cli/index.md:421 f8322d2a23564b6e8a726bc610070587
 msgid "8.6. Terminal Navigation with Clickable Hyperlinks"
 msgstr ""
 
-#: ../../source/cli/index.md:421 2415c86e14654016a3744862e714a06c
+#: ../../source/cli/index.md:423 ca05e77230e542549bbdda6fbedc0412
 msgid ""
 "Navigate directory structures directly in modern terminal emulators using"
 " OSC 8 escape sequences:"
 msgstr ""
 
-#: ../../source/cli/index.md:431 bbcd2e0fab08450ca0a65f66d277dbdb
+#: ../../source/cli/index.md:433 cb768126c26546e48b20fcc0b5e4b605
 msgid "8.7. Structured Document and Streaming Exports"
 msgstr ""
 
-#: ../../source/cli/index.md:433 0169963b024b4bf38dc2daa5c9aee18b
+#: ../../source/cli/index.md:435 07f02c81378b42c2b404cdb3442b5304
 msgid ""
 "Stream or serialize metadata records in line-delimited JSON, YAML, or XML"
 " formats:"
 msgstr ""
 
-#: ../../source/cli/index.md:446 90e06d99356240c1aa186a67e09c3ac0
+#: ../../source/cli/index.md:448 51cced030c0e45d7805bc345d3a4ed8f
 msgid "9. See Also"
 msgstr ""
 
-#: ../../source/cli/index.md:448 20ab2bc7e7ac43cf882eb807a5062f65
+#: ../../source/cli/index.md:450 37146f9aaab94327b9a75b5fccd84161
 msgid "`find(1)`, `xargs(1)`, `file(1)`"
 msgstr ""
 
-#: ../../source/cli/index.md:449 7453905a4fc5466e8b79682a2d665b35
+#: ../../source/cli/index.md:451 8263efc203ae439690460cabbfefc9bb
 msgid "Documentation: <https://bdperkin.github.io/findfmt>"
 msgstr ""
 
-#: ../../source/cli/index.md:450 1335c17af223450da90a210890d19d08
+#: ../../source/cli/index.md:452 dd4746317c7b4d83a673182165e8927f
 msgid "Repository & Bug Tracker: <https://github.com/bdperkin/findfmt>"
 msgstr ""

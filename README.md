@@ -296,6 +296,11 @@ ______________________________________________________________________
 | `--help`                                               | Display the categorized help summary and exit                                                                                          |
 | `-- [PATHS...]`                                        | POSIX terminator: treat following tokens strictly as paths                                                                             |
 
+See
+[Exit Status in the CLI Reference](https://bdperkin.github.io/findfmt/cli/index.html#exit-status)
+for the formal exit-code contract (`0` success or early pipe close, `1` runtime error or no matches
+with `--exit-status`, `2` invalid CLI usage or configuration error, `130` interrupted by `SIGINT`).
+
 ______________________________________________________________________
 
 ## 5. Development & Testing
