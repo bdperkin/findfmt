@@ -81,9 +81,12 @@ def test_smoke_unreadable_directory_resilience(tmp_path: Path) -> None:
 
     try:
         res = runner.invoke(app, [str(tmp_path), "--no-pager"])
-        assert res.exit_code == 0
+        expected_code = 0 if (hasattr(os, "geteuid") and os.geteuid() == 0) else 1
+        assert res.exit_code == expected_code
         assert "valid.txt" in res.output
         assert "Traceback" not in res.output
+        if expected_code == 1:
+            assert "cannot open" in res.stderr
 
         res_root = runner.invoke(app, [str(unreadable_sub), "--no-pager"])
         assert res_root.exit_code == 2
@@ -98,7 +101,8 @@ def test_smoke_permission_error_graceful(tmp_path: Path) -> None:
     (tmp_path / "valid.txt").write_text("ok", encoding="utf-8")
     with patch("os.scandir", side_effect=PermissionError("Access denied")):
         res = runner.invoke(app, [str(tmp_path), "--no-pager"])
-        assert res.exit_code == 0
+        assert res.exit_code == 1
+        assert "cannot open" in res.stderr
         assert "Traceback" not in res.output
 
 

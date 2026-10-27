@@ -149,8 +149,9 @@ def test_ipynb_manifest_cell_executes(tmp_path: Path, monkeypatch: pytest.Monkey
 
 @pytest.mark.parametrize("fmt", ["text", "json", "table", "tree"])
 def test_missing_paths_never_traceback(tmp_path: Path, fmt: str) -> None:
-    """A missing path ends without a traceback in every format (exit code: #320)."""
-    _run(str(tmp_path / "missing"), "-f", fmt)
+    """A missing path ends without a traceback in every format and exits 1 (#320)."""
+    code, _ = _run(str(tmp_path / "missing"), "-f", fmt)
+    assert code == 1
     _run(str(tmp_path / "missing"), "--from-file", str(tmp_path / "missing.txt"), "-f", fmt)
 
 

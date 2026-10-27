@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
@@ -154,44 +156,31 @@ def test_cli_summary_no_matches(tmp_path: Path):
 
 def test_cli_flag_negations(sample_repo: Path):
     runner = CliRunner()
-
     res = runner.invoke(app, [str(sample_repo), "--no-all-tags", "-t", "python"])
     assert res.exit_code == 0
     assert "src/app.py" in res.stdout.replace("\\", "/")
-
     res = runner.invoke(app, [str(sample_repo), "--ignore"])
     assert res.exit_code == 0
     assert "build/output.log" not in res.stdout
-
     res = runner.invoke(app, [str(sample_repo), "--no-hidden"])
     assert res.exit_code == 0
     assert ".config/settings.yaml" not in res.stdout
-
-    res = runner.invoke(app, [str(sample_repo), "--no-follow-symlinks"])
-    assert res.exit_code == 0
-
-    res = runner.invoke(app, [str(sample_repo), "--no-symlinks"])
-    assert res.exit_code == 0
-
+    assert runner.invoke(app, [str(sample_repo), "--no-follow-symlinks"]).exit_code == 0
+    assert runner.invoke(app, [str(sample_repo), "--no-symlinks"]).exit_code == 0
     res = runner.invoke(app, [str(sample_repo), "--no-absolute", "-t", "python"])
     assert res.exit_code == 0
     assert "src/app.py" in res.stdout.replace("\\", "/")
     assert str(sample_repo / "src" / "app.py") not in res.stdout
-
     res = runner.invoke(app, [str(sample_repo), "--no-print0"])
     assert res.exit_code == 0
     assert "\0" not in res.stdout
-
     res = runner.invoke(app, [str(sample_repo), "--no-list-tags"])
     assert res.exit_code == 0
     assert "[" not in res.stdout
-
     res = runner.invoke(app, [str(sample_repo), "--no-summary"])
     assert res.exit_code == 0
     assert "--- findfmt summary ---" not in res.stderr
-
-    res = runner.invoke(app, [str(sample_repo), "--no-exit-status"])
-    assert res.exit_code == 0
+    assert runner.invoke(app, [str(sample_repo), "--no-exit-status"]).exit_code == 0
 
 
 def test_posix_double_dash_hyphenated_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
@@ -294,44 +283,16 @@ def test_cli_format_json_with_summary(sample_repo: Path):
 
 def test_cli_metadata_flags(sample_repo: Path):
     runner = CliRunner()
+    for flag in ("-p", "--permissions"):
+        res = runner.invoke(app, [flag, str(sample_repo / "src")])
+        assert res.exit_code == 0
+        assert "[-r" in res.stdout
 
-    # Test permissions flag -p and --permissions
-    res_p = runner.invoke(app, ["-p", str(sample_repo / "src")])
-    assert res_p.exit_code == 0
-    assert "[-r" in res_p.stdout
+    for flag in ("-u", "--user", "-g", "--group", "--inodes", "--device"):
+        res = runner.invoke(app, [flag, str(sample_repo / "src")])
+        assert res.exit_code == 0
+        assert "[" in res.stdout
 
-    res_perms = runner.invoke(app, ["--permissions", str(sample_repo / "src")])
-    assert res_perms.exit_code == 0
-    assert "[-r" in res_perms.stdout
-
-    # Test user flag -u and --user
-    res_u = runner.invoke(app, ["-u", str(sample_repo / "src")])
-    assert res_u.exit_code == 0
-    assert "[" in res_u.stdout
-
-    res_user = runner.invoke(app, ["--user", str(sample_repo / "src")])
-    assert res_user.exit_code == 0
-    assert "[" in res_user.stdout
-
-    # Test group flag -g and --group
-    res_g = runner.invoke(app, ["-g", str(sample_repo / "src")])
-    assert res_g.exit_code == 0
-    assert "[" in res_g.stdout
-
-    res_group = runner.invoke(app, ["--group", str(sample_repo / "src")])
-    assert res_group.exit_code == 0
-    assert "[" in res_group.stdout
-
-    # Test inode and device flags
-    res_inodes = runner.invoke(app, ["--inodes", str(sample_repo / "src")])
-    assert res_inodes.exit_code == 0
-    assert "[" in res_inodes.stdout
-
-    res_device = runner.invoke(app, ["--device", str(sample_repo / "src")])
-    assert res_device.exit_code == 0
-    assert "[" in res_device.stdout
-
-    # Test combined flags
     res_all_meta = runner.invoke(
         app,
         ["--inodes", "--device", "-p", "-u", "-g", "--list-tags", str(sample_repo / "src")],
@@ -466,12 +427,70 @@ def test_output_file_open_failure_exit_code(tmp_path: Path) -> None:
 def test_exit_status_flag_no_matches_returns_1(sample_repo: Path) -> None:
     """Verify --exit-status exits with status 1 on zero matches, 0 otherwise."""
     runner = CliRunner()
-
     res = runner.invoke(app, [str(sample_repo), "-t", "nonexistent-tag-xyz", "--exit-status"])
     assert res.exit_code == 1
+    assert runner.invoke(app, [str(sample_repo), "-t", "nonexistent-tag-xyz"]).exit_code == 0
+    assert runner.invoke(app, [str(sample_repo), "--exit-status"]).exit_code == 0
 
-    res = runner.invoke(app, [str(sample_repo), "-t", "nonexistent-tag-xyz"])
-    assert res.exit_code == 0
 
-    res = runner.invoke(app, [str(sample_repo), "--exit-status"])
-    assert res.exit_code == 0
+def test_missing_path_reports_error_and_exits_1(tmp_path: Path) -> None:
+    """Verify missing root path emits stderr diagnostic and exits with code 1."""
+    missing = tmp_path / "nonexistent"
+    res = CliRunner().invoke(app, [str(missing)])
+    assert res.exit_code == 1
+    assert "cannot open" in res.stderr
+    assert str(missing) in res.stderr
+
+
+def test_missing_and_existing_paths_mixed(tmp_path: Path) -> None:
+    """Verify existing paths are still output when mixed with missing paths, exiting 1."""
+    valid_dir = tmp_path / "valid"
+    valid_dir.mkdir()
+    (valid_dir / "found.py").write_text("x = 1\n", encoding="utf-8")
+    missing = tmp_path / "missing"
+    res = CliRunner().invoke(app, [str(missing), str(valid_dir)])
+    assert res.exit_code == 1
+    assert "found.py" in res.stdout
+    assert "cannot open" in res.stderr
+    assert str(missing) in res.stderr
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32" or (hasattr(os, "geteuid") and os.geteuid() == 0),
+    reason="chmod 000 permissions not enforced on Windows or for root",
+)
+def test_unreadable_subdirectory_reports_and_continues(tmp_path: Path) -> None:
+    """Verify unreadable subdirectory emits one stderr line, lists siblings, and exits 1."""
+    runner = CliRunner()
+    (tmp_path / "sibling.py").write_text("x = 1\n", encoding="utf-8")
+    unreadable = tmp_path / "locked"
+    unreadable.mkdir()
+    unreadable.chmod(0o000)
+    try:
+        res = runner.invoke(app, [str(tmp_path)])
+        assert res.exit_code == 1
+        assert "sibling.py" in res.stdout
+        err_lines = [line for line in res.stderr.splitlines() if line.strip()]
+        assert len(err_lines) == 1
+        assert "cannot open" in err_lines[0]
+        assert str(unreadable) in err_lines[0]
+    finally:
+        unreadable.chmod(0o755)
+
+
+def test_help_all_exit_code_table_matches_behaviour(tmp_path: Path) -> None:
+    """Parse the exit-code table from --help-all and assert each documented code is produced."""
+    runner = CliRunner()
+    help_res = runner.invoke(app, ["--help-all"])
+    assert help_res.exit_code == 0
+    section = help_res.stdout.split("Exit Codes:\n", 1)[1].split("\n\n", 1)[0]
+    documented_codes = {
+        int(m.group(1)) for line in section.splitlines() if (m := re.match(r"^\s+(\d+)\s+", line))
+    }
+    assert documented_codes == {0, 1, 2, 130}
+
+    assert runner.invoke(app, [str(tmp_path)]).exit_code == 0
+    assert runner.invoke(app, [str(tmp_path / "missing")]).exit_code == 1
+    assert runner.invoke(app, ["--unknown-flag"]).exit_code == 2
+    with patch("findfmt.cli.runner.find_files", side_effect=KeyboardInterrupt):
+        assert runner.invoke(app, [str(tmp_path)]).exit_code == 130

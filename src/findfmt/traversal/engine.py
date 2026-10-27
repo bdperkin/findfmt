@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import errno
+import os
 from pathlib import Path  # noqa: TC003
 from typing import TYPE_CHECKING, Any
 
@@ -11,6 +13,7 @@ from findfmt.parsers import ingest_from_file
 from findfmt.sizes import calculate_accumulated_sizes
 from findfmt.traversal.boundaries import (
     check_depth_limit,
+    check_file_limit,
     filter_directory_entry,
     has_matching_descendants,
     init_visited_dirs,
@@ -32,8 +35,7 @@ from findfmt.traversal.patterns import create_pattern_matcher
 from findfmt.traversal.sorting import collect_directory_entries
 
 if TYPE_CHECKING:
-    import os
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
 
     import pathspec
 
@@ -64,9 +66,10 @@ def _scan_directory_entries(  # noqa: PLR0913
     root_dev: int | None = None,
     matcher: PatternMatcher | None = None,
     base_root: Path | None = None,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> tuple[list[Path], list[tuple[Path, os.DirEntry[str]]]]:
     """Scan and partition directory entries into subdirectories and files."""
-    entries = collect_directory_entries(root, config)
+    entries = collect_directory_entries(root, config, on_error=on_error)
     if entries is None:
         return [], []
 
@@ -115,6 +118,7 @@ def _traverse_subdirs(  # noqa: PLR0913
     inherited_match: bool,
     accumulated_sizes: dict[Path, int] | None = None,
     prune_memo: dict[tuple[int, int], bool] | None = None,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> Iterator[FileInfo]:
     """Descend and traverse discovered subdirectories."""
     if not check_depth_limit(current_depth, config.max_depth):
@@ -137,6 +141,7 @@ def _traverse_subdirs(  # noqa: PLR0913
             inherited_match=child_inherit,
             base_root=base_root,
             memo=prune_memo,
+            on_error=on_error,
         ):
             continue
 
@@ -160,6 +165,7 @@ def _traverse_subdirs(  # noqa: PLR0913
             inherited_match=child_inherit,
             accumulated_sizes=accumulated_sizes,
             prune_memo=prune_memo,
+            on_error=on_error,
         )
 
 
@@ -177,8 +183,11 @@ def traverse_directory(  # noqa: PLR0913
     inherited_match: bool = False,
     accumulated_sizes: dict[Path, int] | None = None,
     prune_memo: dict[tuple[int, int], bool] | None = None,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> Iterator[FileInfo]:
     """Recursively traverse a directory hierarchy honoring .gitignore, filters, and boundaries."""
+    check_depth_limit(0, config.max_depth)
+    check_file_limit(0, config.file_limit)
     effective_base = base_root if base_root is not None else root
     active_matcher = matcher if matcher is not None else create_pattern_matcher(config)
     effective_dev = resolve_device(
@@ -206,6 +215,7 @@ def traverse_directory(  # noqa: PLR0913
         root_dev=effective_dev,
         matcher=active_matcher,
         base_root=effective_base,
+        on_error=on_error,
     )
 
     targets = subdirs if config.dirs_only else files
@@ -221,6 +231,7 @@ def traverse_directory(  # noqa: PLR0913
         inherited_match=inherited_match,
         accumulated_sizes=accumulated_sizes,
         prune_memo=active_prune_memo,
+        on_error=on_error,
     )
     descendants = _traverse_subdirs(
         subdirs,
@@ -235,6 +246,7 @@ def traverse_directory(  # noqa: PLR0913
         inherited_match=inherited_match,
         accumulated_sizes=accumulated_sizes,
         prune_memo=active_prune_memo,
+        on_error=on_error,
     )
 
     if config.dirs_first:
@@ -250,10 +262,13 @@ def _traverse_single_root(
     resolved_root: Path,
     config: TraversalConfig,
     matcher: PatternMatcher,
+    *,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> Iterator[FileInfo]:
     """Yield matching items from a single root path (file or directory)."""
     try:
         is_file = resolved_root.is_file()
+        is_dir = False if is_file else resolved_root.is_dir()
     except (OSError, RuntimeError):
         return
 
@@ -264,6 +279,9 @@ def _traverse_single_root(
             if matches_filter(info, config, matcher=matcher):
                 yield info
 
+        return
+
+    if not is_dir:
         return
 
     accumulated_sizes = (
@@ -283,11 +301,44 @@ def _traverse_single_root(
         prefix=prefix,
         matcher=matcher,
         accumulated_sizes=accumulated_sizes,
+        on_error=on_error,
     )
 
 
-def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
+def _resolve_existing_root(
+    root: Path,
+    on_error: Callable[[OSError], None] | None,
+) -> Path | None:
+    """Resolve a root path if it exists, reporting missing or inaccessible roots via on_error."""
+    try:
+        resolved_root = root.resolve()
+        exists = resolved_root.exists()
+    except (OSError, RuntimeError) as err:
+        if isinstance(err, OSError) and on_error is not None:
+            if not err.filename:
+                err.filename = str(root)
+
+            on_error(err)
+
+        return None
+
+    if exists:
+        return resolved_root
+
+    if not root.is_symlink() and on_error is not None:
+        on_error(FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), str(root)))
+
+    return None
+
+
+def find_files(
+    config: TraversalConfig,
+    *,
+    on_error: Callable[[OSError], None] | None = None,
+) -> Iterator[FileInfo]:
     """Discover and classify files across all configured root paths or external listings."""
+    check_depth_limit(0, config.max_depth)
+    check_file_limit(0, config.file_limit)
     if config.from_file is not None:
         yield from ingest_from_file(config)
         return
@@ -295,11 +346,12 @@ def find_files(config: TraversalConfig) -> Iterator[FileInfo]:
     matcher = create_pattern_matcher(config)
     roots = config.root_paths if config.sort_by == SortKey.NONE else sorted(config.root_paths)
     for root in roots:
-        try:
-            resolved_root = root.resolve()
-            exists = resolved_root.exists()
-        except (OSError, RuntimeError):
-            continue
-
-        if exists:
-            yield from _traverse_single_root(root, resolved_root, config, matcher)
+        resolved_root = _resolve_existing_root(root, on_error)
+        if resolved_root is not None:
+            yield from _traverse_single_root(
+                root,
+                resolved_root,
+                config,
+                matcher,
+                on_error=on_error,
+            )
