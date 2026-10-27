@@ -232,7 +232,7 @@
   },
   "find_files": {
    "kind": "function",
-   "signature": "(config: 'TraversalConfig') -> 'Iterator[FileInfo]'"
+   "signature": "(config: 'TraversalConfig', *, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
   },
   "format_display_path": {
    "kind": "function",
@@ -356,7 +356,7 @@
   },
   "traverse_directory": {
    "kind": "function",
-   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None) -> 'Iterator[FileInfo]'"
+   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
   }
  },
  "findfmt.classifier": {
@@ -978,7 +978,7 @@
   },
   "find_files": {
    "kind": "function",
-   "signature": "(config: 'TraversalConfig') -> 'Iterator[FileInfo]'"
+   "signature": "(config: 'TraversalConfig', *, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
   },
   "findfmt": {
    "kind": "function",
@@ -2413,7 +2413,7 @@
   },
   "find_files": {
    "kind": "function",
-   "signature": "(config: 'TraversalConfig') -> 'Iterator[FileInfo]'"
+   "signature": "(config: 'TraversalConfig', *, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
   },
   "is_path_ignored": {
    "kind": "function",
@@ -2457,7 +2457,7 @@
   },
   "traverse_directory": {
    "kind": "function",
-   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None) -> 'Iterator[FileInfo]'"
+   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
   }
  },
  "findfmt.traversal.boundaries": {
@@ -2483,7 +2483,7 @@
   },
   "has_matching_descendants": {
    "kind": "function",
-   "signature": "(directory: 'Path', config: 'TraversalConfig', specs: 'tuple[tuple[Path, PathSpecType], ...]', *, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, base_root: 'Path | None' = None, visited: 'set[tuple[int, int]] | None' = None, memo: 'dict[tuple[int, int], bool] | None' = None) -> 'bool'"
+   "signature": "(directory: 'Path', config: 'TraversalConfig', specs: 'tuple[tuple[Path, PathSpecType], ...]', *, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, base_root: 'Path | None' = None, visited: 'set[tuple[int, int]] | None' = None, memo: 'dict[tuple[int, int], bool] | None' = None, on_error: 'Callable[[OSError], None] | None' = None) -> 'bool'"
   },
   "init_visited_dirs": {
    "kind": "function",
@@ -2511,7 +2511,7 @@
   },
   "yield_matching_items": {
    "kind": "function",
-   "signature": "(targets: 'Sequence[Path | tuple[Path, os.DirEntry[str]]]', config: 'TraversalConfig', specs: 'tuple[tuple[Path, PathSpecType], ...]', *, base_root: 'Path', prefix: 'Path | None', root_dev: 'int | None', current_depth: 'int', matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None) -> 'Iterator[FileInfo]'"
+   "signature": "(targets: 'Sequence[Path | tuple[Path, os.DirEntry[str]]]', config: 'TraversalConfig', specs: 'tuple[tuple[Path, PathSpecType], ...]', *, base_root: 'Path', prefix: 'Path | None', root_dev: 'int | None', current_depth: 'int', matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
   }
  },
  "findfmt.traversal.devices": {
@@ -2527,7 +2527,7 @@
  "findfmt.traversal.engine": {
   "find_files": {
    "kind": "function",
-   "signature": "(config: 'TraversalConfig') -> 'Iterator[FileInfo]'"
+   "signature": "(config: 'TraversalConfig', *, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
   },
   "load_custom_gitignore_spec": {
    "kind": "function",
@@ -2555,7 +2555,7 @@
   },
   "traverse_directory": {
    "kind": "function",
-   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None) -> 'Iterator[FileInfo]'"
+   "signature": "(root: 'Path', config: 'TraversalConfig', active_specs: 'tuple[tuple[Path, PathSpecType], ...] | None' = None, *, base_root: 'Path | None' = None, visited_dirs: 'set[Path] | None' = None, prefix: 'Path | None' = None, root_dev: 'int | None' = None, current_depth: 'int' = 1, matcher: 'PatternMatcher | None' = None, inherited_match: 'bool' = False, accumulated_sizes: 'dict[Path, int] | None' = None, prune_memo: 'dict[tuple[int, int], bool] | None' = None, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
   }
  },
  "findfmt.traversal.filters": {
@@ -2657,7 +2657,7 @@
   },
   "collect_directory_entries": {
    "kind": "function",
-   "signature": "(root: 'Path', config: 'TraversalConfig') -> 'list[os.DirEntry[str]] | None'"
+   "signature": "(root: 'Path', config: 'TraversalConfig', *, on_error: 'Callable[[OSError], None] | None' = None) -> 'list[os.DirEntry[str]] | None'"
   },
   "get_entry_ctime": {
    "kind": "function",

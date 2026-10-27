@@ -7,8 +7,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Features
+
+- *(api)* Add optional keyword-only `on_error: Callable[[OSError], None] | None = None` callback to
+  `find_files`, `traverse_directory`, `collect_directory_entries`, `has_matching_descendants`, and
+  `yield_matching_items` (#320).
+
 ### Bug Fixes
 
+- *(traversal)* Report missing root paths and unreadable subdirectories to stderr
+  (`findfmt: cannot open '<path>': <reason>`) and exit with status 1 while continuing to list
+  accessible paths (#320).
+- *(api)* Raise `TraversalError` on negative `max_depth` or `file_limit` and `ParserError` when
+  `--from-file` cannot read the input file (#320).
 - *(format)* XML output keeps the `mtime` and `ctime` attributes for files whose timestamp is the
   Unix epoch (`0.0`) instead of dropping them (#513).
 

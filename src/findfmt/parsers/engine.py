@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 import identify.identify as identify_engine
 
 from findfmt.classifier import _adjust_nt_tags, classify_file
+from findfmt.exceptions import ParserError
 from findfmt.models import FileInfo, SortKey
 from findfmt.parsers.flat_parser import parse_flat_listing
 from findfmt.parsers.tab_parser import parse_tab_outline
@@ -161,8 +162,12 @@ def _read_lines(from_file: str | None, stream: TextIO | None = None) -> list[str
         return [str(line) for line in raw_text.splitlines()]
 
     if from_file is not None:
-        with Path(from_file).open(encoding="utf-8", errors="replace") as f:
-            return [str(line) for line in f.read().splitlines()]
+        try:
+            with Path(from_file).open(encoding="utf-8", errors="replace") as f:
+                return [str(line) for line in f.read().splitlines()]
+        except OSError as err:
+            msg = f"Cannot read input from '{from_file}': {err}"
+            raise ParserError(msg) from err
 
     return []
 

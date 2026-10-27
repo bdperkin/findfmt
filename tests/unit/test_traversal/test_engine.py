@@ -2,7 +2,13 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+import findfmt.exceptions as findfmt_exceptions
+from findfmt.exceptions import ParserError, TraversalError
 from findfmt.models import FileInfo, TraversalConfig
+from findfmt.parsers import ingest_from_file
+from findfmt.traversal.boundaries import has_matching_descendants
 from findfmt.traversal.engine import (
     _scan_directory_entries,
     _traverse_single_root,
@@ -15,6 +21,7 @@ from findfmt.traversal.engine import (
 )
 from findfmt.traversal.ignore import is_path_ignored
 from findfmt.traversal.patterns import create_pattern_matcher
+from findfmt.traversal.sorting import collect_directory_entries
 
 
 def test_load_gitignore_spec_valid(tmp_path: Path):
@@ -282,12 +289,18 @@ def test_scan_directory_entries_is_file_oserror(tmp_path: Path):
 
 
 def test_traverse_single_root_is_file_oserror(tmp_path: Path):
-    """Verify _traverse_single_root handles OSError from resolved_root.is_file."""
+    """Verify _traverse_single_root handles OSError and non-file/non-dir roots."""
     config = TraversalConfig()
     matcher = create_pattern_matcher(config)
     with patch.object(Path, "is_file", side_effect=OSError("Access denied")):
         res = list(_traverse_single_root(tmp_path, tmp_path, config, matcher))
         assert res == []
+
+    with (
+        patch.object(Path, "is_file", return_value=False),
+        patch.object(Path, "is_dir", return_value=False),
+    ):
+        assert list(_traverse_single_root(tmp_path, tmp_path, config, matcher)) == []
 
 
 def test_find_files_root_resolve_oserror(tmp_path: Path):
@@ -296,3 +309,84 @@ def test_find_files_root_resolve_oserror(tmp_path: Path):
     with patch.object(Path, "resolve", side_effect=OSError("Resolution failure")):
         res = list(find_files(config))
         assert res == []
+
+
+def test_on_error_callback_receives_oserror(tmp_path: Path) -> None:
+    """Verify on_error receives OSError with filename set, and default None preserves behavior."""
+    missing = tmp_path / "does_not_exist"
+    cfg_missing = TraversalConfig(root_paths=(missing,))
+    assert list(find_files(cfg_missing)) == []
+
+    errors: list[OSError] = []
+    assert list(find_files(cfg_missing, on_error=errors.append)) == []
+    assert len(errors) == 1
+    assert isinstance(errors[0], FileNotFoundError)
+    assert errors[0].filename == str(missing)
+
+    # Resolve raising OSError with and without filename pre-populated
+    errors.clear()
+    cfg_root = TraversalConfig(root_paths=(tmp_path,))
+    with patch.object(Path, "resolve", side_effect=OSError("Resolve error")):
+        assert list(find_files(cfg_root, on_error=errors.append)) == []
+
+    assert len(errors) == 1
+    assert errors[0].filename == str(tmp_path)
+
+    errors.clear()
+    pre_named = OSError(13, "Permission denied", str(tmp_path))
+    with patch.object(Path, "resolve", side_effect=pre_named):
+        assert list(find_files(cfg_root, on_error=errors.append)) == []
+
+    assert len(errors) == 1
+    assert errors[0].filename == str(tmp_path)
+
+    # traverse_directory / collect_directory_entries scandir OSError
+    errors.clear()
+    cfg = TraversalConfig()
+    with patch("os.scandir", side_effect=PermissionError("Denied")):
+        assert list(traverse_directory(tmp_path, cfg, on_error=errors.append)) == []
+
+    assert len(errors) == 1
+    assert errors[0].filename == str(tmp_path)
+
+    errors.clear()
+    with patch("os.scandir", side_effect=PermissionError(13, "Denied", str(tmp_path))):
+        assert collect_directory_entries(tmp_path, cfg, on_error=errors.append) is None
+
+    assert len(errors) == 1
+    assert errors[0].filename == str(tmp_path)
+
+    # has_matching_descendants scandir OSError and RuntimeError
+    errors.clear()
+    with patch("os.scandir", side_effect=PermissionError("Denied")):
+        assert has_matching_descendants(tmp_path, cfg, (), on_error=errors.append) is False
+
+    assert len(errors) == 1
+    assert errors[0].filename == str(tmp_path)
+
+    errors.clear()
+    with patch("os.scandir", side_effect=PermissionError(13, "Denied", str(tmp_path))):
+        assert has_matching_descendants(tmp_path, cfg, (), on_error=errors.append) is False
+
+    assert len(errors) == 1
+    assert errors[0].filename == str(tmp_path)
+
+    with patch("os.scandir", side_effect=RuntimeError("Runtime failure")):
+        assert has_matching_descendants(tmp_path, cfg, (), memo={}) is False
+        assert has_matching_descendants(tmp_path, cfg, (), memo=None) is False
+
+
+def test_exported_exceptions_are_raised_or_removed(tmp_path: Path) -> None:
+    """Verify TraversalError and ParserError are actively raised by library scenarios."""
+    assert "TraversalError" in findfmt_exceptions.__all__
+    assert "ParserError" in findfmt_exceptions.__all__
+
+    with pytest.raises(TraversalError, match="max_depth must be non-negative"):
+        list(find_files(TraversalConfig(root_paths=(tmp_path,), max_depth=-1)))
+
+    with pytest.raises(TraversalError, match="file_limit must be non-negative"):
+        list(find_files(TraversalConfig(root_paths=(tmp_path,), file_limit=-1)))
+
+    missing_listing = tmp_path / "missing_manifest.txt"
+    with pytest.raises(ParserError, match="Cannot read input"):
+        list(ingest_from_file(TraversalConfig(from_file=str(missing_listing))))

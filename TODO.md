@@ -3,11 +3,11 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 146 Closed Issues | 132 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 147 Closed Issues | 131 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
-> milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304)
+> milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320)
 
 ______________________________________________________________________
 
@@ -454,6 +454,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#304](https://github.com/bdperkin/findfmt/issues/304)** - feat(i18n): design and implement
   Python format placeholder & variable protection validation for AI translation (Closed: 2026-10-26
   via PR [#519](https://github.com/bdperkin/findfmt/pull/519))
+- [x] **[#320](https://github.com/bdperkin/findfmt/issues/320)** - fix(traversal): missing or
+  unreadable paths are silently skipped with exit 0 (Closed: 2026-10-26 via PR
+  [#520](https://github.com/bdperkin/findfmt/pull/520))
 
 ______________________________________________________________________
 
@@ -549,11 +552,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Parent: [#229](https://github.com/bdperkin/findfmt/issues/229) | Milestone: v1.5.1)* -
   **Value:** Medium | **Effort:** S - **Rationale:** Locks in RTL behaviour cheaply; guards the
   Urdu/Arabic releases.
-- [ ] **[#320](https://github.com/bdperkin/findfmt/issues/320)** - fix(traversal): missing or
-  unreadable paths are silently skipped with exit 0 *(Rank: 15 | Epic:
-  [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
-  | Milestone: v1.1.1)* - **Value:** High | **Effort:** M - **Rationale:** Silent exit 0 on missing
-  paths breaks scripts and CI.
 - [ ] **[#323](https://github.com/bdperkin/findfmt/issues/323)** - fix(traversal): align global
   gitignore discovery with git (drop ~/.gitignore, use repo cwd, stop at repo root) *(Rank: 16 |
   Epic:
@@ -1311,9 +1309,8 @@ linked natively on GitHub.
   [#113](https://github.com/bdperkin/findfmt/issues/113),
   [#114](https://github.com/bdperkin/findfmt/issues/114)
 - [ ] **[#383](https://github.com/bdperkin/findfmt/issues/383)** - [Epic] Directory Traversal
-  Robustness, Symlink Safety & Ignore Rule Parity *(Milestone: v1.4.1 | Open sub-issues: 6)* -
+  Robustness, Symlink Safety & Ignore Rule Parity *(Milestone: v1.4.1 | Open sub-issues: 5)* -
   [#111](https://github.com/bdperkin/findfmt/issues/111),
-  [#320](https://github.com/bdperkin/findfmt/issues/320),
   [#321](https://github.com/bdperkin/findfmt/issues/321),
   [#322](https://github.com/bdperkin/findfmt/issues/322),
   [#323](https://github.com/bdperkin/findfmt/issues/323),
@@ -1444,7 +1441,7 @@ v1.1.0 was released on 2026-10-24 (PyPI, GHCR, and GitHub Releases), and its mil
 
 | Milestone       | Theme                                                                                                                                  | Open Issues |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.1          | Output Correctness & Exit-Code Contract: ipynb/cp437 fixes, Broken-Pipe Parity, Config-Default Bug, Translation Placeholder Validation | 4           |
+| v1.1.1          | Output Correctness & Exit-Code Contract: ipynb/cp437 fixes, Broken-Pipe Parity, Config-Default Bug, Translation Placeholder Validation | 3           |
 | v1.1.2          | Test Determinism & Hermeticity: Deterministic Perf Counters, Coverage Hygiene, Dependency-Matrix ADR (+ Spanish catalog)               | 8           |
 | v1.1.3          | Release Safety & Packaging Hygiene: Tag-Pinned Releases, Reproducible Container, Required Floor Checks, 3.15 Gating                    | 6           |
 | v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                                       | 9           |

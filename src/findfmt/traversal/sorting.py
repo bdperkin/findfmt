@@ -204,12 +204,15 @@ def sort_directory_entries(
 def collect_directory_entries(
     root: Path,
     config: TraversalConfig,
+    *,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> list[os.DirEntry[str]] | None:
     """Collect and optionally sort directory entries from filesystem root.
 
     Args:
         root: Directory path to scan.
         config: Traversal configuration with sort and file_limit parameters.
+        on_error: Optional callback invoked with an OSError if scanning fails.
 
     Returns:
         List of os.DirEntry objects, or None on error or exceeded limit.
@@ -224,7 +227,13 @@ def collect_directory_entries(
                     entries.append(entry)
                     if len(entries) > config.file_limit:
                         return None
-    except (OSError, RuntimeError):
+    except (OSError, RuntimeError) as err:
+        if isinstance(err, OSError) and on_error is not None:
+            if not err.filename:
+                err.filename = str(root)
+
+            on_error(err)
+
         return None
 
     if config.sort_by == SortKey.NONE:

@@ -270,81 +270,7 @@ def execute_findfmt(  # noqa: PLR0913
     color: bool | None = None,
     locale: str | None = None,
 ) -> None:
-    """Execute file discovery, classification, formatting, and summary reporting.
-
-    Args:
-        paths: Directory or file paths to inspect.
-        tags: Tags to match.
-        exclude_tags: Tags to exclude.
-        all_tags: Whether all tags must match.
-        shebang: Shebang filter pattern.
-        no_ignore: Whether to ignore gitignore rules.
-        gitignore_file: External gitignore file to apply across traversal scope.
-        hidden: Whether to include hidden files.
-        follow_symlinks: Whether to follow symbolic links.
-        dirs_only: Whether to list directories only and suppress files.
-        one_file_system: Whether to confine traversal to the root filesystem device.
-        max_depth: Maximum directory depth level.
-        file_limit: Entry count threshold to skip directories.
-        prune: Whether to omit directories with zero matching files.
-        pattern: Include wildcard/glob pattern list.
-        exclude_pattern: Exclude wildcard/glob pattern list.
-        ignore_case: Whether pattern comparisons are case-insensitive.
-        match_dirs: Whether directory matches inherit to descendants.
-        output_format: Configured output serialization format.
-        output: Destination file path for redirected output.
-        tree: Whether tree view was explicitly requested.
-        table_style: Optional table border style name.
-        csv_safe: Whether to neutralize spreadsheet formula injection in CSV/TSV output.
-        absolute: Whether to emit absolute paths.
-        relative: Whether to prepend input search path prefix to relative paths.
-        print0: Whether to delimit output with NUL characters.
-        list_tags: Whether to display tags in output.
-        summary: Whether to display execution summary.
-        exit_status: Whether to exit with code 1 if no matching files are found.
-        sort: Sort criteria identifier.
-        reverse: Whether to reverse sort order.
-        unsorted: Whether to disable sorting.
-        dirs_first: Whether to group directories first.
-        files_first: Whether to group files first.
-        from_file: Optional input file or '-' for stdin to ingest directory structure.
-        offline: Whether to enforce offline classification without disk access.
-        permissions: Whether to display permissions in ls -l format.
-        user: Whether to display file owner username or UID.
-        group: Whether to display file owner group name or GID.
-        size: Whether to display file size in bytes.
-        human_readable: Whether to format sizes using binary units.
-        si: Whether to format sizes using SI metric units.
-        du: Whether to accumulate recursive directory disk usage.
-        inodes: Whether to display filesystem inode number.
-        device: Whether to display filesystem device number.
-        mtime: Whether to display file modification date/time.
-        ctime: Whether to display last status change date/time.
-        time_format: Optional strftime syntax format string for dates/times.
-        classify: Whether to append file classification indicator characters.
-        hide_control_chars: Whether to mask non-printable characters with '?'.
-        literal: Whether to emit literal control characters.
-        quote_name: Whether to enclose filenames in double quotes.
-        find_files_func: Traversal generator function to execute.
-        pager: Optional interactive pager override flag.
-        stream: Target output text stream (defaults to sys.stdout).
-        pager_controller: Optional injected PagerController instance.
-        no_indent: Whether to suppress branch indentation and whitespace padding.
-        ansi_lines: Whether to use ANSI/VT100 alternate line drawing escapes.
-        cp437: Whether to use CP437 console graphics line drawing characters.
-        xml: Whether XML document output format flag is active.
-        html: Optional HTML base HREF string if active.
-        json: Whether JSON document output format flag is active.
-        intro: Optional HTML template intro header fragment path.
-        outro: Optional HTML template outro footer fragment path.
-        title: Optional custom HTML document title.
-        no_links: Whether to suppress hyperlinks in HTML mode.
-        hyperlink: Whether to wrap paths in OSC 8 terminal hyperlink escapes.
-        hyperlink_schema: URI schema for terminal hyperlinks.
-        hyperlink_authority: Optional URI authority component for terminal hyperlinks.
-        color: Explicit color enable override flag.
-        locale: Optional display locale override string.
-    """
+    """Execute file discovery, classification, formatting, and summary reporting."""
     install_signal_handlers()
 
     if locale is not None:
@@ -423,6 +349,7 @@ def execute_findfmt(  # noqa: PLR0913
 
     tag_counter: Counter[str] = Counter()
     match_count = total_bytes = 0
+    had_traversal_error = False
     delimiter = "\0" if config.null_delimited else "\n"
 
     reconfigure_surrogateescape(sys.stdout)
@@ -458,12 +385,23 @@ def execute_findfmt(  # noqa: PLR0913
         **formatter_kwargs,
     )
 
-    actual_find_files = find_files_func or find_files
+    def _on_traversal_error(err: OSError) -> None:
+        """Report missing or unreadable path to stderr and mark traversal failure."""
+        nonlocal had_traversal_error
+        had_traversal_error = True
+        bad_path = err.filename or "<unknown>"
+        reason = err.strerror or (str(err.args[0]) if err.args else str(err))
+        typer.echo(f"findfmt: cannot open '{bad_path}': {reason}", err=True)
 
     def _matched_files() -> Iterable[FileInfo]:
         """Yield matched files while accumulating frequency statistics."""
         nonlocal match_count, total_bytes
-        for file_info in actual_find_files(config):
+        file_iter = (
+            find_files_func(config)
+            if find_files_func is not None
+            else find_files(config, on_error=_on_traversal_error)
+        )
+        for file_info in file_iter:
             match_count += 1
             if config.show_summary:
                 tag_counter.update(file_info.tags)
@@ -488,5 +426,5 @@ def execute_findfmt(  # noqa: PLR0913
         if config.show_summary:
             write_summary(match_count, tag_counter, total_bytes=total_bytes, force_color=color)
 
-        if exit_status and match_count == 0:
+        if had_traversal_error or (exit_status and match_count == 0):
             raise typer.Exit(code=1)

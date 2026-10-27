@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from findfmt.classifier import _resolve_relative, classify_file
+from findfmt.exceptions import TraversalError
 from findfmt.traversal.devices import check_device_boundary, resolve_device
 from findfmt.traversal.filters import matches_filter
 from findfmt.traversal.ignore import (
@@ -19,7 +20,7 @@ from findfmt.traversal.symlinks import init_visited_dirs, should_skip_symlink_di
 from findfmt.traversal.tags import INTERPRETER_TAGS, can_skip_file_by_tags
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Sequence
+    from collections.abc import Callable, Iterator, Sequence
 
     import pathspec
 
@@ -49,11 +50,19 @@ __all__ = [
 
 def check_file_limit(count: int, file_limit: int | None) -> bool:
     """Verify whether directory entry count does not exceed filelimit threshold."""
+    if file_limit is not None and file_limit < 0:
+        msg = f"file_limit must be non-negative, got {file_limit}"
+        raise TraversalError(msg)
+
     return file_limit is None or count <= file_limit
 
 
 def check_depth_limit(current_depth: int, max_depth: int | None) -> bool:
     """Determine whether traversal can descend further based on maximum depth."""
+    if max_depth is not None and max_depth < 0:
+        msg = f"max_depth must be non-negative, got {max_depth}"
+        raise TraversalError(msg)
+
     return max_depth is None or current_depth < max_depth
 
 
@@ -186,16 +195,22 @@ def _check_visited_or_memo(
 
 def _scan_sorted_entries(
     directory: Path,
-    memo: dict[tuple[int, int], bool] | None,
+    memo: dict[tuple[int, int], bool],
     dir_key: tuple[int, int],
+    *,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> list[os.DirEntry[str]] | None:
     """Scan directory entries safely, closing handle and tracking memo on error."""
     try:
         with os.scandir(directory) as scan_it:
             return sorted(scan_it, key=lambda e: e.name)
-    except (OSError, RuntimeError):
-        if memo is not None:
-            memo[dir_key] = False
+    except (OSError, RuntimeError) as err:
+        memo[dir_key] = False
+        if isinstance(err, OSError) and on_error is not None:
+            if not err.filename:
+                err.filename = str(directory)
+
+            on_error(err)
 
         return None
 
@@ -212,6 +227,7 @@ def _has_matching_in_subdirs(  # noqa: PLR0913
     effective_root: Path,
     visited: set[tuple[int, int]],
     memo: dict[tuple[int, int], bool],
+    on_error: Callable[[OSError], None] | None = None,
 ) -> bool:
     """Recursively search discovered child subdirectories for matching files."""
     for subdir in subdirs:
@@ -235,6 +251,7 @@ def _has_matching_in_subdirs(  # noqa: PLR0913
             base_root=effective_root,
             visited=visited,
             memo=memo,
+            on_error=on_error,
         ):
             return True
 
@@ -254,6 +271,7 @@ def _eval_descendants(  # noqa: PLR0913
     base_root: Path | None,
     visited: set[tuple[int, int]],
     memo: dict[tuple[int, int], bool],
+    on_error: Callable[[OSError], None] | None = None,
 ) -> bool:
     """Evaluate entries directly and descend into subdirectories if needed."""
     subdirs, found = _inspect_entries(
@@ -283,6 +301,7 @@ def _eval_descendants(  # noqa: PLR0913
         effective_root=effective_root,
         visited=visited,
         memo=memo,
+        on_error=on_error,
     )
 
 
@@ -298,6 +317,7 @@ def has_matching_descendants(  # noqa: PLR0913
     base_root: Path | None = None,
     visited: set[tuple[int, int]] | None = None,
     memo: dict[tuple[int, int], bool] | None = None,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> bool:
     """Determine whether a directory or any subtrees contain matching files."""
     try:
@@ -310,14 +330,13 @@ def has_matching_descendants(  # noqa: PLR0913
     if cached:
         return val
 
-    entries = _scan_sorted_entries(directory, memo, dir_key)
+    active_visited = visited if visited is not None else set()
+    active_memo = memo if memo is not None else {}
+    entries = _scan_sorted_entries(directory, active_memo, dir_key, on_error=on_error)
     if entries is None:
         return False
 
-    active_visited = visited if visited is not None else set()
-    active_memo = memo if memo is not None else {}
     active_visited.add(dir_key)
-
     try:
         result = _eval_descendants(
             entries,
@@ -331,6 +350,7 @@ def has_matching_descendants(  # noqa: PLR0913
             base_root=base_root,
             visited=active_visited,
             memo=active_memo,
+            on_error=on_error,
         )
     finally:
         active_visited.remove(dir_key)
@@ -350,6 +370,7 @@ def _should_skip_dir_prune(  # noqa: PLR0913
     matcher: PatternMatcher | None,
     inherited_match: bool,
     prune_memo: dict[tuple[int, int], bool] | None = None,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> bool:
     """Determine if a directory should be skipped due to empty pruning."""
     if not (config.dirs_only and config.prune_empty):
@@ -366,6 +387,7 @@ def _should_skip_dir_prune(  # noqa: PLR0913
         inherited_match=inherited_match,
         base_root=base_root,
         memo=prune_memo,
+        on_error=on_error,
     )
 
 
@@ -407,6 +429,7 @@ def yield_matching_items(  # noqa: PLR0913
     inherited_match: bool = False,
     accumulated_sizes: dict[Path, int] | None = None,
     prune_memo: dict[tuple[int, int], bool] | None = None,
+    on_error: Callable[[OSError], None] | None = None,
 ) -> Iterator[FileInfo]:
     """Yield FileInfo records for candidate paths that satisfy filters and pruning."""
     for item in targets:
@@ -422,6 +445,7 @@ def yield_matching_items(  # noqa: PLR0913
             matcher=matcher,
             inherited_match=inherited_match,
             prune_memo=prune_memo,
+            on_error=on_error,
         ):
             continue
 
