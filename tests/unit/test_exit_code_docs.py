@@ -20,15 +20,28 @@ def _section(text: str, start: str, end: str) -> str:
 
 
 def test_help_all_exit_codes_describe_exit_status() -> None:
-    """The --help-all Exit Codes table explains the no-match and --exit-status cases."""
+    """The --help-all Exit Codes table explains the no-match, --exit-status, and SIGINT cases."""
     table = _section(get_help_all(), "Exit Codes:\n", "\n\n")
     assert "--exit-status" in table
+    assert "SIGINT" in table
     assert "matching files found" not in table
-    assert {line.split()[0] for line in table.splitlines() if line.strip()} == {"0", "1", "2"}
+    assert {line.split()[0] for line in table.splitlines() if line.strip()} == {
+        "0",
+        "1",
+        "2",
+        "130",
+    }
 
 
 def test_cli_reference_exit_status_section_describes_exit_status() -> None:
-    """The CLI reference's Exit Status section explains the no-match and --exit-status cases."""
+    """The CLI reference's Exit Status section documents codes 0, 1, 2, and 130."""
     section = _section(CLI_REFERENCE.read_text(encoding="utf-8"), "## 7. Exit Status", "\n## ")
     assert "--exit-status" in section
+    assert "SIGPIPE" in section
+    assert "SIGINT" in section
     assert "matching files found" not in section
+    for code in ("`0`", "`1`", "`2`", "`130`"):
+        assert code in section
+
+    readme = (CLI_REFERENCE.parents[3] / "README.md").read_text(encoding="utf-8")
+    assert "cli/index.html#exit-status" in readme

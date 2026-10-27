@@ -341,14 +341,17 @@ findfilefmt python -- -hyphenated-dir/
 
 ## 7. Exit Status
 
-- `0`: Success, including runs where no files match, and help, version, or diagnostics queries.
-- `1`: Runtime traversal, classification, or filesystem I/O error, or no matching files when
-  `--exit-status` is given.
-- `2`: Invalid command-line arguments or syntax error.
+| Code  | Meaning                                                                                                                     |
+| ----- | --------------------------------------------------------------------------------------------------------------------------- |
+| `0`   | Success, including runs where no files match, help/version/diagnostics queries, and early pipeline termination (`SIGPIPE`). |
+| `1`   | Runtime traversal, classification, or filesystem I/O error, or no matching files when `--exit-status` is given.             |
+| `2`   | Invalid command-line arguments, conflicting options, or configuration file error.                                           |
+| `130` | Execution interrupted by `SIGINT` (`Ctrl+C`).                                                                               |
 
 Pass `--exit-status` for `grep`-style scripting, where "nothing matched" should be a failure. The
 command wrappers (`findfiles`, `findfilefmt`, `findfilemime`, `findfmt0`, `findshebang`,
-`findsummary`) use the same codes and exit with status 1 when they stop with an error message.
+`findsummary`) follow the same exit-code contract across all status codes (`0`, `1`, `2`, and
+`130`).
 
 ## 8. Examples
 
