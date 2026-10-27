@@ -7,7 +7,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
+from findfmt.cli import app
 from findfmt.formatters import (
     HtmlFormatter,
     OutputFormat,
@@ -414,3 +416,27 @@ def test_html_formatter_empty_tags_with_mime() -> None:
     html_out = HtmlFormatter().format([child])
     assert '<span class="mime">text/plain</span>' in html_out
     assert '<span class="badge' not in html_out
+
+
+@pytest.mark.parametrize("cli_flags", [["--sort", "size"], ["--reverse"], ["--dirsfirst"]])
+@pytest.mark.parametrize("fmt", ["xml", "html"])
+def test_html_xml_respect_sort(tmp_path: Path, cli_flags: list[str], fmt: str) -> None:
+    """Verify HTML and XML formats preserve --sort, --reverse, and --dirsfirst order."""
+    (tmp_path / "alpha.txt").write_bytes(b"x" * 100)
+    (tmp_path / "beta.txt").write_bytes(b"x" * 10)
+    sub = tmp_path / "subdir"
+    sub.mkdir()
+    (sub / "gamma.txt").write_bytes(b"x" * 50)
+    runner = CliRunner()
+    text_res = runner.invoke(app, [str(tmp_path), "-f", "text", *cli_flags])
+    fmt_res = runner.invoke(app, [str(tmp_path), "-f", fmt, *cli_flags])
+    assert text_res.exit_code == 0
+    assert fmt_res.exit_code == 0
+    expected_order = [Path(line).name for line in text_res.stdout.splitlines() if line.strip()]
+    actual_order = [
+        name
+        for line in fmt_res.stdout.splitlines()
+        for name in ("alpha.txt", "beta.txt", "gamma.txt")
+        if name in line
+    ]
+    assert actual_order == expected_order

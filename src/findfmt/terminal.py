@@ -7,6 +7,11 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, TextIO
 
+if sys.version_info >= (3, 12):  # pragma: no cover
+    from typing import override
+else:  # pragma: no cover
+    from typing_extensions import override
+
 from rich.console import Console
 
 from findfmt.utils.strings import _ANSI_ESCAPE_RE
@@ -83,6 +88,16 @@ def is_color_enabled(
     return bool(getattr(target, "isatty", lambda: False)())
 
 
+class _PipeSafeConsole(Console):
+    """Rich Console subclass that propagates BrokenPipeError to CLI signal handlers."""
+
+    @override
+    def on_broken_pipe(self) -> None:
+        """Suppress further Console buffer writes and re-raise BrokenPipeError."""
+        self.quiet = True
+        raise BrokenPipeError
+
+
 def get_console(
     stream: TextIO | None = None,
     *,
@@ -110,7 +125,7 @@ def get_console(
     is_tty = getattr(target, "isatty", lambda: False)()
 
     if not color_on:
-        return Console(
+        return _PipeSafeConsole(
             file=target,
             no_color=True,
             force_terminal=False,
@@ -119,14 +134,14 @@ def get_console(
         )
 
     if is_tty:
-        return Console(
+        return _PipeSafeConsole(
             file=target,
             no_color=False,
             width=width,
             highlight=False,
         )
 
-    return Console(
+    return _PipeSafeConsole(
         file=target,
         no_color=False,
         force_terminal=True,
