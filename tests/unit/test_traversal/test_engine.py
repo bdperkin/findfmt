@@ -289,12 +289,18 @@ def test_scan_directory_entries_is_file_oserror(tmp_path: Path):
 
 
 def test_traverse_single_root_is_file_oserror(tmp_path: Path):
-    """Verify _traverse_single_root handles OSError from resolved_root.is_file."""
+    """Verify _traverse_single_root handles OSError and non-file/non-dir roots."""
     config = TraversalConfig()
     matcher = create_pattern_matcher(config)
     with patch.object(Path, "is_file", side_effect=OSError("Access denied")):
         res = list(_traverse_single_root(tmp_path, tmp_path, config, matcher))
         assert res == []
+
+    with (
+        patch.object(Path, "is_file", return_value=False),
+        patch.object(Path, "is_dir", return_value=False),
+    ):
+        assert list(_traverse_single_root(tmp_path, tmp_path, config, matcher)) == []
 
 
 def test_find_files_root_resolve_oserror(tmp_path: Path):
