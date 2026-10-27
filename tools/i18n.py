@@ -17,6 +17,49 @@ except ImportError:
     except ImportError:
         compile_po_to_mo = None  # type: ignore[assignment]
 
+try:
+    from tools.i18n_validation import (
+        extract_brace_placeholders,
+        extract_printf_placeholders,
+        extract_rich_tags,
+        mask_placeholders,
+        parse_po_catalog,
+        unmask_placeholders,
+        validate_catalogs,
+        validate_message_pair,
+        validate_po_file,
+    )
+except ImportError:
+    from i18n_validation import (  # type: ignore[no-redef]
+        extract_brace_placeholders,
+        extract_printf_placeholders,
+        extract_rich_tags,
+        mask_placeholders,
+        parse_po_catalog,
+        unmask_placeholders,
+        validate_catalogs,
+        validate_message_pair,
+        validate_po_file,
+    )
+
+__all__ = [
+    "compile_catalogs",
+    "extract_brace_placeholders",
+    "extract_messages",
+    "extract_printf_placeholders",
+    "extract_rich_tags",
+    "init_catalog",
+    "main",
+    "mask_placeholders",
+    "parse_po_catalog",
+    "prune_untranslated_obsolete",
+    "unmask_placeholders",
+    "update_catalogs",
+    "validate_catalogs",
+    "validate_message_pair",
+    "validate_po_file",
+]
+
 DEFAULT_DOMAIN = "findfmt"
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 _EMPTY_MSGSTR = re.compile(r'#~ msgstr(?:\[\d+\])? ""')
@@ -50,15 +93,7 @@ def _get_working_dir(*paths: Path, base: Path = PROJECT_ROOT) -> Path | None:
 
 
 def _sanitize_po_locations(file_path: Path, root: Path = PROJECT_ROOT) -> None:
-    """Ensure file location comments in a PO/POT file use relative paths.
-
-    Strips absolute project root prefixes or full filesystem paths from
-    location comments (e.g. `#: /path/to/project/src/...` -> `#: src/...`).
-
-    Args:
-        file_path: Path to the .po or .pot file to sanitize.
-        root: Project root directory to treat as base.
-    """
+    """Ensure file location comments in a PO/POT file use relative paths."""
     if not file_path.is_file():
         return
 
@@ -109,19 +144,7 @@ def extract_messages(
     domain: str = DEFAULT_DOMAIN,
     bugs_address: str = BUGS_ADDRESS,
 ) -> int:
-    """Extract translatable strings from source files into a POT template file.
-
-    Wraps pybabel extract with xgettext fallback.
-
-    Args:
-        source_dir: Directory containing source code to inspect.
-        pot_file: Output path for the generated .pot template.
-        domain: Translation domain name.
-        bugs_address: URL or email for bug reports in the catalog header.
-
-    Returns:
-        Exit code (0 for success, non-zero for failure).
-    """
+    """Extract translatable strings from source files into a POT template file."""
     pot_file.parent.mkdir(parents=True, exist_ok=True)
     sys.stdout.write(f"Extracting messages from {source_dir} -> {pot_file}\n")
 
@@ -156,6 +179,10 @@ def extract_messages(
 
     xgettext_bin = shutil.which("xgettext")
     if xgettext_bin is not None:
+        py_files = [
+            _to_rel_path_str(p, PROJECT_ROOT) if cwd == PROJECT_ROOT else str(p)
+            for p in sorted(source_dir.rglob("*.py"))
+        ]
         cmd = [
             xgettext_bin,
             "--language=Python",
@@ -165,13 +192,8 @@ def extract_messages(
             "--from-code=UTF-8",
             "-o",
             cmd_pot,
+            *py_files,
         ]
-        if cwd == PROJECT_ROOT:
-            py_files = [_to_rel_path_str(p, PROJECT_ROOT) for p in sorted(source_dir.rglob("*.py"))]
-        else:
-            py_files = [str(p) for p in sorted(source_dir.rglob("*.py"))]
-
-        cmd.extend(py_files)
         proc = subprocess.run(cmd, cwd=cwd, check=False)
         if proc.returncode == 0:
             _sanitize_po_locations(pot_file, root=PROJECT_ROOT)
@@ -188,17 +210,7 @@ def init_catalog(
     locale_dir: Path = DEFAULT_LOCALE_DIR,
     domain: str = DEFAULT_DOMAIN,
 ) -> int:
-    """Initialize a new language PO catalog from a POT template.
-
-    Args:
-        locale: Target locale code (e.g. 'es', 'fr').
-        pot_file: Input POT template path.
-        locale_dir: Destination directory for locale catalogs.
-        domain: Translation domain name.
-
-    Returns:
-        Exit code (0 for success, non-zero for failure).
-    """
+    """Initialize a new language PO catalog from a POT template."""
     if not pot_file.is_file():
         sys.stderr.write(f"Error: Template file {pot_file} not found. Run 'extract' first.\n")
         return 1
@@ -331,96 +343,65 @@ def compile_catalogs(
     locale_dir: Path = DEFAULT_LOCALE_DIR,
     domain: str = DEFAULT_DOMAIN,
 ) -> int:
-    """Compile all PO catalogs under locale_dir to binary MO catalogs.
+    """Validate and compile all PO catalogs under locale_dir to binary MO catalogs."""
+    if validate_catalogs(locale_dir, domain) != 0:
+        return 1
 
-    Args:
-        locale_dir: Directory containing locale catalogs.
-        domain: Translation domain name.
-
-    Returns:
-        Exit code (0 for success, non-zero for failure).
-    """
     pybabel_bin = shutil.which("pybabel")
     if pybabel_bin is not None:
         cmd = [pybabel_bin, "compile", "-d", str(locale_dir), "-D", domain]
         return subprocess.run(cmd, check=False).returncode
 
+    po_files = list(locale_dir.glob(f"*/LC_MESSAGES/{domain}.po"))
     msgfmt_bin = shutil.which("msgfmt")
     if msgfmt_bin is not None:
-        for po_path in locale_dir.glob(f"*/LC_MESSAGES/{domain}.po"):
-            mo_path = po_path.with_suffix(".mo")
-            proc = subprocess.run([msgfmt_bin, "-o", str(mo_path), str(po_path)], check=False)
-            if proc.returncode != 0:
-                return proc.returncode
+        codes = [
+            subprocess.run(
+                [msgfmt_bin, "-o", str(p.with_suffix(".mo")), str(p)],
+                check=False,
+            ).returncode
+            for p in po_files
+        ]
+        return next((c for c in codes if c != 0), 0)
 
-        return 0
+    if compile_po_to_mo is None:
+        sys.stderr.write("Error: No suitable compiler found for catalogs.\n")
+        return 1
 
-    if compile_po_to_mo is not None:
-        try:
-            for po_path in locale_dir.glob(f"*/LC_MESSAGES/{domain}.po"):
-                compile_po_to_mo(po_path, po_path.with_suffix(".mo"))
-        except Exception as err:  # noqa: BLE001
-            sys.stderr.write(f"Error compiling catalogs: {err}\n")
-            return 1
+    try:
+        for po_path in po_files:
+            compile_po_to_mo(po_path, po_path.with_suffix(".mo"))
+    except Exception as err:  # noqa: BLE001
+        sys.stderr.write(f"Error compiling catalogs: {err}\n")
+        return 1
 
-        return 0
-
-    sys.stderr.write("Error: No suitable compiler found for catalogs.\n")
-    return 1
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Build command line argument parser for i18n management.
-
-    Returns:
-        Configured ArgumentParser instance.
-    """
+    """Build command line argument parser for i18n management."""
     parser = argparse.ArgumentParser(
         prog="i18n.py",
-        description="Extract, update, and compile gettext translation catalogs for findfmt.",
+        description="Extract, update, validate, and compile gettext translation catalogs.",
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     domain_p = argparse.ArgumentParser(add_help=False)
-    domain_p.add_argument(
-        "--domain",
-        default=DEFAULT_DOMAIN,
-        help="Catalog domain (default: findfmt).",
-    )
+    domain_p.add_argument("--domain", default=DEFAULT_DOMAIN, help="Catalog domain.")
 
     loc_p = argparse.ArgumentParser(add_help=False)
-    loc_p.add_argument(
-        "--localedir",
-        type=Path,
-        default=DEFAULT_LOCALE_DIR,
-        help="Locale base directory.",
-    )
+    loc_p.add_argument("--localedir", type=Path, default=DEFAULT_LOCALE_DIR, help="Locale dir.")
 
     pot_p = argparse.ArgumentParser(add_help=False)
-    pot_p.add_argument(
-        "--pot",
-        type=Path,
-        default=DEFAULT_POT_FILE,
-        help="Input POT template file.",
-    )
+    pot_p.add_argument("--pot", type=Path, default=DEFAULT_POT_FILE, help="Input POT file.")
 
     sub_extract = subparsers.add_parser(
         "extract",
         parents=[domain_p],
         help="Extract translatable strings to POT file.",
     )
-    sub_extract.add_argument(
-        "--source",
-        type=Path,
-        default=DEFAULT_SOURCE_DIR,
-        help="Source directory (default: src/findfmt).",
-    )
-    sub_extract.add_argument(
-        "--output",
-        type=Path,
-        default=DEFAULT_POT_FILE,
-        help="Output POT file (default: src/findfmt/locale/findfmt.pot).",
-    )
+    sub_extract.add_argument("--source", type=Path, default=DEFAULT_SOURCE_DIR, help="Source dir.")
+    sub_extract.add_argument("--output", type=Path, default=DEFAULT_POT_FILE, help="Output POT.")
 
     sub_init = subparsers.add_parser(
         "init",
@@ -429,34 +410,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub_init.add_argument("locale", help="Locale code (e.g. en, es, fr, de, ja).")
 
+    subparsers.add_parser("update", parents=[domain_p, pot_p, loc_p], help="Update PO catalogs.")
     subparsers.add_parser(
-        "update",
-        parents=[domain_p, pot_p, loc_p],
-        help="Update existing PO files from POT template.",
-    )
-    subparsers.add_parser(
-        "compile",
+        "validate",
         parents=[domain_p, loc_p],
-        help="Compile PO files into binary MO files.",
+        help="Validate placeholders and markup in PO catalogs.",
     )
+    subparsers.add_parser("compile", parents=[domain_p, loc_p], help="Compile PO to MO files.")
 
     sub_all = subparsers.add_parser(
         "all",
         parents=[domain_p, loc_p],
-        help="Run extract, update, and compile lifecycle steps.",
+        help="Run extract, update, validate, and compile lifecycle steps.",
     )
-    sub_all.add_argument(
-        "--source",
-        type=Path,
-        default=DEFAULT_SOURCE_DIR,
-        help="Source directory.",
-    )
-
+    sub_all.add_argument("--source", type=Path, default=DEFAULT_SOURCE_DIR, help="Source dir.")
     return parser
 
 
 def _run_all(args: argparse.Namespace) -> int:
-    """Run extract, update, and compile lifecycle steps in sequence."""
+    """Run extract, update, validate, and compile lifecycle steps in sequence."""
     pot = args.localedir / f"{args.domain}.pot"
     code = extract_messages(args.source, pot, args.domain)
     if code != 0:
@@ -475,6 +447,7 @@ def _dispatch_command(args: argparse.Namespace) -> int:
         "extract": lambda: extract_messages(args.source, args.output, args.domain),
         "init": lambda: init_catalog(args.locale, args.pot, args.localedir, args.domain),
         "update": lambda: update_catalogs(args.pot, args.localedir, args.domain),
+        "validate": lambda: validate_catalogs(args.localedir, args.domain),
         "compile": lambda: compile_catalogs(args.localedir, args.domain),
         "all": lambda: _run_all(args),
     }

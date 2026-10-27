@@ -119,9 +119,10 @@ All pull requests must satisfy our quality gate before merging:
   uv run python tools/api_surface.py --write
   ```
 - **Localization Tooling & Message Catalogs**: If updating translatable strings or locale catalogs,
-  extract and compile message catalogs:
+  extract, validate, and compile message catalogs:
   ```bash
   uv run python tools/i18n.py extract
+  uv run python tools/i18n.py validate
   uv run python tools/i18n.py compile
   ```
   The documentation has its own Sphinx catalogs under `docs/source/locale/`. After changing
