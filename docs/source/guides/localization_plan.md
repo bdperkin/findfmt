@@ -354,6 +354,9 @@ according to gettext standards:
 Compile `.po` files to binary `.mo` format and verify wheel packaging:
 
 ```bash
+# Validate format placeholders and Rich markup parity across all PO catalogs
+uv run python tools/i18n.py validate
+
 # Compile catalogs
 uv run python tools/i18n.py compile
 

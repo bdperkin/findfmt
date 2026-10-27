@@ -9,6 +9,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+from tools.i18n_validation import extract_brace_placeholders, parse_po_catalog, validate_po_file
 from typer.testing import CliRunner
 
 import findfmt.utils.strings
@@ -16,11 +17,13 @@ from findfmt.cli.main import app
 from findfmt.formatters import RichTableFormatter, TextFormatter
 from findfmt.formatters.visual import format_summary_panel
 from findfmt.i18n import (
+    _,
     _format_grouped_digits,
     _get_numeric_conventions,
     _sync_system_locale,
     format_integer,
     format_number,
+    ngettext,
     override_locale,
 )
 from findfmt.models import FileInfo
@@ -173,45 +176,19 @@ def test_locale_aware_numbers_and_sizes() -> None:
 
 def test_pluralization_logic() -> None:
     """Verify ngettext and format_summary_panel distinguish singular vs plural."""
-    # In C locale
-    with override_locale("C"):
-        panel_one = format_summary_panel(1, Counter({"txt": 1}))
-        assert "Matched file:" in str(panel_one.renderable)
-
-        panel_two = format_summary_panel(2, Counter({"txt": 2}))
-        assert "Matched files:" in str(panel_two.renderable)
-
-    # In Spanish catalog
-    with override_locale("es"):
-        panel_es_one = format_summary_panel(1, Counter({"txt": 1}))
-        assert "Archivo coincidente:" in str(panel_es_one.renderable)
-
-        panel_es_two = format_summary_panel(2, Counter({"txt": 2}))
-        assert "Archivos coincidentes:" in str(panel_es_two.renderable)
-
-    # In French catalog
-    with override_locale("fr"):
-        panel_fr_one = format_summary_panel(1, Counter({"txt": 1}))
-        assert "Fichier correspondant:" in str(panel_fr_one.renderable)
-
-        panel_fr_two = format_summary_panel(2, Counter({"txt": 2}))
-        assert "Fichiers correspondants:" in str(panel_fr_two.renderable)
-
-    # In German catalog
-    with override_locale("de"):
-        panel_de_one = format_summary_panel(1, Counter({"txt": 1}))
-        assert "Passende Datei:" in str(panel_de_one.renderable)
-
-        panel_de_two = format_summary_panel(2, Counter({"txt": 2}))
-        assert "Passende Dateien:" in str(panel_de_two.renderable)
-
-    # In Japanese catalog (nplurals=1)
-    with override_locale("ja"):
-        panel_ja_one = format_summary_panel(1, Counter({"txt": 1}))
-        assert "一致したファイル:" in str(panel_ja_one.renderable)
-
-        panel_ja_two = format_summary_panel(2, Counter({"txt": 2}))
-        assert "一致したファイル:" in str(panel_ja_two.renderable)
+    cases = [
+        ("C", "Matched file:", "Matched files:"),
+        ("es", "Archivo coincidente:", "Archivos coincidentes:"),
+        ("fr", "Fichier correspondant:", "Fichiers correspondants:"),
+        ("de", "Passende Datei:", "Passende Dateien:"),
+        ("ja", "一致したファイル:", "一致したファイル:"),
+    ]
+    for lang, singular_text, plural_text in cases:
+        with override_locale(lang):
+            panel_one = format_summary_panel(1, Counter({"txt": 1}))
+            assert singular_text in str(panel_one.renderable)
+            panel_two = format_summary_panel(2, Counter({"txt": 2}))
+            assert plural_text in str(panel_two.renderable)
 
 
 def test_non_ascii_cjk_output_formatters(tmp_path: Path) -> None:
@@ -226,30 +203,13 @@ def test_non_ascii_cjk_output_formatters(tmp_path: Path) -> None:
         f.write_text("content", encoding="utf-8")
 
     files = [
-        FileInfo(
-            path=ja_file,
-            relative_path=Path(ja_file.name),
-            tags=frozenset({"text"}),
-            size_bytes=7,
-        ),
-        FileInfo(
-            path=es_file,
-            relative_path=Path(es_file.name),
-            tags=frozenset({"python"}),
-            size_bytes=7,
-        ),
-        FileInfo(
-            path=de_file,
-            relative_path=Path(de_file.name),
-            tags=frozenset({"markdown"}),
-            size_bytes=7,
-        ),
-        FileInfo(
-            path=fr_file,
-            relative_path=Path(fr_file.name),
-            tags=frozenset({"json"}),
-            size_bytes=7,
-        ),
+        FileInfo(path=f, relative_path=Path(f.name), tags=frozenset({tag}), size_bytes=7)
+        for f, tag in (
+            (ja_file, "text"),
+            (es_file, "python"),
+            (de_file, "markdown"),
+            (fr_file, "json"),
+        )
     ]
 
     # Test TextFormatter handles CJK and non-ASCII names
@@ -487,3 +447,28 @@ def test_resolve_time_format_exceptions_and_value_error(monkeypatch: pytest.Monk
 
     res = format_timestamp(ts, fmt="%unknown")
     assert res == "fallback_time"
+
+
+@pytest.mark.parametrize("lang", ["en", "es", "fr", "de", "ja"])
+def test_catalog_entries_placeholder_parity_and_runtime_formatting(lang: str) -> None:
+    """Verify every catalog entry in every locale preserves placeholders and formats cleanly."""
+    locale_root = Path(__file__).resolve().parents[2] / "src" / "findfmt" / "locale"
+    po_path = locale_root / lang / "LC_MESSAGES" / "findfmt.po"
+    assert validate_po_file(po_path) == []
+
+    entries = parse_po_catalog(po_path.read_text(encoding="utf-8"))
+    with override_locale(lang):
+        for entry in entries:
+            placeholders = extract_brace_placeholders(entry.msgid)
+            if entry.msgid_plural is not None:
+                placeholders |= extract_brace_placeholders(entry.msgid_plural)
+
+            kwargs = dict.fromkeys(placeholders, "sample")
+            if entry.msgid_plural is not None:
+                for count in (1, 2):
+                    translated = ngettext(entry.msgid, entry.msgid_plural, count)
+                    assert translated.format(**kwargs)
+            else:
+                translated = _(entry.msgid)
+                if kwargs:
+                    assert translated.format(**kwargs)
