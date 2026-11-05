@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.1.dev10+ga62e419a4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 15:14-0500\n"
+"POT-Creation-Date: 2026-11-05 17:16-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -742,7 +742,7 @@ msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
 #: 27588306021a47d99af489c6eadaa05d
-msgid "**8.4s**"
+msgid "**`8.4s`**"
 msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
@@ -767,7 +767,7 @@ msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
 #: 3d4133783892446388a9eefe79a04197
-msgid "9.6s"
+msgid "`9.6s`"
 msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
@@ -792,7 +792,7 @@ msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
 #: e47306a69aa84dbaa46d63cf4d0e1dc3
-msgid "12.6s"
+msgid "`12.6s`"
 msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
@@ -817,7 +817,7 @@ msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
 #: f6d1106d55454510a4f344d35694fcef
-msgid "14.4s"
+msgid "`14.4s`"
 msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
@@ -848,7 +848,7 @@ msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
 #: f51ac3d3b3a8494b94ea37dc3223d25a
-msgid "3.6s"
+msgid "`3.6s`"
 msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
@@ -873,7 +873,7 @@ msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
 #: 371133d82ec44763969aa5a3c5bac4f3
-msgid "4.2s"
+msgid "`4.2s`"
 msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
@@ -898,7 +898,7 @@ msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7
 #: 830cf00f80b148cba4aacfb0cf7ac007
-msgid "27.0s"
+msgid "`27.0s`"
 msgstr ""
 
 #: ../../source/guides/ai_translation_benchmark.md:7

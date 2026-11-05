@@ -148,13 +148,13 @@ catalog), yielding **6,313 input tokens** (including system prompt and glossary 
 
 | Backend Provider                        | Offline Capable | Batches / Catalog | Input Tokens | Output Tokens | Latency / Catalog | Cost / Catalog (USD) | Cost: 4 Baseline Locales | Cost: All 52 Locales |
 | --------------------------------------- | :-------------: | ----------------: | -----------: | ------------: | ----------------: | -------------------: | -----------------------: | -------------------: |
-| **`OpenAI GPT-4o-mini`**                |       No        |                 6 |        6,313 |         6,541 |          **8.4s** |         **$0.00487** |              **$0.0195** |          **$0.2533** |
-| **`Anthropic Claude 3.5 Haiku`**        |       No        |                 6 |        6,313 |         6,541 |              9.6s |             $0.03121 |                  $0.1249 |              $1.6231 |
-| **`OpenAI GPT-4o`**                     |       No        |                 6 |        6,313 |         6,541 |             12.6s |             $0.08119 |                  $0.3248 |              $4.2220 |
-| **`Anthropic Claude 3.5 Sonnet`**       |       No        |                 6 |        6,313 |         6,541 |             14.4s |             $0.11705 |                  $0.4682 |              $6.0868 |
-| **`Azure AI Translator (NMT)`**         |       No        |                 6 |          N/A |           N/A |              3.6s |             $0.16533 |                  $0.6613 |              $8.5972 |
-| **`Google Cloud Translation v2`**       |       No        |                 6 |          N/A |           N/A |              4.2s |             $0.33066 |                  $1.3226 |             $17.1943 |
-| **`Local Ollama / vLLM (Qwen2.5-14B)`** |     **Yes**     |                 6 |        6,313 |         6,541 |             27.0s |         **$0.00000** |              **$0.0000** |          **$0.0000** |
+| **`OpenAI GPT-4o-mini`**                |       No        |                 6 |        6,313 |         6,541 |        **`8.4s`** |         **$0.00487** |              **$0.0195** |          **$0.2533** |
+| **`Anthropic Claude 3.5 Haiku`**        |       No        |                 6 |        6,313 |         6,541 |            `9.6s` |             $0.03121 |                  $0.1249 |              $1.6231 |
+| **`OpenAI GPT-4o`**                     |       No        |                 6 |        6,313 |         6,541 |           `12.6s` |             $0.08119 |                  $0.3248 |              $4.2220 |
+| **`Anthropic Claude 3.5 Sonnet`**       |       No        |                 6 |        6,313 |         6,541 |           `14.4s` |             $0.11705 |                  $0.4682 |              $6.0868 |
+| **`Azure AI Translator (NMT)`**         |       No        |                 6 |          N/A |           N/A |            `3.6s` |             $0.16533 |                  $0.6613 |              $8.5972 |
+| **`Google Cloud Translation v2`**       |       No        |                 6 |          N/A |           N/A |            `4.2s` |             $0.33066 |                  $1.3226 |             $17.1943 |
+| **`Local Ollama / vLLM (Qwen2.5-14B)`** |     **Yes**     |                 6 |        6,313 |         6,541 |           `27.0s` |         **$0.00000** |              **$0.0000** |          **$0.0000** |
 
 ```{tip}
 Modern small instruction-tuned LLMs (`GPT-4o-mini` and `Claude 3.5 Haiku`) are both **33x–67x
