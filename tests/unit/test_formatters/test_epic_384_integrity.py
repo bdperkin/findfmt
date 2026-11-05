@@ -25,14 +25,14 @@ def test_epic_384_formatter_integrity_acceptance(tmp_path: Path) -> None:
 
     # 1. Markdown escapes raw HTML tags in filenames (#333)
     html_file = FileInfo(
-        path=Path("/workspace/<script>alert(1)</script>.md"),
-        relative_path=Path("<script>alert(1)</script>.md"),
+        path=Path("/workspace/<img src=x onerror=alert(1)>.md"),
+        relative_path=Path("<img src=x onerror=alert(1)>.md"),
         tags=frozenset({"markdown", "text"}),
         size_bytes=5,
     )
     md_out = MarkdownFormatter().format([html_file])
-    assert "&lt;script&gt;alert(1)&lt;/script&gt;.md" in md_out
-    assert "<script>alert(1)</script>.md" not in md_out
+    assert "&lt;img src=x onerror=alert(1)&gt;.md" in md_out
+    assert "<img src=x onerror=alert(1)>.md" not in md_out
 
     # 2. --csv-safe neutralizes spreadsheet formula injection prefixes (#339)
     csv_res = runner.invoke(app, ["-f", "csv", "--csv-safe", str(tmp_path)])
