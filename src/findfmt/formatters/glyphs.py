@@ -14,20 +14,14 @@ __all__ = [
 TREE_GUIDE_SETS: dict[str, tuple[str, str, str, str]] = {
     "unicode": ("    ", "│   ", "├── ", "└── "),
     "ansi": ("    ", "\x1b(0x\x1b(B   ", "\x1b(0tqq\x1b(B ", "\x1b(0mqq\x1b(B "),
-    "cp437": ("    ", "\xb3   ", "\xc3\xc4\xc4 ", "\xc0\xc4\xc4 "),
+    "cp437": ("    ", "│   ", "├── ", "└── "),
     "none": ("", "", "", ""),
 }
 
 # Code Page 437 (IBM-PC) table box style using hardware box drawing characters
 CP437_BOX = Box(
-    "\xda\xc4\xc2\xbf\n"
-    "\xb3 \xb3\xb3\n"
-    "\xc3\xc4\xc5\xb4\n"
-    "\xb3 \xb3\xb3\n"
-    "\xc3\xc4\xc5\xb4\n"
-    "\xc3\xc4\xc5\xb4\n"
-    "\xb3 \xb3\xb3\n"
-    "\xc0\xc4\xc1\xd9\n",
+    "┌─┬┐\n│ ││\n├─┼┤\n│ ││\n├─┼┤\n├─┼┤\n│ ││\n└─┴┘\n",
+    ascii=True,
 )
 
 

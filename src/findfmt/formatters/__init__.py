@@ -335,8 +335,9 @@ def _create_visual_formatter(
     common = _extract_common_formatter_kwargs(kwargs)
 
     if fmt_str == OutputFormat.TABLE.value:
-        style = kwargs.get("table_style", "rounded")
-        style_str = str(style) if isinstance(style, str) else "rounded"
+        default_style = "cp437" if kwargs.get("cp437") else "rounded"
+        style = kwargs.get("table_style", default_style)
+        style_str = str(style) if isinstance(style, str) else default_style
         return RichTableFormatter(
             absolute=absolute,
             table_style=style_str,

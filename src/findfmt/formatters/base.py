@@ -67,7 +67,7 @@ def write_stream_safe(stream: TextIO, content: str) -> None:
         content: String content potentially containing surrogate code points.
     """
     reconfigure = getattr(stream, "reconfigure", None)
-    if callable(reconfigure):
+    if callable(reconfigure) and getattr(stream, "encoding", None) != "cp437":
         reconfigure(errors="surrogateescape")
 
     try:

@@ -98,6 +98,13 @@ class _PipeSafeConsole(Console):
         raise BrokenPipeError
 
 
+def _reconfigure_cp437(stream: TextIO) -> None:
+    """Reconfigure text stream to CP437 encoding with replacement error handling."""
+    reconfigure = getattr(stream, "reconfigure", None)
+    if callable(reconfigure):
+        reconfigure(encoding="cp437", errors="replace")
+
+
 def get_console(
     stream: TextIO | None = None,
     *,
@@ -118,7 +125,7 @@ def get_console(
     """
     target = stream if stream is not None else sys.stdout
     reconfigure = getattr(target, "reconfigure", None)
-    if callable(reconfigure):
+    if callable(reconfigure) and getattr(target, "encoding", None) != "cp437":
         reconfigure(errors="surrogateescape")
 
     color_on = force_color if force_color is not None else is_color_enabled(target, env=env)

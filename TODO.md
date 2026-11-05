@@ -3,11 +3,12 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 148 Closed Issues | 130 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 149 Closed Issues | 129 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
-> milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320); 2026-11-05 (closed #303)
+> milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320); 2026-11-05 (closed
+> issues #303 and #343)
 
 ______________________________________________________________________
 
@@ -461,6 +462,9 @@ Note: Ordered chronologically by completion date.
   evaluate open-source Python gettext AI translators (gettext-translator, pytlai,
   auto-gettext-translator) (Closed: 2026-11-05 via PR
   [#527](https://github.com/bdperkin/findfmt/pull/527))
+- [x] **[#343](https://github.com/bdperkin/findfmt/issues/343)** - fix(format): --cp437 writes
+  Latin-1 code points, which show as mojibake (Closed: 2026-11-05 via PR
+  [#528](https://github.com/bdperkin/findfmt/pull/528))
 
 ______________________________________________________________________
 
@@ -760,10 +764,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Directory Traversal Robustness, Symlink Safety & Ignore Rule Parity](https://github.com/bdperkin/findfmt/issues/383)
   | Milestone: v1.2.1)* - **Value:** High | **Effort:** L - **Rationale:** Symlink handling produces
   wrong paths and duplicate entries.
-- [ ] **[#343](https://github.com/bdperkin/findfmt/issues/343)** - fix(format): --cp437 writes
-  Latin-1 code points, which show as mojibake *(Rank: 54 | Epic:
-  [[Epic] Formatter Integrity: Encoding Robustness, Stream Sanitization & Format Parity](https://github.com/bdperkin/findfmt/issues/384)
-  | Milestone: v1.1.1)* - **Value:** Low | **Effort:** S - **Rationale:** Small encoding fix.
 - [ ] **[#305](https://github.com/bdperkin/findfmt/issues/305)** - feat(i18n): formulate domain
   context prompt engineering and ngettext pluralization rules for AI translation *(Rank: 55 | Epic:
   [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
@@ -1237,7 +1237,7 @@ linked natively on GitHub.
 
 - [ ] **[#384](https://github.com/bdperkin/findfmt/issues/384)** - [Epic] Formatter Integrity:
   Encoding Robustness, Stream Sanitization & Format Parity *(Milestone: v1.1.1 | Open sub-issues:
-  1)* - [#343](https://github.com/bdperkin/findfmt/issues/343)
+  0)* - none remaining
 - [ ] **[#344](https://github.com/bdperkin/findfmt/issues/344)** - [Epic] CI Pipeline Determinism,
   Packaging Smoke Tests, and Tooling Alignment *(Milestone: v1.1.3 | Open sub-issues: 5)* -
   [#345](https://github.com/bdperkin/findfmt/issues/345),
@@ -1438,7 +1438,7 @@ v1.1.0 was released on 2026-10-24 (PyPI, GHCR, and GitHub Releases), and its mil
 
 | Milestone       | Theme                                                                                                                                  | Open Issues |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.1          | Output Correctness & Exit-Code Contract: ipynb/cp437 fixes, Broken-Pipe Parity, Config-Default Bug, Translation Placeholder Validation | 2           |
+| v1.1.1          | Output Correctness & Exit-Code Contract: ipynb/cp437 fixes, Broken-Pipe Parity, Config-Default Bug, Translation Placeholder Validation | 1           |
 | v1.1.2          | Test Determinism & Hermeticity: Deterministic Perf Counters, Coverage Hygiene, Dependency-Matrix ADR (+ Spanish catalog)               | 8           |
 | v1.1.3          | Release Safety & Packaging Hygiene: Tag-Pinned Releases, Reproducible Container, Required Floor Checks, 3.15 Gating                    | 6           |
 | v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                                       | 9           |

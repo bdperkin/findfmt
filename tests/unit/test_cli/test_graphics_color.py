@@ -85,8 +85,10 @@ def test_cli_cp437_tree(tmp_path: Path) -> None:
 
     res = runner.invoke(app, ["--tree", "-S", str(repo)])
     assert res.exit_code == 0
-    assert "\xc3\xc4\xc4" in res.stdout or "\xc0\xc4\xc4" in res.stdout
-    assert "root.py" in res.stdout
+    decoded = res.stdout_bytes.decode("cp437")
+    assert "├──" in decoded or "└──" in decoded
+    assert b"\xc3\xc4\xc4" in res.stdout_bytes or b"\xc0\xc4\xc4" in res.stdout_bytes
+    assert "root.py" in decoded
 
 
 def test_cli_color_force_option(tmp_path: Path) -> None:

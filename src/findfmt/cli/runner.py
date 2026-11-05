@@ -16,7 +16,7 @@ from findfmt.cli.signals import handle_broken_pipe, install_signal_handlers, tra
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.i18n import set_locale
 from findfmt.summary import write_summary
-from findfmt.terminal import PagerController, is_color_enabled
+from findfmt.terminal import PagerController, _reconfigure_cp437, is_color_enabled
 from findfmt.traversal import find_files
 
 if TYPE_CHECKING:
@@ -355,6 +355,9 @@ def execute_findfmt(  # noqa: PLR0913
     reconfigure_surrogateescape(sys.stdout)
     sink = open_output_sink(output, stream)
     target_stream = sink.stream
+    if cp437 or table_style == "cp437":
+        _reconfigure_cp437(target_stream)
+
     pager_ctrl = pager_controller or PagerController(
         pager=pager,
         stream=target_stream,

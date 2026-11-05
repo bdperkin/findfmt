@@ -20,7 +20,7 @@ from findfmt.formatters.base import Formatter
 from findfmt.formatters.glyphs import resolve_tree_guides
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
-from findfmt.terminal import get_console
+from findfmt.terminal import _reconfigure_cp437, get_console
 from findfmt.utils.hyperlinks import build_file_uri
 from findfmt.utils.strings import format_display_path
 
@@ -389,5 +389,8 @@ class RichTreeFormatter(Formatter):
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream formatted tree directly to a text stream."""
+        if self.cp437 and not self.no_indent and not self.ansi_lines:
+            _reconfigure_cp437(stream)
+
         tree = self._build_tree(files)
         get_console(stream, width=self.console_width, force_color=self.force_color).print(tree)

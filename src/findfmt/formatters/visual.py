@@ -24,7 +24,7 @@ from findfmt.formatters.tree import RichTreeFormatter
 from findfmt.i18n import _, format_integer, ngettext
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
-from findfmt.terminal import get_console
+from findfmt.terminal import _reconfigure_cp437, get_console
 from findfmt.utils.hyperlinks import build_file_uri
 from findfmt.utils.strings import format_display_path
 
@@ -294,5 +294,8 @@ class RichTableFormatter(Formatter):
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream formatted table directly to a text stream."""
+        if self.table_style == "cp437":
+            _reconfigure_cp437(stream)
+
         table = self._build_table(files)
         get_console(stream, width=self.console_width, force_color=self.force_color).print(table)
