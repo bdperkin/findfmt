@@ -3,11 +3,11 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 147 Closed Issues | 131 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 148 Closed Issues | 130 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
-> milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320)
+> milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320); 2026-11-05 (closed #303)
 
 ______________________________________________________________________
 
@@ -457,6 +457,10 @@ Note: Ordered chronologically by completion date.
 - [x] **[#320](https://github.com/bdperkin/findfmt/issues/320)** - fix(traversal): missing or
   unreadable paths are silently skipped with exit 0 (Closed: 2026-10-26 via PR
   [#520](https://github.com/bdperkin/findfmt/pull/520))
+- [x] **[#303](https://github.com/bdperkin/findfmt/issues/303)** - feat(i18n): benchmark and
+  evaluate open-source Python gettext AI translators (gettext-translator, pytlai,
+  auto-gettext-translator) (Closed: 2026-11-05 via PR
+  [#527](https://github.com/bdperkin/findfmt/pull/527))
 
 ______________________________________________________________________
 
@@ -583,12 +587,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.2. Medium Priority / Core Deliverables
 
-- [ ] **[#303](https://github.com/bdperkin/findfmt/issues/303)** - feat(i18n): benchmark and
-  evaluate open-source Python gettext AI translators (gettext-translator, pytlai,
-  auto-gettext-translator) *(Rank: 21 | Epic:
-  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
-  | Milestone: v1.1.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Evaluation prerequisite
-  for the AI translation chain.
 - [ ] **[#221](https://github.com/bdperkin/findfmt/issues/221)** - feat(i18n): add language support
   for Spanish (es) (~559 million) *(Rank: 22 | Epic:
   [[Epic] Add Language Support: Romance (~1.25 Billion)](https://github.com/bdperkin/findfmt/issues/200)
@@ -770,7 +768,7 @@ sub-issues. Respect `Blocked by` links when picking up work.
   context prompt engineering and ngettext pluralization rules for AI translation *(Rank: 55 | Epic:
   [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
   | Milestone: v1.1.2)* - **Value:** Low | **Effort:** S - **Rationale:** Small; only one plural
-  msgid today. Blocked by [#303](https://github.com/bdperkin/findfmt/issues/303).
+  msgid today.
 - [ ] **[#353](https://github.com/bdperkin/findfmt/issues/353)** - [Tests] Tighten coverage pragmas
   and eliminate reachable/dead code pragmas *(Rank: 56 | Epic:
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
@@ -1249,8 +1247,7 @@ linked natively on GitHub.
   [#475](https://github.com/bdperkin/findfmt/issues/475)
 - [ ] **[#308](https://github.com/bdperkin/findfmt/issues/308)** - [Epic] Investigate Open-Source
   Python AI Translators & Automation for GNU gettext .po Files *(Milestone: v1.1.4 | Open
-  sub-issues: 4)* - [#303](https://github.com/bdperkin/findfmt/issues/303),
-  [#305](https://github.com/bdperkin/findfmt/issues/305),
+  sub-issues: 3)* - [#305](https://github.com/bdperkin/findfmt/issues/305),
   [#306](https://github.com/bdperkin/findfmt/issues/306),
   [#307](https://github.com/bdperkin/findfmt/issues/307)
 - [ ] **[#385](https://github.com/bdperkin/findfmt/issues/385)** - [Epic] Packaging Integrity,
@@ -1441,7 +1438,7 @@ v1.1.0 was released on 2026-10-24 (PyPI, GHCR, and GitHub Releases), and its mil
 
 | Milestone       | Theme                                                                                                                                  | Open Issues |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.1          | Output Correctness & Exit-Code Contract: ipynb/cp437 fixes, Broken-Pipe Parity, Config-Default Bug, Translation Placeholder Validation | 3           |
+| v1.1.1          | Output Correctness & Exit-Code Contract: ipynb/cp437 fixes, Broken-Pipe Parity, Config-Default Bug, Translation Placeholder Validation | 2           |
 | v1.1.2          | Test Determinism & Hermeticity: Deterministic Perf Counters, Coverage Hygiene, Dependency-Matrix ADR (+ Spanish catalog)               | 8           |
 | v1.1.3          | Release Safety & Packaging Hygiene: Tag-Pinned Releases, Reproducible Container, Required Floor Checks, 3.15 Gating                    | 6           |
 | v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                                       | 9           |
