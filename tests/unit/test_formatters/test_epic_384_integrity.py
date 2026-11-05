@@ -19,7 +19,7 @@ def test_epic_384_formatter_integrity_acceptance(tmp_path: Path) -> None:
     """Verify Epic #384 acceptance criteria across CLI formatters in a single workspace."""
     (tmp_path / "alpha.txt").write_text("a", encoding="utf-8")
     (tmp_path / "zeta.txt").write_text("z", encoding="utf-8")
-    (tmp_path / "=SUM(A1:A2).csv").write_text("1,2", encoding="utf-8")
+    (tmp_path / "=SUM(A1).csv").write_text("1,2", encoding="utf-8")
 
     runner = CliRunner()
 
@@ -37,7 +37,7 @@ def test_epic_384_formatter_integrity_acceptance(tmp_path: Path) -> None:
     # 2. --csv-safe neutralizes spreadsheet formula injection prefixes (#339)
     csv_res = runner.invoke(app, ["-f", "csv", "--csv-safe", str(tmp_path)])
     assert csv_res.exit_code == 0
-    assert "'=SUM(A1:A2).csv" in csv_res.stdout
+    assert "'=SUM(A1).csv" in csv_res.stdout
 
     # 3. -f ipynb emits valid Python AST in code cells without JSON null/false NameError (#330)
     ipynb_res = runner.invoke(app, ["-f", "ipynb", str(tmp_path)])
