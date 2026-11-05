@@ -21,7 +21,42 @@ def test_tree_guide_sets_completeness() -> None:
     assert TREE_GUIDE_SETS["none"] == ("", "", "", "")
     assert TREE_GUIDE_SETS["unicode"] == ("    ", "│   ", "├── ", "└── ")
     assert "\x1b(0" in TREE_GUIDE_SETS["ansi"][1]
-    assert "\xb3" in TREE_GUIDE_SETS["cp437"][1]
+    assert "│" in TREE_GUIDE_SETS["cp437"][1]
+
+
+def test_cp437_glyphs_encode_to_expected_bytes() -> None:
+    """Verify every CP437 tree guide and table box glyph encodes to its CP437 byte value."""
+    expected_guides = (b"    ", b"\xb3   ", b"\xc3\xc4\xc4 ", b"\xc0\xc4\xc4 ")
+    actual_guides = tuple(g.encode("cp437") for g in TREE_GUIDE_SETS["cp437"])
+    assert actual_guides == expected_guides
+
+    expected_box_bytes = (
+        b"\xda\xc4\xc2\xbf\n"
+        b"\xb3 \xb3\xb3\n"
+        b"\xc3\xc4\xc5\xb4\n"
+        b"\xb3 \xb3\xb3\n"
+        b"\xc3\xc4\xc5\xb4\n"
+        b"\xc3\xc4\xc5\xb4\n"
+        b"\xb3 \xb3\xb3\n"
+        b"\xc0\xc4\xc1\xd9\n"
+    )
+    assert str(CP437_BOX).encode("cp437") == expected_box_bytes
+
+    expected_glyph_map = {
+        "─": b"\xc4",
+        "│": b"\xb3",
+        "├": b"\xc3",
+        "└": b"\xc0",
+        "┌": b"\xda",
+        "┬": b"\xc2",
+        "┐": b"\xbf",
+        "┼": b"\xc5",
+        "┤": b"\xb4",
+        "┴": b"\xc1",
+        "┘": b"\xd9",
+    }
+    for glyph, expected_byte in expected_glyph_map.items():
+        assert glyph.encode("cp437") == expected_byte
 
 
 def test_cp437_box_instance() -> None:

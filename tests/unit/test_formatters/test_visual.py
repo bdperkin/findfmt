@@ -193,8 +193,20 @@ def test_rich_table_formatter_cp437(sample_files: list[FileInfo]) -> None:
     """Verify table format renders correctly with cp437 hardware borders."""
     fmt = RichTableFormatter(table_style="cp437")
     output = fmt.format(sample_files)
-    assert "\xda" in output or "\xc4" in output
+    encoded = output.encode("cp437", errors="replace")
+    assert b"\xda" in encoded or b"\xc4" in encoded
     assert "app.py" in output
+
+    raw = io.BytesIO()
+    wrapper = io.TextIOWrapper(raw, encoding="utf-8", errors="surrogateescape")
+    fmt.stream(sample_files, wrapper)
+    wrapper.flush()
+    assert wrapper.encoding == "cp437"
+    assert b"\xda" in raw.getvalue() or b"\xc4" in raw.getvalue()
+
+    str_buf = io.StringIO()
+    fmt.stream(sample_files, str_buf)
+    assert "app.py" in str_buf.getvalue()
 
 
 def test_rich_tree_formatter_no_indent(sample_files: list[FileInfo]) -> None:
@@ -218,8 +230,16 @@ def test_rich_tree_formatter_cp437(sample_files: list[FileInfo]) -> None:
     """Verify tree format uses CP437 console graphics when cp437=True."""
     fmt = RichTreeFormatter(cp437=True)
     output = fmt.format(sample_files)
-    assert "\xc3\xc4\xc4" in output or "\xc0\xc4\xc4" in output
+    encoded = output.encode("cp437", errors="replace")
+    assert b"\xc3\xc4\xc4" in encoded or b"\xc0\xc4\xc4" in encoded
     assert "app.py" in output
+
+    raw = io.BytesIO()
+    wrapper = io.TextIOWrapper(raw, encoding="utf-8", errors="surrogateescape")
+    fmt.stream(sample_files, wrapper)
+    wrapper.flush()
+    assert wrapper.encoding == "cp437"
+    assert b"\xc3\xc4\xc4" in raw.getvalue() or b"\xc0\xc4\xc4" in raw.getvalue()
 
 
 def test_rich_formatters_metadata_populated_and_none() -> None:
