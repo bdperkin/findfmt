@@ -11,4 +11,5 @@ quickstart
 configuration
 ci_integration
 localization_plan
+ai_translation_benchmark
 ```

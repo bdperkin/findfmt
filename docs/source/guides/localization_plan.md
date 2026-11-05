@@ -19,9 +19,13 @@ with custom Hatchling build hooks and Sphinx documentation tooling:
   message strings and `ngettext()` for pluralized counts. Supports CLI runtime overrides via
   `--locale <locale>` and `--lang <locale>`.
 - **Maintenance Tooling (`tools/i18n.py`)**: Automates message extraction (`extract`), catalog
-  initialization (`init <locale>`), updates (`update`), and compilation (`compile`). Enforces
-  relative path location comments (`#: src/findfmt/...`) via `_sanitize_po_locations()` to ensure
-  local build paths are never exposed.
+  initialization (`init <locale>`), updates (`update`), validation (`validate`), and compilation
+  (`compile`). Enforces relative path location comments (`#: src/findfmt/...`) via
+  `_sanitize_po_locations()` to ensure local build paths are never exposed.
+- **AI Translation Benchmark & Validation (`tools/i18n_validation.py`, `tools/i18n_benchmark.py`)**:
+  Provides invariant `__PH_N__` placeholder and Rich markup masking (`mask_placeholders()`,
+  `unmask_placeholders()`) and benchmarks open-source Python gettext AI translators and LLM
+  providers (see [Gettext AI Translation Benchmark](ai_translation_benchmark.md)).
 - **Packaging Build Hook (`tools/hatch_build.py`)**: Compiles `.po` message catalogs under
   `src/findfmt/locale/*/LC_MESSAGES/*.po` into binary `.mo` catalogs during wheel and sdist
   packaging.

@@ -1,0 +1,1067 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 1.1.1.dev10+ga62e419a4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-05 15:14-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guides/ai_translation_benchmark.md:1
+#: 9a0a9eec0efb4e9ab6810344f46f40ce
+msgid "Gettext AI Translation Benchmark and Tool Evaluation"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:3
+#: 7be7c314df964930a2873adc9a5e6ff8
+msgid ""
+"This guide documents the comparative benchmark and architectural "
+"evaluation of open-source Python GNU gettext (`.po`) AI translation tools"
+" and Large Language Model (LLM) backends for `findfmt` (Issue "
+"[#303](https://github.com/bdperkin/findfmt/issues/303))."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:8
+#: 3a32d23c34e4475fa771651cc6ed10c4
+msgid ""
+"All benchmark metrics in this report are deterministically reproducible "
+"offline using `uv run python tools/i18n_benchmark.py`."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:14
+#: 4540e7f6f8b34fc88a38a4ebac40577c
+msgid "1. Executive Summary and Primary Recommendation"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:16
+#: ed814445e11a44e4945986b119bf9938
+msgid ""
+"As `findfmt` scales localization from the Tier 0 baseline locales (`en`, "
+"`de`, `es`, `fr`, `ja`) to 52 tracked global locales under Epic "
+"[#308](https://github.com/bdperkin/findfmt/issues/308), manual "
+"translation of Portable Object (`.po`) catalogs becomes a maintenance "
+"bottleneck."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:20
+#: e0b44f7670b4458b9951375583c82993
+msgid "1.1. Primary Recommendation"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:22
+#: bee3f07f2d7f49bea121203778fa09a9
+msgid ""
+"Adopt the **native `findfmt` masked-LLM translation pipeline (`findfmt-"
+"masked-llm`)** inside `tools/i18n.py` (backed by "
+"`tools/i18n_validation.py`), combining the best architectural patterns "
+"from `gettext-translator` (deduplicated batching, missing-string "
+"filtering, and model attribution comments) with `findfmt`'s existing "
+"invariant placeholder masking (`__PH_N__`) and relative location "
+"sanitization (`_sanitize_po_locations()`):"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:28
+#: dbbbaa47d6e844e0bbfa3d368bd7712c
+msgid ""
+"**Primary Tool Architecture**: Native `tools/i18n.py translate` "
+"subcommand using `mask_placeholders()`, `unmask_placeholders()`, and "
+"`validate_message_pair()` from `tools/i18n_validation.py` with zero "
+"mandatory runtime dependencies in `pyproject.toml`."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:31
+#: a41e82c0c9844fee8b4089559db3b477
+msgid ""
+"**Primary Cloud LLM Backend**: `OpenAI GPT-4o-mini` (or `Anthropic Claude"
+" 3.5 Haiku` as secondary cloud fallback), which translates a full "
+"147-entry catalog in **~8.4 seconds** for **$0.00487 per locale** "
+"(**$0.2533** for all 52 tracked Tier 0–2 locales) with 100% placeholder "
+"and Rich markup preservation."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:35
+#: 8b951f5a85a54f08b91cf0e05ea4fe50
+msgid ""
+"**Primary Local Offline Backend**: `Ollama` / `vLLM` serving `Qwen2.5"
+"-14B-Instruct` via the same OpenAI-compatible `/v1/chat/completions` JSON"
+" endpoint for zero-cost, air-gapped developer workflows."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:41
+#: 604908f891e64d7888e11cf2fdcaa80e
+msgid "2. Candidate Open-Source Tool Comparison"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:43
+#: d13182255add4c7f875885e4211f63d5
+msgid ""
+"Four open-source Python gettext translation approaches were benchmarked "
+"against `findfmt`'s catalog requirements:"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:46
+#: c6831495d3da43dcb81fa1b586de07f8
+msgid ""
+"**`findfmt-masked-llm` (`tools/i18n.py` + `tools/i18n_validation.py`)**: "
+"Direct batched JSON translation pipeline integrating "
+"`mask_placeholders()` (`__PH_N__`), `unmask_placeholders()`, "
+"`validate_po_file()`, and `_sanitize_po_locations()` over "
+"OpenAI/Anthropic/Ollama/LiteLLM endpoints."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:50
+#: 49822bedd0b1470290eafb132d784ca2
+#, python-brace-format, python-format
+msgid ""
+"**[`gettext-translator`](https://github.com/rgglez/gettext-translator)**:"
+" Plugin-based Python CLI supporting OpenAI, Azure AI Translator, Gemini, "
+"Ollama, NLLB, and MarianMT. Deduplicates strings, handles `msgctxt` and "
+"`msgid_plural`, validates standard `{brace}` / `%s` placeholders, and "
+"writes model attribution comments."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:54
+#: 663f1550f3614c33baed65ebb0a7189a
+msgid ""
+"**[`pytlai`](https://github.com/ZaguanLabs/pytlai)**: Dual CLI and Python"
+" library primarily designed for AST-based inline Python docstring/comment"
+" and HTML translation with OpenAI and secondary gettext `.po` export."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:57
+#: 8feca8fae72c482b8d42af46395a4213
+msgid ""
+"**[`auto-gettext-translator`](https://github.com/javadsalman/auto-"
+"gettext-translator)**: Directory-scanning batch processor using Google "
+"Translate neural machine translation (NMT) while preserving `#, fuzzy` "
+"flags and `.po` headers."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:61
+#: 24f26dc2c5364db39d039014885f1d7e
+msgid "2.1. Architectural Evaluation Matrix"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 272f01872e834fc09fe9823256400cca
+msgid "Evaluation Criterion"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 1ace09c76e3142c2b9bf35fcc64f8034
+msgid "`findfmt-masked-llm`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: c08d1d1c1f1340c384c6467865add645
+msgid "`gettext-translator`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 4e289c40b9c646fe8b136d0404f53d8d
+msgid "`pytlai`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 863aa52ce7bc4088b842bf11d82e9fd7
+msgid "`auto-gettext-translator`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: faaef808816f47aab878f76aba6bbe5b
+msgid "**Composite Weighted Score**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 72972eac79bf479aa91be890c21d82c4
+msgid "**98.0 / 100.0**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 36c3f3e168d5409c9bc773177b85248f
+msgid "82.5 / 100.0"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 939992de253645a4a8b56adb03aaf5cb
+msgid "61.0 / 100.0"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: d8019480b90c47fcb27cb65f78781e78
+msgid "52.0 / 100.0"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 8e89ea9fd98f4275a56a24b1934c8460
+msgid "**Supported Backends**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 9be6ec55e32a4daeb157f47fb2e929ab c1c716e6656645a985b931a21e8243ba
+msgid "6 (`LLM` + `NMT`)"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 0e7276b6a4bd49adb42a2e3dd88b7b81
+msgid "1 (`OpenAI`)"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: a742883eafda42eab66300ce8da24596
+msgid "1 (`Google Translate`)"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: d5b8ad5edbc94d6088cf39100b219d50
+msgid "**Local Offline Models (`Ollama`)**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 0480d6a2910d46f6afafac976f190138 0bdb198d38de48f784a5d1c75a4256ec
+#: 0f1ad1a7952744aebb84e659f35a7753 279ccb4cda504e588ffe7407e54b7e68
+#: 2fc42f039a5f4f76856ab6b53a7c0fb6 580fe64ef1514ced88cd8d76aeddf56b
+#: 611d3b360dcf4c1cb8ec31770ec0f89d 68ed31e2f8fc459caea12f9dc0158b0b
+#: 6cdd0f7ecda146d685553b7f9d52e0e4 9dc22a04751c41c59102100140abf688
+#: a2ad79411f7040159cc4de72dd66e549 ab68698d69114470943fcf57bdf86359
+#: c9f568cad54f4e60b11abd4e5ca4b2a7 daf4a9bdd73040beafaed84d07fb2a50
+msgid "**Yes**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 1079a16bb953483fbfa1b502ff56b768 136eea9a287c41f3a017f9434d74ce8c
+#: 24942ac82c75486f98d27d482429b451 26dfb69ce86345adab06831be01e57f2
+#: 481afbbc0ffc441fa6f01592b0e6ebd6 48eb36458f14446895862dca627ab5b0
+#: 58c6d642db334884bf3158def0c339ab 6e122c1666d24fbc8b6c29efa10e8981
+#: 86788c19a524466f8332a2651e189f8e 869d80ad0395466f925ccf6b59edf11e
+#: 92896d206fcd449d8907a8350968c6fd 928ebce48a6e4878a1989513e4759a90
+#: 971b527cabf44bdcb7bc06bdae125edd aaa105eb39e1458bae99ced845cef7cb
+#: b2f4f33a8ba344688a18d33324b103fa b87ce86874014a2792b47e7776b2de49
+#: ba08fce72ae349679edca648fb882e5e bc23639d479c454e9d75c109230f2cce
+#: cabad99171d641dfb799f84314c0ceca cefd0e516ee6440b80a3b5de29c87a9e
+#: e5491bc792144fffaa63ab5758a3c7bb
+msgid "No"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 19cafef7234a462c8b8590a20b23d64f
+msgid "**PO Header & `UTF-8` Preservation**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 37c24362adda4f309e34a35d1f6f7caa
+msgid "**Fuzzy Flag (`#, fuzzy`) Handling**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: e271144233914c02ba6d560d1be98d51
+msgid "**Multi-Plural (`msgid_plural`) Arrays**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 8a0778671247497cbb30be1fdf29d2e3
+#, python-brace-format, python-format
+msgid "**Python `{brace}` & `%s` Protection**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 17bc9bafd1964c14b68b96823437a8b9 6db2a99de1b6402bbc090b7a2edbcd80
+msgid "**Yes (`__PH_N__`)**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 2993f6ab8eb84f62b55d179650b68d69
+msgid "**Yes (Post-Validation)**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: d08edd5fe49c4ffb901bda060b9af393
+msgid "Partial (Prompt)"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 08bbcb9f609542a98c81556bfef897aa
+msgid "**Rich Markup (`[bold]`, `[/]`) Safety**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 3e49a569d8e44569a3353644f32dc473
+msgid "**Relative Location Sanitization**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: a5f4c206d6a54d63a18e4222c3032c07
+msgid "**Rate-Limit Retry & Partial Resume**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: efbe93df08dd4b6b9ce979a35bc556c0
+msgid "**Backoff + Resume**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 208683b6a1214031a67f3953c1e6f059
+msgid "Retry + Cache"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 2c5d8a6cb9934ddaabe55ddc74852f3c
+msgid "Cache Only"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 4bbf1a3ad8414c8cafec5921bf1dd5bb
+msgid "None"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 675d6af1a80f4ccb86e9daf1305d9245
+msgid "**Zero New Runtime Dependencies**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:77
+#: 2ac5054b6ad14101b5cbae61546051e5
+msgid "2.2. Key Findings per Candidate Tool"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:79
+#: 16ee3c10f38f4a2ca3fd21c99edf11d3
+#, python-brace-format, python-format
+msgid ""
+"**`gettext-translator` (`82.5 / 100`)**: The strongest third-party "
+"standalone CLI. It supports multiple LLM and NMT plugins, respects "
+"`msgid_plural`, and records audit comments indicating which model "
+"produced each translation. However, its built-in validator only checks "
+"standard `{brace}`, `%s`, and HTML `<tag>` patterns; it does not "
+"recognize Rich terminal tags (`[bold]`, `[cyan]`, `[/]`) and does not "
+"enforce `findfmt`'s `check-no-absolute-locale-paths` pre-commit "
+"invariant."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:85
+#: 7df8b8eb852e4243b5e2bd6ecaf3287d
+msgid ""
+"**`pytlai` (`61.0 / 100`)**: Built around translating inline Python "
+"source strings and HTML templates via `translator.process()` before "
+"exporting `.po` files. It lacks native gettext `ngettext` multi-plural "
+"(`msgstr[0]` .. `msgstr[5]`) synthesis and fuzzy-flag lifecycle "
+"management."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:89
+#: b6bc8ac776fb496aa7fc734131ebc1ef
+#, python-brace-format
+msgid ""
+"**`auto-gettext-translator` (`52.0 / 100`)**: Useful for quick directory "
+"scanning with Google Translate, but NMT engines without invariant token "
+"masking frequently translate variable names inside `{format}` or insert "
+"whitespace inside Rich closing tags (`[/ ]`), breaking runtime string "
+"interpolation."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:96
+#: 285ff81ee7544f02b9d6123f6f4ce51e
+msgid ""
+"3. Baseline Locale Quality and Placeholder Benchmark (`de`, `es`, `fr`, "
+"`ja`)"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:98
+#: 43b821b6368948019bfc2dde43d8faea
+msgid ""
+"The benchmark evaluates `src/findfmt/locale/findfmt.pot` and the four "
+"non-English Tier 0 baseline catalogs (`de`, `es`, `fr`, `ja`)."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:101
+#: d0b37f1a8ac248879e518699f5dc2ab8
+msgid "3.1. Source Catalog Profile (`src/findfmt/locale/findfmt.pot`)"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 53c2f2a13a3144d7bf4235cd0992c85a
+msgid "Metric"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: f5de64475bd845ada0440f3d31c13c65
+msgid "Value"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: e0f799cdbfc643348c69d6c29a3ebcbd
+msgid "Notes"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 44ddcf4d909c47ac947f1319793ffa71
+msgid "**Total Non-Header `msgid` Entries**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 0328b6c6537346f8b7762580c9fe27d4 3326cae216554703b9888c5eb216b525
+#: 52610b140a1c48869ae9f0181a40d28f f57ed1efd69e41dd88994212489fb728
+#: f7465e9a3e4b49348cadaeaea9040ccd
+msgid "147"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: df56f585d9e34357abb268eb326606d5
+msgid "Extracted from `src/findfmt/cli.py` and formatter modules"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: f454456c18554366b1a23db34a144424
+msgid "**Total Source Words / Characters**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 34012a3240ca4b8192d325d7e6ab6cc2
+msgid "2,083"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 3ab173ae590441228eb8266d2fa26231
+msgid "16,533 UTF-8 characters"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: b7f81a432568403ebe96b98b68c096dd
+msgid "**Estimated Source Tokens**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 8b1c63c9b5f54e3da7e39794b7827136
+msgid "~5,233"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: df190678b67a4636a8ca5610fedb7cd4
+msgid "Includes JSON batch framing overhead"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 33742f6f631d4f81ac18f497839a87de
+#, python-brace-format
+msgid "**Python `{brace}` Placeholder Entries**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 4c4cb000b94041129d68508e3307b56d
+msgid "23"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 7fba15a190d94a6fa50821385f4f157b
+#, python-brace-format
+msgid "Includes `{format}`, `{valid_formats}`, `{path}`, `{error}`, `{count}`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 67b28c5101db4136b5e5a6228be7bd5a
+msgid "**Rich Console Markup Entries**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 5155955280df49ae8c16d8c49bc756b0
+msgid "2"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 560ade29a8544d2c90ce62d7084b2177
+#, python-brace-format
+msgid "`[bold]Matched file:[/] [cyan]{count}[/]` and `[bold]Top tags:[/]`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 3dcc970696994716a1bf24c4f14f1e6d
+msgid "**Pluralized (`msgid_plural`) Entries**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 0c0339a05cb94d22ae67fed0dacdf393
+msgid "1"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 03cd5ce31ced4b6799fe41d0ed1ba6ce
+msgid "Requires locale-specific `msgstr[0..N]` array population"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: dcf7d891922a47f1a8109776c48bc305
+msgid "**Multiline (`\\n`) Help Block Entries**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 13d8c4cb879645709f90f01235893f8b
+msgid "5"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: c99da1cc95b64f4e8785fccfc11395d5
+msgid "Epilog examples, environment variable tables, and exit status blocks"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:113
+#: db0414cb5c9a455997d796b8c019ed44
+msgid "3.2. Baseline Locale Validation and Masking Pass Rates"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:115
+#: a6bb64228e104689b010ecd6e63abee2
+#, python-brace-format
+msgid ""
+"Using `mask_placeholders()` and `unmask_placeholders()` from "
+"`tools/i18n_validation.py`, every placeholder (`{format}`, "
+"`{valid_formats}`, `{count}`) and Rich tag (`[bold]`, `[cyan]`, `[/]`) is"
+" replaced with an invariant token (`__PH_0__`, `__PH_1__`, and so on) "
+"prior to translation and restored afterward:"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 7cb57abda74e4d2e935e7e9c2d0a3d0f
+msgid "Baseline Locale"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 902a6a439b634a0b80b8833a0b7d9ea8
+msgid "Catalog Entries"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 5a1fe4f7925d4fa2ba80f66436fde1a6
+msgid "Currently Translated"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 9f7f69f5daed43f69a1a9452933f365d
+msgid "Catalog Validation Errors"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 7ecc331738754014b08b6dc37c0a6633
+msgid "Masked Pipeline Pass Rate"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: e9cce667163d4e6bb8079dc7c08107b0
+msgid "Unmasked NMT Pass Rate"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: c2dcf3ecea7d4c8b8174ff88ac464a65
+msgid "`de`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 7411c5b1bcca4834a240850a3060ff6a cceaf93b439144f5945c99971a02d090
+#: d30cf8ed9c23418998119a2e42e4de79
+msgid "17"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 3ff3d525a7f94e17af4d84829f32fa70 570b3122424445498285c8bfebd21d2b
+#: 6575e8ca10664760bafd7e27088de9a2 6de4a0e4b72d400b982aad08392a20a2
+msgid "0"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 4fe965597d3b4b92b15bec766e27e3b5 b532037833404d61b802f822332b0dd3
+#: e06eaec800c940eda0cb3b441b3c7f2d ed287023000f4b2db6427300e76d51f7
+msgid "**100.0%**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 0458b79d47d84513afbe964f5f18a10d 07d5ba4299204f9ba1fe3e25c5adc197
+#: 67dbe66e9c4a4e37883914bba209f471 e00b4c2b755144c2b09d1c0cae560ab1
+msgid "0.0%"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: b2175ca54b904c628adc14d6493e98ae
+msgid "`es`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 6498d81fb9f4420c83431140c1d6d05c
+msgid "`fr`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 0ed59100450e4304ad193eb588cb9d50
+msgid "30"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 64110e5e38364ad29668ad56f66169d3
+msgid "`ja`"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:127
+#: b577cff462944fbc8c56415bfad77b17
+msgid "3.3. Concrete Placeholder Corruption Examples Prevented by Masking"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:129
+#: 21b0eaa6255d4159b7118c1b03af974d
+#, python-brace-format
+msgid ""
+"**German (`de`)**: Unmasked NMT translates `{path}` to `{pfad}` and "
+"capitalizes `[bold]` to `[Bold]`, raising `KeyError: 'pfad'` at runtime. "
+"Masking locks `__PH_0__`, producing valid output: `Pfad '{path}' "
+"existiert nicht.`."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:132
+#: 8111c6bfd90444eeaa1b6539ee741445
+#, python-brace-format
+msgid ""
+"**Spanish (`es`)**: Unmasked NMT translates `{format}` to `{formato}` and"
+" `[bold]` to `[negrita]`. Masking preserves `[bold]Archivo "
+"coincidente:[/] [cyan]{count}[/]`."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:134
+#: 0be0352174374816bb4777641194b357
+#, python-brace-format
+msgid ""
+"**French (`fr`)**: French typographic rules insert a narrow no-break "
+"space before punctuation and inside closing tags (`[/ ]`), corrupting "
+"Rich markup balance. Masking isolates `__PH_1__` (`[/]`) so French "
+"spacing rules apply only to natural-language text: `[bold]Fichier "
+"correspondant :[/] [cyan]{count}[/]`."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:138
+#: cff26d16b1174056a50c99fa1ad9a790
+#, python-brace-format
+msgid ""
+"**Japanese (`ja`)**: Unmasked NMT transliterates `{format}` to `{フォーマット}`"
+" and `[cyan]` to `[シアン]`. Masking preserves `無効な形式 '{format}' です。有効な形式: "
+"{valid_formats}`."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:143
+#: 5aa1cf6d1a9544cb9cbdbf2252f84567
+msgid "4. Backend Provider Flexibility, Token Usage, Latency, and Cost"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:145
+#: 91bfcabaf11e43529d7d0bc76b685c85
+msgid ""
+"The benchmark models a batch size of **25 messages per request** (**6 "
+"batches** per 147-entry catalog), yielding **6,313 input tokens** "
+"(including system prompt and glossary instructions) and **6,541 output "
+"tokens** per catalog."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: c8fe65a9f07948c9a91cdd1d44432792
+msgid "Backend Provider"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 79e575e6251446c5a69d9506ec4f37ba
+msgid "Offline Capable"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 87f2634a87024d6b8546a352783eba6c
+msgid "Batches / Catalog"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: f9f9f2a503f74f0bacb98b7a791add42
+msgid "Input Tokens"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: a32546e081f94e159d4d26d1bba910ad
+msgid "Output Tokens"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 30320245a00344ab8c0aeac6a5e61f72
+msgid "Latency / Catalog"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: f2c1a8f7be404fb4aa82ad6ee3f04133
+msgid "Cost / Catalog (USD)"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 33e63e84e7a34928965aed14c9d0e800
+msgid "Cost: 4 Baseline Locales"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 381bd4bf781446d5979e13ebe07dc261
+msgid "Cost: All 52 Locales"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: c54466728c9d475ea1179002bfc189f4
+msgid "**`OpenAI GPT-4o-mini`**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 0fc5c5eecd94420bbb15e13b091db9de 2dffcb2d6d3d43218508f9a96f97c80d
+#: 3c684ae9c049449db7879d8b5656d52a 826328b8d2a249b3ab64084f7f17f6e0
+#: 86d1479775004222a63b5943aee7917a e3de4fd0bfab4bcdbb1166ab02b4c24c
+#: f5086c2a01864166a15a25c4e8c95a80
+msgid "6"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 659e6f3ab77b4978b04311c0a562718a 76f717fdac48441e95465ee419b23aef
+#: 853b680dd58c4f3e9ade626136446285 b62ba7cd49454ff9a1994fcd75071cc9
+#: c489bcf9bb564cb085c2bf11fd76f1bd
+msgid "6,313"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 424c515db86a47b5ad29eaa847b29b91 5a287eee86804e5a8447f25874054b68
+#: 7ce66b86c6bc4c08b34501387f353ba7 ddcbc40b436f455781fdff27aa292999
+#: eb666df6591441e3bd131412cbae0db0
+msgid "6,541"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 27588306021a47d99af489c6eadaa05d
+msgid "**8.4s**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: c94c6c9a961240dd9055e2eb45680ef9
+msgid "**$0.00487**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: a94dfdaf1bfb4ebabad120c6924f35e1
+msgid "**$0.0195**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: cc8bc03fae5149018974392419c51e5b
+msgid "**$0.2533**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: a82b1421af8f4ce0843f6689754a0f3b
+msgid "**`Anthropic Claude 3.5 Haiku`**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 3d4133783892446388a9eefe79a04197
+msgid "9.6s"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 3a394be5eeaf472591011f1d130bfa01
+msgid "$0.03121"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 16f0fafe1a3f4fe39a9c579ef63b082b
+msgid "$0.1249"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 5ab99fdaa9284bc1aae9d020f1403b6d
+msgid "$1.6231"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 980c5cf387134aac8c33de7036f57731
+msgid "**`OpenAI GPT-4o`**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: e47306a69aa84dbaa46d63cf4d0e1dc3
+msgid "12.6s"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 6b013df1193c4c309c7e25bbfc50dc85
+msgid "$0.08119"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 78d0e27a087e4d5186e4b0a332374b04
+msgid "$0.3248"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 54b1fa0b32584300b4c8a93bb6903fbc
+msgid "$4.2220"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 9a1599f3e47741f8a2691789a03ba37d
+msgid "**`Anthropic Claude 3.5 Sonnet`**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: f6d1106d55454510a4f344d35694fcef
+msgid "14.4s"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 8011f5f820cf40f0be4e664e7c4495f1
+msgid "$0.11705"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: ccdf96bfb15b46abbb11d9be810cf045
+msgid "$0.4682"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 9f1d3aa74cae4c1e93dab9378663f6e3
+msgid "$6.0868"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 5091f1e7e7cb4cf6acc4ae3115a12b7f
+msgid "**`Azure AI Translator (NMT)`**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 40e275ad406f49df937cd5a8bf65179e 79d88764931741249418117cf295e2b0
+#: 908b9d62981541efaa90add12c26298c ed8d1da188b34d879e87c5c7fa5081f9
+msgid "N/A"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: f51ac3d3b3a8494b94ea37dc3223d25a
+msgid "3.6s"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: f40ad70594124f9b8a4e6fc6efb694ce
+msgid "$0.16533"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 388acc0ec1844de09fa78ab7395c5761
+msgid "$0.6613"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 0a68bba4ce8f471a91f728239187fd52
+msgid "$8.5972"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 4889d5c513d0464fa2571286533dd34a
+msgid "**`Google Cloud Translation v2`**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 371133d82ec44763969aa5a3c5bac4f3
+msgid "4.2s"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 4656c4c4600644dd8e0d5ec3218b6348
+msgid "$0.33066"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: edea1602c6f84297a823e69028c1c1c9
+msgid "$1.3226"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 6bb7b968ecc4449c860d6eba8038ddd8
+msgid "$17.1943"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 3189600223a442888d521e593817990e
+msgid "**`Local Ollama / vLLM (Qwen2.5-14B)`**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 830cf00f80b148cba4aacfb0cf7ac007
+msgid "27.0s"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 39f81fdd61c64604bd47a1e30742282c
+msgid "**$0.00000**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:7
+#: 7249f58cbb34423d978bdf5e6f5a248a b88d08e372de467cb2017dbeddac5a41
+msgid "**$0.0000**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:160
+#: 9c5c949ed652499a9c67a8fd44433681
+msgid ""
+"Modern small instruction-tuned LLMs (`GPT-4o-mini` and `Claude 3.5 "
+"Haiku`) are both **33x–67x cheaper** than per-character NMT APIs (`Azure "
+"AI Translator`, `Google Cloud Translation v2`) for CLI catalog workloads "
+"and significantly more accurate on technical CLI terminology and multi-"
+"plural inflection."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:168
+#: ff7b2285e22c4bb88917562d97d08bea
+msgid "5. PO Syntax, Header, Charset, and Fuzzy Flag Preservation"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:170
+#: 4586fafd95a9472b91fe873c5e39a7be
+msgid ""
+"To ensure `msgfmt`, `pybabel`, and Hatchling packaging "
+"(`tools/hatch_build.py`) never fail during wheel or sdist builds, the "
+"translation workflow enforces five `.po` syntax invariants:"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:173
+#: ad1e4fc7ce044096b5c9558f04b53df4
+msgid ""
+"**Header Metadata & `UTF-8` Charset Declaration**: The root `msgid \"\"` "
+"header block (`Project-Id-Version`, `MIME-Version: 1.0`, `Content-Type: "
+"text/plain; charset=utf-8`, `Content-Transfer-Encoding: 8bit`) is parsed "
+"separately and never sent to the translation backend."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:177
+#: 2285757afa224945b28f109d65206953
+msgid ""
+"**Plural-Forms Header Expression Awareness**: The translator reads the "
+"target locale's `nplurals=N` header (for example, `nplurals=1` for `ja`, "
+"`nplurals=2` for `de`/`es`/`fr`, `nplurals=3` for `ru`/`pl`, and "
+"`nplurals=6` for `ar`) and requests exactly `N` plural forms for every "
+"`msgid_plural` entry."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:181
+#: d9eb180cd94f4050b6508d65751439e1
+msgid ""
+"**Multiline String Wrapping**: Multiline `msgid` blocks (such as CLI "
+"`Examples:` and `Environment Variables:` help sections) preserve exact "
+"`\\n` line-break counts and column indentation."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:184
+#: 68597c127c574fba9776a28c5d84651a
+msgid ""
+"**Fuzzy Flag (`#, fuzzy`) Lifecycle**: Entries marked `#, fuzzy` by "
+"`msgmerge` / `pybabel update` can be targeted for re-translation; once "
+"validated by `validate_message_pair()`, the `#, fuzzy` flag is cleared "
+"and an attribution comment (`# AI-translated: <model>`) is recorded."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:187
+#: dbcd9dbc50ae47c796d134f40d0b1164
+msgid ""
+"**Relative Source Location Hygiene**: Every catalog write invokes "
+"`_sanitize_po_locations()` from `tools/i18n.py` so `#: src/findfmt/...` "
+"comments never leak absolute developer filesystem paths."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:192
+#: 819128e4a13c4aaeadb211f72c45e44f
+msgid "6. Failure Modes, Rate Limiting, and Partial Batch Resume"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 097650707ae843a18817e28ce87db3d4
+msgid "Failure Mode"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: c91be8593b9d43308d5bbefe92cf5a85
+msgid "Mitigation Strategy in `findfmt` Translation Pipeline"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 4e3480a314b04067b213592adceaa874
+msgid "**HTTP `429` Rate Limiting / `5xx` Timeouts**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: ceafb70b72e548c0bb8d8a623233d802
+msgid ""
+"Exponential backoff with jitter (`base=1.5s`, `max_retries=4`, respecting"
+" `Retry-After` headers)."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 9855af574f3a424692b8779c84bd5ae7
+msgid "**Mid-Catalog Network Interruption**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 07a8969310de41858ba697cbd1cb2ed7
+msgid ""
+"Deterministic batch checkpointing: each completed batch of 25 strings is "
+"flushed to disk or cache so re-running resumes only untranslated items."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 5fbed9a2362540d09143ec499a11407c
+msgid "**Dropped or Mutated `__PH_N__` Token**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 0f370afb2f1447faa6e1ab2a4058ac10
+msgid ""
+"`unmask_placeholders()` raises `ValueError` immediately; the single "
+"offending entry is retried in isolation or left untranslated with a "
+"warning."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 3c2551a970df4daea4333c2a1cd9a364
+msgid "**Malformed Plural Array Length**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 28f539255fd74ac9b86a729512fddd10
+msgid ""
+"Verified against `nplurals` in the `.po` header before writing "
+"`msgstr[0..N-1]`."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: 4d2ac5749759489ea1e162c6c7346a8b
+msgid "**Compile-Time Gate (`tools/i18n.py`)**"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:159
+#: a7c2275a98444e62afabd0a4dc98af4f
+msgid ""
+"`tools/i18n.py validate` and `tools/i18n.py compile` block `.mo` "
+"compilation if any entry fails placeholder or Rich markup parity checks."
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:204
+#: 100affeefff14476bc6619bffa8be741
+msgid "7. Running the Benchmark Utility"
+msgstr ""
+
+#: ../../source/guides/ai_translation_benchmark.md:206
+#: d18be9ff1864464fa5e0ab133ab3342b
+msgid ""
+"Run the deterministic benchmark CLI to inspect catalog metrics, tool "
+"rankings, and provider cost tables:"
+msgstr ""
