@@ -174,7 +174,7 @@ def _ensure_dir_path(
 class HtmlFormatter(Formatter):
     """Semantic, accessible HTML5 document serializer with intro/outro templating."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913 - wide CLI/config signature
         self,
         *,
         absolute: bool = False,

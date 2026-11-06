@@ -89,7 +89,7 @@ def _validate_ordering(*, dirs_first: bool, files_first: bool) -> None:
         raise typer.Exit(code=2)
 
 
-def validate_cli_options(  # noqa: PLR0913
+def validate_cli_options(  # noqa: PLR0913 - wide CLI/config signature
     *,
     gitignore_file: Path | None,
     sort: str | None,
@@ -140,7 +140,7 @@ def validate_cli_options(  # noqa: PLR0913
         raise typer.Exit(code=2) from e
 
 
-def build_traversal_config(  # noqa: PLR0913
+def build_traversal_config(  # noqa: PLR0913 - wide CLI/config signature
     paths: list[Path] | None,
     tags: list[str] | None,
     exclude_tags: list[str] | None,

@@ -199,7 +199,7 @@ def set_locale(
     Returns:
         The resolved active locale code.
     """
-    global _current_locale, _current_translation  # noqa: PLW0603
+    global _current_locale, _current_translation  # noqa: PLW0603 - module-level locale state
 
     _sync_system_locale(locale_name)
 
@@ -259,7 +259,7 @@ def override_locale(
     Yields:
         The activated locale name.
     """
-    global _current_locale, _current_translation  # noqa: PLW0603
+    global _current_locale, _current_translation  # noqa: PLW0603 - module-level locale state
     saved_locale = _current_locale
     saved_translation = _current_translation
     saved_system_locale: str | None = None

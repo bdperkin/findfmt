@@ -5,7 +5,7 @@ from __future__ import annotations
 import contextlib
 import errno
 import os
-from pathlib import Path  # noqa: TC003
+from pathlib import Path  # noqa: TC003 - runtime signature introspection
 from typing import TYPE_CHECKING, Any
 
 from findfmt.classifier import classify_file, compute_relative_prefix
@@ -60,7 +60,7 @@ __all__ = [
 ]
 
 
-def _scan_directory_entries(  # noqa: PLR0913
+def _scan_directory_entries(  # noqa: PLR0913 - wide CLI/config signature
     root: Path,
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -100,7 +100,7 @@ def _scan_directory_entries(  # noqa: PLR0913
     return subdirs, files
 
 
-def _traverse_subdirs(  # noqa: PLR0913
+def _traverse_subdirs(  # noqa: PLR0913 - wide CLI/config signature
     subdirs: list[Path],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -169,7 +169,7 @@ def _traverse_subdirs(  # noqa: PLR0913
         )
 
 
-def traverse_directory(  # noqa: PLR0913
+def traverse_directory(  # noqa: PLR0913 - wide CLI/config signature
     root: Path,
     config: TraversalConfig,
     active_specs: tuple[tuple[Path, PathSpecType], ...] | None = None,

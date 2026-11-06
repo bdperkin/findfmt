@@ -185,15 +185,18 @@ def unmask_placeholders(translated_text: str, token_map: dict[str, str]) -> str:
     """Restore original placeholders and Rich tags from invariant `__PH_N__` tokens."""
     missing = [token for token in token_map if token not in translated_text]
     if missing:
-        raise ValueError(f"Missing placeholder token(s) in translated text: {missing}")  # noqa: EM102, TRY003
+        msg = f"Missing placeholder token(s) in translated text: {missing}"
+        raise ValueError(msg)
 
     found_tokens = [m.group(0) for m in _MASK_TOKEN_RE.finditer(translated_text)]
     unknown = [token for token in found_tokens if token not in token_map]
     if unknown:
-        raise ValueError(f"Unknown placeholder token(s) in translated text: {unknown}")  # noqa: EM102, TRY003
+        msg = f"Unknown placeholder token(s) in translated text: {unknown}"
+        raise ValueError(msg)
 
     if Counter(found_tokens) != Counter(token_map.keys()):
-        raise ValueError(f"Duplicate placeholder token(s) in translated text: {found_tokens}")  # noqa: EM102, TRY003
+        msg = f"Duplicate placeholder token(s) in translated text: {found_tokens}"
+        raise ValueError(msg)
 
     for token, original in token_map.items():
         translated_text = translated_text.replace(token, original)

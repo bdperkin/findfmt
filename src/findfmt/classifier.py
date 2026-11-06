@@ -176,7 +176,7 @@ def _identify_tags_from_buffer(
     return tags
 
 
-def _identify_tags(  # noqa: PLR0913
+def _identify_tags(  # noqa: PLR0913 - wide CLI/config signature
     path: Path,
     str_path: str,
     *,
@@ -384,7 +384,7 @@ def _resolve_file_location(
     )
 
 
-def classify_file(  # noqa: PLR0913
+def classify_file(  # noqa: PLR0913 - wide CLI/config signature
     path: Path,
     root_path: Path | None = None,
     prefix: Path | None = None,

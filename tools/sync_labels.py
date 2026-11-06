@@ -115,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parse_arguments(argv)
     try:
         sync_labels(args.file, dry_run=args.dry_run)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001 - CLI top-level error boundary
         sys.stderr.write(f"Label synchronization failed: {exc}\n")
         return 1
 

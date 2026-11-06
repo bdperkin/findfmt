@@ -64,7 +64,7 @@ def _setup_synthetic_tree(
     return sub_dir, link_path
 
 
-def TestOneInput(data: bytes) -> None:  # noqa: N802
+def TestOneInput(data: bytes) -> None:  # noqa: N802 - Atheris TestOneInput contract
     """Fuzz directory traversal, symlink resolution, and gitignore filtering.
 
     Args:

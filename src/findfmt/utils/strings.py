@@ -175,7 +175,7 @@ def _wrap_osc8_link(text: str, uri: str, *, escape_markup: bool) -> str:
     return format_osc8_link(text, uri)
 
 
-def format_display_path(  # noqa: PLR0913
+def format_display_path(  # noqa: PLR0913 - wide CLI/config signature
     path_str: str,
     *,
     quote_name: bool = False,

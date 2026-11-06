@@ -30,7 +30,7 @@ __all__ = ["TextFormatter"]
 class TextFormatter(Formatter):
     """Standard line-oriented or NUL-delimited plain text formatter."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913 - wide CLI/config signature
         self,
         *,
         absolute: bool = False,

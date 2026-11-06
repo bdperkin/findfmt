@@ -20,7 +20,7 @@ try:
         validate_po_file,
     )
 except ImportError:
-    from i18n_validation import (  # type: ignore[no-redef]
+    from i18n_validation import (  # type: ignore[no-redef] - standalone script import shim
         extract_brace_placeholders,
         extract_rich_tags,
         mask_placeholders,

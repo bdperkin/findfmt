@@ -112,7 +112,7 @@ def test_rich_table_formatter_columns_translated(mock_locale_catalog: Path) -> N
             show_mtime=True,
         )
         table = Table()
-        formatter._setup_columns(table)  # noqa: SLF001
+        formatter._setup_columns(table)  # noqa: SLF001 - white-box internal unit test
         col_names = [col.header for col in table.columns]
         assert "Inodo" in col_names
         assert "Dispositivo" in col_names

@@ -84,7 +84,7 @@ def cjk_file_sample() -> list[FileInfo]:
         ("日本語", 6),
         ("中文", 4),
         ("한국어", 6),
-        ("全角：１２３", 12),  # noqa: RUF001
+        ("全角：１２３", 12),  # noqa: RUF001 - intentional fullwidth CJK test
         ("\x1b[31mhello\x1b[0m", 5),
         ("\x1b[1;34m日本語\x1b[0m", 6),
         ("abc 日本語 def", 14),

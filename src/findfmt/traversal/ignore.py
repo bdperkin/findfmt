@@ -93,7 +93,7 @@ def _find_git_config_excludes_file(root: Path | None = None) -> Path | None:
     cmd.extend(["config", "--get", "core.excludesFile"])
 
     try:
-        proc = subprocess.run(  # noqa: S603
+        proc = subprocess.run(  # noqa: S603 - vetted executable args list
             cmd,
             capture_output=True,
             text=True,

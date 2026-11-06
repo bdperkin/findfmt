@@ -193,7 +193,7 @@ def _create_html_formatter(
         outro_file=_as_path(kwargs.get("outro_file")),
         no_links=bool(kwargs.get("no_links", False)),
         no_indent=bool(kwargs.get("no_indent", False)),
-        **common,  # type: ignore[arg-type]
+        **common,  # type: ignore[arg-type] - dynamic formatter kwargs dict
     )
 
 
@@ -212,7 +212,7 @@ def _create_document_formatter(
         return XmlFormatter(
             absolute=absolute,
             no_indent=bool(kwargs.get("no_indent", False)),
-            **common,  # type: ignore[arg-type]
+            **common,  # type: ignore[arg-type] - dynamic formatter kwargs dict
         )
 
     if fmt_str == OutputFormat.HTML.value:
@@ -342,7 +342,7 @@ def _create_visual_formatter(
             absolute=absolute,
             table_style=style_str,
             force_color=force_color,
-            **common,  # type: ignore[arg-type]
+            **common,  # type: ignore[arg-type] - dynamic formatter kwargs dict
         )
 
     if fmt_str == OutputFormat.TREE.value:
@@ -352,7 +352,7 @@ def _create_visual_formatter(
             no_indent=bool(kwargs.get("no_indent", False)),
             ansi_lines=bool(kwargs.get("ansi_lines", False)),
             cp437=bool(kwargs.get("cp437", False)),
-            **common,  # type: ignore[arg-type]
+            **common,  # type: ignore[arg-type] - dynamic formatter kwargs dict
         )
 
     return None
@@ -373,7 +373,7 @@ def _create_text_formatter(
         absolute=absolute,
         show_tags=show_tags,
         delimiter=delim,
-        **common,  # type: ignore[arg-type]
+        **common,  # type: ignore[arg-type] - dynamic formatter kwargs dict
     )
 
 

@@ -20,7 +20,7 @@ else:
     from findfmt.classifier import classify_file, extract_shebang, get_known_tags
 
 
-def TestOneInput(data: bytes) -> None:  # noqa: N802
+def TestOneInput(data: bytes) -> None:  # noqa: N802 - Atheris TestOneInput contract
     """Fuzz classify_file and extract_shebang against arbitrary byte inputs.
 
     Args:

@@ -20,8 +20,8 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 try:
     from babel.messages import mofile, pofile
 except ImportError:
-    mofile = None  # type: ignore[assignment]
-    pofile = None  # type: ignore[assignment]
+    mofile = None  # type: ignore[assignment] - optional dependency fallback
+    pofile = None  # type: ignore[assignment] - optional dependency fallback
 
 
 def _unescape_po_str(escaped: str) -> str:

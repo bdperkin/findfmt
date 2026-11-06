@@ -236,7 +236,7 @@ def resolve_color_flag(
     return None
 
 
-def display_with_pager(  # noqa: PLR0913
+def display_with_pager(  # noqa: PLR0913 - wide CLI/config signature
     content: str,
     *,
     ctx: object = None,

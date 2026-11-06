@@ -372,7 +372,7 @@ def test_relative_root_honours_gitignore(
     monkeypatch.chdir(sample_repo)
     cfg = TraversalConfig()
 
-    rel_paths = [f.relative_path for f in traverse_directory(Path("."), cfg)]  # noqa: PTH201
+    rel_paths = [f.relative_path for f in traverse_directory(Path(), cfg)]
     abs_paths = [f.relative_path for f in traverse_directory(sample_repo, cfg)]
 
     assert rel_paths == abs_paths
