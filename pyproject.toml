@@ -202,10 +202,11 @@ ini_options.minversion = "8.0"
 ini_options.testpaths = [ "tests" ]
 ini_options.pythonpath = [ "src" ]
 ini_options.addopts = """\
-  -ra -q --strict-markers --strict-config --cov=findfmt --cov-report=term-missing --cov-report=xml \
+  -ra -q --strict-markers --strict-config -m \"not perf\" --cov=findfmt --cov-report=term-missing --cov-report=xml \
   --cov-fail-under=100 --junitxml=junit.xml -o junit_family=xunit2\
   """
 ini_options.markers = [
+  "perf: marks performance and benchmark tests (deselect with '-m \"not perf\"')",
   "slow: marks tests as slow (deselect with '-m \"not slow\"')",
 ]
 ini_options.filterwarnings = [

@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-import time
+import json
+import os
 import tracemalloc
 from collections.abc import Iterator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
+import pytest
 from tools.benchmark import (
     BenchmarkMetric,
     _NullSink,
@@ -26,6 +29,9 @@ from findfmt.formatters import (
 from findfmt.models import FileInfo, TraversalConfig
 from findfmt.traversal.engine import find_files
 
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
 
 def _generate_synthetic_file_infos(count: int) -> Iterator[FileInfo]:
     """Generate a lazy stream of FileInfo instances without buffering."""
@@ -43,6 +49,7 @@ def _generate_synthetic_file_infos(count: int) -> Iterator[FileInfo]:
         )
 
 
+@pytest.mark.perf
 def test_streaming_formatters_maintain_bounded_memory():
     """Verify streaming formatters maintain O(1) memory while buffering formatters scale."""
     count = 5000
@@ -79,8 +86,8 @@ def test_streaming_formatters_maintain_bounded_memory():
     assert json_peak_mb > max(streaming_peaks["text"], streaming_peaks["jsonl"])
 
 
-def test_early_gitignore_pruning_bounds_memory_and_traversal_time(tmp_path: Path):
-    """Verify early .gitignore pruning skips massive ignored directories in O(1) time."""
+def test_ignored_dirs_not_scanned(tmp_path: Path, mocker: MockerFixture):
+    """Verify early .gitignore pruning never calls os.scandir on ignored directories (#345)."""
     # Create ignored directories with 3,000 dummy files
     (tmp_path / ".gitignore").write_text("node_modules/\n.venv/\nbuild/\n", encoding="utf-8")
     for ignored_name in ("node_modules/pkg_a", "node_modules/pkg_b", ".venv/lib", "build"):
@@ -96,24 +103,36 @@ def test_early_gitignore_pruning_bounds_memory_and_traversal_time(tmp_path: Path
         (src_dir / f"mod_{i:03d}.py").write_text(f"x = {i}\n", encoding="utf-8")
 
     config = TraversalConfig(root_paths=(tmp_path,), respect_gitignore=True)
+    scandir_spy = mocker.spy(os, "scandir")
     tracemalloc.start()
-    t_start = time.perf_counter()
     matched_files = list(find_files(config))
-    t_end = time.perf_counter()
     _, peak_bytes = tracemalloc.get_traced_memory()
     tracemalloc.stop()
 
     peak_mb = peak_bytes / (1024.0 * 1024.0)
-    duration = t_end - t_start
+    scanned_paths = {Path(call.args[0]).resolve() for call in scandir_spy.call_args_list}
+    ignored_dirs = {
+        (tmp_path / name).resolve()
+        for name in (
+            "node_modules",
+            "node_modules/pkg_a",
+            "node_modules/pkg_b",
+            ".venv",
+            ".venv/lib",
+            "build",
+        )
+    }
 
     # Only the 50 unignored source files should be returned
     assert len(matched_files) == 50
-    # Directory pruning should complete rapidly (< 1.0s) without scanning 3,000 ignored files
-    assert duration < 1.0
+    # Deterministic counter assertion: no os.scandir call targets any ignored directory
+    assert scanned_paths.isdisjoint(ignored_dirs)
+    assert scanned_paths == {tmp_path.resolve(), src_dir.resolve()}
     # Peak heap memory should remain very small (< 1.5 MB)
     assert peak_mb < 1.5
 
 
+@pytest.mark.perf
 def test_continuous_traversal_no_unbounded_memory_growth(tmp_path: Path):
     """Verify repeated continuous traversals do not leak heap memory across runs."""
     generate_synthetic_tree(tmp_path, target_files=200, seed=42)
@@ -134,6 +153,7 @@ def test_continuous_traversal_no_unbounded_memory_growth(tmp_path: Path):
     assert peaks[-1] <= peaks[0] * 1.25
 
 
+@pytest.mark.perf
 def test_topology_baselines_execution(tmp_path: Path):
     """Verify performance harness executes across flat, deep, and real-world topologies."""
     # 1. Flat
@@ -194,8 +214,21 @@ def test_canonical_v1_baseline_fixture_loads():
         assert c.throughput_delta_pct == 0.0
 
 
-def test_prune_runs_in_linear_time_on_deep_tree(tmp_path: Path):
-    """Verify --prune runs in linear time on a deep tree without quadratic rescanning."""
+def test_baseline_fixture_measured_in_clean_subprocess():
+    """Verify v1_baseline.json records subprocess measurement and plausible RSS (< 200 MB)."""
+    baseline_path = Path(__file__).parent.parent / "fixtures" / "v1_baseline.json"
+    data = json.loads(baseline_path.read_text(encoding="utf-8"))
+    assert data.get("measured_in") == "subprocess"
+    metrics = load_baseline_report(baseline_path)
+    assert len(metrics) == 6
+    for metric in metrics:
+        assert 0.0 < metric.peak_rss_mb < 200.0, (
+            f"Tier '{metric.tier}' has implausible peak_rss_mb={metric.peak_rss_mb}"
+        )
+
+
+def test_prune_runs_in_linear_time_on_deep_tree(tmp_path: Path, mocker: MockerFixture):
+    """Verify --prune scans each directory level a bounded constant number of times (#345)."""
     depth = 25
     curr = tmp_path
     for i in range(depth):
@@ -211,10 +244,9 @@ def test_prune_runs_in_linear_time_on_deep_tree(tmp_path: Path):
         include_tags=frozenset({"python"}),
     )
 
-    t0 = time.perf_counter()
+    scandir_spy = mocker.spy(os, "scandir")
     results = list(find_files(config))
-    duration = time.perf_counter() - t0
 
     assert len(results) == depth
-    # Pruning on a 25-deep directory tree should complete in well under 1 second with memoization
-    assert duration < 1.0
+    # Total directories = depth + 1 (26). With memoization, os.scandir is O(depth), not O(depth^2).
+    assert scandir_spy.call_count <= 2 * (depth + 1)

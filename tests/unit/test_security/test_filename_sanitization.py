@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import sys
-import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -356,27 +355,23 @@ def test_cli_literal_and_sanitization_e2e(tmp_path: Path) -> None:
 
 
 def test_c1_osc_regex_linear_time() -> None:
-    """Verify C1-OSC escape stripping executes in linear time without ReDoS vulnerabilities."""
+    """Verify C1-OSC escape stripping prevents backtracking across \\x9d boundaries (#345)."""
     stress_input = "\x9d" * 50_000
-    start = time.perf_counter()
     result = strip_ansi_escapes(stress_input)
-    elapsed = time.perf_counter() - start
-
-    msg = f"Stripping 50,000 repetitious \\x9d took {elapsed:.4f}s, expected < 0.100s"
-    assert elapsed < 0.1, msg
     assert result == stress_input
+    assert list(strings._ANSI_ESCAPE_RE.finditer(stress_input)) == []  # noqa: SLF001
 
     # Also verify interspersed non-terminating repetitive patterns
     interspersed = ("\x9d" + "x" * 10) * 5_000
-    start_interspersed = time.perf_counter()
     res_interspersed = strip_ansi_escapes(interspersed)
-    elapsed_interspersed = time.perf_counter() - start_interspersed
-
-    msg_interspersed = (
-        f"Stripping interspersed \\x9d took {elapsed_interspersed:.4f}s, expected < 0.100s"
-    )
-    assert elapsed_interspersed < 0.1, msg_interspersed
     assert res_interspersed == interspersed
+    assert list(strings._ANSI_ESCAPE_RE.finditer(interspersed)) == []  # noqa: SLF001
+
+    # Verify the character class excludes \x9d so a trailing valid sequence matches only the last
+    # \x9d rather than greedily spanning all 50,000 preceding \x9d bytes
+    matches = list(strings._ANSI_ESCAPE_RE.finditer(stress_input + "0;Title\x9cpayload.txt"))  # noqa: SLF001
+    assert len(matches) == 1
+    assert matches[0].start() == len(stress_input) - 1
 
     # Verify standard valid C1-OSC sequence stripping remains fully functional
     c1_osc_valid = "\x9d0;Title\x9cpayload.txt"
