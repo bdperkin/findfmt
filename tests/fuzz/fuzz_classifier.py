@@ -54,7 +54,7 @@ def TestOneInput(data: bytes) -> None:  # noqa: N802
 
         with contextlib.suppress(OSError, ValueError, UnicodeDecodeError):
             info = classify_file(target_path)
-            assert info.path == target_path.resolve()
+            assert info.path == target_path
             assert isinstance(info.tags, frozenset)
             assert isinstance(info.is_executable, bool)
             assert isinstance(info.is_symlink, bool)
