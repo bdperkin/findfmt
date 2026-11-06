@@ -19,23 +19,6 @@ from rich.table import Table
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-__all__ = [
-    "DEFAULT_IGNORE_PATHS",
-    "DEFAULT_INCLUDE_PATTERNS",
-    "GRAND_UNIFIED_SUPPRESSION_REGEX",
-    "AllowedSuppression",
-    "AuditorConfig",
-    "SuppressionViolation",
-    "app",
-    "audit",
-    "audit_file",
-    "console",
-    "discover_files",
-    "extract_comments",
-    "has_justification",
-    "is_whitelisted",
-    "load_config",
-]
 app = typer.Typer(help="Audit and verify inline linter and type-checker suppression comments.")
 console = Console(width=200)
 MIN_JUSTIFICATION_WORDS = 2
@@ -107,11 +90,8 @@ def _parse_allowed_entries(raw_allowed: object) -> tuple[AllowedSuppression, ...
 
     entries: list[AllowedSuppression] = []
     for item in raw_allowed:
-        if not isinstance(item, dict):
-            continue
-
-        file_val = item.get("file")
-        if not isinstance(file_val, str) or not file_val:
+        file_val = item.get("file") if isinstance(item, dict) else None
+        if not isinstance(item, dict) or not isinstance(file_val, str) or not file_val:
             continue
 
         raw_line, raw_code, raw_reason = item.get("line"), item.get("code"), item.get("reason")
@@ -139,10 +119,10 @@ def load_config(config_path: Path | None = None) -> AuditorConfig:
         return AuditorConfig()
 
     tool_section = data.get("tool", {})
-    raw_cfg = tool_section.get("findfmt", {}).get("suppression_auditor")
-    if not isinstance(raw_cfg, dict):
-        raw_cfg = tool_section.get("suppression-auditor", {})
-
+    raw_cfg = tool_section.get("findfmt", {}).get("suppression_auditor") or tool_section.get(
+        "suppression-auditor",
+        {},
+    )
     if not isinstance(raw_cfg, dict):
         return AuditorConfig()
 
@@ -176,21 +156,13 @@ def is_whitelisted(
     root: Path,
 ) -> bool:
     """Check whether a specific file, line, and directive match an allowed entry."""
-    resolved_target = file_path.resolve()
-    rel_target = _rel_posix(file_path, root)
-    for entry in allowed:
-        if (root / entry.file).resolve() != resolved_target and entry.file != rel_target:
-            continue
-
-        if entry.line is not None and entry.line != line_no:
-            continue
-
-        if entry.code is not None and entry.code.lower() not in directive.lower():
-            continue
-
-        return True
-
-    return False
+    resolved_target, rel_target = file_path.resolve(), _rel_posix(file_path, root)
+    return any(
+        ((root / entry.file).resolve() == resolved_target or entry.file == rel_target)
+        and (entry.line is None or entry.line == line_no)
+        and (entry.code is None or entry.code.lower() in directive.lower())
+        for entry in allowed
+    )
 
 
 def extract_comments(content: str) -> list[tuple[int, str]]:
@@ -249,20 +221,22 @@ def discover_files(
 ) -> list[Path]:
     """Resolve target Python files from explicit arguments or repository globs."""
     ignore_spec = pathspec.PathSpec.from_lines("gitignore", config.ignore_paths)
-    candidates: list[Path] = []
     if explicit_files is not None and len(explicit_files) > 0:
-        for item in explicit_files:
-            if item.is_dir():
-                candidates.extend(sorted(item.rglob("*.py")))
-            elif item.is_file() and item.suffix == ".py":
-                candidates.append(item)
+        candidates = [
+            p
+            for item in explicit_files
+            for p in (sorted(item.rglob("*.py")) if item.is_dir() else [item])
+            if p.is_file() and p.suffix == ".py"
+        ]
     else:
-        seen: set[Path] = set()
-        for pattern in config.include:
-            for match_path in sorted(root.glob(pattern)):
-                if match_path.is_file() and match_path.suffix == ".py" and match_path not in seen:
-                    seen.add(match_path)
-                    candidates.append(match_path)
+        candidates = list(
+            dict.fromkeys(
+                p
+                for pattern in config.include
+                for p in sorted(root.glob(pattern))
+                if p.is_file() and p.suffix == ".py"
+            ),
+        )
 
     return [
         p

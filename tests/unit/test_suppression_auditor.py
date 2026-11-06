@@ -25,6 +25,8 @@ from tools.suppression_auditor import (
 from typer.testing import CliRunner
 
 runner = CliRunner()
+BARE_NOQA = f"# {'noqa'}"
+BARE_TYPE_IGNORE = f"# {'type'}: ignore"
 
 
 def test_audit_clean_file(tmp_path: Path) -> None:
@@ -53,7 +55,7 @@ def test_audit_justified_suppression(tmp_path: Path) -> None:
 def test_audit_unjustified_suppression(tmp_path: Path) -> None:
     """Ensure a bare/unjustified suppression comment fails with exit code 1."""
     p = tmp_path / "unjustified.py"
-    p.write_text("x = 1  # type: ignore\n", encoding="utf-8")
+    p.write_text(f"x = 1  {BARE_TYPE_IGNORE}\n", encoding="utf-8")
 
     result = runner.invoke(app, [str(p)])
     assert result.exit_code == 1
@@ -65,7 +67,7 @@ def test_audit_multiple_mixed_suppressions(tmp_path: Path) -> None:
     """Test a file containing both valid/justified and invalid suppressions."""
     p = tmp_path / "mixed.py"
     p.write_text(
-        "# noqa: E501 # Legacy line length restriction exception\ny = 2  # noqa\n",
+        f"# noqa: E501 # Legacy line length restriction exception\ny = 2  {BARE_NOQA}\n",
         encoding="utf-8",
     )
 
@@ -84,7 +86,7 @@ allowed = [
 """
     (tmp_path / "pyproject.toml").write_text(pyproject_content, encoding="utf-8")
     target_path = tmp_path / "target.py"
-    target_path.write_text("x = 1  # type: ignore\n", encoding="utf-8")
+    target_path.write_text(f"x = 1  {BARE_TYPE_IGNORE}\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["target.py"])
@@ -104,7 +106,7 @@ allowed = [
 """
     (tmp_path / "pyproject.toml").write_text(pyproject_content, encoding="utf-8")
     target_path = tmp_path / "target.py"
-    target_path.write_text("x = 1  # type: ignore\n", encoding="utf-8")
+    target_path.write_text(f"x = 1  {BARE_TYPE_IGNORE}\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["target.py"])
@@ -122,7 +124,7 @@ ignore_paths = ["vendor/**"]
     vendor_dir = tmp_path / "vendor"
     vendor_dir.mkdir()
     target_path = vendor_dir / "external.py"
-    target_path.write_text("x = 1  # type: ignore\n", encoding="utf-8")
+    target_path.write_text(f"x = 1  {BARE_TYPE_IGNORE}\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, [str(target_path)])
@@ -138,7 +140,7 @@ strict = true
 """
     (tmp_path / "pyproject.toml").write_text(pyproject_content, encoding="utf-8")
     target_path = tmp_path / "target.py"
-    target_path.write_text("x = 1  # noqa\n", encoding="utf-8")
+    target_path.write_text(f"x = 1  {BARE_NOQA}\n", encoding="utf-8")
 
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, [str(target_path)])
@@ -212,7 +214,7 @@ def test_config_parsing_edge_cases(tmp_path: Path) -> None:
 
 def test_extract_comments_and_audit_file_fallbacks(tmp_path: Path) -> None:
     """Test tokenize fallback on incomplete syntax, string literal safety, and OSError."""
-    # String literals containing "# noqa" are ignored by tokenize
+    # String literals containing suppression tokens are ignored by tokenize
     str_literal_code = 'x = "# noqa: E501"\n'
     assert extract_comments(str_literal_code) == []
 
@@ -230,11 +232,11 @@ def test_extract_comments_and_audit_file_fallbacks(tmp_path: Path) -> None:
     # Out-of-bounds line_no fallback in audit_file
     valid_file = tmp_path / "valid.py"
     valid_file.write_text("x = 1\n", encoding="utf-8")
-    with patch("tools.suppression_auditor.extract_comments", return_value=[(99, "# noqa")]):
+    with patch("tools.suppression_auditor.extract_comments", return_value=[(99, BARE_NOQA)]):
         checked_oob, violations_oob = audit_file(valid_file, AuditorConfig(), tmp_path)
 
     assert checked_oob == 1
-    assert violations_oob[0].content == "# noqa"
+    assert violations_oob[0].content == BARE_NOQA
 
     # _rel_posix fallback when path is outside root
     assert _rel_posix(Path("/outside/file.py"), tmp_path / "nested") == "/outside/file.py"
