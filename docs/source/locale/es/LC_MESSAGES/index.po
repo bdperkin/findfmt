@@ -1,16 +1,15 @@
-# SOME DESCRIPTIVE TITLE.
+# Spanish translations for findfmt documentation index.
 # Copyright (C) Brandon Perkins
 # This file is distributed under the same license as the findfmt package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+# Brandon Perkins <bdperkin@gmail.com>, 2026.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
+"Project-Id-Version: findfmt 1.1.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-24 01:04-0400\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2026-11-05 20:20-0500\n"
+"Last-Translator: Brandon Perkins <bdperkin@gmail.com>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
@@ -21,32 +20,32 @@ msgstr ""
 
 #: ../../source/index.md:123
 msgid "User Guide"
-msgstr ""
+msgstr "Guía del usuario"
 
 #: ../../source/index.md:130
 msgid "CLI Reference"
-msgstr ""
+msgstr "Referencia de la CLI"
 
 #: ../../source/index.md:137
 msgid "API Documentation"
-msgstr ""
+msgstr "Documentación de la API"
 
 #: ../../source/index.md:144
 msgid "Quality & Architecture"
-msgstr ""
+msgstr "Calidad y arquitectura"
 
 #: ../../source/index.md:151
 msgid "Community & Governance"
-msgstr ""
+msgstr "Comunidad y gobernanza"
 
 #: ../../source/index.md:1 cb2eb9079ada4cd5840f87a7226fa056
 msgid "findfmt Documentation"
-msgstr ""
+msgstr "Documentación de findfmt"
 
 #: ../../source/index.md:4 ../../source/index.md:12
 #: 35432b9b0a034b14952fcfb3c1c9c40e e90f2cd885c540deb89292d56e7c1853
 msgid "findfmt Logo"
-msgstr ""
+msgstr "Logotipo de findfmt"
 
 #: ../../source/index.md:45 711e6201daa94a4da9128229bd3f50dc
 msgid ""
@@ -54,10 +53,14 @@ msgid ""
 "classification suite. It locates files by content format, shebang, and "
 "MIME tag rather than relying strictly on file extensions."
 msgstr ""
+"**findfmt** es una suite de descubrimiento y clasificación de archivos de "
+"alto rendimiento compatible con `.gitignore`. Localiza archivos por "
+"formato de contenido, directiva shebang y etiqueta MIME en lugar de "
+"depender estrictamente de las extensiones de archivo."
 
 #: ../../source/index.md:49 772d77d92cac412683d9c64cb989d4a0
 msgid "1. Core Capabilities"
-msgstr ""
+msgstr "1. Capacidades principales"
 
 #: ../../source/index.md:51 6e5f9db043564f769dbe5062e4a82490
 msgid ""
@@ -65,68 +68,88 @@ msgid ""
 "content heuristics to identify file types (e.g. Python, Shell, YAML, "
 "JSON, Executable) even when filenames lack extensions."
 msgstr ""
+"**Clasificación inteligente**: Impulsada por el motor `identify` y "
+"heurísticas de contenido para identificar tipos de archivo (p. ej. "
+"Python, Shell, YAML, JSON, Ejecutable) incluso cuando los nombres de "
+"archivo carecen de extensión."
 
 #: ../../source/index.md:54 30f2427d5d88481d89564181243a2316
 msgid ""
 "**Git-Aware Traversal**: Automatically prunes directories and files "
 "matched by `.gitignore` and `.git/info/exclude` rules early in traversal."
 msgstr ""
+"**Recorrido compatible con Git**: Omite automáticamente directorios y "
+"archivos que coinciden con las reglas de `.gitignore` y "
+"`.git/info/exclude` en una fase temprana del recorrido."
 
 #: ../../source/index.md:56 1241c9f178c04b71b30a12cbfcae4cae
 msgid ""
 "**Deterministic Output**: Always produces clean, relative, alphabetically"
 " sorted file paths ready for Unix pipelines and `xargs`."
 msgstr ""
+"**Salida determinista**: Produce siempre rutas de archivo limpias, "
+"relativas y ordenadas alfabéticamente, listas para tuberías Unix y "
+"`xargs`."
 
 #: ../../source/index.md:58 b6d45648076c43e8ade785e941264ff6
 msgid ""
 "**Modern Python Architecture**: Built with a strict `uv`-first "
 "methodology, 100% test coverage, and strict static type checking."
 msgstr ""
+"**Arquitectura moderna en Python**: Construida con una metodología "
+"estricta basada en `uv`, 100% de cobertura de pruebas y verificación "
+"estricta de tipos estáticos."
 
 #: ../../source/index.md:61 3c88c60e886c471f81e09ae5bf665c17
 msgid "2. Quickstart"
-msgstr ""
+msgstr "2. Inicio rápido"
 
 #: ../../source/index.md:63 1b59420587cd44f09d0a31d25790f6e4
 msgid "2.1. Direct Execution & Installation"
-msgstr ""
+msgstr "2.1. Ejecución directa e instalación"
 
 #: ../../source/index.md:65 f15bf3e7768a45fcaa002bf48e4c547e
 msgid "Execute immediately with `uvx` without an explicit installation step:"
-msgstr ""
+msgstr "Ejecute inmediatamente con `uvx` sin un paso de instalación explícito:"
 
 #: ../../source/index.md:72 c1964cd099154d5fbf6e9dfa3fb37345
 msgid "Install as an isolated user tool or project dependency:"
-msgstr ""
+msgstr "Instale como herramienta de usuario aislada o dependencia de proyecto:"
 
 #: ../../source/index.md:85 154ed2910df74ce998213436e6744ff8
 msgid "2.2. Core Discovery Workflows"
-msgstr ""
+msgstr "2.2. Flujos principales de descubrimiento"
 
 #: ../../source/index.md:104 db8965547fab4c049921409b7b591dc1
 msgid "2.3. Programmatic Python Library Usage"
-msgstr ""
+msgstr "2.3. Uso programático como biblioteca de Python"
 
 #: ../../source/index.md:106 7b805d6101e04f4dbad5870df47cb43d
 msgid "Integrate `findfmt` directly into Python scripts and automated pipelines:"
 msgstr ""
+"Integre `findfmt` directamente en scripts de Python y canalizaciones "
+"automatizadas:"
 
 #: ../../source/index.md:161 c9be0cfa63534c249883c2fc34bc902a
 msgid "3. Community & Feedback"
-msgstr ""
+msgstr "3. Comunidad y comentarios"
 
 #: ../../source/index.md:163 bb5786113abc48d0bfb0f96ce09bd890
 msgid ""
 "**Source Code**: "
 "[github.com/bdperkin/findfmt](https://github.com/bdperkin/findfmt)"
 msgstr ""
+"**Código fuente**: "
+"[github.com/bdperkin/findfmt](https://github.com/bdperkin/findfmt)"
 
 #: ../../source/index.md:164 db79baddd366487e9657cfefdf16e152
 msgid ""
 "**Issue Tracker**: Report bugs, request formats, or propose features on "
 "[GitHub Issues](https://github.com/bdperkin/findfmt/issues)."
 msgstr ""
+"**Seguimiento de incidencias**: Informe errores, solicite formatos o "
+"proponga funciones en [GitHub "
+"Issues](https://github.com/bdperkin/findfmt/issues)."
 
 #: ../../source/index.md:166 13739927aaf14b9d861be81f5969b9de
 msgid ""
@@ -134,15 +157,24 @@ msgid ""
 "Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)"
 " to get started with local development."
 msgstr ""
+"**Contribuir**: Revise las [Guías de "
+"contribución](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)"
+" para comenzar con el desarrollo local."
 
 #: ../../source/index.md:169 42ae30aa03f74bf39af387cb76378725
 msgid ""
 "**Accessibility**: See our [Accessibility Statement](accessibility.md) "
 "for supported assistive technologies and barrier reporting."
 msgstr ""
+"**Accesibilidad**: Consulte nuestra [Declaración de "
+"accesibilidad](accessibility.md) para conocer las tecnologías de "
+"asistencia compatibles y el informe de barreras."
 
 #: ../../source/index.md:171 95c5846cae164ee88eac776bf73c324e
 msgid ""
 "**Security Policy**: See our [Security Policy](security.md) for reporting"
 " vulnerabilities and threat modeling details."
 msgstr ""
+"**Política de seguridad**: Consulte nuestra [Política de "
+"seguridad](security.md) para informar vulnerabilidades y detalles del "
+"modelado de amenazas."

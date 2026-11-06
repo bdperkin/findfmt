@@ -282,3 +282,44 @@ def test_cli_flags_locale_english(tmp_path: Path) -> None:
         assert res_us.exit_code == 0
         assert "Matched file: 1" in res_us.output
         assert get_current_locale() == "en_US"
+
+
+def test_cli_flags_locale_spanish(tmp_path: Path) -> None:
+    """Verify CLI execution with --locale es and LANG=es applies full Spanish catalog."""
+    file1 = tmp_path / "uno.py"
+    file1.write_text("print(1)\n", encoding="utf-8")
+
+    runner = CliRunner()
+    with override_locale("C"):
+        # Singular summary (1 file)
+        res_single = runner.invoke(app, ["--locale", "es", "--summary", str(tmp_path)])
+        assert res_single.exit_code == 0
+        assert "Archivo coincidente: 1" in res_single.output
+        assert "Tamaño total:" in res_single.output
+        assert "resumen findfmt" in res_single.output
+        assert get_current_locale() == "es"
+
+        # Plural summary (2 files) and LANG=es environment variable
+        file2 = tmp_path / "dos.py"
+        file2.write_text("print(2)\n", encoding="utf-8")
+        res_plural = runner.invoke(
+            app,
+            ["--summary", "--format", "table", "--size", str(tmp_path)],
+            env={"LANG": "es"},
+        )
+        assert res_plural.exit_code == 0
+        assert "Archivos coincidentes: 2" in res_plural.output
+        assert "Ruta" in res_plural.output
+        assert "Tamaño" in res_plural.output
+
+        # Diagnostics and error message localization
+        res_diag = runner.invoke(app, ["--locale", "es", "--diagnostics", "--no-config"])
+        assert res_diag.exit_code == 0
+        assert "Configuration: ninguna" in res_diag.output
+
+        res_err = runner.invoke(
+            app,
+            ["--locale", "es", "--dirsfirst", "--filesfirst", str(tmp_path)],
+        )
+        assert res_err.exit_code == 2
+        assert "¡Error:" in res_err.output
