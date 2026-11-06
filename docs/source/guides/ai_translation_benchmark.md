@@ -247,7 +247,7 @@ Strict Formatting & Invariant Rules:
 ### 7.3. Multi-Form `ngettext` Pluralization Prompt Rules (`build_plural_prompt`)
 
 `parse_plural_forms_header()` and `get_plural_rule_spec()` inspect the target `.po` header's
-`Plural-Forms:` declaration and construct a family-specific `ngettext` prompt requesting a JSON
+`Plural-Forms:` declaration and construct a locale-specific `ngettext` prompt requesting a JSON
 array of exact length `nplurals`:
 
 | Plural Rule Family       | `nplurals` | Representative Locales                         | Required `msgstr[0..N-1]` Array Slots                                                                                             |
@@ -255,8 +255,8 @@ array of exact length `nplurals`:
 | `one-form`               |    `1`     | `zh`, `zh_CN`, `zh_TW`, `ja`, `ko`, `id`, `vi` | `msgstr[0]`: universal count form (`n >= 0`)                                                                                      |
 | `two-form-standard`      |    `2`     | `en`, `de`, `es`, `it`, `pt`, `nl`, `sv`, `hi` | `msgstr[0]`: singular (`n == 1`); `msgstr[1]`: plural (`n != 1`)                                                                  |
 | `two-form-zero-singular` |    `2`     | `fr`, `pt_BR`, `tr`, `fa`, `am`                | `msgstr[0]`: singular (`n == 0` or `n == 1`); `msgstr[1]`: plural (`n > 1`)                                                       |
-| `three-form-slavic`      |    `3`     | `ru`, `uk`, `be`, `sr`, `hr`, `bs`             | `msgstr[0]`: singular (`1, 21, 31..`); `msgstr[1]`: paucal (`2..4`); `msgstr[2]`: plural (`0, 5..20..`)                           |
-| `three-form-polish`      |    `3`     | `pl`                                           | `msgstr[0]`: singular (`n == 1`); `msgstr[1]`: paucal (`2..4`, except `12..14`); `msgstr[2]`: plural (`other`)                    |
+| `three-form-slavic`      |    `3`     | `ru`, `uk`, `be`, `sr`, `hr`, `bs`             | `msgstr[0]`: singular (`1, 21, 31..`); `msgstr[1]`: few (`2..4`); `msgstr[2]`: plural (`0, 5..20..`)                              |
+| `three-form-polish`      |    `3`     | `pl`                                           | `msgstr[0]`: singular (`n == 1`); `msgstr[1]`: few (`2..4`, except `12..14`); `msgstr[2]`: plural (`other`)                       |
 | `six-form-arabic`        |    `6`     | `ar`                                           | `msgstr[0]`: zero (`0`); `[1]`: one (`1`); `[2]`: dual (`2`); `[3]`: few (`3..10`); `[4]`: many (`11..99`); `[5]`: other (`100+`) |
 
 ### 7.4. Temperature & Prompt Token Overhead Evaluation

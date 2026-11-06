@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.1.dev10+ga62e419a4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 17:30+0000\n"
+"POT-Creation-Date: 2026-11-06 17:42+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -1423,7 +1423,7 @@ msgstr ""
 #: 82b2bd31012e4c8d89bfa7a66c3b1272
 msgid ""
 "`parse_plural_forms_header()` and `get_plural_rule_spec()` inspect the "
-"target `.po` header's `Plural-Forms:` declaration and construct a family-"
+"target `.po` header's `Plural-Forms:` declaration and construct a locale-"
 "specific `ngettext` prompt requesting a JSON array of exact length "
 "`nplurals`:"
 msgstr ""
@@ -1523,7 +1523,7 @@ msgstr ""
 #: ../../source/guides/ai_translation_benchmark.md:160
 #: cf295e1aeaa64576919ae9143fdd6e4c
 msgid ""
-"`msgstr[0]`: singular (`1, 21, 31..`); `msgstr[1]`: paucal (`2..4`); "
+"`msgstr[0]`: singular (`1, 21, 31..`); `msgstr[1]`: few (`2..4`); "
 "`msgstr[2]`: plural (`0, 5..20..`)"
 msgstr ""
 
@@ -1540,7 +1540,7 @@ msgstr ""
 #: ../../source/guides/ai_translation_benchmark.md:160
 #: 6d9e4bfd419b40cb8be75a1b45f0a556
 msgid ""
-"`msgstr[0]`: singular (`n == 1`); `msgstr[1]`: paucal (`2..4`, except "
+"`msgstr[0]`: singular (`n == 1`); `msgstr[1]`: few (`2..4`, except "
 "`12..14`); `msgstr[2]`: plural (`other`)"
 msgstr ""
 
