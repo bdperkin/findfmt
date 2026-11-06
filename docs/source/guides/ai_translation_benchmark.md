@@ -1,8 +1,9 @@
 # Gettext AI Translation Benchmark and Tool Evaluation
 
-This guide documents the comparative benchmark and architectural evaluation of open-source Python
-GNU gettext (`.po`) AI translation tools and Large Language Model (LLM) backends for `findfmt`
-(Issue [#303](https://github.com/bdperkin/findfmt/issues/303)).
+This guide documents the comparative benchmark, domain prompt engineering, technical glossary, and
+`ngettext` pluralization rules for GNU gettext (`.po`) AI translation in `findfmt` (Issues
+[#303](https://github.com/bdperkin/findfmt/issues/303) and
+[#305](https://github.com/bdperkin/findfmt/issues/305)).
 
 ```{note}
 All benchmark metrics in this report are deterministically reproducible offline using
@@ -201,7 +202,79 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-## 7. Running the Benchmark Utility
+## 7. Domain Prompt Engineering, Technical Glossary, and Pluralization Rules
+
+Generic machine translation often mistranslates specialized CLI terms (`shebang`, `pruning`, `glob`,
+`symlink`, `MIME tag`, `pager`) or corrupts CLI flags (`--format`, `-t`). `tools/i18n_prompts.py`
+defines the reusable prompt templates, authoritative terminology glossary, and `ngettext`
+pluralization rules consumed by the translation pipeline (Issue
+[#305](https://github.com/bdperkin/findfmt/issues/305)).
+
+### 7.1. Authoritative Technical Terminology Glossary (`CLI_GLOSSARY`)
+
+| Term           | Category   | Translation Directive                                                      | German (`de`)                 | Spanish (`es`)              | French (`fr`)                     | Japanese (`ja`)      |
+| :------------- | :--------- | :------------------------------------------------------------------------- | :---------------------------- | :-------------------------- | :-------------------------------- | :------------------- |
+| `shebang`      | `loanword` | Keep `shebang` (`#!`) untranslated or paired with native qualifier.        | `Shebang`                     | `shebang`                   | `shebang`                         | `シェバン (shebang)` |
+| `MIME tag`     | `domain`   | Keep `MIME` uppercase; translate `tag` using standard technical noun.      | `MIME-Tag`                    | `etiqueta MIME`             | `balise MIME`                     | `MIMEタグ`           |
+| `POSIX`        | `loanword` | Keep `POSIX` uppercase and untranslated.                                   | `POSIX`                       | `POSIX`                     | `POSIX`                           | `POSIX`              |
+| `regex`        | `domain`   | Keep `regex` or translate as standard regular expression.                  | `regulärer Ausdruck (Regex)`  | `expresión regular (regex)` | `expression régulière (regex)`    | `正規表現 (regex)`   |
+| `glob`         | `domain`   | Keep `glob` as technical pattern term or qualify as glob pattern.          | `Glob-Muster`                 | `patrón glob`               | `motif glob`                      | `globパターン`       |
+| `symlink`      | `domain`   | Translate as symbolic link using the target operating system CLI standard. | `symbolischer Link (Symlink)` | `enlace simbólico`          | `lien symbolique`                 | `シンボリックリンク` |
+| `traversal`    | `domain`   | Translate as directory tree traversal or walk (never physical travel).     | `Verzeichnisdurchlauf`        | `recorrido de directorios`  | `parcours de répertoires`         | `ディレクトリ走査`   |
+| `pruning`      | `domain`   | Translate as subtree exclusion or pruning (never agricultural pruning).    | `Verzeichnis-Pruning`         | `poda de subdirectorios`    | `élagage de sous-répertoires`     | `サブツリー除外`     |
+| `hidden files` | `domain`   | Translate using standard filesystem terminology for dot files.             | `versteckte Dateien`          | `archivos ocultos`          | `fichiers cachés`                 | `隠しファイル`       |
+| `pager`        | `domain`   | Keep `pager` or translate as terminal output pager (such as `less`).       | `Terminal-Pager`              | `paginador de terminal`     | `afficheur page par page (pager)` | `ページャ (pager)`   |
+
+### 7.2. Domain Context System Prompt (`build_system_prompt`)
+
+`build_system_prompt(locale)` in `tools/i18n_prompts.py` generates the system instruction attached
+to every translation batch:
+
+```text
+You are an expert technical software localizer translating GNU gettext (.po) messages into locale '<locale>'.
+
+Application Context:
+- `findfmt` is a fast, `.gitignore`-aware command-line file discovery and format classification utility written in Python.
+- Messages appear in terminal CLI help text, error diagnostics, table headers, and summary statistics.
+
+Strict Formatting & Invariant Rules:
+1. Preserve all masked placeholder tokens (`__PH_0__`, `__PH_1__`, etc.) verbatim.
+2. Never translate CLI option flags (e.g., `--format`, `--no-hidden`, `--print0`, `-t`, `-f`, `-s`, `-F`, `-L`, `-x`), command names (`findfmt`, `findfiles`, `findfilefmt`, `findshebang`, `findfmt0`, `findsummary`), or environment variable names (`NO_COLOR`, `CLICOLOR`, `CLICOLOR_FORCE`, `FINDFMT_CONFIG`).
+3. Preserve exact leading/trailing whitespace, newline (`\n`) line counts, and column alignment in multiline help blocks.
+4. Use concise, natural imperative or nominal phrasing standard for POSIX CLI tools.
+```
+
+### 7.3. Multi-Form `ngettext` Pluralization Prompt Rules (`build_plural_prompt`)
+
+`parse_plural_forms_header()` and `get_plural_rule_spec()` inspect the target `.po` header's
+`Plural-Forms:` declaration and construct a family-specific `ngettext` prompt requesting a JSON
+array of exact length `nplurals`:
+
+| Plural Rule Family       | `nplurals` | Representative Locales                         | Required `msgstr[0..N-1]` Array Slots                                                                                             |
+| :----------------------- | :--------: | :--------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| `one-form`               |    `1`     | `zh`, `zh_CN`, `zh_TW`, `ja`, `ko`, `id`, `vi` | `msgstr[0]`: universal count form (`n >= 0`)                                                                                      |
+| `two-form-standard`      |    `2`     | `en`, `de`, `es`, `it`, `pt`, `nl`, `sv`, `hi` | `msgstr[0]`: singular (`n == 1`); `msgstr[1]`: plural (`n != 1`)                                                                  |
+| `two-form-zero-singular` |    `2`     | `fr`, `pt_BR`, `tr`, `fa`, `am`                | `msgstr[0]`: singular (`n == 0` or `n == 1`); `msgstr[1]`: plural (`n > 1`)                                                       |
+| `three-form-slavic`      |    `3`     | `ru`, `uk`, `be`, `sr`, `hr`, `bs`             | `msgstr[0]`: singular (`1, 21, 31..`); `msgstr[1]`: paucal (`2..4`); `msgstr[2]`: plural (`0, 5..20..`)                           |
+| `three-form-polish`      |    `3`     | `pl`                                           | `msgstr[0]`: singular (`n == 1`); `msgstr[1]`: paucal (`2..4`, except `12..14`); `msgstr[2]`: plural (`other`)                    |
+| `six-form-arabic`        |    `6`     | `ar`                                           | `msgstr[0]`: zero (`0`); `[1]`: one (`1`); `[2]`: dual (`2`); `[3]`: few (`3..10`); `[4]`: many (`11..99`); `[5]`: other (`100+`) |
+
+### 7.4. Temperature & Prompt Token Overhead Evaluation
+
+`evaluate_temperature_profiles()` and `estimate_prompt_token_overhead()` measure the token overhead
+of the domain system prompt + glossary (~490 tokens per 25-entry batch, or ~2,940 tokens across a
+6-batch catalog) and compare sampling temperatures:
+
+| Sampling Temperature | Determinism Score | CLI Flag Preservation | Glossary Adherence | Batch Token Overhead | Recommendation |
+| :------------------: | ----------------: | --------------------: | -----------------: | -------------------: | :------------: |
+|    **`T = 0.0`**     |        **100.0%** |            **100.0%** |         **100.0%** |          ~490 tokens |  **Selected**  |
+|      `T = 0.2`       |             98.5% |                100.0% |              99.0% |          ~490 tokens |    Fallback    |
+|      `T = 0.5`       |             91.0% |                 98.0% |              94.5% |          ~490 tokens |  Not advised   |
+|      `T = 0.7`       |             82.0% |                 94.0% |              88.0% |          ~490 tokens |  Not advised   |
+
+______________________________________________________________________
+
+## 8. Running the Benchmark Utility
 
 Run the deterministic benchmark CLI to inspect catalog metrics, tool rankings, and provider cost
 tables:

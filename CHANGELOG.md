@@ -11,6 +11,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - *(i18n)* Expand Spanish (`es`) gettext message catalog to 100% coverage and localize documentation
   index (#221).
+- *(i18n)* Add `tools/i18n_prompts.py` with domain context system prompt builder, CLI terminology
+  glossary, `ngettext` multi-form pluralization prompt rules, and CLI flag preservation validator
+  (#305).
 
 ### Bug Fixes
 
