@@ -21,6 +21,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   collection at the Git repository root (#323).
 - *(api)* Add optional `root: Path | None = None` parameter to `find_global_gitignore_path` and
   `load_global_gitignore_spec` (#323).
+- *(traversal)* Emit symbolic links by default with `FileInfo.path` preserved at the link location,
+  populate `symlink_target` via `os.readlink`, and classify target content when `follow_symlinks`
+  (`-l`) is active (#321).
+- *(api)* Add optional keyword-only `follow_symlinks: bool = False` parameter to `classify_file`
+  (#321).
 
 ## [1.1.1] - 2026-11-05
 

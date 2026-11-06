@@ -81,7 +81,22 @@ def test_classify_file_symlink(tmp_path: Path):
 
     info = classify_file(link, root_path=tmp_path)
     assert info.is_symlink
-    assert "symlink" in info.tags or "text" in info.tags
+    assert info.symlink_target == str(target)
+    assert info.path == link
+    assert "symlink" in info.tags
+
+    info_follow = classify_file(link, root_path=tmp_path, follow_symlinks=True)
+    assert info_follow.is_symlink
+    assert info_follow.symlink_target == str(target)
+    assert info_follow.path == link
+    assert "symlink" in info_follow.tags
+    assert "text" in info_follow.tags
+    assert "file" in info_follow.tags
+
+    with patch("os.readlink", side_effect=OSError("readlink error")):
+        info_no_target = classify_file(link, root_path=tmp_path, follow_symlinks=True)
+        assert info_no_target.is_symlink
+        assert info_no_target.symlink_target is None
 
 
 def test_classify_file_nonexistent(tmp_path: Path):
@@ -323,8 +338,8 @@ def test_fifo_swap_does_not_block(tmp_path: Path) -> None:
         swap_path.write_text("initial regular content\n", encoding="utf-8")
         orig_inspect = _inspect_metadata
 
-        def swapped_inspect(path: Path, entry: os.DirEntry[str] | None = None):
-            res = orig_inspect(path, entry=entry)
+        def swapped_inspect(path: Path, entry: os.DirEntry[str] | None = None, **kwargs):
+            res = orig_inspect(path, entry=entry, **kwargs)
             path.unlink()
             os.mkfifo(path)
             return res

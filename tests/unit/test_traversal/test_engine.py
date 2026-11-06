@@ -182,8 +182,7 @@ def test_scan_directory_entries_broken_symlink(tmp_path: Path):
     broken_link.symlink_to(tmp_path / "non_existent_target")
     subdirs, files = _scan_directory_entries(tmp_path, config, ())
     assert subdirs == []
-    # Broken symlink is not a dir and not a regular file
-    assert files == []
+    assert [f[0] for f in files] == [broken_link]
 
 
 def test_find_files_single_file_not_matching_filter(tmp_path: Path):
@@ -390,3 +389,111 @@ def test_exported_exceptions_are_raised_or_removed(tmp_path: Path) -> None:
     missing_listing = tmp_path / "missing_manifest.txt"
     with pytest.raises(ParserError, match="Cannot read input"):
         list(ingest_from_file(TraversalConfig(from_file=str(missing_listing))))
+
+
+def test_symlink_listed_without_follow(tmp_path: Path) -> None:
+    """Default traversal yields symlink entries with is_symlink=True and symlink_target set."""
+    real = tmp_path / "real.py"
+    real.write_text("print('hi')\n", encoding="utf-8")
+    link = tmp_path / "link.py"
+    try:
+        link.symlink_to("real.py")
+    except (OSError, NotImplementedError):  # pragma: no cover
+        pytest.skip("Symlinks not supported on this platform")
+
+    results = list(find_files(TraversalConfig(root_paths=(tmp_path,))))
+    by_name = {r.relative_path.as_posix(): r for r in results}
+    assert "link.py" in by_name
+    link_info = by_name["link.py"]
+    assert link_info.is_symlink is True
+    assert link_info.symlink_target == "real.py"
+    assert link_info.indicator == "@"
+    assert "symlink" in link_info.tags
+
+
+def test_symlink_classified_by_target_when_following(tmp_path: Path) -> None:
+    """With follow_symlinks=True (-l), symlinks are classified by their target content and tags."""
+    real = tmp_path / "real.py"
+    real.write_text("#!/usr/bin/env python3\nprint('target')\n", encoding="utf-8")
+    link = tmp_path / "link.py"
+    alias = tmp_path / "alias_no_ext"
+    try:
+        link.symlink_to("real.py")
+        alias.symlink_to("real.py")
+    except (OSError, NotImplementedError):  # pragma: no cover
+        pytest.skip("Symlinks not supported on this platform")
+
+    cfg = TraversalConfig(
+        root_paths=(tmp_path,),
+        follow_symlinks=True,
+        include_tags=frozenset({"python"}),
+    )
+    results = list(find_files(cfg))
+    by_name = {r.relative_path.as_posix(): r for r in results}
+    assert set(by_name) == {"real.py", "link.py", "alias_no_ext"}
+    for name in ("link.py", "alias_no_ext"):
+        info = by_name[name]
+        assert "python" in info.tags
+        assert "text" in info.tags
+        assert "file" in info.tags
+        assert "symlink" in info.tags
+        assert info.is_symlink is True
+        assert info.symlink_target == "real.py"
+        assert info.shebang == "#!/usr/bin/env python3"
+
+    # Also verify --prune and direct single-root symlink classification with -l
+    cfg_prune = TraversalConfig(
+        root_paths=(tmp_path,),
+        follow_symlinks=True,
+        prune_empty=True,
+        include_tags=frozenset({"python"}),
+    )
+    assert len(list(find_files(cfg_prune))) == 3
+    single_res = list(find_files(TraversalConfig(root_paths=(link,), follow_symlinks=True)))
+    assert len(single_res) == 1
+    assert single_res[0].path == link.parent.resolve() / "link.py"
+    assert "python" in single_res[0].tags
+
+
+def test_symlink_path_is_link_location(tmp_path: Path) -> None:
+    """FileInfo.path is the symlink location (not resolved target) and stays under root."""
+    external = tmp_path / "external"
+    external.mkdir()
+    target = external / "real.py"
+    target.write_text("x = 1\n", encoding="utf-8")
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    link = repo / "link.py"
+    try:
+        link.symlink_to(target)
+    except (OSError, NotImplementedError):  # pragma: no cover
+        pytest.skip("Symlinks not supported on this platform")
+
+    resolved_repo = repo.resolve()
+    for follow in (False, True):
+        items = list(find_files(TraversalConfig(root_paths=(repo,), follow_symlinks=follow)))
+        assert len(items) == 1
+        assert items[0].path == resolved_repo / "link.py"
+        assert items[0].path.is_relative_to(resolved_repo)
+        assert items[0].to_dict(absolute=True)["path"] == str(resolved_repo / "link.py")
+
+
+def test_broken_symlink_listed_not_crashing(tmp_path: Path) -> None:
+    """Dangling symlink is listed in default mode with symlink_target set and no error."""
+    dangling = tmp_path / "dangling.py"
+    try:
+        dangling.symlink_to("missing_target.py")
+    except (OSError, NotImplementedError):  # pragma: no cover
+        pytest.skip("Symlinks not supported on this platform")
+
+    errors: list[OSError] = []
+    results = list(find_files(TraversalConfig(root_paths=(tmp_path,)), on_error=errors.append))
+    assert errors == []
+    assert len(results) == 1
+    info = results[0]
+    assert info.relative_path == Path("dangling.py")
+    assert info.is_symlink is True
+    assert info.symlink_target == "missing_target.py"
+    assert info.indicator == "@"
+    assert list(find_files(TraversalConfig(root_paths=(dangling,), follow_symlinks=True))) == []

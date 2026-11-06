@@ -90,16 +90,7 @@ def _resolve_relative(
     root_path: Path | None,
     prefix: Path | None = None,
 ) -> Path:
-    """Compute relative path from root_path if provided.
-
-    Args:
-        path: Target file path.
-        root_path: Optional root directory path.
-        prefix: Optional prefix to prepend to relative path.
-
-    Returns:
-        Relative path if root_path is given and matches, otherwise original path.
-    """
+    """Compute relative path from root_path if provided."""
     if root_path is None:
         return path
 
@@ -192,19 +183,7 @@ def _identify_tags(  # noqa: PLR0913
     buffer: bytes | None = None,
     is_executable: bool = False,
 ) -> set[str]:
-    """Extract identify tags with fallback handling, using buffer if available.
-
-    Args:
-        path: Target file path.
-        str_path: String representation of path.
-        exists: Flag indicating whether path exists on disk.
-        is_regular_or_symlink: Flag indicating whether path is regular file or symlink.
-        buffer: Optional pre-read file content buffer.
-        is_executable: Flag indicating whether file is executable.
-
-    Returns:
-        Set of tag strings identified for the file.
-    """
+    """Extract identify tags with fallback handling, using buffer if available."""
     try:
         if not exists or not is_regular_or_symlink:
             return set(identify_engine.tags_from_filename(path.name))
@@ -225,18 +204,7 @@ def _shebang_info(
     is_symlink: bool,
     buffer: bytes | None = None,
 ) -> tuple[str | None, set[str]]:
-    """Extract shebang and interpreter tags if applicable.
-
-    Args:
-        path: Target file path.
-        str_path: String representation of path.
-        is_file: Flag indicating whether path is a regular file.
-        is_symlink: Flag indicating whether path is a symbolic link.
-        buffer: Optional pre-read file content buffer.
-
-    Returns:
-        Tuple containing shebang string (or None) and set of tags.
-    """
+    """Extract shebang and interpreter tags if applicable."""
     if not (is_file and not is_symlink):
         return None, set()
 
@@ -254,14 +222,7 @@ def _shebang_info(
 
 
 def _mime_info(str_path: str) -> tuple[str | None, set[str]]:
-    """Extract MIME type and MIME-derived tags.
-
-    Args:
-        str_path: String representation of the file path.
-
-    Returns:
-        Tuple containing MIME type string (or None) and set of MIME tags.
-    """
+    """Extract MIME type and MIME-derived tags."""
     mime_type, _ = mimetypes.guess_type(str_path)
     tags: set[str] = (
         {f"mime:{mime_type}", mime_type.split("/", 1)[0]} if mime_type is not None else set()
@@ -270,16 +231,7 @@ def _mime_info(str_path: str) -> tuple[str | None, set[str]]:
 
 
 def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -> bool:
-    """Determine whether a file is executable across POSIX and Windows platforms.
-
-    Args:
-        path: File path to check.
-        exists: Flag indicating whether path exists on disk.
-        shebang: Optional shebang line string if detected.
-
-    Returns:
-        True if the file is considered executable on the host platform.
-    """
+    """Determine whether a file is executable across POSIX and Windows platforms."""
     if not exists:
         return False
 
@@ -295,9 +247,40 @@ def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -
     return os.access(path, os.X_OK)
 
 
+def _read_symlink_target(path: Path, *, is_symlink: bool) -> str | None:
+    """Read symlink destination via Path.readlink if path is a symbolic link."""
+    if not is_symlink:
+        return None
+
+    try:
+        return str(path.readlink()).removeprefix("\\\\?\\")
+    except OSError:
+        return None
+
+
+def _augment_symlink_tags(
+    tags: set[str],
+    path: Path,
+    *,
+    is_symlink: bool,
+    symlink_target: str | None,
+    follow_symlinks: bool,
+) -> None:
+    """Include symlink tag and filename tags for symbolic links."""
+    if not is_symlink:
+        return
+
+    tags.add(identify_engine.SYMLINK)
+    tags.update(identify_engine.tags_from_filename(path.name))
+    if follow_symlinks and symlink_target is not None:
+        tags.update(identify_engine.tags_from_filename(Path(symlink_target).name))
+
+
 def _inspect_entry_metadata(
     path: Path,
     entry: os.DirEntry[str],
+    *,
+    follow_symlinks: bool = False,
 ) -> tuple[bool, bool, bool, int, os.stat_result | None]:
     """Inspect metadata from an os.DirEntry object."""
     try:
@@ -306,14 +289,14 @@ def _inspect_entry_metadata(
         is_symlink = False
 
     try:
-        stat_result = entry.stat(follow_symlinks=not is_symlink)
+        stat_result = entry.stat(follow_symlinks=follow_symlinks or not is_symlink)
         size_bytes = stat_result.st_size
         exists = True
         is_file = stat.S_ISREG(stat_result.st_mode)
     except OSError:
         stat_result, size_bytes, exists, is_file = None, 0, False, False
 
-    if is_symlink and exists:
+    if is_symlink and not follow_symlinks and exists:
         try:
             is_file = path.is_file()
         except OSError:
@@ -324,6 +307,8 @@ def _inspect_entry_metadata(
 
 def _inspect_path_metadata(
     path: Path,
+    *,
+    follow_symlinks: bool = False,
 ) -> tuple[bool, bool, bool, int, os.stat_result | None]:
     """Inspect filesystem metadata directly from a Path object."""
     try:
@@ -332,7 +317,7 @@ def _inspect_path_metadata(
         is_symlink = False
 
     try:
-        stat_result = path.lstat() if is_symlink else path.stat()
+        stat_result = path.lstat() if (is_symlink and not follow_symlinks) else path.stat()
         size_bytes = stat_result.st_size
     except OSError:
         stat_result, size_bytes = None, 0
@@ -349,29 +334,18 @@ def _inspect_path_metadata(
 def _inspect_metadata(
     path: Path,
     entry: os.DirEntry[str] | None = None,
+    *,
+    follow_symlinks: bool = False,
 ) -> tuple[bool, bool, bool, int, os.stat_result | None]:
-    """Inspect filesystem metadata safely, reusing DirEntry when available.
-
-    Args:
-        path: File path to inspect.
-        entry: Optional os.DirEntry from directory scanning.
-
-    Returns:
-        Tuple of (is_symlink, exists, is_file, size_bytes, stat_result).
-    """
+    """Inspect filesystem metadata safely, reusing DirEntry when available."""
     if entry is not None:
-        return _inspect_entry_metadata(path, entry)
+        return _inspect_entry_metadata(path, entry, follow_symlinks=follow_symlinks)
 
-    return _inspect_path_metadata(path)
+    return _inspect_path_metadata(path, follow_symlinks=follow_symlinks)
 
 
 def _adjust_nt_tags(tags: set[str], *, is_executable: bool) -> None:
-    """Adjust executable tags on Windows platform.
-
-    Args:
-        tags: Set of tags to modify in place.
-        is_executable: Flag indicating whether path is executable.
-    """
+    """Adjust executable tags on Windows platform."""
     if os.name != "nt":
         return
 
@@ -409,13 +383,25 @@ def _extract_timestamps_and_indicator(  # noqa: PLR0913
     return mtime, ctime, indicator
 
 
-def classify_file(
+def _resolve_file_location(
+    path: Path,
+    *,
+    entry: os.DirEntry[str] | None,
+    is_symlink: bool,
+    exists: bool,
+) -> Path:
+    """Return resolved path for standalone regular files, keeping link and entry locations."""
+    return path.resolve() if entry is None and not is_symlink and exists else path
+
+
+def classify_file(  # noqa: PLR0913
     path: Path,
     root_path: Path | None = None,
     prefix: Path | None = None,
     accumulated_size: int | None = None,
     *,
     entry: os.DirEntry[str] | None = None,
+    follow_symlinks: bool = False,
 ) -> FileInfo:
     """Classify a given file path by inspection of name, content, and metadata.
 
@@ -425,16 +411,23 @@ def classify_file(
         prefix: Optional prefix to prepend to relative_path.
         accumulated_size: Optional accumulated directory disk usage in bytes.
         entry: Optional os.DirEntry metadata from scandir.
+        follow_symlinks: Whether to follow symbolic links for content and target classification.
 
     Returns:
         FileInfo containing metadata, identified tags, shebang, and MIME info.
     """
     str_path = str(path)
-    is_symlink, exists, is_file, size_bytes, stat_result = _inspect_metadata(path, entry=entry)
+    is_symlink, exists, is_file, size_bytes, stat_result = _inspect_metadata(
+        path,
+        entry=entry,
+        follow_symlinks=follow_symlinks,
+    )
+    symlink_target = _read_symlink_target(path, is_symlink=is_symlink)
     permissions_str, owner_user, owner_group, inode, device = extract_metadata(stat_result)
+    follow_target = not is_symlink or follow_symlinks
 
     buffer: bytes | None = None
-    if exists and is_file and not is_symlink:
+    if exists and is_file and follow_target:
         buffer, is_file, size_bytes, stat_result = _inspect_file_content(
             path,
             size_bytes,
@@ -447,10 +440,10 @@ def classify_file(
         path,
         str_path,
         is_file=is_file,
-        is_symlink=is_symlink,
+        is_symlink=not follow_target,
         buffer=buffer,
     )
-    is_executable = _check_executable(path, exists=exists, shebang=shebang)
+    is_executable = _check_executable(path, exists=exists and follow_target, shebang=shebang)
 
     tags = _identify_tags(
         path,
@@ -461,13 +454,20 @@ def classify_file(
         is_executable=is_executable,
     )
     tags.update(shebang_tags)
+    _augment_symlink_tags(
+        tags,
+        path,
+        is_symlink=is_symlink,
+        symlink_target=symlink_target,
+        follow_symlinks=follow_symlinks,
+    )
     _adjust_nt_tags(tags, is_executable=is_executable)
 
     mime_type, mime_tags = _mime_info(str_path)
     tags.update(mime_tags)
 
     relative_path = _resolve_relative(path, root_path, prefix=prefix)
-    resolved_path = path.resolve() if (is_symlink or entry is None) and exists else path
+    resolved_path = _resolve_file_location(path, entry=entry, is_symlink=is_symlink, exists=exists)
     effective_size = accumulated_size if accumulated_size is not None else size_bytes
     mtime, ctime, indicator = _extract_timestamps_and_indicator(
         path,
@@ -486,6 +486,7 @@ def classify_file(
         mime_type=mime_type,
         is_executable=is_executable,
         is_symlink=is_symlink,
+        symlink_target=symlink_target,
         size_bytes=effective_size,
         permissions_str=permissions_str,
         owner_user=owner_user,
