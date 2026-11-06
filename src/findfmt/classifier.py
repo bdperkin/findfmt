@@ -253,7 +253,7 @@ def _read_symlink_target(path: Path, *, is_symlink: bool) -> str | None:
         return None
 
     try:
-        return str(path.readlink())
+        return str(path.readlink()).removeprefix("\\\\?\\")
     except OSError:
         return None
 

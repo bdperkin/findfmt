@@ -496,3 +496,4 @@ def test_broken_symlink_listed_not_crashing(tmp_path: Path) -> None:
     assert info.is_symlink is True
     assert info.symlink_target == "missing_target.py"
     assert info.indicator == "@"
+    assert list(find_files(TraversalConfig(root_paths=(dangling,), follow_symlinks=True))) == []
