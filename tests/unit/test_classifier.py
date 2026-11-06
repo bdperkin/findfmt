@@ -98,6 +98,12 @@ def test_classify_file_symlink(tmp_path: Path):
         assert info_no_target.is_symlink
         assert info_no_target.symlink_target is None
 
+    dangling = tmp_path / "dangling.txt"
+    dangling.symlink_to(tmp_path / "missing_target.txt")
+    info_dangling = classify_file(dangling, root_path=tmp_path, follow_symlinks=True)
+    assert info_dangling.is_symlink
+    assert info_dangling.size_bytes == 0
+
 
 def test_classify_file_nonexistent(tmp_path: Path):
     nonexistent = tmp_path / "missing.py"
@@ -113,6 +119,10 @@ def test_classify_file_no_root_path(tmp_path: Path):
     info = classify_file(file_path)
     assert info.relative_path == file_path
     assert "json" in info.tags
+
+    rel_info = classify_file(Path("pyproject.toml"))
+    assert rel_info.path.is_absolute()
+    assert "toml" in rel_info.tags
 
 
 def test_classify_file_relative_to_unrelated_root(tmp_path: Path):
@@ -296,21 +306,16 @@ def test_inspect_metadata_direntry_error_branches(tmp_path: Path) -> None:
     assert size == 0
     assert st is None
 
-    # is_symlink=True and exists=True, but path.is_file() raises OSError
     mock_entry2 = MagicMock(spec=os.DirEntry)
     mock_entry2.is_symlink.return_value = True
     fake_stat = tmp_path.stat()
     mock_entry2.stat.return_value = fake_stat
 
-    with patch.object(Path, "is_file", side_effect=OSError("is_file error")):
-        is_sym2, exists2, is_file2, size2, _ = _inspect_metadata(
-            tmp_path / "sym",
-            entry=mock_entry2,
-        )
-        assert is_sym2
-        assert exists2
-        assert not is_file2
-        assert size2 == fake_stat.st_size
+    is_sym2, exists2, is_file2, size2, _ = _inspect_metadata(tmp_path / "sym", entry=mock_entry2)
+    assert is_sym2
+    assert exists2
+    assert not is_file2
+    assert size2 == fake_stat.st_size
 
 
 def test_extract_shebang_from_buffer() -> None:

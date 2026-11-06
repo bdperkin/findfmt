@@ -2471,7 +2471,7 @@
   },
   "check_device_boundary": {
    "kind": "function",
-   "signature": "(path: 'Path', root_dev: 'int | None') -> 'bool'"
+   "signature": "(path: 'Path', root_dev: 'int | None', *, entry: 'os.DirEntry[str] | None' = None, follow_symlinks: 'bool' = True) -> 'bool'"
   },
   "check_file_limit": {
    "kind": "function",
@@ -2521,7 +2521,7 @@
  "findfmt.traversal.devices": {
   "check_device_boundary": {
    "kind": "function",
-   "signature": "(path: 'Path', root_dev: 'int | None') -> 'bool'"
+   "signature": "(path: 'Path', root_dev: 'int | None', *, entry: 'os.DirEntry[str] | None' = None, follow_symlinks: 'bool' = True) -> 'bool'"
   },
   "resolve_device": {
    "kind": "function",

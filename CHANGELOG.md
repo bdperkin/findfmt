@@ -26,6 +26,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`-l`) is active (#321).
 - *(api)* Add optional keyword-only `follow_symlinks: bool = False` parameter to `classify_file`
   (#321).
+- *(api)* Add optional keyword-only `entry` and `follow_symlinks` parameters to
+  `check_device_boundary` (#337).
+
+### Performance
+
+- *(traversal)* Eliminate redundant per-file `os.stat`, `os.access`, and `Path.is_dir` syscalls
+  across classification, pattern matching, and `-x` device boundary checks, and eliminate double
+  classification of files under `--prune` (#337).
 
 ## [1.1.1] - 2026-11-05
 

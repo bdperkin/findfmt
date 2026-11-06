@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import tracemalloc
 from collections.abc import Iterator
 from pathlib import Path
@@ -250,3 +251,34 @@ def test_prune_runs_in_linear_time_on_deep_tree(tmp_path: Path, mocker: MockerFi
     assert len(results) == depth
     # Total directories = depth + 1 (26). With memoization, os.scandir is O(depth), not O(depth^2).
     assert scandir_spy.call_count <= 2 * (depth + 1)
+
+
+def test_traversal_syscall_and_prune_classification_bounds(
+    tmp_path: Path,
+    mocker: MockerFixture,
+):
+    """Verify traversal with patterns, -x, and --prune avoids redundant syscalls."""
+    sub = tmp_path / "pkg" / "sub"
+    sub.mkdir(parents=True)
+    files = [sub / f"mod_{i}.py" for i in range(10)]
+    for f in files:
+        f.write_text("import os\n", encoding="utf-8")
+
+    access_spy = mocker.spy(os, "access")
+    is_dir_spy = mocker.spy(Path, "is_dir")
+    classify_spy = mocker.spy(sys.modules["findfmt.traversal.boundaries"], "classify_file")
+
+    config = TraversalConfig(
+        root_paths=(tmp_path,),
+        respect_gitignore=False,
+        prune_empty=True,
+        one_file_system=True,
+        include_tags=frozenset({"python"}),
+        include_patterns=("*.py",),
+    )
+    results = list(find_files(config))
+
+    assert len(results) == len(files)
+    assert access_spy.call_count == 0
+    assert is_dir_spy.call_count <= len(config.root_paths)
+    assert classify_spy.call_count == len(files)

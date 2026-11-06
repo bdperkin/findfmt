@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from findfmt.traversal.patterns import matches_pattern_criteria
+from findfmt.traversal.patterns import _is_directory_info, matches_pattern_criteria
 
 if TYPE_CHECKING:
     from findfmt.models import FileInfo, TraversalConfig
@@ -39,7 +39,7 @@ def matches_filter(
     inherited_match: bool = False,
 ) -> bool:
     """Determine whether a classified file satisfies filter criteria."""
-    if not file_info.path.is_dir() and (
+    if not _is_directory_info(file_info) and (
         not _matches_tags(file_info.tags, config)
         or not _matches_shebang(file_info.shebang, config.shebang_filter)
     ):

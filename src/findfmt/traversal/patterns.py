@@ -204,6 +204,11 @@ def create_pattern_matcher(config: TraversalConfig) -> PatternMatcher:
     return PatternMatcher.from_config(config)
 
 
+def _is_directory_info(file_info: FileInfo) -> bool:
+    """Return True if FileInfo represents a directory without querying the filesystem."""
+    return file_info.indicator == "/" or "directory" in file_info.tags
+
+
 def matches_pattern_criteria(
     file_info: FileInfo,
     config: TraversalConfig,
@@ -218,7 +223,7 @@ def matches_pattern_criteria(
     active_matcher = matcher if matcher is not None else create_pattern_matcher(config)
     target_path = file_info.relative_path or file_info.path
 
-    if file_info.path.is_dir():
+    if _is_directory_info(file_info):
         if active_matcher.should_exclude(target_path, is_dir=True):
             return False
 
