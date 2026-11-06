@@ -14,6 +14,8 @@ from findfmt.metadata import extract_metadata
 from findfmt.models import FileInfo
 from findfmt.utils.strings import get_classification_indicator
 
+mimetypes.init()
+
 __all__ = [
     "classify_file",
     "compute_relative_prefix",
@@ -230,7 +232,13 @@ def _mime_info(str_path: str) -> tuple[str | None, set[str]]:
     return mime_type, tags
 
 
-def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -> bool:
+def _check_executable(
+    path: Path,
+    *,
+    exists: bool,
+    shebang: str | None = None,
+    stat_result: os.stat_result | None = None,
+) -> bool:
     """Determine whether a file is executable across POSIX and Windows platforms."""
     if not exists:
         return False
@@ -244,7 +252,7 @@ def _check_executable(path: Path, *, exists: bool, shebang: str | None = None) -
         )
         return path.name.upper().endswith(exts) or bool(shebang)
 
-    return os.access(path, os.X_OK)
+    return stat_result is not None and bool(stat_result.st_mode & 0o111)
 
 
 def _read_symlink_target(path: Path, *, is_symlink: bool) -> str | None:
@@ -277,14 +285,13 @@ def _augment_symlink_tags(
 
 
 def _inspect_entry_metadata(
-    path: Path,
     entry: os.DirEntry[str],
     *,
     follow_symlinks: bool = False,
 ) -> tuple[bool, bool, bool, int, os.stat_result | None]:
     """Inspect metadata from an os.DirEntry object."""
     try:
-        is_symlink = entry.is_symlink()
+        is_symlink = entry.is_symlink() is True
     except OSError:
         is_symlink = False
 
@@ -296,12 +303,6 @@ def _inspect_entry_metadata(
     except OSError:
         stat_result, size_bytes, exists, is_file = None, 0, False, False
 
-    if is_symlink and not follow_symlinks and exists:
-        try:
-            is_file = path.is_file()
-        except OSError:
-            is_file = False
-
     return is_symlink, exists, is_file, size_bytes, stat_result
 
 
@@ -311,24 +312,16 @@ def _inspect_path_metadata(
     follow_symlinks: bool = False,
 ) -> tuple[bool, bool, bool, int, os.stat_result | None]:
     """Inspect filesystem metadata directly from a Path object."""
+    is_symlink = False
     try:
-        is_symlink = path.is_symlink()
+        st = path.stat(follow_symlinks=False)
+        is_symlink = stat.S_ISLNK(st.st_mode)
+        if is_symlink and follow_symlinks:
+            st = path.stat()
     except OSError:
-        is_symlink = False
+        return is_symlink, False, False, 0, None
 
-    try:
-        stat_result = path.lstat() if (is_symlink and not follow_symlinks) else path.stat()
-        size_bytes = stat_result.st_size
-    except OSError:
-        stat_result, size_bytes = None, 0
-
-    try:
-        exists = path.exists()
-        is_file = path.is_file() if exists else False
-    except OSError:
-        exists, is_file = False, False
-
-    return is_symlink, exists, is_file, size_bytes, stat_result
+    return is_symlink, True, stat.S_ISREG(st.st_mode), st.st_size, st
 
 
 def _inspect_metadata(
@@ -339,7 +332,7 @@ def _inspect_metadata(
 ) -> tuple[bool, bool, bool, int, os.stat_result | None]:
     """Inspect filesystem metadata safely, reusing DirEntry when available."""
     if entry is not None:
-        return _inspect_entry_metadata(path, entry, follow_symlinks=follow_symlinks)
+        return _inspect_entry_metadata(entry, follow_symlinks=follow_symlinks)
 
     return _inspect_path_metadata(path, follow_symlinks=follow_symlinks)
 
@@ -356,23 +349,16 @@ def _adjust_nt_tags(tags: set[str], *, is_executable: bool) -> None:
     tags.add(add_tag)
 
 
-def _extract_timestamps_and_indicator(  # noqa: PLR0913
-    path: Path,
+def _extract_timestamps_and_indicator(
     stat_result: os.stat_result | None,
     *,
-    exists: bool,
-    is_file: bool,
     is_symlink: bool,
     is_executable: bool,
 ) -> tuple[float | None, float | None, str | None]:
     """Extract mtime, ctime, and classification indicator safely."""
     mtime = stat_result.st_mtime if stat_result is not None else None
     ctime = stat_result.st_ctime if stat_result is not None else None
-    is_dir = (
-        stat.S_ISDIR(stat_result.st_mode)
-        if stat_result is not None
-        else (exists and not is_file and not is_symlink and path.is_dir())
-    )
+    is_dir = stat.S_ISDIR(stat_result.st_mode) if stat_result is not None else False
 
     indicator = get_classification_indicator(
         is_dir=is_dir,
@@ -391,7 +377,11 @@ def _resolve_file_location(
     exists: bool,
 ) -> Path:
     """Return resolved path for standalone regular files, keeping link and entry locations."""
-    return path.resolve() if entry is None and not is_symlink and exists else path
+    return (
+        path.resolve()
+        if entry is None and not is_symlink and exists and not path.is_absolute()
+        else path
+    )
 
 
 def classify_file(  # noqa: PLR0913
@@ -443,7 +433,12 @@ def classify_file(  # noqa: PLR0913
         is_symlink=not follow_target,
         buffer=buffer,
     )
-    is_executable = _check_executable(path, exists=exists and follow_target, shebang=shebang)
+    is_executable = _check_executable(
+        path,
+        exists=exists and follow_target,
+        shebang=shebang,
+        stat_result=stat_result,
+    )
 
     tags = _identify_tags(
         path,
@@ -470,10 +465,7 @@ def classify_file(  # noqa: PLR0913
     resolved_path = _resolve_file_location(path, entry=entry, is_symlink=is_symlink, exists=exists)
     effective_size = accumulated_size if accumulated_size is not None else size_bytes
     mtime, ctime, indicator = _extract_timestamps_and_indicator(
-        path,
         stat_result,
-        exists=exists,
-        is_file=is_file,
         is_symlink=is_symlink,
         is_executable=is_executable,
     )

@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import runpy
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
+import pytest
 from rich.console import Console
 from tools.benchmark import (
     DEFAULT_SEED,
@@ -30,48 +33,37 @@ from tools.benchmark import (
     save_baseline_report,
 )
 
+from findfmt.classifier import classify_file
+from findfmt.models import TraversalConfig
+from findfmt.traversal import find_files
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
 
 def test_data_model_conversions():
     """Verify serialization methods for BenchmarkMetric, BenchmarkReport, and ComparisonRow."""
-    metric = BenchmarkMetric(
-        tier="small",
-        target_path="/tmp/test",
-        files_count=10,
-        dirs_count=2,
-        duration_seconds=0.05,
-        files_per_sec=200.0,
-        dirs_per_sec=40.0,
-        first_file_latency_ms=1.5,
-        peak_memory_bytes=1048576,
-        peak_memory_mb=1.0,
-    )
+    metric = BenchmarkMetric("small", "/tmp/test", 10, 2, 0.05, 200.0, 40.0, 1.5, 1048576, 1.0)
     metric_dict = metric.to_dict()
     assert metric_dict["tier"] == "small"
     assert metric_dict["files_count"] == 10
 
-    report = BenchmarkReport(
-        timestamp="2026-10-14T00:00:00Z",
-        findfmt_version="0.5.1",
-        python_version="3.13.0",
-        platform="Linux-x86_64",
-        seed=42,
-        metrics=[metric],
-    )
+    report = BenchmarkReport("2026-10-14T00:00:00Z", "0.5.1", "3.13.0", "Linux", 42, [metric])
     report_dict = report.to_dict()
     assert report_dict["findfmt_version"] == "0.5.1"
     assert len(report_dict["metrics"]) == 1
 
     row = ComparisonRow(
-        tier="small",
-        baseline_files_per_sec=180.0,
-        current_files_per_sec=200.0,
-        throughput_delta_pct=11.11,
-        baseline_latency_ms=2.0,
-        current_latency_ms=1.5,
-        latency_delta_pct=-25.0,
-        baseline_memory_mb=1.2,
-        current_memory_mb=1.0,
-        memory_delta_pct=-16.67,
+        "small",
+        180.0,
+        200.0,
+        11.11,
+        2.0,
+        1.5,
+        -25.0,
+        1.2,
+        1.0,
+        -16.67,
         regressed=False,
     )
     row_dict = row.to_dict()
@@ -294,56 +286,32 @@ def test_main_cli_flows(tmp_path: Path):
     assert ret == 1
 
     # 5. Compare with baseline and no regression returns 0
-    ret = main(
-        [
-            "--tier",
-            "small",
-            "--files",
-            "10",
-            "--baseline",
-            str(base_file),
-            "--threshold",
-            "99.9",
-        ],
-    )
-    assert ret == 0
+    cli_args = ["--tier", "small", "--files", "10", "--baseline", str(base_file)]
+    assert main([*cli_args, "--threshold", "99.9"]) == 0
 
     # 6. Compare with baseline and forced regression
+    fast_metric = BenchmarkMetric(
+        "small",
+        "/p",
+        100,
+        10,
+        0.0001,
+        10000000.0,
+        1000000.0,
+        0.01,
+        1024,
+        0.1,
+    )
     fast_base = BenchmarkReport(
         "2026-10-14T00:00:00Z",
         "0.5.1",
         "3.13.0",
         "Linux",
         42,
-        [
-            BenchmarkMetric(
-                "small",
-                "/p",
-                100,
-                10,
-                0.0001,
-                10000000.0,
-                1000000.0,
-                0.01,
-                1024,
-                0.1,
-            ),
-        ],
+        [fast_metric],
     )
     save_baseline_report(fast_base, base_file)
-    ret = main(
-        [
-            "--tier",
-            "small",
-            "--files",
-            "10",
-            "--baseline",
-            str(base_file),
-            "--threshold",
-            "5.0",
-        ],
-    )
-    assert ret == 1
+    assert main([*cli_args, "--threshold", "5.0"]) == 1
 
 
 def test_main_dunder_main():
@@ -480,3 +448,46 @@ def test_collect_metrics_topologies_and_formats():
     assert len(metrics) == 32
     for td in cleanups:
         td.cleanup()
+
+
+def test_classify_uses_cached_stat(tmp_path: Path, mocker: MockerFixture):
+    """Verify per-file classification uses <= 1 os.stat and 0 Path.is_dir/os.access calls."""
+    files = [tmp_path / f"sample_{i}.py" for i in range(5)]
+    for f in files:
+        f.write_text("print('ok')\n", encoding="utf-8")
+
+    stat_spy = mocker.spy(os, "stat")
+    access_spy = mocker.spy(os, "access")
+    is_dir_spy = mocker.spy(Path, "is_dir")
+
+    for f in files:
+        info = classify_file(f, root_path=tmp_path)
+        assert "python" in info.tags
+
+    assert stat_spy.call_count <= len(files)
+    assert access_spy.call_count == 0
+    assert is_dir_spy.call_count == 0
+
+
+@pytest.mark.parametrize("depth", [5, 10, 20])
+def test_prune_scandir_calls_linear(tmp_path: Path, mocker: MockerFixture, depth: int):
+    """Verify --prune os.scandir call count scales linearly with depth and classifies once."""
+    curr = tmp_path
+    for i in range(depth):
+        curr = curr / f"d_{i:02d}"
+        curr.mkdir()
+
+    (curr / "leaf.py").write_text("x = 1\n", encoding="utf-8")
+
+    scandir_spy = mocker.spy(os, "scandir")
+    classify_spy = mocker.spy(sys.modules["findfmt.traversal.boundaries"], "classify_file")
+    cfg = TraversalConfig(
+        root_paths=(tmp_path,),
+        prune_empty=True,
+        include_tags=frozenset({"python"}),
+    )
+    results = list(find_files(cfg))
+
+    assert len(results) == 1
+    assert scandir_spy.call_count <= 2 * (depth + 1)
+    assert classify_spy.call_count == 1

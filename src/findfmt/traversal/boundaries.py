@@ -106,7 +106,12 @@ def filter_directory_entry(  # noqa: PLR0913
         return None
 
     entry_path = Path(entry.path)
-    if root_dev is not None and not check_device_boundary(entry_path, root_dev):
+    if root_dev is not None and not check_device_boundary(
+        entry_path,
+        root_dev,
+        entry=entry,
+        follow_symlinks=config.follow_symlinks,
+    ):
         return None
 
     try:

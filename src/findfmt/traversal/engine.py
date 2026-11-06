@@ -127,17 +127,21 @@ def _traverse_subdirs(  # noqa: PLR0913
             base_root=base_root,
             parent_inherited=inherited_match,
         )
-        if config.prune_empty and not has_matching_descendants(
-            subdir,
-            config,
-            child_specs,
-            root_dev=root_dev,
-            current_depth=current_depth + 1,
-            matcher=matcher,
-            inherited_match=child_inherit,
-            base_root=base_root,
-            memo=prune_memo,
-            on_error=on_error,
+        if (
+            config.dirs_only
+            and config.prune_empty
+            and not has_matching_descendants(
+                subdir,
+                config,
+                child_specs,
+                root_dev=root_dev,
+                current_depth=current_depth + 1,
+                matcher=matcher,
+                inherited_match=child_inherit,
+                base_root=base_root,
+                memo=prune_memo,
+                on_error=on_error,
+            )
         ):
             continue
 
