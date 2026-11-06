@@ -377,11 +377,7 @@ def _resolve_file_location(
     exists: bool,
 ) -> Path:
     """Return resolved path for standalone regular files, keeping link and entry locations."""
-    return (
-        path.resolve()
-        if entry is None and not is_symlink and exists and not path.is_absolute()
-        else path
-    )
+    return path.resolve() if entry is None and not is_symlink and exists else path
 
 
 def classify_file(  # noqa: PLR0913

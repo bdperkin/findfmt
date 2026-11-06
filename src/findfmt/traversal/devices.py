@@ -25,7 +25,8 @@ def check_device_boundary(
 
     with contextlib.suppress(OSError, RuntimeError):
         st = entry.stat(follow_symlinks=follow_symlinks) if entry is not None else path.stat()
-        return st.st_dev == root_dev
+        dev = st.st_dev or path.stat().st_dev
+        return dev == root_dev
 
     return False
 
