@@ -11,7 +11,7 @@ from typer.testing import CliRunner
 
 from findfmt.cli import app
 from findfmt.models import TraversalConfig
-from findfmt.traversal import find_files
+from findfmt.traversal import find_files, traverse_directory
 from findfmt.traversal.ignore import (
     PathSpecType,
     find_git_repo_root,
@@ -355,3 +355,43 @@ def test_gitignore_significant_whitespace(tmp_path: Path) -> None:
     assert " leading.txt" not in results
     assert "trailing" in results
     assert "trailing " not in results
+
+
+def test_relative_root_honours_gitignore(
+    sample_repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify traverse_directory(Path('.'), cfg) matches absolute root and excludes ignored."""
+    monkeypatch.chdir(sample_repo)
+    cfg = TraversalConfig()
+
+    rel_paths = [f.relative_path for f in traverse_directory(Path("."), cfg)]  # noqa: PTH201
+    abs_paths = [f.relative_path for f in traverse_directory(sample_repo, cfg)]
+
+    assert rel_paths == abs_paths
+    assert len(rel_paths) > 0
+    names = {p.name for p in rel_paths}
+    assert "app.py" in names
+    assert "debug.log" not in names
+    assert "output.bin" not in names
+    assert "ignored.nestedignore" not in names
+    assert "test.gitexcluded" not in names
+
+
+def test_relative_subdir_root_honours_ancestor_gitignore(
+    sample_repo: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify traverse_directory(Path('sub'), cfg) applies parent and nested .gitignore rules."""
+    (sample_repo / "src" / "sub.log").write_text("ignored by root .gitignore\n", encoding="utf-8")
+    monkeypatch.chdir(sample_repo)
+    cfg = TraversalConfig()
+
+    rel_paths = [f.relative_path for f in traverse_directory(Path("src"), cfg)]
+    abs_paths = [f.relative_path for f in traverse_directory(sample_repo / "src", cfg)]
+
+    assert rel_paths == abs_paths
+    names = {p.name for p in rel_paths}
+    assert names == {"app.py", "config.json", "nested.py"}
+    assert "sub.log" not in names
+    assert "ignored.nestedignore" not in names
