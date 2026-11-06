@@ -18,6 +18,16 @@ except ImportError:
         compile_po_to_mo = None  # type: ignore[assignment]
 
 try:
+    from tools.i18n_prompts import (
+        CLI_GLOSSARY,
+        PLURAL_RULE_SPECS,
+        build_plural_prompt,
+        build_system_prompt,
+        extract_cli_flags,
+        get_plural_rule_spec,
+        parse_plural_forms_header,
+        validate_cli_flags_preserved,
+    )
     from tools.i18n_validation import (
         extract_brace_placeholders,
         extract_printf_placeholders,
@@ -30,6 +40,16 @@ try:
         validate_po_file,
     )
 except ImportError:
+    from i18n_prompts import (  # type: ignore[no-redef]
+        CLI_GLOSSARY,
+        PLURAL_RULE_SPECS,
+        build_plural_prompt,
+        build_system_prompt,
+        extract_cli_flags,
+        get_plural_rule_spec,
+        parse_plural_forms_header,
+        validate_cli_flags_preserved,
+    )
     from i18n_validation import (  # type: ignore[no-redef]
         extract_brace_placeholders,
         extract_printf_placeholders,
@@ -43,19 +63,27 @@ except ImportError:
     )
 
 __all__ = [
+    "CLI_GLOSSARY",
+    "PLURAL_RULE_SPECS",
+    "build_plural_prompt",
+    "build_system_prompt",
     "compile_catalogs",
     "extract_brace_placeholders",
+    "extract_cli_flags",
     "extract_messages",
     "extract_printf_placeholders",
     "extract_rich_tags",
+    "get_plural_rule_spec",
     "init_catalog",
     "main",
     "mask_placeholders",
+    "parse_plural_forms_header",
     "parse_po_catalog",
     "prune_untranslated_obsolete",
     "unmask_placeholders",
     "update_catalogs",
     "validate_catalogs",
+    "validate_cli_flags_preserved",
     "validate_message_pair",
     "validate_po_file",
 ]
@@ -263,14 +291,7 @@ def init_catalog(
 
 
 def prune_untranslated_obsolete(po_path: Path) -> int:
-    """Drop obsolete ``#~`` entries without a translation; translated ones are kept.
-
-    Args:
-        po_path: PO catalog to prune in place.
-
-    Returns:
-        Number of obsolete entries removed.
-    """
+    """Drop obsolete ``#~`` entries without a translation; translated ones are kept."""
     blocks = po_path.read_text(encoding="utf-8").split("\n\n")
     kept = []
     for block in blocks:
@@ -289,16 +310,7 @@ def update_catalogs(
     locale_dir: Path = DEFAULT_LOCALE_DIR,
     domain: str = DEFAULT_DOMAIN,
 ) -> int:
-    """Update all existing language PO catalogs from POT template.
-
-    Args:
-        pot_file: Source POT template path.
-        locale_dir: Directory containing locale catalogs.
-        domain: Translation domain name.
-
-    Returns:
-        Exit code (0 for success, non-zero for failure).
-    """
+    """Update all existing language PO catalogs from POT template."""
     if not pot_file.is_file():
         sys.stderr.write(f"Error: Template file {pot_file} not found. Run 'extract' first.\n")
         return 1
@@ -455,14 +467,7 @@ def _dispatch_command(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """CLI entrypoint for i18n maintenance tool.
-
-    Args:
-        argv: Command line arguments (defaults to sys.argv[1:]).
-
-    Returns:
-        Exit code integer.
-    """
+    """CLI entrypoint for i18n maintenance tool."""
     parser = build_parser()
     args = parser.parse_args(argv)
     return _dispatch_command(args)
