@@ -18,6 +18,7 @@ from findfmt.traversal.boundaries import (
     filter_directory_entry,
     has_matching_descendants,
     init_visited_dirs,
+    is_candidate_file_entry,
     matches_filter,
     resolve_active_specs,
     resolve_device,
@@ -93,14 +94,8 @@ def _scan_directory_entries(  # noqa: PLR0913
         if is_dir:
             if not should_skip_dir(entry.name, include_hidden=config.include_hidden):
                 subdirs.append(entry_path)
-        else:
-            try:
-                is_file = entry.is_file(follow_symlinks=config.follow_symlinks)
-            except (OSError, RuntimeError):
-                continue
-
-            if is_file:
-                files.append((entry_path, entry))
+        elif is_candidate_file_entry(entry, follow_symlinks=config.follow_symlinks):
+            files.append((entry_path, entry))
 
     return subdirs, files
 
@@ -262,6 +257,15 @@ def traverse_directory(  # noqa: PLR0913
         yield from descendants
 
 
+def _classify_root_kind(resolved_root: Path, *, follow_symlinks: bool) -> tuple[bool, bool]:
+    """Return (is_file_or_link, is_dir) for a resolved root path."""
+    try:
+        is_file = resolved_root.is_file() or (not follow_symlinks and resolved_root.is_symlink())
+        return is_file, (False if is_file else resolved_root.is_dir())
+    except (OSError, RuntimeError):
+        return False, False
+
+
 def _traverse_single_root(
     root: Path,
     resolved_root: Path,
@@ -271,16 +275,17 @@ def _traverse_single_root(
     on_error: Callable[[OSError], None] | None = None,
 ) -> Iterator[FileInfo]:
     """Yield matching items from a single root path (file or directory)."""
-    try:
-        is_file = resolved_root.is_file()
-        is_dir = False if is_file else resolved_root.is_dir()
-    except (OSError, RuntimeError):
-        return
+    is_file, is_dir = _classify_root_kind(resolved_root, follow_symlinks=config.follow_symlinks)
 
     if is_file:
         if not config.dirs_only:
             prefix = compute_relative_prefix(root.parent) if config.relative_prefix else None
-            info = classify_file(resolved_root, root_path=resolved_root.parent, prefix=prefix)
+            info = classify_file(
+                resolved_root,
+                root_path=resolved_root.parent,
+                prefix=prefix,
+                follow_symlinks=config.follow_symlinks,
+            )
             if matches_filter(info, config, matcher=matcher):
                 yield info
 
@@ -310,28 +315,50 @@ def _traverse_single_root(
     )
 
 
+def _report_root_error(
+    root: Path,
+    err: OSError | RuntimeError,
+    on_error: Callable[[OSError], None] | None,
+) -> None:
+    """Invoke on_error callback ensuring err.filename is populated."""
+    if isinstance(err, OSError) and on_error is not None:
+        if not err.filename:
+            err.filename = str(root)
+
+        on_error(err)
+
+
 def _resolve_existing_root(
     root: Path,
     on_error: Callable[[OSError], None] | None,
+    *,
+    follow_symlinks: bool = False,
 ) -> Path | None:
     """Resolve a root path if it exists, reporting missing or inaccessible roots via on_error."""
     try:
+        is_symlink = root.is_symlink()
+        if is_symlink and not follow_symlinks:
+            return root.parent.resolve() / root.name
+
         resolved_root = root.resolve()
         exists = resolved_root.exists()
     except (OSError, RuntimeError) as err:
-        if isinstance(err, OSError) and on_error is not None:
-            if not err.filename:
-                err.filename = str(root)
-
-            on_error(err)
-
+        _report_root_error(root, err, on_error)
         return None
 
     if exists:
-        return resolved_root
+        return (
+            root.parent.resolve() / root.name
+            if is_symlink and not resolved_root.is_dir()
+            else resolved_root
+        )
 
-    if not root.is_symlink() and on_error is not None:
-        on_error(FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), str(root)))
+    if not is_symlink:
+        _report_root_error(
+            root,
+            FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), str(root)),
+            on_error,
+        )
 
     return None
 
@@ -351,7 +378,11 @@ def find_files(
     matcher = create_pattern_matcher(config)
     roots = config.root_paths if config.sort_by == SortKey.NONE else sorted(config.root_paths)
     for root in roots:
-        resolved_root = _resolve_existing_root(root, on_error)
+        resolved_root = _resolve_existing_root(
+            root,
+            on_error,
+            follow_symlinks=config.follow_symlinks,
+        )
         if resolved_root is not None:
             yield from _traverse_single_root(
                 root,

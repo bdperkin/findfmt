@@ -216,3 +216,21 @@ def test_cli_csv_safe_tsv_and_csv(tmp_path: Path) -> None:
     res_tsv = runner.invoke(app, ["-f", "tsv", "--csv-safe", str(tmp_path)])
     assert res_tsv.exit_code == 0
     assert "'=formula.txt" in res_tsv.stdout
+
+
+def test_classify_indicator_for_symlink(tmp_path: Path) -> None:
+    """Verify -F / --classify displays '@' indicator for symlinks in default mode."""
+    target = tmp_path / "real.py"
+    target.write_text("print(1)\n", encoding="utf-8")
+    link = tmp_path / "link.py"
+    try:
+        link.symlink_to("real.py")
+    except (OSError, NotImplementedError):  # pragma: no cover
+        pytest.skip("Symlinks not supported on this platform")
+
+    runner = CliRunner()
+    result = runner.invoke(app, ["-F", str(tmp_path)])
+    assert result.exit_code == 0
+    lines = result.stdout.strip().splitlines()
+    assert "link.py@" in lines
+    assert "real.py" in lines

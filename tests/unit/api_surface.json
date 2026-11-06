@@ -216,7 +216,7 @@
   },
   "classify_file": {
    "kind": "function",
-   "signature": "(path: 'Path', root_path: 'Path | None' = None, prefix: 'Path | None' = None, accumulated_size: 'int | None' = None, *, entry: 'os.DirEntry[str] | None' = None) -> 'FileInfo'"
+   "signature": "(path: 'Path', root_path: 'Path | None' = None, prefix: 'Path | None' = None, accumulated_size: 'int | None' = None, *, entry: 'os.DirEntry[str] | None' = None, follow_symlinks: 'bool' = False) -> 'FileInfo'"
   },
   "detect_locale": {
    "kind": "function",
@@ -362,7 +362,7 @@
  "findfmt.classifier": {
   "classify_file": {
    "kind": "function",
-   "signature": "(path: 'Path', root_path: 'Path | None' = None, prefix: 'Path | None' = None, accumulated_size: 'int | None' = None, *, entry: 'os.DirEntry[str] | None' = None) -> 'FileInfo'"
+   "signature": "(path: 'Path', root_path: 'Path | None' = None, prefix: 'Path | None' = None, accumulated_size: 'int | None' = None, *, entry: 'os.DirEntry[str] | None' = None, follow_symlinks: 'bool' = False) -> 'FileInfo'"
   },
   "compute_relative_prefix": {
    "kind": "function",
@@ -2488,6 +2488,10 @@
   "init_visited_dirs": {
    "kind": "function",
    "signature": "(root: 'Path', *, follow_symlinks: 'bool', visited: 'set[Path] | None') -> 'set[Path] | None'"
+  },
+  "is_candidate_file_entry": {
+   "kind": "function",
+   "signature": "(entry: 'os.DirEntry[str]', *, follow_symlinks: 'bool') -> 'bool'"
   },
   "matches_filter": {
    "kind": "function",

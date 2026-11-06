@@ -39,6 +39,7 @@ __all__ = [
     "filter_directory_entry",
     "has_matching_descendants",
     "init_visited_dirs",
+    "is_candidate_file_entry",
     "matches_filter",
     "resolve_active_specs",
     "resolve_device",
@@ -126,6 +127,38 @@ def filter_directory_entry(  # noqa: PLR0913
     return entry_path, is_dir
 
 
+def is_candidate_file_entry(entry: os.DirEntry[str], *, follow_symlinks: bool) -> bool:
+    """Determine if a directory entry is a candidate file or unfollowed symlink."""
+    try:
+        return entry.is_file(follow_symlinks=follow_symlinks) or (
+            not follow_symlinks and entry.is_symlink() is True
+        )
+    except (OSError, RuntimeError):
+        return False
+
+
+def _can_skip_entry_by_tags(
+    entry: os.DirEntry[str] | None,
+    config: TraversalConfig,
+    *,
+    filename: str,
+) -> bool:
+    """Determine if a directory entry can be skipped early by filename/executable tags."""
+    if entry is not None and config.follow_symlinks:
+        with contextlib.suppress(OSError, RuntimeError):
+            if entry.is_symlink() is True:
+                return False
+
+    is_exec: bool | None = None
+    if entry is not None and (config.include_tags & INTERPRETER_TAGS):
+        with contextlib.suppress(OSError, RuntimeError):
+            is_exec = bool(
+                entry.stat(follow_symlinks=config.follow_symlinks).st_mode & 0o111,
+            )
+
+    return can_skip_file_by_tags(filename, config, is_executable=is_exec)
+
+
 def _inspect_entries(  # noqa: PLR0913
     entries: Sequence[os.DirEntry[str]],
     config: TraversalConfig,
@@ -154,26 +187,17 @@ def _inspect_entries(  # noqa: PLR0913
         if is_dir:
             if not should_skip_dir(entry.name, include_hidden=config.include_hidden):
                 subdirs.append(entry_path)
-        else:
-            try:
-                is_file = entry.is_file(follow_symlinks=config.follow_symlinks)
-            except (OSError, RuntimeError):
+        elif is_candidate_file_entry(entry, follow_symlinks=config.follow_symlinks):
+            if _can_skip_entry_by_tags(entry, config, filename=entry.name):
                 continue
 
-            if is_file:
-                is_exec: bool | None = None
-                if config.include_tags & INTERPRETER_TAGS:
-                    with contextlib.suppress(OSError, RuntimeError):
-                        is_exec = bool(
-                            entry.stat(follow_symlinks=config.follow_symlinks).st_mode & 0o111,
-                        )
-
-                if can_skip_file_by_tags(entry.name, config, is_executable=is_exec):
-                    continue
-
-                info = classify_file(entry_path, entry=entry)
-                if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
-                    return [], True
+            info = classify_file(
+                entry_path,
+                entry=entry,
+                follow_symlinks=config.follow_symlinks,
+            )
+            if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
+                return [], True
 
     return subdirs, False
 
@@ -406,14 +430,7 @@ def _can_skip_candidate_file(  # noqa: PLR0913
     if matcher and not matcher.matches_file(rel_path, inherited_match=inherited_match):
         return True
 
-    is_exec: bool | None = None
-    if entry is not None and (config.include_tags & INTERPRETER_TAGS):
-        with contextlib.suppress(OSError, RuntimeError):
-            is_exec = bool(
-                entry.stat(follow_symlinks=config.follow_symlinks).st_mode & 0o111,
-            )
-
-    return can_skip_file_by_tags(path.name, config, is_executable=is_exec)
+    return _can_skip_entry_by_tags(entry, config, filename=path.name)
 
 
 def yield_matching_items(  # noqa: PLR0913
@@ -471,6 +488,7 @@ def yield_matching_items(  # noqa: PLR0913
             prefix=prefix,
             accumulated_size=accum_size,
             entry=entry,
+            follow_symlinks=config.follow_symlinks,
         )
         if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
             yield info
