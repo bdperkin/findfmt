@@ -1,0 +1,697 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 1.1.2.dev4+g56fb33125.d20261106\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-06 04:57+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/quality/dependency_matrix.md:1 01cdce9180194050af289d86717732d6
+msgid "Dependency Resolution Matrix & Orchestration ADR"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:3 61fd57865615473d9057149c5d1703ea
+msgid ""
+"This document records the Architecture Decision Record (ADR) and "
+"technical specification for multi-dimensional dependency resolution and "
+"Python interpreter matrix testing in `findfmt` (Issues "
+"[#426](https://github.com/bdperkin/findfmt/issues/426), "
+"[#425](https://github.com/bdperkin/findfmt/issues/425), and "
+"[#349](https://github.com/bdperkin/findfmt/issues/349))."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:11
+#: 973158348fa6421e9cd727a621709469
+msgid "1. Context, Problem Statement & Architecture Decision"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:13
+#: 6ec3ffeef4c34008bc40a144c1b6b527
+msgid "1.1. Context & Problem Statement"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:15
+#: 8fdff2e4f7fb4ad784506686f5f40c0b
+msgid ""
+"`findfmt` uses `hatchling` as its PEP 517 build backend in "
+"`pyproject.toml` and relies on `uv` for virtual environment creation, "
+"lockfile synchronization (`uv.lock`), and test execution. Standard CI "
+"jobs execute `uv sync --locked --all-groups`, which validates only a "
+"single resolution point: `--resolution highest --prerelease disallow "
+"--fork-strategy fewest`."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:20
+#: 61d0183e5db54c8aa02b14c390e3e929
+msgid ""
+"Relying solely on the default lockfile leaves three failure modes "
+"untested:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:22
+#: e3a18b798fe04d12ab3b227cf64d9ed8
+msgid ""
+"**Lower-Bound Drift**: Direct dependency floors declared in "
+"`pyproject.toml` (`identify>=2.6`, `pathspec>=1.0.1`, `pyyaml>=6.0.1`, "
+"`rich>=13.8`, `typer>=0.16`, `typing-extensions>=4`) can silently bit-rot"
+" when new code relies on features added in later minor releases."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:25
+#: 2d0cf779a6304d2caebc0a21954dc0c0
+msgid ""
+"**Upstream Pre-Release Breakages**: Upcoming alpha, beta, or release-"
+"candidate versions of direct or transitive dependencies (`click`, `rich`,"
+" `typer`, `pathspec`, `pytest`) can introduce breaking API changes before"
+" stable publication."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:28
+#: ef4544aba51448cc9398e4d09c6c92c2
+msgid ""
+"**Multi-Interpreter & Fork-Strategy Divergence**: Marker evaluation "
+"across supported Python interpreters (`3.11` through `3.15`) and `uv` "
+"resolver fork strategies can yield distinct package selections on minimum"
+" versus maximum runtimes."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:32
+#: 6c6a46157742465499e830b87d3c7946
+msgid "1.2. Architecture Decision Summary"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:34
+#: de949a8607b347b995011a1e5d073d47
+msgid ""
+"**Status**: Accepted (Milestone `v1.1.2`, Issue "
+"[#426](https://github.com/bdperkin/findfmt/issues/426))."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:36
+#: 2a91732eee384cbdbfbc74da62e9e9ed
+msgid ""
+"**CI Orchestrator**: Use native GitHub Actions `strategy.matrix` (`fail-"
+"fast: false`) for parallel cloud execution:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:38
+#: 117d11c153664083931d052e27e04f31
+msgid ""
+"**PR Smoke Gate**: 2-cell `dependency-smoke-matrix` job in "
+"`.github/workflows/ci.yml` (`lowest-direct` + `disallow` and `highest` + "
+"`allow`)."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:40
+#: b872b62370ae4d4da1b259c1b50d0174
+msgid ""
+"**Scheduled Exhaustive Matrix**: 6-cell pruned matrix in "
+"`.github/workflows/dependency-matrix.yml` triggered nightly via "
+"`schedule` and on-demand via `workflow_dispatch` (Issue "
+"[#429](https://github.com/bdperkin/findfmt/issues/429))."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:43
+#: d9086c30f46d48719e9a4ee061dd7d35
+msgid ""
+"**Local Orchestrator**: Extend `tools/verify_quality.py` with native `uv`"
+" subprocess orchestration covering both the dependency resolution axis "
+"(Issue [#427](https://github.com/bdperkin/findfmt/issues/427)) and the "
+"multi-Python interpreter axis (Issue "
+"[#349](https://github.com/bdperkin/findfmt/issues/349)), adding zero "
+"external task-runner dependencies or secondary configuration files."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:51
+#: 99b697b0d29c4365b4e90ec337120a1c
+msgid "2. Orchestration Tooling Assessment"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:53
+#: 5ca938cd56204f5aa5712e4221024372
+msgid ""
+"Five orchestration mechanisms were evaluated across both the dependency "
+"resolution axis (`--resolution`, `--prerelease`, `--fork-strategy`) and "
+"the Python interpreter axis (`3.11`–`3.15`):"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md f5514eec0abf4df5a7e19d3a03a923e5
+msgid "Orchestrator Candidate"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 0b695b96ea974203ad7c5b4b3c8492f8
+msgid "Configuration Surface"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md fbdd4cfc9e3f4b2eaa36b0b2a402f09b
+msgid "CI Integration & Parallelism"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 4b8b3222dcba4352b14477c6554b733c
+msgid "Local Ergonomics & Caching"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md f5abffb52ec7485e85b64f72cfd2941b
+msgid "Dependency & Config Overhead"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 71dbdf037e664ce9aa7de0bedd20637f
+msgid "Verdict"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 2e39dd765f124f5ca9e0a35fcc2eafca
+msgid "**GitHub Actions `strategy.matrix`**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 8a0ad234accf4e21be5a156e273ae7af
+msgid "`.github/workflows/*.yml`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md e468b3f91f2f4ee2afd1aed164682158
+msgid "**Native**: parallel VMs, step summaries, and `setup-uv` cache sharing."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 97595a57bbbc4568887b52888239b113
+msgid "Not runnable locally without external container emulation."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md f0d0298bb3044527a782be42f7c60f78
+msgid "**Zero** extra packages; standard workflow YAML."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 2cc8c02acde74016a1dc502ea209eb4e
+msgid "**Selected (CI)**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md e520fcd5c438413bafc2cc33e55930e5
+msgid "**Native `uv` in `tools/verify_quality.py`**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 46b2f5e5ffff4a859a3623f2d418385c
+msgid "`tools/verify_quality.py` + `pyproject.toml`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md eaa73ce3ffa54a0ab706752e1d960d88
+msgid "Invoked directly by CI quality gate and smoke steps."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 681bf0fce73c44c1985ec795884d4532
+msgid ""
+"**High**: reuses local `uv` wheel cache and auto-skips or provisions "
+"missing interpreters."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 94c0081403dd4b12932b2b85cdc14110
+msgid "**Zero** new dependencies or config files."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 044a7192d6b94997a6629bc81e9c31cc
+msgid "**Selected (Local)**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 22f1fa8725ef4824b7809b188632d3db
+msgid "**Hatch Matrix (`[tool.hatch.envs]`)**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 173fe0b502194b169af0baf4b363959b
+msgid "`pyproject.toml` (`[tool.hatch.envs.test.matrix]`)"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 977485b1e78a4128be97c1e854da7cb5
+msgid ""
+"Requires separate GHA matrix mapping to avoid serial execution on one "
+"runner."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 018cee2326b44d0095214a14bd655e5e
+msgid ""
+"Requires global `hatch` CLI (only `hatchling` is installed in `dev` "
+"group)."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 00aeccfd2a1145e698a617bdfcb4b864
+msgid "Adds `hatch` CLI requirement and custom `uv pip` override scripts."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md b6caa1b0bc2e4a31bd28c11a2b746650
+#: c2dbd324c10346fba585d8e6fa93a94d d5673afa709746f3920b2bb2951edae6
+#: d6aacb46a8cd49feab0449addaef0cb5
+msgid "**Rejected**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 87e05a2458ba412fb5eb6f6dc461cc8b
+msgid "**`nox` (`noxfile.py` with `uv` backend)**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md b9edc1b11a4347e3b148b6ae31416f7d
+msgid "`noxfile.py`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 477199342f484232a9730a066b3f090d
+msgid "Requires `nox-to-gha` action or duplicate matrix definitions in YAML."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 77d689b174d34c228349e0fd85d3553b
+msgid "Good imperative parameterization via `@nox.parametrize`."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md b661866011624fa28a3ee55c5e3a09c7
+msgid "Adds `nox` dependency and a new top-level `noxfile.py`."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 16c8f2a7251744fa8cb8fc7409dd1253
+msgid "**`tox` + `tox-uv` (`[tool.tox]`)**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md a9f36e2baea244c9b84bee94f6bf38fe
+msgid "`pyproject.toml` or `tox.ini`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 97a52af6a7ea4bfd88ce1777aa80508e
+msgid "Requires `tox-gh-actions` plugin to map factors to GHA jobs."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 8f5c1ac053b04b4bbbe450293da658bb
+msgid ""
+"Fast virtualenv creation via `tox-uv`, but awkward factor syntax for `uv`"
+" flags."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md a84cfec80ef4460a8efc6cffcd709fc4
+msgid "Adds `tox` and `tox-uv` dependencies; duplicates version lists."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 56a48d79f8bd4c2695a6ab9de3427711
+msgid "**Command Runners (`Make`, `just`, `invoke`)**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md a862d31028174b3fa7ce17c31a20349f
+msgid "`Makefile` / `justfile` / `tasks.py`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md abed45ff3e53483cb5139fb3ae0974a8
+msgid "No native environment or matrix lifecycle management."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 6260f31091f14e3aab76b90f4ba84680
+msgid "Shell aliases only; must still delegate to `uv` or Python scripts."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 1183efd5d9274047b05c5e517385056a
+msgid "Adds non-Python binary or task file without solving isolation."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:65
+#: c5919f8d8649465fbbaf9f45099a3125
+msgid "2.1. Rationale for Hybrid GitHub Actions + `tools/verify_quality.py`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:67
+#: 63742330c1d745889f01a684eb18c8cc
+msgid ""
+"**Single Resolver & Zero Lock Drift**: `uv` is the sole environment "
+"manager and package resolver. Driving ephemeral virtual environments (`uv"
+" venv` + `uv pip install`) directly from `tools/verify_quality.py` "
+"locally and `strategy.matrix` in GitHub Actions guarantees identical "
+"resolver semantics without translating flags through `tox` or `hatch` "
+"wrapper layers."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:71
+#: 3c2d00439cc64b42803c9d86f4eebaf0
+msgid ""
+"**Single Source of Truth for Python Versions**: `tools/verify_quality.py`"
+" reads the supported interpreter list (`3.11`, `3.12`, `3.13`, `3.14`, "
+"`3.15`) directly from the `Programming Language :: Python :: 3.X` Trove "
+"classifiers in `pyproject.toml`, preventing drift between "
+"`pyproject.toml`, `.github/workflows/ci.yml`, and local runner "
+"definitions."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:75
+#: f425f17787c54d6f98dc97eb60414995
+msgid ""
+"**Minimal Dependency Surface**: Keeping orchestration inside "
+"`tools/verify_quality.py` avoids adding `nox`, `tox`, `tox-uv`, or the "
+"full `hatch` CLI to `[dependency-groups].dev`."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:80
+#: 410b584bc8384c85819be068f41eece5
+msgid "3. Combinatorial Space & Matrix Pruning Analysis"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:82
+#: 0bc1e7027c734b2f87c2d5b6be2ab695
+msgid "3.1. Raw Combinatorial Space (30 Permutations)"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:84
+#: 4d2e456e861d42e18e6e86e0ee26976b
+msgid "`uv` exposes three primary resolution control dimensions:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:86
+#: 7af0fc9a19a4433398d9478f70d643f4
+msgid "**`--resolution`** (3 values): `highest`, `lowest`, `lowest-direct`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:87
+#: a44ed6ba48e1481dafd9909bb74a12d0
+msgid ""
+"**`--prerelease`** (5 values): `disallow`, `allow`, `if-necessary`, "
+"`explicit`, `if-necessary-or-explicit`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:89
+#: b2bb963225064405a1c8a35b314e07b7
+msgid "**`--fork-strategy`** (2 values): `fewest`, `requires-python`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:91
+#: 2b1eb225f4e34df8a22279bcd76b1e67
+msgid ""
+"The unpruned Cartesian product yields $3 \\\\times 5 \\\\times 2 = 30$ "
+"permutations per Python interpreter (150 combinations across all 5 "
+"supported Python versions)."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:94
+#: c218032a68e640d8bf7adce32cf45ceb
+msgid "3.2. Pruning `--prerelease` Permutations"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:96
+#: 0bd816e809304a0985868fee92af2cdc
+msgid ""
+"Inspecting `[project].dependencies` and `[dependency-groups].test` in "
+"`pyproject.toml` shows that every dependency specifier uses a stable "
+"lower bound (`>=X.Y` or `>=X.Y.Z`) with zero explicit pre-release "
+"specifiers (such as `>=1.0a1` or `>=2.0.0rc1`):"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:100
+#: a133bd3351a141498ef2de91c7c3f872
+msgid ""
+"**Eliminate `explicit` and `if-necessary-or-explicit` (-12 "
+"combinations)**: Because no specifier in `pyproject.toml` opts into an "
+"explicit pre-release tag, `--prerelease explicit` is mathematically "
+"identical to `--prerelease disallow`, and `--prerelease if-necessary-or-"
+"explicit` is identical to `--prerelease if-necessary` across all "
+"resolutions and fork strategies."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:104
+#: 39388948b32c424bab762ad2ba491f11
+msgid ""
+"**Eliminate `if-necessary` under `highest` and `lowest-direct` (-4 "
+"combinations)**: Every direct and transitive dependency of `findfmt` has "
+"published stable wheels satisfying `>=3.11`. Under `highest` and `lowest-"
+"direct`, the solver never lacks a stable candidate, so `if-necessary` "
+"produces the exact same resolution graph as `disallow`."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:108
+#: b295523ae77946e5929b54e9c45a3f98
+msgid ""
+"**Retain `(lowest, if-necessary, fewest)` and eliminate `(lowest, "
+"disallow, *)` / `(lowest, allow, *)` (-5 combinations)**: Full transitive"
+" `--resolution lowest` attempts to pick the oldest historical release of "
+"every transitive package (`click`, `pygments`, `markdown-it-py`, `mdurl`,"
+" `packaging`). Using `if-necessary` allows the solver to fall back only "
+"when an ancient transitive sdist lacks metadata, whereas `lowest` + "
+"`allow` selects broken historical alpha tags from transitive dependencies"
+" that are unrelated to `findfmt`'s own version bounds."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:115
+#: 53d337375f6d4c159cdb14579d289a11
+msgid "3.3. Pruning `--fork-strategy` Permutations"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:117
+#: 8d569a3f9427446fb6fc92e5df0de965
+msgid ""
+"`uv`'s `--fork-strategy` flag (`fewest` versus `requires-python`) "
+"controls how the universal resolver splits resolution forks across "
+"disjoint Python version ranges:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:120
+#: 71adc20b1ba3430c815b42ccbb3dfaf5
+msgid ""
+"When resolving into a single target interpreter environment (`uv pip "
+"install --python <env>`), environment markers (`python_version < '3.12'` "
+"for `typing-extensions>=4`) evaluate to a fixed boolean for that "
+"interpreter."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:123
+#: 10fc2f9472734f9c97e07140f5df9ca0
+msgid ""
+"Consequently, varying `--fork-strategy` across all `lowest-direct` and "
+"`allow` permutations produces identical per-interpreter package sets (-8 "
+"combinations)."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:125
+#: e764d96bc1b943d8bd24093391570560
+msgid ""
+"Retaining a single `(highest, disallow, requires-python)` cell verifies "
+"that `--fork-strategy requires-python` succeeds cleanly against "
+"`findfmt`'s `requires-python = \">=3.11\"` metadata."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:129
+#: ec16193e11b04c11afa12f54a73ee688
+msgid "3.4. Formal Pruned Matrix Specification"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:131
+#: 89525656ce0c42fc82c8b18ef38a300d
+msgid ""
+"Pruning reduces the 30 raw combinations by **80%** to **6 canonical non-"
+"redundant cells** for the exhaustive matrix and **2 cells** for the fast "
+"PR smoke gate:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md bb60bd214f614ccfb026f0a4f936f387
+msgid "Cell ID"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md cf1cf01292e04502a45a36dfdd77caa0
+msgid "`--resolution`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md c304586cb12b46c4a6f1479aef41c0f0
+msgid "`--prerelease`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md cecd7c5f688d4dc69b87242b6e8d4496
+msgid "`--fork-strategy`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 992072a60012422daaf8d47e5cf64c32
+msgid "Execution Tier"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md fa7874da1f7346a08d2390da7e152fc6
+msgid "Primary Verification Target"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md e81024672f9940cd85ab699c86af9e4f
+msgid "**M1**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 2f355da0bb1947a0a262b2e32e30fed9
+#: ce88f4953bde474eae68319920f7bc73
+msgid "`lowest-direct`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 069be951fedd4b278bd86bdc13f84b3b
+#: 2fe6999e1442457abf21ecb9083ad268 a09a6b89c5f34f3b9062f6f4741e3236
+msgid "`disallow`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 3383c6ec5e51458ebf183c3117124b14
+#: 470aefab92fb444ab22588e212082e11 4ec2037c43874099bff4f8f09241462d
+#: 56bc7e8c24c34433960246f337b0484b bd549ec9509046a79b4ddb76cf9757d0
+msgid "`fewest`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 68f41c5ebd6342cc91226543bc760f94
+#: 8b533375c5174175a1f2ff56eb57c186
+msgid "**PR Smoke** & **Full**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 58ee1db6e0044b77835d049c683d4d5e
+msgid ""
+"Verifies declared direct minimum bounds in `pyproject.toml` against "
+"stable transitive packages."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 4c12231db11d44e586ef711780b6dfd7
+msgid "**M2**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 4245c8a855fd40f299d1db753c691ef8
+#: 9cb026786e694676813276df18187196 e5ec6b2a960b402d8993930d4d0f5b5b
+msgid "`highest`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 12ea553dbcdf4b7a9a1f8ac55af8b371
+#: f929f1c7b45e48d0bc257f94130b936b
+msgid "`allow`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md d53f3589d79e49f6b9512d54ee6c5993
+msgid ""
+"Detects breaking changes in upstream alpha, beta, and release-candidate "
+"releases early."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 896e52fc02de4e2fbb36233cfdd1f055
+msgid "**M3**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 07e9e48d55ac4979923a333da749f119
+#: 44029085af6a40768da4a24fe5ecc85e 475afa5b86ab4c18a6c36c1687a89820
+#: 49064fd0005645298de1619f35ac7f52
+msgid "**Full (Nightly)**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 09d07a2db7f846f39adf9ba88dc66ceb
+msgid "Validates the latest stable upstream releases unpinned from `uv.lock`."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 3bef23c24a5a4b80b39c52d6563a59b0
+msgid "**M4**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md ff50fabd854b453dbc199f4d91831609
+msgid ""
+"Verifies direct dependency floors when paired with pre-release transitive"
+" dependencies."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 4963a693c14b4b3facecc74c34a80613
+msgid "**M5**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md bc2cb66a303f47dba1493d2d53ed5926
+msgid "`lowest`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 66c1d49675d542f98ef236dfc113c834
+msgid "`if-necessary`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 5c3f5e98862d4b9f8cd70ea86c8b22c1
+msgid ""
+"Stress-tests full transitive dependency floors across the entire "
+"dependency graph."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md 38641c13742a4da78844923714c09e78
+msgid "**M6**"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md c7be8fd0a14c4df98cee562b00f96c64
+msgid "`requires-python`"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md feb31be012e349febf4a2190fc1f144a
+msgid "Validates `requires-python` marker fork-strategy resolution semantics."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:145
+#: 16a48c5a24834922bbaeb2042a87f98b
+msgid "4. Failure Diagnostic Architecture"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:147
+#: f2cabbb3ec404c6fb6fca784d57a8afc
+msgid ""
+"When any resolution or `pytest` step fails in CI or local matrix "
+"execution, the runner executes a three-stage diagnostic pipeline:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:150
+#: eece47633cc14e7598a68744df23fdbf
+msgid "4.1. Stage 1 — Ephemeral Dependency Tree Capture"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:152
+#: 7af6afcf936543f5b1ce3fb7468c5808
+msgid ""
+"Immediately upon resolution or test failure (`if: failure()` in GitHub "
+"Actions or non-zero exit code in `tools/verify_quality.py`), the runner "
+"captures the resolved dependency graph from the isolated environment:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:160
+#: 7e697548b06a433d810f9544c01683f2
+msgid ""
+"In GitHub Actions, this output is appended as a fenced Markdown block to "
+"`$GITHUB_STEP_SUMMARY` under the failing cell heading (`### Dependency "
+"Tree (<resolution> / <prerelease> / <fork-strategy>)`)."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:164
+#: 04ea0bf51a4c4dfcbd2ac29484e486ed
+msgid "4.2. Stage 2 — Baseline Lockfile Version Diffing"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:166
+#: a67367a3089f468faf85e2114cf2cff1
+msgid ""
+"To isolate which package version triggered the regression, the runner "
+"compares the failing environment's installed package list (`uv pip list "
+"--format json --python <env_path>`) against the pinned versions in "
+"`uv.lock`, reporting a concise delta table of downgraded or pre-release "
+"packages."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:170
+#: 1c806d02c01e48a59ace46060d4bd231
+msgid "4.3. Stage 3 — Offending Bound Pinpointing & Remediation"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:172
+#: fac3d351b716434f92271aedf6537db8
+msgid ""
+"The diagnostic reporter cross-references installed direct package "
+"versions against the specifiers in `pyproject.toml` "
+"(`[project].dependencies` and `[dependency-groups].test`):"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:175
+#: 4ae61329597f4d46957b6108f96a7f5d
+msgid ""
+"If a failure occurs under `lowest-direct` (`M1` or `M4`), the report "
+"identifies the direct dependencies pinned at their floor versions and "
+"outputs the exact `pyproject.toml` lower bound that requires bumping."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:178
+#: 90fcdef35b5b43df84b25db5b909ed07
+msgid ""
+"If a failure occurs under `prerelease=allow` (`M2` or `M4`), the report "
+"highlights every installed package whose version matches a pre-release "
+"segment (`a`, `b`, `rc`, `dev`) so maintainers can file upstream reports "
+"or add temporary upper-bound exclusions."
+msgstr ""
+

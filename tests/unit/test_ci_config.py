@@ -445,3 +445,22 @@ def test_perf_marker_and_ci_job() -> None:
     assert "perf-tests" in jobs, "CI workflow must define a dedicated perf-tests job"
     perf_steps = jobs["perf-tests"]["steps"]
     assert any("pytest -m perf" in str(s.get("run", "")) for s in perf_steps)
+
+
+def test_dependency_matrix_adr_specification() -> None:
+    """Validate dependency resolution matrix ADR exists, is indexed, and defines M1-M6 (#426)."""
+    repo = _repo_root()
+    adr_path = repo / "docs" / "source" / "quality" / "dependency_matrix.md"
+    index_path = repo / "docs" / "source" / "quality" / "index.md"
+    assert adr_path.is_file(), f"Missing ADR document at {adr_path}"
+
+    index_text = index_path.read_text(encoding="utf-8")
+    assert "dependency_matrix" in index_text
+
+    adr_text = adr_path.read_text(encoding="utf-8")
+    for cell_id in ("**M1**", "**M2**", "**M3**", "**M4**", "**M5**", "**M6**"):
+        assert cell_id in adr_text, f"Expected pruned cell {cell_id} in {adr_path}"
+
+    assert "tools/verify_quality.py" in adr_text
+    assert "strategy.matrix" in adr_text
+    assert "uv pip tree" in adr_text

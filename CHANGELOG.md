@@ -35,6 +35,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   across classification, pattern matching, and `-x` device boundary checks, and eliminate double
   classification of files under `--prune` (#337).
 
+### Documentation
+
+- *(deps)* Add Architecture Decision Record (`docs/source/quality/dependency_matrix.md`) evaluating
+  matrix orchestration runners and defining the pruned 6-cell `uv` dependency resolution matrix and
+  failure diagnostic pipeline (#426).
+
 ## [1.1.1] - 2026-11-05
 
 ### Features
