@@ -34,5 +34,6 @@ the complete analysis and version matrix:
 :maxdepth: 1
 
 compatibility
+dependency_matrix
 performance
 ```
