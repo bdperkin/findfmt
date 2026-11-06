@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import gettext
 import io
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -329,12 +330,15 @@ def test_tools_i18n_main_cli(monkeypatch: pytest.MonkeyPatch) -> None:
     assert main(["all"]) == 2
 
 
-def test_starter_locale_catalogs_exist_and_translate() -> None:
+def test_starter_locale_catalogs_exist_and_translate(tmp_path: Path) -> None:
     """Verify that all starter catalogs (en, es, fr, de, ja) exist and function."""
-    locale_dir = PROJECT_ROOT / "src" / "findfmt" / "locale"
-    assert (locale_dir / "findfmt.pot").is_file()
+    src_locale_dir = PROJECT_ROOT / "src" / "findfmt" / "locale"
+    assert (src_locale_dir / "findfmt.pot").is_file()
 
-    # Compile catalogs to test runtime loading
+    locale_dir = tmp_path / "locale"
+    shutil.copytree(src_locale_dir, locale_dir)
+
+    # Compile catalogs into temporary directory to test runtime loading
     compile_catalogs(locale_dir=locale_dir)
 
     expected_translations = {

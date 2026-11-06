@@ -15,12 +15,18 @@ def test_built_wheel_loads_german_catalog(tmp_path: Path) -> None:
     dist_dir = tmp_path / "dist"
     venv_dir = tmp_path / "venv"
 
-    # Build wheel using uv build in isolation
-    subprocess.run(
-        ["uv", "build", "--wheel", "--out-dir", str(dist_dir)],
-        check=True,
-        capture_output=True,
-    )
+    # Build wheel using uv build in isolation and remove any build-time .mo artifacts from src/
+    repo_locale = Path(__file__).resolve().parents[2] / "src" / "findfmt" / "locale"
+    try:
+        subprocess.run(
+            ["uv", "build", "--wheel", "--out-dir", str(dist_dir)],
+            check=True,
+            capture_output=True,
+        )
+    finally:
+        for mo_file in repo_locale.glob("*/LC_MESSAGES/*.mo"):
+            mo_file.unlink(missing_ok=True)
+
     wheels = list(dist_dir.glob("*.whl"))
     assert len(wheels) == 1
     wheel_path = wheels[0]
