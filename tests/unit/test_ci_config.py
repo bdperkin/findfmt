@@ -426,3 +426,22 @@ def test_release_notes_come_from_the_changelog() -> None:
     assert not any("git-cliff" in str(s.get("uses")) for s in build["steps"])
     release = _step(jobs["create-github-release"], "softprops/action-gh-release")
     assert release["with"]["body"] == "${{ needs.build-distributions.outputs.release_body }}"
+
+
+def test_perf_marker_and_ci_job() -> None:
+    """Validate perf marker registration, default deselection, and dedicated CI job (#345)."""
+    pyproject_path = _repo_root() / "pyproject.toml"
+    with pyproject_path.open("rb") as f:
+        data = tomllib.load(f)
+
+    pytest_opts = data["tool"]["pytest"]["ini_options"]
+    markers = pytest_opts.get("markers", [])
+    assert any(m.startswith("perf:") for m in markers), "perf marker must be registered"
+    addopts = pytest_opts.get("addopts", "")
+    assert "not perf" in addopts, "default addopts must deselect perf marker"
+
+    ci = _load_ci_workflow()
+    jobs = ci.get("jobs", {})
+    assert "perf-tests" in jobs, "CI workflow must define a dedicated perf-tests job"
+    perf_steps = jobs["perf-tests"]["steps"]
+    assert any("pytest -m perf" in str(s.get("run", "")) for s in perf_steps)

@@ -56,6 +56,7 @@ class BenchmarkReport(_DictMixin):
     platform: str
     seed: int
     metrics: list[BenchmarkMetric]
+    measured_in: str = "subprocess"
 
 
 @dataclass(frozen=True, slots=True)

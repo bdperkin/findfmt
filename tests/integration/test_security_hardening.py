@@ -6,8 +6,8 @@ Part of Epic #338 (sub-issues #361, #362, #363).
 from __future__ import annotations
 
 import os
-import time
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from typer.testing import CliRunner
@@ -22,14 +22,15 @@ runner = CliRunner()
 
 
 def test_redos_terminal_escape_c1_osc_linear_time_integration() -> None:
-    """Verify C1-OSC terminal escape sequence processing finishes in under 100 ms."""
+    """Verify C1-OSC terminal escape sequence processing prevents backtracking across \\x9d."""
     payload = "\x9d" * 50000 + ";test"
-    t_start = time.perf_counter()
     sanitized = strip_ansi_escapes(payload)
-    elapsed = time.perf_counter() - t_start
-
-    assert elapsed < 0.1, f"Regex stripping took too long: {elapsed:.3f}s (expected < 0.1s)"
     assert sanitized == payload
+    assert list(strings._ANSI_ESCAPE_RE.finditer(payload)) == []  # noqa: SLF001
+
+    matches = list(strings._ANSI_ESCAPE_RE.finditer("\x9d" * 50000 + "0;Title\x9c"))  # noqa: SLF001
+    assert len(matches) == 1
+    assert matches[0].start() == 49999
 
     assert strings._ANSI_ESCAPE_RE is terminal._ANSI_REGEX  # noqa: SLF001
     assert strings._ANSI_ESCAPE_RE is hyperlinks._ESCAPE_SEQ_RE  # noqa: SLF001
@@ -81,11 +82,14 @@ def test_fifo_swap_safety_integration(tmp_path: Path) -> None:
     fifo_path.unlink()
     os.mkfifo(fifo_path)
 
-    t_start = time.perf_counter()
-    info = classify_file(fifo_path, root_path=tmp_path)
-    elapsed = time.perf_counter() - t_start
+    with (
+        patch("os.open", wraps=os.open) as spy_open,
+        patch("os.read", wraps=os.read) as spy_read,
+    ):
+        info = classify_file(fifo_path, root_path=tmp_path)
 
-    assert elapsed < 1.0, f"FIFO classification took {elapsed:.3f}s (expected < 1.0s)"
+    spy_open.assert_not_called()
+    spy_read.assert_not_called()
     assert info.indicator == "|"
     assert info.shebang is None
     assert "file" not in info.tags

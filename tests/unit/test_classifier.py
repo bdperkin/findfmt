@@ -1,6 +1,5 @@
 import os
 import stat
-import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -330,13 +329,16 @@ def test_fifo_swap_does_not_block(tmp_path: Path) -> None:
             os.mkfifo(path)
             return res
 
-        start = time.perf_counter()
-        with patch.object(classifier, "_inspect_metadata", side_effect=swapped_inspect):
+        with (
+            patch.object(classifier, "_inspect_metadata", side_effect=swapped_inspect),
+            patch("os.open", wraps=os.open) as spy_open,
+            patch("os.read", wraps=os.read) as spy_read,
+        ):
             info = classify_file(swap_path, root_path=tmp_path)
 
-        elapsed = time.perf_counter() - start
-
-        assert elapsed < 1.0, f"FIFO swap took {elapsed}s, expected < 1.0s"
+        assert spy_open.called
+        assert (spy_open.call_args.args[1] & getattr(os, "O_NONBLOCK", 0)) != 0
+        spy_read.assert_not_called()
         assert info.indicator == "|"
         assert info.shebang is None
         assert "file" not in info.tags
