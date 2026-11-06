@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
+import contextlib
+import gettext
 import os
 import stat
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
+
+import findfmt.i18n
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
@@ -17,13 +25,33 @@ from tools.hatch_build import compile_po_to_mo  # noqa: E402 - import after sys.
 
 
 @pytest.fixture(scope="session", autouse=True)
-def compile_locale_catalogs_for_tests() -> None:
-    """Ensure starter locale .mo catalogs in src/findfmt/locale are compiled for tests."""
+def compile_locale_catalogs_for_tests(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Generator[Path, None, None]:
+    """Compile starter locale .po catalogs into an isolated temporary directory for tests."""
     locale_root = PROJECT_ROOT / "src" / "findfmt" / "locale"
+    for stale_mo in locale_root.glob("*/LC_MESSAGES/*.mo"):
+        with contextlib.suppress(OSError):
+            stale_mo.unlink()
+
+    tmp_locale_dir = tmp_path_factory.mktemp("locale")
     for po_file in locale_root.glob("*/LC_MESSAGES/*.po"):
-        mo_file = po_file.with_suffix(".mo")
-        if not mo_file.is_file() or po_file.stat().st_mtime > mo_file.stat().st_mtime:
-            compile_po_to_mo(po_file, mo_file)
+        rel_po = po_file.relative_to(locale_root)
+        mo_file = (tmp_locale_dir / rel_po).with_suffix(".mo")
+        mo_file.parent.mkdir(parents=True, exist_ok=True)
+        compile_po_to_mo(po_file, mo_file)
+
+    original_locale_dir = findfmt.i18n.DEFAULT_LOCALE_DIR
+    original_bound_dir = gettext.bindtextdomain(findfmt.i18n.DEFAULT_DOMAIN)
+    findfmt.i18n.DEFAULT_LOCALE_DIR = tmp_locale_dir
+    gettext.bindtextdomain(findfmt.i18n.DEFAULT_DOMAIN, str(tmp_locale_dir))
+    findfmt.i18n.reset_locale()
+    try:
+        yield tmp_locale_dir
+    finally:
+        findfmt.i18n.DEFAULT_LOCALE_DIR = original_locale_dir
+        gettext.bindtextdomain(findfmt.i18n.DEFAULT_DOMAIN, original_bound_dir)
+        findfmt.i18n.reset_locale()
 
 
 @pytest.fixture(autouse=True)

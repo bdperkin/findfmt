@@ -55,6 +55,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `pyproject.toml`, and the `suppression-audit` pre-commit hook to audit and enforce justification
   for all inline linter and type-checker suppression directives across `src/`, `tests/`, and
   `tools/` (#540).
+- *(tests)* Isolate `compile_locale_catalogs_for_tests` session fixture in `tests/conftest.py` to
+  compile `.mo` catalogs into `tmp_path_factory` instead of `src/findfmt/locale/` and verify test
+  dependency group sufficiency (#359).
 
 ## [1.1.1] - 2026-11-05
 

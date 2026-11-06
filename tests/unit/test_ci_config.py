@@ -1,11 +1,16 @@
 """Tests for CI workflows and Dependabot configuration."""
 
 import fnmatch
+import gettext
+import shutil
+import subprocess
 import tomllib
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+import findfmt.i18n
 
 
 def _repo_root() -> Path:
@@ -251,30 +256,14 @@ def test_ci_uses_locked_sync() -> None:
 
     sync_steps_found = 0
     for wf_path in workflow_files:
-        with wf_path.open(encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-
-        if not isinstance(data, dict):
-            continue
-
-        jobs = data.get("jobs", {})
-        for job_name, job_data in jobs.items():
-            if not isinstance(job_data, dict):
-                continue
-
-            steps = job_data.get("steps", [])
-            for step in steps:
-                if not isinstance(step, dict):
-                    continue
-
-                run_cmd = step.get("run", "")
-                for line in run_cmd.splitlines():
+        data = yaml.safe_load(wf_path.read_text(encoding="utf-8"))
+        for job_name, job_data in (data.get("jobs", {}) if isinstance(data, dict) else {}).items():
+            steps = job_data.get("steps", []) if isinstance(job_data, dict) else []
+            for step in (s for s in steps if isinstance(s, dict)):
+                for line in str(step.get("run", "")).splitlines():
                     if "uv sync" in line:
                         sync_steps_found += 1
-                        assert "--locked" in line, (
-                            f"Step {step.get('name', 'unnamed')} in {wf_path.name}:{job_name} "
-                            f"executes uv sync without --locked: {line}"
-                        )
+                        assert "--locked" in line, f"{wf_path.name}:{job_name} missing --locked"
 
     assert sync_steps_found >= 5, f"Expected at least 5 uv sync steps, found {sync_steps_found}"
 
@@ -282,7 +271,6 @@ def test_ci_uses_locked_sync() -> None:
 def test_version_sensitive_checkouts_fetch_full_history() -> None:
     """Validate that version-sensitive workflows configure fetch-depth: 0 on actions/checkout."""
     workflows_dir = _repo_root() / ".github" / "workflows"
-
     version_sensitive_jobs = [
         (workflows_dir / "ci.yml", "packaging-smoke-test"),
         (workflows_dir / "ci.yml", "container-smoke-test"),
@@ -290,27 +278,17 @@ def test_version_sensitive_checkouts_fetch_full_history() -> None:
         (workflows_dir / "release.yml", "build-distributions"),
         (workflows_dir / "release.yml", "verify-release"),
     ]
-
     for wf_path, job_name in version_sensitive_jobs:
         assert wf_path.is_file(), f"Missing workflow file: {wf_path}"
-        with wf_path.open(encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-
+        data = yaml.safe_load(wf_path.read_text(encoding="utf-8"))
         job = data.get("jobs", {}).get(job_name)
         assert job is not None, f"Job {job_name} not found in {wf_path.name}"
-
-        steps = job.get("steps", [])
         checkout_step = next(
-            (s for s in steps if "actions/checkout" in s.get("uses", "")),
+            (s for s in job.get("steps", []) if "actions/checkout" in s.get("uses", "")),
             None,
         )
         assert checkout_step is not None, f"Checkout step missing in {wf_path.name}:{job_name}"
-
-        with_cfg = checkout_step.get("with", {})
-        assert with_cfg.get("fetch-depth") == 0, (
-            f"Job {job_name} in {wf_path.name} must set fetch-depth: 0 for actions/checkout, "
-            f"got {with_cfg.get('fetch-depth')}"
-        )
+        assert checkout_step.get("with", {}).get("fetch-depth") == 0
 
 
 RELEASE_TAG_EXPR = "${{ inputs.tag || github.ref_name }}"
@@ -464,3 +442,38 @@ def test_dependency_matrix_adr_specification() -> None:
     assert "tools/verify_quality.py" in adr_text
     assert "strategy.matrix" in adr_text
     assert "uv pip tree" in adr_text
+
+
+def test_test_group_is_sufficient() -> None:
+    """Validate that [dependency-groups].test includes all required test packages (#359)."""
+    with (_repo_root() / "pyproject.toml").open("rb") as f:
+        data = tomllib.load(f)
+
+    test_deps = data.get("dependency-groups", {}).get("test", [])
+    names = {
+        str(d).split(";")[0].split(">=")[0].split("==")[0].strip()
+        for d in test_deps
+        if isinstance(d, str)
+    }
+    assert {"docutils", "hatchling", "pytest", "pytest-cov", "pytest-mock"} <= names
+
+
+def test_session_fixture_does_not_write_to_src(compile_locale_catalogs_for_tests: Path) -> None:
+    """Validate session locale fixture compiles .mo catalogs to tmp_path, not src/ (#359)."""
+    src_locale_dir = _repo_root() / "src" / "findfmt" / "locale"
+    assert not compile_locale_catalogs_for_tests.resolve().is_relative_to(src_locale_dir.resolve())
+    assert compile_locale_catalogs_for_tests == findfmt.i18n.DEFAULT_LOCALE_DIR
+    assert gettext.bindtextdomain(findfmt.i18n.DEFAULT_DOMAIN) == str(
+        compile_locale_catalogs_for_tests,
+    )
+    assert len(list(compile_locale_catalogs_for_tests.glob("*/LC_MESSAGES/findfmt.mo"))) >= 5
+    assert list(src_locale_dir.glob("*/LC_MESSAGES/*.mo")) == []
+    if shutil.which("git") is not None:
+        proc = subprocess.run(
+            ["git", "status", "--porcelain", "--ignored", "src/findfmt/locale"],
+            cwd=_repo_root(),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert ".mo" not in proc.stdout
