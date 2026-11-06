@@ -3,13 +3,10 @@
 from __future__ import annotations
 
 import runpy
-import tokenize
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from typer.testing import CliRunner
-
 from tools.suppression_auditor import (
     GRAND_UNIFIED_SUPPRESSION_REGEX,
     AllowedSuppression,
@@ -25,6 +22,7 @@ from tools.suppression_auditor import (
     is_whitelisted,
     load_config,
 )
+from typer.testing import CliRunner
 
 runner = CliRunner()
 
@@ -234,6 +232,7 @@ def test_extract_comments_and_audit_file_fallbacks(tmp_path: Path) -> None:
     valid_file.write_text("x = 1\n", encoding="utf-8")
     with patch("tools.suppression_auditor.extract_comments", return_value=[(99, "# noqa")]):
         checked_oob, violations_oob = audit_file(valid_file, AuditorConfig(), tmp_path)
+
     assert checked_oob == 1
     assert violations_oob[0].content == "# noqa"
 
@@ -274,4 +273,5 @@ def test_discover_files_directories_and_default_globs(
         pytest.raises(SystemExit) as exc_info,
     ):
         runpy.run_path(str(script_path), run_name="__main__")
+
     assert exc_info.value.code == 0

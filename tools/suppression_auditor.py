@@ -104,13 +104,16 @@ def _parse_allowed_entries(raw_allowed: object) -> tuple[AllowedSuppression, ...
     """Parse allowed suppression table entries from TOML configuration."""
     if not isinstance(raw_allowed, list):
         return ()
+
     entries: list[AllowedSuppression] = []
     for item in raw_allowed:
         if not isinstance(item, dict):
             continue
+
         file_val = item.get("file")
         if not isinstance(file_val, str) or not file_val:
             continue
+
         raw_line, raw_code, raw_reason = item.get("line"), item.get("code"), item.get("reason")
         line_int = (
             raw_line if isinstance(raw_line, int) and not isinstance(raw_line, bool) else None
@@ -118,6 +121,7 @@ def _parse_allowed_entries(raw_allowed: object) -> tuple[AllowedSuppression, ...
         code_str = str(raw_code) if isinstance(raw_code, str) and raw_code else None
         reason_str = str(raw_reason).strip() if isinstance(raw_reason, str) else ""
         entries.append(AllowedSuppression(file_val, line_int, code_str, reason_str))
+
     return tuple(entries)
 
 
@@ -126,6 +130,7 @@ def load_config(config_path: Path | None = None) -> AuditorConfig:
     pyproject_path = config_path or Path("pyproject.toml")
     if not pyproject_path.is_file():
         return AuditorConfig()
+
     try:
         with pyproject_path.open("rb") as f:
             data = tomllib.load(f)
@@ -137,6 +142,7 @@ def load_config(config_path: Path | None = None) -> AuditorConfig:
     raw_cfg = tool_section.get("findfmt", {}).get("suppression_auditor")
     if not isinstance(raw_cfg, dict):
         raw_cfg = tool_section.get("suppression-auditor", {})
+
     if not isinstance(raw_cfg, dict):
         return AuditorConfig()
 
@@ -175,11 +181,15 @@ def is_whitelisted(
     for entry in allowed:
         if (root / entry.file).resolve() != resolved_target and entry.file != rel_target:
             continue
+
         if entry.line is not None and entry.line != line_no:
             continue
+
         if entry.code is not None and entry.code.lower() not in directive.lower():
             continue
+
         return True
+
     return False
 
 
@@ -219,13 +229,16 @@ def audit_file(
         match = GRAND_UNIFIED_SUPPRESSION_REGEX.search(comment_text)
         if not match:
             continue
+
         checked += 1
         directive = match.group("directive").strip()
         if is_whitelisted(file_path, line_no, directive, config.allowed, root):
             continue
+
         if not has_justification(comment_text):
             raw_line = lines[line_no - 1].strip() if 1 <= line_no <= len(lines) else comment_text
             violations.append(SuppressionViolation(str(file_path), line_no, raw_line, directive))
+
     return checked, violations
 
 
@@ -250,6 +263,7 @@ def discover_files(
                 if match_path.is_file() and match_path.suffix == ".py" and match_path not in seen:
                     seen.add(match_path)
                     candidates.append(match_path)
+
     return [
         p
         for p in candidates
@@ -284,6 +298,7 @@ def audit(
         table.add_column("Suppression Line", overflow="fold")
         for violation in violations:
             table.add_row(escape(violation.file), str(violation.line), escape(violation.content))
+
         console.print(table)
         console.print(f"\n[yellow]Configured strict mode: {is_strict}[/yellow]")
         console.print("[yellow]Action required: Add inline reason or pyproject.toml rule.[/yellow]")
