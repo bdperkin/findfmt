@@ -398,7 +398,7 @@ def test_symlink_listed_without_follow(tmp_path: Path) -> None:
     link = tmp_path / "link.py"
     try:
         link.symlink_to("real.py")
-    except (OSError, NotImplementedError):  # pragma: no cover
+    except (OSError, NotImplementedError):
         pytest.skip("Symlinks not supported on this platform")
 
     results = list(find_files(TraversalConfig(root_paths=(tmp_path,))))
@@ -420,7 +420,7 @@ def test_symlink_classified_by_target_when_following(tmp_path: Path) -> None:
     try:
         link.symlink_to("real.py")
         alias.symlink_to("real.py")
-    except (OSError, NotImplementedError):  # pragma: no cover
+    except (OSError, NotImplementedError):
         pytest.skip("Symlinks not supported on this platform")
 
     cfg = TraversalConfig(
@@ -467,7 +467,7 @@ def test_symlink_path_is_link_location(tmp_path: Path) -> None:
     link = repo / "link.py"
     try:
         link.symlink_to(target)
-    except (OSError, NotImplementedError):  # pragma: no cover
+    except (OSError, NotImplementedError):
         pytest.skip("Symlinks not supported on this platform")
 
     resolved_repo = repo.resolve()
@@ -484,7 +484,7 @@ def test_broken_symlink_listed_not_crashing(tmp_path: Path) -> None:
     dangling = tmp_path / "dangling.py"
     try:
         dangling.symlink_to("missing_target.py")
-    except (OSError, NotImplementedError):  # pragma: no cover
+    except (OSError, NotImplementedError):
         pytest.skip("Symlinks not supported on this platform")
 
     errors: list[OSError] = []

@@ -10,9 +10,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-if sys.version_info >= (3, 12):  # pragma: no cover
+if sys.version_info >= (3, 12):
     from typing import override
-else:  # pragma: no cover
+else:
     from typing_extensions import override
 
 import pytest

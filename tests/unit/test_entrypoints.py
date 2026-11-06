@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import runpy
+import sys
+import types
+import typing
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -70,6 +73,14 @@ def test_main_module():
             runpy.run_module("findfmt.__main__", run_name="__main__")
 
         assert exc_info.value.code == 0
+
+        with pytest.raises(SystemExit) as cli_exc_info:
+            runpy.run_path(
+                str(Path(__file__).resolve().parents[2] / "src" / "findfmt" / "cli" / "main.py"),
+                run_name="__main__",
+            )
+
+        assert cli_exc_info.value.code == 0
 
 
 def test_main_findfiles(sample_repo: Path, capsys: pytest.CaptureFixture[str]):
@@ -257,3 +268,34 @@ def test_wrapper_config_and_cli_precedence(
     cli_captured = capsys.readouterr()
     assert token in (cli_captured.out + cli_captured.err).replace("\\", "/")
     reset_active_config()
+
+
+def test_version_and_platform_import_fallbacks(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Exercise <3.12 typing_extensions and POSIX ImportError shims across src and tools."""
+    root = Path(__file__).resolve().parents[2]
+    monkeypatch.setitem(sys.modules, "typing_extensions", typing)
+    monkeypatch.setattr(typing, "override", getattr(typing, "override", lambda f: f), raising=False)
+    for ver in ((3, 11, 0, "final", 0), (3, 12, 0, "final", 0)):
+        monkeypatch.setattr(sys, "version_info", ver)
+        for top in ("src/findfmt", "tools"):
+            for path in sorted((root / top).rglob("*.py")):
+                if "sys.version_info >= (3, 12):" in path.read_text(encoding="utf-8"):
+                    runpy.run_path(str(path), run_name="_shim")
+
+    meta_path = str(root / "src" / "findfmt" / "metadata.py")
+    bench_path = str(root / "tools" / "benchmark.py")
+    for mod_name in ("pwd", "grp", "resource"):
+        monkeypatch.setitem(sys.modules, mod_name, None)
+
+    ns_missing = runpy.run_path(meta_path, run_name="_shim")
+    assert ns_missing["pwd"] is None
+    assert ns_missing["grp"] is None
+    assert runpy.run_path(bench_path, run_name="_shim")["resource"] is None
+
+    for mod_name in ("pwd", "grp", "resource"):
+        monkeypatch.setitem(sys.modules, mod_name, types.ModuleType(mod_name))
+
+    ns_present = runpy.run_path(meta_path, run_name="_shim")
+    assert ns_present["pwd"] is not None
+    assert ns_present["grp"] is not None
+    assert runpy.run_path(bench_path, run_name="_shim")["resource"] is not None

@@ -18,9 +18,9 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
-if sys.version_info >= (3, 12):  # pragma: no cover
+if sys.version_info >= (3, 12):
     from typing import override
-else:  # pragma: no cover
+else:
     from typing_extensions import override
 
 from tools.benchmark_models import (
@@ -52,7 +52,7 @@ from findfmt.traversal.engine import find_files
 
 try:
     import resource
-except ImportError:  # pragma: no cover
+except ImportError:
     resource = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:

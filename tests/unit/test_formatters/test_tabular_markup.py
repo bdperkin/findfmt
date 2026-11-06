@@ -243,7 +243,7 @@ def _publish_html(rst_text: str) -> bytes:
     """Publish RST text to HTML bytes, handling docutils version differences."""
     try:
         res = docutils.core.publish_string(rst_text, writer="html")
-    except AssertionError:  # pragma: no cover
+    except AssertionError:
         res = docutils.core.publish_string(rst_text, writer_name="html")
 
     if isinstance(res, bytes):

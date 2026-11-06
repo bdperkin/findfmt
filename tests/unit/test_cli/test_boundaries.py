@@ -109,7 +109,7 @@ def test_symlink_loop_detection(tmp_path: Path) -> None:
     try:
         (dir_a / "link_b").symlink_to(dir_b, target_is_directory=True)
         (dir_b / "link_a").symlink_to(dir_a, target_is_directory=True)
-    except OSError:  # pragma: no cover
+    except OSError:
         return  # Skip if filesystem does not support symlinks
 
     runner = CliRunner()
