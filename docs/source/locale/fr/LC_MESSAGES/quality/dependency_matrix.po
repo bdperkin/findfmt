@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.2.dev4+g56fb33125.d20261106\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 04:57+0000\n"
+"POT-Creation-Date: 2026-11-06 05:19+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -48,7 +48,7 @@ msgstr ""
 msgid ""
 "`findfmt` uses `hatchling` as its PEP 517 build backend in "
 "`pyproject.toml` and relies on `uv` for virtual environment creation, "
-"lockfile synchronization (`uv.lock`), and test execution. Standard CI "
+"lock file synchronization (`uv.lock`), and test execution. Standard CI "
 "jobs execute `uv sync --locked --all-groups`, which validates only a "
 "single resolution point: `--resolution highest --prerelease disallow "
 "--fork-strategy fewest`."
@@ -57,7 +57,7 @@ msgstr ""
 #: ../../source/quality/dependency_matrix.md:20
 #: 61d0183e5db54c8aa02b14c390e3e929
 msgid ""
-"Relying solely on the default lockfile leaves three failure modes "
+"Relying solely on the default lock file leaves three failure modes "
 "untested:"
 msgstr ""
 
@@ -128,7 +128,7 @@ msgstr ""
 #: d9086c30f46d48719e9a4ee061dd7d35
 msgid ""
 "**Local Orchestrator**: Extend `tools/verify_quality.py` with native `uv`"
-" subprocess orchestration covering both the dependency resolution axis "
+" process orchestration covering both the dependency resolution axis "
 "(Issue [#427](https://github.com/bdperkin/findfmt/issues/427)) and the "
 "multi-Python interpreter axis (Issue "
 "[#349](https://github.com/bdperkin/findfmt/issues/349)), adding zero "
@@ -181,7 +181,9 @@ msgid "`.github/workflows/*.yml`"
 msgstr ""
 
 #: ../../source/quality/dependency_matrix.md e468b3f91f2f4ee2afd1aed164682158
-msgid "**Native**: parallel VMs, step summaries, and `setup-uv` cache sharing."
+msgid ""
+"**Native**: parallel virtual machines, step summaries, and `setup-uv` "
+"cache reuse."
 msgstr ""
 
 #: ../../source/quality/dependency_matrix.md 97595a57bbbc4568887b52888239b113
@@ -265,7 +267,7 @@ msgid "Requires `nox-to-gha` action or duplicate matrix definitions in YAML."
 msgstr ""
 
 #: ../../source/quality/dependency_matrix.md 77d689b174d34c228349e0fd85d3553b
-msgid "Good imperative parameterization via `@nox.parametrize`."
+msgid "Good imperative matrix generation via `@nox.parametrize`."
 msgstr ""
 
 #: ../../source/quality/dependency_matrix.md b661866011624fa28a3ee55c5e3a09c7
@@ -384,7 +386,7 @@ msgstr ""
 #: ../../source/quality/dependency_matrix.md:91
 #: 2b1eb225f4e34df8a22279bcd76b1e67
 msgid ""
-"The unpruned Cartesian product yields $3 \\\\times 5 \\\\times 2 = 30$ "
+"The full Cartesian product yields $3 \\\\times 5 \\\\times 2 = 30$ "
 "permutations per Python interpreter (150 combinations across all 5 "
 "supported Python versions)."
 msgstr ""
@@ -652,7 +654,7 @@ msgstr ""
 
 #: ../../source/quality/dependency_matrix.md:164
 #: 04ea0bf51a4c4dfcbd2ac29484e486ed
-msgid "4.2. Stage 2 — Baseline Lockfile Version Diffing"
+msgid "4.2. Stage 2 — Baseline Lock File Version Diffing"
 msgstr ""
 
 #: ../../source/quality/dependency_matrix.md:166

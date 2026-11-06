@@ -13,11 +13,11 @@ ______________________________________________________________________
 ### 1.1. Context & Problem Statement
 
 `findfmt` uses `hatchling` as its PEP 517 build backend in `pyproject.toml` and relies on `uv` for
-virtual environment creation, lockfile synchronization (`uv.lock`), and test execution. Standard CI
+virtual environment creation, lock file synchronization (`uv.lock`), and test execution. Standard CI
 jobs execute `uv sync --locked --all-groups`, which validates only a single resolution point:
 `--resolution highest --prerelease disallow --fork-strategy fewest`.
 
-Relying solely on the default lockfile leaves three failure modes untested:
+Relying solely on the default lock file leaves three failure modes untested:
 
 1. **Lower-Bound Drift**: Direct dependency floors declared in `pyproject.toml` (`identify>=2.6`,
    `pathspec>=1.0.1`, `pyyaml>=6.0.1`, `rich>=13.8`, `typer>=0.16`, `typing-extensions>=4`) can
@@ -40,7 +40,7 @@ Relying solely on the default lockfile leaves three failure modes untested:
   - **Scheduled Exhaustive Matrix**: 6-cell pruned matrix in
     `.github/workflows/dependency-matrix.yml` triggered nightly via `schedule` and on-demand via
     `workflow_dispatch` (Issue [#429](https://github.com/bdperkin/findfmt/issues/429)).
-- **Local Orchestrator**: Extend `tools/verify_quality.py` with native `uv` subprocess orchestration
+- **Local Orchestrator**: Extend `tools/verify_quality.py` with native `uv` process orchestration
   covering both the dependency resolution axis (Issue
   [#427](https://github.com/bdperkin/findfmt/issues/427)) and the multi-Python interpreter axis
   (Issue [#349](https://github.com/bdperkin/findfmt/issues/349)), adding zero external task-runner
@@ -53,14 +53,14 @@ ______________________________________________________________________
 Five orchestration mechanisms were evaluated across both the dependency resolution axis
 (`--resolution`, `--prerelease`, `--fork-strategy`) and the Python interpreter axis (`3.11`–`3.15`):
 
-| Orchestrator Candidate                         | Configuration Surface                              | CI Integration & Parallelism                                                  | Local Ergonomics & Caching                                                                 | Dependency & Config Overhead                                       | Verdict              |
-| :--------------------------------------------- | :------------------------------------------------- | :---------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------- |
-| **GitHub Actions `strategy.matrix`**           | `.github/workflows/*.yml`                          | **Native**: parallel VMs, step summaries, and `setup-uv` cache sharing.       | Not runnable locally without external container emulation.                                 | **Zero** extra packages; standard workflow YAML.                   | **Selected (CI)**    |
-| **Native `uv` in `tools/verify_quality.py`**   | `tools/verify_quality.py` + `pyproject.toml`       | Invoked directly by CI quality gate and smoke steps.                          | **High**: reuses local `uv` wheel cache and auto-skips or provisions missing interpreters. | **Zero** new dependencies or config files.                         | **Selected (Local)** |
-| **Hatch Matrix (`[tool.hatch.envs]`)**         | `pyproject.toml` (`[tool.hatch.envs.test.matrix]`) | Requires separate GHA matrix mapping to avoid serial execution on one runner. | Requires global `hatch` CLI (only `hatchling` is installed in `dev` group).                | Adds `hatch` CLI requirement and custom `uv pip` override scripts. | **Rejected**         |
-| **`nox` (`noxfile.py` with `uv` backend)**     | `noxfile.py`                                       | Requires `nox-to-gha` action or duplicate matrix definitions in YAML.         | Good imperative parameterization via `@nox.parametrize`.                                   | Adds `nox` dependency and a new top-level `noxfile.py`.            | **Rejected**         |
-| **`tox` + `tox-uv` (`[tool.tox]`)**            | `pyproject.toml` or `tox.ini`                      | Requires `tox-gh-actions` plugin to map factors to GHA jobs.                  | Fast virtualenv creation via `tox-uv`, but awkward factor syntax for `uv` flags.           | Adds `tox` and `tox-uv` dependencies; duplicates version lists.    | **Rejected**         |
-| **Command Runners (`Make`, `just`, `invoke`)** | `Makefile` / `justfile` / `tasks.py`               | No native environment or matrix lifecycle management.                         | Shell aliases only; must still delegate to `uv` or Python scripts.                         | Adds non-Python binary or task file without solving isolation.     | **Rejected**         |
+| Orchestrator Candidate                         | Configuration Surface                              | CI Integration & Parallelism                                                       | Local Ergonomics & Caching                                                                 | Dependency & Config Overhead                                       | Verdict              |
+| :--------------------------------------------- | :------------------------------------------------- | :--------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------- |
+| **GitHub Actions `strategy.matrix`**           | `.github/workflows/*.yml`                          | **Native**: parallel virtual machines, step summaries, and `setup-uv` cache reuse. | Not runnable locally without external container emulation.                                 | **Zero** extra packages; standard workflow YAML.                   | **Selected (CI)**    |
+| **Native `uv` in `tools/verify_quality.py`**   | `tools/verify_quality.py` + `pyproject.toml`       | Invoked directly by CI quality gate and smoke steps.                               | **High**: reuses local `uv` wheel cache and auto-skips or provisions missing interpreters. | **Zero** new dependencies or config files.                         | **Selected (Local)** |
+| **Hatch Matrix (`[tool.hatch.envs]`)**         | `pyproject.toml` (`[tool.hatch.envs.test.matrix]`) | Requires separate GHA matrix mapping to avoid serial execution on one runner.      | Requires global `hatch` CLI (only `hatchling` is installed in `dev` group).                | Adds `hatch` CLI requirement and custom `uv pip` override scripts. | **Rejected**         |
+| **`nox` (`noxfile.py` with `uv` backend)**     | `noxfile.py`                                       | Requires `nox-to-gha` action or duplicate matrix definitions in YAML.              | Good imperative matrix generation via `@nox.parametrize`.                                  | Adds `nox` dependency and a new top-level `noxfile.py`.            | **Rejected**         |
+| **`tox` + `tox-uv` (`[tool.tox]`)**            | `pyproject.toml` or `tox.ini`                      | Requires `tox-gh-actions` plugin to map factors to GHA jobs.                       | Fast virtualenv creation via `tox-uv`, but awkward factor syntax for `uv` flags.           | Adds `tox` and `tox-uv` dependencies; duplicates version lists.    | **Rejected**         |
+| **Command Runners (`Make`, `just`, `invoke`)** | `Makefile` / `justfile` / `tasks.py`               | No native environment or matrix lifecycle management.                              | Shell aliases only; must still delegate to `uv` or Python scripts.                         | Adds non-Python binary or task file without solving isolation.     | **Rejected**         |
 
 ### 2.1. Rationale for Hybrid GitHub Actions + `tools/verify_quality.py`
 
@@ -88,8 +88,8 @@ ______________________________________________________________________
   `if-necessary-or-explicit`
 - **`--fork-strategy`** (2 values): `fewest`, `requires-python`
 
-The unpruned Cartesian product yields $3 \\times 5 \\times 2 = 30$ permutations per Python
-interpreter (150 combinations across all 5 supported Python versions).
+The full Cartesian product yields $3 \\times 5 \\times 2 = 30$ permutations per Python interpreter
+(150 combinations across all 5 supported Python versions).
 
 ### 3.2. Pruning `--prerelease` Permutations
 
@@ -161,7 +161,7 @@ In GitHub Actions, this output is appended as a fenced Markdown block to `$GITHU
 under the failing cell heading
 (`### Dependency Tree (<resolution> / <prerelease> / <fork-strategy>)`).
 
-### 4.2. Stage 2 — Baseline Lockfile Version Diffing
+### 4.2. Stage 2 — Baseline Lock File Version Diffing
 
 To isolate which package version triggered the regression, the runner compares the failing
 environment's installed package list (`uv pip list --format json --python <env_path>`) against the
