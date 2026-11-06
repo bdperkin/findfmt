@@ -7,11 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-05
+
 ### Features
 
 - *(api)* Add optional keyword-only `on_error: Callable[[OSError], None] | None = None` callback to
   `find_files`, `traverse_directory`, `collect_directory_entries`, `has_matching_descendants`, and
   `yield_matching_items` (#320).
+- *(i18n)* Add `tools/validate_po_placeholders.py` and `--mask` / `--unmask` utilities to validate
+  and protect Python format placeholders, CLI flags, Rich markup tags, and ANSI escapes during AI
+  translation (#304).
 
 ### Bug Fixes
 
@@ -20,13 +25,32 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   accessible paths (#320).
 - *(api)* Raise `TraversalError` on negative `max_depth` or `file_limit` and `ParserError` when
   `--from-file` cannot read the input file (#320).
+- *(config)* Wrapper entry-point defaults (`findfiles`, `findfilefmt`, `findfilemime`, `findfmt0`,
+  `findshebang`, `findsummary`) no longer override values configured in `.findfmt.toml` or
+  `pyproject.toml` (#454).
+- *(format)* Enforce consistent broken-pipe (`SIGPIPE` / `BrokenPipeError`) exit codes across Rich
+  visual formatters and honor `--sort` and `--reverse` in `--tree`, `--format html`, and
+  `--format xml` (#341, #384).
+- *(format)* Encode `--cp437` (`-S`) and `--table-style cp437` box-drawing glyphs as CP437 bytes
+  (`0xB3`, `0xC4`, `0xC3`, `0xC0`, etc.) instead of Latin-1 code points that rendered as mojibake
+  (#343, #384).
 - *(format)* XML output keeps the `mtime` and `ctime` attributes for files whose timestamp is the
   Unix epoch (`0.0`) instead of dropping them (#513).
+
+### Documentation
+
+- *(cli)* Document the formal CLI exit-code contract (`0`, `1`, `2`, `130`, `141`) in the README,
+  CLI reference, and `--help-all` with an exhaustive test matrix (#369, #347).
+- *(i18n)* Add the comparative benchmark and evaluation guide for open-source Python gettext AI
+  translators (`gettext-translator`, `pytlai`, `auto-gettext-translator`, and LiteLLM/Ollama)
+  (#303).
 
 ### Changed
 
 - *(api)* `findfmt.cli.trap_cli_signals` is annotated as returning `Generator[None]` instead of
   `Iterator[None]`, which ty deprecates for `@contextmanager`. Runtime behavior is unchanged (#513).
+- *(traversal)* Remove unused internal `_load_active_specs` helper and test-only engine aliases
+  while preserving `findfmt.traversal.__all__` (#351).
 
 ## [1.1.0] - 2026-10-24
 
@@ -515,4 +539,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.0.1]: https://github.com/bdperkin/findfmt/compare/v1.0.0...v1.0.1
 [1.0.2]: https://github.com/bdperkin/findfmt/compare/v1.0.1...v1.0.2
 [1.1.0]: https://github.com/bdperkin/findfmt/compare/v1.0.2...v1.1.0
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.0...HEAD
+[1.1.1]: https://github.com/bdperkin/findfmt/compare/v1.1.0...v1.1.1
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.1...HEAD
