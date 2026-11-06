@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import io
+import os
+import shutil
 import sys
 
-if sys.version_info >= (3, 12):  # pragma: no cover
+if sys.version_info >= (3, 12):
     from typing import override
-else:  # pragma: no cover
+else:
     from typing_extensions import override
 
 import pytest
@@ -93,10 +95,29 @@ def test_is_color_enabled_tty_detection(monkeypatch: pytest.MonkeyPatch) -> None
     assert is_color_enabled(env={}) is True
 
 
-def test_get_terminal_height() -> None:
-    """Verify terminal height returns positive integer with fallback."""
+def test_get_terminal_height(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify terminal height returns positive integer with fallback on error or zero height."""
     height = get_terminal_height(fallback=30)
     assert height > 0
+
+    def _raise_os_error(*_args: object, **_kwargs: object) -> os.terminal_size:
+        raise OSError
+
+    monkeypatch.setattr(shutil, "get_terminal_size", _raise_os_error)
+    assert get_terminal_height(fallback=32) == 32
+
+    def _raise_value_error(*_args: object, **_kwargs: object) -> os.terminal_size:
+        raise ValueError
+
+    monkeypatch.setattr(shutil, "get_terminal_size", _raise_value_error)
+    assert get_terminal_height(fallback=40) == 40
+
+    monkeypatch.setattr(
+        shutil,
+        "get_terminal_size",
+        lambda *_args, **_kwargs: os.terminal_size((80, 0)),
+    )
+    assert get_terminal_height(fallback=28) == 28
 
 
 def test_should_use_pager_disabled() -> None:

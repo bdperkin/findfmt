@@ -286,3 +286,17 @@ def test_public_str_enums_stringify_to_value(enum_cls: type[enum.StrEnum]) -> No
         assert f"{member}" == member.value
         assert _format_toml_value(member) == f'"{member.value}"'
         assert enum_cls(member.value) is member
+
+
+def test_no_coverage_pragma_on_reachable_code() -> None:
+    """Verify no pragma: no cover annotations remain in src, tests, or tools (#353)."""
+    root = Path(__file__).resolve().parents[2]
+    pragma = re.compile(r"#\s*pragma:\s*no cover\b")
+    bad = [
+        f"{p.relative_to(root)}:{n}"
+        for top in ("src", "tests", "tools")
+        for p in sorted((root / top).rglob("*.py"))
+        for n, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1)
+        if pragma.search(line)
+    ]
+    assert not bad, f"Disallowed pragma: no cover found: {bad}"

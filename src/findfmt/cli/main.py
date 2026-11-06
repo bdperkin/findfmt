@@ -227,5 +227,5 @@ def findfmt(
     runner.execute_findfmt(**params)
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     app()

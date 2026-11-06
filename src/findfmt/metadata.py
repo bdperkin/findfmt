@@ -16,12 +16,12 @@ if TYPE_CHECKING:
 
 try:
     import pwd
-except ImportError:  # pragma: no cover
+except ImportError:
     pwd = None  # type: ignore[assignment]
 
 try:
     import grp
-except ImportError:  # pragma: no cover
+except ImportError:
     grp = None  # type: ignore[assignment]
 
 __all__ = [

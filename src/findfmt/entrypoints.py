@@ -153,18 +153,18 @@ def _invoke_with_defaults(
     args_list = list(argv) if argv is not None else None
     try:
         with trap_cli_signals():
-            cmd.main(
-                args=args_list,
-                prog_name=info_name,
-                default_map=defaults,
-                obj={"argv": args_list if args_list is not None else list(sys.argv[1:])},
+            return int(
+                cmd.main(
+                    args=args_list,
+                    prog_name=info_name,
+                    default_map=defaults,
+                    obj={"argv": args_list if args_list is not None else list(sys.argv[1:])},
+                ),
             )
     except SystemExit as exc:
         return _handle_system_exit(exc)
     except typer.Exit as exc:
         return exc.exit_code
-
-    return 0  # pragma: no cover
 
 
 def main(argv: Sequence[str] | None = None) -> int:

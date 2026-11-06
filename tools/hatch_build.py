@@ -13,7 +13,7 @@ from typing import Any
 if sys.version_info >= (3, 12):
     from typing import override
 else:
-    from typing_extensions import override  # pragma: no cover
+    from typing_extensions import override
 
 from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 

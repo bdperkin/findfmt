@@ -7,9 +7,9 @@ import shutil
 import sys
 from typing import TYPE_CHECKING, TextIO
 
-if sys.version_info >= (3, 12):  # pragma: no cover
+if sys.version_info >= (3, 12):
     from typing import override
-else:  # pragma: no cover
+else:
     from typing_extensions import override
 
 from rich.console import Console
@@ -169,7 +169,7 @@ def get_terminal_height(fallback: int = 24) -> int:
     """
     try:
         height = shutil.get_terminal_size(fallback=(80, fallback)).lines
-    except (OSError, ValueError):  # pragma: no cover
+    except (OSError, ValueError):
         return fallback
     else:
         return height if height > 0 else fallback

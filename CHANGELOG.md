@@ -44,6 +44,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   matrix orchestration runners and defining the pruned 6-cell `uv` dependency resolution matrix and
   failure diagnostic pipeline (#426).
 
+### Changed
+
+- *(tests)* Eliminate all 53 `# pragma: no cover` annotations across `src/`, `tests/`, and `tools/`,
+  remove the unreachable trailing `return 0` in `entrypoints.py`, add unit tests covering
+  `terminal.py` height fallbacks, `__main__` execution (`findfmt.__main__` and `findfmt.cli.main`),
+  `< 3.12` / `>= 3.12` `override` version gates, and POSIX `ImportError` (`pwd`, `grp`, `resource`)
+  shims, and enforce zero `# pragma: no cover` usage in `test_api_stability.py` (#353).
+
 ## [1.1.1] - 2026-11-05
 
 ### Features
