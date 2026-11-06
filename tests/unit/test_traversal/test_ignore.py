@@ -159,13 +159,20 @@ def test_load_ancestor_specs(tmp_path: Path) -> None:
     assert specs[1][0] == repo.resolve()
     assert specs[2][0] == sub.resolve()
 
-    # Outside git repository
+    # Outside git repository: parent .gitignore outside repo is not collected
     outside = tmp_path / "non_repo" / "child"
     outside.mkdir(parents=True)
     (outside.parent / ".gitignore").write_text("*.tmp\n", encoding="utf-8")
+    (outside / ".gitignore").write_text("*.local\n", encoding="utf-8")
     with patch("findfmt.traversal.ignore.find_git_repo_root", return_value=None):
         specs_outside = load_ancestor_specs(outside)
-        assert any(base == outside.parent.resolve() for base, _ in specs_outside)
+        assert not any(base == outside.parent.resolve() for base, _ in specs_outside)
+        assert any(base == outside.resolve() for base, _ in specs_outside)
+
+    # Unreachable git_root (e.g., mocked git_root not in resolved.parents)
+    with patch("findfmt.traversal.ignore.find_git_repo_root", return_value=tmp_path / "other"):
+        specs_unbounded = load_ancestor_specs(sub)
+        assert len(specs_unbounded) >= 1
 
     # OSError during root.resolve()
     with patch.object(Path, "resolve", side_effect=OSError("Error")):

@@ -2433,7 +2433,7 @@
   },
   "load_global_gitignore_spec": {
    "kind": "function",
-   "signature": "(spec_file: 'Path | None' = None) -> 'PathSpecType | None'"
+   "signature": "(spec_file: 'Path | None' = None, *, root: 'Path | None' = None) -> 'PathSpecType | None'"
   },
   "matches_filter": {
    "kind": "function",
@@ -2543,7 +2543,7 @@
   },
   "load_global_gitignore_spec": {
    "kind": "function",
-   "signature": "(spec_file: 'Path | None' = None) -> 'PathSpecType | None'"
+   "signature": "(spec_file: 'Path | None' = None, *, root: 'Path | None' = None) -> 'PathSpecType | None'"
   },
   "matches_filter": {
    "kind": "function",
@@ -2575,7 +2575,7 @@
   },
   "find_global_gitignore_path": {
    "kind": "function",
-   "signature": "() -> 'Path | None'"
+   "signature": "(root: 'Path | None' = None) -> 'Path | None'"
   },
   "is_path_ignored": {
    "kind": "function",
@@ -2603,7 +2603,7 @@
   },
   "load_global_gitignore_spec": {
    "kind": "function",
-   "signature": "(spec_file: 'Path | None' = None) -> 'PathSpecType | None'"
+   "signature": "(spec_file: 'Path | None' = None, *, root: 'Path | None' = None) -> 'PathSpecType | None'"
   },
   "load_spec_file": {
    "kind": "function",

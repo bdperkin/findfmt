@@ -7,6 +7,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Bug Fixes
+
+- *(traversal)* Resolve relative `root` paths in `traverse_directory` so `.gitignore` rules match
+  relative roots and subdirectories (#322).
+- *(traversal)* Align global and ancestor `.gitignore` discovery with Git: drop the `~/.gitignore`
+  fallback, run `git -C <root> config --get core.excludesFile`, and stop ancestor `.gitignore`
+  collection at the Git repository root (#323).
+- *(api)* Add optional `root: Path | None = None` parameter to `find_global_gitignore_path` and
+  `load_global_gitignore_spec` (#323).
+
 ## [1.1.1] - 2026-11-05
 
 ### Features
