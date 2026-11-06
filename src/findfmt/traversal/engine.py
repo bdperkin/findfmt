@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 import errno
 import os
 from pathlib import Path  # noqa: TC003
@@ -188,6 +189,10 @@ def traverse_directory(  # noqa: PLR0913
     """Recursively traverse a directory hierarchy honoring .gitignore, filters, and boundaries."""
     check_depth_limit(0, config.max_depth)
     check_file_limit(0, config.file_limit)
+    if base_root is None:
+        with contextlib.suppress(OSError, RuntimeError):
+            root = root.resolve()
+
     effective_base = base_root if base_root is not None else root
     active_matcher = matcher if matcher is not None else create_pattern_matcher(config)
     effective_dev = resolve_device(
