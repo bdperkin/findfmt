@@ -93,7 +93,7 @@ class OutputSink:
             self._unregister_atexit()
             self._close_stream()
             try:
-                os.replace(self.temp_path, self.target_path)  # noqa: PTH105
+                os.replace(self.temp_path, self.target_path)  # noqa: PTH105 - atomic file replace
             except OSError as e:
                 self._cleanup_temp()
                 typer.echo(
@@ -144,7 +144,7 @@ def _create_staging_file(target_path: Path) -> tuple[TextIO, Path]:
 
     target_dir = target_path.parent
     # Temporary staging file in the destination directory guarantees atomic replace
-    raw_temp = tempfile.NamedTemporaryFile(  # noqa: SIM115
+    raw_temp = tempfile.NamedTemporaryFile(  # noqa: SIM115 - staging file closed on commit
         mode="w",
         encoding="utf-8",
         errors="surrogateescape",

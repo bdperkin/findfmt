@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 __all__ = ["RichTreeFormatter"]
 
 
-def _format_file_label(  # noqa: PLR0913
+def _format_file_label(  # noqa: PLR0913 - wide CLI/config signature
     file_info: FileInfo,
     filename: str,
     *,
@@ -117,7 +117,7 @@ def _record_dir_disk_paths(
             dir_disk_paths[sub_t] = file_info.path.parents[parent_idx]
 
 
-def _traverse_tree_node(  # noqa: PLR0913
+def _traverse_tree_node(  # noqa: PLR0913 - wide CLI/config signature
     tree: Tree,
     dir_nodes: dict[tuple[str, ...], Tree],
     dir_parts: tuple[str, ...],
@@ -204,7 +204,7 @@ def _compute_tree_dir_sizes(
 class RichTreeFormatter(Formatter):
     """Hierarchical directory tree serializer using Rich."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913 - wide CLI/config signature
         self,
         *,
         absolute: bool = False,

@@ -18,7 +18,7 @@ _src_dir = Path(__file__).resolve().parent.parent / "src"
 if _src_dir.is_dir() and str(_src_dir) not in sys.path:
     sys.path.insert(0, str(_src_dir))
 
-from findfmt.classifier import classify_file  # noqa: E402
+from findfmt.classifier import classify_file  # noqa: E402 - import after sys.path setup
 
 
 @dataclass(frozen=True)

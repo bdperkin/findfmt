@@ -13,9 +13,9 @@ try:
     from tools.hatch_build import compile_po_to_mo
 except ImportError:
     try:
-        from hatch_build import compile_po_to_mo  # type: ignore[no-redef]
+        from hatch_build import compile_po_to_mo  # type: ignore[no-redef] - local import fallback
     except ImportError:
-        compile_po_to_mo = None  # type: ignore[assignment]
+        compile_po_to_mo = None  # type: ignore[assignment] - optional dependency fallback
 
 try:
     from tools.i18n_prompts import (
@@ -40,7 +40,7 @@ try:
         validate_po_file,
     )
 except ImportError:
-    from i18n_prompts import (  # type: ignore[no-redef]
+    from i18n_prompts import (  # type: ignore[no-redef] - standalone script import shim
         CLI_GLOSSARY,
         PLURAL_RULE_SPECS,
         build_plural_prompt,
@@ -50,7 +50,7 @@ except ImportError:
         parse_plural_forms_header,
         validate_cli_flags_preserved,
     )
-    from i18n_validation import (  # type: ignore[no-redef]
+    from i18n_validation import (  # type: ignore[no-redef] - standalone script import shim
         extract_brace_placeholders,
         extract_printf_placeholders,
         extract_rich_tags,
@@ -383,7 +383,7 @@ def compile_catalogs(
     try:
         for po_path in po_files:
             compile_po_to_mo(po_path, po_path.with_suffix(".mo"))
-    except Exception as err:  # noqa: BLE001
+    except Exception as err:  # noqa: BLE001 - CLI top-level error boundary
         sys.stderr.write(f"Error compiling catalogs: {err}\n")
         return 1
 

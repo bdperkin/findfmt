@@ -8,7 +8,7 @@ from dataclasses import dataclass
 try:
     from tools.i18n_validation import mask_placeholders
 except ImportError:
-    from i18n_validation import mask_placeholders  # type: ignore[no-redef]
+    from i18n_validation import mask_placeholders  # type: ignore[no-redef] - local import fallback
 
 __all__ = [
     "CLI_GLOSSARY",

@@ -75,7 +75,7 @@ def test_extract_raw_args_caller_frames() -> None:
     frame_ctx.obj = {"argv": ["--from-frame-ctx"]}
 
     def frame_helper_ctx() -> list[str]:
-        ctx = frame_ctx  # noqa: F841
+        ctx = frame_ctx  # noqa: F841 - bound for frame.f_locals check
         return _extract_raw_args()
 
     assert frame_helper_ctx() == ["--from-frame-ctx"]
@@ -84,20 +84,20 @@ def test_extract_raw_args_caller_frames() -> None:
     frame_ctx_no_argv.obj = {"no_argv": 1}
 
     def frame_helper_no_argv() -> list[str]:
-        ctx = frame_ctx_no_argv  # noqa: F841
-        argv = ("--from-argv",)  # noqa: F841
+        ctx = frame_ctx_no_argv  # noqa: F841 - bound for frame.f_locals check
+        argv = ("--from-argv",)  # noqa: F841 - bound for frame.f_locals check
         return _extract_raw_args()
 
     assert frame_helper_no_argv() == ["--from-argv"]
 
     def frame_helper_argv() -> list[str]:
-        argv = ("--frame-argv-1", "--frame-argv-2")  # noqa: F841
+        argv = ("--frame-argv-1", "--frame-argv-2")  # noqa: F841 - bound for frame.f_locals check
         return _extract_raw_args()
 
     assert frame_helper_argv() == ["--frame-argv-1", "--frame-argv-2"]
 
     def frame_helper_args_list() -> list[str]:
-        args_list = ["--frame-args-list"]  # noqa: F841
+        args_list = ["--frame-args-list"]  # noqa: F841 - bound for frame.f_locals check
         return _extract_raw_args()
 
     assert frame_helper_args_list() == ["--frame-args-list"]

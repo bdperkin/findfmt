@@ -155,7 +155,7 @@ def _describe(obj: object) -> dict[str, Any]:
 
 def surface() -> dict[str, dict[str, Any]]:
     """Return ``{module: {exported name: description}}`` for every public findfmt module."""
-    import findfmt  # noqa: PLC0415
+    import findfmt  # noqa: PLC0415 - scoped lazy test/tool import
 
     modules = [
         "findfmt",

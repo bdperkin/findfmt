@@ -53,7 +53,7 @@ from findfmt.traversal.engine import find_files
 try:
     import resource
 except ImportError:
-    resource = None  # type: ignore[assignment]
+    resource = None  # type: ignore[assignment] - optional dependency fallback
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
@@ -107,7 +107,7 @@ def get_peak_rss_mb() -> float:
         return 0.0
 
 
-def _run_single_traversal(  # noqa: PLR0913
+def _run_single_traversal(  # noqa: PLR0913 - wide CLI/config signature
     target_path: Path,
     tier_name: str,
     *,
@@ -179,7 +179,7 @@ def _run_single_traversal(  # noqa: PLR0913
     )
 
 
-def measure_traversal(  # noqa: PLR0913
+def measure_traversal(  # noqa: PLR0913 - wide CLI/config signature
     target_path: Path,
     tier_name: str,
     *,

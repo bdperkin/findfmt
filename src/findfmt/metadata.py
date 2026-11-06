@@ -17,12 +17,12 @@ if TYPE_CHECKING:
 try:
     import pwd
 except ImportError:
-    pwd = None  # type: ignore[assignment]
+    pwd = None  # type: ignore[assignment] - optional dependency fallback
 
 try:
     import grp
 except ImportError:
-    grp = None  # type: ignore[assignment]
+    grp = None  # type: ignore[assignment] - optional dependency fallback
 
 __all__ = [
     "clear_metadata_cache",
@@ -34,7 +34,7 @@ __all__ = [
 ]
 
 
-def format_metadata_parts(  # noqa: PLR0913
+def format_metadata_parts(  # noqa: PLR0913 - wide CLI/config signature
     file_info: FileInfo,
     *,
     show_inodes: bool = False,

@@ -371,6 +371,6 @@ def test_translatable_units_are_exactly_the_produced_units() -> None:
     #352 moved base-1024 sizes to IEC labels, leaving ``KB`` and single-letter units translatable
     but never produced.
     """
-    from findfmt import sizes  # noqa: PLC0415
+    from findfmt import sizes  # noqa: PLC0415 - scoped lazy test/tool import
 
     assert set(sizes._TRANSLATABLE_UNITS) == set(sizes.BINARY_UNITS) | set(sizes.SI_UNITS)  # noqa: SLF001

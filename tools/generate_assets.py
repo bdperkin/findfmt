@@ -274,7 +274,7 @@ def main(argv: list[str] | None = None) -> int:
             source_preview=args.preview_svg,
             source_icon=args.icon_svg,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001 - CLI top-level error boundary
         sys.stderr.write(f"Asset generation failed: {exc}\n")
         return 1
 

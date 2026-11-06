@@ -276,3 +276,37 @@ exclude = [
 ]
 overrides.python = { warning = 300, error = 500 }
 overrides.yaml = { warning = 150, error = 300 }
+
+[tool.suppression-auditor]
+strict = true
+include = [
+  "src/**/*.py",
+  "tests/**/*.py",
+  "tools/**/*.py",
+]
+ignore_paths = [
+  "dist/**",
+  "build/**",
+  "vendor/**",
+  ".venv/**",
+  ".git/**",
+  "__pycache__/**",
+]
+allowed = [
+  { file = "tests/integration/test_security_hardening.py", line = 29, code = "noqa: SLF001", reason = "White-box verification of internal ANSI escape regex" },
+  { file = "tests/integration/test_security_hardening.py", line = 31, code = "noqa: SLF001", reason = "White-box ReDoS stress test on internal C1-OSC regex" },
+  { file = "tests/integration/test_security_hardening.py", line = 35, code = "noqa: SLF001", reason = "Verify terminal module shares canonical ANSI regex instance" },
+  { file = "tests/integration/test_security_hardening.py", line = 36, code = "noqa: SLF001", reason = "Verify hyperlinks module shares canonical ANSI regex instance" },
+  { file = "tests/unit/test_api_surface.py", line = 182, code = "noqa: SLF001", reason = "White-box unit test for internal _qualified_name helper" },
+  { file = "tests/unit/test_api_surface.py", line = 189, code = "noqa: UP045", reason = "Intentionally test legacy typing.Optional[Path] normalization" },
+  { file = "tests/unit/test_formatters/test_non_utf8.py", line = 179, code = "noqa: SLF001", reason = "White-box unit test for internal _clean_val surrogate handling" },
+  { file = "tests/unit/test_formatters/test_non_utf8.py", line = 180, code = "noqa: SLF001", reason = "White-box unit test for internal _clean_val control-char preservation" },
+  { file = "tests/unit/test_i18n_localization.py", line = 49, code = "type: ignore[assignment]", reason = "Monkeypatch stdlib locale.format_string with MagicMock in test" },
+  { file = "tests/unit/test_i18n_localization.py", line = 53, code = "type: ignore[assignment]", reason = "Restore original stdlib locale.format_string function after test" },
+  { file = "tests/unit/test_security/test_filename_sanitization.py", line = 362, code = "noqa: SLF001", reason = "White-box stress test on internal _ANSI_ESCAPE_RE pattern" },
+  { file = "tests/unit/test_security/test_filename_sanitization.py", line = 368, code = "noqa: SLF001", reason = "White-box test on interspersed C1-OSC sequences" },
+  { file = "tests/unit/test_security/test_filename_sanitization.py", line = 372, code = "noqa: SLF001", reason = "White-box test on terminated C1-OSC sequence matching" },
+  { file = "tests/unit/test_security/test_filename_sanitization.py", line = 383, code = "noqa: SLF001", reason = "Verify terminal._ANSI_REGEX aliases strings._ANSI_ESCAPE_RE" },
+  { file = "tests/unit/test_security/test_filename_sanitization.py", line = 384, code = "noqa: SLF001", reason = "Verify hyperlinks._ESCAPE_SEQ_RE aliases strings._ANSI_ESCAPE_RE" },
+  { file = "tests/unit/test_sizes.py", line = 376, code = "noqa: SLF001", reason = "Verify internal _TRANSLATABLE_UNITS covers all binary and SI units" },
+]

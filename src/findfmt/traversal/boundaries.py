@@ -72,7 +72,7 @@ def should_skip_dir(dir_name: str, *, include_hidden: bool) -> bool:
     return dir_name == ".git" or bool(not include_hidden and dir_name.startswith("."))
 
 
-def _is_entry_excluded(  # noqa: PLR0913
+def _is_entry_excluded(  # noqa: PLR0913 - wide CLI/config signature
     entry_path: Path,
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -92,7 +92,7 @@ def _is_entry_excluded(  # noqa: PLR0913
     return bool(matcher and matcher.should_exclude(entry_path, is_dir=is_dir, base_root=base_root))
 
 
-def filter_directory_entry(  # noqa: PLR0913
+def filter_directory_entry(  # noqa: PLR0913 - wide CLI/config signature
     entry: os.DirEntry[str],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -164,7 +164,7 @@ def _can_skip_entry_by_tags(
     return can_skip_file_by_tags(filename, config, is_executable=is_exec)
 
 
-def _inspect_entries(  # noqa: PLR0913
+def _inspect_entries(  # noqa: PLR0913 - wide CLI/config signature
     entries: Sequence[os.DirEntry[str]],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -244,7 +244,7 @@ def _scan_sorted_entries(
         return None
 
 
-def _has_matching_in_subdirs(  # noqa: PLR0913
+def _has_matching_in_subdirs(  # noqa: PLR0913 - wide CLI/config signature
     subdirs: Sequence[Path],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -287,7 +287,7 @@ def _has_matching_in_subdirs(  # noqa: PLR0913
     return False
 
 
-def _eval_descendants(  # noqa: PLR0913
+def _eval_descendants(  # noqa: PLR0913 - wide CLI/config signature
     entries: Sequence[os.DirEntry[str]],
     directory: Path,
     config: TraversalConfig,
@@ -334,7 +334,7 @@ def _eval_descendants(  # noqa: PLR0913
     )
 
 
-def has_matching_descendants(  # noqa: PLR0913
+def has_matching_descendants(  # noqa: PLR0913 - wide CLI/config signature
     directory: Path,
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -388,7 +388,7 @@ def has_matching_descendants(  # noqa: PLR0913
     return result
 
 
-def _should_skip_dir_prune(  # noqa: PLR0913
+def _should_skip_dir_prune(  # noqa: PLR0913 - wide CLI/config signature
     path: Path,
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -420,7 +420,7 @@ def _should_skip_dir_prune(  # noqa: PLR0913
     )
 
 
-def _can_skip_candidate_file(  # noqa: PLR0913
+def _can_skip_candidate_file(  # noqa: PLR0913 - wide CLI/config signature
     path: Path,
     entry: os.DirEntry[str] | None,
     config: TraversalConfig,
@@ -438,7 +438,7 @@ def _can_skip_candidate_file(  # noqa: PLR0913
     return _can_skip_entry_by_tags(entry, config, filename=path.name)
 
 
-def yield_matching_items(  # noqa: PLR0913
+def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
     targets: Sequence[Path | tuple[Path, os.DirEntry[str]]],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],

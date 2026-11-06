@@ -95,7 +95,7 @@ def format_summary_panel(
 class RichTableFormatter(Formatter):
     """Rich visual table serializer supporting customizable borders and tag badges."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913 - wide CLI/config signature
         self,
         *,
         absolute: bool = False,

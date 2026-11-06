@@ -210,7 +210,7 @@ def should_use_pager(
 class PagerController:
     """Controller for interactive terminal paging and TTY/color handling."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913 - wide CLI/config signature
         self,
         *,
         pager: bool | None = None,

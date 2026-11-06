@@ -52,7 +52,7 @@ def get_git_version() -> str | None:
         return None
 
     try:
-        proc = subprocess.run(  # noqa: S603
+        proc = subprocess.run(  # noqa: S603 - vetted executable args list
             [git_path, "--version"],
             capture_output=True,
             text=True,

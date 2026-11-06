@@ -5,7 +5,7 @@ from __future__ import annotations
 import io
 import sys
 from collections import Counter
-from pathlib import Path  # noqa: TC003
+from pathlib import Path  # noqa: TC003 - runtime signature introspection
 from typing import TYPE_CHECKING, TextIO
 
 import typer
@@ -36,7 +36,7 @@ def _is_stream_tty(stream: TextIO) -> bool:
         return False
 
 
-def _deliver_output(  # noqa: PLR0913
+def _deliver_output(  # noqa: PLR0913 - wide CLI/config signature
     formatter: Formatter,
     files: Iterable[FileInfo],
     pager_ctrl: PagerController,
@@ -105,7 +105,7 @@ def _resolve_effective_format(
     return output_format
 
 
-def _append_html_kwargs(  # noqa: PLR0913
+def _append_html_kwargs(  # noqa: PLR0913 - wide CLI/config signature
     kwargs: dict[str, object],
     config: TraversalConfig,
     *,
@@ -123,7 +123,7 @@ def _append_html_kwargs(  # noqa: PLR0913
     kwargs["no_links"] = no_links or config.no_links
 
 
-def _build_formatter_kwargs(  # noqa: PLR0913
+def _build_formatter_kwargs(  # noqa: PLR0913 - wide CLI/config signature
     config: TraversalConfig,
     *,
     effective_format: OutputFormat,
@@ -196,7 +196,7 @@ def _build_formatter_kwargs(  # noqa: PLR0913
     return kwargs
 
 
-def execute_findfmt(  # noqa: PLR0913
+def execute_findfmt(  # noqa: PLR0913 - wide CLI/config signature
     *,
     paths: list[Path] | None,
     tags: list[str] | None,

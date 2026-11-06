@@ -51,6 +51,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `terminal.py` height fallbacks, `__main__` execution (`findfmt.__main__` and `findfmt.cli.main`),
   `< 3.12` / `>= 3.12` `override` version gates, and POSIX `ImportError` (`pwd`, `grp`, `resource`)
   shims, and enforce zero `# pragma: no cover` usage in `test_api_stability.py` (#353).
+- *(lint)* Add `tools/suppression_auditor.py`, `[tool.suppression-auditor]` configuration in
+  `pyproject.toml`, and the `suppression-audit` pre-commit hook to audit and enforce justification
+  for all inline linter and type-checker suppression directives across `src/`, `tests/`, and
+  `tools/` (#540).
 
 ## [1.1.1] - 2026-11-05
 

@@ -10,15 +10,9 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-
-# Ensure project root is in sys.path
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-import tools.hatch_build  # noqa: E402
-import tools.i18n  # noqa: E402
-from tools.hatch_build import (  # noqa: E402
+import tools.hatch_build
+import tools.i18n
+from tools.hatch_build import (
     CatalogBuildHook,
     _compile_po_pure_python,
     _generate_mo_bytes,
@@ -26,7 +20,7 @@ from tools.hatch_build import (  # noqa: E402
     _unescape_po_str,
     compile_po_to_mo,
 )
-from tools.i18n import (  # noqa: E402
+from tools.i18n import (
     _get_working_dir,
     _sanitize_po_locations,
     _to_rel_path_str,
@@ -37,7 +31,9 @@ from tools.i18n import (  # noqa: E402
     update_catalogs,
 )
 
-from findfmt.i18n import _, override_locale  # noqa: E402
+from findfmt.i18n import _, override_locale
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_unescape_po_str() -> None:

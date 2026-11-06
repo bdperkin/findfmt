@@ -169,7 +169,7 @@ def test_write_stream_safe_no_buffer_reraises() -> None:
 def test_xml_formatter_clean_val_none() -> None:
     """Verify XmlFormatter._clean_val handles None input cleanly."""
     fmt = XmlFormatter()
-    assert fmt._clean_val(None) is None  # noqa: SLF001
+    assert fmt._clean_val(None) is None  # noqa: SLF001 - white-box internal unit test
 
 
 def test_xml_formatter_literal_masks_surrogates() -> None:

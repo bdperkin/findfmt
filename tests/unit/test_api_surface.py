@@ -109,13 +109,13 @@ def test_describe_uninspectable_signature(monkeypatch: pytest.MonkeyPatch) -> No
         "kind": "function",
         "signature": "(iterable, value=None, /)",
     }
-    assert api_surface._signature(object()) == ""  # noqa: SLF001
+    assert api_surface._signature(object()) == ""  # noqa: SLF001 - white-box internal unit test
 
     def broken() -> None:
         """Callable whose signature metadata cannot be read."""
 
     setattr(broken, "__signature__", 42)  # noqa: B010 - simulate unreadable metadata
-    assert api_surface._signature(broken) == ""  # noqa: SLF001
+    assert api_surface._signature(broken) == ""  # noqa: SLF001 - white-box internal unit test
 
 
 def test_main_prints_and_writes(
@@ -136,7 +136,7 @@ def test_main_prints_and_writes(
 
 def test_surface_skips_modules_without_all(monkeypatch: pytest.MonkeyPatch) -> None:
     """Modules that do not declare ``__all__`` contribute no public names."""
-    import findfmt  # noqa: PLC0415
+    import findfmt  # noqa: PLC0415 - scoped lazy test/tool import
 
     fake = types.ModuleType("findfmt.fake")
     infos = [
@@ -184,7 +184,7 @@ def test_type_names_are_platform_and_version_stable(
 
 def test_type_expressions_are_built_from_their_parts() -> None:
     """Unions, generics, and None render from canonical parts rather than version-specific reprs."""
-    type_name = api_surface._type_name  # noqa: SLF001
+    type_name = api_surface._type_name  # noqa: SLF001 - white-box internal unit test
     assert type_name(Path | None) == "pathlib.Path | None"
     assert type_name(typing.Optional[Path]) == "pathlib.Path | None"  # noqa: UP045
     assert type_name(list[Path]) == "list[pathlib.Path]"

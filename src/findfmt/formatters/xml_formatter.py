@@ -104,7 +104,7 @@ def _ensure_dir_path(
 class XmlFormatter(Formatter):
     """Hierarchical XML document serializer utilizing ElementTree."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913 - wide CLI/config signature
         self,
         *,
         absolute: bool = False,
