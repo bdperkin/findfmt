@@ -7,6 +7,7 @@ import struct
 from pathlib import Path
 
 import pytest
+from tools.i18n_validation import parse_po_catalog
 
 from findfmt.i18n import (
     _,
@@ -315,7 +316,7 @@ def test_cjk_and_indonesian_single_form_plural_logic(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize(
-    ("rule_name", "header", "forms", "expected_indices"),
+    ("rule_name", "header", "forms", "expected_groups"),
     [
         (
             "polish_3_form",
@@ -324,73 +325,24 @@ def test_cjk_and_indonesian_single_form_plural_logic(tmp_path: Path) -> None:
                 "n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
             ),
             ["plik", "pliki", "plikow"],
-            {
-                1: 0,
-                2: 1,
-                3: 1,
-                4: 1,
-                22: 1,
-                24: 1,
-                102: 1,
-                0: 2,
-                5: 2,
-                10: 2,
-                11: 2,
-                19: 2,
-                20: 2,
-                21: 2,
-                25: 2,
-                100: 2,
-                101: 2,
-            },
+            (((1,), 0), ((2, 3, 4, 22, 24, 102), 1), ((0, 5, 10, 11, 19, 20, 21, 25, 100, 101), 2)),
         ),
         (
             "czech_3_form",
             "nplurals=3; plural=(n==1 ? 0 : (n>=2 && n<=4) ? 1 : 2);",
             ["soubor", "soubory", "souboru"],
-            {
-                1: 0,
-                2: 1,
-                3: 1,
-                4: 1,
-                0: 2,
-                5: 2,
-                10: 2,
-                11: 2,
-                19: 2,
-                20: 2,
-                21: 2,
-                22: 2,
-                24: 2,
-                100: 2,
-                101: 2,
-            },
+            (((1,), 0), ((2, 3, 4), 1), ((0, 5, 10, 11, 19, 20, 21, 22, 24, 100, 101), 2)),
         ),
         (
             "slovenian_4_form",
             "nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3);",
             ["ena", "dve", "tri", "ostalo"],
-            {
-                1: 0,
-                101: 0,
-                2: 1,
-                102: 1,
-                3: 2,
-                4: 2,
-                103: 2,
-                104: 2,
-                0: 3,
-                5: 3,
-                10: 3,
-                11: 3,
-                19: 3,
-                20: 3,
-                21: 3,
-                22: 3,
-                24: 3,
-                100: 3,
-                105: 3,
-            },
+            (
+                ((1, 101), 0),
+                ((2, 102), 1),
+                ((3, 4, 103, 104), 2),
+                ((0, 5, 10, 11, 19, 20, 21, 22, 24, 100, 105), 3),
+            ),
         ),
     ],
 )
@@ -399,14 +351,14 @@ def test_extended_plural_families_boundary_matrix(
     rule_name: str,
     header: str,
     forms: list[str],
-    expected_indices: dict[int, int],
+    expected_groups: tuple[tuple[tuple[int, ...], int], ...],
 ) -> None:
     """Verify boundary values on Polish, Czech, and Slovenian plural families."""
     _create_plural_catalog(tmp_path, rule_name, header, forms)
     with override_locale(rule_name, localedir=tmp_path):
-        for n, expected_idx in expected_indices.items():
-            expected_str = forms[expected_idx]
-            assert ngettext("file", "files", n) == expected_str
+        for counts, expected_idx in expected_groups:
+            for n in counts:
+                assert ngettext("file", "files", n) == forms[expected_idx]
 
 
 def test_real_findfmt_catalogs_pluralization() -> None:
@@ -469,3 +421,58 @@ def test_english_canonical_catalog_runtime() -> None:
             assert ngettext("file", "files", n) == "files"
 
         assert ngettext("file", "files", 1) == "file"
+
+
+def test_spanish_canonical_catalog_runtime(tmp_path: Path) -> None:
+    """Verify Spanish (es) catalog coverage, gender agreement, inverted punctuation, and plurals."""
+    es_po_path = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "findfmt"
+        / "locale"
+        / "es"
+        / "LC_MESSAGES"
+        / "findfmt.po"
+    )
+    entries = parse_po_catalog(es_po_path.read_text(encoding="utf-8"))
+    assert len(entries) >= 145
+    assert all(e.msgstrs and all(bool(s) for s in e.msgstrs) for e in entries)
+
+    with override_locale("es") as loc:
+        assert loc == "es"
+        assert get_current_locale() == "es"
+        trans = get_current_translation()
+        assert isinstance(trans, gettext.GNUTranslations)
+
+        # Gender agreement in diagnostics (identify -> masculino, Git -> masculino, Config -> fem.)
+        assert _("not installed") == "no instalado"
+        assert _("not found") == "no encontrado"
+        assert _("none") == "ninguna"
+
+        # Inverted exclamation marks in Spanish error reporting
+        err_msg = _("Error: Cannot specify both --dirsfirst and --filesfirst.")
+        assert err_msg.startswith("¡Error:")
+        assert err_msg.endswith("!")
+
+        # Pluralization rules: nplurals=2; plural=(n != 1);
+        sg = "[bold]Matched file:[/] [cyan]{count}[/]"
+        pl = "[bold]Matched files:[/] [cyan]{count}[/]"
+        assert ngettext(sg, pl, 1) == "[bold]Archivo coincidente:[/] [cyan]{count}[/]"
+        for n in (0, 2, 5, 100):
+            assert ngettext(sg, pl, n) == "[bold]Archivos coincidentes:[/] [cyan]{count}[/]"
+
+    # Verify inverted question and exclamation marks (¿, ¡) in custom error catalog
+    mo_dir = tmp_path / "es" / "LC_MESSAGES"
+    mo_dir.mkdir(parents=True, exist_ok=True)
+    (mo_dir / "findfmt.mo").write_bytes(
+        _generate_mo_bytes(
+            {
+                "": "Content-Type: text/plain; charset=UTF-8\n",
+                "Retry operation?": "¿Reintentar la operación?",
+                "Operation failed!": "¡Falló la operación!",
+            },
+        ),
+    )
+    with override_locale("es_ES.UTF-8", localedir=tmp_path):
+        assert _("Retry operation?") == "¿Reintentar la operación?"
+        assert _("Operation failed!") == "¡Falló la operación!"

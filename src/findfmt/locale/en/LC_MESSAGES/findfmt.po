@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-10-26 20:20-0400\n"
+"POT-Creation-Date: 2026-11-05 20:17-0500\n"
 "PO-Revision-Date: 2026-10-21 11:38-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -527,6 +527,8 @@ msgid ""
 "Prefix formula trigger characters (=, +, -, @, TAB, CR) in CSV/TSV cells "
 "with a single quote to prevent spreadsheet formula injection."
 msgstr ""
+"Prefix formula trigger characters (=, +, -, @, TAB, CR) in CSV/TSV cells "
+"with a single quote to prevent spreadsheet formula injection."
 
 #: src/findfmt/cli/help.py:174
 msgid "Enable or disable interactive paging (defaults to auto-paging on TTY)."
@@ -586,7 +588,7 @@ msgstr "Print summary match statistics to stderr."
 
 #: src/findfmt/cli/help.py:194
 msgid "Exit with status code 1 if no matching files are found."
-msgstr ""
+msgstr "Exit with status code 1 if no matching files are found."
 
 #: src/findfmt/cli/help.py:195
 msgid ""

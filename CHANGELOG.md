@@ -7,6 +7,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Features
+
+- *(i18n)* Expand Spanish (`es`) gettext message catalog to 100% coverage and localize documentation
+  index (#221).
+
 ### Bug Fixes
 
 - *(traversal)* Resolve relative `root` paths in `traverse_directory` so `.gitignore` rules match
