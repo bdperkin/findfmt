@@ -6,6 +6,7 @@ import ast
 import enum
 import importlib
 import re
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -300,3 +301,28 @@ def test_no_coverage_pragma_on_reachable_code() -> None:
         if pragma.search(line)
     ]
     assert not bad, f"Disallowed pragma: no cover found: {bad}"
+
+
+def test_declared_minimums_match_lockfile_floor() -> None:
+    """Verify declared pyproject.toml dependency minimums are >= bisected verified floors (#325)."""
+    pyproject_path = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    with pyproject_path.open("rb") as f:
+        data = tomllib.load(f)
+
+    verified_floors = {
+        "identify": (2, 6),
+        "pathspec": (1, 0, 1),
+        "pyyaml": (6, 0, 1),
+        "rich": (13, 8),
+        "typer": (0, 16),
+        "typing-extensions": (4, 4),
+    }
+
+    declared: dict[str, tuple[int, ...]] = {}
+    for spec in data["project"]["dependencies"]:
+        pkg, ver = spec.split(";")[0].strip().split(">=", 1)
+        declared[pkg.strip()] = tuple(int(part) for part in ver.strip().split("."))
+
+    assert set(declared) == set(verified_floors)
+    for pkg, floor in verified_floors.items():
+        assert declared[pkg] >= floor, f"{pkg} minimum {declared[pkg]} is below floor {floor}"

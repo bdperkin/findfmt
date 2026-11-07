@@ -20,7 +20,7 @@ jobs execute `uv sync --locked --all-groups`, which validates only a single reso
 Relying solely on the default lock file leaves three failure modes untested:
 
 1. **Lower-Bound Drift**: Direct dependency floors declared in `pyproject.toml` (`identify>=2.6`,
-   `pathspec>=1.0.1`, `pyyaml>=6.0.1`, `rich>=13.8`, `typer>=0.16`, `typing-extensions>=4`) can
+   `pathspec>=1.0.1`, `pyyaml>=6.0.1`, `rich>=13.8`, `typer>=0.16`, `typing-extensions>=4.4`) can
    silently bit-rot when new code relies on features added in later minor releases.
 2. **Upstream Pre-Release Breakages**: Upcoming alpha, beta, or release-candidate versions of direct
    or transitive dependencies (`click`, `rich`, `typer`, `pathspec`, `pytest`) can introduce
@@ -118,7 +118,7 @@ pre-release specifiers (such as `>=1.0a1` or `>=2.0.0rc1`):
 resolver splits resolution forks across disjoint Python version ranges:
 
 - When resolving into a single target interpreter environment (`uv pip install --python <env>`),
-  environment markers (`python_version < '3.12'` for `typing-extensions>=4`) evaluate to a fixed
+  environment markers (`python_version < '3.12'` for `typing-extensions>=4.4`) evaluate to a fixed
   boolean for that interpreter.
 - Consequently, varying `--fork-strategy` across all `lowest-direct` and `allow` permutations
   produces identical per-interpreter package sets (-8 combinations).

@@ -185,8 +185,8 @@ def test_test_matrix_never_falls_back_to_system_python() -> None:
 
 
 MAXIMUM_PYTHON = "3.15"
-# Jobs that run on a single interpreter: they track the supported maximum. The dependency smoke
-# matrix is excluded on purpose; it verifies dependency floors and is owned by #325.
+# Jobs that run on a single interpreter and track the supported maximum. The dependency smoke
+# matrix tracks the supported minimum instead (#325).
 SINGLE_VERSION_JOBS = {
     "ci.yml": ("quality-gate", "container-smoke-test"),
     "docs.yml": ("build",),
@@ -318,3 +318,17 @@ def test_wheel_smoke_test_covers_minimum_and_maximum_python() -> None:
     assert "tools/smoke_wheel.py --wheel dist/*.whl" in runs
     below = f"3.{_minor_version(minimum)[1] - 1}"
     assert f"--python {below}" in runs, "the job must check pip refuses the unsupported Python"
+
+
+def test_dependency_smoke_matrix_uses_minimum_python() -> None:
+    """Validate dependency-smoke-matrix verifies dependency floors on the minimum Python (#325)."""
+    minimum, _ = _supported_range()
+    job = _load_ci_workflow()["jobs"]["dependency-smoke-matrix"]
+    versions = [
+        str(step["with"]["python-version"])
+        for step in job["steps"]
+        if "actions/setup-python" in str(step.get("uses", ""))
+    ]
+    assert versions == [minimum], (
+        f"dependency-smoke-matrix runs Python {versions}, expected {minimum}"
+    )
