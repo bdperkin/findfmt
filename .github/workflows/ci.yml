@@ -108,15 +108,19 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Build Distribution Packages
         run: uv build
-      - name: Install Wheel into a Clean Virtual Environment
+      - name: Install and Smoke-Test the Installed Wheel
         run: |
           uv venv --python "$PYTHON_VERSION" smoke_env
           uv pip install --python smoke_env dist/*.whl
-      - name: Smoke-Test the Installed Wheel
-        run: |
           python=smoke_env/bin/python
           [ -x "$python" ] || python=smoke_env/Scripts/python.exe
           "$python" tools/smoke_wheel.py --wheel dist/*.whl
+      - name: Install and Smoke-Test the Source Distribution
+        if: runner.os == 'Linux'
+        run: |
+          uv venv --python "$PYTHON_VERSION" sdist_env
+          uv pip install --python sdist_env dist/*.tar.gz
+          sdist_env/bin/python tools/smoke_wheel.py --sdist dist/*.tar.gz
       - name: Verify pip Refuses Python 3.10
         if: runner.os == 'Linux' && matrix.python-version == '3.11'
         run: |
