@@ -288,6 +288,7 @@ def test_version_sensitive_checkouts_fetch_full_history() -> None:
     """Validate that version-sensitive workflows configure fetch-depth: 0 on actions/checkout."""
     workflows_dir = _repo_root() / ".github" / "workflows"
     version_sensitive_jobs = [
+        (workflows_dir / "ci.yml", "package-check"),
         (workflows_dir / "ci.yml", "packaging-smoke-test"),
         (workflows_dir / "ci.yml", "container-smoke-test"),
         (workflows_dir / "docs.yml", "build"),

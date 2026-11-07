@@ -1,6 +1,7 @@
-"""Tests for zizmor CI/CD security static analysis configuration (#468)."""
+"""Tests for zizmor CI/CD security static analysis and package checks (#468, #475)."""
 
 import re
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -139,3 +140,62 @@ def test_contributing_docs_mention_zizmor() -> None:
     text = (_repo_root() / "CONTRIBUTING.md").read_text(encoding="utf-8")
     assert "zizmor" in text
     assert "zizmor: ignore[" in text
+
+
+def test_lint_group_includes_packaging_verifiers() -> None:
+    """Validate that [dependency-groups].lint pins check-wheel-contents and twine (#475)."""
+    with (_repo_root() / "pyproject.toml").open("rb") as f:
+        data = tomllib.load(f)
+
+    lint_deps = data.get("dependency-groups", {}).get("lint", [])
+    assert "check-wheel-contents>=0.6.3" in lint_deps
+    assert "twine>=6" in lint_deps
+
+
+def test_ci_package_check_job() -> None:
+    """Validate package-check job in .github/workflows/ci.yml (#475)."""
+    ci_path = _repo_root() / ".github" / "workflows" / "ci.yml"
+    ci = yaml.safe_load(ci_path.read_text(encoding="utf-8"))
+    jobs = ci.get("jobs", {})
+    assert "package-check" in jobs, "package-check job must be present in CI"
+
+    job = jobs["package-check"]
+    assert job.get("name") == "Package Metadata & Wheel Contents"
+    assert job.get("needs") == "quality-gate"
+    assert job.get("runs-on") == "ubuntu-latest"
+    assert job.get("timeout-minutes") == 10
+
+    checkout = _step(job, "actions/checkout")
+    assert checkout.get("with", {}).get("fetch-depth") == 0
+    assert checkout.get("with", {}).get("persist-credentials") is False
+
+    uv_step = _step(job, "astral-sh/setup-uv")
+    assert uv_step.get("with", {}).get("enable-cache") is True
+
+    py_step = _step(job, "actions/setup-python")
+    assert str(py_step.get("with", {}).get("python-version")) == "3.15"
+
+    runs = [str(s.get("run", "")) for s in job.get("steps", []) if "run" in s]
+    assert "uv sync --locked --only-group lint" in runs
+    assert 'uv build --out-dir "$RUNNER_TEMP/dist"' in runs
+    assert 'uv run twine check --strict "$RUNNER_TEMP"/dist/*' in runs
+    assert 'uv run check-wheel-contents --no-config "$RUNNER_TEMP/dist"' in runs
+
+
+def test_release_build_distributions_verifies_wheel_contents() -> None:
+    """Validate release workflow and contributor docs run check-wheel-contents (#475)."""
+    rel_path = _repo_root() / ".github" / "workflows" / "release.yml"
+    rel = yaml.safe_load(rel_path.read_text(encoding="utf-8"))
+    steps = rel["jobs"]["build-distributions"]["steps"]
+    names = [s.get("name") for s in steps]
+    assert "Verify Distribution Packages with Twine" in names
+    assert "Verify Wheel Contents" in names
+
+    twine_idx = names.index("Verify Distribution Packages with Twine")
+    wheel_idx = names.index("Verify Wheel Contents")
+    upload_idx = names.index("Upload Distribution Artifacts")
+    assert twine_idx < wheel_idx < upload_idx
+    assert steps[wheel_idx].get("run") == "uv run check-wheel-contents --no-config dist"
+
+    contrib = (_repo_root() / "CONTRIBUTING.md").read_text(encoding="utf-8")
+    assert "uv run check-wheel-contents --no-config dist" in contrib
