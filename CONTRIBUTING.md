@@ -112,6 +112,14 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   vale *.md docs/
   ```
+- **CI/CD Static Security Analysis**: GitHub Actions workflows (`.github/workflows/`),
+  `.github/dependabot.yml`, and `.pre-commit-config.yaml` are audited with
+  [zizmor](https://github.com/zizmorcore/zizmor) in pre-commit and CI:
+  ```bash
+  uvx zizmor .github/ .pre-commit-config.yaml
+  ```
+  Suppress accepted risks inline with `# zizmor: ignore[<audit>] -- <reason>`; every suppression
+  must include a justification comment after `--`.
 - **Public API Snapshot**: `tests/unit/test_api_surface.py` fails when a name in any module's
   `__all__` (or its signature) changes. For intentional changes, regenerate the snapshot and record
   the change in `CHANGELOG.md` (see the API stability policy in the documentation):
@@ -172,7 +180,7 @@ git commit -s -m "feat: add support for MIME categories"
    ```
 4. **Code Review & Quality Gates**:
    - Every PR triggers our full automated CI suite (Linux, macOS, Windows across Python 3.11–3.15,
-     100% test and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL,
+     100% test and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL, zizmor,
      ClusterFuzzLite, Vale prose linting, and dependency review). All status checks must pass before
      merging.
    - Community contributions require thorough code review and approval from repository maintainers.

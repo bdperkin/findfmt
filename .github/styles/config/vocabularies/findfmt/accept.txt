@@ -162,3 +162,5 @@
 (?i)validators
 (?i)charset
 (?i)charsets
+(?i)zizmor
+(?i)sarif

@@ -82,7 +82,7 @@ repos:
       - id: ssort
 
   # Python code structure: absolufy-imports
-  - repo: https://github.com/marcogorelli/absolufy-imports
+  - repo: https://github.com/marcogorelli/absolufy-imports  # zizmor: ignore[archived-uses] -- stable single-purpose AST import normalizer
     rev: v0.3.1
     hooks:
       - id: absolufy-imports
@@ -179,7 +179,7 @@ repos:
 
   # PyMarkdown linter
   - repo: https://github.com/jackdewinter/pymarkdown
-    rev: v0.9.41
+    rev: v0.9.41  # zizmor: ignore[ref-confusion] -- upstream publishes matching branch and tag names
     hooks:
       - id: pymarkdown
 
@@ -195,6 +195,12 @@ repos:
     hooks:
       - id: detect-secrets
         exclude: package.lock.json|uv.lock
+
+  # Security: GitHub Actions, Dependabot, and pre-commit static analysis
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.32.0
+    hooks:
+      - id: zizmor
 
   # Conventional Commits verification
   - repo: https://github.com/compilerla/conventional-pre-commit
