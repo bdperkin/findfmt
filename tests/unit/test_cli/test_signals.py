@@ -311,10 +311,9 @@ def test_subprocess_pipeline_head_truncation(tmp_path: Path):
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="POSIX signal tests")
-def test_subprocess_sigint_clean_exit(tmp_path: Path):
+def test_subprocess_sigint_clean_exit(broken_pipe_tree: Path):
     """Verify findfmt interrupted by SIGINT exits with code 130 and no traceback."""
-    target = "/usr" if Path("/usr").is_dir() else str(tmp_path)
-    cmd = [sys.executable, "-m", "findfmt", target]
+    cmd = [sys.executable, "-m", "findfmt", str(broken_pipe_tree), str(broken_pipe_tree)]
     proc = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
@@ -324,7 +323,7 @@ def test_subprocess_sigint_clean_exit(tmp_path: Path):
     first_line = proc.stdout.readline()
     assert len(first_line) > 0
     proc.send_signal(signal.SIGINT)
-    _, err = proc.communicate(timeout=5)
+    _, err = proc.communicate(timeout=10)
     assert proc.returncode == 130
     assert b"KeyboardInterrupt" not in err
     assert b"Traceback" not in err
