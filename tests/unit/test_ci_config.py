@@ -187,6 +187,14 @@ def test_ci_dependency_smoke_matrix_steps() -> None:
     uv_step = next(s for s in steps if "astral-sh/setup-uv" in s.get("uses", ""))
     assert uv_step.get("with", {}).get("enable-cache") is True, "setup-uv must enable cache sharing"
 
+    py_step = next(s for s in steps if "actions/setup-python" in s.get("uses", ""))
+    assert str(py_step.get("with", {}).get("python-version")) == "3.11", (
+        "dependency-smoke-matrix must run on the minimum supported Python (3.11)"
+    )
+
+    venv_step = next(s for s in steps if "Create Clean Virtual Environment" in s.get("name", ""))
+    assert "--python 3.11" in venv_step.get("run", "")
+
     install_step = next(s for s in steps if "Install Dependencies" in s.get("name", ""))
     install_run = install_step.get("run", "")
     assert "--resolution ${{ matrix.resolution }}" in install_run
@@ -216,9 +224,17 @@ def test_pyproject_dependency_minimums() -> None:
                 pkg, ver = name.split(op, 1)
                 dep_dict[pkg.strip()] = ver.strip()
 
-    assert dep_dict.get("pyyaml") == "6.0.1", "pyyaml floor must be >=6.0.1 for Python 3.12+ builds"
-    assert dep_dict.get("rich") == "13.8", "rich floor must be >=13.8 for tree guide support"
-    assert dep_dict.get("typer") == "0.16", "typer floor must be >=0.16 for Click compatibility"
+    assert dep_dict == {
+        "identify": "2.6",
+        "pathspec": "1.0.1",
+        "pyyaml": "6.0.1",
+        "rich": "13.8",
+        "typer": "0.16",
+        "typing-extensions": "4.4",
+    }
+
+    build_reqs = data.get("build-system", {}).get("requires", [])
+    assert "typing-extensions>=4.4; python_version<'3.12'" in build_reqs
 
     test_deps = data.get("dependency-groups", {}).get("test", [])
     test_dep_names = {d.split(";")[0].split(">=")[0].split("==")[0].strip() for d in test_deps}

@@ -141,9 +141,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7
         with:
-          python-version: '3.14'
+          # Verify dependency floors on the minimum supported Python (#325).
+          python-version: '3.11'
       - name: Create Clean Virtual Environment
-        run: uv venv smoke_env
+        run: uv venv --python 3.11 smoke_env
       - name: Install Dependencies (${{ matrix.resolution }} / ${{ matrix.prerelease }})
         run: |
           uv pip install --python smoke_env --group test -e . \
