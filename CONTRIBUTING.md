@@ -199,11 +199,13 @@ tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MI
    link, and raises `version.fallback-version` to `X.Y.Z.dev0`. That section becomes the GitHub
    Release notes (`tools/release_notes.py`), and the workflow fails before building anything if it
    is missing. `uvx git-cliff --unreleased --tag vX.Y.Z` drafts entries from the commit history.
-2. Check the distributions locally. `twine` must report no warnings, and the wheel must hold only
-   the `findfmt` package (with `py.typed` and the compiled `*.mo` catalogs) and its metadata:
+2. Check the distributions locally. `twine` must report no warnings, `check-wheel-contents` must
+   pass, and the wheel must hold only the `findfmt` package (with `py.typed` and the compiled `*.mo`
+   catalogs) and its metadata:
    ```bash
    uv build --clear
-   uvx twine check --strict dist/*
+   uv run twine check --strict dist/*
+   uv run check-wheel-contents --no-config dist
    unzip -l dist/*.whl
    ```
    CI's packaging smoke test installs the wheel on the minimum and maximum supported Python on

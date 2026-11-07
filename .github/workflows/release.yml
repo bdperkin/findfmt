@@ -70,6 +70,8 @@ jobs:
         run: python tools/verify_release_version.py --tag "$RELEASE_TAG" --dist dist
       - name: Verify Distribution Packages with Twine
         run: uv run twine check --strict dist/*
+      - name: Verify Wheel Contents
+        run: uv run check-wheel-contents --no-config dist
       - name: Extract Release Notes from CHANGELOG.md
         id: notes
         run: |
