@@ -218,7 +218,14 @@ tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MI
    curl -s https://test.pypi.org/pypi/findfmt/1.1.0/json | jq -r .info.version
    uvx --from findfmt==1.1.0 findfmt --version
    ```
-5. To re-run a release for an existing tag, start the workflow **on the tag**: choose the tag in
+5. Close the GitHub milestone for the released tag once all of its issues are closed, and record the
+   completed release and milestone closure in `TODO.md` (header audit trail and
+   `## 5. Milestone Plan`):
+   ```bash
+   milestone_num="$(gh api repos/bdperkin/findfmt/milestones --jq '.[] | select(.title == "v1.1.0") | .number')"
+   gh api "repos/bdperkin/findfmt/milestones/${milestone_num}" -X PATCH -f state=closed
+   ```
+6. To re-run a release for an existing tag, start the workflow **on the tag**: choose the tag in
    **Actions → Release & Publish → Run workflow → Use workflow from**, and enter the same tag (for
    example `v1.1.0`), or run `gh workflow run release.yml --ref v1.1.0 -f tag=v1.1.0`. The `pypi`
    and `testpypi` environments only deploy `v*.*.*` tags, so a run started from a branch fails.
