@@ -242,6 +242,7 @@ def test_dependency_matrix_workflow_pruned_cells_and_steps() -> None:
     jobs = workflow.get("jobs", {})
     assert "dependency-matrix" in jobs
     job = jobs["dependency-matrix"]
+    assert "matrix." not in str(job.get("if", ""))
     assert job.get("runs-on") == "ubuntu-latest"
     strategy = job.get("strategy", {})
     assert strategy.get("fail-fast") is False
