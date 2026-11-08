@@ -10,7 +10,7 @@
 > milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320); 2026-11-05 (closed
 > issues #303, #343, #384, #322, #323, #221, #345, #321, #337, and #426; released v1.1.1 and closed
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
-> issues #360 and #344; released v1.1.2 and closed its milestone; triaged #546)
+> issues #360 and #344; released v1.1.2 and v1.1.3 and closed their milestones; triaged #546)
 
 ______________________________________________________________________
 
@@ -1444,12 +1444,11 @@ Re-planned on 2026-10-24 for the 1.1.0 release: v1.1.0 now holds the release wor
 and #469). Its remaining traversal and localization issues moved by theme: #320 → v1.1.1, #323 →
 v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 
-v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, and v1.1.2 on 2026-11-06 (PyPI, GHCR, and
-GitHub Releases), and their milestones are closed.
+v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, and v1.1.3 on
+2026-11-08 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
 
 | Milestone       | Theme                                                                                                                 | Open Issues |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.3          | Release Safety & Packaging Hygiene: Tag-Pinned Releases, Reproducible Container, Required Floor Checks, 3.15 Gating   | 0           |
 | v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                      | 10          |
 | v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 4           |
 | v1.2.0          | Core/CLI Decoupling: Side-Effect-Free Import, Wrapper Parsing, Friendly Errors                                        | 6           |
