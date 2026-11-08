@@ -182,3 +182,14 @@
 (?i)sniffing
 (?i)suppression
 (?i)suppressions
+(?i)poeditor
+(?i)crowdin
+(?i)localazy
+(?i)poedit
+(?i)cldr
+(?i)byok
+(?i)sharetm
+(?i)deepl
+(?i)osi
+(?i)saas
+(?i)reflow

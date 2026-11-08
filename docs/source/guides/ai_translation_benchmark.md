@@ -286,3 +286,7 @@ uv run python tools/i18n_benchmark.py
 # Emit machine-readable JSON benchmark report
 uv run python tools/i18n_benchmark.py --json
 ```
+
+For a comparison of managed cloud localization platforms (POEditor, Crowdin, Localazy) against
+`tools/i18n.py translate`, see
+[Managed Localization Platforms vs. Local CI Automation (ADR)](localization_platforms.md).
