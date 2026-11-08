@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from tools.sync_pre_commit_deps import sync_deps
 
 import findfmt.i18n
 
@@ -180,30 +181,23 @@ def test_ci_dependency_smoke_matrix_structure() -> None:
 def test_ci_dependency_smoke_matrix_steps() -> None:
     """Validate dependency smoke matrix steps, cache usage, and diagnostics."""
     ci = _load_ci_workflow()
-    job = ci["jobs"]["dependency-smoke-matrix"]
-    steps = job.get("steps", [])
+    steps = ci["jobs"]["dependency-smoke-matrix"].get("steps", [])
     assert len(steps) >= 5, "Expected setup, env creation, install, test, and diagnostic steps"
-
     uv_step = next(s for s in steps if "astral-sh/setup-uv" in s.get("uses", ""))
     assert uv_step.get("with", {}).get("enable-cache") is True, "setup-uv must enable cache sharing"
-
     py_step = next(s for s in steps if "actions/setup-python" in s.get("uses", ""))
-    assert str(py_step.get("with", {}).get("python-version")) == "3.11", (
-        "dependency-smoke-matrix must run on the minimum supported Python (3.11)"
-    )
-
+    assert str(py_step.get("with", {}).get("python-version")) == "3.11"
     venv_step = next(s for s in steps if "Create Clean Virtual Environment" in s.get("name", ""))
     assert "--python 3.11" in venv_step.get("run", "")
-
-    install_step = next(s for s in steps if "Install Dependencies" in s.get("name", ""))
-    install_run = install_step.get("run", "")
+    install_run = next(s for s in steps if "Install Dependencies" in s.get("name", "")).get(
+        "run",
+        "",
+    )
     assert "--resolution ${{ matrix.resolution }}" in install_run
     assert "--prerelease ${{ matrix.prerelease }}" in install_run
     assert "--group test" in install_run
-
     test_step = next(s for s in steps if "Run Pytest" in s.get("name", ""))
     assert "pytest" in test_step.get("run", "")
-
     diag_step = next(s for s in steps if "Capture Dependency Tree" in s.get("name", ""))
     assert diag_step.get("if") == "failure()"
     assert "uv pip tree" in diag_step.get("run", "")
@@ -211,13 +205,11 @@ def test_ci_dependency_smoke_matrix_steps() -> None:
 
 def test_pyproject_dependency_minimums() -> None:
     """Validate declared dependency minimums match verified working floors."""
-    pyproject_path = _repo_root() / "pyproject.toml"
-    with pyproject_path.open("rb") as f:
+    with (_repo_root() / "pyproject.toml").open("rb") as f:
         data = tomllib.load(f)
 
-    deps = data.get("project", {}).get("dependencies", [])
     dep_dict: dict[str, str] = {}
-    for dep in deps:
+    for dep in data.get("project", {}).get("dependencies", []):
         name = dep.split(";")[0].strip()
         for op in (">=", "=="):
             if op in name:
@@ -232,36 +224,21 @@ def test_pyproject_dependency_minimums() -> None:
         "typer": "0.16",
         "typing-extensions": "4.4",
     }
-
     build_reqs = data.get("build-system", {}).get("requires", [])
     assert "typing-extensions>=4.4; python_version<'3.12'" in build_reqs
-
     test_deps = data.get("dependency-groups", {}).get("test", [])
     test_dep_names = {d.split(";")[0].split(">=")[0].split("==")[0].strip() for d in test_deps}
-    assert "docutils" in test_dep_names, "docutils must be in test dependency group"
-    assert "hatchling" in test_dep_names, "hatchling must be in test dependency group"
+    assert {"docutils", "hatchling"} <= test_dep_names
 
 
 def test_ci_hermetic_git_ignore_step() -> None:
     """Validate that CI jobs populate ~/.config/git/ignore before running pytest."""
-    ci = _load_ci_workflow()
-    jobs = ci.get("jobs", {})
-
-    # test-matrix
-    tm_steps = jobs["test-matrix"]["steps"]
-    tm_hermetic_idx = next(i for i, s in enumerate(tm_steps) if "Hermeticity" in s.get("name", ""))
-    tm_pytest_idx = next(i for i, s in enumerate(tm_steps) if "Run Pytest" in s.get("name", ""))
-    assert tm_hermetic_idx < tm_pytest_idx, "Hermeticity step must precede pytest in test-matrix"
-
-    # dependency-smoke-matrix
-    dsm_steps = jobs["dependency-smoke-matrix"]["steps"]
-    dsm_hermetic_idx = next(
-        i for i, s in enumerate(dsm_steps) if "Hermeticity" in s.get("name", "")
-    )
-    dsm_pytest_idx = next(i for i, s in enumerate(dsm_steps) if "Run Pytest" in s.get("name", ""))
-    assert dsm_hermetic_idx < dsm_pytest_idx, (
-        "Hermeticity step must precede pytest in dependency-smoke-matrix"
-    )
+    jobs = _load_ci_workflow().get("jobs", {})
+    for job_name in ("test-matrix", "dependency-smoke-matrix"):
+        steps = jobs[job_name]["steps"]
+        hermetic_idx = next(i for i, s in enumerate(steps) if "Hermeticity" in s.get("name", ""))
+        pytest_idx = next(i for i, s in enumerate(steps) if "Run Pytest" in s.get("name", ""))
+        assert hermetic_idx < pytest_idx, f"Hermeticity step must precede pytest in {job_name}"
 
 
 def test_ci_uses_locked_sync() -> None:
@@ -494,3 +471,21 @@ def test_session_fixture_does_not_write_to_src(compile_locale_catalogs_for_tests
             check=False,
         )
         assert ".mo" not in proc.stdout
+
+
+def test_ruff_versions_aligned() -> None:
+    """Validate ruff, ty, and all shared lint tool revs in pre-commit match uv.lock (#360)."""
+    repo = _repo_root()
+    with (repo / "uv.lock").open("rb") as f:
+        lock_data = tomllib.load(f)
+
+    locked = {
+        pkg["name"].lower(): pkg["version"]
+        for pkg in lock_data.get("package", [])
+        if "name" in pkg and "version" in pkg
+    }
+    pre_commit = yaml.safe_load((repo / ".pre-commit-config.yaml").read_text(encoding="utf-8"))
+    revs = {str(r.get("repo", "")): str(r.get("rev", "")) for r in pre_commit.get("repos", [])}
+    assert revs["https://github.com/astral-sh/ruff-pre-commit"] == f"v{locked['ruff']}"
+    assert revs["https://github.com/astral-sh/ty-pre-commit"] == f"v{locked['ty']}"
+    assert sync_deps(repo) == 0
