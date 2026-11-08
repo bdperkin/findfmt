@@ -32,6 +32,8 @@ jobs:
         with:
           python-version: '3.15'
       - name: Verify Release Tag
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           python tools/verify_release_version.py --tag "$RELEASE_TAG"
           # The pypi/testpypi environments only deploy v*.*.* tags; dispatch on the tag itself (#495).
@@ -39,6 +41,11 @@ jobs:
           test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/${RELEASE_TAG}^{commit}")"
           # The release notes come from CHANGELOG.md; fail now if it was not prepared (#498).
           python tools/release_notes.py --tag "$RELEASE_TAG" > /dev/null
+          # Fail fast if the matching GitHub milestone still has open issues (#546).
+          endpoint="repos/${GITHUB_REPOSITORY}/milestones?state=all&per_page=100"
+          open_issues="$(gh api --paginate "$endpoint" |
+            jq -r --arg tag "$RELEASE_TAG" '.[] | select(.title == $tag) | .open_issues')"
+          test -z "$open_issues" || test "$open_issues" -eq 0
       - name: Install dependencies
         run: uv sync --locked --all-groups
       - name: Verify Complete Quality Suite
@@ -130,6 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
     steps:
       - name: Download Distribution Artifacts
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
@@ -144,6 +152,26 @@ jobs:
           files: dist/*
           draft: false
           prerelease: false
+      - name: Close Release Milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          endpoint="repos/${GITHUB_REPOSITORY}/milestones?state=all&per_page=100"
+          milestone_json="$(gh api --paginate "$endpoint" |
+            jq -c --arg tag "$RELEASE_TAG" '.[] | select(.title == $tag)')"
+          if [ -z "$milestone_json" ]; then
+            echo "No GitHub milestone found matching ${RELEASE_TAG}; skipping."
+            exit 0
+          fi
+          state="$(jq -r '.state' <<< "$milestone_json")"
+          if [ "$state" = "closed" ]; then
+            echo "GitHub milestone ${RELEASE_TAG} is already closed."
+            exit 0
+          fi
+          open_issues="$(jq -r '.open_issues' <<< "$milestone_json")"
+          test "$open_issues" -eq 0
+          milestone_num="$(jq -r '.number' <<< "$milestone_json")"
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/milestones/${milestone_num}" -f state=closed
   containerize:
     name: Build & Publish Container to GHCR
     needs: [build-distributions, publish-pypi]

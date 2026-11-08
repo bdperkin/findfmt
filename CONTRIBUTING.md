@@ -230,11 +230,11 @@ tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MI
    curl -s https://test.pypi.org/pypi/findfmt/1.1.0/json | jq -r .info.version
    uvx --from findfmt==1.1.0 findfmt --version
    ```
-5. Close the GitHub milestone for the released tag once all of its issues are closed, and record the
-   completed release and milestone closure in `TODO.md` (header audit trail and
-   `## 5. Milestone Plan`):
+5. Confirm that `.github/workflows/release.yml` closed the GitHub milestone for the released tag (or
+   close it manually if needed), and record the completed release and milestone closure in `TODO.md`
+   (header audit trail and `## 5. Milestone Plan`):
    ```bash
-   milestone_num="$(gh api repos/bdperkin/findfmt/milestones --jq '.[] | select(.title == "v1.1.0") | .number')"
+   milestone_num="$(gh api "repos/bdperkin/findfmt/milestones?state=all" --jq '.[] | select(.title == "v1.1.0") | .number')"
    gh api "repos/bdperkin/findfmt/milestones/${milestone_num}" -X PATCH -f state=closed
    ```
 6. To re-run a release for an existing tag, start the workflow **on the tag**: choose the tag in
