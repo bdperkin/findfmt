@@ -58,9 +58,8 @@ DEFAULT_BATCH_SIZE = 25
 DEFAULT_TEMPERATURE = 0.0
 _HTTP_TOO_MANY_REQUESTS = 429
 _HTTP_INTERNAL_ERROR = 500
-_JSON_ARRAY_RE = re.compile(r"\[.*\]", re.DOTALL)
 _MOCK_PLURAL_COUNT_RE = re.compile(r"JSON array of exactly (\d+) strings")
-_MOCK_SINGULAR_RE = re.compile(r"Source singular \(msgid\): ('(?:\\.|[^'])*'|\"(?:\\.|[^\"])*\")")
+_SINGULAR_PREFIX = "Source singular (msgid): "
 
 
 @dataclass(frozen=True)
@@ -183,8 +182,9 @@ def build_batch_user_prompt(items: list[tuple[int, str]], locale: str) -> str:
 
 def _extract_json_array(raw_text: str) -> list[str]:
     """Extract and parse a JSON array of strings from an LLM response."""
-    match = _JSON_ARRAY_RE.search(raw_text.strip())
-    candidate = match.group(0) if match is not None else raw_text.strip()
+    start = raw_text.find("[")
+    end = raw_text.rfind("]")
+    candidate = raw_text[start : end + 1] if 0 <= start < end else raw_text.strip()
     try:
         parsed = json.loads(candidate)
     except json.JSONDecodeError as err:
@@ -244,17 +244,20 @@ def _mock_transport(system_prompt: str, user_prompt: str, _config: TranslationCo
     plural_match = _MOCK_PLURAL_COUNT_RE.search(user_prompt)
     if plural_match is not None:
         count = int(plural_match.group(1))
-        src_match = _MOCK_SINGULAR_RE.search(user_prompt)
-        raw_src = src_match.group(1) if src_match is not None else ""
-        src = (
-            str(json.loads(raw_src))
-            if raw_src.startswith('"')
-            else raw_src.strip("'").replace("\\n", "\n")
+        raw_src = next(
+            (
+                ln.removeprefix(_SINGULAR_PREFIX).strip()
+                for ln in user_prompt.splitlines()
+                if ln.startswith(_SINGULAR_PREFIX)
+            ),
+            "",
         )
+        src = raw_src.strip("'\"").replace("\\n", "\n")
         return json.dumps([f"[{locale}:{i}] {src}" for i in range(count)], ensure_ascii=False)
 
-    array_match = _JSON_ARRAY_RE.search(user_prompt)
-    items = json.loads(array_match.group(0)) if array_match is not None else []
+    start = user_prompt.find("[")
+    end = user_prompt.rfind("]")
+    items = json.loads(user_prompt[start : end + 1]) if 0 <= start < end else []
     return json.dumps([f"[{locale}] {item['source']}" for item in items], ensure_ascii=False)
 
 
