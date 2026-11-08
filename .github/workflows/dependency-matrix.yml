@@ -39,10 +39,6 @@ jobs:
   dependency-matrix:
     name: Matrix ${{ matrix.cell }} (${{ matrix.resolution }} / ${{ matrix.prerelease }}
       / ${{ matrix.fork-strategy }})
-    if: >-
-      (inputs.resolution == '' || inputs.resolution == matrix.resolution) &&
-      (inputs.prerelease == '' || inputs.prerelease == matrix.prerelease) &&
-      (inputs.fork_strategy == '' || inputs.fork_strategy == matrix.fork-strategy)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
