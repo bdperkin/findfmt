@@ -5,7 +5,9 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
+from tools import sync_pre_commit_deps
 
 
 def _repo_root() -> Path:
@@ -221,3 +223,82 @@ def test_ci_packaging_smoke_test_includes_sdist_on_linux() -> None:
 
     contrib = (_repo_root() / "CONTRIBUTING.md").read_text(encoding="utf-8")
     assert "tools/smoke_wheel.py --sdist dist/*.tar.gz" in contrib
+
+
+def test_codecov_action_sha_aligned() -> None:
+    """Validate all codecov/codecov-action references use a single SHA and comment (#360)."""
+    workflows_dir = _repo_root() / ".github" / "workflows"
+    codecov_lines: set[str] = set()
+    for wf in sorted(workflows_dir.glob("*.yml")):
+        for line in wf.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("uses:") and "codecov/codecov-action@" in stripped:
+                codecov_lines.add(stripped)
+
+    assert len(codecov_lines) == 1, f"Expected identical codecov-action uses, got {codecov_lines}"
+
+
+def test_docs_linkcheck_scheduled_not_on_prs() -> None:
+    """Validate Sphinx linkcheck runs on schedule/workflow_dispatch without gating PRs (#360)."""
+    docs_path = _repo_root() / ".github" / "workflows" / "docs.yml"
+    docs = yaml.safe_load(docs_path.read_text(encoding="utf-8"))
+    triggers = docs.get("on", docs.get(True))
+    assert "schedule" in triggers, "docs.yml must include a schedule trigger"
+    assert isinstance(triggers["schedule"], list)
+    assert triggers["schedule"][0].get("cron")
+
+    steps = docs["jobs"]["build"]["steps"]
+    strict_build = next(s for s in steps if s.get("name") == "Build All Sphinx Formats (Strict)")
+    assert "linkcheck" not in str(strict_build.get("run", ""))
+
+    linkcheck_step = next(
+        (s for s in steps if "make -C docs linkcheck" in str(s.get("run", ""))),
+        None,
+    )
+    assert linkcheck_step is not None, "docs.yml must include a linkcheck step"
+    cond = str(linkcheck_step.get("if", ""))
+    assert "schedule" in cond
+    assert "workflow_dispatch" in cond
+    assert "pull_request" not in cond
+
+
+def test_sync_pre_commit_deps_modes(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Validate sync_pre_commit_deps detects drift and rewrites rev in --write mode (#360)."""
+    assert sync_pre_commit_deps.sync_deps(tmp_path) == 1
+
+    lock_file = tmp_path / "uv.lock"
+    pre_commit_file = tmp_path / ".pre-commit-config.yaml"
+    lock_file.write_text(
+        '[[package]]\nname = "ruff"\nversion = "0.17.3"\n'
+        '[[package]]\nname = "deptry"\nversion = "0.25.1"\n',
+        encoding="utf-8",
+    )
+    pre_commit_file.write_text("- invalid-root-list\n", encoding="utf-8")
+    assert sync_pre_commit_deps.sync_deps(tmp_path) == 1
+
+    pre_commit_file.write_text(
+        "repos:\n"
+        "  - repo: meta\n"
+        "  - repo: https://github.com/astral-sh/ruff-pre-commit\n"
+        "    rev: v0.16.10  # comment\n"
+        "  - repo: https://github.com/osprey-oss/deptry\n"
+        "    rev: 0.25.0\n",
+        encoding="utf-8",
+    )
+    assert sync_pre_commit_deps.sync_deps(tmp_path) == 1
+    err = capsys.readouterr().err
+    assert "Version mismatch for ruff" in err
+    assert "Version mismatch for deptry" in err
+
+    assert sync_pre_commit_deps.sync_deps(tmp_path, write=True) == 0
+    updated = pre_commit_file.read_text(encoding="utf-8")
+    assert "rev: v0.17.3  # comment" in updated
+    assert "rev: 0.25.1" in updated
+    assert sync_pre_commit_deps.sync_deps(tmp_path) == 0
+
+    monkeypatch.setattr(sync_pre_commit_deps, "__file__", str(tmp_path / "tools" / "sync.py"))
+    assert sync_pre_commit_deps.main([]) == 0

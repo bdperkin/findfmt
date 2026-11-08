@@ -7,6 +7,8 @@ on:
     branches: [main]
   release:
     types: [published]
+  schedule:
+    - cron: 0 5 * * 1
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,7 +35,10 @@ jobs:
         run: uv sync --locked --all-groups
       - name: Build All Sphinx Formats (Strict)
         run: make -C docs clean html dirhtml singlehtml epub man latex text texinfo
-          htmlhelp qthelp devhelp json pickle xml pseudoxml linkcheck changes gettext
+          htmlhelp qthelp devhelp json pickle xml pseudoxml changes gettext
+      - name: Check External Documentation Links
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        run: make -C docs linkcheck
       - name: Upload Digital Documentation (EPUB & SingleHTML)
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
@@ -78,16 +83,19 @@ jobs:
           retention-days: 14
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d  # v6
-        if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name
+          == 'release'
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9  # v5
         with:
           path: docs/_build/html
-        if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name
+          == 'release'
   deploy:
     name: Deploy to GitHub Pages
     needs: build
-    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name
+      == 'release'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

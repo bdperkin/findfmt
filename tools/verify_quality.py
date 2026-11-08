@@ -34,6 +34,10 @@ def main() -> int:
         ("Deptry Dependencies", ["uv", "run", "deptry", "."]),
         ("Vulture Dead Code", ["uv", "run", "vulture", "src"]),
         ("Codespell Spelling", ["uv", "run", "codespell"]),
+        (
+            "Pre-Commit Dependency Sync",
+            ["uv", "run", "python", "tools/sync_pre_commit_deps.py"],
+        ),
         ("UV Dependency Audit", ["uv", "audit", "--preview-features", "audit-command"]),
     ]
 
