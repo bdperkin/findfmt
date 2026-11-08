@@ -85,7 +85,6 @@ def test_dependabot_docker_and_fuzz_groups() -> None:
     docker_patterns = groups["docker"].get("patterns")
     assert isinstance(docker_patterns, list)
     assert any(fnmatch.fnmatch("docker/build-push-action", pat) for pat in docker_patterns)
-
     assert "clusterfuzzlite" in groups
     fuzz_patterns = groups["clusterfuzzlite"].get("patterns")
     assert isinstance(fuzz_patterns, list)
@@ -100,7 +99,6 @@ def _collect_workflow_codeql_actions() -> set[str]:
     repo = _repo_root()
     workflow_files = list((repo / ".github" / "workflows").glob("*.yml"))
     assert workflow_files, "No workflow files found in .github/workflows"
-
     codeql_uses: set[str] = set()
     for wf in workflow_files:
         with wf.open(encoding="utf-8") as f:
@@ -120,7 +118,6 @@ def test_dependabot_covers_workflow_codeql_actions() -> None:
     groups = _get_gh_actions_groups()
     codeql_patterns = groups["codeql-action"]["patterns"]
     codeql_uses = _collect_workflow_codeql_actions()
-
     assert codeql_uses, "Expected at least one github/codeql-action step in workflows"
     for action in codeql_uses:
         assert any(fnmatch.fnmatch(action, pat) for pat in codeql_patterns), (
@@ -133,14 +130,11 @@ def test_dependabot_pip_groups() -> None:
     config = _load_dependabot_config()
     updates = config["updates"]
     pip_entry = next(entry for entry in updates if entry.get("package-ecosystem") == "pip")
-
     assert pip_entry.get("directory") == "/"
     groups = pip_entry.get("groups")
     assert isinstance(groups, dict), "pip entry must define dependency groups"
-
     assert "dev-dependencies" in groups
     assert groups["dev-dependencies"].get("dependency-type") == "development"
-
     assert "production-dependencies" in groups
     assert groups["production-dependencies"].get("dependency-type") == "production"
 
@@ -161,18 +155,14 @@ def test_ci_dependency_smoke_matrix_structure() -> None:
     ci = _load_ci_workflow()
     jobs = ci.get("jobs", {})
     assert "dependency-smoke-matrix" in jobs, "dependency-smoke-matrix job must be present in CI"
-
     job = jobs["dependency-smoke-matrix"]
     assert job.get("runs-on") == "ubuntu-latest"
     assert job.get("needs") == "quality-gate"
-
     strategy = job.get("strategy", {})
     assert strategy.get("fail-fast") is False
-
     matrix = strategy.get("matrix", {})
     includes = matrix.get("include", [])
     assert len(includes) == 2, "Smoke matrix should define exactly two curated combinations"
-
     combinations = {(inc.get("resolution"), inc.get("prerelease")) for inc in includes}
     expected = {("lowest-direct", "disallow"), ("highest", "allow")}
     assert combinations == expected, f"Expected {expected}, got {combinations}"
@@ -321,15 +311,33 @@ def test_release_checkout_uses_tag_input() -> None:
 
 
 def test_release_validates_tag_before_quality_gate() -> None:
-    """Validate the release fails fast unless the checkout is exactly the requested vX.Y.Z tag."""
+    """Validate the release fails fast unless the checkout is the requested vX.Y.Z tag (#546)."""
     steps = _load_release_workflow()["jobs"]["verify-release"]["steps"]
     names = [s.get("name") for s in steps]
     check = steps[names.index("Verify Release Tag")]
+    assert check.get("env", {}).get("GH_TOKEN") == "${{ github.token }}"
     assert "tools/verify_release_version.py" in check["run"]
     assert "git rev-parse" in check["run"], "the checked-out commit must be the tag's commit"
     # The publishing environments only deploy v*.*.* tags, so a dispatch must run on the tag (#495).
     assert 'test "$GITHUB_REF" = "refs/tags/${RELEASE_TAG}"' in check["run"]
+    assert "repos/${GITHUB_REPOSITORY}/milestones?state=all" in check["run"]
+    assert 'test -z "$open_issues" || test "$open_issues" -eq 0' in check["run"]
     assert names.index("Verify Release Tag") < names.index("Verify Complete Quality Suite")
+
+
+def test_release_closes_matching_milestone() -> None:
+    """Validate create-github-release idempotently closes the matching release milestone (#546)."""
+    job = _load_release_workflow()["jobs"]["create-github-release"]
+    assert job["permissions"] == {"contents": "write", "issues": "write"}
+    names = [s.get("name") for s in job["steps"]]
+    assert names.index("Create GitHub Release") < names.index("Close Release Milestone")
+    close_step = job["steps"][names.index("Close Release Milestone")]
+    assert close_step.get("env", {}).get("GH_TOKEN") == "${{ github.token }}"
+    assert 'if [ "$state" = "closed" ]; then' in close_step["run"]
+    assert (
+        'gh api -X PATCH "repos/${GITHUB_REPOSITORY}/milestones/${milestone_num}" -f state=closed'
+        in close_step["run"]
+    )
 
 
 def test_release_verifies_built_version_before_publishing() -> None:
