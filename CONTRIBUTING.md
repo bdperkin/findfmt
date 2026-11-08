@@ -4,7 +4,9 @@ Thank you for your interest in contributing to `findfmt`! We welcome contributio
 reports and documentation fixes to major features.
 
 For architecture guides, API reference, and user tutorials, consult our online documentation at
-[https://bdperkin.github.io/findfmt](https://bdperkin.github.io/findfmt).
+[https://bdperkin.github.io/findfmt](https://bdperkin.github.io/findfmt). For the technical
+architecture reference, file decomposition policy, and behavioral standards for AI coding agents and
+developers, see [AGENTS.md](AGENTS.md).
 
 ## 1. Reporting Issues & Proposing Features
 
