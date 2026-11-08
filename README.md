@@ -331,6 +331,7 @@ ______________________________________________________________________
 ## 6. Governance & Community
 
 - [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)
+- [Developer & AI Agent Guidelines](https://github.com/bdperkin/findfmt/blob/main/AGENTS.md)
 - [Code of Conduct](https://github.com/bdperkin/findfmt/blob/main/CODE_OF_CONDUCT.md)
 - [Security Policy](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)
 - [Support Guide](https://github.com/bdperkin/findfmt/blob/main/SUPPORT.md)
