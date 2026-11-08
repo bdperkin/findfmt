@@ -46,9 +46,10 @@ contributing to this codebase.
   `exceptions.py`, `i18n.py`, `utils/`: Core data models, POSIX metadata formatting, IEC/SI size
   formatting, summary tables, terminal sanitization, structured error diagnostics, and GNU `gettext`
   internationalization (`src/findfmt/locale/`).
-- `tools/`: Maintainer and CI automation scripts (`verify_quality.py`, `line_linter.py`,
-  `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_translate.py`, `i18n_validation.py`,
-  `i18n_prompts.py`, `hatch_build.py`, `smoke_wheel.py`, `release_notes.py`, `benchmark.py`).
+- `tools/`: Maintainer and CI automation scripts (`verify_quality.py`, `dep_matrix.py`,
+  `line_linter.py`, `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_translate.py`,
+  `i18n_validation.py`, `i18n_prompts.py`, `hatch_build.py`, `smoke_wheel.py`, `release_notes.py`,
+  `benchmark.py`).
 - `tests/`: Comprehensive `pytest` suites mirroring the source layout (`tests/unit/`,
   `tests/integration/`, `tests/fuzz/`).
 
