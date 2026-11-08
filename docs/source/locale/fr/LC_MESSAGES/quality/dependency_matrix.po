@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.2.dev4+g56fb33125.d20261106\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-06 05:19+0000\n"
+"POT-Creation-Date: 2026-11-08 21:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -66,8 +66,8 @@ msgstr ""
 msgid ""
 "**Lower-Bound Drift**: Direct dependency floors declared in "
 "`pyproject.toml` (`identify>=2.6`, `pathspec>=1.0.1`, `pyyaml>=6.0.1`, "
-"`rich>=13.8`, `typer>=0.16`, `typing-extensions>=4.4`) can silently bit-rot"
-" when new code relies on features added in later minor releases."
+"`rich>=13.8`, `typer>=0.16`, `typing-extensions>=4.4`) can silently bit-"
+"rot when new code relies on features added in later minor releases."
 msgstr ""
 
 #: ../../source/quality/dependency_matrix.md:25
@@ -695,4 +695,77 @@ msgid ""
 "highlights every installed package whose version matches a pre-release "
 "segment (`a`, `b`, `rc`, `dev`) so maintainers can file upstream reports "
 "or add temporary upper-bound exclusions."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:184
+#: 66a495ac42804536a055d87d3a4156c1
+msgid "5. Local Execution & Bound Troubleshooting Playbook"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:186
+#: 34db759fa7ec49d59af5f683bbd7d0a9
+msgid ""
+"Contributors can run the dependency resolution matrix locally using "
+"`tools/verify_quality.py` (also documented in `CONTRIBUTING.md` under "
+"*Dependency Resolution Testing*):"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:204
+#: a655e72781634024914bef78bf57613f
+msgid "5.1. Troubleshooting Lower-Bound & Pre-Release Failures"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:206
+#: 94168c000b944aeb84c5b2604445627c
+msgid ""
+"**Read the Three-Stage Diagnostic Report**: When `uv pip install` or "
+"`pytest` exits non-zero, check **Stage 1** (`uv pip tree`), **Stage 2** "
+"(installed version deltas compared to `uv.lock`), and **Stage 3** "
+"(actionable `pyproject.toml` remediation lines)."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:209
+#: a9f8d6c2914741baa6b138f041de8144
+msgid "**Bisect Minimum Floor Regressions (`M1`, `M4`, `M5`)**:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:210
+#: 379271124e524701a585561830dadcee
+msgid ""
+"Create a temporary environment (`uv venv --python 3.11 /tmp/dep-bisect`) "
+"and install the failing combination."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:212
+#: a01b44415ff84a8ba7cfa31e61c10e1f
+#, python-format
+msgid ""
+"Upgrade the implicated package (`uv pip install --python /tmp/dep-bisect "
+"\"<pkg>==<version>\"`) until `/tmp/dep-bisect/bin/pytest` passes with "
+"100% coverage."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:214
+#: 25b28890def24cd28deae9845cb9271b
+msgid ""
+"Raise the floor specifier in `pyproject.toml` (`[project].dependencies` "
+"or `[dependency-groups].test`) and refresh `uv.lock` via `uv lock`."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:216
+#: 7d36a83785d441ee8a3144bee245f00f
+msgid "**Triage Upstream Pre-Release Regressions (`M2`, `M4`)**:"
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:217
+#: f479d206844b4152abb2d01c5df0dcdf
+msgid "Inspect the pre-release package flagged in **Stage 3**."
+msgstr ""
+
+#: ../../source/quality/dependency_matrix.md:218
+#: 87e16f28723e471792ae3e928ec67fb9
+msgid ""
+"Update internal call sites if an upstream API deprecation was finalized, "
+"or add a documented temporary upper bound in `pyproject.toml` while "
+"reporting the issue upstream."
 msgstr ""

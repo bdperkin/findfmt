@@ -250,22 +250,26 @@ def test_ci_uses_locked_sync() -> None:
 
 
 def test_dependency_matrix_adr_specification() -> None:
-    """Validate dependency resolution matrix ADR exists, is indexed, and defines M1-M6 (#426)."""
+    """Validate dependency resolution matrix ADR and CONTRIBUTING docs (#426, #430)."""
     repo = _repo_root()
     adr_path = repo / "docs" / "source" / "quality" / "dependency_matrix.md"
     index_path = repo / "docs" / "source" / "quality" / "index.md"
+    contrib_path = repo / "CONTRIBUTING.md"
     assert adr_path.is_file(), f"Missing ADR document at {adr_path}"
 
     index_text = index_path.read_text(encoding="utf-8")
     assert "dependency_matrix" in index_text
 
     adr_text = adr_path.read_text(encoding="utf-8")
+    contrib_text = contrib_path.read_text(encoding="utf-8")
     for cell_id in ("**M1**", "**M2**", "**M3**", "**M4**", "**M5**", "**M6**"):
         assert cell_id in adr_text, f"Expected pruned cell {cell_id} in {adr_path}"
 
-    assert "tools/verify_quality.py" in adr_text
-    assert "strategy.matrix" in adr_text
-    assert "uv pip tree" in adr_text
+    for token in ("tools/verify_quality.py", "--smoke", "--full", "--resolution", "uv pip tree"):
+        assert token in adr_text
+        assert token in contrib_text
+
+    assert "dependency_matrix.md" in contrib_text
 
 
 def test_pyproject_dependency_minimums() -> None:
