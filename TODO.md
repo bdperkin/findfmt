@@ -3,14 +3,14 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 169 Closed Issues | 114 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 170 Closed Issues | 113 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
 > milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320); 2026-11-05 (closed
 > issues #303, #343, #384, #322, #323, #221, #345, #321, #337, and #426; released v1.1.1 and closed
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
-> issues #360, #344, and #546; released v1.1.2 and v1.1.3 and closed their milestones)
+> issues #360, #344, #546, and #306; released v1.1.2 and v1.1.3 and closed their milestones)
 
 ______________________________________________________________________
 
@@ -527,6 +527,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#546](https://github.com/bdperkin/findfmt/issues/546)** - ci(release): automatically close
   matching GitHub milestone on release publication (.github/workflows/release.yml) (Closed:
   2026-11-08 via PR [#554](https://github.com/bdperkin/findfmt/pull/554))
+- [x] **[#306](https://github.com/bdperkin/findfmt/issues/306)** - feat(i18n): integrate AI
+  translation command into developer tooling (tools/i18n.py translate) (Closed: 2026-11-08 via PR
+  [#555](https://github.com/bdperkin/findfmt/pull/555))
 
 ______________________________________________________________________
 
@@ -623,12 +626,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   **Value:** High | **Effort:** M - **Rationale:** Security hardening for untrusted input lists.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#306](https://github.com/bdperkin/findfmt/issues/306)** - feat(i18n): integrate AI
-  translation command into developer tooling (tools/i18n.py translate) *(Rank: 16 | Epic:
-  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
-  | Milestone: v1.1.4)* - **Value:** Medium | **Effort:** M - **Rationale:** Integrates the chosen
-  translator into tools/i18n.py. Blocked by [#305](https://github.com/bdperkin/findfmt/issues/305).
 
 - [ ] **[#427](https://github.com/bdperkin/findfmt/issues/427)** - tools(deps): implement local
   dependency resolution matrix runner with failure diagnostics *(Rank: 17 | Epic:
@@ -1264,8 +1261,7 @@ linked natively on GitHub.
 
 - [ ] **[#308](https://github.com/bdperkin/findfmt/issues/308)** - [Epic] Investigate Open-Source
   Python AI Translators & Automation for GNU gettext .po Files *(Milestone: v1.1.4 | Open
-  sub-issues: 2)* - [#306](https://github.com/bdperkin/findfmt/issues/306),
-  [#307](https://github.com/bdperkin/findfmt/issues/307)
+  sub-issues: 1)* - [#307](https://github.com/bdperkin/findfmt/issues/307)
 - [ ] **[#385](https://github.com/bdperkin/findfmt/issues/385)** - [Epic] Packaging Integrity,
   Release Automation & Dependency Verification *(Milestone: v1.1.4 | Open sub-issues: 1)* -
   [#349](https://github.com/bdperkin/findfmt/issues/349)
@@ -1446,7 +1442,7 @@ v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, a
 
 | Milestone       | Theme                                                                                                                 | Open Issues |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                      | 9           |
+| v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                      | 8           |
 | v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 4           |
 | v1.2.0          | Core/CLI Decoupling: Side-Effect-Free Import, Wrapper Parsing, Friendly Errors                                        | 6           |
 | v1.2.1          | CLI Help/Docs Accuracy, Pager Streaming, Depth-Safe Traversal & API Hygiene                                           | 8           |

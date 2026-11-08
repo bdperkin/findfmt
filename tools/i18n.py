@@ -9,6 +9,37 @@ import subprocess
 import sys
 from pathlib import Path
 
+from tools.i18n_prompts import (
+    CLI_GLOSSARY,
+    PLURAL_RULE_SPECS,
+    build_plural_prompt,
+    build_system_prompt,
+    extract_cli_flags,
+    get_plural_rule_spec,
+    parse_plural_forms_header,
+    validate_cli_flags_preserved,
+)
+from tools.i18n_translate import (
+    DEFAULT_BATCH_SIZE,
+    DEFAULT_TEMPERATURE,
+    SUPPORTED_BACKENDS,
+    TranslationConfig,
+    TranslationResult,
+    translate_catalogs,
+    translate_po_file,
+)
+from tools.i18n_validation import (
+    extract_brace_placeholders,
+    extract_printf_placeholders,
+    extract_rich_tags,
+    mask_placeholders,
+    parse_po_catalog,
+    unmask_placeholders,
+    validate_catalogs,
+    validate_message_pair,
+    validate_po_file,
+)
+
 try:
     from tools.hatch_build import compile_po_to_mo
 except ImportError:
@@ -17,54 +48,12 @@ except ImportError:
     except ImportError:
         compile_po_to_mo = None  # type: ignore[assignment] - optional dependency fallback
 
-try:
-    from tools.i18n_prompts import (
-        CLI_GLOSSARY,
-        PLURAL_RULE_SPECS,
-        build_plural_prompt,
-        build_system_prompt,
-        extract_cli_flags,
-        get_plural_rule_spec,
-        parse_plural_forms_header,
-        validate_cli_flags_preserved,
-    )
-    from tools.i18n_validation import (
-        extract_brace_placeholders,
-        extract_printf_placeholders,
-        extract_rich_tags,
-        mask_placeholders,
-        parse_po_catalog,
-        unmask_placeholders,
-        validate_catalogs,
-        validate_message_pair,
-        validate_po_file,
-    )
-except ImportError:
-    from i18n_prompts import (  # type: ignore[no-redef] - standalone script import shim
-        CLI_GLOSSARY,
-        PLURAL_RULE_SPECS,
-        build_plural_prompt,
-        build_system_prompt,
-        extract_cli_flags,
-        get_plural_rule_spec,
-        parse_plural_forms_header,
-        validate_cli_flags_preserved,
-    )
-    from i18n_validation import (  # type: ignore[no-redef] - standalone script import shim
-        extract_brace_placeholders,
-        extract_printf_placeholders,
-        extract_rich_tags,
-        mask_placeholders,
-        parse_po_catalog,
-        unmask_placeholders,
-        validate_catalogs,
-        validate_message_pair,
-        validate_po_file,
-    )
-
 __all__ = [
     "CLI_GLOSSARY",
     "PLURAL_RULE_SPECS",
+    "SUPPORTED_BACKENDS",
+    "TranslationConfig",
+    "TranslationResult",
     "build_plural_prompt",
     "build_system_prompt",
     "compile_catalogs",
@@ -80,6 +69,8 @@ __all__ = [
     "parse_plural_forms_header",
     "parse_po_catalog",
     "prune_untranslated_obsolete",
+    "translate_catalogs",
+    "translate_po_file",
     "unmask_placeholders",
     "update_catalogs",
     "validate_catalogs",
@@ -182,24 +173,9 @@ def extract_messages(
 
     pybabel_bin = shutil.which("pybabel")
     if pybabel_bin is not None:
-        cmd = [
-            pybabel_bin,
-            "extract",
-            "-k",
-            "_",
-            "-k",
-            "ngettext:1,2",
-            "--project",
-            domain,
-            "--version",
-            "0.8.0",
-            "--msgid-bugs-address",
-            bugs_address,
-            "-o",
-            cmd_pot,
-            cmd_source,
-        ]
-        proc = subprocess.run(cmd, cwd=cwd, check=False)
+        base_args = [pybabel_bin, "extract", "-k", "_", "-k", "ngettext:1,2", "--project", domain]
+        meta_args = ["--version", "0.8.0", "--msgid-bugs-address", bugs_address, "-o", cmd_pot]
+        proc = subprocess.run([*base_args, *meta_args, cmd_source], cwd=cwd, check=False)
         if proc.returncode == 0:
             _sanitize_po_locations(pot_file, root=PROJECT_ROOT)
 
@@ -211,18 +187,9 @@ def extract_messages(
             _to_rel_path_str(p, PROJECT_ROOT) if cwd == PROJECT_ROOT else str(p)
             for p in sorted(source_dir.rglob("*.py"))
         ]
-        cmd = [
-            xgettext_bin,
-            "--language=Python",
-            "--keyword=_",
-            "--keyword=ngettext:1,2",
-            f"--msgid-bugs-address={bugs_address}",
-            "--from-code=UTF-8",
-            "-o",
-            cmd_pot,
-            *py_files,
-        ]
-        proc = subprocess.run(cmd, cwd=cwd, check=False)
+        xg_args = [xgettext_bin, "--language=Python", "--keyword=_", "--keyword=ngettext:1,2"]
+        out_args = [f"--msgid-bugs-address={bugs_address}", "--from-code=UTF-8", "-o", cmd_pot]
+        proc = subprocess.run([*xg_args, *out_args, *py_files], cwd=cwd, check=False)
         if proc.returncode == 0:
             _sanitize_po_locations(pot_file, root=PROJECT_ROOT)
 
@@ -263,12 +230,9 @@ def init_catalog(
         cmd_target = _to_rel_path_str(target_po) if cwd else str(target_po)
         cmd = [
             msginit_bin,
-            "--input",
-            cmd_pot,
-            "--output",
-            cmd_target,
-            "--locale",
-            locale,
+            f"--input={cmd_pot}",
+            f"--output={cmd_target}",
+            f"--locale={locale}",
             "--no-translator",
         ]
         proc = subprocess.run(cmd, cwd=cwd, check=False)
@@ -423,6 +387,19 @@ def build_parser() -> argparse.ArgumentParser:
     sub_init.add_argument("locale", help="Locale code (e.g. en, es, fr, de, ja).")
 
     subparsers.add_parser("update", parents=[domain_p, pot_p, loc_p], help="Update PO catalogs.")
+    sub_tr = subparsers.add_parser(
+        "translate",
+        parents=[domain_p, loc_p],
+        help="Translate untranslated PO catalog entries with an AI backend.",
+    )
+    sub_tr.add_argument("locale", nargs="?", default=None, help="Target locale code.")
+    sub_tr.add_argument("--locale", dest="locale_opt", default=None, help="Target locale code.")
+    sub_tr.add_argument("--all", dest="all_locales", action="store_true", help="All locales.")
+    sub_tr.add_argument("--backend", choices=SUPPORTED_BACKENDS, default="openai", help="Backend.")
+    sub_tr.add_argument("--model", default=None, help="Optional LLM model override.")
+    sub_tr.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE, help="Batch size.")
+    sub_tr.add_argument("--temperature", type=float, default=DEFAULT_TEMPERATURE, help="Temp.")
+    sub_tr.add_argument("--dry-run", action="store_true", help="Preview without modifying files.")
     subparsers.add_parser(
         "validate",
         parents=[domain_p, loc_p],
@@ -437,6 +414,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub_all.add_argument("--source", type=Path, default=DEFAULT_SOURCE_DIR, help="Source dir.")
     return parser
+
+
+def _run_translate(args: argparse.Namespace) -> int:
+    """Run AI translation subcommand from parsed CLI arguments."""
+    cfg = TranslationConfig(
+        backend=args.backend,
+        model=args.model,
+        batch_size=args.batch_size,
+        temperature=args.temperature,
+        dry_run=args.dry_run,
+        sanitize_fn=lambda p: _sanitize_po_locations(p, root=PROJECT_ROOT),
+    )
+    return translate_catalogs(
+        args.locale_opt or args.locale,
+        all_locales=args.all_locales,
+        locale_dir=args.localedir,
+        domain=args.domain,
+        config=cfg,
+    )
 
 
 def _run_all(args: argparse.Namespace) -> int:
@@ -459,6 +455,7 @@ def _dispatch_command(args: argparse.Namespace) -> int:
         "extract": lambda: extract_messages(args.source, args.output, args.domain),
         "init": lambda: init_catalog(args.locale, args.pot, args.localedir, args.domain),
         "update": lambda: update_catalogs(args.pot, args.localedir, args.domain),
+        "translate": lambda: _run_translate(args),
         "validate": lambda: validate_catalogs(args.localedir, args.domain),
         "compile": lambda: compile_catalogs(args.localedir, args.domain),
         "all": lambda: _run_all(args),
