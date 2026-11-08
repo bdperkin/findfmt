@@ -1,12 +1,14 @@
-"""Smoke-test an installed findfmt wheel in a clean environment (#496).
+"""Smoke-test an installed findfmt wheel or sdist in a clean environment (#496, #358).
 
 CI installs the built wheel into a fresh virtual environment on the minimum and maximum supported
-Python on Linux, macOS, and Windows, then runs this script with that environment's interpreter.
-It checks the installed package, not the source tree: the version matches the wheel, the console
-scripts run, and the user-visible 1.1 behavior works without a traceback.
+Python on Linux, macOS, and Windows (plus the built sdist on Linux), then runs this script with that
+environment's interpreter. It checks the installed package, not the source tree: the version matches
+the distribution archive, the console scripts run, and the user-visible 1.1 behavior works without a
+traceback.
 
 Usage:
     smoke_env/bin/python tools/smoke_wheel.py --wheel dist/findfmt-1.1.0-py3-none-any.whl
+    sdist_env/bin/python tools/smoke_wheel.py --sdist dist/findfmt-1.1.0.tar.gz
 """
 
 from __future__ import annotations
@@ -30,6 +32,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+SDIST_PREFIX = "findfmt-"
+SDIST_SUFFIX = ".tar.gz"
 WHEEL_NAME_FIELDS = 5  # name-version-python-abi-platform.whl
 WRAPPERS = ("findfilefmt", "findfilemime", "findfiles", "findfmt0", "findshebang", "findsummary")
 
@@ -46,6 +50,21 @@ def wheel_version(wheel: Path) -> str:
         raise SmokeError(msg)
 
     return parts[1]
+
+
+def sdist_version(sdist: Path) -> str:
+    """Return the version from an sdist file name (``findfmt-version.tar.gz``)."""
+    name = sdist.name
+    if not (name.startswith(SDIST_PREFIX) and name.endswith(SDIST_SUFFIX)):
+        msg = f"{name} is not an sdist file name"
+        raise SmokeError(msg)
+
+    version = name.removeprefix(SDIST_PREFIX).removesuffix(SDIST_SUFFIX)
+    if not version:
+        msg = f"{name} is not an sdist file name"
+        raise SmokeError(msg)
+
+    return version
 
 
 def script(name: str) -> str:
@@ -143,7 +162,9 @@ def check_translations() -> None:
 def main(argv: list[str] | None = None) -> int:
     """Run every smoke check and return the exit status."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--wheel", type=Path, help="wheel that was installed (checks its version)")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--wheel", type=Path, help="wheel that was installed (checks its version)")
+    group.add_argument("--sdist", type=Path, help="sdist that was installed (checks its version)")
     parser.add_argument(
         "--allow-source",
         action="store_true",
@@ -151,14 +172,20 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    def _expected_version() -> str | None:
+        if args.wheel is not None:
+            return wheel_version(args.wheel)
+
+        if args.sdist is not None:
+            return sdist_version(args.sdist)
+
+        return None
+
     with tempfile.TemporaryDirectory() as tree:
         checks: list[tuple[str, Callable[[], None]]] = [
             (
                 "installed package",
-                lambda: check_installed(
-                    wheel_version(args.wheel) if args.wheel else None,
-                    allow_source=args.allow_source,
-                ),
+                lambda: check_installed(_expected_version(), allow_source=args.allow_source),
             ),
             ("console scripts", lambda: check_commands(Path(tree))),
             ("translations", check_translations),

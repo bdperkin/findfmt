@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 from tools import smoke_wheel
-from tools.smoke_wheel import SmokeError, main, run, script, wheel_version
+from tools.smoke_wheel import SmokeError, main, run, script, sdist_version, wheel_version
 
 
 def test_wheel_version_parses_wheel_file_names() -> None:
@@ -16,6 +16,17 @@ def test_wheel_version_parses_wheel_file_names() -> None:
     assert wheel_version(Path("findfmt-1.1.1.dev3+gabc-py3-none-any.whl")) == "1.1.1.dev3+gabc"
     with pytest.raises(SmokeError, match="not a wheel"):
         wheel_version(Path("findfmt-1.1.0.tar.gz"))
+
+
+def test_sdist_version_parses_sdist_file_names() -> None:
+    """The version is extracted between 'findfmt-' and '.tar.gz' (#358)."""
+    assert sdist_version(Path("dist/findfmt-1.1.0.tar.gz")) == "1.1.0"
+    assert sdist_version(Path("findfmt-1.1.3.dev4+gabc.tar.gz")) == "1.1.3.dev4+gabc"
+    with pytest.raises(SmokeError, match="not an sdist"):
+        sdist_version(Path("findfmt-1.1.0-py3-none-any.whl"))
+
+    with pytest.raises(SmokeError, match="not an sdist"):
+        sdist_version(Path("findfmt-.tar.gz"))
 
 
 def test_smoke_test_passes_on_the_development_install(capsys: pytest.CaptureFixture[str]) -> None:
@@ -35,6 +46,12 @@ def test_smoke_test_rejects_the_source_tree(capsys: pytest.CaptureFixture[str]) 
 def test_smoke_test_checks_the_wheel_version(capsys: pytest.CaptureFixture[str]) -> None:
     """A wheel whose version differs from the installed package fails the smoke test."""
     assert main(["--allow-source", "--wheel", "findfmt-0.0.1-py3-none-any.whl"]) == 1
+    assert "expected 0.0.1" in capsys.readouterr().err
+
+
+def test_smoke_test_checks_the_sdist_version(capsys: pytest.CaptureFixture[str]) -> None:
+    """An sdist whose version differs from the installed package fails the smoke test (#358)."""
+    assert main(["--allow-source", "--sdist", "findfmt-0.0.1.tar.gz"]) == 1
     assert "expected 0.0.1" in capsys.readouterr().err
 
 

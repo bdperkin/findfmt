@@ -199,3 +199,25 @@ def test_release_build_distributions_verifies_wheel_contents() -> None:
 
     contrib = (_repo_root() / "CONTRIBUTING.md").read_text(encoding="utf-8")
     assert "uv run check-wheel-contents --no-config dist" in contrib
+
+
+def test_ci_packaging_smoke_test_includes_sdist_on_linux() -> None:
+    """Validate packaging-smoke-test installs and smoke-tests the sdist on Linux (#358)."""
+    ci_path = _repo_root() / ".github" / "workflows" / "ci.yml"
+    ci = yaml.safe_load(ci_path.read_text(encoding="utf-8"))
+    job = ci["jobs"]["packaging-smoke-test"]
+    steps = job.get("steps", [])
+
+    sdist_step = next(
+        (s for s in steps if "Source Distribution" in str(s.get("name", ""))),
+        None,
+    )
+    assert sdist_step is not None, "packaging-smoke-test must include an sdist smoke-test step"
+    assert sdist_step.get("if") == "runner.os == 'Linux'"
+    sdist_run = str(sdist_step.get("run", ""))
+    assert 'uv venv --python "$PYTHON_VERSION" sdist_env' in sdist_run
+    assert "uv pip install --python sdist_env dist/*.tar.gz" in sdist_run
+    assert "sdist_env/bin/python tools/smoke_wheel.py --sdist dist/*.tar.gz" in sdist_run
+
+    contrib = (_repo_root() / "CONTRIBUTING.md").read_text(encoding="utf-8")
+    assert "tools/smoke_wheel.py --sdist dist/*.tar.gz" in contrib
