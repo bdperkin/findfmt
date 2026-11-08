@@ -1,0 +1,129 @@
+---
+name: Dependency Resolution Matrix
+on:
+  schedule:
+    - cron: 0 3 * * *
+  workflow_dispatch:
+    inputs:
+      resolution:
+        description: Override uv --resolution mode (leave empty for full pruned matrix)
+        required: false
+        default: ''
+        type: choice
+        options: ['', highest, lowest, lowest-direct]
+      prerelease:
+        description: Override uv --prerelease mode (leave empty for full pruned matrix)
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - disallow
+          - allow
+          - if-necessary
+          - explicit
+          - if-necessary-or-explicit
+      fork_strategy:
+        description: Override uv --fork-strategy mode (leave empty for full pruned
+          matrix)
+        required: false
+        default: ''
+        type: choice
+        options: ['', fewest, requires-python]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  dependency-matrix:
+    name: Matrix ${{ matrix.cell }} (${{ matrix.resolution }} / ${{ matrix.prerelease }}
+      / ${{ matrix.fork-strategy }})
+    if: >-
+      (inputs.resolution == '' || inputs.resolution == matrix.resolution) &&
+      (inputs.prerelease == '' || inputs.prerelease == matrix.prerelease) &&
+      (inputs.fork_strategy == '' || inputs.fork_strategy == matrix.fork-strategy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - cell: M1
+            resolution: lowest-direct
+            prerelease: disallow
+            fork-strategy: fewest
+          - cell: M2
+            resolution: highest
+            prerelease: allow
+            fork-strategy: fewest
+          - cell: M3
+            resolution: highest
+            prerelease: disallow
+            fork-strategy: fewest
+          - cell: M4
+            resolution: lowest-direct
+            prerelease: allow
+            fork-strategy: fewest
+          - cell: M5
+            resolution: lowest
+            prerelease: if-necessary
+            fork-strategy: fewest
+          - cell: M6
+            resolution: highest
+            prerelease: disallow
+            fork-strategy: requires-python
+    env:
+      CELL_ID: ${{ matrix.cell }}
+      RESOLUTION: ${{ inputs.resolution || matrix.resolution }}
+      PRERELEASE: ${{ inputs.prerelease || matrix.prerelease }}
+      FORK_STRATEGY: ${{ inputs.fork_strategy || matrix.fork-strategy }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
+        with:
+          persist-credentials: false
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2  # v10.3.3
+        with:
+          enable-cache: true
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7
+        with:
+          python-version: '3.11'
+      - name: Create Clean Virtual Environment
+        run: uv venv --python 3.11 matrix_env
+      - name: Install Dependencies
+        run: |
+          uv pip install --python matrix_env --group test -e . \
+            --resolution "$RESOLUTION" \
+            --prerelease "$PRERELEASE" \
+            --fork-strategy "$FORK_STRATEGY"
+      - name: Populate Global Gitignore to Verify Hermeticity
+        run: |
+          mkdir -p ~/.config/git
+          echo '*' > ~/.config/git/ignore
+      - name: Run Pytest
+        run: ./matrix_env/bin/pytest
+      - name: Record Matrix Cell Result Summary
+        if: always()
+        env:
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          {
+            echo "### Dependency Matrix Result: ${CELL_ID}"
+            echo ""
+            echo "| Cell | Resolution | Prerelease | Fork Strategy | Status |"
+            echo "| :--- | :--- | :--- | :--- | :--- |"
+            echo "| \`${CELL_ID}\` | \`${RESOLUTION}\` | \`${PRERELEASE}\` | \`${FORK_STRATEGY}\` | **${JOB_STATUS}** |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Capture Dependency Tree on Failure
+        if: failure()
+        run: |-
+          {
+            echo "### Dependency Tree (${CELL_ID}: ${RESOLUTION} / ${PRERELEASE} / ${FORK_STRATEGY})"
+            echo '```'
+            uv pip tree --python matrix_env 2>&1 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

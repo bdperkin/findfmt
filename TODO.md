@@ -3,14 +3,14 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 172 Closed Issues | 112 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 173 Closed Issues | 111 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
 > milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320); 2026-11-05 (closed
 > issues #303, #343, #384, #322, #323, #221, #345, #321, #337, and #426; released v1.1.1 and closed
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
-> issues #360, #344, #546, #306, #556, and #427; released v1.1.2 and v1.1.3 and closed their
+> issues #360, #344, #546, #306, #556, #427, and #429; released v1.1.2 and v1.1.3 and closed their
 > milestones)
 
 ______________________________________________________________________
@@ -537,6 +537,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#427](https://github.com/bdperkin/findfmt/issues/427)** - tools(deps): implement local
   dependency resolution matrix runner with failure diagnostics (Closed: 2026-11-08 via PR
   [#558](https://github.com/bdperkin/findfmt/pull/558))
+- [x] **[#429](https://github.com/bdperkin/findfmt/issues/429)** - ci(deps): create exhaustive
+  scheduled and dispatch dependency resolution matrix workflow (Closed: 2026-11-08 via PR
+  [#559](https://github.com/bdperkin/findfmt/pull/559))
 
 ______________________________________________________________________
 
@@ -633,12 +636,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   **Value:** High | **Effort:** M - **Rationale:** Security hardening for untrusted input lists.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#429](https://github.com/bdperkin/findfmt/issues/429)** - ci(deps): create exhaustive
-  scheduled and dispatch dependency resolution matrix workflow *(Rank: 18 | Epic:
-  [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
-  | Milestone: v1.1.4)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled exhaustive
-  matrix. Blocked by [#426](https://github.com/bdperkin/findfmt/issues/426).
 
 - [ ] **[#215](https://github.com/bdperkin/findfmt/issues/215)** - feat(i18n): add language support
   for German (de) (~133 million) *(Rank: 19 | Epic:
@@ -802,7 +799,7 @@ sub-issues. Respect `Blocked by` links when picking up work.
   matrix testing and bound troubleshooting in contributing guide *(Rank: 44 | Epic:
   [[Epic] Exhaustive Dependency Resolution Matrix Testing via uv in CI and Tooling](https://github.com/bdperkin/findfmt/issues/425)
   | Milestone: v1.1.4)* - **Value:** Low | **Effort:** S - **Rationale:** Docs for the matrix
-  tooling. Blocked by [#429](https://github.com/bdperkin/findfmt/issues/429).
+  tooling.
 
 - [ ] **[#366](https://github.com/bdperkin/findfmt/issues/366)** - [CLI] Validate numeric CLI
   parameters (min=0) and clarify misleading option help descriptions *(Rank: 45 | Epic:
@@ -1265,8 +1262,7 @@ linked natively on GitHub.
   Release Automation & Dependency Verification *(Milestone: v1.1.4 | Open sub-issues: 1)* -
   [#349](https://github.com/bdperkin/findfmt/issues/349)
 - [ ] **[#425](https://github.com/bdperkin/findfmt/issues/425)** - [Epic] Exhaustive Dependency
-  Resolution Matrix Testing via uv in CI and Tooling *(Milestone: v1.1.4 | Open sub-issues: 2)* -
-  [#429](https://github.com/bdperkin/findfmt/issues/429),
+  Resolution Matrix Testing via uv in CI and Tooling *(Milestone: v1.1.4 | Open sub-issues: 1)* -
   [#430](https://github.com/bdperkin/findfmt/issues/430)
 - [ ] **[#336](https://github.com/bdperkin/findfmt/issues/336)** - [Epic] Traversal Engine
   Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety *(Milestone:
@@ -1440,7 +1436,7 @@ v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, a
 
 | Milestone       | Theme                                                                                                                 | Open Issues |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                      | 7           |
+| v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                      | 6           |
 | v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 4           |
 | v1.2.0          | Core/CLI Decoupling: Side-Effect-Free Import, Wrapper Parsing, Friendly Errors                                        | 6           |
 | v1.2.1          | CLI Help/Docs Accuracy, Pager Streaming, Depth-Safe Traversal & API Hygiene                                           | 8           |
