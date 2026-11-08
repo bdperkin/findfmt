@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 01:04-0400\n"
+"POT-Creation-Date: 2026-11-08 21:59+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -19,58 +19,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/quality/index.md:1 83fc704fb5eb411eb3d4c5c75b69e2ad
+#: ../../source/quality/index.md:1 6a20cd256f0a4d70922312956c9e69b9
 msgid "Quality Metrics & Architecture"
 msgstr ""
 
-#: ../../source/quality/index.md:3 d4cefc00098846d0b55b0def1025a05d
+#: ../../source/quality/index.md:3 d35366e6f1bd41bc8bd44a029b627290
 msgid "`findfmt` is engineered under the strictest software quality standards."
 msgstr ""
 
-#: ../../source/quality/index.md:5 e95457b3a5ee49aabbe7947ea44404b9
+#: ../../source/quality/index.md:5 7568e723dd364d3cb34f56c08f80983b
 msgid "1. Code Quality Standards"
 msgstr ""
 
-#: ../../source/quality/index.md:7 25f7eb0a494c454a94cda7f526789f20
+#: ../../source/quality/index.md:7 77f931f48d1144d081a964eaa9e6020f
 msgid ""
 "**100% Code Coverage**: Enforced through `pytest-cov` and Codecov CI "
 "checks."
 msgstr ""
 
-#: ../../source/quality/index.md:8 e5ffdc0610d543e397dce947d4c0f6e9
+#: ../../source/quality/index.md:8 664608a7ff6c4a9ea2a6413f08ced023
 msgid ""
 "**Strict Static Typing**: Verified with `ty` in pedantic mode (`all = "
 "\"error\"`) and `pyproject.toml` configuration."
 msgstr ""
 
-#: ../../source/quality/index.md:10 c16adc601a194e90930b0ae28a92d820
+#: ../../source/quality/index.md:10 f9e62bda867b45caa0b886b0feac34c8
 msgid ""
 "**Ruff Strictness**: Formatted and linted using `ruff` with `ALL` rules "
 "selected."
 msgstr ""
 
-#: ../../source/quality/index.md:11 73fe35cf96124366ab7f55c7f4960e7b
+#: ../../source/quality/index.md:11 4cad236af92e43499fe063e5401bbb8a
 msgid "**Cyclomatic Complexity**: Monitored using `radon` and capped via `xenon`."
 msgstr ""
 
-#: ../../source/quality/index.md:12 174172abc94f483181b8c6ab6df5939a
+#: ../../source/quality/index.md:12 6f00c650f5734f1f8db9492818bfe5d3
 #, python-format
 msgid ""
 "**Documentation Completeness**: Monitored via `interrogate` ensuring 100%"
 " docstring coverage."
 msgstr ""
 
-#: ../../source/quality/index.md:13 39c1ae3e69b247f69047b9475b6dd103
+#: ../../source/quality/index.md:13 cd0596152f304450a4857ec7a8fc4a22
 msgid ""
 "**Prose & Style Linting**: Enforced on all Markdown documentation using "
 "Vale with Google and Proselint style standards."
 msgstr ""
 
-#: ../../source/quality/index.md:16 99d1fef3605f467a950610dd00f9a54a
+#: ../../source/quality/index.md:16 3365c61ac71b44cda6d341c9d20e0e22
 msgid "2. Traversal Complexity Optimization & Performance Baselines"
 msgstr ""
 
-#: ../../source/quality/index.md:18 effb3769e3d644f08caa26f5f63ab15a
+#: ../../source/quality/index.md:18 235ae76c64b144a384783b647f936641
 msgid ""
 "Repository traversal performs early pruning of `.gitignore` hierarchies "
 "to prevent recursing into expansive unneeded directory trees such as "
@@ -78,7 +78,7 @@ msgid ""
 "time."
 msgstr ""
 
-#: ../../source/quality/index.md:22 4fccc2132e7d4b3a8503177d3dd20dfc
+#: ../../source/quality/index.md:22 460fb6ff9a6744dc9293d116dcbcb64e
 msgid ""
 "Official v1.0.0 benchmarks establish traversal throughput exceeding 3,000"
 " files/second on standard hierarchies and confirm bounded $O(1)$ memory "
@@ -87,14 +87,19 @@ msgid ""
 "topology baselines and regression testing procedures."
 msgstr ""
 
-#: ../../source/quality/index.md:27 48237215a90e435f90cb13166a5112a8
+#: ../../source/quality/index.md:27 16d4d3c080e74ec08dcd818e3e5278f7
 msgid "3. Python Runtime Compatibility"
 msgstr ""
 
-#: ../../source/quality/index.md:29 b21cf5c70cd044c8b83c116737ab0b91
+#: ../../source/quality/index.md:29 c34cf929cdea4e17a1762502d214fe8a
 msgid ""
 "`findfmt` officially supports Python 3.11 through 3.15, with automated CI"
 " matrices testing Ubuntu, macOS, and Windows. A non-gating `3.16-dev` job"
-" gives early warning for the next Python release. See the complete "
-"analysis and version matrix:"
+" gives early warning for the next Python release. Direct and transitive "
+"dependency bounds in `pyproject.toml` are continuously verified across "
+"`uv` resolution strategies (`highest`, `lowest`, `lowest-direct`), pre-"
+"release modes, and fork strategies in CI and via "
+"`tools/verify_quality.py` (see [Dependency Resolution Matrix & "
+"Orchestration ADR](dependency_matrix.md)). See the complete analysis and "
+"version matrix:"
 msgstr ""

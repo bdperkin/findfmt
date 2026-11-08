@@ -145,6 +145,37 @@ All pull requests must satisfy our quality gate before merging:
   marked fuzzy for review, but a translation whose source text was removed is deleted.
   `tests/unit/test_docs_catalogs.py` fails when a page has no catalog in some language.
 
+### 4.1. Dependency Resolution Testing
+
+`findfmt` validates dependency declarations in `pyproject.toml` across `uv` resolution strategies
+(`highest`, `lowest`, `lowest-direct`), pre-release policies (`disallow`, `allow`, `if-necessary`,
+`explicit`, `if-necessary-or-explicit`), and fork strategies (`fewest`, `requires-python`). Pull
+requests run a 2-cell smoke matrix in `.github/workflows/ci.yml` (**M1**: `lowest-direct` +
+`disallow`; **M2**: `highest` + `allow`), while `.github/workflows/dependency-matrix.yml` runs all 6
+pruned cells (**M1–M6**) nightly and via `workflow_dispatch` (see
+`docs/source/quality/dependency_matrix.md`).
+
+Run the dependency matrix locally in isolated temporary virtual environments via
+`tools/verify_quality.py`:
+
+```bash
+uv run python tools/verify_quality.py --smoke
+uv run python tools/verify_quality.py --full
+uv run python tools/verify_quality.py --resolution lowest-direct --prerelease disallow --fork-strategy fewest
+```
+
+When a matrix cell fails, `tools/verify_quality.py` prints a three-stage diagnostic report:
+
+1. **Inspect `uv pip tree` and Version Deltas**: Review Stage 1 (`uv pip tree`) and Stage 2 (deltas
+   against `uv.lock`) to identify which downgraded or pre-release package triggered the failure.
+2. **Bisect and Raise Lower Bounds**: If `lowest-direct` (**M1**/**M4**) or transitive `lowest`
+   (**M5**) fails, test candidate versions in an ephemeral environment
+   (`uv pip install --python <venv> <pkg>==<ver>`), update the minimum floor in `pyproject.toml`
+   (`[project].dependencies` or `[dependency-groups].test`), and run `uv lock`.
+3. **Handle Upstream Pre-Releases**: If `prerelease=allow` (**M2**/**M4**) fails due to an upstream
+   alpha, beta, or release candidate, update the affected call site or add a temporary upper-bound
+   constraint in `pyproject.toml`.
+
 ## 5. Commit Guidelines
 
 We use [Conventional Commits](https://www.conventionalcommits.org/) to power our automated semantic

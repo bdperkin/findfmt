@@ -178,3 +178,42 @@ The diagnostic reporter cross-references installed direct package versions again
 - If a failure occurs under `prerelease=allow` (`M2` or `M4`), the report highlights every installed
   package whose version matches a pre-release segment (`a`, `b`, `rc`, `dev`) so maintainers can
   file upstream reports or add temporary upper-bound exclusions.
+
+______________________________________________________________________
+
+## 5. Local Execution & Bound Troubleshooting Playbook
+
+Contributors can run the dependency resolution matrix locally using `tools/verify_quality.py` (also
+documented in `CONTRIBUTING.md` under *Dependency Resolution Testing*):
+
+```bash
+# Execute the 2-cell PR smoke matrix (M1 and M2)
+uv run python tools/verify_quality.py --smoke
+
+# Execute all 6 canonical pruned cells (M1 through M6)
+uv run python tools/verify_quality.py --full
+
+# Execute a targeted permutation against a specific Python interpreter
+uv run python tools/verify_quality.py \
+  --resolution lowest-direct \
+  --prerelease disallow \
+  --fork-strategy fewest \
+  --python 3.11
+```
+
+### 5.1. Troubleshooting Lower-Bound & Pre-Release Failures
+
+1. **Read the Three-Stage Diagnostic Report**: When `uv pip install` or `pytest` exits non-zero,
+   check **Stage 1** (`uv pip tree`), **Stage 2** (installed version deltas compared to `uv.lock`),
+   and **Stage 3** (actionable `pyproject.toml` remediation lines).
+2. **Bisect Minimum Floor Regressions (`M1`, `M4`, `M5`)**:
+   - Create a temporary environment (`uv venv --python 3.11 /tmp/dep-bisect`) and install the
+     failing combination.
+   - Upgrade the implicated package (`uv pip install --python /tmp/dep-bisect "<pkg>==<version>"`)
+     until `/tmp/dep-bisect/bin/pytest` passes with 100% coverage.
+   - Raise the floor specifier in `pyproject.toml` (`[project].dependencies` or
+     `[dependency-groups].test`) and refresh `uv.lock` via `uv lock`.
+3. **Triage Upstream Pre-Release Regressions (`M2`, `M4`)**:
+   - Inspect the pre-release package flagged in **Stage 3**.
+   - Update internal call sites if an upstream API deprecation was finalized, or add a documented
+     temporary upper bound in `pyproject.toml` while reporting the issue upstream.
