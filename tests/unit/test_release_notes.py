@@ -66,6 +66,7 @@ def test_every_released_version_has_notes() -> None:
     assert "1.1.0" in versions
     assert "1.1.1" in versions
     assert "1.1.2" in versions
+    assert "1.1.3" in versions
     for version in versions:
         notes = release_notes(text, f"v{version}")
         assert not re.search(r"^## |^\[[^\]]+\]: |<!--", notes, re.MULTILINE), version

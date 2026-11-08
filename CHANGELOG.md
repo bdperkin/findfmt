@@ -7,6 +7,37 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-11-08
+
+### Documentation
+
+- *(release)* Document GitHub milestone closure and `TODO.md` roadmap tracking in the maintainer
+  release checklist in `CONTRIBUTING.md` (#545).
+
+### Security
+
+- *(ci)* Add `zizmor` static analysis pre-commit hook and `.github/workflows/zizmor.yml` SARIF
+  code-scanning workflow for GitHub Actions, Dependabot, and pre-commit configurations, and harden
+  workflows with `persist-credentials: false`, job-scoped permissions, and environment-bound
+  template expressions (#468).
+
+### Changed
+
+- *(deps)* Pin `dependency-smoke-matrix` in `.github/workflows/ci.yml` to the minimum supported
+  Python (`3.11`), add `typing-extensions>=4.4; python_version<'3.12'` to `[build-system].requires`,
+  and make `Dependency Smoke Matrix` a required status check on `main` (#325).
+- *(packaging)* Add `package-check` CI job (`Package Metadata & Wheel Contents`) running `uv build`,
+  `twine check --strict`, and `check-wheel-contents --no-config` on every PR and in `release.yml`,
+  and register it as a required status check on `main` (#475, #344).
+- *(packaging)* Expand `packaging-smoke-test` in `.github/workflows/ci.yml` and
+  `tools/smoke_wheel.py` (`--sdist`) to install and smoke-test source distributions
+  (`dist/*.tar.gz`) on Linux across supported Python extremes (#358, #344).
+- *(ci)* Align `ruff` (`0.17.3`) and shared lint tool versions across `.pre-commit-config.yaml` and
+  `uv.lock`, implement drift enforcement and `--write` synchronization in
+  `tools/sync_pre_commit_deps.py` wired into `tools/verify_quality.py`, standardize
+  `codecov/codecov-action` comments, and move Sphinx `linkcheck` in `.github/workflows/docs.yml` to
+  scheduled and manual dispatch runs (#360, #344).
+
 ## [1.1.2] - 2026-11-06
 
 ### Features
@@ -595,4 +626,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.1.0]: https://github.com/bdperkin/findfmt/compare/v1.0.2...v1.1.0
 [1.1.1]: https://github.com/bdperkin/findfmt/compare/v1.1.0...v1.1.1
 [1.1.2]: https://github.com/bdperkin/findfmt/compare/v1.1.1...v1.1.2
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.2...HEAD
+[1.1.3]: https://github.com/bdperkin/findfmt/compare/v1.1.2...v1.1.3
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.3...HEAD
