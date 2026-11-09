@@ -11,7 +11,7 @@
 > issues #303, #343, #384, #322, #323, #221, #345, #321, #337, and #426; released v1.1.1 and closed
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
 > issues #360, #344, #546, #306, #556, #427, #429, #430, #425, #307, #308, #564, #566, #349, and
-> epic #385; released v1.1.2 and v1.1.3 and closed their milestones)
+> epic #385; released v1.1.2, v1.1.3, and v1.1.4 and closed their milestones)
 
 ______________________________________________________________________
 
@@ -1428,12 +1428,11 @@ Re-planned on 2026-10-24 for the 1.1.0 release: v1.1.0 now holds the release wor
 and #469). Its remaining traversal and localization issues moved by theme: #320 → v1.1.1, #323 →
 v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 
-v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, and v1.1.3 on
-2026-11-08 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
+v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, and v1.1.3 and v1.1.4
+on 2026-11-08 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
 
 | Milestone       | Theme                                                                                                                 | Open Issues |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                      | 2           |
 | v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 4           |
 | v1.2.0          | Core/CLI Decoupling: Side-Effect-Free Import, Wrapper Parsing, Friendly Errors                                        | 6           |
 | v1.2.1          | CLI Help/Docs Accuracy, Pager Streaming, Depth-Safe Traversal & API Hygiene                                           | 8           |

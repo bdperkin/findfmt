@@ -7,6 +7,43 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.4] - 2026-11-08
+
+### Features
+
+- *(i18n)* Add `tools/i18n_translate.py` and `uv run python -m tools.i18n translate` for batch AI
+  translation of GNU `gettext` `.po` message catalogs via OpenAI, Anthropic, Ollama, and
+  deterministic mock backends with placeholder/markup validation and retry fallback (#306).
+- *(i18n)* Add `tools/i18n_sync.py`, the `i18n-catalog-check` pre-commit hook, and
+  `uv run python -m tools.i18n sync` to enforce POT/PO synchronization and 100% translation
+  completeness across completed locales (`en`, `es`) and automate one-command extraction, update, AI
+  translation, validation, and `.mo` compilation (#566).
+- *(deps)* Add `tools/dep_matrix.py` and extend `tools/verify_quality.py` (`--smoke`, `--full`,
+  `--resolution`, `--prerelease`, `--fork-strategy`) with a local `uv` dependency resolution matrix
+  runner and 3-stage failure diagnostic engine (#427).
+
+### Documentation
+
+- *(agents)* Add `AGENTS.md` developer and AI coding agent architecture guide, testing/linting
+  standards, and 350/500-line file decomposition policy (#556).
+- *(deps)* Document local and CI dependency resolution matrix testing and lower-bound/pre-release
+  remediation workflows in `CONTRIBUTING.md` (#430, #425).
+- *(i18n)* Add `docs/source/guides/localization_platforms.md` evaluating managed SaaS localization
+  platforms (POEditor, Crowdin, Localazy) versus local open-source CLI automation (#307, #308), and
+  document the end-to-end AI translation runbook and locale onboarding steps (#564).
+
+### Changed
+
+- *(release)* Automatically close the matching GitHub milestone in `.github/workflows/release.yml`
+  once a release is published (#546).
+- *(ci)* Add `.github/workflows/dependency-matrix.yml` for nightly scheduled and `workflow_dispatch`
+  execution of the 6-cell pruned `uv` dependency resolution matrix with step summaries, and raise
+  test dependency lower bounds (`click>=8.2`, `pytest>=8.4`, `pytest-cov>=7`, `hatchling>=1.25`) for
+  `--resolution lowest` compatibility (#429, #425).
+- *(tools)* Add multi-Python local test runner support (`--all-pythons`, `--pythons`, `--list`) to
+  `tools/verify_quality.py` reading supported interpreters (`3.11`–`3.15`) from `pyproject.toml`,
+  and de-duplicate the `quality-gate` job in `.github/workflows/ci.yml` (#349, #385).
+
 ## [1.1.3] - 2026-11-08
 
 ### Documentation
@@ -627,4 +664,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.1.1]: https://github.com/bdperkin/findfmt/compare/v1.1.0...v1.1.1
 [1.1.2]: https://github.com/bdperkin/findfmt/compare/v1.1.1...v1.1.2
 [1.1.3]: https://github.com/bdperkin/findfmt/compare/v1.1.2...v1.1.3
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.3...HEAD
+[1.1.4]: https://github.com/bdperkin/findfmt/compare/v1.1.3...v1.1.4
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.4...HEAD
