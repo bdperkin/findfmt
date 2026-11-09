@@ -34,7 +34,7 @@ jobs:
       - name: Install Dependencies
         run: uv sync --locked --all-groups
       - name: Build All Sphinx Formats (Strict)
-        run: make -C docs clean html dirhtml singlehtml epub man latex text texinfo
+        run: make -C docs clean html-all dirhtml singlehtml epub man latex text texinfo
           htmlhelp qthelp devhelp json pickle xml pseudoxml changes gettext
       - name: Check External Documentation Links
         if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

@@ -45,12 +45,22 @@ html_theme = "furo"
 html_title = "findfmt Documentation"
 html_logo = "_static/logo.svg"
 html_favicon = "_static/favicon.ico"
+templates_path = ["_templates"]
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_theme_options = {
     "source_repository": "https://github.com/bdperkin/findfmt",
     "source_branch": "main",
     "source_directory": "docs/source/",
+}
+html_context = {
+    "languages": [
+        ("en", "English"),
+        ("de", "Deutsch"),
+        ("es", "Español"),
+        ("fr", "Français"),
+        ("ja", "日本語"),
+    ],
 }
 
 # Man page output
