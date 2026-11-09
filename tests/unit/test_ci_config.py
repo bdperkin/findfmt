@@ -1,12 +1,15 @@
 """Tests for CI workflows and Dependabot configuration."""
 
 import fnmatch
+import re
 import tomllib
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
-from tools.dep_matrix import FULL_MATRIX
+from tools import verify_quality
+from tools.dep_matrix import FULL_MATRIX, load_supported_pythons
 
 
 def _repo_root() -> Path:
@@ -291,3 +294,35 @@ def test_perf_marker_and_ci_job() -> None:
     assert "perf-tests" in jobs, "CI workflow must define a dedicated perf-tests job"
     perf_steps = jobs["perf-tests"]["steps"]
     assert any("pytest -m perf" in str(s.get("run", "")) for s in perf_steps)
+
+
+def test_local_runner_covers_supported_pythons(capsys: pytest.CaptureFixture[str]) -> None:
+    """Validate local runner Python version list matches classifiers and CI smoke step (#349)."""
+    pyproject_path = _repo_root() / "pyproject.toml"
+    with pyproject_path.open("rb") as f:
+        data = tomllib.load(f)
+
+    prefix = "Programming Language :: Python :: "
+    classifier_versions = {
+        c.removeprefix(prefix)
+        for c in data["project"]["classifiers"]
+        if isinstance(c, str)
+        and c.startswith(prefix + "3.")
+        and c.removeprefix(prefix)[2:].isdigit()
+    }
+    runner_versions = set(load_supported_pythons(pyproject_path))
+    assert runner_versions == classifier_versions
+
+    assert verify_quality.main(["--list"], repo_root=_repo_root()) == 0
+    list_output = capsys.readouterr().out
+    listed_versions = set(re.findall(r"py(3\.\d+)\s+\(python=3\.\d+\)", list_output))
+    assert listed_versions == classifier_versions
+
+    ci = _load_ci_workflow()
+    qg_steps = ci["jobs"]["quality-gate"]["steps"]
+    qg_runs = [str(s.get("run", "")) for s in qg_steps if "run" in s]
+    assert "uv run python tools/verify_quality.py --list" in qg_runs
+    assert "uv run python tools/verify_quality.py" in qg_runs
+    assert "uv run ruff check" not in qg_runs, (
+        "quality-gate must not duplicate individual linter invocations run by verify_quality.py"
+    )

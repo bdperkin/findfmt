@@ -76,6 +76,31 @@ _IMPORT_ERR_RE = re.compile(
     r"module ['\"]([^'\"]+)['\"] has no attribute)",
 )
 _REQ_NAME_RE = re.compile(r"^([A-Za-z0-9_.-]+)")
+_CLASSIFIER_PREFIX = "Programming Language :: Python :: "
+
+
+def load_supported_pythons(pyproject_path: Path | None = None) -> tuple[str, ...]:
+    """Load supported Python `3.X` versions from `pyproject.toml` Trove classifiers."""
+    target = pyproject_path or (Path(__file__).resolve().parent.parent / "pyproject.toml")
+    if not target.is_file():
+        return ()
+
+    with target.open("rb") as f:
+        data = tomllib.load(f)
+
+    project = data.get("project", {})
+    classifiers = project.get("classifiers", []) if isinstance(project, dict) else []
+    if not isinstance(classifiers, list):
+        return ()
+
+    versions = [
+        c.removeprefix(_CLASSIFIER_PREFIX)
+        for c in classifiers
+        if isinstance(c, str)
+        and c.startswith(_CLASSIFIER_PREFIX + "3.")
+        and c.removeprefix(_CLASSIFIER_PREFIX)[2:].isdigit()
+    ]
+    return tuple(sorted(versions, key=lambda v: tuple(int(p) for p in v.split("."))))
 
 
 def normalize_pkg_name(name: str) -> str:
