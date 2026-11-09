@@ -19,25 +19,18 @@ from tools.i18n_prompts import (
     parse_plural_forms_header,
     validate_cli_flags_preserved,
 )
+from tools.i18n_sync import (
+    add_translation_cli_args,
+    sync_pending_locales,
+    validate_and_check_catalogs,
+)
 from tools.i18n_translate import (
-    DEFAULT_BATCH_SIZE,
-    DEFAULT_TEMPERATURE,
-    SUPPORTED_BACKENDS,
     TranslationConfig,
-    TranslationResult,
     translate_catalogs,
-    translate_po_file,
 )
 from tools.i18n_validation import (
-    extract_brace_placeholders,
-    extract_printf_placeholders,
-    extract_rich_tags,
-    mask_placeholders,
     parse_po_catalog,
-    unmask_placeholders,
     validate_catalogs,
-    validate_message_pair,
-    validate_po_file,
 )
 
 try:
@@ -51,32 +44,20 @@ except ImportError:
 __all__ = [
     "CLI_GLOSSARY",
     "PLURAL_RULE_SPECS",
-    "SUPPORTED_BACKENDS",
-    "TranslationConfig",
-    "TranslationResult",
     "build_plural_prompt",
     "build_system_prompt",
     "compile_catalogs",
-    "extract_brace_placeholders",
     "extract_cli_flags",
     "extract_messages",
-    "extract_printf_placeholders",
-    "extract_rich_tags",
     "get_plural_rule_spec",
     "init_catalog",
     "main",
-    "mask_placeholders",
     "parse_plural_forms_header",
     "parse_po_catalog",
     "prune_untranslated_obsolete",
-    "translate_catalogs",
-    "translate_po_file",
-    "unmask_placeholders",
     "update_catalogs",
     "validate_catalogs",
     "validate_cli_flags_preserved",
-    "validate_message_pair",
-    "validate_po_file",
 ]
 
 DEFAULT_DOMAIN = "findfmt"
@@ -320,7 +301,7 @@ def compile_catalogs(
     domain: str = DEFAULT_DOMAIN,
 ) -> int:
     """Validate and compile all PO catalogs under locale_dir to binary MO catalogs."""
-    if validate_catalogs(locale_dir, domain) != 0:
+    if validate_and_check_catalogs(locale_dir, domain) != 0:
         return 1
 
     pybabel_bin = shutil.which("pybabel")
@@ -394,18 +375,21 @@ def build_parser() -> argparse.ArgumentParser:
     )
     sub_tr.add_argument("locale", nargs="?", default=None, help="Target locale code.")
     sub_tr.add_argument("--locale", dest="locale_opt", default=None, help="Target locale code.")
-    sub_tr.add_argument("--all", dest="all_locales", action="store_true", help="All locales.")
-    sub_tr.add_argument("--backend", choices=SUPPORTED_BACKENDS, default="openai", help="Backend.")
-    sub_tr.add_argument("--model", default=None, help="Optional LLM model override.")
-    sub_tr.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE, help="Batch size.")
-    sub_tr.add_argument("--temperature", type=float, default=DEFAULT_TEMPERATURE, help="Temp.")
-    sub_tr.add_argument("--dry-run", action="store_true", help="Preview without modifying files.")
+    add_translation_cli_args(sub_tr)
     subparsers.add_parser(
         "validate",
         parents=[domain_p, loc_p],
-        help="Validate placeholders and markup in PO catalogs.",
+        help="Validate placeholders, markup, POT sync, and completed-locale coverage.",
     )
     subparsers.add_parser("compile", parents=[domain_p, loc_p], help="Compile PO to MO files.")
+
+    sub_sync = subparsers.add_parser(
+        "sync",
+        parents=[domain_p, loc_p],
+        help="Extract, update, fill English, AI-translate completed locales, and compile.",
+    )
+    sub_sync.add_argument("--source", type=Path, default=DEFAULT_SOURCE_DIR, help="Source dir.")
+    add_translation_cli_args(sub_sync)
 
     sub_all = subparsers.add_parser(
         "all",
@@ -416,9 +400,9 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _run_translate(args: argparse.Namespace) -> int:
-    """Run AI translation subcommand from parsed CLI arguments."""
-    cfg = TranslationConfig(
+def _build_translation_config(args: argparse.Namespace) -> TranslationConfig:
+    """Construct `TranslationConfig` from parsed CLI arguments."""
+    return TranslationConfig(
         backend=args.backend,
         model=args.model,
         batch_size=args.batch_size,
@@ -426,27 +410,46 @@ def _run_translate(args: argparse.Namespace) -> int:
         dry_run=args.dry_run,
         sanitize_fn=lambda p: _sanitize_po_locations(p, root=PROJECT_ROOT),
     )
+
+
+def _run_translate(args: argparse.Namespace) -> int:
+    """Run AI translation subcommand from parsed CLI arguments."""
     return translate_catalogs(
         args.locale_opt or args.locale,
         all_locales=args.all_locales,
         locale_dir=args.localedir,
         domain=args.domain,
+        config=_build_translation_config(args),
+    )
+
+
+def _run_all_extract_and_update(args: argparse.Namespace) -> int:
+    """Run extract and update lifecycle steps for `sync` and `all`."""
+    pot = args.localedir / f"{args.domain}.pot"
+    code = extract_messages(args.source, pot, args.domain)
+    return code if code != 0 else update_catalogs(pot, args.localedir, args.domain)
+
+
+def _run_sync(args: argparse.Namespace) -> int:
+    """Run extract, update, English identity fill, AI translation, and compile."""
+    code = _run_all_extract_and_update(args)
+    if code != 0:
+        return code
+
+    cfg = _build_translation_config(args)
+    code = sync_pending_locales(
+        args.localedir,
+        args.domain,
+        all_locales=args.all_locales,
         config=cfg,
     )
+    return code if (code != 0 or cfg.dry_run) else compile_catalogs(args.localedir, args.domain)
 
 
 def _run_all(args: argparse.Namespace) -> int:
     """Run extract, update, validate, and compile lifecycle steps in sequence."""
-    pot = args.localedir / f"{args.domain}.pot"
-    code = extract_messages(args.source, pot, args.domain)
-    if code != 0:
-        return code
-
-    code = update_catalogs(pot, args.localedir, args.domain)
-    if code != 0:
-        return code
-
-    return compile_catalogs(args.localedir, args.domain)
+    code = _run_all_extract_and_update(args)
+    return code if code != 0 else compile_catalogs(args.localedir, args.domain)
 
 
 def _dispatch_command(args: argparse.Namespace) -> int:
@@ -456,7 +459,8 @@ def _dispatch_command(args: argparse.Namespace) -> int:
         "init": lambda: init_catalog(args.locale, args.pot, args.localedir, args.domain),
         "update": lambda: update_catalogs(args.pot, args.localedir, args.domain),
         "translate": lambda: _run_translate(args),
-        "validate": lambda: validate_catalogs(args.localedir, args.domain),
+        "sync": lambda: _run_sync(args),
+        "validate": lambda: validate_and_check_catalogs(args.localedir, args.domain),
         "compile": lambda: compile_catalogs(args.localedir, args.domain),
         "all": lambda: _run_all(args),
     }

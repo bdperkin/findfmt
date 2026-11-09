@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.4.dev7+g7a8368977.d20261108\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-09 00:58+0000\n"
+"POT-Creation-Date: 2026-11-09 01:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -825,12 +825,12 @@ msgstr ""
 msgid "5.2. Step-by-Step Catalog Translation Workflow"
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:180
+#: ../../source/guides/localization_platforms.md:183
 #: 703d20eebaca496ea132c795ff21b882
 msgid "5.3. Runtime Locale Conventions & Test Registration"
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:182
+#: ../../source/guides/localization_platforms.md:185
 #: 627ce5e13d6640d98819db5f2f4db6ef
 msgid ""
 "When onboarding a new language `<locale>`, verify the following runtime "
@@ -838,12 +838,26 @@ msgid ""
 "container or CI hosts without OS locale packs installed:"
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:185
+#: ../../source/guides/localization_platforms.md:188
+#: a5d11d2903c141a09577fd1f85e4d52d
+msgid "**Completed-Locale Gate (`tools/i18n_sync.py`):**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:189
+#: 1c29474d638b427bb32c6134e6db8c67
+msgid ""
+"Once `<locale>` is 100% translated, add it to `COMPLETE_LOCALES` in "
+"`tools/i18n_sync.py` so the `i18n-catalog-check` pre-commit hook and `uv "
+"run python -m tools.i18n sync` enforce zero untranslated or `fuzzy` "
+"entries whenever new source strings are added."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:192
 #: fb83321d8d124d38b023cd0a06674582
 msgid "**Territory & Numeric Grouping Fallbacks (`src/findfmt/i18n.py`):**"
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:186
+#: ../../source/guides/localization_platforms.md:193
 #: e7fe9e225778415fabf2f93ab3e0ef9f
 msgid ""
 "Add `<locale>` to `_LANG_TO_TERRITORY` if its primary ISO territory code "
@@ -851,7 +865,7 @@ msgid ""
 "\"CN\"`, `\"hi\": \"IN\"`)."
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:188
+#: ../../source/guides/localization_platforms.md:195
 #: d193a9e03a7946ff96e703ada02a8f8e
 msgid ""
 "Add `<locale>`'s decimal separator, thousands separator, and digit "
@@ -859,24 +873,24 @@ msgid ""
 " `[3, 2, 0]` grouping in `_get_numeric_conventions()`)."
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:191
+#: ../../source/guides/localization_platforms.md:198
 #: dc56d2f4681048d2bcd5a3aa31b6b5fd
 msgid "**Timestamp Format Fallback (`src/findfmt/utils/strings.py`):**"
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:192
+#: ../../source/guides/localization_platforms.md:199
 #: b459d7fea4e14047ac91862c187dc17f
 msgid ""
 "Add `<locale>`'s `strftime` fallback pattern to `fallback_formats` in "
 "`resolve_time_format()`."
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:193
+#: ../../source/guides/localization_platforms.md:200
 #: a484d415b5414d9eb273aa789c17cc3f
 msgid "**Unit & Integration Tests (`tests/unit/test_i18n_localization.py`):**"
 msgstr ""
 
-#: ../../source/guides/localization_platforms.md:194
+#: ../../source/guides/localization_platforms.md:201
 #: dc133ffda0ed4178869231c29f1ceb6c
 msgid ""
 "Include `<locale>` in "
