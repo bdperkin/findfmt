@@ -189,11 +189,11 @@ OptOneFileSystem = Annotated[
 ]
 OptMaxDepth = Annotated[
     int | None,
-    typer.Option("-L", "--max-depth", rich_help_panel=_PC, help=h.HELP_MAX_DEPTH),
+    typer.Option("-L", "--max-depth", min=0, rich_help_panel=_PC, help=h.HELP_MAX_DEPTH),
 ]
 OptFileLimit = Annotated[
     int | None,
-    typer.Option("--filelimit", rich_help_panel=_PC, help=h.HELP_FILE_LIMIT),
+    typer.Option("--filelimit", min=0, rich_help_panel=_PC, help=h.HELP_FILE_LIMIT),
 ]
 OptPrune = Annotated[bool, typer.Option("--prune", rich_help_panel=_PC, help=h.HELP_PRUNE)]
 OptSort = Annotated[str | None, typer.Option("--sort", rich_help_panel=_PC, help=h.HELP_SORT)]

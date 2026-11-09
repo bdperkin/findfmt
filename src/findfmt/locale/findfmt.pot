@@ -598,7 +598,7 @@ msgid "List all known classification tags supported by the engine and exit."
 msgstr ""
 
 #: src/findfmt/cli/help.py:219
-msgid "Enable verbose output or extended runtime diagnostics with --version."
+msgid "Include extended runtime diagnostics when used with --version."
 msgstr ""
 
 #: src/findfmt/cli/help.py:220
@@ -777,8 +777,8 @@ msgid ""
 "'C').\n"
 "  --version, -v, -V             Display version (use with --verbose for "
 "diagnostics).\n"
-"  --verbose                     Enable verbose output or extended runtime"
-" diagnostics.\n"
+"  --verbose                     Include extended runtime diagnostics with"
+" --version.\n"
 "  --diagnostics                 Display runtime environment diagnostics "
 "and exit.\n"
 "  --help-all                    Display this comprehensive reference and "
