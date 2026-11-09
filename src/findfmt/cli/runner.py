@@ -66,6 +66,9 @@ def _deliver_output(  # noqa: PLR0913 - wide CLI/config signature
             formatter.stream(files, target_stream)
     except BrokenPipeError:
         handle_broken_pipe(target_stream)
+    except FindFmtError as err:
+        typer.echo(f"Error: {err}", err=True)
+        raise typer.Exit(code=2) from err
 
 
 def _reconfigure_surrogateescape(stream: TextIO) -> None:

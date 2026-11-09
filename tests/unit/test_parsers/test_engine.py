@@ -11,6 +11,7 @@ import pytest
 
 from findfmt.models import FileInfo, SortKey, TraversalConfig
 from findfmt.parsers.engine import (
+    _decode_bytes,
     _read_lines,
     _resolve_and_classify,
     _sort_file_infos,
@@ -130,6 +131,24 @@ def test_read_lines(tmp_path: Path) -> None:
     # From stdin stream
     stream = io.StringIO("stdin1\nstdin2\n")
     assert _read_lines("-", stream=stream) == ["stdin1", "stdin2"]
+
+    # Non-UTF-8 bytes from file and buffered stdin round-trip via surrogateescape
+    raw_non_utf8 = b"bad\xff.txt\nraw\xe9.py\n"
+    f_bytes = tmp_path / "non_utf8_input.txt"
+    f_bytes.write_bytes(raw_non_utf8)
+    lines_from_file = _read_lines(str(f_bytes))
+    assert lines_from_file == ["bad\udcff.txt", "raw\udce9.py"]
+    assert "\ufffd" not in "".join(lines_from_file)
+
+    buffered_stdin = io.TextIOWrapper(io.BytesIO(raw_non_utf8), encoding="utf-8", errors="strict")
+    lines_from_stdin = _read_lines("-", stream=buffered_stdin)
+    assert lines_from_stdin == ["bad\udcff.txt", "raw\udce9.py"]
+
+    with patch(
+        "os.fsdecode",
+        side_effect=UnicodeDecodeError("utf-8", raw_non_utf8, 3, 4, "invalid start byte"),
+    ):
+        assert _decode_bytes(raw_non_utf8) == "bad\udcff.txt\nraw\udce9.py\n"
 
 
 def test_sort_file_infos(tmp_path: Path) -> None:

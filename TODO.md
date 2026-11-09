@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 188 Closed Issues | 116 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 189 Closed Issues | 115 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -15,7 +15,8 @@
 > issues #215, #222, #228, and #233; added #574; released v1.1.5 and closed its milestone; added
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
-> realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329)
+> realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329
+> and #460)
 
 ______________________________________________________________________
 
@@ -587,7 +588,10 @@ Note: Ordered chronologically by completion date.
   commit-msg hook for title/body length and message structure (Closed: 2026-11-09 as not planned;
   upstream unmaintained, local-only, high false-positive rate)
 - [x] **[#329](https://github.com/bdperkin/findfmt/issues/329)** - fix(cli): invalid --table-style
-  and other domain errors print full tracebacks (Closed: 2026-11-09)
+  and other domain errors print full tracebacks (Closed: 2026-11-09 via PR
+  [#602](https://github.com/bdperkin/findfmt/pull/602))
+- [x] **[#460](https://github.com/bdperkin/findfmt/issues/460)** - fix(parsers): read --from-file
+  stdin and files as bytes with os.fsdecode (no crash on non-UTF-8 names) (Closed: 2026-11-09)
 
 ______________________________________________________________________
 
@@ -601,11 +605,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#460](https://github.com/bdperkin/findfmt/issues/460)** - fix(parsers): read --from-file
-  stdin and files as bytes with os.fsdecode (no crash on non-UTF-8 names) *(Rank: 2 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Parent: [#334](https://github.com/bdperkin/findfmt/issues/334) | Milestone: v1.2.2)* -
-  **Value:** High | **Effort:** S - **Rationale:** Crash on real-world input; small fix.
 - [ ] **[#588](https://github.com/bdperkin/findfmt/issues/588)** - chore(lint): integrate cargo fmt,
   cargo clippy, and cargo check into tools/verify_quality.py alongside ruff and ty *(Rank: 3 | Epic:
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
@@ -1344,7 +1343,6 @@ its sub-issues close.
   mis-parses ASCII tree output, crashes on non-UTF-8 stdin, and lacks NUL input *(Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
   | Milestone: v1.2.2)* - **Sub-issues:** [#459](https://github.com/bdperkin/findfmt/issues/459),
-  [#460](https://github.com/bdperkin/findfmt/issues/460),
   [#461](https://github.com/bdperkin/findfmt/issues/461),
   [#463](https://github.com/bdperkin/findfmt/issues/463)
 
@@ -1560,7 +1558,7 @@ v1.8.1).
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
 | v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 6           |
 | v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                                                  | 6           |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 8           |
+| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                                     | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                                              | 8           |
 | v1.3.2          | Pre-commit & CI Config Hardening: Schema Validation, Workflow Timeouts, Meta Hooks & Markdown Linting                                 | 4           |
