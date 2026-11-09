@@ -11,12 +11,6 @@ from importlib.metadata import PackageNotFoundError, version
 
 import typer
 
-from findfmt.cli.file_config import (
-    format_config_dump,
-    get_active_config_data,
-    get_active_config_path,
-)
-from findfmt.cli.pager import display_with_pager
 from findfmt.i18n import _
 
 __all__ = [
@@ -96,6 +90,8 @@ def get_diagnostics(ctx: typer.Context | None = None) -> str:
         config_path = ctx.meta.get("findfmt_config_path")
 
     if config_path is None:
+        from findfmt.cli.file_config import get_active_config_path
+
         config_path = get_active_config_path()
 
     cfg_str = str(config_path) if config_path is not None else _("none")
@@ -178,6 +174,8 @@ def version_callback(
         ctx = None
 
     if value:
+        from findfmt.cli.pager import display_with_pager
+
         if _is_verbose_requested(ctx):
             display_with_pager(get_diagnostics(ctx=ctx), ctx=ctx)
         else:
@@ -204,6 +202,8 @@ def diagnostics_callback(
         ctx = None
 
     if value:
+        from findfmt.cli.pager import display_with_pager
+
         display_with_pager(get_diagnostics(ctx=ctx), ctx=ctx)
         raise typer.Exit(code=0)
 
@@ -226,6 +226,13 @@ def show_config_callback(
         ctx = None
 
     if value:
+        from findfmt.cli.file_config import (
+            format_config_dump,
+            get_active_config_data,
+            get_active_config_path,
+        )
+        from findfmt.cli.pager import display_with_pager
+
         path = get_active_config_path()
         data = get_active_config_data()
         if ctx is not None:

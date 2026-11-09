@@ -2,16 +2,11 @@
 
 from __future__ import annotations
 
+import warnings
+from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
+from importlib.metadata import version as _pkg_version
+
 from findfmt.classifier import classify_file, get_known_tags
-from findfmt.cli import get_version, main
-from findfmt.entrypoints import (
-    main_findfilefmt,
-    main_findfilemime,
-    main_findfiles,
-    main_findfmt0,
-    main_findshebang,
-    main_findsummary,
-)
 from findfmt.exceptions import (
     FindFmtError,
     InvalidSortCriteriaError,
@@ -23,7 +18,6 @@ from findfmt.exceptions import (
 )
 from findfmt.formatters import Formatter, OutputFormat, get_formatter
 from findfmt.i18n import (
-    _,
     detect_locale,
     detect_locales,
     get_current_locale,
@@ -58,6 +52,15 @@ from findfmt.utils.strings import (
     strip_ansi_escapes,
 )
 
+
+def get_version() -> str:
+    """Retrieve package version or fallback string."""
+    try:
+        return _pkg_version("findfmt")
+    except _PackageNotFoundError:
+        return "1.1.3.dev0"
+
+
 __version__ = get_version()
 
 __all__ = [
@@ -73,7 +76,6 @@ __all__ = [
     "UnsupportedBoxStyleError",
     "UnsupportedFormatError",
     "UnsupportedTableStyleError",
-    "_",
     "__version__",
     "build_file_uri",
     "calculate_accumulated_sizes",
@@ -98,13 +100,6 @@ __all__ = [
     "get_formatter",
     "get_known_tags",
     "get_version",
-    "main",
-    "main_findfilefmt",
-    "main_findfilemime",
-    "main_findfiles",
-    "main_findfmt0",
-    "main_findshebang",
-    "main_findsummary",
     "mask_control_characters",
     "ngettext",
     "override_locale",
@@ -114,3 +109,43 @@ __all__ = [
     "strip_ansi_escapes",
     "traverse_directory",
 ]
+
+_DEPRECATED_CLI_ENTRYPOINTS: frozenset[str] = frozenset(
+    {
+        "main",
+        "main_findfilefmt",
+        "main_findfilemime",
+        "main_findfiles",
+        "main_findfmt0",
+        "main_findshebang",
+        "main_findsummary",
+    },
+)
+
+
+def __getattr__(name: str) -> object:
+    """Lazily resolve deprecated CLI entry points and gettext helper."""
+    if name in _DEPRECATED_CLI_ENTRYPOINTS:
+        warnings.warn(
+            f"'findfmt.{name}' is deprecated and will be removed in v2.0; "
+            f"import '{name}' from 'findfmt.cli' or 'findfmt.entrypoints' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from findfmt import entrypoints
+
+        return getattr(entrypoints, name)
+
+    if name == "_":
+        warnings.warn(
+            "'findfmt._' is deprecated and will be removed in v2.0; "
+            "import '_' from 'findfmt.i18n' instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        from findfmt.i18n import _ as gettext_func
+
+        return gettext_func
+
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)

@@ -9,9 +9,6 @@ import stat
 import unicodedata
 from typing import TYPE_CHECKING
 
-import rich.markup
-from rich.cells import cell_len
-
 from findfmt.i18n import get_current_locale
 
 if TYPE_CHECKING:
@@ -82,6 +79,8 @@ def cell_width(text: str) -> int:
     Returns:
         Total number of terminal display cells occupied by the string.
     """
+    from rich.cells import cell_len
+
     clean_text = strip_ansi_escapes(text)
     return cell_len(clean_text)
 
@@ -216,6 +215,8 @@ def format_display_path(  # noqa: PLR0913 - wide CLI/config signature
         result = f"{result}{indicator}"
 
     if escape_markup:
+        import rich.markup
+
         result = rich.markup.escape(result)
 
     if hyperlink and uri is not None and uri:

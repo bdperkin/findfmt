@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 190 Closed Issues | 114 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 191 Closed Issues | 113 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -16,7 +16,7 @@
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
-> issues #460 and #366)
+> issues #460, #366, and #452)
 
 ______________________________________________________________________
 
@@ -594,7 +594,10 @@ Note: Ordered chronologically by completion date.
   stdin and files as bytes with os.fsdecode (no crash on non-UTF-8 names) (Closed: 2026-11-09 via PR
   [#603](https://github.com/bdperkin/findfmt/pull/603))
 - [x] **[#366](https://github.com/bdperkin/findfmt/issues/366)** - [CLI] Validate numeric CLI
-  parameters (min=0) and clarify misleading option help descriptions (Closed: 2026-11-09)
+  parameters (min=0) and clarify misleading option help descriptions (Closed: 2026-11-09 via PR
+  [#604](https://github.com/bdperkin/findfmt/pull/604))
+- [x] **[#452](https://github.com/bdperkin/findfmt/issues/452)** - refactor(api): lazy-load main,
+  main\_\* and _ from the package root via module \_\_getattr\_\_ (Closed: 2026-11-09)
 
 ______________________________________________________________________
 
@@ -613,12 +616,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same
   zero-warning static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#452](https://github.com/bdperkin/findfmt/issues/452)** - refactor(api): lazy-load main,
-  main\_\* and _ from the package root via module \_\_getattr\_\_ *(Rank: 5 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Parent: [#324](https://github.com/bdperkin/findfmt/issues/324) | Milestone: v1.2.0)* -
-  **Value:** Medium | **Effort:** S - **Rationale:** Small change that removes most import cost and
-  unblocks [#377](https://github.com/bdperkin/findfmt/issues/377).
 - [ ] **[#459](https://github.com/bdperkin/findfmt/issues/459)** - fix(parsers): strip ASCII tree
   branches and the summary trailer in --from-file tree input *(Rank: 6 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
@@ -1004,8 +1001,7 @@ sub-issues. Respect `Blocked by` links when picking up work.
   top-level main\_\* entry points and _ helper exports from findfmt package root *(Rank: 68 | Epic:
   [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
   | Milestone: v1.8.1)* - **Value:** Low | **Effort:** S - **Rationale:** v2.0 removal of shims
-  introduced by [#324](https://github.com/bdperkin/findfmt/issues/324). Blocked by
-  [#452](https://github.com/bdperkin/findfmt/issues/452).
+  introduced by [#324](https://github.com/bdperkin/findfmt/issues/324).
 
 - [ ] **[#504](https://github.com/bdperkin/findfmt/issues/504)** - refactor(api)!: make
   TraversalConfig and CLI command callback parameters keyword-only (v2.0) *(Rank: 69 | Epic:
@@ -1329,7 +1325,6 @@ its sub-issues close.
   findfmt" side-effect free and decouple the core from the CLI *(Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
   | Milestone: v1.2.0)* - **Sub-issues:** [#451](https://github.com/bdperkin/findfmt/issues/451),
-  [#452](https://github.com/bdperkin/findfmt/issues/452),
   [#453](https://github.com/bdperkin/findfmt/issues/453)
 - [ ] **[#332](https://github.com/bdperkin/findfmt/issues/332)** - feat(cli): layered config
   precedence (user < project < env < CLI) and remove format booleans from config *(Epic:
@@ -1554,7 +1549,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                                                 | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 5           |
+| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 4           |
 | v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                                                  | 6           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                                     | 8           |

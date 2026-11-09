@@ -6,8 +6,12 @@ import ast
 import enum
 import importlib
 import re
+import subprocess
+import sys
 import tomllib
+from importlib.metadata import PackageNotFoundError
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -202,7 +206,6 @@ def test_root_package_exports() -> None:
         "UnsupportedBoxStyleError",
         "UnsupportedFormatError",
         "UnsupportedTableStyleError",
-        "_",
         "__version__",
         "build_file_uri",
         "calculate_accumulated_sizes",
@@ -227,13 +230,6 @@ def test_root_package_exports() -> None:
         "get_formatter",
         "get_known_tags",
         "get_version",
-        "main",
-        "main_findfilefmt",
-        "main_findfilemime",
-        "main_findfiles",
-        "main_findfmt0",
-        "main_findshebang",
-        "main_findsummary",
         "mask_control_characters",
         "ngettext",
         "override_locale",
@@ -248,6 +244,51 @@ def test_root_package_exports() -> None:
     for export in expected_exports:
         msg = f"Expected export '{export}' missing from root findfmt package"
         assert hasattr(findfmt, export), msg
+
+
+@pytest.mark.parametrize(
+    "attr",
+    [
+        "main",
+        "main_findfilefmt",
+        "main_findfilemime",
+        "main_findfiles",
+        "main_findfmt0",
+        "main_findshebang",
+        "main_findsummary",
+        "_",
+    ],
+)
+def test_lazy_deprecated_root_exports(attr: str) -> None:
+    """Deprecated CLI entry points and _ lazy-load from findfmt with DeprecationWarning (#452)."""
+    with pytest.deprecated_call(match=rf"'findfmt\.{attr}' is deprecated"):
+        resolved = getattr(findfmt, attr)
+
+    assert callable(resolved)
+
+
+def test_lazy_module_getattr_and_importtime() -> None:
+    """Verify lazy __getattr__ fallbacks and that importing findfmt skips typer and rich (#452)."""
+    assert findfmt.get_version() == findfmt.__version__
+    with patch("findfmt._pkg_version", side_effect=PackageNotFoundError):
+        assert findfmt.get_version() == "1.1.3.dev0"
+
+    with pytest.raises(AttributeError, match="has no attribute 'nonexistent_symbol'"):
+        findfmt.__getattr__("nonexistent_symbol")
+
+    assert findfmt.formatters.__getattr__("RichTableFormatter").__name__ == "RichTableFormatter"
+    assert findfmt.formatters.__getattr__("RichTreeFormatter").__name__ == "RichTreeFormatter"
+    with pytest.raises(AttributeError, match="has no attribute 'nonexistent_formatter'"):
+        findfmt.formatters.__getattr__("nonexistent_formatter")
+
+    proc = subprocess.run(
+        [sys.executable, "-X", "importtime", "-c", "import findfmt"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "typer" not in proc.stderr
+    assert "rich" not in proc.stderr
 
 
 def test_py_typed_marker_present() -> None:

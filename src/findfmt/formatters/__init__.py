@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
+from findfmt.exceptions import UnsupportedBoxStyleError
 from findfmt.formatters.base import (
     TABLE_FIELD_NAMES,
     Formatter,
@@ -33,12 +34,10 @@ from findfmt.formatters.structured import (
     YamlFormatter,
 )
 from findfmt.formatters.text import TextFormatter
-from findfmt.formatters.visual import (
-    RichTableFormatter,
-    RichTreeFormatter,
-    UnsupportedBoxStyleError,
-)
 from findfmt.formatters.xml_formatter import XmlFormatter
+
+if TYPE_CHECKING:
+    from findfmt.formatters.visual import RichTableFormatter, RichTreeFormatter
 
 __all__ = [
     "FORMULA_TRIGGER_CHARS",
@@ -335,6 +334,8 @@ def _create_visual_formatter(
     common = _extract_common_formatter_kwargs(kwargs)
 
     if fmt_str == OutputFormat.TABLE.value:
+        from findfmt.formatters.visual import RichTableFormatter
+
         default_style = "cp437" if kwargs.get("cp437") else "rounded"
         style = kwargs.get("table_style", default_style)
         style_str = str(style) if isinstance(style, str) else default_style
@@ -346,6 +347,8 @@ def _create_visual_formatter(
         )
 
     if fmt_str == OutputFormat.TREE.value:
+        from findfmt.formatters.visual import RichTreeFormatter
+
         return RichTreeFormatter(
             absolute=absolute,
             force_color=force_color,
@@ -441,3 +444,19 @@ def get_formatter(
 
     valid_formats = ", ".join(f.value for f in OutputFormat)
     raise UnsupportedFormatError(str(format_type), valid_formats)
+
+
+def __getattr__(name: str) -> type[Formatter]:
+    """Lazily resolve Rich visual formatters on module attribute access."""
+    if name == "RichTableFormatter":
+        from findfmt.formatters.visual import RichTableFormatter
+
+        return RichTableFormatter
+
+    if name == "RichTreeFormatter":
+        from findfmt.formatters.visual import RichTreeFormatter
+
+        return RichTreeFormatter
+
+    msg = f"module {__name__!r} has no attribute {name!r}"
+    raise AttributeError(msg)
