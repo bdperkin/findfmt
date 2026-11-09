@@ -65,7 +65,7 @@ def test_find_fuzzy_entries() -> None:
 
 def test_shipped_catalogs_pass_completeness_and_sync() -> None:
     """Verify shipped catalogs pass AST source sync and COMPLETE_LOCALES checks."""
-    assert COMPLETE_LOCALES == ("de", "en", "es")
+    assert COMPLETE_LOCALES == ("de", "en", "es", "fr")
     assert check_catalog_completeness(LOCALE_DIR) == []
     assert validate_and_check_catalogs(LOCALE_DIR) == 0
 

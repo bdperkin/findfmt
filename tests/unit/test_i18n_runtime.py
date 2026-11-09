@@ -362,3 +362,59 @@ def test_spanish_canonical_catalog_runtime(tmp_path: Path) -> None:
     with override_locale("es_ES.UTF-8", localedir=tmp_path):
         assert _("Retry operation?") == "¿Reintentar la operación?"
         assert _("Operation failed!") == "¡Falló la operación!"
+
+
+def test_french_canonical_catalog_runtime(tmp_path: Path) -> None:
+    """Verify French (fr) catalog coverage, non-breaking spaces, elisions, and plurals (#222)."""
+    fr_po_path = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "findfmt"
+        / "locale"
+        / "fr"
+        / "LC_MESSAGES"
+        / "findfmt.po"
+    )
+    entries = parse_po_catalog(fr_po_path.read_text(encoding="utf-8"))
+    assert len(entries) >= 145
+    assert all(e.msgstrs and all(bool(s) for s in e.msgstrs) for e in entries)
+
+    with override_locale("fr") as loc:
+        assert loc == "fr"
+        assert get_current_locale() == "fr"
+        trans = get_current_translation()
+        assert isinstance(trans, gettext.GNUTranslations)
+
+        # Diagnostics, French typography (non-breaking space before ':'), and elisions
+        assert _("not installed") == "non installé"
+        assert _("not found") == "non trouvé"
+        assert _("none") == "aucune"
+        assert _("Total size:") == "Taille totale\u00a0:"
+        assert _("[bold]Top tags:[/]") == "[bold]Principales balises\u00a0:[/]"
+        assert _("Invert the active sort order.") == "Inverser l'ordre de tri actif."
+
+        err_msg = _("Error: Cannot specify both --dirsfirst and --filesfirst.")
+        assert err_msg.startswith("Erreur\u00a0:")
+        assert "--dirsfirst" in err_msg
+
+        # French pluralization rules: nplurals=2; plural=(n > 1); (0 and 1 are singular)
+        sg = "[bold]Matched file:[/] [cyan]{count}[/]"
+        pl = "[bold]Matched files:[/] [cyan]{count}[/]"
+        for n in (0, 1):
+            assert ngettext(sg, pl, n) == "[bold]Fichier correspondant\u00a0:[/] [cyan]{count}[/]"
+
+        for n in (2, 5, 100):
+            assert ngettext(sg, pl, n) == "[bold]Fichiers correspondants\u00a0:[/] [cyan]{count}[/]"
+
+    mo_dir = tmp_path / "fr" / "LC_MESSAGES"
+    mo_dir.mkdir(parents=True, exist_ok=True)
+    (mo_dir / "findfmt.mo").write_bytes(
+        _generate_mo_bytes(
+            {
+                "": "Content-Type: text/plain; charset=UTF-8\n",
+                "Operation failed!": "Échec de l'opération\u00a0!",
+            },
+        ),
+    )
+    with override_locale("fr_FR.UTF-8", localedir=tmp_path):
+        assert _("Operation failed!") == "Échec de l'opération\u00a0!"
