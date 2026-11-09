@@ -12,17 +12,15 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-import rich.markup
-from rich.table import Table
-
+from findfmt.exceptions import UnsupportedBoxStyleError
 from findfmt.formatters.base import TABLE_FIELD_NAMES, Formatter, write_stream_safe
-from findfmt.formatters.visual import RICH_BOX_STYLES, UnsupportedBoxStyleError
-from findfmt.terminal import get_console
 
 _QuotingType = Literal[0, 1, 2, 3]
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+
+    from rich.table import Table
 
     from findfmt.models import FileInfo
 
@@ -275,6 +273,8 @@ class CsvTableFormatter(Formatter):
             UnsupportedBoxStyleError: If table_style is not recognized.
         """
         super().__init__(absolute=absolute)
+        from findfmt.formatters.visual import RICH_BOX_STYLES
+
         normalized = table_style.lower().strip()
         if normalized not in RICH_BOX_STYLES:
             valid_styles = ", ".join(sorted(RICH_BOX_STYLES.keys()))
@@ -288,6 +288,9 @@ class CsvTableFormatter(Formatter):
 
     def _build_table(self, files: Iterable[FileInfo]) -> Table:
         """Construct a Rich Table populated with CSV record rows."""
+        import rich.markup
+        from rich.table import Table
+
         table = Table(
             box=self.box_style,
             show_header=True,
@@ -307,6 +310,8 @@ class CsvTableFormatter(Formatter):
     @override
     def format(self, files: Iterable[FileInfo]) -> str:
         """Render CSV records into an aligned table string."""
+        from findfmt.terminal import get_console
+
         table = self._build_table(files)
         buf = io.StringIO()
         width = self.console_width if self.console_width is not None else 120
@@ -316,6 +321,8 @@ class CsvTableFormatter(Formatter):
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream aligned CSV table directly to a text stream."""
+        from findfmt.terminal import get_console
+
         reconfigure = getattr(stream, "reconfigure", None)
         if callable(reconfigure):
             reconfigure(errors="surrogateescape")

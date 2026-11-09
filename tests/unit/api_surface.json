@@ -198,10 +198,6 @@
    ],
    "kind": "exception"
   },
-  "_": {
-   "kind": "function",
-   "signature": "(message: 'str') -> 'str'"
-  },
   "__version__": {
    "kind": "data",
    "type": "str"
@@ -297,34 +293,6 @@
   "get_version": {
    "kind": "function",
    "signature": "() -> 'str'"
-  },
-  "main": {
-   "kind": "function",
-   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
-  },
-  "main_findfilefmt": {
-   "kind": "function",
-   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
-  },
-  "main_findfilemime": {
-   "kind": "function",
-   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
-  },
-  "main_findfiles": {
-   "kind": "function",
-   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
-  },
-  "main_findfmt0": {
-   "kind": "function",
-   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
-  },
-  "main_findshebang": {
-   "kind": "function",
-   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
-  },
-  "main_findsummary": {
-   "kind": "function",
-   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
   },
   "mask_control_characters": {
    "kind": "function",
