@@ -47,6 +47,19 @@ def _validate_file_exists(file_path: Path | None, label: str) -> None:
         raise typer.Exit(code=2)
 
 
+def _validate_utf8_file(file_path: Path | None, label: str) -> None:
+    """Validate that specified file exists and is readable as UTF-8."""
+    if file_path is None:
+        return
+
+    _validate_file_exists(file_path, label)
+    try:
+        file_path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as err:
+        typer.echo(f"Error: Cannot read '{file_path}' as UTF-8: {err}", err=True)
+        raise typer.Exit(code=2) from err
+
+
 def _validate_format_conflicts(
     *,
     tree: bool,
@@ -127,8 +140,8 @@ def validate_cli_options(  # noqa: PLR0913 - wide CLI/config signature
         typer.Exit: On invalid argument values or conflicting options.
     """
     _validate_file_exists(gitignore_file, "Gitignore file")
-    _validate_file_exists(intro, "Intro file")
-    _validate_file_exists(outro, "Outro file")
+    _validate_utf8_file(intro, "Intro file")
+    _validate_utf8_file(outro, "Outro file")
     _validate_format_conflicts(tree=tree, xml=xml, html=html, json=json)
     _validate_from_file(from_file)
     _validate_ordering(dirs_first=dirs_first, files_first=files_first)

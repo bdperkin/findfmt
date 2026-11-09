@@ -13,6 +13,7 @@ import typer
 from findfmt.cli.config import build_traversal_config
 from findfmt.cli.output_sink import OutputSink, open_output_sink, reconfigure_surrogateescape
 from findfmt.cli.signals import handle_broken_pipe, install_signal_handlers, trap_cli_signals
+from findfmt.exceptions import FindFmtError
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.i18n import set_locale
 from findfmt.summary import write_summary
@@ -196,6 +197,27 @@ def _build_formatter_kwargs(  # noqa: PLR0913 - wide CLI/config signature
     return kwargs
 
 
+def _create_formatter(
+    effective_format: OutputFormat,
+    config: TraversalConfig,
+    sink: OutputSink,
+    formatter_kwargs: dict[str, object],
+) -> Formatter:
+    """Instantiate output formatter, exiting with code 2 on domain errors."""
+    try:
+        return get_formatter(
+            effective_format,
+            absolute=not config.relative_paths,
+            show_tags=config.show_tags,
+            delimiter="\0" if config.null_delimited else "\n",
+            **formatter_kwargs,
+        )
+    except FindFmtError as err:
+        sink.close()
+        typer.echo(f"Error: {err}", err=True)
+        raise typer.Exit(code=2) from err
+
+
 def execute_findfmt(  # noqa: PLR0913 - wide CLI/config signature
     *,
     paths: list[Path] | None,
@@ -350,7 +372,6 @@ def execute_findfmt(  # noqa: PLR0913 - wide CLI/config signature
     tag_counter: Counter[str] = Counter()
     match_count = total_bytes = 0
     had_traversal_error = False
-    delimiter = "\0" if config.null_delimited else "\n"
 
     reconfigure_surrogateescape(sys.stdout)
     sink = open_output_sink(output, stream)
@@ -380,12 +401,11 @@ def execute_findfmt(  # noqa: PLR0913 - wide CLI/config signature
         no_links=no_links,
     )
 
-    formatter = get_formatter(
+    formatter = _create_formatter(
         effective_format,
-        absolute=absolute,
-        show_tags=config.show_tags,
-        delimiter=delimiter,
-        **formatter_kwargs,
+        config,
+        sink,
+        formatter_kwargs,
     )
 
     def _on_traversal_error(err: OSError) -> None:
