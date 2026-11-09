@@ -112,10 +112,11 @@ When modifying public symbols in `__all__` or translatable strings wrapped in `_
 # Regenerate public API surface snapshot after intentional public API updates
 uv run python tools/api_surface.py --write
 
-# Extract, validate, and compile gettext message catalogs
-uv run python tools/i18n.py extract
-uv run python tools/i18n.py validate
-uv run python tools/i18n.py compile
+# Extract, AI-translate, validate, and compile gettext message catalogs
+uv run python -m tools.i18n extract
+uv run python -m tools.i18n translate <locale> --dry-run
+uv run python -m tools.i18n validate
+uv run python -m tools.i18n compile
 ```
 
 ## 3. Coding Standards & Conventions

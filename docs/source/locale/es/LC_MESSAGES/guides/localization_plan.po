@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.0.3.dev20+g4c93cc2a7.d20261024\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-05 15:14-0500\n"
+"POT-Creation-Date: 2026-11-09 00:57+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -410,7 +410,8 @@ msgstr ""
 msgid "2 (`n != 1`)"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:6 5c323eea1e57439e95226fd3ddf21ffc
+#: ../../source/guides/localization_plan.md:6 2246b42004454e4aa56f34e5b7fe4670
+#: 5c323eea1e57439e95226fd3ddf21ffc
 msgid "Canonical Catalog Active"
 msgstr ""
 
@@ -430,9 +431,8 @@ msgstr ""
 msgid "~133 M"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:6 2246b42004454e4aa56f34e5b7fe4670
-#: 4f566b6e420e4a739efbfc1317b89f7d 5c673bcc294f4b9bb491656d4e8fab20
-#: 7b6cb4c3d4b841eead8bfc4376a9db3b
+#: ../../source/guides/localization_plan.md:6 4f566b6e420e4a739efbfc1317b89f7d
+#: 5c673bcc294f4b9bb491656d4e8fab20 7b6cb4c3d4b841eead8bfc4376a9db3b
 msgid "Starter Catalog Active"
 msgstr ""
 
@@ -1669,90 +1669,79 @@ msgid "7.3. Step 3: Translate Strings & Validate Format Placeholders"
 msgstr ""
 
 #: ../../source/guides/localization_plan.md:349
-#: 8187c98efaaa4924a1989dc8ef0967ab
+#: e2113e08a0b74968ad31dee00f813a52
 msgid ""
-"Translate all `msgid` entries into `msgstr` (or `msgstr[0]`, `msgstr[1]`,"
-" etc. for pluralized strings)."
-msgstr ""
-
-#: ../../source/guides/localization_plan.md:351
-#: e8319824a1eb44088c055b312c657f32
-#, python-brace-format, python-format
-msgid ""
-"Ensure formatting placeholders (such as `{count}`, `{path}`, `%s`) are "
-"preserved verbatim."
+"Run `uv run python -m tools.i18n translate <locale>` (or populate "
+"`msgstr` / `msgstr[N]` entries directly; see [Managed Localization "
+"Platforms vs. Local CI Automation](localization_platforms.md) for AI "
+"provider setup and runtime convention registration)."
 msgstr ""
 
 #: ../../source/guides/localization_plan.md:352
-#: 2dbdfc62abb2484ea8ef1c46647afb25
+#: cf0088e558494c4ea7b85ea91d17bd3c
+#, python-brace-format, python-format
 msgid ""
-"Retain command-line arguments, option flags (`--tree`, `-t`, `-s`), and "
-"tag names without translation."
+"Ensure formatting placeholders (`{count}`, `{path}`, `%s`), Rich tags "
+"(`[bold]`, `[/]`), and CLI option flags (`--tree`, `-t`, `-s`) are "
+"preserved verbatim in UTF-8 without BOM."
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:354
-#: 9e41ede11f774ca4b5d689c6a1a2bfa2
-msgid ""
-"Ensure all files are saved with UTF-8 encoding without byte-order marks "
-"(BOM)."
-msgstr ""
-
-#: ../../source/guides/localization_plan.md:356
+#: ../../source/guides/localization_plan.md:355
 #: c33c5a12e4b9495186fec8776b0f7f87
 msgid "7.4. Step 4: Compile Catalogs and Test Packaging"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:358
+#: ../../source/guides/localization_plan.md:357
 #: b8c199c2fac74772b1cb5ef37c5430dd
 msgid "Compile `.po` files to binary `.mo` format and verify wheel packaging:"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:371
+#: ../../source/guides/localization_plan.md:370
 #: 77db727310684eb3bf30c78888ca65a0
 msgid "7.5. Step 5: Add Unit & Integration Tests"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:373
+#: ../../source/guides/localization_plan.md:372
 #: 7e8ef7605e144afa80668cc65354528c
 msgid "Add test cases to `tests/unit/test_i18n_runtime.py` verifying:"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:375
+#: ../../source/guides/localization_plan.md:374
 #: 693da1c01875463ab70c64325e173b4f
 msgid "Catalog loading via `override_locale(\"<locale>\")`."
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:376
+#: ../../source/guides/localization_plan.md:375
 #: 5bab40bc103e44c8aa79c6c99d3739c4
 msgid "Execution of the CLI with `--locale <locale>` or `--lang <locale>`."
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:377
+#: ../../source/guides/localization_plan.md:376
 #: 59061d359a894ced9cecf6aa3d759986
 msgid "Boundary testing of singular and plural numbers."
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:378
+#: ../../source/guides/localization_plan.md:377
 #: b72541368ad94d2ab9ebc1d0fd813d6b
 msgid "Clean rendering without mojibake or string interpolation errors."
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:380
+#: ../../source/guides/localization_plan.md:379
 #: f05d87d9be1e47f1a87c88adff625f9f
 msgid "7.6. Step 6: Sphinx Documentation Localization"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:382
+#: ../../source/guides/localization_plan.md:381
 #: 8798a3b4444b4f10942bdf729010dbd6
 msgid "Extract documentation strings and update language catalogs for Sphinx:"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:392
+#: ../../source/guides/localization_plan.md:391
 #: c890679680a643d9b4eb6aa427359bb1
 msgid "7.7. Step 7: Quality Verification Gates"
 msgstr ""
 
-#: ../../source/guides/localization_plan.md:394
+#: ../../source/guides/localization_plan.md:393
 #: e473c4311b6f4d98bdc9ed8bb7c76943
 msgid "Run the automated verification suite:"
 msgstr ""

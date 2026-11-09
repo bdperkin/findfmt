@@ -118,6 +118,10 @@ def test_localization_platforms_adr_documentation() -> None:
         "Architecture Decision Record (ADR)",
         "Option A",
         "Option B",
+        "End-to-End AI Localization Runbook",
+        "OPENAI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "_REGIONAL_DEFAULTS",
     ):
         assert required_term in content, f"Missing {required_term!r} in {adr_path}"
 

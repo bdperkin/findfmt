@@ -346,12 +346,11 @@ according to gettext standards:
 
 ### 7.3. Step 3: Translate Strings & Validate Format Placeholders
 
-- Translate all `msgid` entries into `msgstr` (or `msgstr[0]`, `msgstr[1]`, etc. for pluralized
-  strings).
-- Ensure formatting placeholders (such as `{count}`, `{path}`, `%s`) are preserved verbatim.
-- Retain command-line arguments, option flags (`--tree`, `-t`, `-s`), and tag names without
-  translation.
-- Ensure all files are saved with UTF-8 encoding without byte-order marks (BOM).
+- Run `uv run python -m tools.i18n translate <locale>` (or populate `msgstr` / `msgstr[N]` entries
+  directly; see [Managed Localization Platforms vs. Local CI Automation](localization_platforms.md)
+  for AI provider setup and runtime convention registration).
+- Ensure formatting placeholders (`{count}`, `{path}`, `%s`), Rich tags (`[bold]`, `[/]`), and CLI
+  option flags (`--tree`, `-t`, `-s`) are preserved verbatim in UTF-8 without BOM.
 
 ### 7.4. Step 4: Compile Catalogs and Test Packaging
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.4.dev7+g7a8368977.d20261108\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 22:59+0000\n"
+"POT-Creation-Date: 2026-11-09 00:58+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -297,7 +297,7 @@ msgstr ""
 
 #: ../../source/guides/localization_platforms.md:27
 #: fcd9b0bcb1f74468b4cf333f3478de25
-msgid "Key Technical Findings"
+msgid "1.1. Key Technical Findings"
 msgstr ""
 
 #: ../../source/guides/localization_platforms.md:29
@@ -507,7 +507,7 @@ msgstr ""
 
 #: ../../source/guides/localization_platforms.md:62
 #: bf4d7ac02af64625b41f387250c6eaca
-msgid "Managed Cloud Platform Workflow"
+msgid "3.1. Managed Cloud Platform Workflow"
 msgstr ""
 
 #: ../../source/guides/localization_platforms.md:64
@@ -542,7 +542,7 @@ msgstr ""
 
 #: ../../source/guides/localization_platforms.md:74
 #: a8c1aa66e0dd46aeb7e395d9e954d13e
-msgid "Local Git + CI Auditing Workflow (`findfmt` Standard)"
+msgid "3.2. Local Git + CI Auditing Workflow (`findfmt` Standard)"
 msgstr ""
 
 #: ../../source/guides/localization_platforms.md:76
@@ -592,8 +592,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/guides/localization_platforms.md:93
-#: c89a6c7840f14a6a8f9c22ce6c5fdf66
-msgid "Context"
+#: 8bd3d58b74cb4910b1c1a1bdcfe7ebcf
+msgid "4.1. Context"
 msgstr ""
 
 #: ../../source/guides/localization_platforms.md:95
@@ -629,7 +629,7 @@ msgstr ""
 
 #: ../../source/guides/localization_platforms.md:108
 #: 210a6a890e0b428a826cc2cb8e0201c7
-msgid "Decision"
+msgid "4.2. Decision"
 msgstr ""
 
 #: ../../source/guides/localization_platforms.md:110
@@ -642,7 +642,7 @@ msgstr ""
 
 #: ../../source/guides/localization_platforms.md:113
 #: 87542830e3864b43a366ec7358c377cf
-msgid "Rationale"
+msgid "4.3. Rationale"
 msgstr ""
 
 #: ../../source/guides/localization_platforms.md:115
@@ -676,7 +676,7 @@ msgstr ""
 
 #: ../../source/guides/localization_platforms.md:126
 #: 5e9f344862514a9198d55cb66372c57e
-msgid "Future Re-Evaluation Trigger (Optional Hybrid Overlay)"
+msgid "4.4. Future Re-Evaluation Trigger (Optional Hybrid Overlay)"
 msgstr ""
 
 #: ../../source/guides/localization_platforms.md:128
@@ -690,4 +690,197 @@ msgid ""
 "and official GitHub Action) strictly as a **downstream PR "
 "generator**—where all exported commits must still pass `uv run python "
 "tools/i18n.py validate` and `pre-commit` in CI before merging."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:137
+#: 817964ca13b54e4bb05bbe395fb4d77d
+msgid "5. End-to-End AI Localization Runbook"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:139
+#: a6cbc16d20d94600a94f92d18842cfbd
+msgid ""
+"The steps below cover the complete workflow for localizing an existing or"
+" newly added language catalog under **Option A**."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:142
+#: d1f9ff594b71471bab2a10a29e0a295b
+msgid "5.1. Configuring AI Backends"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:144
+#: cdaf0f72a72c45a684b60e825727694d
+msgid ""
+"`tools/i18n_translate.py` uses Python's standard-library `urllib.request`"
+" with zero external SDK dependencies. Configure your preferred provider "
+"via environment variables:"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 73de0f30d0b8421f9fc4858e1af9e874
+msgid "Provider / Mode"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 5d06bd76e7034fa49c2fd9406ee187b3
+msgid "Required Environment Variables"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 239736f020e14726ad3ed82c836ddae5
+msgid "Example Invocation"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 98b8aa969c0e4a91a84385d230b6f4e2
+msgid "**OpenAI** *(default)*"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: b8f14dfc99b248bd8aa69f3552246064
+msgid "`OPENAI_API_KEY` (and optional `OPENAI_BASE_URL`)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 37f9c9101fac461180f204da74bd4539
+msgid ""
+"`uv run python -m tools.i18n translate de --backend openai --model gpt-"
+"4o-mini`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 67b4e25ffd8a4a83a96f7ebade4d738e
+msgid "**Google Gemini** *(OpenAI-compatible)*"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 4a3b42aa6aeb4db58b0e07139eadcf56
+msgid ""
+"`OPENAI_API_KEY` and `OPENAI_BASE_URL` set to "
+"`https://generativelanguage.googleapis.com/v1beta/openai/chat/completions`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 6d7ed90854974e819d3aaae68bc48cbe
+msgid ""
+"`uv run python -m tools.i18n translate de --backend openai --model "
+"gemini-2.5-flash`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 9e4da4853ce440dc87c3e0fecfcb9b70
+msgid "**Anthropic Claude**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: f961fdc2c4a64aeba1665c79d6012163
+msgid "`ANTHROPIC_API_KEY`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: af819c513f874aaba6734c79e3f27d74
+msgid ""
+"`uv run python -m tools.i18n translate de --backend anthropic --model "
+"claude-3-5-haiku-latest`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 59b363f48d6942df9c5c722cef09a2fa
+msgid "**Local Ollama** *(offline)*"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: ed0fe173c31846698f0ade4ada48fdcc
+msgid "None (`ollama serve` running locally, or `OLLAMA_HOST`)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: c8e90487ed994956a96d187a919a535d
+msgid ""
+"`uv run python -m tools.i18n translate de --backend ollama --model "
+"qwen2.5:14b`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: a5a55f41cda1422e86db995d27fe6dbb
+msgid "**Direct AI Coding Agent Translation**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: f29ae3e7c23b4542976a594c7bfe7e7c
+msgid "None (when working inside an offline AI coding assistant session)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: c4c3598d7b904561acb67c898dff0a30
+msgid ""
+"Populate untranslated `msgstr` entries in "
+"`src/findfmt/locale/<locale>/LC_MESSAGES/findfmt.po` following "
+"`tools/i18n_prompts.py`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:155
+#: 346aae3212204e6881f1688c8767ac16
+msgid "5.2. Step-by-Step Catalog Translation Workflow"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:180
+#: 703d20eebaca496ea132c795ff21b882
+msgid "5.3. Runtime Locale Conventions & Test Registration"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:182
+#: 627ce5e13d6640d98819db5f2f4db6ef
+msgid ""
+"When onboarding a new language `<locale>`, verify the following runtime "
+"fallbacks and test suites so localized formatting works even on minimal "
+"container or CI hosts without OS locale packs installed:"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:185
+#: fb83321d8d124d38b023cd0a06674582
+msgid "**Territory & Numeric Grouping Fallbacks (`src/findfmt/i18n.py`):**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:186
+#: e7fe9e225778415fabf2f93ab3e0ef9f
+msgid ""
+"Add `<locale>` to `_LANG_TO_TERRITORY` if its primary ISO territory code "
+"differs from `<LOCALE>.upper()` (for example, `\"ja\": \"JP\"`, `\"zh\": "
+"\"CN\"`, `\"hi\": \"IN\"`)."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:188
+#: d193a9e03a7946ff96e703ada02a8f8e
+msgid ""
+"Add `<locale>`'s decimal separator, thousands separator, and digit "
+"grouping to `_REGIONAL_DEFAULTS` in `src/findfmt/i18n.py` (or South Asian"
+" `[3, 2, 0]` grouping in `_get_numeric_conventions()`)."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:191
+#: dc56d2f4681048d2bcd5a3aa31b6b5fd
+msgid "**Timestamp Format Fallback (`src/findfmt/utils/strings.py`):**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:192
+#: b459d7fea4e14047ac91862c187dc17f
+msgid ""
+"Add `<locale>`'s `strftime` fallback pattern to `fallback_formats` in "
+"`resolve_time_format()`."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:193
+#: a484d415b5414d9eb273aa789c17cc3f
+msgid "**Unit & Integration Tests (`tests/unit/test_i18n_localization.py`):**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:194
+#: dc133ffda0ed4178869231c29f1ceb6c
+msgid ""
+"Include `<locale>` in "
+"`test_catalog_entries_placeholder_parity_and_runtime_formatting` and add "
+"assertions for localized CLI `--help`, summary panels, and plural "
+"boundaries."
 msgstr ""
