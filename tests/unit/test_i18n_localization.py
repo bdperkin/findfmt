@@ -179,7 +179,7 @@ def test_pluralization_logic() -> None:
     cases = [
         ("C", "Matched file:", "Matched files:"),
         ("es", "Archivo coincidente:", "Archivos coincidentes:"),
-        ("fr", "Fichier correspondant:", "Fichiers correspondants:"),
+        ("fr", "Fichier correspondant\u00a0:", "Fichiers correspondants\u00a0:"),
         ("de", "Passende Datei:", "Passende Dateien:"),
         ("ja", "一致したファイル:", "一致したファイル:"),
     ]
@@ -382,7 +382,7 @@ def test_summary_panel_total_bytes_localized() -> None:
         panel = format_summary_panel(15, Counter({"python": 10}), total_bytes=bytes_12_4_mb)
         render_text = str(panel.renderable)
         assert "12,4 Mio" in render_text
-        assert "Taille totale :" in render_text
+        assert "Taille totale\u00a0:" in render_text
 
     # In German
     with override_locale("de"):

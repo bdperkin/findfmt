@@ -364,3 +364,44 @@ def test_cli_flags_locale_german(tmp_path: Path) -> None:
         )
         assert res_err.exit_code == 2
         assert "Fehler:" in res_err.output
+
+
+def test_cli_flags_locale_french(tmp_path: Path) -> None:
+    """Verify CLI execution with --locale fr and LANG=fr applies full French catalog (#222)."""
+    file1 = tmp_path / "un.py"
+    file1.write_text("print(1)\n", encoding="utf-8")
+
+    runner = CliRunner()
+    with override_locale("C"):
+        # Singular summary (1 file)
+        res_single = runner.invoke(app, ["--locale", "fr", "--summary", str(tmp_path)])
+        assert res_single.exit_code == 0
+        assert "Fichier correspondant\u00a0: 1" in res_single.output
+        assert "Taille totale\u00a0:" in res_single.output
+        assert "résumé findfmt" in res_single.output
+        assert get_current_locale() == "fr"
+
+        # Plural summary (2 files) and LANG=fr environment variable
+        file2 = tmp_path / "deux.py"
+        file2.write_text("print(2)\n", encoding="utf-8")
+        res_plural = runner.invoke(
+            app,
+            ["--summary", "--format", "table", "--size", str(tmp_path)],
+            env={"LANG": "fr"},
+        )
+        assert res_plural.exit_code == 0
+        assert "Fichiers correspondants\u00a0: 2" in res_plural.output
+        assert "Chemin" in res_plural.output
+        assert "Taille" in res_plural.output
+
+        # Diagnostics and error message localization
+        res_diag = runner.invoke(app, ["--locale", "fr", "--diagnostics", "--no-config"])
+        assert res_diag.exit_code == 0
+        assert "Configuration: aucune" in res_diag.output
+
+        res_err = runner.invoke(
+            app,
+            ["--locale", "fr", "--dirsfirst", "--filesfirst", str(tmp_path)],
+        )
+        assert res_err.exit_code == 2
+        assert "Erreur\u00a0:" in res_err.output

@@ -13,6 +13,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`src/findfmt/locale/de/LC_MESSAGES/findfmt.po`, 147/147 messages) and localized Sphinx homepage
   (`docs/source/locale/de/LC_MESSAGES/index.po`), and enroll `de` in `COMPLETE_LOCALES` for
   pre-commit catalog completeness enforcement (#215).
+- *(i18n)* Complete the canonical French (`fr`) localization catalog
+  (`src/findfmt/locale/fr/LC_MESSAGES/findfmt.po`, 147/147 messages with non-breaking spaces before
+  high punctuation and verified elisions) and localized Sphinx homepage
+  (`docs/source/locale/fr/LC_MESSAGES/index.po`), and enroll `fr` in `COMPLETE_LOCALES` (#222).
 
 ## [1.1.4] - 2026-11-08
 
