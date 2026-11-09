@@ -273,3 +273,10 @@ repos:
         entry: '^#: (\S+\s+)*(/|[A-Za-z]:[\\/])'
         language: pygrep
         files: ^src/findfmt/locale/.*\.(po|pot)$
+      - id: i18n-catalog-check
+        name: Validate gettext catalogs and completeness
+        entry: python -m tools.i18n validate
+        language: python
+        additional_dependencies: [pathspec, identify, typer, pyyaml, rich]
+        files: ^src/findfmt/.*\.(py|po|pot)$
+        pass_filenames: false

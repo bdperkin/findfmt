@@ -170,11 +170,14 @@ uv run python -m tools.i18n translate de --dry-run
 # Run batch AI translation (checkpoints progress after every 25-entry batch)
 uv run python -m tools.i18n translate de --backend openai
 
-# Validate placeholders ({name}, %s), Rich markup ([bold], [/]), and plural forms
+# Validate placeholders ({name}, %s), Rich markup ([bold], [/]), POT sync, and completed-locale coverage
 uv run python -m tools.i18n validate
 
 # Compile .po catalogs into binary .mo catalogs
 uv run python -m tools.i18n compile
+
+# Or run the one-command sync pipeline (extract -> update -> fill en -> AI-translate COMPLETE_LOCALES -> compile)
+uv run python -m tools.i18n sync --backend openai
 ```
 
 ### 5.3. Runtime Locale Conventions & Test Registration
@@ -182,14 +185,18 @@ uv run python -m tools.i18n compile
 When onboarding a new language `<locale>`, verify the following runtime fallbacks and test suites so
 localized formatting works even on minimal container or CI hosts without OS locale packs installed:
 
-1. **Territory & Numeric Grouping Fallbacks (`src/findfmt/i18n.py`):**
+1. **Completed-Locale Gate (`tools/i18n_sync.py`):**
+   - Once `<locale>` is 100% translated, add it to `COMPLETE_LOCALES` in `tools/i18n_sync.py` so the
+     `i18n-catalog-check` pre-commit hook and `uv run python -m tools.i18n sync` enforce zero
+     untranslated or `fuzzy` entries whenever new source strings are added.
+2. **Territory & Numeric Grouping Fallbacks (`src/findfmt/i18n.py`):**
    - Add `<locale>` to `_LANG_TO_TERRITORY` if its primary ISO territory code differs from
      `<LOCALE>.upper()` (for example, `"ja": "JP"`, `"zh": "CN"`, `"hi": "IN"`).
    - Add `<locale>`'s decimal separator, thousands separator, and digit grouping to
      `_REGIONAL_DEFAULTS` in `src/findfmt/i18n.py` (or South Asian `[3, 2, 0]` grouping in
      `_get_numeric_conventions()`).
-2. **Timestamp Format Fallback (`src/findfmt/utils/strings.py`):**
+3. **Timestamp Format Fallback (`src/findfmt/utils/strings.py`):**
    - Add `<locale>`'s `strftime` fallback pattern to `fallback_formats` in `resolve_time_format()`.
-3. **Unit & Integration Tests (`tests/unit/test_i18n_localization.py`):**
+4. **Unit & Integration Tests (`tests/unit/test_i18n_localization.py`):**
    - Include `<locale>` in `test_catalog_entries_placeholder_parity_and_runtime_formatting` and add
      assertions for localized CLI `--help`, summary panels, and plural boundaries.
