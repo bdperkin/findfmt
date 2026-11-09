@@ -37,7 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_DOMAIN = "findfmt"
 DEFAULT_SOURCE_DIR = PROJECT_ROOT / "src" / "findfmt"
 DEFAULT_LOCALE_DIR = PROJECT_ROOT / "src" / "findfmt" / "locale"
-COMPLETE_LOCALES: tuple[str, ...] = ("en", "es")
+COMPLETE_LOCALES: tuple[str, ...] = ("de", "en", "es")
 _NGETTEXT_MIN_ARGS = 2
 
 

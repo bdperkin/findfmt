@@ -323,3 +323,44 @@ def test_cli_flags_locale_spanish(tmp_path: Path) -> None:
         )
         assert res_err.exit_code == 2
         assert "¡Error:" in res_err.output
+
+
+def test_cli_flags_locale_german(tmp_path: Path) -> None:
+    """Verify CLI execution with --locale de and LANG=de applies full German catalog (#215)."""
+    file1 = tmp_path / "eins.py"
+    file1.write_text("print(1)\n", encoding="utf-8")
+
+    runner = CliRunner()
+    with override_locale("C"):
+        # Singular summary (1 file)
+        res_single = runner.invoke(app, ["--locale", "de", "--summary", str(tmp_path)])
+        assert res_single.exit_code == 0
+        assert "Passende Datei: 1" in res_single.output
+        assert "Gesamtgröße:" in res_single.output
+        assert "findfmt Zusammenfassung" in res_single.output
+        assert get_current_locale() == "de"
+
+        # Plural summary (2 files) and LANG=de environment variable
+        file2 = tmp_path / "zwei.py"
+        file2.write_text("print(2)\n", encoding="utf-8")
+        res_plural = runner.invoke(
+            app,
+            ["--summary", "--format", "table", "--size", str(tmp_path)],
+            env={"LANG": "de"},
+        )
+        assert res_plural.exit_code == 0
+        assert "Passende Dateien: 2" in res_plural.output
+        assert "Pfad" in res_plural.output
+        assert "Größe" in res_plural.output
+
+        # Diagnostics and error message localization
+        res_diag = runner.invoke(app, ["--locale", "de", "--diagnostics", "--no-config"])
+        assert res_diag.exit_code == 0
+        assert "Configuration: keine" in res_diag.output
+
+        res_err = runner.invoke(
+            app,
+            ["--locale", "de", "--dirsfirst", "--filesfirst", str(tmp_path)],
+        )
+        assert res_err.exit_code == 2
+        assert "Fehler:" in res_err.output
