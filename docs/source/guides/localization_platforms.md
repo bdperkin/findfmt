@@ -131,3 +131,65 @@ GitHub PRs becomes a bottleneck, `findfmt` may enable **Crowdin for Open Source*
 managed candidate due to its full `nplurals=1..6` CLDR support and official GitHub Action) strictly
 as a **downstream PR generator**—where all exported commits must still pass
 `uv run python tools/i18n.py validate` and `pre-commit` in CI before merging.
+
+______________________________________________________________________
+
+## 5. End-to-End AI Localization Runbook
+
+The steps below cover the complete workflow for localizing an existing or newly added language
+catalog under **Option A**.
+
+### 5.1. Configuring AI Backends
+
+`tools/i18n_translate.py` uses Python's standard-library `urllib.request` with zero external SDK
+dependencies. Configure your preferred provider via environment variables:
+
+| Provider / Mode                         | Required Environment Variables                                                                                           | Example Invocation                                                                                                               |
+| :-------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
+| **OpenAI** *(default)*                  | `OPENAI_API_KEY` (and optional `OPENAI_BASE_URL`)                                                                        | `uv run python -m tools.i18n translate de --backend openai --model gpt-4o-mini`                                                  |
+| **Google Gemini** *(OpenAI-compatible)* | `OPENAI_API_KEY` and `OPENAI_BASE_URL` set to `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions` | `uv run python -m tools.i18n translate de --backend openai --model gemini-2.5-flash`                                             |
+| **Anthropic Claude**                    | `ANTHROPIC_API_KEY`                                                                                                      | `uv run python -m tools.i18n translate de --backend anthropic --model claude-3-5-haiku-latest`                                   |
+| **Local Ollama** *(offline)*            | None (`ollama serve` running locally, or `OLLAMA_HOST`)                                                                  | `uv run python -m tools.i18n translate de --backend ollama --model qwen2.5:14b`                                                  |
+| **Direct AI Coding Agent Translation**  | None (when working inside an offline AI coding assistant session)                                                        | Populate untranslated `msgstr` entries in `src/findfmt/locale/<locale>/LC_MESSAGES/findfmt.po` following `tools/i18n_prompts.py` |
+
+### 5.2. Step-by-Step Catalog Translation Workflow
+
+```bash
+# Extract latest translatable strings into src/findfmt/locale/findfmt.pot
+uv run python -m tools.i18n extract
+
+# 2a. Initialize a brand-new locale catalog (e.g., pt_BR)
+uv run python -m tools.i18n init pt_BR
+
+# 2b. Or synchronize existing locale catalogs (e.g., de, fr, ja) with findfmt.pot
+uv run python -m tools.i18n update
+
+# Preview untranslated entry and batch counts without modifying files
+uv run python -m tools.i18n translate de --dry-run
+
+# Run batch AI translation (checkpoints progress after every 25-entry batch)
+uv run python -m tools.i18n translate de --backend openai
+
+# Validate placeholders ({name}, %s), Rich markup ([bold], [/]), and plural forms
+uv run python -m tools.i18n validate
+
+# Compile .po catalogs into binary .mo catalogs
+uv run python -m tools.i18n compile
+```
+
+### 5.3. Runtime Locale Conventions & Test Registration
+
+When onboarding a new language `<locale>`, verify the following runtime fallbacks and test suites so
+localized formatting works even on minimal container or CI hosts without OS locale packs installed:
+
+1. **Territory & Numeric Grouping Fallbacks (`src/findfmt/i18n.py`):**
+   - Add `<locale>` to `_LANG_TO_TERRITORY` if its primary ISO territory code differs from
+     `<LOCALE>.upper()` (for example, `"ja": "JP"`, `"zh": "CN"`, `"hi": "IN"`).
+   - Add `<locale>`'s decimal separator, thousands separator, and digit grouping to
+     `_REGIONAL_DEFAULTS` in `src/findfmt/i18n.py` (or South Asian `[3, 2, 0]` grouping in
+     `_get_numeric_conventions()`).
+2. **Timestamp Format Fallback (`src/findfmt/utils/strings.py`):**
+   - Add `<locale>`'s `strftime` fallback pattern to `fallback_formats` in `resolve_time_format()`.
+3. **Unit & Integration Tests (`tests/unit/test_i18n_localization.py`):**
+   - Include `<locale>` in `test_catalog_entries_placeholder_parity_and_runtime_formatting` and add
+     assertions for localized CLI `--help`, summary panels, and plural boundaries.
