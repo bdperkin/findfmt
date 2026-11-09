@@ -30,24 +30,8 @@ jobs:
           python-version: '3.15'
       - name: Install dependencies
         run: uv sync --locked --all-groups
-      - name: Run Ruff Check
-        run: uv run ruff check
-      - name: Run Ruff Format Check
-        run: uv run ruff format --check
-      - name: Run Ty Type Checker
-        run: uv run ty check
-      - name: Run Interrogate (Docstrings)
-        run: uv run interrogate src
-      - name: Run Radon (Complexity)
-        run: uv run radon cc src -s -a
-      - name: Run Xenon (Complexity Assertions)
-        run: uv run xenon src
-      - name: Run Deptry (Dependencies)
-        run: uv run deptry .
-      - name: Run Vulture (Dead Code)
-        run: uv run vulture src
-      - name: Run Codespell (Spelling)
-        run: uv run codespell
+      - name: Verify Local Runner Configuration
+        run: uv run python tools/verify_quality.py --list
       - name: Verify Complete Quality Suite
         run: uv run python tools/verify_quality.py
   package-check:

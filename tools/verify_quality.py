@@ -14,21 +14,25 @@ if TYPE_CHECKING:
 
 try:
     from tools.dep_matrix import (
+        FULL_MATRIX,
         VALID_FORK_STRATEGIES,
         VALID_PRERELEASES,
         VALID_RESOLUTIONS,
         MatrixCell,
         capture_diagnostics,
+        load_supported_pythons,
         select_cells,
     )
 except ModuleNotFoundError:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from tools.dep_matrix import (
+        FULL_MATRIX,
         VALID_FORK_STRATEGIES,
         VALID_PRERELEASES,
         VALID_RESOLUTIONS,
         MatrixCell,
         capture_diagnostics,
+        load_supported_pythons,
         select_cells,
     )
 
@@ -167,12 +171,102 @@ def run_matrix(
     return 0
 
 
+def list_sessions(repo_root: Path) -> int:
+    """Print supported multi-Python sessions and dependency matrix cells."""
+    pythons = load_supported_pythons(repo_root / "pyproject.toml")
+    sys.stdout.write("Supported Python Interpreter Sessions (pyproject.toml):\n")
+    for ver in pythons:
+        sys.stdout.write(f"  - py{ver} (python={ver})\n")
+
+    sys.stdout.write("\nDependency Resolution Matrix Cells:\n")
+    for cell in FULL_MATRIX:
+        sys.stdout.write(f"  - {cell.label}\n")
+
+    return 0
+
+
+def is_python_available(python_spec: str) -> bool:
+    """Return True if `uv python find <python_spec>` locates an installed interpreter."""
+    proc = subprocess.run(
+        ["uv", "python", "find", python_spec],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return proc.returncode == 0
+
+
+def run_python_session(
+    python_spec: str,
+    repo_root: Path,
+    pytest_args: Sequence[str] = (),
+) -> str:
+    """Run pytest for a single Python version (`passed`, `skipped`, or `failed`)."""
+    sys.stdout.write(f"\n[+] Python Session py{python_spec}\n")
+    sys.stdout.flush()
+    if not is_python_available(python_spec):
+        sys.stdout.write(
+            f"[~] Skipping Python {python_spec} (interpreter not installed locally)\n",
+        )
+        return "skipped"
+
+    cell = MatrixCell(f"py{python_spec}", "highest", "disallow", "fewest")
+    return "passed" if run_matrix_cell(cell, python_spec, repo_root, pytest_args) else "failed"
+
+
+def run_multi_python(
+    versions: Sequence[str],
+    repo_root: Path,
+    pytest_args: Sequence[str] = (),
+) -> int:
+    """Run pytest across all requested Python interpreter versions."""
+    passed: list[str] = []
+    skipped: list[str] = []
+    failed: list[str] = []
+    for ver in versions:
+        outcome = run_python_session(ver, repo_root, pytest_args)
+        if outcome == "passed":
+            passed.append(ver)
+        elif outcome == "skipped":
+            skipped.append(ver)
+        else:
+            failed.append(ver)
+
+    if failed or not passed:
+        sys.stderr.write(
+            f"\n[-] Multi-Python matrix failed (passed={passed}, skipped={skipped}, "
+            f"failed={failed})\n",
+        )
+        return 1
+
+    sys.stdout.write(
+        f"\n[✓] Multi-Python matrix passed ({len(passed)} passed: {', '.join(passed)}; "
+        f"{len(skipped)} skipped: {', '.join(skipped) or 'none'})!\n",
+    )
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build argument parser for verify_quality.py and dependency matrix modes."""
     parser = argparse.ArgumentParser(
-        description="Run findfmt quality verification suite or local dependency resolution matrix.",
+        description="Run findfmt quality suite, multi-Python runner, or dependency matrix.",
+    )
+    parser.add_argument(
+        "--list",
+        dest="list_sessions",
+        action="store_true",
+        help="List supported Python interpreter sessions and dependency matrix cells.",
     )
     mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
+        "--all-pythons",
+        action="store_true",
+        help="Run pytest across every supported Python interpreter (3.11-3.15).",
+    )
+    mode_group.add_argument(
+        "--pythons",
+        help="Comma-separated list of Python versions to test (e.g. '3.11,3.15').",
+    )
     mode_group.add_argument(
         "--smoke",
         action="store_true",
@@ -199,8 +293,20 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None, repo_root: Path | None = None) -> int:
-    """Execute standard verification suite or dependency resolution matrix."""
+    """Execute standard verification suite, multi-Python matrix, or dependency matrix."""
     args = build_parser().parse_args(list(argv) if argv is not None else None)
+    root = repo_root or Path(__file__).resolve().parent.parent
+    if args.list_sessions:
+        return list_sessions(root)
+
+    if args.all_pythons or args.pythons:
+        versions = (
+            [v.strip() for v in args.pythons.split(",") if v.strip()]
+            if args.pythons
+            else list(load_supported_pythons(root / "pyproject.toml"))
+        )
+        return run_multi_python(versions, root)
+
     is_matrix_mode = bool(
         args.smoke or args.full or args.resolution or args.prerelease or args.fork_strategy,
     )
@@ -214,7 +320,6 @@ def main(argv: Sequence[str] | None = None, repo_root: Path | None = None) -> in
         prerelease=args.prerelease,
         fork_strategy=args.fork_strategy,
     )
-    root = repo_root or Path(__file__).resolve().parent.parent
     return run_matrix(cells, args.python, root)
 
 

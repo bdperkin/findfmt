@@ -21,6 +21,7 @@ from tools.dep_matrix import (
     is_prerelease_version,
     load_declared_bounds,
     load_locked_versions,
+    load_supported_pythons,
     normalize_pkg_name,
     select_cells,
 )
@@ -248,6 +249,60 @@ def test_run_matrix_cell_and_run_matrix(tmp_path: Path) -> None:
         assert verify_quality.run_matrix([cell], "3.11", tmp_path) == 1
 
 
+def test_supported_pythons_and_multi_python_runner(tmp_path: Path) -> None:
+    assert load_supported_pythons(tmp_path / "missing.toml") == ()
+    bad_toml = tmp_path / "bad.toml"
+    bad_toml.write_text('[project]\nclassifiers = "not-a-list"\n', encoding="utf-8")
+    assert load_supported_pythons(bad_toml) == ()
+
+    good_toml = tmp_path / "pyproject.toml"
+    good_toml.write_text(
+        "[project]\n"
+        "classifiers = [\n"
+        '  "Programming Language :: Python :: 3.15",\n'
+        '  "Programming Language :: Python :: 3.11",\n'
+        '  "Programming Language :: Python :: 3 :: Only",\n'
+        "]\n",
+        encoding="utf-8",
+    )
+    assert load_supported_pythons(good_toml) == ("3.11", "3.15")
+    assert verify_quality.list_sessions(tmp_path) == 0
+
+    with patch("tools.verify_quality.subprocess.run", return_value=_proc(0)):
+        assert verify_quality.is_python_available("3.13") is True
+
+    with patch("tools.verify_quality.subprocess.run", return_value=_proc(1)):
+        assert verify_quality.is_python_available("3.99") is False
+        assert verify_quality.run_python_session("3.99", tmp_path) == "skipped"
+
+    with (
+        patch("tools.verify_quality.is_python_available", return_value=True),
+        patch("tools.verify_quality.run_matrix_cell", return_value=True),
+    ):
+        assert verify_quality.run_python_session("3.11", tmp_path) == "passed"
+
+    with (
+        patch("tools.verify_quality.is_python_available", return_value=True),
+        patch("tools.verify_quality.run_matrix_cell", return_value=False),
+    ):
+        assert verify_quality.run_python_session("3.11", tmp_path) == "failed"
+
+    with patch(
+        "tools.verify_quality.run_python_session",
+        side_effect=["passed", "skipped"],
+    ):
+        assert verify_quality.run_multi_python(["3.11", "3.15"], tmp_path) == 0
+
+    with patch(
+        "tools.verify_quality.run_python_session",
+        side_effect=["passed", "failed"],
+    ):
+        assert verify_quality.run_multi_python(["3.11", "3.15"], tmp_path) == 1
+
+    with patch("tools.verify_quality.run_python_session", return_value="skipped"):
+        assert verify_quality.run_multi_python(["3.15"], tmp_path) == 1
+
+
 def test_verify_quality_main_and_module_entrypoints(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -255,6 +310,15 @@ def test_verify_quality_main_and_module_entrypoints(
     with patch("tools.verify_quality.run_quality_suite", return_value=0) as mock_suite:
         assert verify_quality.main([]) == 0
         mock_suite.assert_called_once()
+
+    with patch("tools.verify_quality.list_sessions", return_value=0) as mock_list:
+        assert verify_quality.main(["--list"], repo_root=tmp_path) == 0
+        mock_list.assert_called_once_with(tmp_path)
+
+    with patch("tools.verify_quality.run_multi_python", return_value=0) as mock_mp:
+        assert verify_quality.main(["--all-pythons"], repo_root=tmp_path) == 0
+        assert verify_quality.main(["--pythons", "3.11,3.15"], repo_root=tmp_path) == 0
+        assert mock_mp.call_count == 2
 
     with patch("tools.verify_quality.run_matrix", return_value=0) as mock_matrix:
         assert verify_quality.main(["--smoke"], repo_root=tmp_path) == 0

@@ -3,15 +3,15 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 179 Closed Issues | 109 Actionable Open Tasks | 29 Active Umbrella Epics **Last
+> **Tracking:** 181 Closed Issues | 108 Actionable Open Tasks | 28 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
 > milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320); 2026-11-05 (closed
 > issues #303, #343, #384, #322, #323, #221, #345, #321, #337, and #426; released v1.1.1 and closed
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
-> issues #360, #344, #546, #306, #556, #427, #429, #430, #425, #307, #308, #564, and #566; released
-> v1.1.2 and v1.1.3 and closed their milestones)
+> issues #360, #344, #546, #306, #556, #427, #429, #430, #425, #307, #308, #564, #566, #349, and
+> epic #385; released v1.1.2 and v1.1.3 and closed their milestones)
 
 ______________________________________________________________________
 
@@ -558,6 +558,12 @@ Note: Ordered chronologically by completion date.
 - [x] **[#566](https://github.com/bdperkin/findfmt/issues/566)** - feat(i18n): add catalog
   drift/completeness pre-commit check and auto-AI translation sync command (Closed: 2026-11-08 via
   PR [#567](https://github.com/bdperkin/findfmt/pull/567))
+- [x] **[#349](https://github.com/bdperkin/findfmt/issues/349)** - chore: add a multi-Python local
+  runner (evaluate nox, tox, Hatch, uv) (Closed: 2026-11-08 via PR
+  [#568](https://github.com/bdperkin/findfmt/pull/568))
+- [x] **[#385](https://github.com/bdperkin/findfmt/issues/385)** - [Epic] Packaging Integrity,
+  Release Automation & Dependency Verification (Closed: 2026-11-08 via PR
+  [#568](https://github.com/bdperkin/findfmt/pull/568))
 
 ______________________________________________________________________
 
@@ -920,12 +926,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.3. Future / Low-Priority / Backlog
 
-- [ ] **[#349](https://github.com/bdperkin/findfmt/issues/349)** - chore: add a multi-Python local
-  runner (evaluate nox, tox, Hatch, uv) *(Rank: 63 | Epic:
-  [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)
-  | Milestone: v1.1.4)* - **Value:** Low | **Effort:** M - **Rationale:** Evaluation should follow
-  the [#426](https://github.com/bdperkin/findfmt/issues/426) ADR. Blocked by
-  [#426](https://github.com/bdperkin/findfmt/issues/426).
 - [ ] **[#233](https://github.com/bdperkin/findfmt/issues/233)** - ci(docs): configure automated
   multilingual Sphinx documentation builds in CI pipeline *(Rank: 64 | Epic:
   [[Epic] i18n Platform Infrastructure: RTL/BiDi Rendering & Multilingual Documentation Builds](https://github.com/bdperkin/findfmt/issues/276)
@@ -1261,9 +1261,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are
 linked natively on GitHub.
 
-- [ ] **[#385](https://github.com/bdperkin/findfmt/issues/385)** - [Epic] Packaging Integrity,
-  Release Automation & Dependency Verification *(Milestone: v1.1.4 | Open sub-issues: 1)* -
-  [#349](https://github.com/bdperkin/findfmt/issues/349)
 - [ ] **[#336](https://github.com/bdperkin/findfmt/issues/336)** - [Epic] Traversal Engine
   Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety *(Milestone:
   v1.2.1 | Open sub-issues: 1)* - [#372](https://github.com/bdperkin/findfmt/issues/372)

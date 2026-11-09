@@ -176,6 +176,35 @@ When a matrix cell fails, `tools/verify_quality.py` prints a three-stage diagnos
    alpha, beta, or release candidate, update the affected call site or add a temporary upper-bound
    constraint in `pyproject.toml`.
 
+### 4.2. Multi-Python Local Test Runner
+
+`tools/verify_quality.py` serves as the unified local runner for both dependency resolution matrices
+and multi-Python interpreter testing (`3.11` through `3.15`). It reads the supported Python version
+list directly from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`,
+executes each interpreter inside an isolated temporary `uv` virtual environment, and automatically
+skips interpreters that are not installed locally:
+
+```bash
+# List all configured Python interpreter sessions (py3.11-py3.15) and dependency matrix cells
+uv run python tools/verify_quality.py --list
+
+# Run the test suite across every supported Python interpreter installed locally (3.11-3.15)
+uv run python tools/verify_quality.py --all-pythons
+
+# Run the test suite against a specific subset of Python versions
+uv run python tools/verify_quality.py --pythons 3.11,3.15
+```
+
+Five local runner candidates were evaluated (see `docs/source/quality/dependency_matrix.md`):
+
+| Candidate                         | Configuration Surface                | `uv` & Interpreter Integration                                   | Verdict      |
+| :-------------------------------- | :----------------------------------- | :--------------------------------------------------------------- | :----------- |
+| **`tools/verify_quality.py`**     | `tools/verify_quality.py`            | Native `uv venv` + `pyproject.toml` classifier source of truth   | **Selected** |
+| **`nox` (`noxfile.py`)**          | Top-level `noxfile.py`               | Requires extra `nox` dependency and separate GHA matrix mapping  | **Rejected** |
+| **`tox` + `tox-uv`**              | `tox.ini` or `[tool.tox]`            | Adds `tox`/`tox-uv` dependencies and duplicates version lists    | **Rejected** |
+| **Hatch (`[tool.hatch.envs]`)**   | `pyproject.toml` (`[tool.hatch]`)    | Requires global `hatch` CLI (only `hatchling` is in `dev` group) | **Rejected** |
+| **Command Runners (`Make`, etc)** | `Makefile` / `justfile` / `tasks.py` | Command aliases only; no native multi-Python environment matrix  | **Rejected** |
+
 ## 5. Commit Guidelines
 
 We use [Conventional Commits](https://www.conventionalcommits.org/) to power our automated semantic
