@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 from typer.testing import CliRunner
 
 from findfmt.cli import app
+from findfmt.exceptions import ParserError
 
 runner = CliRunner()
 
@@ -97,3 +99,42 @@ def test_cli_from_file_with_filtering_and_sorting(tmp_path: Path) -> None:
     )
     assert result_tag.exit_code == 0
     assert _normalize_lines(result_tag.output) == ["file2.py", "file10.py"]
+
+
+def test_cli_from_file_non_utf8_round_trip(tmp_path: Path) -> None:
+    """Verify non-UTF-8 file names round-trip unchanged from stdin and files without traceback."""
+    raw_input = b"bad\xff.txt\nraw\xe9.py\n"
+
+    # 1. From stdin (--from-file -)
+    res_stdin = runner.invoke(
+        app,
+        ["--from-file", "-", "--offline", "-0", "--no-pager"],
+        input=raw_input,
+    )
+    assert res_stdin.exit_code == 0
+    assert res_stdin.exception is None
+    assert "Traceback" not in res_stdin.output
+    assert res_stdin.stdout_bytes == b"bad\xff.txt\x00raw\xe9.py\x00"
+
+    # 2. From external file (--from-file <path>)
+    listing_file = tmp_path / "non_utf8_listing.txt"
+    listing_file.write_bytes(raw_input)
+    res_file = runner.invoke(
+        app,
+        ["--from-file", str(listing_file), "--offline", "-0", "--no-pager"],
+    )
+    assert res_file.exit_code == 0
+    assert res_file.exception is None
+    assert "Traceback" not in res_file.output
+    assert res_file.stdout_bytes == b"bad\xff.txt\x00raw\xe9.py\x00"
+
+    # 3. ParserError raised during output delivery exits 2 cleanly with no traceback
+    with patch(
+        "findfmt.parsers.engine._read_lines",
+        side_effect=ParserError("Cannot read input from 'bad.txt': Permission denied"),
+    ):
+        res_err = runner.invoke(app, ["--from-file", "-", "--no-pager"], input=b"")
+
+    assert res_err.exit_code == 2
+    assert "Cannot read input from 'bad.txt'" in res_err.stderr
+    assert "Traceback" not in res_err.output

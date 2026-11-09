@@ -154,20 +154,30 @@ def _resolve_and_classify(
     )
 
 
+def _decode_bytes(data: bytes) -> str:
+    """Decode raw bytes using os.fsdecode with UTF-8 surrogateescape fallback."""
+    try:
+        return os.fsdecode(data)
+    except UnicodeDecodeError:
+        return data.decode("utf-8", errors="surrogateescape")
+
+
 def _read_lines(from_file: str | None, stream: TextIO | None = None) -> list[str]:
     """Read input lines from standard input or external file."""
     if from_file == "-":
         target_stream = stream or sys.stdin
-        raw_text = target_stream.read()
-        return [str(line) for line in raw_text.splitlines()]
+        buffer = getattr(target_stream, "buffer", None)
+        raw_text = _decode_bytes(buffer.read()) if buffer is not None else str(target_stream.read())
+        return raw_text.splitlines()
 
     if from_file is not None:
         try:
-            with Path(from_file).open(encoding="utf-8", errors="replace") as f:
-                return [str(line) for line in f.read().splitlines()]
+            raw_bytes = Path(from_file).read_bytes()
         except OSError as err:
             msg = f"Cannot read input from '{from_file}': {err}"
             raise ParserError(msg) from err
+
+        return _decode_bytes(raw_bytes).splitlines()
 
     return []
 
