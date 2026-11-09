@@ -193,3 +193,6 @@
 (?i)osi
 (?i)saas
 (?i)reflow
+(?i)rollout
+(?i)arity
+(?i)apis
