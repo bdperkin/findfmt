@@ -7,6 +7,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Features
+
+- *(i18n)* Complete the canonical German (`de`) localization catalog
+  (`src/findfmt/locale/de/LC_MESSAGES/findfmt.po`, 147/147 messages) and localized Sphinx homepage
+  (`docs/source/locale/de/LC_MESSAGES/index.po`), and enroll `de` in `COMPLETE_LOCALES` for
+  pre-commit catalog completeness enforcement (#215).
+
 ## [1.1.4] - 2026-11-08
 
 ### Features
