@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 187 Closed Issues | 117 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 188 Closed Issues | 116 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -15,7 +15,7 @@
 > issues #215, #222, #228, and #233; added #574; released v1.1.5 and closed its milestone; added
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
-> and realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4)
+> realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329)
 
 ______________________________________________________________________
 
@@ -586,6 +586,8 @@ Note: Ordered chronologically by completion date.
 - [x] **[#474](https://github.com/bdperkin/findfmt/issues/474)** - ci(pre-commit): add gitlint
   commit-msg hook for title/body length and message structure (Closed: 2026-11-09 as not planned;
   upstream unmaintained, local-only, high false-positive rate)
+- [x] **[#329](https://github.com/bdperkin/findfmt/issues/329)** - fix(cli): invalid --table-style
+  and other domain errors print full tracebacks (Closed: 2026-11-09)
 
 ______________________________________________________________________
 
@@ -599,12 +601,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#329](https://github.com/bdperkin/findfmt/issues/329)** - fix(cli): invalid --table-style
-  and other domain errors print full tracebacks *(Rank: 1 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Milestone: v1.2.0)* - **Value:** High | **Effort:** S - **Rationale:** Domain validation errors
-  (invalid --table-style, --sort, format) print raw tracebacks instead of clean exit-code-2 CLI
-  diagnostics.
 - [ ] **[#460](https://github.com/bdperkin/findfmt/issues/460)** - fix(parsers): read --from-file
   stdin and files as bytes with os.fsdecode (no crash on non-UTF-8 names) *(Rank: 2 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
@@ -1371,10 +1367,9 @@ linked natively on GitHub.
   [#342](https://github.com/bdperkin/findfmt/issues/342),
   [#355](https://github.com/bdperkin/findfmt/issues/355)
 - [ ] **[#386](https://github.com/bdperkin/findfmt/issues/386)** - [Epic] CLI Architecture, Terminal
-  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 5)* -
+  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 4)* -
   [#319](https://github.com/bdperkin/findfmt/issues/319),
   [#324](https://github.com/bdperkin/findfmt/issues/324),
-  [#329](https://github.com/bdperkin/findfmt/issues/329),
   [#331](https://github.com/bdperkin/findfmt/issues/331),
   [#334](https://github.com/bdperkin/findfmt/issues/334)
 - [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
@@ -1563,7 +1558,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                                                 | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 7           |
+| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 6           |
 | v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                                                  | 6           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 8           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                                     | 8           |

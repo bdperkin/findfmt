@@ -13,6 +13,7 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
+from findfmt.exceptions import FindFmtError
 from findfmt.formatters.base import Formatter, write_stream_safe
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
@@ -171,6 +172,15 @@ def _ensure_dir_path(
     return curr, accum_path
 
 
+def _read_utf8_fragment(path: Path) -> str:
+    """Read an HTML template fragment as UTF-8, raising FindFmtError on failure."""
+    try:
+        return path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as err:
+        msg = f"Cannot read '{path}' as UTF-8: {err}"
+        raise FindFmtError(msg) from err
+
+
 class HtmlFormatter(Formatter):
     """Semantic, accessible HTML5 document serializer with intro/outro templating."""
 
@@ -237,11 +247,11 @@ class HtmlFormatter(Formatter):
         self.title = title if title is not None else DEFAULT_TITLE
         self.intro = intro
         if self.intro is None and intro_file is not None:
-            self.intro = intro_file.read_text(encoding="utf-8")
+            self.intro = _read_utf8_fragment(intro_file)
 
         self.outro = outro
         if self.outro is None and outro_file is not None:
-            self.outro = outro_file.read_text(encoding="utf-8")
+            self.outro = _read_utf8_fragment(outro_file)
 
         self.no_links = no_links
         self.no_indent = no_indent

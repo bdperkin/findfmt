@@ -125,6 +125,8 @@ app = typer.Typer(
     help=h.APP_HELP,
     add_completion=False,
     no_args_is_help=False,
+    pretty_exceptions_enable=False,
+    pretty_exceptions_show_locals=False,
     context_settings={"help_option_names": ["--help"]},
 )
 
