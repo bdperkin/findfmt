@@ -1,0 +1,52 @@
+---
+name: Rust Port Task
+description: Track the incremental migration of a performance bottleneck to the findfmt_rs
+  Rust extension
+title: 'perf(rust): '
+labels: [performance, area:rust]
+assignees: [bdperkin]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form to propose or track porting a performance-sensitive Python
+        component in `src/findfmt/` to the native `findfmt_rs/` PyO3 extension crate
+        while preserving 100% pure-Python fallback parity in `src/findfmt/_fallback.py`.
+  - type: input
+    id: target_component
+    attributes:
+      label: Target Python Module / Function to Port
+      description: Which Python file or function is being migrated to `findfmt_rs/`?
+      placeholder: e.g. src/findfmt/traversal/engine.py::find_files or src/findfmt/classifier.py::classify_file
+    validations:
+      required: true
+  - type: textarea
+    id: rust_design
+    attributes:
+      label: Proposed Rust Implementation & PyO3 Binding Contract
+      description: Describe the target module in `findfmt_rs/src/`, crates used (e.g.
+        `ignore`, `globset`, `pyo3`), GIL release strategy (`py.allow_threads`), and
+        `src/findfmt/core.py` fallback dispatch signature.
+      placeholder: |
+        - Rust module: `findfmt_rs/src/traversal.rs`
+        - PyO3 symbol in `findfmt._rust_ext`: `find_files_rs(...)`
+        - Pure-Python fallback in `src/findfmt/_fallback.py`: `find_files_py(...)`
+    validations:
+      required: true
+  - type: checkboxes
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: All ported components must satisfy the hybrid Python-Rust quality
+        and parity gates.
+      options:
+        - label: Rust implementation written inside `findfmt_rs/` using safe abstractions
+            (`#[deny(unsafe_code)]` or documented safety invariants) and passing `cargo
+            clippy --all-targets -- -D warnings`.
+        - label: Exposed cleanly via `findfmt._rust_ext` PyO3 bindings with complete
+            type annotations in `src/findfmt/_rust_ext.pyi` and fallback routing in
+            `src/findfmt/core.py`.
+        - label: Unit and parity tests implemented in `tests/test_parity.py` proving
+            100% identical outputs between `findfmt._rust_ext` and `src/findfmt/_fallback.py`.
+        - label: Benchmarked speedup via `uv run python tools/benchmark.py` documented
+            in the pull request description.

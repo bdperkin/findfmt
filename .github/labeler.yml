@@ -23,6 +23,13 @@ area:packaging:
 area:docs:
   - changed-files:
       - any-glob-to-any-file: [docs/**, '*.md']
+area:rust:
+  - changed-files:
+      - any-glob-to-any-file:
+          - findfmt_rs/**
+          - src/findfmt/core.py
+          - src/findfmt/_fallback.py
+          - src/findfmt/_rust_ext.pyi
 documentation:
   - changed-files:
       - any-glob-to-any-file: [docs/**, '*.md']
