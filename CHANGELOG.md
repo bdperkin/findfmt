@@ -17,6 +17,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (`src/findfmt/locale/fr/LC_MESSAGES/findfmt.po`, 147/147 messages with non-breaking spaces before
   high punctuation and verified elisions) and localized Sphinx homepage
   (`docs/source/locale/fr/LC_MESSAGES/index.po`), and enroll `fr` in `COMPLETE_LOCALES` (#222).
+- *(i18n)* Complete the canonical Japanese (`ja`) localization catalog
+  (`src/findfmt/locale/ja/LC_MESSAGES/findfmt.po`, 147/147 messages with single-form pluralization
+  and half-width/full-width CJK typography) and localized Sphinx homepage
+  (`docs/source/locale/ja/LC_MESSAGES/index.po`), and enroll `ja` in `COMPLETE_LOCALES` (#228).
 
 ## [1.1.4] - 2026-11-08
 

@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
 "POT-Creation-Date: 2026-10-26 20:20-0400\n"
-"PO-Revision-Date: 2026-10-15 13:26-0400\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2026-11-09 08:05-0500\n"
+"Last-Translator: Brandon Perkins <bperkins@redhat.com>\n"
 "Language: ja\n"
 "Language-Team: ja <LL@li.org>\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
@@ -28,19 +28,21 @@ msgstr "見つかりません"
 
 #: src/findfmt/diagnostics.py:101
 msgid "none"
-msgstr ""
+msgstr "なし"
 
 #: src/findfmt/entrypoints.py:196
 msgid ""
 "Find all files and directories, including hidden files respecting "
 ".gitignore."
 msgstr ""
+".gitignore を考慮し、隠しファイルを含むすべてのファイルとディレクトリを検索します。"
 
 #: src/findfmt/entrypoints.py:215
 msgid ""
 "Find files and list detected format and MIME tags, including hidden files"
 " respecting .gitignore."
 msgstr ""
+".gitignore を考慮し、隠しファイルを含むファイルを検索して検出されたフォーマットタグと MIME タグを一覧表示します。"
 
 #: src/findfmt/entrypoints.py:244
 msgid ""
@@ -49,6 +51,9 @@ msgid ""
 "Optionally provide TAG as the first positional argument (e.g. "
 "'findfilefmt python')."
 msgstr ""
+".gitignore を考慮し、隠しファイルを含めてフォーマットタグでファイルを検索します。\n"
+"\n"
+"最初の位置引数として TAG を指定できます（例: 'findfilefmt python'）。"
 
 #: src/findfmt/entrypoints.py:273
 msgid ""
@@ -58,33 +63,39 @@ msgid ""
 "Optionally provide INTERPRETER as the first positional argument (e.g. "
 "'findshebang bash')."
 msgstr ""
+".gitignore を考慮し、隠しファイルを含めてシェバンインタープリタのパターンでファイルを検索します。\n"
+"\n"
+"最初の位置引数として INTERPRETER を指定できます（例: 'findshebang bash'）。"
 
 #: src/findfmt/entrypoints.py:295
 msgid ""
 "Find files and output NUL-delimited paths (--print0), including hidden "
 "files respecting .gitignore."
 msgstr ""
+".gitignore を考慮し、隠しファイルを含むファイルを検索して NUL 区切りのパスを出力します（--print0）。"
 
 #: src/findfmt/entrypoints.py:315
 msgid ""
 "Find files and print summary statistics to stderr, including hidden files"
 " respecting .gitignore."
 msgstr ""
+".gitignore を考慮し、隠しファイルを含むファイルを検索して要約統計を stderr に出力します。"
 
 #: src/findfmt/exceptions.py:39
 #, python-brace-format
 msgid "Unsupported output format: '{format}'. Expected one of: {valid_formats}"
-msgstr ""
+msgstr "サポートされていない出力形式です: '{format}'。有効な形式: {valid_formats}"
 
 #: src/findfmt/exceptions.py:57
 #, python-brace-format
 msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
 msgstr ""
+"サポートされていない RST テーブルスタイルです: '{style}'。'grid' または 'simple' を指定してください。"
 
 #: src/findfmt/exceptions.py:76
 #, python-brace-format
 msgid "Unsupported table style: '{style}'. Expected one of: {valid_styles}"
-msgstr ""
+msgstr "サポートされていないテーブルスタイルです: '{style}'。有効なスタイル: {valid_styles}"
 
 #: src/findfmt/exceptions.py:95
 #, python-brace-format
@@ -92,82 +103,84 @@ msgid ""
 "Invalid sort criteria '{criteria}'. Choose from: name, version, time, "
 "mtime, ctime, size, none."
 msgstr ""
+"無効なソート基準です '{criteria}'。次から選択してください: name, version, time, "
+"mtime, ctime, size, none。"
 
 #: src/findfmt/sizes.py:30 src/findfmt/sizes.py:55
 msgid "B"
-msgstr ""
+msgstr "B"
 
 #: src/findfmt/sizes.py:31
 msgid "KiB"
-msgstr ""
+msgstr "KiB"
 
 #: src/findfmt/sizes.py:32
 msgid "MiB"
-msgstr ""
+msgstr "MiB"
 
 #: src/findfmt/sizes.py:33
 msgid "GiB"
-msgstr ""
+msgstr "GiB"
 
 #: src/findfmt/sizes.py:34
 msgid "TiB"
-msgstr ""
+msgstr "TiB"
 
 #: src/findfmt/sizes.py:35
 msgid "PiB"
-msgstr ""
+msgstr "PiB"
 
 #: src/findfmt/sizes.py:36
 msgid "EiB"
-msgstr ""
+msgstr "EiB"
 
 #: src/findfmt/sizes.py:37
 msgid "kB"
-msgstr ""
+msgstr "kB"
 
 #: src/findfmt/sizes.py:38
 msgid "MB"
-msgstr ""
+msgstr "MB"
 
 #: src/findfmt/sizes.py:39
 msgid "GB"
-msgstr ""
+msgstr "GB"
 
 #: src/findfmt/sizes.py:40
 msgid "TB"
-msgstr ""
+msgstr "TB"
 
 #: src/findfmt/sizes.py:41
 msgid "PB"
-msgstr ""
+msgstr "PB"
 
 #: src/findfmt/sizes.py:42
 msgid "EB"
-msgstr ""
+msgstr "EB"
 
 #: src/findfmt/cli/config.py:45
 #, python-brace-format
 msgid "Error: {label} '{path}' not found."
-msgstr ""
+msgstr "エラー: {label} '{path}' が見つかりません。"
 
 #: src/findfmt/cli/config.py:70
 #, python-brace-format
 msgid "Error: Conflicting format options: {options}."
-msgstr ""
+msgstr "エラー: 出力形式オプションが競合しています: {options}。"
 
 #: src/findfmt/cli/config.py:81
 #, python-brace-format
 msgid "Error: Input file '{path}' not found."
-msgstr ""
+msgstr "エラー: 入力ファイル '{path}' が見つかりません。"
 
 #: src/findfmt/cli/config.py:88
 msgid "Error: Cannot specify both --dirsfirst and --filesfirst."
-msgstr ""
+msgstr "エラー: --dirsfirst と --filesfirst を同時に指定することはできません。"
 
 #: src/findfmt/cli/config_schema.py:124
 #, python-brace-format
 msgid "expected string format name, got {type_name}"
-msgstr ""
+msgstr "文字列のフォーマット名が必要ですが、{type_name} が指定されました"
 
 #: src/findfmt/cli/config_schema.py:128 src/findfmt/cli/config_schema.py:148
 #: src/findfmt/cli/config_schema.py:179 src/findfmt/cli/config_schema.py:196
@@ -175,77 +188,78 @@ msgstr ""
 #: src/findfmt/cli/config_schema.py:252
 #, python-brace-format
 msgid "Error: Invalid value for '{key}' in '{path}': {error}"
-msgstr ""
+msgstr "エラー: '{path}' 内の '{key}' の値が無効です: {error}"
 
 #: src/findfmt/cli/config_schema.py:143
 #, python-brace-format
 msgid "unsupported format '{val}'. Valid options: {valid}"
-msgstr ""
+msgstr "サポートされていない形式 '{val}' です。有効なオプション: {valid}"
 
 #: src/findfmt/cli/config_schema.py:177
 #, python-brace-format
 msgid "expected 'auto', 'always', 'never', or boolean, got '{val}'"
-msgstr ""
+msgstr "'auto'、'always'、'never'、または真偽値が必要ですが、'{val}' が指定されました"
 
 #: src/findfmt/cli/config_schema.py:192
 #, python-brace-format
 msgid "expected boolean (true/false), got {type_name}"
-msgstr ""
+msgstr "真偽値 (true/false) が必要ですが、{type_name} が指定されました"
 
 #: src/findfmt/cli/config_schema.py:216
 #, python-brace-format
 msgid "expected string or list of strings, got {type_name}"
-msgstr ""
+msgstr "文字列または文字列のリストが必要ですが、{type_name} が指定されました"
 
 #: src/findfmt/cli/config_schema.py:233
 #, python-brace-format
 msgid "expected non-negative integer, got {val}"
-msgstr ""
+msgstr "非負整数が必要ですが、{val} が指定されました"
 
 #: src/findfmt/cli/config_schema.py:250
 #, python-brace-format
 msgid "expected string, got {type_name}"
-msgstr ""
+msgstr "文字列が必要ですが、{type_name} が指定されました"
 
 #: src/findfmt/cli/config_schema.py:303
 #, python-brace-format
 msgid "Error: Unknown configuration key '{key}' in '{path}'."
-msgstr ""
+msgstr "エラー: '{path}' 内に不明な設定キー '{key}' があります。"
 
 #: src/findfmt/cli/file_config.py:185
 #, python-brace-format
 msgid "Error: Configuration file '{path}' not found."
-msgstr ""
+msgstr "エラー: 設定ファイル '{path}' が見つかりません。"
 
 #: src/findfmt/cli/file_config.py:197
 #, python-brace-format
 msgid "Error: Invalid TOML in configuration file '{path}': {error}"
-msgstr ""
+msgstr "エラー: 設定ファイル '{path}' の TOML が無効です: {error}"
 
 #: src/findfmt/cli/file_config.py:206
 #, python-brace-format
 msgid "Error reading configuration file '{path}': {error}"
-msgstr ""
+msgstr "設定ファイル '{path}' の読み込みエラー: {error}"
 
 #: src/findfmt/cli/file_config.py:285
 msgid "(none)"
-msgstr ""
+msgstr "(なし)"
 
 #: src/findfmt/cli/file_config.py:286
 #, python-brace-format
 msgid "Active configuration: {path} (using built-in defaults)\n"
-msgstr ""
+msgstr "有効な設定: {path} (組み込みの既定値を使用中)\n"
 
 #: src/findfmt/cli/file_config.py:290
 #, python-brace-format
 msgid "Active configuration: {path}"
-msgstr ""
+msgstr "有効な設定: {path}"
 
 #: src/findfmt/cli/help.py:93
 msgid ""
 "A .gitignore-aware file discovery and classification suite that locates "
 "files by content format, shebang, and MIME tag."
 msgstr ""
+".gitignore に対応したファイル探索・分類スイート。コンテンツ形式、シェバン、および MIME タグによってファイルを特定します。"
 
 #: src/findfmt/cli/help.py:98
 msgid ""
@@ -261,382 +275,423 @@ msgid ""
 "Run 'findfmt --help-all' for the comprehensive manual, environment "
 "variables, and exit codes."
 msgstr ""
+"一般的な使用例:\n"
+"  findfmt -t python                        # Python ファイルを検索\n"
+"  findfmt --shebang bash scripts/          # scripts/ 内の bash スクリプトを検索\n"
+"  findfmt -t python -t executable --all-tags # 両方のタグに一致するファイル\n"
+"  findfiles --no-hidden                    # ラッパー: 隠しファイルを除外\n"
+"  findfmt -- -weird-name                   # ハイフンで始まるパス\n"
+"\n"
+"詳細なマニュアル、環境変数、終了コードについては 'findfmt --help-all' を実行してください。"
 
 #: src/findfmt/cli/help.py:109
 msgid ""
 "One or more directory or file paths to inspect (default: current "
 "directory)."
-msgstr ""
+msgstr "検査する1つ以上のディレクトリまたはファイルパス（既定値: カレントディレクトリ）。"
 
 #: src/findfmt/cli/help.py:110
 msgid ""
 "Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', "
 "'executable')."
-msgstr ""
+msgstr "一致させるタグまたはカンマ区切りのタグ（例: 'python', 'yaml,json', 'executable'）。"
 
 #: src/findfmt/cli/help.py:111
 msgid "Tag or comma-separated tags to exclude."
-msgstr ""
+msgstr "除外するタグまたはカンマ区切りのタグ。"
 
 #: src/findfmt/cli/help.py:112
 msgid "Require matching files to have ALL specified tags rather than ANY tag."
-msgstr ""
+msgstr "いずれかのタグではなく、指定されたすべてのタグを持つファイルのみを一致させます。"
 
 #: src/findfmt/cli/help.py:113
 msgid "Filter files whose shebang contains this interpreter or pattern."
-msgstr ""
+msgstr "シェバンにこのインタープリタまたはパターンを含むファイルを抽出します。"
 
 #: src/findfmt/cli/help.py:114
 msgid "Do not respect .gitignore rules during traversal."
-msgstr ""
+msgstr "探索時に .gitignore ルールを適用しません。"
 
 #: src/findfmt/cli/help.py:115
 msgid "Load and enforce an external gitignore file across the traversal scope."
-msgstr ""
+msgstr "外部の gitignore ファイルを読み込み、探索範囲全体に適用します。"
 
 #: src/findfmt/cli/help.py:117
 msgid ""
 "Read directory listing from a file or standard input ('-') instead of "
 "scanning filesystem."
 msgstr ""
+"ファイルシステムを走査する代わりに、ファイルまたは標準入力 ('-') からパス一覧を読み込みます。"
 
 #: src/findfmt/cli/help.py:119
 msgid ""
 "Enforce offline extension- and filename-only identification without disk "
 "IO."
-msgstr ""
+msgstr "ディスク I/O を行わず、拡張子とファイル名のみによるオフライン判定を強制します。"
 
 #: src/findfmt/cli/help.py:120
 msgid "Include hidden files and directories."
-msgstr ""
+msgstr "隠しファイルと隠しディレクトリを含めます。"
 
 #: src/findfmt/cli/help.py:121
 msgid "Follow symbolic links during traversal."
-msgstr ""
+msgstr "探索時にシンボリックリンクを辿ります。"
 
 #: src/findfmt/cli/help.py:122
 msgid "List directories only, suppressing regular file entries."
-msgstr ""
+msgstr "通常のファイルを除外し、ディレクトリのみを一覧表示します。"
 
 #: src/findfmt/cli/help.py:123
 msgid "Confine traversal to the root filesystem device."
-msgstr ""
+msgstr "探索を開始ディレクトリのファイルシステムデバイス内に制限します。"
 
 #: src/findfmt/cli/help.py:124
 msgid "Restrict descent to a maximum directory depth level."
-msgstr ""
+msgstr "ディレクトリの最大探索階層数を制限します。"
 
 #: src/findfmt/cli/help.py:125
 msgid "Skip directories exceeding this entry count threshold."
-msgstr ""
+msgstr "このエントリ数しきい値を超えるディレクトリをスキップします。"
 
 #: src/findfmt/cli/help.py:126
 msgid "Omit empty directories and directories with zero matching files."
-msgstr ""
+msgstr "空のディレクトリおよび一致するファイルがないディレクトリを省略します。"
 
 #: src/findfmt/cli/help.py:127
 msgid ""
 "Include files matching wildcard or glob pattern (supports multiple -P and"
 " '|')."
 msgstr ""
+"ワイルドカードまたは glob パターンに一致するファイルを含めます（複数の -P と '|' をサポート）。"
 
 #: src/findfmt/cli/help.py:129
 msgid ""
 "Exclude files matching wildcard or glob pattern (supports multiple -I and"
 " '|')."
 msgstr ""
+"ワイルドカードまたは glob パターンに一致するファイルを除外します（複数の -I と '|' をサポート）。"
 
 #: src/findfmt/cli/help.py:131
 msgid "Apply case-insensitive matching across -P and -I patterns."
-msgstr ""
+msgstr "-P および -I パターンで大文字と小文字を区別しない一致を適用します。"
 
 #: src/findfmt/cli/help.py:132
 msgid "Match directory names against patterns; matched dirs inherit to children."
-msgstr ""
+msgstr "ディレクトリ名をパターンと照合します。一致したディレクトリの子要素にも継承されます。"
 
 #: src/findfmt/cli/help.py:133
 msgid "Sort files by criteria: name, version, time (mtime), ctime, size, none."
-msgstr ""
+msgstr "指定した基準でファイルをソートします: name, version, time (mtime), ctime, size, none。"
 
 #: src/findfmt/cli/help.py:134
 msgid "Invert the active sort order."
-msgstr ""
+msgstr "現在のソート順を反転します。"
 
 #: src/findfmt/cli/help.py:136
 msgid ""
 "Do not sort entries; yield files in raw filesystem order (equivalent to "
 "--sort=none)."
 msgstr ""
+"エントリをソートせず、ファイルシステムの生の順序で出力します（--sort=none と同等）。"
 
 #: src/findfmt/cli/help.py:138
 msgid "List directories before files within each directory level."
-msgstr ""
+msgstr "各ディレクトリ階層内でファイルをより先にディレクトリを表示します。"
 
 #: src/findfmt/cli/help.py:139
 msgid "List files before directories within each directory level."
-msgstr ""
+msgstr "各ディレクトリ階層内でディレクトリより先にファイルを表示します。"
 
 #: src/findfmt/cli/help.py:141
 msgid ""
 "Output format (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
 "markdown, md, rst, table, tree, xml, html, ndjson)."
 msgstr ""
+"出力形式 (text, json, jsonl, yaml, ipynb, csv, csv-table, tsv, "
+"markdown, md, rst, table, tree, xml, html, ndjson)。"
 
 #: src/findfmt/cli/help.py:145
 msgid ""
 "Output structured JSON representation of the file tree and "
 "classifications (equivalent to --format json)."
 msgstr ""
+"ファイルツリーと分類の構造化 JSON 表現を出力します（--format json と同等）。"
 
 #: src/findfmt/cli/help.py:148
 msgid "Output directory tree as an XML document (equivalent to --format xml)."
-msgstr ""
+msgstr "ディレクトリツリーを XML ドキュメントとして出力します（--format xml と同等）。"
 
 #: src/findfmt/cli/help.py:149
 msgid "Output directory tree as an HTML document with HTTP reference hyperlinks."
-msgstr ""
+msgstr "ディレクトリツリーを HTTP 参照ハイパーリンク付きの HTML ドキュメントとして出力します。"
 
 #: src/findfmt/cli/help.py:151
 msgid ""
 "Read and insert contents of specified HTML fragment file prior to "
 "directory listing."
 msgstr ""
+"指定した HTML フラグメントファイルの内容を読み込み、ディレクトリ一覧の前に挿入します。"
 
 #: src/findfmt/cli/help.py:153
 msgid ""
 "Read and insert contents of specified HTML fragment file after directory "
 "listing."
 msgstr ""
+"指定した HTML フラグメントファイルの内容を読み込み、ディレクトリ一覧の後に挿入します。"
 
 #: src/findfmt/cli/help.py:154
 msgid ""
 "Set title and <h1> heading for HTML document output (default: 'Directory "
 "Tree')."
 msgstr ""
+"HTML ドキュメント出力のタイトルと <h1> 見出しを設定します（既定値: 'Directory Tree'）。"
 
 #: src/findfmt/cli/help.py:155
 msgid ""
 "Suppress hyperlink anchors in HTML document output, rendering plain text "
 "paths."
 msgstr ""
+"HTML ドキュメント出力内のハイパーリンクアンカーを抑制し、プレーンテキストのパスを描画します。"
 
 #: src/findfmt/cli/help.py:156
 msgid ""
 "Wrap paths in standard OSC 8 clickable terminal hyperlink escape "
 "sequences."
 msgstr ""
+"パスを標準の OSC 8 クリック可能ターミナルハイパーリンクエスケープシーケンスで囲みます。"
 
 #: src/findfmt/cli/help.py:158
 msgid ""
 "URI schema for terminal hyperlinks (defaults to 'file://', e.g. "
 "'vscode://file/', 'cursor://file/', 'subl://')."
 msgstr ""
+"ターミナルハイパーリンクの URI スキーム（既定値: 'file://'、例: 'vscode://file/', "
+"'cursor://file/', 'subl://'）。"
 
 #: src/findfmt/cli/help.py:162
 msgid ""
 "URI authority component for terminal hyperlinks (e.g. 'localhost' or "
 "remote hostname)."
-msgstr ""
+msgstr "ターミナルハイパーリンクの URI オーソリティ要素（例: 'localhost' やリモートホスト名）。"
 
 #: src/findfmt/cli/help.py:164
 msgid "Send command output directly to a file rather than standard output."
-msgstr ""
+msgstr "標準出力ではなくファイルへコマンド出力を直接書き込みます。"
 
 #: src/findfmt/cli/help.py:165
 msgid ""
 "Render output in a hierarchical directory tree (equivalent to --format "
 "tree)."
-msgstr ""
+msgstr "階層的なディレクトリツリーとして出力を描画します（--format tree と同等）。"
 
 #: src/findfmt/cli/help.py:167
 msgid ""
 "Border style for table, csv-table, or rst output (e.g. rounded, simple, "
 "minimal, double, heavy, markdown, ascii, cp437, square, grid)."
 msgstr ""
+"table、csv-table、または rst 出力の罫線スタイル（例: rounded, simple, minimal, "
+"double, heavy, markdown, ascii, cp437, square, grid）。"
 
 #: src/findfmt/cli/help.py:171
 msgid ""
 "Prefix formula trigger characters (=, +, -, @, TAB, CR) in CSV/TSV cells "
 "with a single quote to prevent spreadsheet formula injection."
 msgstr ""
+"スプレッドシートの数式インジェクションを防ぐため、CSV/TSV セル内の数式開始文字 "
+"(=, +, -, @, TAB, CR) の先頭にシングルクォートを付与します。"
 
 #: src/findfmt/cli/help.py:174
 msgid "Enable or disable interactive paging (defaults to auto-paging on TTY)."
-msgstr ""
+msgstr "対話型ページャを有効または無効にします（既定値: TTY での自動ページング）。"
 
 #: src/findfmt/cli/help.py:176
 msgid ""
 "Do not print indentation lines in tree format and strip extraneous "
 "whitespace in structured formats."
 msgstr ""
+"tree 形式でインデント線を表示せず、構造化形式では余分な空白を除去します。"
 
 #: src/findfmt/cli/help.py:180
 msgid ""
 "Use ANSI/VT100 alternate character set line drawing escapes for tree "
 "indentation lines."
 msgstr ""
+"ツリーのインデント線に ANSI/VT100 代替文字セットの罫線エスケープシーケンスを使用します。"
 
 #: src/findfmt/cli/help.py:182
 msgid "Use CP437 (IBM-PC) console graphics characters for tree indentation lines."
-msgstr ""
+msgstr "ツリーのインデント線に CP437 (IBM-PC) コンソール罫線文字を使用します。"
 
 #: src/findfmt/cli/help.py:184
 msgid ""
 "Force enable or disable ANSI color output (defaults to auto-detection "
 "with NO_COLOR compliance)."
 msgstr ""
+"ANSI カラー出力を強制的に有効または無効にします（既定値: NO_COLOR 準拠の自動検出）。"
 
 #: src/findfmt/cli/help.py:187
 msgid "Output absolute paths rather than paths relative to the traversal root."
-msgstr ""
+msgstr "探索ルートからの相対パスではなく絶対パスを出力します。"
 
 #: src/findfmt/cli/help.py:189
 msgid ""
 "Prepend input search path prefix to relative output paths rather than "
 "stripping the root."
 msgstr ""
+"ルートを除去する代わりに、入力検索パスのプレフィックスを相対出力パスの先頭に付加します。"
 
 #: src/findfmt/cli/help.py:191
 msgid "Delimit path outputs with a NUL (\\0) character instead of a newline."
-msgstr ""
+msgstr "改行の代わりに NUL (\\0) 文字でパス出力を区切ります。"
 
 #: src/findfmt/cli/help.py:192
 msgid "Display identified tags alongside each matched path."
-msgstr ""
+msgstr "一致した各パスと並んで識別されたタグを表示します。"
 
 #: src/findfmt/cli/help.py:193
 msgid "Print summary match statistics to stderr."
-msgstr ""
+msgstr "一致の要約統計を stderr に出力します。"
 
 #: src/findfmt/cli/help.py:194
 msgid "Exit with status code 1 if no matching files are found."
-msgstr ""
+msgstr "一致するファイルが見つからない場合、終了コード 1 で終了します。"
 
 #: src/findfmt/cli/help.py:195
 msgid ""
 "Print file type and permissions in standard ls -l format (e.g. -rw-r--"
 "r--)."
 msgstr ""
+"ファイル種別とアクセス権を標準の ls -l 形式で出力します（例: -rw-r--r--）。"
 
 #: src/findfmt/cli/help.py:196
 msgid "Print the username, or UID if username is unavailable, of the file owner."
-msgstr ""
+msgstr "ファイル所有者のユーザー名（取得できない場合は UID）を出力します。"
 
 #: src/findfmt/cli/help.py:197
 msgid ""
 "Print the group name, or GID if group name is unavailable, of the file "
 "group."
-msgstr ""
+msgstr "ファイルグループのグループ名（取得できない場合は GID）を出力します。"
 
 #: src/findfmt/cli/help.py:198
 msgid "Print filesystem inode number (st_ino)."
-msgstr ""
+msgstr "ファイルシステムの inode 番号 (st_ino) を出力します。"
 
 #: src/findfmt/cli/help.py:199
 msgid "Print filesystem device number (st_dev)."
-msgstr ""
+msgstr "ファイルシステムのデバイス番号 (st_dev) を出力します。"
 
 #: src/findfmt/cli/help.py:200
 msgid "Print file size in bytes."
-msgstr ""
+msgstr "ファイルサイズをバイト単位で出力します。"
 
 #: src/findfmt/cli/help.py:202
 msgid ""
 "Print file sizes in human-readable binary format (e.g. 1KiB, 234MiB, "
 "2GiB)."
 msgstr ""
+"人間が読みやすいバイナリ形式でファイルサイズを出力します（例: 1KiB, 234MiB, 2GiB）。"
 
 #: src/findfmt/cli/help.py:204
 msgid ""
 "Print file sizes in human-readable SI metric format (e.g. 1kB, 234MB, "
 "2GB)."
 msgstr ""
+"人間が読みやすい SI メートル法形式でファイルサイズを出力します（例: 1kB, 234MB, 2GB）。"
 
 #: src/findfmt/cli/help.py:205
 msgid ""
 "Report directory size as the recursive sum of all child files and "
 "subdirectories."
 msgstr ""
+"ディレクトリサイズをすべての子ファイルとサブディレクトリの再帰的な合計として報告します。"
 
 #: src/findfmt/cli/help.py:206
 msgid "Print the date and time of the last modification (st_mtime)."
-msgstr ""
+msgstr "最終更新日時 (st_mtime) を出力します。"
 
 #: src/findfmt/cli/help.py:207
 msgid "Print the date and time of the last status change (st_ctime)."
-msgstr ""
+msgstr "最終状態変更日時 (st_ctime) を出力します。"
 
 #: src/findfmt/cli/help.py:209
 msgid ""
 "Specify date and time output format string (strftime syntax; implies -D "
 "unless --ctime)."
 msgstr ""
+"日時出力のフォーマット文字列を指定します（strftime 構文。--ctime がない場合は -D を暗黙指定）。"
 
 #: src/findfmt/cli/help.py:212
 msgid ""
 "Append file type indicator to filenames (* for executable, / for "
 "directory, @ for symlink, = for socket, | for FIFO, > for door)."
 msgstr ""
+"ファイル名にファイル種別インジケータを付加します（* は実行可能、/ はディレクトリ、"
+"@ はシンボリックリンク、= はソケット、| は FIFO、> は door）。"
 
 #: src/findfmt/cli/help.py:215
 msgid "Replace non-printable control characters in filenames with '?'."
-msgstr ""
+msgstr "ファイル名内の印字不可能な制御文字を '?' に置き換えます。"
 
 #: src/findfmt/cli/help.py:216
 msgid ""
 "Print non-printable control characters literally as raw bytes without "
 "masking."
 msgstr ""
+"印字不可能な制御文字をマスクせず生のバイトとしてそのまま出力します。"
 
 #: src/findfmt/cli/help.py:217
 msgid ""
 "Enclose filenames in double quotes, escaping embedded quotes and "
 "backslashes."
 msgstr ""
+"ファイル名を二重引用符で囲み、埋め込まれた引用符とバックスラッシュをエスケープします。"
 
 #: src/findfmt/cli/help.py:218
 msgid "List all known classification tags supported by the engine and exit."
-msgstr ""
+msgstr "エンジンがサポートするすべての既知の分類タグを一覧表示して終了します。"
 
 #: src/findfmt/cli/help.py:219
 msgid "Enable verbose output or extended runtime diagnostics with --version."
-msgstr ""
+msgstr "詳細出力または --version との併用による拡張ランタイム診断を有効にします。"
 
 #: src/findfmt/cli/help.py:220
 msgid "Display runtime environment diagnostics and exit."
-msgstr ""
+msgstr "実行環境の診断情報を表示して終了します。"
 
 #: src/findfmt/cli/help.py:221
 msgid "Display the version of findfmt and exit."
-msgstr ""
+msgstr "findfmt のバージョンを表示して終了します。"
 
 #: src/findfmt/cli/help.py:223
 msgid ""
 "Display comprehensive help reference including environment variables, "
 "exit codes, and examples."
 msgstr ""
+"環境変数、終了コード、使用例を含む包括的なヘルプリファレンスを表示します。"
 
 #: src/findfmt/cli/help.py:226
 msgid "Path to custom configuration file overriding defaults."
-msgstr ""
+msgstr "既定値を上書きするカスタム設定ファイルのパス。"
 
 #: src/findfmt/cli/help.py:227
 msgid "Suppress loading any configuration file."
-msgstr ""
+msgstr "設定ファイルの読み込みをすべて無効にします。"
 
 #: src/findfmt/cli/help.py:228
 msgid "Display resolved configuration settings and exit."
-msgstr ""
+msgstr "解決された設定内容を表示して終了します。"
 
 #: src/findfmt/cli/help.py:229
 msgid ""
 "Explicitly set locale for translations and display (e.g. 'en_US', 'es', "
 "'C')."
 msgstr ""
+"翻訳と表示に使用するロケールを明示的に設定します（例: 'en_US', 'es', 'C'）。"
 
 #: src/findfmt/cli/help.py:238
 msgid "Comprehensive CLI Reference"
-msgstr ""
+msgstr "包括的な CLI リファレンス"
 
 #: src/findfmt/cli/help.py:240
 msgid ""
@@ -837,23 +892,151 @@ msgid ""
 "  $ findsummary                           # Print summary match "
 "statistics to stderr\n"
 msgstr ""
+"使用法: findfmt [OPTIONS] [paths]...\n"
+"\n"
+"タグによるフィルタリング:\n"
+"  --type, -t, --tag <str>       一致させるタグまたはカンマ区切りのタグ。\n"
+"  --exclude, -e, --exclude-tag  除外するタグまたはカンマ区切りのタグ。\n"
+"  --all-tags / --no-all-tags    指定したすべてのタグとの一致を要求する\n"
+"                                [既定値: no-all-tags]。\n"
+"\n"
+"探索の制御:\n"
+"  --pattern, -P <pattern>       ワイルドカードまたは glob パターンに一致するファイルを含める。\n"
+"  --exclude-pattern, -I <pat>   ワイルドカードまたは glob パターンに一致するファイルを除外する。\n"
+"  --ignore-case                 -P と -I で大文字・小文字を区別しない。\n"
+"  --match-dirs, --matchdirs     ディレクトリ名を照合し、子要素へ継承する。\n"
+"  --shebang <str>               シェバンパターンでファイルをフィルタリングする。\n"
+"  --dirs-only, -d               通常ファイルを除外し、ディレクトリのみを一覧表示する。\n"
+"  --max-depth, -L <level>       最大探索階層数を制限する。\n"
+"  --follow-links, --follow-symlinks, -l\n"
+"                                ループ検出付きでディレクトリのシンボリックリンクを辿る。\n"
+"  --symlinks / --no-symlinks    --follow-links / --no-follow-links の別名。\n"
+"  --one-file-system, -x         探索を開始ファイルシステムデバイス内に制限する。\n"
+"  --filelimit <limit>           エントリ数しきい値を超えるディレクトリをスキップする。\n"
+"  --prune                       一致するファイルがないディレクトリを省略する。\n"
+"  --no-ignore / --ignore        .gitignore ルールを無視する [既定値: ignore]。\n"
+"  --gitignore-file <path>       カスタム ignore ファイルを探索範囲に適用する。\n"
+"  --from-file, --fromfile <p>   ファイルまたは標準入力 ('-') からパスを読み込む。\n"
+"  --offline                     オフラインでのファイル名識別を強制する。\n"
+"  --all, --hidden, -a           隠しファイルと隠しディレクトリを含める [既定値: no-hidden]。\n"
+"  --sort <criteria>             ファイルをソートする (name, version, time, ctime, "
+"size, none)\n"
+"                                [既定値: name]。\n"
+"  --reverse, -r                 現在のソート順を反転する。\n"
+"  --unsorted, -U                ソートせずにディレクトリの生順序で出力する。\n"
+"  --dirsfirst                   各階層内でファイルより先にディレクトリを表示する。\n"
+"  --filesfirst                  各階層内でディレクトリより先にファイルを表示する。\n"
+"\n"
+"出力のフォーマット:\n"
+"  --format, -f <fmt>            出力形式 (text, json, jsonl, yaml, ipynb,\n"
+"                                csv, csv-table, tsv, markdown, rst, table, "
+"tree,\n"
+"                                xml, html) [既定値: text]。\n"
+"  --json, -J / --no-json        構造化 JSON 表現を出力する。\n"
+"  --xml, -X / --no-xml          ディレクトリツリーを XML ドキュメントとして出力する。\n"
+"  --html, -H <baseHREF>         ディレクトリツリーを HTML ドキュメントとして出力する。\n"
+"  --intro <path>                一覧の前にカスタム HTML フラグメントを挿入する。\n"
+"  --outro <path>                一覧の後にカスタム HTML フラグメントを追加する。\n"
+"  --title, -T <title>           HTML 出力のタイトルと <h1> 見出しを設定する。\n"
+"  --nolinks / --no-nolinks      HTML 出力内のハイパーリンクアンカーを抑制する。\n"
+"  --hyperlink / --no-hyperlink  パスを OSC 8 ターミナルハイパーリンクで囲む。\n"
+"  --hyperlink-schema <schema>   URI スキームプレフィックス (既定値: file://)。\n"
+"  --hyperlink-authority <auth>  URI オーソリティの上書き (例: localhost)。\n"
+"  --output, -o <path>           コマンド出力を直接ファイルへ書き込む。\n"
+"  --csv-safe / --no-csv-safe    CSV/TSV セル内のスプレッドシート数式を無害化する。\n"
+"  --tree / --no-tree            階層的なツリー表示で出力を描画する。\n"
+"  --table-style <style>         罫線スタイル (rounded, cp437, ascii など)。\n"
+"  --pager / --no-pager          対話型ページャを有効または無効にする。\n"
+"  --no-indent, -i / --indent    インデント線と余分な空白を省略する。\n"
+"  --ansi-lines, -A              ANSI/VT100 罫線エスケープを使用する。\n"
+"  --cp437, -S                   CP437 コンソール罫線文字を使用する。\n"
+"  --color, -C / --no-color, -n  ANSI カラー出力を強制的に有効または無効にする。\n"
+"  --absolute, --full-path       相対パスではなく絶対パスを出力する。\n"
+"  --relative, --relative-path   相対パスの先頭に入力検索パスを付加する。\n"
+"  --permissions, -p             ファイルモードを標準の ls -l 形式で出力する。\n"
+"  --user, -u                    ファイル所有者のユーザー名を表示する (UID にフォールバック)。\n"
+"  --group, -g                   ファイル所有グループを表示する (GID にフォールバック)。\n"
+"  --inodes                      ファイルシステムの inode 番号 (st_ino) を出力する。\n"
+"  --device                      ファイルシステムのデバイス番号 (st_dev) を出力する。\n"
+"  --size / --no-size            ファイルサイズをバイト単位で出力する。\n"
+"  --human-readable, -h          サイズを読みやすいバイナリ形式で出力する。\n"
+"  --si / --no-si                サイズを読みやすい SI メートル法形式で出力する。\n"
+"  --du, --accumulate-size       ディレクトリの再帰的なディスク使用量を集計する。\n"
+"  --mtime, -D                   最終更新日時を表示する。\n"
+"  --ctime                       最終状態変更日時を表示する。\n"
+"  --time-format, --timefmt <f>  日時フォーマット文字列 (strftime 構文)。\n"
+"  --classify, -F                ファイル名に種別インジケータ (/ @ * = | >) を付加する。\n"
+"  --hide-control-chars, -q      印字不可能な制御文字を '?' でマスクする。\n"
+"  --literal, -N                 印字不可能な文字をそのまま出力する。\n"
+"  --quote-name, -Q              ファイル名を二重引用符で囲む。\n"
+"  --print0, -0 / --no-print0    NUL (\\0) バイトで区切る [既定値: no-print0]。\n"
+"  --list-tags / --no-list-tags  識別されたタグを表示する [既定値: no-list-tags]。\n"
+"  --summary, -s / --no-summary  要約統計を出力する [既定値: no-summary]。\n"
+"  --exit-status                 一致するファイルがない場合にコード 1 で終了する。\n"
+"\n"
+"ヘルプと診断:\n"
+"  --config <path>               既定値を上書きするカスタム設定ファイルのパス。\n"
+"  --no-config                   設定ファイルの読み込みを無効にする。\n"
+"  --show-config                 解決された設定を表示して終了する。\n"
+"  --known-tags                  既知のすべての分類タグを一覧表示して終了する。\n"
+"  --locale, --lang <locale>     表示ロケールを設定する (例: 'en_US', 'es', 'C')。\n"
+"  --version, -v, -V             バージョンを表示する (--verbose 併用で診断表示)。\n"
+"  --verbose                     詳細出力または拡張ランタイム診断を有効にする。\n"
+"  --diagnostics                 実行環境の診断情報を表示して終了する。\n"
+"  --help-all                    この包括的なリファレンスを表示して終了する。\n"
+"  --help                        カテゴリ別のヘルプ要約を表示して終了する。\n"
+"\n"
+"コマンドラッパー:\n"
+"  findfiles [PATHS...]          findfmt --hidden と同等\n"
+"  findfilemime [PATHS...]       findfmt --hidden --list-tags と同等\n"
+"  findfilefmt [TAG] [PATHS...]  findfmt --hidden --tag TAG と同等\n"
+"  findshebang [INTERP]...       findfmt --hidden --shebang INTERPRETER と同等\n"
+"  findfmt0 [PATHS...]           findfmt --hidden --print0 と同等\n"
+"  findsummary [PATHS...]        findfmt --hidden --summary と同等\n"
+"\n"
+"POSIX 二重ハイフン (--) 終端記号:\n"
+"  '--' 以降の引数は厳密に位置引数パスとして扱われます:\n"
+"  $ findfmt -- -hyphen-dir/\n"
+"  $ findfilefmt python -- -weird-name/\n"
+"\n"
+"環境変数:\n"
+"  NO_COLOR                      設定時、カラー出力を抑制します (https://no-color.org)。\n"
+"  CLICOLOR                      0 で ANSI カラーを抑制、1 でカラーを有効化します。\n"
+"  CLICOLOR_FORCE                0 以外でパイプ接続時もカラー出力を強制します。\n"
+"  FINDFMT_CONFIG                既定値を上書きするカスタム設定ファイルのパス。\n"
+"\n"
+"終了コード:\n"
+"  0                             成功（一致するファイルがない場合も含む。--exit-status 参照）。\n"
+"  1                             実行時エラー、または --exit-status 指定時の不一致。\n"
+"  2                             コマンドライン引数、オプション、または設定ファイルの誤り。\n"
+"  130                           SIGINT (Ctrl+C) による中断。\n"
+"\n"
+"ワークフロー例:\n"
+"  $ findfmt -t python                     # 現在のリポジトリ内の Python ファイルを検索\n"
+"  $ findfmt --shebang bash scripts/       # scripts/ 内の bash スクリプトを検索\n"
+"  $ findfmt -t python -t executable --all-tags  # 両方のタグを必須にする\n"
+"  $ findfiles --no-hidden                 # 隠しファイルを除いて探索する\n"
+"  $ findfilefmt json                      # ショートカット: JSON ファイルを検索\n"
+"  $ findshebang python                    # ショートカット: Python シェバンスクリプトを検索\n"
+"  $ findfmt0 -t python | xargs -0 flake8  # NUL 区切りパスを安全にパイプ渡し\n"
+"  $ findsummary                           # 要約統計を stderr に出力\n"
 
 #: src/findfmt/cli/options.py:100
 msgid "Tag Filtering"
-msgstr ""
+msgstr "タグによるフィルタリング"
 
 #: src/findfmt/cli/options.py:101
 msgid "Traversal Controls"
-msgstr ""
+msgstr "探索の制御"
 
 #: src/findfmt/cli/options.py:102
 msgid "Output Formatting"
-msgstr ""
+msgstr "出力のフォーマット"
 
 #: src/findfmt/cli/output_sink.py:100 src/findfmt/cli/output_sink.py:207
 #, python-brace-format
 msgid "Error opening output file '{path}': {error}"
-msgstr ""
+msgstr "出力ファイル '{path}' を開く際のエラー: {error}"
 
 #: src/findfmt/formatters/visual.py:70
 #, python-brace-format
@@ -875,11 +1058,11 @@ msgstr "--- findfmt 要約 ---"
 
 #: src/findfmt/formatters/visual.py:188
 msgid "Inode"
-msgstr ""
+msgstr "inode"
 
 #: src/findfmt/formatters/visual.py:191
 msgid "Device"
-msgstr ""
+msgstr "デバイス"
 
 #: src/findfmt/formatters/visual.py:194
 msgid "Permissions"
@@ -887,7 +1070,7 @@ msgstr "アクセス権"
 
 #: src/findfmt/formatters/visual.py:197
 msgid "User"
-msgstr ""
+msgstr "ユーザー"
 
 #: src/findfmt/formatters/visual.py:200
 msgid "Group"

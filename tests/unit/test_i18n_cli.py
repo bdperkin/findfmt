@@ -405,3 +405,44 @@ def test_cli_flags_locale_french(tmp_path: Path) -> None:
         )
         assert res_err.exit_code == 2
         assert "Erreur\u00a0:" in res_err.output
+
+
+def test_cli_flags_locale_japanese(tmp_path: Path) -> None:
+    """Verify CLI execution with --locale ja and LANG=ja applies full Japanese catalog (#228)."""
+    file1 = tmp_path / "ichi.py"
+    file1.write_text("print(1)\n", encoding="utf-8")
+
+    runner = CliRunner()
+    with override_locale("C"):
+        # Singular summary (1 file)
+        res_single = runner.invoke(app, ["--locale", "ja", "--summary", str(tmp_path)])
+        assert res_single.exit_code == 0
+        assert "一致したファイル: 1" in res_single.output
+        assert "合計サイズ:" in res_single.output
+        assert "findfmt 要約" in res_single.output
+        assert get_current_locale() == "ja"
+
+        # Plural summary (2 files) and LANG=ja environment variable
+        file2 = tmp_path / "ni.py"
+        file2.write_text("print(2)\n", encoding="utf-8")
+        res_plural = runner.invoke(
+            app,
+            ["--summary", "--format", "table", "--size", str(tmp_path)],
+            env={"LANG": "ja"},
+        )
+        assert res_plural.exit_code == 0
+        assert "一致したファイル: 2" in res_plural.output
+        assert "パス" in res_plural.output
+        assert "サイズ" in res_plural.output
+
+        # Diagnostics and error message localization
+        res_diag = runner.invoke(app, ["--locale", "ja", "--diagnostics", "--no-config"])
+        assert res_diag.exit_code == 0
+        assert "Configuration: なし" in res_diag.output
+
+        res_err = runner.invoke(
+            app,
+            ["--locale", "ja", "--dirsfirst", "--filesfirst", str(tmp_path)],
+        )
+        assert res_err.exit_code == 2
+        assert "エラー:" in res_err.output
