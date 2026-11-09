@@ -216,7 +216,7 @@ HELP_HIDE_CONTROL_CHARS = _("Replace non-printable control characters in filenam
 HELP_LITERAL = _("Print non-printable control characters literally as raw bytes without masking.")
 HELP_QUOTE_NAME = _("Enclose filenames in double quotes, escaping embedded quotes and backslashes.")
 HELP_KNOWN_TAGS = _("List all known classification tags supported by the engine and exit.")
-HELP_VERBOSE = _("Enable verbose output or extended runtime diagnostics with --version.")
+HELP_VERBOSE = _("Include extended runtime diagnostics when used with --version.")
 HELP_DIAGNOSTICS = _("Display runtime environment diagnostics and exit.")
 HELP_VERSION = _("Display the version of findfmt and exit.")
 HELP_HELP_ALL = _(
@@ -320,7 +320,7 @@ def get_help_all() -> str:
         "  --known-tags                  List all known classification tags and exit.\n"
         "  --locale, --lang <locale>     Set display locale (e.g. 'en_US', 'es', 'C').\n"
         "  --version, -v, -V             Display version (use with --verbose for diagnostics).\n"
-        "  --verbose                     Enable verbose output or extended runtime diagnostics.\n"
+        "  --verbose                     Include extended runtime diagnostics with --version.\n"
         "  --diagnostics                 Display runtime environment diagnostics and exit.\n"
         "  --help-all                    Display this comprehensive reference and exit.\n"
         "  --help                        Display categorized help summary and exit.\n\n"

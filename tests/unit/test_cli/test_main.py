@@ -12,6 +12,8 @@ import yaml
 from typer.testing import CliRunner
 
 from findfmt.cli import app
+from findfmt.cli.help import HELP_VERBOSE, get_help_all
+from findfmt.cli.pager import resolve_pager_flag
 from findfmt.entrypoints import (
     main_findfilefmt,
     main_findfilemime,
@@ -415,3 +417,22 @@ def test_typer_app_pretty_exceptions_disabled() -> None:
     """Verify Typer pretty exceptions and local variable dumps are disabled."""
     assert app.pretty_exceptions_enable is False
     assert app.pretty_exceptions_show_locals is False
+
+
+def test_negative_numeric_options_rejected(tmp_path: Path) -> None:
+    """Verify negative values for -L/--max-depth and --filelimit exit with code 2."""
+    runner = CliRunner()
+    for args in (
+        ["-L", "-1", str(tmp_path)],
+        ["--max-depth", "-1", str(tmp_path)],
+        ["--filelimit", "-5", str(tmp_path)],
+    ):
+        result = runner.invoke(app, args)
+        assert result.exit_code == 2
+        assert "Traceback" not in result.output
+
+    assert "extended runtime diagnostics" in str(HELP_VERBOSE)
+    assert "verbose output" not in str(HELP_VERBOSE).lower()
+    assert "Include extended runtime diagnostics with --version." in get_help_all()
+    assert resolve_pager_flag.__doc__ is not None
+    assert "-P" not in resolve_pager_flag.__doc__

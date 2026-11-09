@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 189 Closed Issues | 115 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 190 Closed Issues | 114 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -15,8 +15,8 @@
 > issues #215, #222, #228, and #233; added #574; released v1.1.5 and closed its milestone; added
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
-> realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329
-> and #460)
+> realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
+> issues #460 and #366)
 
 ______________________________________________________________________
 
@@ -591,7 +591,10 @@ Note: Ordered chronologically by completion date.
   and other domain errors print full tracebacks (Closed: 2026-11-09 via PR
   [#602](https://github.com/bdperkin/findfmt/pull/602))
 - [x] **[#460](https://github.com/bdperkin/findfmt/issues/460)** - fix(parsers): read --from-file
-  stdin and files as bytes with os.fsdecode (no crash on non-UTF-8 names) (Closed: 2026-11-09)
+  stdin and files as bytes with os.fsdecode (no crash on non-UTF-8 names) (Closed: 2026-11-09 via PR
+  [#603](https://github.com/bdperkin/findfmt/pull/603))
+- [x] **[#366](https://github.com/bdperkin/findfmt/issues/366)** - [CLI] Validate numeric CLI
+  parameters (min=0) and clarify misleading option help descriptions (Closed: 2026-11-09)
 
 ______________________________________________________________________
 
@@ -610,10 +613,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same
   zero-warning static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#366](https://github.com/bdperkin/findfmt/issues/366)** - [CLI] Validate numeric CLI
-  parameters (min=0) and clarify misleading option help descriptions *(Rank: 4 | Epic:
-  [[Epic] CLI Documentation Accuracy, Dynamic --help-all Generation, and Option Validation](https://github.com/bdperkin/findfmt/issues/346)
-  | Milestone: v1.2.0)* - **Value:** Medium | **Effort:** S - **Rationale:** Small validation fix.
 - [ ] **[#452](https://github.com/bdperkin/findfmt/issues/452)** - refactor(api): lazy-load main,
   main\_\* and _ from the package root via module \_\_getattr\_\_ *(Rank: 5 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
@@ -1358,8 +1357,7 @@ linked natively on GitHub.
   v1.2.1 | Open sub-issues: 1)* - [#372](https://github.com/bdperkin/findfmt/issues/372)
 - [ ] **[#346](https://github.com/bdperkin/findfmt/issues/346)** - [Epic] CLI Documentation
   Accuracy, Dynamic --help-all Generation, and Option Validation *(Milestone: v1.2.1 | Open
-  sub-issues: 2)* - [#365](https://github.com/bdperkin/findfmt/issues/365),
-  [#366](https://github.com/bdperkin/findfmt/issues/366)
+  sub-issues: 1)* - [#365](https://github.com/bdperkin/findfmt/issues/365)
 - [ ] **[#348](https://github.com/bdperkin/findfmt/issues/348)** - [Epic] Core Refactoring & API
   Hygiene Cleanup *(Milestone: v1.2.2 | Open sub-issues: 2)* -
   [#342](https://github.com/bdperkin/findfmt/issues/342),
@@ -1556,7 +1554,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                                                 | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 6           |
+| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 5           |
 | v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                                                  | 6           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                                     | 8           |

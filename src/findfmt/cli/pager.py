@@ -188,7 +188,7 @@ def resolve_pager_flag(
         args: Optional explicit sequence of argument strings.
 
     Returns:
-        True if --pager/-P requested, False if --no-pager requested, None for auto.
+        True if --pager requested, False if --no-pager requested, None for auto.
     """
     if ctx is not None:
         params = getattr(ctx, "params", {})
