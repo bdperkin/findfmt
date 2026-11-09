@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 191 Closed Issues | 113 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 192 Closed Issues | 112 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -16,7 +16,7 @@
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
-> issues #460, #366, and #452)
+> issues #460, #366, #452, and #319)
 
 ______________________________________________________________________
 
@@ -597,7 +597,10 @@ Note: Ordered chronologically by completion date.
   parameters (min=0) and clarify misleading option help descriptions (Closed: 2026-11-09 via PR
   [#604](https://github.com/bdperkin/findfmt/pull/604))
 - [x] **[#452](https://github.com/bdperkin/findfmt/issues/452)** - refactor(api): lazy-load main,
-  main\_\* and _ from the package root via module \_\_getattr\_\_ (Closed: 2026-11-09)
+  main\_\* and _ from the package root via module \_\_getattr\_\_ (Closed: 2026-11-09 via PR
+  [#605](https://github.com/bdperkin/findfmt/pull/605))
+- [x] **[#319](https://github.com/bdperkin/findfmt/issues/319)** - fix(cli): wrapper entry points
+  misparse value options; findfilefmt -o x tag truncates a file named "tag" (Closed: 2026-11-09)
 
 ______________________________________________________________________
 
@@ -698,11 +701,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Parent: [#229](https://github.com/bdperkin/findfmt/issues/229) | Milestone: v1.6.1)* -
   **Value:** Medium | **Effort:** S - **Rationale:** Locks in RTL behaviour cheaply; guards the
   Urdu/Arabic releases.
-- [ ] **[#319](https://github.com/bdperkin/findfmt/issues/319)** - fix(cli): wrapper entry points
-  misparse value options; findfilefmt -o x tag truncates a file named "tag" *(Rank: 20 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Milestone: v1.2.0)* - **Value:** High | **Effort:** M - **Rationale:** Wrapper commands
-  mis-parse common options; can create stray files.
 - [ ] **[#451](https://github.com/bdperkin/findfmt/issues/451)** - fix(i18n): defer locale
   initialisation so "import findfmt" does not change process locale *(Rank: 21 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
@@ -1298,7 +1296,7 @@ sub-issues. Respect `Blocked by` links when picking up work.
   Epic:
   [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
   | Milestone: v1.8.1)* - **Value:** Low | **Effort:** L - **Rationale:** v2.0 redesign of wrapper
-  entry points. Blocked by [#319](https://github.com/bdperkin/findfmt/issues/319).
+  entry points.
 
 ______________________________________________________________________
 
@@ -1358,8 +1356,7 @@ linked natively on GitHub.
   [#342](https://github.com/bdperkin/findfmt/issues/342),
   [#355](https://github.com/bdperkin/findfmt/issues/355)
 - [ ] **[#386](https://github.com/bdperkin/findfmt/issues/386)** - [Epic] CLI Architecture, Terminal
-  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 4)* -
-  [#319](https://github.com/bdperkin/findfmt/issues/319),
+  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 3)* -
   [#324](https://github.com/bdperkin/findfmt/issues/324),
   [#331](https://github.com/bdperkin/findfmt/issues/331),
   [#334](https://github.com/bdperkin/findfmt/issues/334)
@@ -1549,7 +1546,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                                                 | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 4           |
+| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 3           |
 | v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                                                  | 6           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                                     | 8           |
