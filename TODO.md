@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 185 Closed Issues | 104 Actionable Open Tasks | 28 Active Umbrella Epics **Last
+> **Tracking:** 185 Closed Issues | 105 Actionable Open Tasks | 28 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -12,7 +12,7 @@
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
 > issues #360, #344, #546, #306, #556, #427, #429, #430, #425, #307, #308, #564, #566, #349, and
 > epic #385; released v1.1.2, v1.1.3, and v1.1.4 and closed their milestones); 2026-11-09 (closed
-> issues #215, #222, #228, and #233)
+> issues #215, #222, #228, and #233; added #574; released v1.1.5 and closed its milestone)
 
 ______________________________________________________________________
 
@@ -849,6 +849,13 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Milestone: v1.3.1)* - **Value:** Low | **Effort:** S - **Rationale:** Small docs task; badge
   list already mostly done.
 
+- [ ] **[#574](https://github.com/bdperkin/findfmt/issues/574)** - feat(docs): display
+  representative country flag icons in the multilingual documentation language switcher *(Rank: 50 |
+  Epic:
+  [[Epic] Documentation Architecture, Sphinx Navigation & Project Branding](https://github.com/bdperkin/findfmt/issues/379)
+  | Milestone: v1.3.1)* - **Value:** Low | **Effort:** S - **Rationale:** Visual UX polish for the
+  Sphinx sidebar language switcher.
+
 - [ ] **[#313](https://github.com/bdperkin/findfmt/issues/313)** - chore(pre-commit): configure
   yamlfix formatting rules in pyproject.toml *(Rank: 51 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
@@ -1270,10 +1277,11 @@ linked natively on GitHub.
   [#331](https://github.com/bdperkin/findfmt/issues/331),
   [#334](https://github.com/bdperkin/findfmt/issues/334)
 - [ ] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
-  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 3)* -
+  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 4)* -
   [#302](https://github.com/bdperkin/findfmt/issues/302),
   [#309](https://github.com/bdperkin/findfmt/issues/309),
-  [#312](https://github.com/bdperkin/findfmt/issues/312)
+  [#312](https://github.com/bdperkin/findfmt/issues/312),
+  [#574](https://github.com/bdperkin/findfmt/issues/574)
 - [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
   Architecture: Layered Precedence, Schemas & Validation Diagnostics *(Milestone: v1.3.1 | Open
   sub-issues: 4)* - [#310](https://github.com/bdperkin/findfmt/issues/310),
@@ -1414,17 +1422,17 @@ Re-planned on 2026-10-24 for the 1.1.0 release: v1.1.0 now holds the release wor
 and #469). Its remaining traversal and localization issues moved by theme: #320 → v1.1.1, #323 →
 v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 
-v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, and v1.1.3 and v1.1.4
-on 2026-11-08 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
+v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, v1.1.3 and v1.1.4 on
+2026-11-08, and v1.1.5 on 2026-11-09 (PyPI, GHCR, and GitHub Releases), and their milestones are
+closed.
 
 | Milestone       | Theme                                                                                                                 | Open Issues |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 0           |
 | v1.2.0          | Core/CLI Decoupling: Side-Effect-Free Import, Wrapper Parsing, Friendly Errors                                        | 6           |
 | v1.2.1          | CLI Help/Docs Accuracy, Pager Streaming, Depth-Safe Traversal & API Hygiene                                           | 8           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                         | 8           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                     | 7           |
-| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                              | 9           |
+| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                              | 10          |
 | v1.3.2          | Pre-commit & CI Config Hardening: Schema Validation, Workflow Timeouts, Meta Hooks, Markdown & Commit-Message Linting | 5           |
 | v1.4.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                            | 4           |
 | v1.4.1          | Extended Ignore File Formats (.dockerignore, eslint/prettier/npm/stylelint presets)                                   | 6           |

@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.5] - 2026-11-09
+
 ### Features
 
 - *(i18n)* Complete the canonical German (`de`) localization catalog
@@ -686,4 +688,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.1.2]: https://github.com/bdperkin/findfmt/compare/v1.1.1...v1.1.2
 [1.1.3]: https://github.com/bdperkin/findfmt/compare/v1.1.2...v1.1.3
 [1.1.4]: https://github.com/bdperkin/findfmt/compare/v1.1.3...v1.1.4
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.4...HEAD
+[1.1.5]: https://github.com/bdperkin/findfmt/compare/v1.1.4...v1.1.5
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.5...HEAD
