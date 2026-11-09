@@ -3,15 +3,15 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 175 Closed Issues | 110 Actionable Open Tasks | 30 Active Umbrella Epics **Last
+> **Tracking:** 177 Closed Issues | 109 Actionable Open Tasks | 29 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
 > milestone); 2026-10-26 (closed #351, #454, #341, #369, #347, #304, #320); 2026-11-05 (closed
 > issues #303, #343, #384, #322, #323, #221, #345, #321, #337, and #426; released v1.1.1 and closed
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
-> issues #360, #344, #546, #306, #556, #427, #429, #430, and #425; released v1.1.2 and v1.1.3 and
-> closed their milestones)
+> issues #360, #344, #546, #306, #556, #427, #429, #430, #425, #307, and #308; released v1.1.2 and
+> v1.1.3 and closed their milestones)
 
 ______________________________________________________________________
 
@@ -546,6 +546,12 @@ Note: Ordered chronologically by completion date.
 - [x] **[#425](https://github.com/bdperkin/findfmt/issues/425)** - [Epic] Exhaustive Dependency
   Resolution Matrix Testing via uv in CI and Tooling (Closed: 2026-11-08 via PR
   [#562](https://github.com/bdperkin/findfmt/pull/562))
+- [x] **[#307](https://github.com/bdperkin/findfmt/issues/307)** - feat(i18n): evaluate managed
+  localization platforms with native AI (POEditor, Crowdin, Localazy) vs local CI automation
+  (Closed: 2026-11-08 via PR [#563](https://github.com/bdperkin/findfmt/pull/563))
+- [x] **[#308](https://github.com/bdperkin/findfmt/issues/308)** - [Epic] Investigate Open-Source
+  Python AI Translators & Automation for GNU gettext .po Files (Closed: 2026-11-08 via PR
+  [#563](https://github.com/bdperkin/findfmt/pull/563))
 
 ______________________________________________________________________
 
@@ -908,12 +914,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.3. Future / Low-Priority / Backlog
 
-- [ ] **[#307](https://github.com/bdperkin/findfmt/issues/307)** - feat(i18n): evaluate managed
-  localization platforms with native AI (POEditor, Crowdin, Localazy) vs local CI automation *(Rank:
-  63 | Epic:
-  [[Epic] Investigate Open-Source Python AI Translators & Automation for GNU gettext .po Files](https://github.com/bdperkin/findfmt/issues/308)
-  | Milestone: v1.1.4)* - **Value:** Low | **Effort:** M - **Rationale:** Platform evaluation;
-  informs [#306](https://github.com/bdperkin/findfmt/issues/306).
 - [ ] **[#349](https://github.com/bdperkin/findfmt/issues/349)** - chore: add a multi-Python local
   runner (evaluate nox, tox, Hatch, uv) *(Rank: 63 | Epic:
   [[Epic] Packaging Integrity, Release Automation & Dependency Verification](https://github.com/bdperkin/findfmt/issues/385)
@@ -1255,9 +1255,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are
 linked natively on GitHub.
 
-- [ ] **[#308](https://github.com/bdperkin/findfmt/issues/308)** - [Epic] Investigate Open-Source
-  Python AI Translators & Automation for GNU gettext .po Files *(Milestone: v1.1.4 | Open
-  sub-issues: 1)* - [#307](https://github.com/bdperkin/findfmt/issues/307)
 - [ ] **[#385](https://github.com/bdperkin/findfmt/issues/385)** - [Epic] Packaging Integrity,
   Release Automation & Dependency Verification *(Milestone: v1.1.4 | Open sub-issues: 1)* -
   [#349](https://github.com/bdperkin/findfmt/issues/349)
@@ -1433,7 +1430,7 @@ v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, a
 
 | Milestone       | Theme                                                                                                                 | Open Issues |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                      | 4           |
+| v1.1.4          | Dependency-Matrix Automation, Local Multi-Python Runner & AI Translation Tooling                                      | 2           |
 | v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 4           |
 | v1.2.0          | Core/CLI Decoupling: Side-Effect-Free Import, Wrapper Parsing, Friendly Errors                                        | 6           |
 | v1.2.1          | CLI Help/Docs Accuracy, Pager Streaming, Depth-Safe Traversal & API Hygiene                                           | 8           |

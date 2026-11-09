@@ -1,0 +1,693 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) Brandon Perkins
+# This file is distributed under the same license as the findfmt package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: findfmt 1.1.4.dev7+g7a8368977.d20261108\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-08 22:59+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: en\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: ../../source/guides/localization_platforms.md:1
+#: f949890694f14db1b992db8b12d466ee
+msgid "Managed Localization Platforms vs. Local CI Automation (ADR)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:3
+#: 8f4211be8654499aa8068351e2284dbb
+msgid ""
+"As `findfmt` scales localization coverage across Tier 1 through Tier 4 "
+"languages (see [Multi-Language Localization Architecture & Phased Rollout"
+" Plan](localization_plan.md) and [Open-Source Python AI Translation "
+"Benchmark & Architecture](ai_translation_benchmark.md)), this document "
+"evaluates managed cloud localization platforms with native AI assistants "
+"(**POEditor**, **Crowdin**, and **Localazy**) against `findfmt`'s self-"
+"hosted CLI pipeline (`tools/i18n.py translate`) and records our "
+"Architecture Decision Record (ADR)."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:12
+#: 289fc1a9f92f4149927bf1bef6c3a2eb
+msgid "1. Platform Feature Evaluation"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:14
+#: 2fbd24b086634b34990b55c8b643a6ae
+msgid ""
+"The table below compares **POEditor**, **Crowdin**, **Localazy**, and "
+"**`tools/i18n.py translate`** across the technical requirements of "
+"`findfmt`'s GNU `gettext` catalog pipeline:"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: d7cd011af0664314ba4527dc9a486be4
+msgid "Capability / Requirement"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: a6b3d7387d43453ea39408263ae3546e
+msgid "POEditor"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: cbf4a8df42ee4486825cc9050d296bd2
+msgid "Crowdin"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 60e7495286624068b0d965f248a065a8
+msgid "Localazy"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 1ab243137fcd414d9a65044e1e530a9c 3444e2f8d6e743b4851c1892f71a989a
+msgid "Local CLI (`tools/i18n.py translate`)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: e08ae1f53a5441ed906f392089240025
+msgid "**PO Import/Export & `UTF-8` Fidelity**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: e955650afc7643ffa792b1a491e6a0d1
+msgid ""
+"Native `.po`/`.pot` import/export; preserves `UTF-8` but can reflow line "
+"wrapping and headers"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: da00d99db55e48e1872809224e74cbf3
+msgid ""
+"High-fidelity `.po` parser/exporter; preserves `UTF-8` and standard "
+"gettext headers"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 96924a6b284d465ebb9530f0eb026957
+msgid "Native `.po` plugin via CLI/GitHub integration; preserves `UTF-8` encoding"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: de09bcf61ca14185806c04c74815281b
+msgid ""
+"Direct `polib` AST manipulation; preserves exact headers, wrapping, and "
+"`charset=UTF-8`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: d8315a2f363e4f21b602249a2fe82087
+msgid "**Relative Source Location Comments (`#:`)**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: cc4bdbff5e93448ab22c657375cd4632
+msgid ""
+"Preserves reference comments, though export formatting can differ from "
+"`babel`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 2ca299f66eee473ea08d535622fbaf9d
+msgid "Preserves `#:` location comments; configurable export templates"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 0fb7613e33ab444c83eeecc12acd45c3
+msgid "Preserves `#:` references when configured in `localazy.json`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 1c786cdbe7fc403292eab8e5965ffdd9
+msgid ""
+"Strictly enforces relative `src/findfmt/...` paths compatible with "
+"`check-no-absolute-locale-paths`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: ee48921de1a948abbf7ea638b64fe815
+#, python-brace-format, python-format
+msgid "**Python Placeholders (`{name}`, `%s`)**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 4e01c6ab4d3e41e3be098766a9533840
+#, python-brace-format, python-format
+msgid ""
+"Highlights `%s` and `{name}` tokens in UI; QA checks warn on missing "
+"placeholders"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: c800c10875a347f28e7741089bd38870
+msgid ""
+"Native `python-format` / brace placeholder detection with automated QA "
+"checks before export"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 2dd82f9f3a624879997bf65a76a10d4e
+msgid ""
+"Highlights placeholders and runs automated placeholder validation in "
+"review queues"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 040a8b20144341cda250019af47fe9ab
+#, python-brace-format, python-format
+msgid ""
+"Pre-commit and runtime validator (`tools/i18n_validation.py`) rejects any"
+" mismatched `{...}` or `%s`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 53d680ad9d984d22a9e0429fdbc1ffdf
+msgid "**Rich Markup Preservation (`[bold]`, `[/]`)**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 569fb974e30d446e87072e357542dcd9
+msgid ""
+"Treats Rich `[style]` tags as plain text unless custom regex QA rules are"
+" configured"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: ae7bbf55f3e54889afbeb860ef661ee0
+msgid ""
+"Supports custom QA regex rules, but AI assistants can still translate "
+"inside bracketed tags"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: a95b2f1766064abea2bd2be7a1642b48
+msgid ""
+"Requires custom glossary/exclusion rules to prevent translating `[bold]` "
+"or `[cyan]`"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: bb1b374104df451290cadac77d0ab48a
+msgid ""
+"Native Rich tag validator (`extract_rich_tags`) + system prompt "
+"constraints guarantee 100% tag safety"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 31a9196633294abaab3c642fd7b05fd2
+msgid "**Multi-Form `ngettext` Plurals (`nplurals=1..6`)**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 3ec939d0ace9440b93fc918970914613
+msgid ""
+"Supports gettext plural forms (`msgid_plural` / `msgstr[N]`) mapped to "
+"target locale rules"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 3d561a95c41a44a8b7ac8764ca4637af
+msgid ""
+"Full CLDR & GNU `gettext` plural support (`nplurals=1..6`, including "
+"Slavic 3-form and Arabic 6-form)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: e5db4c0fa7de4d489211055a901f95d8
+msgid "Native CLDR plural rules mapped to `msgstr[0..N-1]` slots on `.po` export"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 4404c3e31dcd461f9bad03337b51a78d
+msgid ""
+"Parses catalog `Plural-Forms` header directly (`tools/i18n_prompts.py`) "
+"and validates array arity"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 3b35e81a799d40a8a555360e80731d43
+msgid "**Built-in AI Translation Assistants**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 32405fb0c4314ee5a54bbf8d5f515c60
+msgid ""
+"Automated AI translation via OpenAI/DeepL/Google (consumes plan or BYOK "
+"credits)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 6a36ea6c07b5480187516f9f8604c8be
+msgid ""
+"Crowdin AI Assistant with context harvesting, TM leverage, and BYOK LLM "
+"provider support"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: d3232377d156494f9ec4bc6f8956bf77
+msgid "Localazy AI & ShareTM automated pre-translation pipelines"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 079e9b08f54e4312916dd2cbfc321ba4
+msgid ""
+"Built-in `polib` + OpenAI-compatible / local Ollama client with "
+"deterministic `T=0.0` batching"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: b149d215bebf4acbbfcf1dfcd71e7e0f
+msgid "**Continuous GitHub Synchronization**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 58034522c8734a93a14dd8e39cf4666f
+msgid "Webhook and GitHub repo connector opening automated sync PRs or commits"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 7f637f8a0cde4112938481b43e51eddf
+msgid ""
+"Official GitHub App and `crowdin/github-action` with bidirectional "
+"branch/PR synchronization"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 078766ce4c3748d9a88df9168bfede8f
+msgid "Official GitHub Action (`localazy/upload` & `download`) and webhook sync"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: ccfe466f4da049c7832a1ab25a685a25
+msgid ""
+"Runs natively in local dev (`uv run python tools/i18n.py`) and GitHub "
+"Actions without external state"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:27
+#: fcd9b0bcb1f74468b4cf333f3478de25
+msgid "Key Technical Findings"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:29
+#: 486af448d6ef460f947a13d01b26f53b
+#, python-brace-format, python-format
+msgid ""
+"**Rich Markup & CLI Flag Invariants:** Managed platforms natively "
+"understand `%s` and `{name}` placeholders when `#, python-format` or `#, "
+"python-brace-format` flags are present, but none natively parse Rich "
+"console markup (`[bold]`, `[cyan]`, `[/]`) out of the box. In contrast, "
+"`tools/i18n_validation.py` and `tools/i18n_prompts.py` enforce exact "
+"parity for `{brace}` placeholders, `%s` tokens, Rich markup tags, and "
+"`--cli-flags` before any `msgstr` is written to disk."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:35
+#: 9b2a2cb4387a4c7fa175c79bd531b64e
+msgid ""
+"**Header & Diff Hygiene:** Cloud platforms regenerate `.po` files on "
+"export using their own serializers, which frequently alters header "
+"ordering, line wrapping, or `#:` source comment formatting. `findfmt`'s "
+"pre-commit hooks (`i18n-validate` and `check-no-absolute-locale-paths`) "
+"require deterministic `babel`/`polib` formatting with workspace-relative "
+"paths."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:42
+#: d2a58cc24e9f48bd9c8cd417d27e88b6
+msgid "2. Cost, Privacy, and Open-Source Licensing Comparison"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:44
+#: e439ba1370dd41b9935518402b99da76
+msgid ""
+"All three commercial platforms offer free plans for qualifying open-"
+"source projects, subject to vendor approval and usage caps:"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: c86a121d956e4df1b513170d25b3e799
+msgid "Dimension"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 5d559c50befa4ad68236761e8c580ffe
+msgid "POEditor Open Source Plan"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 4fb683fd12804e8085fd6fe828891a3d
+msgid "Crowdin for Open Source"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: a495b4a8b38a46bdbb32a04c493302b9
+msgid "Localazy OSS Plan"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 93242b49dd7842c7a758a00935b8388a
+msgid "**Open-Source Eligibility**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 999c2f2019a6462886ec598563ccc56d
+msgid "Manual application per public OSI-licensed repository"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 2a42c9fe10b14a1b88378967013e46bc
+msgid ""
+"Manual application; requires active public OSI-licensed repo and "
+"attribution"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 47d27fcf0d214dfd88c800817b023022
+msgid "OSS application program or community tier credits"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 8ffb42f7796f42aaa09c2eee5c0a1f95
+msgid "Included in repository under MIT license; zero vendor approval required"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 31d025d61fb841ef92b98df3b4172442
+msgid "**String / Word Capacity**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 70d43d2886f7499db86ed829c9fd0adc
+msgid "Up to 10,000 strings on standard OSS approval (renewable upon request)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: b2657f354b654104a2d56677d904f42e
+msgid ""
+"Unlimited strings and collaborators for approved non-commercial OSS "
+"projects"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 8783abfc11a14a499a9fb6872a8073d4
+msgid "Tiered source-string limits depending on OSS sponsorship level"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: b5ceb064ba8a4b4faf09d640a1d155f7
+msgid "Unlimited strings, locales, and branches"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 3e10cdbd75a544d284afab7a23421e8c
+msgid "**AI Translation Quotas**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: dfa0ca6bf03b4f009571d04f38a2f06c
+msgid ""
+"Limited built-in machine translation character quota; requires BYOK for "
+"scale"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 3f7a44bc24664512934b0d20b3e0eb8a
+msgid ""
+"Requires BYOK API keys (OpenAI, Anthropic, Gemini, DeepL) for AI "
+"translation"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 61cc6561851c4422b947d940184380f8
+msgid "Automated MT/AI requires paid tier or consumed translation credits"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 2a1cfc0985154893860817ca80870418
+msgid ""
+"Supports free local inference (`Ollama`) or low-cost BYOK API (~$0.35/100"
+" locales)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: cc6b57e9494e48f697caa5403b6a9eca
+msgid "**Data Privacy & Air-Gap Safety**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 35331b2020fe4aa881a581079eaa5a33
+msgid "Source strings and contributor metadata stored on vendor cloud"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 937173c9e0944a168f329107efeb3871
+msgid "Source strings and translation memory hosted in Crowdin cloud"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 6c24c46197e0422b8b8bd947482ff502
+msgid "Source strings shared with Localazy cloud and optional ShareTM network"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: f40696c9ad3e427d964ff356c2179c1f
+#, python-format
+msgid "100% local execution with `Ollama` or direct ephemeral API calls"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 58b4a051df8743d89ff76adb267f10b6
+msgid "**Vendor Lock-In Risk**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: cc9308ddcf30409a85ffc3e958822e10
+msgid "Medium (review history, comments, and glossary live in POEditor database)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 63daa5a9a23d4ea1ad71372334654132
+msgid "Medium (TM, review votes, and QA rules live in Crowdin project state)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 3b01bd7c1d064f27b9b0d03c9f648f6d
+msgid "Medium (workflow queues and review states live in Localazy cloud)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md
+#: 2fee8a183b4e4e118c2dd31af816d80c
+msgid "Zero (all prompts, glossaries, validators, and `.po` catalogs live in Git)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:57
+#: 449fcc3faae84e159778c4c102f7e082
+msgid "3. Contributor Auditing & Community Review Workflows"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:59
+#: 20b2db354acb49a5a49479db52ea1ad7
+msgid ""
+"As `findfmt` expands across 100+ locales, native-speaker community "
+"contributors need a clear path to audit, correct, and approve AI-"
+"generated translations:"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:62
+#: bf4d7ac02af64625b41f387250c6eaca
+msgid "Managed Cloud Platform Workflow"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:64
+#: 3d9017c27e34496794d6c0d8fd4d2b78
+msgid ""
+"**Strengths:** Non-technical translators can log into a web UI, filter by"
+" `fuzzy` or unapproved strings, view side-by-side translation memory "
+"suggestions, vote on alternatives, and leave per-string comments without "
+"installing Git or Python."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:67
+#: 2953ef22c6bb4505bd43e78647830ee6
+msgid "**Drawbacks:**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:68
+#: 5a81dc02a417451dbac1c60c914bcf47
+msgid ""
+"Introduces dual sources of truth (Git PRs vs. cloud platform state), "
+"creating merge conflicts when developers run `uv run python tools/i18n.py"
+" extract` and update `.pot`/`.po` catalogs in feature branches."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:71
+#: 996b22c5ed7f48aaad40b4655fbcb537
+msgid ""
+"Cloud exports can bypass local pre-commit checks until a sync PR fails in"
+" CI, requiring manual maintainer intervention to fix broken Rich tags or "
+"CLI flags."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:74
+#: a8c1aa66e0dd46aeb7e395d9e954d13e
+msgid "Local Git + CI Auditing Workflow (`findfmt` Standard)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:76
+#: 5453b9b1467b47599f94d419d733be6a
+msgid "**Strengths:**"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:77
+#: 33e5d6e2722b47a0a78ba52760b7add3
+msgid ""
+"AI-generated translations produced by `tools/i18n.py translate` can be "
+"marked with the standard GNU `gettext` `fuzzy` flag (`--mark-fuzzy`) or "
+"reviewed directly as clean `.po` diffs in GitHub Pull Requests."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:80
+#: 75b65bc3a54c45459ffdb92e8a873d4d
+msgid ""
+"Native speakers can edit `.po` files directly in the GitHub Web Editor "
+"(`github.dev`), Poedit desktop, or any text editor and submit a standard "
+"Pull Request."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:82
+#: 6c1954a8e67a4ab6a7e40b2911d95443
+msgid ""
+"Every contribution is automatically audited in CI by `uv run python "
+"tools/i18n.py validate` and `msgfmt --check`, guaranteeing zero broken "
+"placeholders, Rich tags, or plural forms."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:87
+#: 95b250de7a9a47a085a748d11da9d39e
+msgid "4. Architecture Decision Record (ADR): Localization Pipeline"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:89
+#: a360f321acdf4dfd9d0dcbc5df1dc46d
+msgid "**Status:** Accepted"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:90
+#: 306f37dd92cf4a80bc6d2a677e80d5c5
+msgid ""
+"**Issue:** [#307](https://github.com/bdperkin/findfmt/issues/307) (Parent"
+" Epic: [#308](https://github.com/bdperkin/findfmt/issues/308))"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:93
+#: c89a6c7840f14a6a8f9c22ce6c5fdf66
+msgid "Context"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:95
+#: b8b67b11e90d42d2bda8f4ab5fbcb94c
+#, python-brace-format, python-format
+msgid ""
+"`findfmt` maintains a concise, highly technical CLI catalog (~150 "
+"entries) containing Python brace placeholders (`{path}`, `{count}`), "
+"`printf` tokens (`%s`), Rich terminal markup (`[bold]`, `[/]`), and CLI "
+"flags (`--format`, `--hidden`), alongside multi-language Sphinx "
+"documentation catalogs under `docs/source/locale/`. We must choose "
+"between two primary localization architectures:"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:100
+#: ec34c8da8c0548549024f763f797ecef
+msgid ""
+"**Option A (Local Open-Source CLI Automation + Git PRs):** Use "
+"`tools/i18n.py` (`extract`, `translate`, `validate`, `compile`, `status`)"
+" backed by `polib`, `babel`, and deterministic LLM batch translation "
+"(`tools/i18n_translate.py`), with all review and auditing conducted via "
+"GitHub Pull Requests and CI gates."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:104
+#: b232be2dc6bf41299105a462ef723f25
+msgid ""
+"**Option B (Managed Cloud Localization Platform with Bidirectional GitHub"
+" Sync):** Adopt a hosted platform (Crowdin, POEditor, or Localazy) as the"
+" primary translation hub synchronized to GitHub via webhooks or GitHub "
+"Actions."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:108
+#: 210a6a890e0b428a826cc2cb8e0201c7
+msgid "Decision"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:110
+#: babe693185a8465582a8a5572c4196f2
+msgid ""
+"We select **Option A: Fully local, open-source CLI automation via "
+"`tools/i18n.py translate` + Git Pull Requests** as `findfmt`'s "
+"authoritative localization architecture."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:113
+#: 87542830e3864b43a366ec7358c377cf
+msgid "Rationale"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:115
+#: b1db4c07c3054c58ba9a9aa64b731929
+#, python-brace-format, python-format
+msgid ""
+"**Strict Structural Validation:** `tools/i18n_validation.py` enforces "
+"`findfmt`-specific invariants (Rich `[bold]`/`[/]` markup parity, "
+"`{brace}` and `%s` placeholder sets, `ngettext` plural array counts "
+"across `nplurals=1..6`, and relative `#:` location paths) both during LLM"
+" generation and in pre-commit/CI."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:119
+#: a5e14d16526c4a8786e677a1b27ab5cd
+msgid ""
+"**Single Source of Truth & Zero Lock-In:** Keeping `.pot` templates, "
+"`.po` catalogs, domain glossaries (`tools/i18n_prompts.py`), and "
+"validation logic inside the Git repository eliminates bidirectional sync "
+"conflicts and external SaaS dependencies."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:122
+#: f0a5c339d07743acb0e2c12c2034befe
+msgid ""
+"**Negligible Cost & Offline Reproducibility:** Translating the entire "
+"150-message CLI catalog across 100 locales costs **~$0.35** via hosted "
+"APIs or **$0.00** using local `Ollama` models, with deterministic `T = "
+"0.0` temperature and automatic fuzzy fallback."
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:126
+#: 5e9f344862514a9198d55cb66372c57e
+msgid "Future Re-Evaluation Trigger (Optional Hybrid Overlay)"
+msgstr ""
+
+#: ../../source/guides/localization_platforms.md:128
+#: 368f4959d35644e190370cd00c52fd99
+msgid ""
+"If community translation contributions from non-developer native speakers"
+" exceed **10+ active external translators per release cycle** or if "
+"managing Sphinx documentation `.po` reviews via GitHub PRs becomes a "
+"bottleneck, `findfmt` may enable **Crowdin for Open Source** (the "
+"strongest managed candidate due to its full `nplurals=1..6` CLDR support "
+"and official GitHub Action) strictly as a **downstream PR "
+"generator**—where all exported commits must still pass `uv run python "
+"tools/i18n.py validate` and `pre-commit` in CI before merging."
+msgstr ""

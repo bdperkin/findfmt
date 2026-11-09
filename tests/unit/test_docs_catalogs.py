@@ -103,3 +103,23 @@ def test_catalogs_do_not_translate_removed_flags(language: str) -> None:
         if any(text in msgid for text in REMOVED_STRINGS)
     )
     assert not stale, f"{language}: catalogs still contain removed text: {stale}"
+
+
+def test_localization_platforms_adr_documentation() -> None:
+    """Verify the managed localization platform evaluation and ADR guide (#307)."""
+    adr_path = SOURCE / "guides" / "localization_platforms.md"
+    assert adr_path.is_file(), "docs/source/guides/localization_platforms.md must exist"
+    content = adr_path.read_text(encoding="utf-8")
+    for required_term in (
+        "POEditor",
+        "Crowdin",
+        "Localazy",
+        "tools/i18n.py translate",
+        "Architecture Decision Record (ADR)",
+        "Option A",
+        "Option B",
+    ):
+        assert required_term in content, f"Missing {required_term!r} in {adr_path}"
+
+    guides_index = (SOURCE / "guides" / "index.md").read_text(encoding="utf-8")
+    assert "localization_platforms" in guides_index
