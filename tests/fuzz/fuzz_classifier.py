@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 try:
-    import atheris  # ty: ignore[unresolved-import]
+    import atheris  # ty: ignore[import-not-found]
 except ImportError:
     atheris = None
 
