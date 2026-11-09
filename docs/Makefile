@@ -82,11 +82,11 @@ intl-build:
 html-all: html intl-build
 	@for lang in $(LANGUAGES); do \
 		echo "Building $$lang documentation..."; \
-		$(SPHINXBUILD) -b html -d "$(DOCTREEDIR)-$$lang" -D language=$$lang "$(SOURCEDIR)" "$(BUILDDIR)/html/$$lang" $(SPHINXOPTS); \
+		$(SPHINXBUILD) -b html -d "$(DOCTREEDIR)-$$lang" -D language=$$lang -A in_lang_subdir=1 "$(SOURCEDIR)" "$(BUILDDIR)/html/$$lang" $(SPHINXOPTS); \
 	done
 
 clean:
-	rm -rf "$(BUILDDIR)"
+	rm -rf "$(BUILDDIR)" "$(LOCALEDIR)"/*/*/*.mo "$(LOCALEDIR)"/*/*/*/*.mo
 
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)

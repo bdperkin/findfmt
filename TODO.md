@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 184 Closed Issues | 105 Actionable Open Tasks | 28 Active Umbrella Epics **Last
+> **Tracking:** 185 Closed Issues | 104 Actionable Open Tasks | 28 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -12,7 +12,7 @@
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
 > issues #360, #344, #546, #306, #556, #427, #429, #430, #425, #307, #308, #564, #566, #349, and
 > epic #385; released v1.1.2, v1.1.3, and v1.1.4 and closed their milestones); 2026-11-09 (closed
-> issues #215, #222, and #228)
+> issues #215, #222, #228, and #233)
 
 ______________________________________________________________________
 
@@ -574,6 +574,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#228](https://github.com/bdperkin/findfmt/issues/228)** - feat(i18n): add language support
   for Japanese (ja) (~123 million) (Closed: 2026-11-09 via PR
   [#572](https://github.com/bdperkin/findfmt/pull/572))
+- [x] **[#233](https://github.com/bdperkin/findfmt/issues/233)** - ci(docs): configure automated
+  multilingual Sphinx documentation builds in CI pipeline (Closed: 2026-11-09 via PR
+  [#573](https://github.com/bdperkin/findfmt/pull/573))
 
 ______________________________________________________________________
 
@@ -918,11 +921,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.3. Future / Low-Priority / Backlog
 
-- [ ] **[#233](https://github.com/bdperkin/findfmt/issues/233)** - ci(docs): configure automated
-  multilingual Sphinx documentation builds in CI pipeline *(Rank: 64 | Epic:
-  [[Epic] i18n Platform Infrastructure: RTL/BiDi Rendering & Multilingual Documentation Builds](https://github.com/bdperkin/findfmt/issues/276)
-  | Milestone: v1.1.5)* - **Value:** Low | **Effort:** M - **Rationale:** Infrastructure mostly
-  exists; remaining CI wiring and switcher.
 - [ ] **[#342](https://github.com/bdperkin/findfmt/issues/342)** - refactor(cli): pass click.Context
   explicitly instead of walking stack frames; validate TraversalConfig *(Rank: 65 | Epic:
   [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
@@ -1301,8 +1299,7 @@ linked natively on GitHub.
   [#111](https://github.com/bdperkin/findfmt/issues/111)
 - [ ] **[#276](https://github.com/bdperkin/findfmt/issues/276)** - [Epic] i18n Platform
   Infrastructure: RTL/BiDi Rendering & Multilingual Documentation Builds *(Milestone: v1.5.1 | Open
-  sub-issues: 2)* - [#229](https://github.com/bdperkin/findfmt/issues/229),
-  [#233](https://github.com/bdperkin/findfmt/issues/233)
+  sub-issues: 1)* - [#229](https://github.com/bdperkin/findfmt/issues/229)
 - [ ] **[#205](https://github.com/bdperkin/findfmt/issues/205)** - [Epic] Add Language Support:
   Japonic & Koreanic (~205 Million) *(Milestone: v1.6.0 | Open sub-issues: 1)* -
   [#258](https://github.com/bdperkin/findfmt/issues/258)
@@ -1422,7 +1419,7 @@ on 2026-11-08 (PyPI, GHCR, and GitHub Releases), and their milestones are closed
 
 | Milestone       | Theme                                                                                                                 | Open Issues |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 1           |
+| v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 0           |
 | v1.2.0          | Core/CLI Decoupling: Side-Effect-Free Import, Wrapper Parsing, Friendly Errors                                        | 6           |
 | v1.2.1          | CLI Help/Docs Accuracy, Pager Streaming, Depth-Safe Traversal & API Hygiene                                           | 8           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                         | 8           |

@@ -22,6 +22,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and half-width/full-width CJK typography) and localized Sphinx homepage
   (`docs/source/locale/ja/LC_MESSAGES/index.po`), and enroll `ja` in `COMPLETE_LOCALES` (#228).
 
+### Documentation
+
+- *(docs)* Configure `.github/workflows/docs.yml` to build all localized Sphinx documentation
+  subdirectories (`docs/_build/html/{en,es,fr,de,ja}/`) via `make -C docs html-all` and add a
+  sidebar language switcher (`docs/source/_templates/sidebar/variant-selector.html`) (#233).
+
 ## [1.1.4] - 2026-11-08
 
 ### Features

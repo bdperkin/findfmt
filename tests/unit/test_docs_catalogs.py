@@ -127,3 +127,29 @@ def test_localization_platforms_adr_documentation() -> None:
 
     guides_index = (SOURCE / "guides" / "index.md").read_text(encoding="utf-8")
     assert "localization_platforms" in guides_index
+
+
+def test_multilingual_sphinx_ci_and_language_switcher() -> None:
+    """Verify CI docs workflow, Makefile html-all, conf.py languages, and switcher UI (#233)."""
+    docs_workflow = (ROOT / ".github" / "workflows" / "docs.yml").read_text(encoding="utf-8")
+    assert "html-all" in docs_workflow
+
+    makefile = (DOCS / "Makefile").read_text(encoding="utf-8")
+    assert "html-all: html intl-build" in makefile
+    assert "-A in_lang_subdir=1" in makefile
+
+    conf_text = (SOURCE / "conf.py").read_text(encoding="utf-8")
+    assert 'templates_path = ["_templates"]' in conf_text
+    for lang in _languages():
+        assert f'("{lang}",' in conf_text
+
+    switcher = (SOURCE / "_templates" / "sidebar" / "variant-selector.html").read_text(
+        encoding="utf-8",
+    )
+    assert "findfmt-language-switcher" in switcher
+    assert "findfmt-language-select" in switcher
+    assert "in_lang_subdir" in switcher
+
+    custom_css = (SOURCE / "_static" / "custom.css").read_text(encoding="utf-8")
+    assert ".findfmt-language-switcher" in custom_css
+    assert ".findfmt-language-select" in custom_css

@@ -1,0 +1,33 @@
+{# Multilingual documentation language switcher (#233) #}
+{% if languages %}
+{% set active_lang = language or "en" %}
+{% set lang_base = (content_root ~ "../") if in_lang_subdir else content_root %}
+{% set target_doc = (pagename or "index") ~ (file_suffix or ".html") %}
+<div class="findfmt-language-switcher" role="navigation" aria-label="{{ _('Language') }}">
+  <label for="findfmt-language-select">{{ _('Language') }}</label>
+  <select
+    id="findfmt-language-select"
+    class="findfmt-language-select"
+    aria-label="{{ _('Language') }}"
+    onchange="if (this.value) { window.location.href = this.value; }"
+  >
+    {% for code, label in languages %}
+    <option
+      value="{{ lang_base }}{{ code }}/{{ target_doc }}"
+      {% if code == active_lang %}selected="selected"{% endif %}
+    >{{ label }} ({{ code }})</option>
+    {% endfor %}
+  </select>
+  <ul class="findfmt-language-links">
+    {% for code, label in languages %}
+    <li>
+      <a
+        href="{{ lang_base }}{{ code }}/{{ target_doc }}"
+        lang="{{ code }}"
+        {% if code == active_lang %}aria-current="true"{% endif %}
+      >{{ code }}</a>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
