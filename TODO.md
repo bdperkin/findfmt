@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 183 Closed Issues | 106 Actionable Open Tasks | 28 Active Umbrella Epics **Last
+> **Tracking:** 184 Closed Issues | 105 Actionable Open Tasks | 28 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -12,7 +12,7 @@
 > its milestone); 2026-11-08 (closed #305, #353, #540, #359, #545, #325, #468, #475, #358, and
 > issues #360, #344, #546, #306, #556, #427, #429, #430, #425, #307, #308, #564, #566, #349, and
 > epic #385; released v1.1.2, v1.1.3, and v1.1.4 and closed their milestones); 2026-11-09 (closed
-> issues #215 and #222)
+> issues #215, #222, and #228)
 
 ______________________________________________________________________
 
@@ -571,6 +571,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#222](https://github.com/bdperkin/findfmt/issues/222)** - feat(i18n): add language support
   for French (fr) (~310 million) (Closed: 2026-11-09 via PR
   [#571](https://github.com/bdperkin/findfmt/pull/571))
+- [x] **[#228](https://github.com/bdperkin/findfmt/issues/228)** - feat(i18n): add language support
+  for Japanese (ja) (~123 million) (Closed: 2026-11-09 via PR
+  [#572](https://github.com/bdperkin/findfmt/pull/572))
 
 ______________________________________________________________________
 
@@ -667,12 +670,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   **Value:** High | **Effort:** M - **Rationale:** Security hardening for untrusted input lists.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#228](https://github.com/bdperkin/findfmt/issues/228)** - feat(i18n): add language support
-  for Japanese (ja) (~123 million) *(Rank: 21 | Epic:
-  [[Epic] Add Language Support: Japonic & Koreanic (~205 Million)](https://github.com/bdperkin/findfmt/issues/205)
-  | Milestone: v1.1.5)* - **Value:** Medium | **Effort:** M - **Rationale:** Scheduled localization
-  catalog for Japanese (`ja`, ~123 million); extends reach of the CLI to a large speaker base.
 
 - [ ] **[#329](https://github.com/bdperkin/findfmt/issues/329)** - fix(cli): invalid --table-style
   and other domain errors print full tracebacks *(Rank: 22 | Epic:
@@ -1307,8 +1304,7 @@ linked natively on GitHub.
   sub-issues: 2)* - [#229](https://github.com/bdperkin/findfmt/issues/229),
   [#233](https://github.com/bdperkin/findfmt/issues/233)
 - [ ] **[#205](https://github.com/bdperkin/findfmt/issues/205)** - [Epic] Add Language Support:
-  Japonic & Koreanic (~205 Million) *(Milestone: v1.6.0 | Open sub-issues: 2)* -
-  [#228](https://github.com/bdperkin/findfmt/issues/228),
+  Japonic & Koreanic (~205 Million) *(Milestone: v1.6.0 | Open sub-issues: 1)* -
   [#258](https://github.com/bdperkin/findfmt/issues/258)
 - [ ] **[#301](https://github.com/bdperkin/findfmt/issues/301)** - [Epic] Investigate BeeWare
   Briefcase for Native Standalone Binary & Console Application Distribution *(Milestone: v1.7.0 |
@@ -1426,7 +1422,7 @@ on 2026-11-08 (PyPI, GHCR, and GitHub Releases), and their milestones are closed
 
 | Milestone       | Theme                                                                                                                 | Open Issues |
 | --------------- | --------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 2           |
+| v1.1.5          | Localization Wave: German, French & Japanese Catalogs and Multilingual Docs Builds                                    | 1           |
 | v1.2.0          | Core/CLI Decoupling: Side-Effect-Free Import, Wrapper Parsing, Friendly Errors                                        | 6           |
 | v1.2.1          | CLI Help/Docs Accuracy, Pager Streaming, Depth-Safe Traversal & API Hygiene                                           | 8           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                         | 8           |

@@ -98,7 +98,7 @@ to its parent epic:
 |    `ar`     | Arabic                     | Afroasiatic        | [#201](https://github.com/bdperkin/findfmt/issues/201) | [#225](https://github.com/bdperkin/findfmt/issues/225) |   ~370 M |         Arabic          | **RTL**  | 6 (zero, one, two, few, many, other) | Issue [#225](https://github.com/bdperkin/findfmt/issues/225) |
 |    `ru`     | Russian                    | Slavic             | [#202](https://github.com/bdperkin/findfmt/issues/202) | [#226](https://github.com/bdperkin/findfmt/issues/226) |   ~255 M |        Cyrillic         |   LTR    |             3 (`Slavic`)             | Issue [#226](https://github.com/bdperkin/findfmt/issues/226) |
 |    `id`     | Indonesian                 | Austronesian       | [#203](https://github.com/bdperkin/findfmt/issues/203) | [#227](https://github.com/bdperkin/findfmt/issues/227) |   ~199 M |          Latin          |   LTR    |               1 (`0`)                | Issue [#227](https://github.com/bdperkin/findfmt/issues/227) |
-|    `ja`     | Japanese                   | Japonic & Koreanic | [#205](https://github.com/bdperkin/findfmt/issues/205) | [#228](https://github.com/bdperkin/findfmt/issues/228) |   ~123 M |      Kanji / Kana       |   LTR    |               1 (`0`)                |                    Starter Catalog Active                    |
+|    `ja`     | Japanese                   | Japonic & Koreanic | [#205](https://github.com/bdperkin/findfmt/issues/205) | [#228](https://github.com/bdperkin/findfmt/issues/228) |   ~123 M |      Kanji / Kana       |   LTR    |               1 (`0`)                |                   Canonical Catalog Active                   |
 
 ______________________________________________________________________
 

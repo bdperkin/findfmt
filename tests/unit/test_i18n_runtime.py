@@ -418,3 +418,57 @@ def test_french_canonical_catalog_runtime(tmp_path: Path) -> None:
     )
     with override_locale("fr_FR.UTF-8", localedir=tmp_path):
         assert _("Operation failed!") == "Échec de l'opération\u00a0!"
+
+
+def test_japanese_canonical_catalog_runtime(tmp_path: Path) -> None:
+    """Verify Japanese (ja) catalog coverage, single-form plurals, and CJK/ASCII balance (#228)."""
+    ja_po_path = (
+        Path(__file__).resolve().parents[2]
+        / "src"
+        / "findfmt"
+        / "locale"
+        / "ja"
+        / "LC_MESSAGES"
+        / "findfmt.po"
+    )
+    entries = parse_po_catalog(ja_po_path.read_text(encoding="utf-8"))
+    assert len(entries) >= 145
+    assert all(e.msgstrs and all(bool(s) for s in e.msgstrs) for e in entries)
+
+    with override_locale("ja") as loc:
+        assert loc == "ja"
+        assert get_current_locale() == "ja"
+        trans = get_current_translation()
+        assert isinstance(trans, gettext.GNUTranslations)
+
+        # Diagnostics, half-width ASCII units, and Japanese full-width prose
+        assert _("not installed") == "未インストール"
+        assert _("not found") == "見つかりません"
+        assert _("none") == "なし"
+        assert _("Total size:") == "合計サイズ:"
+        assert _("[bold]Top tags:[/]") == "[bold]上位のタグ:[/]"
+        assert _("KiB") == "KiB"
+        assert _("MB") == "MB"
+
+        err_msg = _("Error: Cannot specify both --dirsfirst and --filesfirst.")
+        assert err_msg.startswith("エラー:")
+        assert "--dirsfirst" in err_msg
+
+        # Japanese single-form pluralization: nplurals=1; plural=0;
+        sg = "[bold]Matched file:[/] [cyan]{count}[/]"
+        pl = "[bold]Matched files:[/] [cyan]{count}[/]"
+        for n in (0, 1, 2, 5, 100):
+            assert ngettext(sg, pl, n) == "[bold]一致したファイル:[/] [cyan]{count}[/]"
+
+    mo_dir = tmp_path / "ja" / "LC_MESSAGES"
+    mo_dir.mkdir(parents=True, exist_ok=True)
+    (mo_dir / "findfmt.mo").write_bytes(
+        _generate_mo_bytes(
+            {
+                "": "Content-Type: text/plain; charset=UTF-8\n",
+                "Operation failed!": "操作に失敗しました。",
+            },
+        ),
+    )
+    with override_locale("ja_JP.UTF-8", localedir=tmp_path):
+        assert _("Operation failed!") == "操作に失敗しました。"
