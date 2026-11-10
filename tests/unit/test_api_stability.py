@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import enum
 import importlib
+import os
 import re
 import subprocess
 import sys
@@ -289,6 +290,31 @@ def test_lazy_module_getattr_and_importtime() -> None:
     )
     assert "typer" not in proc.stderr
     assert "rich" not in proc.stderr
+
+
+def test_import_does_not_change_process_locale() -> None:
+    """Importing findfmt under LC_ALL=de_DE.UTF-8 leaves process locale unchanged (#451)."""
+    script = (
+        "import locale, sys; "
+        "before_all = locale.setlocale(locale.LC_ALL); "
+        "before_num = locale.setlocale(locale.LC_NUMERIC); "
+        "import findfmt; "
+        "after_all = locale.setlocale(locale.LC_ALL); "
+        "after_num = locale.setlocale(locale.LC_NUMERIC); "
+        "assert before_all == after_all, (before_all, after_all); "
+        "assert before_num == after_num, (before_num, after_num); "
+        "assert findfmt.format_size_binary(1536) == '1.5 KiB'; "
+        "sys.stdout.write('ok\\n')"
+    )
+    env = {**os.environ, "LC_ALL": "de_DE.UTF-8", "LANG": "de_DE.UTF-8", "LANGUAGE": "de_DE:de"}
+    proc = subprocess.run(
+        [sys.executable, "-c", script],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert proc.stdout.strip() == "ok"
 
 
 def test_py_typed_marker_present() -> None:

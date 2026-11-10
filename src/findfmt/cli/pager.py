@@ -26,6 +26,7 @@ from findfmt.cli.signals import (
     is_broken_pipe_wrapper,
     trap_cli_signals,
 )
+from findfmt.i18n import set_locale
 from findfmt.terminal import PagerController, get_console, is_color_enabled
 
 if TYPE_CHECKING:
@@ -345,6 +346,7 @@ class FindfmtCommand(typer.core.TyperCommand):
         Returns:
             Configured Click Context instance.
         """
+        set_locale()
         config_path, no_config, _ = extract_config_args(args)
         help_requested = any(arg in ("--help", "-h", "--help-all") for arg in args)
 

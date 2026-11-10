@@ -129,21 +129,12 @@ def _try_apply_locale_candidate(cand: str) -> bool:
         cand: The locale identifier candidate string.
 
     Returns:
-        True if LC_ALL or individual categories were successfully set, False otherwise.
+        True if LC_ALL was successfully set, False otherwise.
     """
     try:
         locale.setlocale(locale.LC_ALL, cand)
     except (locale.Error, ValueError, OSError):
-        applied = False
-        with contextlib.suppress(locale.Error, ValueError, OSError):
-            locale.setlocale(locale.LC_TIME, cand)
-            applied = True
-
-        with contextlib.suppress(locale.Error, ValueError, OSError):
-            locale.setlocale(locale.LC_NUMERIC, cand)
-            applied = True
-
-        return applied
+        return False
     else:
         return True
 
@@ -453,7 +444,3 @@ def format_integer(value: int, *, grouping: bool = False) -> str:
 
     sign = "-" if value < 0 else ""
     return sign + _format_grouped_digits(str(abs(value)), th_sep, grp)
-
-
-# Initialize default locale from environment
-set_locale()

@@ -305,7 +305,7 @@ def test_cli_flags_locale_spanish(tmp_path: Path) -> None:
         res_plural = runner.invoke(
             app,
             ["--summary", "--format", "table", "--size", str(tmp_path)],
-            env={"LANG": "es"},
+            env={"LANG": "es", "LC_ALL": "", "LC_MESSAGES": "", "LANGUAGE": ""},
         )
         assert res_plural.exit_code == 0
         assert "Archivos coincidentes: 2" in res_plural.output
@@ -346,7 +346,7 @@ def test_cli_flags_locale_german(tmp_path: Path) -> None:
         res_plural = runner.invoke(
             app,
             ["--summary", "--format", "table", "--size", str(tmp_path)],
-            env={"LANG": "de"},
+            env={"LANG": "de", "LC_ALL": "", "LC_MESSAGES": "", "LANGUAGE": ""},
         )
         assert res_plural.exit_code == 0
         assert "Passende Dateien: 2" in res_plural.output
@@ -387,7 +387,7 @@ def test_cli_flags_locale_french(tmp_path: Path) -> None:
         res_plural = runner.invoke(
             app,
             ["--summary", "--format", "table", "--size", str(tmp_path)],
-            env={"LANG": "fr"},
+            env={"LANG": "fr", "LC_ALL": "", "LC_MESSAGES": "", "LANGUAGE": ""},
         )
         assert res_plural.exit_code == 0
         assert "Fichiers correspondants\u00a0: 2" in res_plural.output
@@ -428,7 +428,7 @@ def test_cli_flags_locale_japanese(tmp_path: Path) -> None:
         res_plural = runner.invoke(
             app,
             ["--summary", "--format", "table", "--size", str(tmp_path)],
-            env={"LANG": "ja"},
+            env={"LANG": "ja", "LC_ALL": "", "LC_MESSAGES": "", "LANGUAGE": ""},
         )
         assert res_plural.exit_code == 0
         assert "一致したファイル: 2" in res_plural.output

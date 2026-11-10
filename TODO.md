@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 192 Closed Issues | 112 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 193 Closed Issues | 111 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -16,7 +16,7 @@
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
-> issues #460, #366, #452, and #319)
+> issues #460, #366, #452, #319, and #451)
 
 ______________________________________________________________________
 
@@ -600,7 +600,10 @@ Note: Ordered chronologically by completion date.
   main\_\* and _ from the package root via module \_\_getattr\_\_ (Closed: 2026-11-09 via PR
   [#605](https://github.com/bdperkin/findfmt/pull/605))
 - [x] **[#319](https://github.com/bdperkin/findfmt/issues/319)** - fix(cli): wrapper entry points
-  misparse value options; findfilefmt -o x tag truncates a file named "tag" (Closed: 2026-11-09)
+  misparse value options; findfilefmt -o x tag truncates a file named "tag" (Closed: 2026-11-09 via
+  PR [#606](https://github.com/bdperkin/findfmt/pull/606))
+- [x] **[#451](https://github.com/bdperkin/findfmt/issues/451)** - fix(i18n): defer locale
+  initialisation so "import findfmt" does not change process locale (Closed: 2026-11-09)
 
 ______________________________________________________________________
 
@@ -701,12 +704,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Parent: [#229](https://github.com/bdperkin/findfmt/issues/229) | Milestone: v1.6.1)* -
   **Value:** Medium | **Effort:** S - **Rationale:** Locks in RTL behaviour cheaply; guards the
   Urdu/Arabic releases.
-- [ ] **[#451](https://github.com/bdperkin/findfmt/issues/451)** - fix(i18n): defer locale
-  initialisation so "import findfmt" does not change process locale *(Rank: 21 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Parent: [#324](https://github.com/bdperkin/findfmt/issues/324) | Milestone: v1.2.0)* -
-  **Value:** High | **Effort:** M - **Rationale:** Silent library-side behaviour change for
-  embedders; high value.
 - [ ] **[#372](https://github.com/bdperkin/findfmt/issues/372)** - [Core] Replace recursive
   directory traversal and size calculation with iterative depth-safe implementations *(Rank: 22 |
   Epic:
@@ -1322,8 +1319,7 @@ its sub-issues close.
 - [ ] **[#324](https://github.com/bdperkin/findfmt/issues/324)** - refactor(api): make "import
   findfmt" side-effect free and decouple the core from the CLI *(Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Milestone: v1.2.0)* - **Sub-issues:** [#451](https://github.com/bdperkin/findfmt/issues/451),
-  [#453](https://github.com/bdperkin/findfmt/issues/453)
+  | Milestone: v1.2.0)* - **Sub-issues:** [#453](https://github.com/bdperkin/findfmt/issues/453)
 - [ ] **[#332](https://github.com/bdperkin/findfmt/issues/332)** - feat(cli): layered config
   precedence (user < project < env < CLI) and remove format booleans from config *(Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
@@ -1546,7 +1542,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                                                 | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 3           |
+| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 2           |
 | v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                                                  | 6           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                                     | 8           |

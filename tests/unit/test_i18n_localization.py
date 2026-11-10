@@ -80,14 +80,14 @@ def test_sync_system_locale_paths(monkeypatch: pytest.MonkeyPatch) -> None:
     _sync_system_locale("es")
     assert (locale.LC_ALL, "es") in calls
 
-    # Test candidate iteration with partial failures
+    # Test candidate iteration when first candidate fails and second succeeds
     calls.clear()
 
     def mock_failing_setlocale(category: int, loc: str | None = None) -> str:
         if loc is not None:
             calls.append((category, loc))
 
-        if category == locale.LC_ALL:
+        if loc == "es":
             err_msg = "unsupported"
             raise locale.Error(err_msg)
 
@@ -95,9 +95,7 @@ def test_sync_system_locale_paths(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr(locale, "setlocale", mock_failing_setlocale)
     _sync_system_locale("es")
-    # Verifies fallback to LC_TIME and LC_NUMERIC
-    assert any(cat == locale.LC_TIME for cat, _loc in calls)
-    assert any(cat == locale.LC_NUMERIC for cat, _loc in calls)
+    assert calls == [(locale.LC_ALL, "es"), (locale.LC_ALL, "es.UTF-8")]
 
 
 def test_override_locale_saved_system_locale_none(monkeypatch: pytest.MonkeyPatch) -> None:
