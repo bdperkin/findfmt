@@ -1296,4 +1296,3 @@ msgstr "Lien symbolique"
 #: src/findfmt/formatters/visual.py:213
 msgid "Shebang"
 msgstr "Directive shebang"
-

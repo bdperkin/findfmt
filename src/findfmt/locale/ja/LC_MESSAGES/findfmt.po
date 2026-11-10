@@ -1083,4 +1083,3 @@ msgstr "シンボリックリンク"
 #: src/findfmt/formatters/visual.py:213
 msgid "Shebang"
 msgstr "シェバンディレクティブ"
-

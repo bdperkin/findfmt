@@ -928,4 +928,3 @@ msgstr ""
 #: src/findfmt/formatters/visual.py:213
 msgid "Shebang"
 msgstr ""
-
