@@ -16,7 +16,8 @@
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
-> issues #460, #366, #452, #319, #451, #453, #324, and #609)
+> issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
+> its milestone)
 
 ______________________________________________________________________
 
@@ -612,7 +613,8 @@ Note: Ordered chronologically by completion date.
   findfmt" side-effect free and decouple the core from the CLI (Closed: 2026-11-10 via #451, #452,
   and #453)
 - [x] **[#609](https://github.com/bdperkin/findfmt/issues/609)** - build(release): automate and
-  validate fallback version synchronization across codebase and build tooling (Closed: 2026-11-10)
+  validate fallback version synchronization across codebase and build tooling (Closed: 2026-11-10 via
+  PR [#610](https://github.com/bdperkin/findfmt/pull/610))
 
 ______________________________________________________________________
 
@@ -1526,8 +1528,8 @@ and #469). Its remaining traversal and localization issues moved by theme: #320 
 v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 
 v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, v1.1.3 and v1.1.4 on
-2026-11-08, and v1.1.5 on 2026-11-09 (PyPI, GHCR, and GitHub Releases), and their milestones are
-closed.
+2026-11-08, v1.1.5 on 2026-11-09, and v1.2.0 on 2026-11-10 (PyPI, GHCR, and GitHub Releases), and
+their milestones are closed.
 
 Realigned on 2026-11-09 ahead of v1.2.0: pulled #366 into v1.2.0, closed #311 and #474 as not
 planned, promoted the Hybrid Python-Rust engine track (#576-#598) from v1.8.0-v1.8.4 to
@@ -1536,25 +1538,24 @@ pluggability, and shifted subsequent feature, localization, packaging, and v2.0-
 one minor version (v1.4.x → v1.5.x, v1.5.x → v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 →
 v1.8.1).
 
-| Milestone       | Theme                                                                                                                                 | Open Issues |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 0           |
-| v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                                                  | 6           |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 7           |
-| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                                     | 8           |
-| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                                              | 8           |
-| v1.3.2          | Pre-commit & CI Config Hardening: Schema Validation, Workflow Timeouts, Meta Hooks & Markdown Linting                                 | 4           |
-| v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                                          | 5           |
-| v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                                     | 6           |
-| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                                             | 5           |
-| v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                                        | 3           |
-| v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases                    | 4           |
-| v1.5.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                                            | 4           |
-| v1.5.1          | Extended Ignore File Formats (.dockerignore, eslint/prettier/npm/stylelint presets)                                                   | 6           |
-| v1.6.0          | Tier 1 Localizations (zh_CN, hi) & BiDi Rendering Strategy                                                                            | 3           |
-| v1.6.1          | Tier 2 Localizations (bn, ur, pt) & RTL Table/Tree Rendering                                                                          | 7           |
-| v1.6.2          | Tier 2 Localizations (ar, ru, id)                                                                                                     | 3           |
-| v1.7.0          | Tier 3 Localizations (pa, pt_BR, it, ko, tr, vi)                                                                                      | 7           |
-| v1.8.0          | Native Standalone Binary Distribution Evaluation (BeeWare Briefcase) — gated on #300 decision                                         | 6           |
-| v1.8.1          | v2.0 Transition Prep: Deprecation Warnings & Breaking CLI Cleanups                                                                    | 7           |
-| Future Features | Future feature enhancements and unplanned capabilities deferred beyond the scheduled roadmap.                                         | 48          |
+| Milestone       | Theme                                                                                                              | Open Issues |
+| --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
+| v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                               | 6           |
+| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 7           |
+| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
+| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
+| v1.3.2          | Pre-commit & CI Config Hardening: Schema Validation, Workflow Timeouts, Meta Hooks & Markdown Linting              | 4           |
+| v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
+| v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |
+| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |
+| v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 3           |
+| v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 4           |
+| v1.5.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                         | 4           |
+| v1.5.1          | Extended Ignore File Formats (.dockerignore, eslint/prettier/npm/stylelint presets)                                | 6           |
+| v1.6.0          | Tier 1 Localizations (zh_CN, hi) & BiDi Rendering Strategy                                                         | 3           |
+| v1.6.1          | Tier 2 Localizations (bn, ur, pt) & RTL Table/Tree Rendering                                                       | 7           |
+| v1.6.2          | Tier 2 Localizations (ar, ru, id)                                                                                  | 3           |
+| v1.7.0          | Tier 3 Localizations (pa, pt_BR, it, ko, tr, vi)                                                                   | 7           |
+| v1.8.0          | Native Standalone Binary Distribution Evaluation (BeeWare Briefcase) — gated on #300 decision                      | 6           |
+| v1.8.1          | v2.0 Transition Prep: Deprecation Warnings & Breaking CLI Cleanups                                                 | 7           |
+| Future Features | Future feature enhancements and unplanned capabilities deferred beyond the scheduled roadmap.                      | 48          |
