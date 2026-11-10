@@ -52,13 +52,15 @@ from findfmt.utils.strings import (
     strip_ansi_escapes,
 )
 
+_FALLBACK_VERSION: str = "1.1.5.dev0"
+
 
 def get_version() -> str:
     """Retrieve package version or fallback string."""
     try:
         return _pkg_version("findfmt")
     except _PackageNotFoundError:
-        return "1.1.3.dev0"
+        return _FALLBACK_VERSION
 
 
 __version__ = get_version()

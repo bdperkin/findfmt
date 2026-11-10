@@ -258,9 +258,14 @@ tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MI
 
 1. Merge the release-preparation pull request and confirm CI is green on `main`. It turns the
    CHANGELOG `[Unreleased]` entries into a `## [X.Y.Z] - YYYY-MM-DD` section, adds the comparison
-   link, and raises `version.fallback-version` to `X.Y.Z.dev0`. That section becomes the GitHub
-   Release notes (`tools/release_notes.py`), and the workflow fails before building anything if it
-   is missing. `uvx git-cliff --unreleased --tag vX.Y.Z` drafts entries from the commit history.
+   link, and synchronizes fallback versions (`version.fallback-version` in `pyproject.toml` and
+   `_FALLBACK_VERSION` in `src/findfmt/__init__.py`) to `X.Y.Z.dev0` by running:
+   ```bash
+   uv run python tools/verify_release_version.py --tag vX.Y.Z --write
+   ```
+   That CHANGELOG section becomes the GitHub Release notes (`tools/release_notes.py`), and the
+   workflow fails before building anything if it is missing or if the fallback versions are out of
+   sync. `uvx git-cliff --unreleased --tag vX.Y.Z` drafts entries from the commit history.
 2. Check the distributions locally. `twine` must report no warnings, `check-wheel-contents` must
    pass, and the wheel must hold only the `findfmt` package (with `py.typed` and the compiled `*.mo`
    catalogs) and its metadata:

@@ -16,8 +16,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from tools.verify_release_version import check as check_release_version
 
 import findfmt
+from findfmt import _FALLBACK_VERSION
+from findfmt.cli import diagnostics
 from findfmt.cli.file_config import _format_toml_value
 from findfmt.exceptions import (
     FindFmtError,
@@ -275,7 +278,7 @@ def test_lazy_module_getattr_and_importtime() -> None:
     """Verify lazy __getattr__ fallbacks and that importing findfmt skips typer and rich (#452)."""
     assert findfmt.get_version() == findfmt.__version__
     with patch("findfmt._pkg_version", side_effect=PackageNotFoundError):
-        assert findfmt.get_version() == "1.1.3.dev0"
+        assert findfmt.get_version() == _FALLBACK_VERSION
 
     with pytest.raises(AttributeError, match="has no attribute 'nonexistent_symbol'"):
         findfmt.__getattr__("nonexistent_symbol")
@@ -432,3 +435,31 @@ def test_declared_minimums_match_lockfile_floor() -> None:
     assert set(declared) == set(verified_floors)
     for pkg, floor in verified_floors.items():
         assert declared[pkg] >= floor, f"{pkg} minimum {declared[pkg]} is below floor {floor}"
+
+
+def test_fallback_version_synchronization() -> None:
+    """Verify fallback versions in pyproject.toml, findfmt, and diagnostics match (#609)."""
+    root = Path(__file__).resolve().parents[2]
+    with (root / "pyproject.toml").open("rb") as f:
+        data = tomllib.load(f)
+
+    expected_fallback = data["tool"]["hatch"]["version"]["fallback-version"]
+    assert re.fullmatch(r"\d+\.\d+\.\d+\.dev0", expected_fallback) is not None
+    assert expected_fallback == _FALLBACK_VERSION
+
+    with patch("findfmt._pkg_version", side_effect=PackageNotFoundError):
+        assert findfmt.get_version() == expected_fallback
+
+    with patch("findfmt.cli.diagnostics.version", side_effect=PackageNotFoundError):
+        assert diagnostics.get_version() == expected_fallback
+
+    base_version = expected_fallback.removesuffix(".dev0")
+    assert check_release_version(f"v{base_version}", repo=root) == []
+
+    dev_literal = re.compile(r"\b\d+\.\d+\.\d+\.dev\d+\b")
+    src_matches = [
+        (p.relative_to(root).as_posix(), m.group(0))
+        for p in sorted((root / "src").rglob("*.py"))
+        for m in dev_literal.finditer(p.read_text(encoding="utf-8"))
+    ]
+    assert src_matches == [("src/findfmt/__init__.py", expected_fallback)]

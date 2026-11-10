@@ -10,6 +10,7 @@ import pytest
 import typer
 from typer.testing import CliRunner
 
+from findfmt import _FALLBACK_VERSION
 from findfmt.cli import (
     app,
     diagnostics_callback,
@@ -32,7 +33,7 @@ def test_get_version():
 
 def test_get_version_package_not_found():
     with patch("findfmt.cli.diagnostics.version", side_effect=PackageNotFoundError):
-        assert get_version() == "1.1.3.dev0"
+        assert get_version() == _FALLBACK_VERSION
 
 
 def test_cli_known_tags():
