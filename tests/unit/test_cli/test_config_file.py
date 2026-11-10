@@ -15,14 +15,15 @@ from findfmt.cli import (
     format_config_dump,
     get_active_config_data,
     get_active_config_path,
+    get_diagnostics,
+    main_findfiles,
     resolve_and_load_config,
+    show_config_callback,
 )
 from findfmt.cli.file_config import (
     _format_toml_value,
     reset_active_config,
 )
-from findfmt.diagnostics import get_diagnostics, show_config_callback
-from findfmt.entrypoints import main_findfiles
 from findfmt.formatters import OutputFormat
 
 

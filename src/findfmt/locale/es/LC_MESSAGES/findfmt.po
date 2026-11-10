@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.1\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-11-05 20:17-0500\n"
+"POT-Creation-Date: 2026-11-10 08:18-0500\n"
 "PO-Revision-Date: 2026-11-05 20:20-0500\n"
 "Last-Translator: Brandon Perkins <bdperkin@gmail.com>\n"
 "Language: es\n"
@@ -17,77 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
-
-#: src/findfmt/diagnostics.py:87
-msgid "not installed"
-msgstr "no instalado"
-
-#: src/findfmt/diagnostics.py:92
-msgid "not found"
-msgstr "no encontrado"
-
-#: src/findfmt/diagnostics.py:101
-msgid "none"
-msgstr "ninguna"
-
-#: src/findfmt/entrypoints.py:196
-msgid ""
-"Find all files and directories, including hidden files respecting "
-".gitignore."
-msgstr ""
-"Buscar todos los archivos y directorios, incluidos los archivos ocultos "
-"respetando .gitignore."
-
-#: src/findfmt/entrypoints.py:215
-msgid ""
-"Find files and list detected format and MIME tags, including hidden files"
-" respecting .gitignore."
-msgstr ""
-"Buscar archivos y listar las etiquetas de formato y MIME detectadas, "
-"incluidos los archivos ocultos respetando .gitignore."
-
-#: src/findfmt/entrypoints.py:244
-msgid ""
-"Find files by format tag, including hidden files respecting .gitignore.\n"
-"\n"
-"Optionally provide TAG as the first positional argument (e.g. "
-"'findfilefmt python')."
-msgstr ""
-"Buscar archivos por etiqueta de formato, incluidos los archivos ocultos "
-"respetando .gitignore.\n"
-"\n"
-"Opcionalmente proporcione TAG como primer argumento posicional (p. ej. "
-"'findfilefmt python')."
-
-#: src/findfmt/entrypoints.py:273
-msgid ""
-"Find files by shebang interpreter pattern, including hidden files "
-"respecting .gitignore.\n"
-"\n"
-"Optionally provide INTERPRETER as the first positional argument (e.g. "
-"'findshebang bash')."
-msgstr ""
-"Buscar archivos por patrón de intérprete shebang, incluidos los archivos "
-"ocultos respetando .gitignore.\n"
-"\n"
-"Opcionalmente proporcione INTERPRETER como primer argumento posicional "
-"(p. ej. 'findshebang bash')."
-
-#: src/findfmt/entrypoints.py:295
-msgid ""
-"Find files and output NUL-delimited paths (--print0), including hidden "
-"files respecting .gitignore."
-msgstr ""
-"Buscar archivos y emitir rutas delimitadas por NUL (--print0), incluidos "
-"los archivos ocultos respetando .gitignore."
-
-#: src/findfmt/entrypoints.py:315
-msgid ""
-"Find files and print summary statistics to stderr, including hidden files"
-" respecting .gitignore."
-msgstr ""
-"Buscar archivos e imprimir estadísticas de resumen en stderr, incluidos "
-"los archivos ocultos respetando .gitignore."
 
 #: src/findfmt/exceptions.py:39
 #, python-brace-format
@@ -176,17 +105,17 @@ msgstr "EB"
 msgid "Error: {label} '{path}' not found."
 msgstr "¡Error: No se encontró {label} '{path}'!"
 
-#: src/findfmt/cli/config.py:70
+#: src/findfmt/cli/config.py:83
 #, python-brace-format
 msgid "Error: Conflicting format options: {options}."
 msgstr "¡Error: Opciones de formato en conflicto: {options}!"
 
-#: src/findfmt/cli/config.py:81
+#: src/findfmt/cli/config.py:94
 #, python-brace-format
 msgid "Error: Input file '{path}' not found."
 msgstr "¡Error: No se encontró el archivo de entrada '{path}'!"
 
-#: src/findfmt/cli/config.py:88
+#: src/findfmt/cli/config.py:101
 msgid "Error: Cannot specify both --dirsfirst and --filesfirst."
 msgstr "¡Error: No se pueden especificar ambos --dirsfirst y --filesfirst!"
 
@@ -237,6 +166,77 @@ msgstr "se esperaba una cadena, se recibió {type_name}"
 #, python-brace-format
 msgid "Error: Unknown configuration key '{key}' in '{path}'."
 msgstr "¡Error: Clave de configuración desconocida '{key}' en '{path}'!"
+
+#: src/findfmt/cli/diagnostics.py:81
+msgid "not installed"
+msgstr "no instalado"
+
+#: src/findfmt/cli/diagnostics.py:86
+msgid "not found"
+msgstr "no encontrado"
+
+#: src/findfmt/cli/diagnostics.py:97
+msgid "none"
+msgstr "ninguna"
+
+#: src/findfmt/cli/entrypoints.py:237
+msgid ""
+"Find all files and directories, including hidden files respecting "
+".gitignore."
+msgstr ""
+"Buscar todos los archivos y directorios, incluidos los archivos ocultos "
+"respetando .gitignore."
+
+#: src/findfmt/cli/entrypoints.py:256
+msgid ""
+"Find files and list detected format and MIME tags, including hidden files"
+" respecting .gitignore."
+msgstr ""
+"Buscar archivos y listar las etiquetas de formato y MIME detectadas, "
+"incluidos los archivos ocultos respetando .gitignore."
+
+#: src/findfmt/cli/entrypoints.py:285
+msgid ""
+"Find files by format tag, including hidden files respecting .gitignore.\n"
+"\n"
+"Optionally provide TAG as the first positional argument (e.g. "
+"'findfilefmt python')."
+msgstr ""
+"Buscar archivos por etiqueta de formato, incluidos los archivos ocultos "
+"respetando .gitignore.\n"
+"\n"
+"Opcionalmente proporcione TAG como primer argumento posicional (p. ej. "
+"'findfilefmt python')."
+
+#: src/findfmt/cli/entrypoints.py:314
+msgid ""
+"Find files by shebang interpreter pattern, including hidden files "
+"respecting .gitignore.\n"
+"\n"
+"Optionally provide INTERPRETER as the first positional argument (e.g. "
+"'findshebang bash')."
+msgstr ""
+"Buscar archivos por patrón de intérprete shebang, incluidos los archivos "
+"ocultos respetando .gitignore.\n"
+"\n"
+"Opcionalmente proporcione INTERPRETER como primer argumento posicional "
+"(p. ej. 'findshebang bash')."
+
+#: src/findfmt/cli/entrypoints.py:336
+msgid ""
+"Find files and output NUL-delimited paths (--print0), including hidden "
+"files respecting .gitignore."
+msgstr ""
+"Buscar archivos y emitir rutas delimitadas por NUL (--print0), incluidos "
+"los archivos ocultos respetando .gitignore."
+
+#: src/findfmt/cli/entrypoints.py:356
+msgid ""
+"Find files and print summary statistics to stderr, including hidden files"
+" respecting .gitignore."
+msgstr ""
+"Buscar archivos e imprimir estadísticas de resumen en stderr, incluidos "
+"los archivos ocultos respetando .gitignore."
 
 #: src/findfmt/cli/file_config.py:185
 #, python-brace-format
@@ -317,8 +317,8 @@ msgid ""
 "Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', "
 "'executable')."
 msgstr ""
-"Etiqueta o etiquetas separadas por comas para coincidir (p. ej. "
-"'python', 'yaml,json', 'executable')."
+"Etiqueta o etiquetas separadas por comas para coincidir (p. ej. 'python',"
+" 'yaml,json', 'executable')."
 
 #: src/findfmt/cli/help.py:111
 msgid "Tag or comma-separated tags to exclude."
@@ -465,8 +465,8 @@ msgstr ""
 #: src/findfmt/cli/help.py:148
 msgid "Output directory tree as an XML document (equivalent to --format xml)."
 msgstr ""
-"Emitir el árbol de directorios como documento XML (equivalente a "
-"--format xml)."
+"Emitir el árbol de directorios como documento XML (equivalente a --format"
+" xml)."
 
 #: src/findfmt/cli/help.py:149
 msgid "Output directory tree as an HTML document with HTTP reference hyperlinks."
@@ -598,7 +598,9 @@ msgstr ""
 
 #: src/findfmt/cli/help.py:187
 msgid "Output absolute paths rather than paths relative to the traversal root."
-msgstr "Emitir rutas absolutas en lugar de rutas relativas a la raíz del recorrido."
+msgstr ""
+"Emitir rutas absolutas en lugar de rutas relativas a la raíz del "
+"recorrido."
 
 #: src/findfmt/cli/help.py:189
 msgid ""
@@ -739,8 +741,7 @@ msgstr ""
 
 #: src/findfmt/cli/help.py:219
 msgid "Include extended runtime diagnostics when used with --version."
-msgstr ""
-"Incluir diagnósticos extendidos del entorno al usarse con --version."
+msgstr "Incluir diagnósticos extendidos del entorno al usarse con --version."
 
 #: src/findfmt/cli/help.py:220
 msgid "Display runtime environment diagnostics and exit."
@@ -1115,8 +1116,8 @@ msgstr ""
 "literalmente.\n"
 "  --quote-name, -Q              Encerrar nombres de archivo entre "
 "comillas dobles.\n"
-"  --print0, -0 / --no-print0    Delimitar con byte NUL (\\0) [default: no-"
-"print0].\n"
+"  --print0, -0 / --no-print0    Delimitar con byte NUL (\\0) [default: "
+"no-print0].\n"
 "  --list-tags / --no-list-tags  Mostrar etiquetas identificadas [default:"
 " no-list-tags].\n"
 "  --summary, -s / --no-summary  Imprimir estadísticas de resumen "

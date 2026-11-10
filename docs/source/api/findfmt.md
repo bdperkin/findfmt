@@ -83,28 +83,28 @@ Documentation for `findfmt` public API modules, subsystems, and data models.
    :show-inheritance:
 ```
 
-## 10. Runtime Diagnostics (`findfmt.diagnostics`)
+## 10. Runtime Diagnostics (`findfmt.cli.diagnostics`)
 
 ```{eval-rst}
-.. automodule:: findfmt.diagnostics
+.. automodule:: findfmt.cli.diagnostics
    :members:
    :undoc-members:
    :show-inheritance:
 ```
 
-## 11. Match Summaries (`findfmt.summary`)
+## 11. Match Summaries (`findfmt.cli.summary`)
 
 ```{eval-rst}
-.. automodule:: findfmt.summary
+.. automodule:: findfmt.cli.summary
    :members:
    :undoc-members:
    :show-inheritance:
 ```
 
-## 12. Terminal Utilities (`findfmt.terminal`)
+## 12. Terminal Utilities (`findfmt.cli.terminal`)
 
 ```{eval-rst}
-.. automodule:: findfmt.terminal
+.. automodule:: findfmt.cli.terminal
    :members:
    :undoc-members:
    :show-inheritance:

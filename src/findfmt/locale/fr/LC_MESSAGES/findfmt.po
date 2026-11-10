@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-10-26 20:20-0400\n"
+"POT-Creation-Date: 2026-11-10 08:18-0500\n"
 "PO-Revision-Date: 2026-11-09 07:00-0500\n"
 "Last-Translator: Brandon Perkins <bperkins@redhat.com>\n"
 "Language: fr\n"
@@ -17,77 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
-
-#: src/findfmt/diagnostics.py:87
-msgid "not installed"
-msgstr "non installé"
-
-#: src/findfmt/diagnostics.py:92
-msgid "not found"
-msgstr "non trouvé"
-
-#: src/findfmt/diagnostics.py:101
-msgid "none"
-msgstr "aucune"
-
-#: src/findfmt/entrypoints.py:196
-msgid ""
-"Find all files and directories, including hidden files respecting "
-".gitignore."
-msgstr ""
-"Rechercher tous les fichiers et répertoires, y compris les fichiers cachés "
-"en respectant .gitignore."
-
-#: src/findfmt/entrypoints.py:215
-msgid ""
-"Find files and list detected format and MIME tags, including hidden files"
-" respecting .gitignore."
-msgstr ""
-"Rechercher des fichiers et lister les balises de format et MIME détectées, "
-"y compris les fichiers cachés en respectant .gitignore."
-
-#: src/findfmt/entrypoints.py:244
-msgid ""
-"Find files by format tag, including hidden files respecting .gitignore.\n"
-"\n"
-"Optionally provide TAG as the first positional argument (e.g. "
-"'findfilefmt python')."
-msgstr ""
-"Rechercher des fichiers par balise de format, y compris les fichiers cachés "
-"en respectant .gitignore.\n"
-"\n"
-"Fournir éventuellement TAG comme premier argument positionnel (p. ex. "
-"'findfilefmt python')."
-
-#: src/findfmt/entrypoints.py:273
-msgid ""
-"Find files by shebang interpreter pattern, including hidden files "
-"respecting .gitignore.\n"
-"\n"
-"Optionally provide INTERPRETER as the first positional argument (e.g. "
-"'findshebang bash')."
-msgstr ""
-"Rechercher des fichiers par motif d'interpréteur shebang, y compris les "
-"fichiers cachés en respectant .gitignore.\n"
-"\n"
-"Fournir éventuellement INTERPRETER comme premier argument positionnel "
-"(p. ex. 'findshebang bash')."
-
-#: src/findfmt/entrypoints.py:295
-msgid ""
-"Find files and output NUL-delimited paths (--print0), including hidden "
-"files respecting .gitignore."
-msgstr ""
-"Rechercher des fichiers et afficher des chemins séparés par NUL (--print0), "
-"y compris les fichiers cachés en respectant .gitignore."
-
-#: src/findfmt/entrypoints.py:315
-msgid ""
-"Find files and print summary statistics to stderr, including hidden files"
-" respecting .gitignore."
-msgstr ""
-"Rechercher des fichiers et afficher les statistiques récapitulatives sur "
-"stderr, y compris les fichiers cachés en respectant .gitignore."
 
 #: src/findfmt/exceptions.py:39
 #, python-brace-format
@@ -176,20 +105,19 @@ msgstr "Eo"
 msgid "Error: {label} '{path}' not found."
 msgstr "Erreur : {label} '{path}' introuvable."
 
-#: src/findfmt/cli/config.py:70
+#: src/findfmt/cli/config.py:83
 #, python-brace-format
 msgid "Error: Conflicting format options: {options}."
 msgstr "Erreur : options de format en conflit : {options}."
 
-#: src/findfmt/cli/config.py:81
+#: src/findfmt/cli/config.py:94
 #, python-brace-format
 msgid "Error: Input file '{path}' not found."
 msgstr "Erreur : fichier d'entrée '{path}' introuvable."
 
-#: src/findfmt/cli/config.py:88
+#: src/findfmt/cli/config.py:101
 msgid "Error: Cannot specify both --dirsfirst and --filesfirst."
-msgstr ""
-"Erreur : impossible de spécifier à la fois --dirsfirst et --filesfirst."
+msgstr "Erreur : impossible de spécifier à la fois --dirsfirst et --filesfirst."
 
 #: src/findfmt/cli/config_schema.py:124
 #, python-brace-format
@@ -239,6 +167,77 @@ msgstr "chaîne attendue, reçu {type_name}"
 msgid "Error: Unknown configuration key '{key}' in '{path}'."
 msgstr "Erreur : clé de configuration inconnue '{key}' dans '{path}'."
 
+#: src/findfmt/cli/diagnostics.py:81
+msgid "not installed"
+msgstr "non installé"
+
+#: src/findfmt/cli/diagnostics.py:86
+msgid "not found"
+msgstr "non trouvé"
+
+#: src/findfmt/cli/diagnostics.py:97
+msgid "none"
+msgstr "aucune"
+
+#: src/findfmt/cli/entrypoints.py:237
+msgid ""
+"Find all files and directories, including hidden files respecting "
+".gitignore."
+msgstr ""
+"Rechercher tous les fichiers et répertoires, y compris les fichiers "
+"cachés en respectant .gitignore."
+
+#: src/findfmt/cli/entrypoints.py:256
+msgid ""
+"Find files and list detected format and MIME tags, including hidden files"
+" respecting .gitignore."
+msgstr ""
+"Rechercher des fichiers et lister les balises de format et MIME "
+"détectées, y compris les fichiers cachés en respectant .gitignore."
+
+#: src/findfmt/cli/entrypoints.py:285
+msgid ""
+"Find files by format tag, including hidden files respecting .gitignore.\n"
+"\n"
+"Optionally provide TAG as the first positional argument (e.g. "
+"'findfilefmt python')."
+msgstr ""
+"Rechercher des fichiers par balise de format, y compris les fichiers "
+"cachés en respectant .gitignore.\n"
+"\n"
+"Fournir éventuellement TAG comme premier argument positionnel (p. ex. "
+"'findfilefmt python')."
+
+#: src/findfmt/cli/entrypoints.py:314
+msgid ""
+"Find files by shebang interpreter pattern, including hidden files "
+"respecting .gitignore.\n"
+"\n"
+"Optionally provide INTERPRETER as the first positional argument (e.g. "
+"'findshebang bash')."
+msgstr ""
+"Rechercher des fichiers par motif d'interpréteur shebang, y compris les "
+"fichiers cachés en respectant .gitignore.\n"
+"\n"
+"Fournir éventuellement INTERPRETER comme premier argument positionnel (p."
+" ex. 'findshebang bash')."
+
+#: src/findfmt/cli/entrypoints.py:336
+msgid ""
+"Find files and output NUL-delimited paths (--print0), including hidden "
+"files respecting .gitignore."
+msgstr ""
+"Rechercher des fichiers et afficher des chemins séparés par NUL "
+"(--print0), y compris les fichiers cachés en respectant .gitignore."
+
+#: src/findfmt/cli/entrypoints.py:356
+msgid ""
+"Find files and print summary statistics to stderr, including hidden files"
+" respecting .gitignore."
+msgstr ""
+"Rechercher des fichiers et afficher les statistiques récapitulatives sur "
+"stderr, y compris les fichiers cachés en respectant .gitignore."
+
 #: src/findfmt/cli/file_config.py:185
 #, python-brace-format
 msgid "Error: Configuration file '{path}' not found."
@@ -247,15 +246,12 @@ msgstr "Erreur : fichier de configuration '{path}' introuvable."
 #: src/findfmt/cli/file_config.py:197
 #, python-brace-format
 msgid "Error: Invalid TOML in configuration file '{path}': {error}"
-msgstr ""
-"Erreur : TOML invalide dans le fichier de configuration '{path}' : "
-"{error}"
+msgstr "Erreur : TOML invalide dans le fichier de configuration '{path}' : {error}"
 
 #: src/findfmt/cli/file_config.py:206
 #, python-brace-format
 msgid "Error reading configuration file '{path}': {error}"
-msgstr ""
-"Erreur lors de la lecture du fichier de configuration '{path}' : {error}"
+msgstr "Erreur lors de la lecture du fichier de configuration '{path}' : {error}"
 
 #: src/findfmt/cli/file_config.py:285
 msgid "(none)"
@@ -298,12 +294,12 @@ msgid ""
 msgstr ""
 "Exemples courants :\n"
 "  findfmt -t python                        # Trouver les fichiers Python\n"
-"  findfmt --shebang bash scripts/          # Trouver les scripts bash dans "
-"scripts/\n"
+"  findfmt --shebang bash scripts/          # Trouver les scripts bash "
+"dans scripts/\n"
 "  findfmt -t python -t executable --all-tags # Fichiers ayant les deux "
 "balises\n"
-"  findfiles --no-hidden                    # Wrapper : exclure les fichiers "
-"cachés\n"
+"  findfiles --no-hidden                    # Wrapper : exclure les "
+"fichiers cachés\n"
 "  findfmt -- -weird-name                   # Chemin commençant par un "
 "tiret\n"
 "\n"
@@ -315,16 +311,16 @@ msgid ""
 "One or more directory or file paths to inspect (default: current "
 "directory)."
 msgstr ""
-"Un ou plusieurs chemins de répertoires ou de fichiers à inspecter "
-"(par défaut : répertoire courant)."
+"Un ou plusieurs chemins de répertoires ou de fichiers à inspecter (par "
+"défaut : répertoire courant)."
 
 #: src/findfmt/cli/help.py:110
 msgid ""
 "Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', "
 "'executable')."
 msgstr ""
-"Balise ou balises séparées par des virgules à rechercher (p. ex. 'python', "
-"'yaml,json', 'executable')."
+"Balise ou balises séparées par des virgules à rechercher (p. ex. "
+"'python', 'yaml,json', 'executable')."
 
 #: src/findfmt/cli/help.py:111
 msgid "Tag or comma-separated tags to exclude."
@@ -339,7 +335,8 @@ msgstr ""
 #: src/findfmt/cli/help.py:113
 msgid "Filter files whose shebang contains this interpreter or pattern."
 msgstr ""
-"Filtrer les fichiers dont le shebang contient cet interpréteur ou ce motif."
+"Filtrer les fichiers dont le shebang contient cet interpréteur ou ce "
+"motif."
 
 #: src/findfmt/cli/help.py:114
 msgid "Do not respect .gitignore rules during traversal."
@@ -356,16 +353,16 @@ msgid ""
 "Read directory listing from a file or standard input ('-') instead of "
 "scanning filesystem."
 msgstr ""
-"Lire la liste des chemins depuis un fichier ou l'entrée standard ('-') au "
-"lieu d'analyser le système de fichiers."
+"Lire la liste des chemins depuis un fichier ou l'entrée standard ('-') au"
+" lieu d'analyser le système de fichiers."
 
 #: src/findfmt/cli/help.py:119
 msgid ""
 "Enforce offline extension- and filename-only identification without disk "
 "IO."
 msgstr ""
-"Forcer l'identification hors ligne basée uniquement sur l'extension et le "
-"nom du fichier sans E/S disque."
+"Forcer l'identification hors ligne basée uniquement sur l'extension et le"
+" nom du fichier sans E/S disque."
 
 #: src/findfmt/cli/help.py:120
 msgid "Include hidden files and directories."
@@ -377,8 +374,7 @@ msgstr "Suivre les liens symboliques lors du parcours."
 
 #: src/findfmt/cli/help.py:122
 msgid "List directories only, suppressing regular file entries."
-msgstr ""
-"Lister uniquement les répertoires, en omettant les fichiers ordinaires."
+msgstr "Lister uniquement les répertoires, en omettant les fichiers ordinaires."
 
 #: src/findfmt/cli/help.py:123
 msgid "Confine traversal to the root filesystem device."
@@ -386,8 +382,7 @@ msgstr "Restreindre le parcours au périphérique du système de fichiers racine
 
 #: src/findfmt/cli/help.py:124
 msgid "Restrict descent to a maximum directory depth level."
-msgstr ""
-"Limiter la descente à un niveau de profondeur maximale de répertoires."
+msgstr "Limiter la descente à un niveau de profondeur maximale de répertoires."
 
 #: src/findfmt/cli/help.py:125
 msgid "Skip directories exceeding this entry count threshold."
@@ -446,12 +441,14 @@ msgstr ""
 #: src/findfmt/cli/help.py:138
 msgid "List directories before files within each directory level."
 msgstr ""
-"Lister les répertoires avant les fichiers dans chaque niveau de répertoire."
+"Lister les répertoires avant les fichiers dans chaque niveau de "
+"répertoire."
 
 #: src/findfmt/cli/help.py:139
 msgid "List files before directories within each directory level."
 msgstr ""
-"Lister les fichiers avant les répertoires dans chaque niveau de répertoire."
+"Lister les fichiers avant les répertoires dans chaque niveau de "
+"répertoire."
 
 #: src/findfmt/cli/help.py:141
 msgid ""
@@ -564,31 +561,31 @@ msgid ""
 "Prefix formula trigger characters (=, +, -, @, TAB, CR) in CSV/TSV cells "
 "with a single quote to prevent spreadsheet formula injection."
 msgstr ""
-"Préfixer les caractères déclencheurs de formules (=, +, -, @, TAB, CR) dans "
-"les cellules CSV/TSV par une apostrophe pour prévenir l'injection de "
-"formules de tableur."
+"Préfixer les caractères déclencheurs de formules (=, +, -, @, TAB, CR) "
+"dans les cellules CSV/TSV par une apostrophe pour prévenir l'injection de"
+" formules de tableur."
 
 #: src/findfmt/cli/help.py:174
 msgid "Enable or disable interactive paging (defaults to auto-paging on TTY)."
 msgstr ""
-"Activer ou désactiver la pagination interactive (pagination automatique par "
-"défaut sur un TTY)."
+"Activer ou désactiver la pagination interactive (pagination automatique "
+"par défaut sur un TTY)."
 
 #: src/findfmt/cli/help.py:176
 msgid ""
 "Do not print indentation lines in tree format and strip extraneous "
 "whitespace in structured formats."
 msgstr ""
-"Ne pas afficher les lignes d'indentation au format arborescent et supprimer "
-"les espaces superflus dans les formats structurés."
+"Ne pas afficher les lignes d'indentation au format arborescent et "
+"supprimer les espaces superflus dans les formats structurés."
 
 #: src/findfmt/cli/help.py:180
 msgid ""
 "Use ANSI/VT100 alternate character set line drawing escapes for tree "
 "indentation lines."
 msgstr ""
-"Utiliser les séquences de tracé de lignes du jeu de caractères alternatif "
-"ANSI/VT100 pour l'indentation de l'arborescence."
+"Utiliser les séquences de tracé de lignes du jeu de caractères alternatif"
+" ANSI/VT100 pour l'indentation de l'arborescence."
 
 #: src/findfmt/cli/help.py:182
 msgid "Use CP437 (IBM-PC) console graphics characters for tree indentation lines."
@@ -630,13 +627,11 @@ msgstr "Afficher les balises identifiées à côté de chaque chemin trouvé."
 
 #: src/findfmt/cli/help.py:193
 msgid "Print summary match statistics to stderr."
-msgstr ""
-"Afficher les statistiques récapitulatives des correspondances sur stderr."
+msgstr "Afficher les statistiques récapitulatives des correspondances sur stderr."
 
 #: src/findfmt/cli/help.py:194
 msgid "Exit with status code 1 if no matching files are found."
-msgstr ""
-"Quitter avec le code d'état 1 si aucun fichier correspondant n'est trouvé."
+msgstr "Quitter avec le code d'état 1 si aucun fichier correspondant n'est trouvé."
 
 #: src/findfmt/cli/help.py:195
 msgid ""
@@ -718,8 +713,8 @@ msgid ""
 "directory, @ for symlink, = for socket, | for FIFO, > for door)."
 msgstr ""
 "Ajouter un indicateur de type de fichier aux noms de fichiers (* pour "
-"exécutable, / pour répertoire, @ pour lien symbolique, = pour socket, "
-"| pour FIFO, > pour door)."
+"exécutable, / pour répertoire, @ pour lien symbolique, = pour socket, | "
+"pour FIFO, > pour door)."
 
 #: src/findfmt/cli/help.py:215
 msgid "Replace non-printable control characters in filenames with '?'."
@@ -1009,8 +1004,8 @@ msgstr ""
 "motif glob.\n"
 "  --exclude-pattern, -I <pat>   Exclure les fichiers correspondant au "
 "motif glob.\n"
-"  --ignore-case                 Correspondance insensible à la casse "
-"pour -P et -I.\n"
+"  --ignore-case                 Correspondance insensible à la casse pour"
+" -P et -I.\n"
 "  --match-dirs, --matchdirs     Comparer les noms de répertoires ; "
 "héritage aux enfants.\n"
 "  --shebang <str>               Filtrer les fichiers par motif shebang.\n"
@@ -1029,8 +1024,8 @@ msgstr ""
 "seuil d'entrées.\n"
 "  --prune                       Omettre les répertoires sans fichier "
 "correspondant.\n"
-"  --no-ignore / --ignore        Ignorer les règles .gitignore [par "
-"défaut : ignore].\n"
+"  --no-ignore / --ignore        Ignorer les règles .gitignore [par défaut"
+" : ignore].\n"
 "  --gitignore-file <path>       Appliquer un fichier d'exclusion "
 "personnalisé.\n"
 "  --from-file, --fromfile <p>   Lire les chemins depuis un fichier ou "
@@ -1044,10 +1039,10 @@ msgstr ""
 "                                [par défaut : name].\n"
 "  --reverse, -r                 Inverser l'ordre de tri actif.\n"
 "  --unsorted, -U                Ordre brut du répertoire sans tri.\n"
-"  --dirsfirst                   Lister les répertoires avant les "
-"fichiers par niveau.\n"
-"  --filesfirst                  Lister les fichiers avant les "
-"répertoires par niveau.\n"
+"  --dirsfirst                   Lister les répertoires avant les fichiers"
+" par niveau.\n"
+"  --filesfirst                  Lister les fichiers avant les répertoires"
+" par niveau.\n"
 "\n"
 "Formatage de la sortie :\n"
 "  --format, -f <fmt>            Format de sortie (text, json, jsonl, "
@@ -1067,8 +1062,8 @@ msgstr ""
 "après la liste.\n"
 "  --title, -T <title>           Définir le titre et l'en-tête <h1> pour "
 "la sortie HTML.\n"
-"  --nolinks / --no-nolinks      Supprimer les ancres d'hyperliens dans "
-"la sortie HTML.\n"
+"  --nolinks / --no-nolinks      Supprimer les ancres d'hyperliens dans la"
+" sortie HTML.\n"
 "  --hyperlink / --no-hyperlink  Encapsuler les chemins dans des "
 "hyperliens OSC 8.\n"
 "  --hyperlink-schema <schema>   Préfixe de schéma URI (par défaut : "
@@ -1110,8 +1105,8 @@ msgstr ""
 "lisible.\n"
 "  --si / --no-si                Afficher les tailles au format métrique "
 "SI lisible.\n"
-"  --du, --accumulate-size       Cumuler récursivement l'espace disque "
-"des répertoires.\n"
+"  --du, --accumulate-size       Cumuler récursivement l'espace disque des"
+" répertoires.\n"
 "  --mtime, -D                   Afficher la date de dernière "
 "modification.\n"
 "  --ctime                       Afficher la date du dernier changement "
@@ -1122,16 +1117,16 @@ msgstr ""
 "noms de fichiers.\n"
 "  --hide-control-chars, -q      Masquer les caractères de contrôle non "
 "imprimables par '?'.\n"
-"  --literal, -N                 Afficher littéralement les caractères "
-"non imprimables.\n"
+"  --literal, -N                 Afficher littéralement les caractères non"
+" imprimables.\n"
 "  --quote-name, -Q              Entourer les noms de fichiers de "
 "guillemets doubles.\n"
 "  --print0, -0 / --no-print0    Délimiter par un octet NUL (\\0) [par "
 "défaut : no-print0].\n"
 "  --list-tags / --no-list-tags  Afficher les balises identifiées [par "
 "défaut : no-list-tags].\n"
-"  --summary, -s / --no-summary  Afficher les statistiques récapitulatives "
-"[par défaut : no-summary].\n"
+"  --summary, -s / --no-summary  Afficher les statistiques récapitulatives"
+" [par défaut : no-summary].\n"
 "  --exit-status                 Quitter avec le code 1 si aucun fichier "
 "n'est trouvé.\n"
 "\n"
@@ -1159,7 +1154,8 @@ msgstr ""
 "\n"
 "Commandes raccourcies (Wrappers) :\n"
 "  findfiles [PATHS...]          Équivalent à findfmt --hidden\n"
-"  findfilemime [PATHS...]       Équivalent à findfmt --hidden --list-tags\n"
+"  findfilemime [PATHS...]       Équivalent à findfmt --hidden --list-tags"
+"\n"
 "  findfilefmt [TAG] [PATHS...]  Équivalent à findfmt --hidden --tag TAG\n"
 "  findshebang [INTERP]...       Équivalent à findfmt --hidden --shebang "
 "INTERPRETER\n"
@@ -1194,9 +1190,10 @@ msgstr ""
 "Exemples d'utilisation :\n"
 "  $ findfmt -t python                     # Trouver les fichiers Python "
 "du dépôt courant\n"
-"  $ findfmt --shebang bash scripts/       # Trouver les scripts bash "
-"dans scripts/\n"
-"  $ findfmt -t python -t executable --all-tags  # Exiger LES DEUX balises\n"
+"  $ findfmt --shebang bash scripts/       # Trouver les scripts bash dans"
+" scripts/\n"
+"  $ findfmt -t python -t executable --all-tags  # Exiger LES DEUX balises"
+"\n"
 "  $ findfiles --no-hidden                 # Parcourir sans les fichiers "
 "cachés\n"
 "  $ findfilefmt json                      # Raccourci : trouver les "
@@ -1223,8 +1220,7 @@ msgstr "Formatage de la sortie"
 #: src/findfmt/cli/output_sink.py:100 src/findfmt/cli/output_sink.py:207
 #, python-brace-format
 msgid "Error opening output file '{path}': {error}"
-msgstr ""
-"Erreur lors de l'ouverture du fichier de sortie '{path}' : {error}"
+msgstr "Erreur lors de l'ouverture du fichier de sortie '{path}' : {error}"
 
 #: src/findfmt/formatters/visual.py:70
 #, python-brace-format

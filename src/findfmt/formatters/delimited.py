@@ -310,7 +310,7 @@ class CsvTableFormatter(Formatter):
     @override
     def format(self, files: Iterable[FileInfo]) -> str:
         """Render CSV records into an aligned table string."""
-        from findfmt.terminal import get_console
+        from findfmt.cli.terminal import get_console
 
         table = self._build_table(files)
         buf = io.StringIO()
@@ -321,7 +321,7 @@ class CsvTableFormatter(Formatter):
     @override
     def stream(self, files: Iterable[FileInfo], stream: TextIO) -> None:
         """Stream aligned CSV table directly to a text stream."""
-        from findfmt.terminal import get_console
+        from findfmt.cli.terminal import get_console
 
         reconfigure = getattr(stream, "reconfigure", None)
         if callable(reconfigure):

@@ -14,11 +14,11 @@ from findfmt import (
     get_formatter,
 )
 from findfmt.cli import app
+from findfmt.cli.terminal import strip_ansi
 from findfmt.formatters.text import TextFormatter
 from findfmt.formatters.tree import RichTreeFormatter
 from findfmt.formatters.visual import RichTableFormatter
 from findfmt.models import FileInfo
-from findfmt.terminal import strip_ansi
 from findfmt.utils.hyperlinks import _normalize_schema
 from findfmt.utils.strings import format_display_path
 

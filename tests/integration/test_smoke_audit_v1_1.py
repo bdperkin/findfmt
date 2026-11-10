@@ -20,8 +20,7 @@ from typing import Any
 import pytest
 from typer.testing import CliRunner
 
-from findfmt.cli import app
-from findfmt.entrypoints import main_findfiles
+from findfmt.cli import app, main_findfiles
 
 runner = CliRunner()
 POSIX_ONLY = pytest.mark.skipif(sys.platform == "win32", reason="name is invalid on Windows")

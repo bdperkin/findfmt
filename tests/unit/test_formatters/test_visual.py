@@ -10,6 +10,7 @@ import pytest
 from typer.testing import CliRunner
 
 from findfmt.cli import app
+from findfmt.cli.summary import write_summary
 from findfmt.formatters.visual import (
     RICH_BOX_STYLES,
     RichTableFormatter,
@@ -20,7 +21,6 @@ from findfmt.formatters.visual import (
     format_tag_badge,
 )
 from findfmt.models import FileInfo
-from findfmt.summary import write_summary
 
 
 @pytest.fixture

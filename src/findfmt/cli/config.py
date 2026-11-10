@@ -17,9 +17,9 @@ from findfmt.cli.file_config import (
     resolve_and_load_config,
     validate_and_convert_config,
 )
+from findfmt.cli.summary import parse_tag_arguments
 from findfmt.i18n import _
 from findfmt.models import SortKey, TraversalConfig
-from findfmt.summary import parse_tag_arguments
 from findfmt.traversal.sorting import resolve_sort_key
 
 if TYPE_CHECKING:

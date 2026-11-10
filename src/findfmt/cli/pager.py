@@ -26,8 +26,8 @@ from findfmt.cli.signals import (
     is_broken_pipe_wrapper,
     trap_cli_signals,
 )
+from findfmt.cli.terminal import PagerController, get_console, is_color_enabled
 from findfmt.i18n import set_locale
-from findfmt.terminal import PagerController, get_console, is_color_enabled
 
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence

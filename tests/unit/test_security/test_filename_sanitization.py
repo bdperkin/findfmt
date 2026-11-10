@@ -19,9 +19,8 @@ from findfmt import (
     format_rich_link,
     mask_control_characters,
     strip_ansi_escapes,
-    terminal,
 )
-from findfmt.cli import app
+from findfmt.cli import app, terminal
 from findfmt.formatters import (
     CsvTableFormatter,
     HtmlFormatter,

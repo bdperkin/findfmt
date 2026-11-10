@@ -37,7 +37,7 @@ from tools.benchmark_topologies import (
     generate_synthetic_tree,
 )
 
-from findfmt.diagnostics import get_version
+from findfmt import get_version
 from findfmt.formatters import (
     CsvFormatter,
     JsonFormatter,

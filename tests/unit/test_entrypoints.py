@@ -14,8 +14,7 @@ import pytest
 import typer
 
 from findfmt.cli import app
-from findfmt.cli.file_config import reset_active_config
-from findfmt.entrypoints import (
+from findfmt.cli.entrypoints import (
     _OPTIONS_WITH_VALUE,
     _consume_option,
     _extract_first_positional,
@@ -28,6 +27,7 @@ from findfmt.entrypoints import (
     main_findshebang,
     main_findsummary,
 )
+from findfmt.cli.file_config import reset_active_config
 
 
 def _click_value_options() -> list[str]:
@@ -343,7 +343,7 @@ def test_wrapper_respects_all_value_options(
         if form == "attached"
         else [flag, "optval"]
     )
-    with patch("findfmt.entrypoints._invoke_with_defaults", return_value=0) as mock_invoke:
+    with patch("findfmt.cli.entrypoints._invoke_with_defaults", return_value=0) as mock_invoke:
         assert wrapper([*opt_tokens, "intended_pos", "src"]) == 0
 
     forwarded = mock_invoke.call_args.kwargs["argv"]

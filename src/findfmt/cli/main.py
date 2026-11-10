@@ -6,6 +6,14 @@ import typer
 
 from findfmt.cli import help as h
 from findfmt.cli import runner
+from findfmt.cli.diagnostics import (
+    diagnostics_callback,
+    get_diagnostics,
+    get_git_version,
+    get_version,
+    version_callback,
+)
+from findfmt.cli.entrypoints import main
 from findfmt.cli.options import (
     OptAbsolute,
     OptAllTags,
@@ -86,16 +94,8 @@ from findfmt.cli.options import (
     show_config_callback,
 )
 from findfmt.cli.pager import FindfmtCommand
-from findfmt.diagnostics import (
-    diagnostics_callback,
-    get_diagnostics,
-    get_git_version,
-    get_version,
-    version_callback,
-)
-from findfmt.entrypoints import main
+from findfmt.cli.terminal import PagerController
 from findfmt.formatters import OutputFormat
-from findfmt.terminal import PagerController
 from findfmt.traversal import find_files
 
 get_help_all = h.get_help_all

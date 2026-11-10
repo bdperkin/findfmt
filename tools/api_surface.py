@@ -22,6 +22,7 @@ import re
 import sys
 import types
 import typing
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -166,13 +167,15 @@ def surface() -> dict[str, dict[str, Any]]:
         ),
     ]
     result: dict[str, dict[str, Any]] = {}
-    for name in modules:
-        module = importlib.import_module(name)
-        exported = getattr(module, "__all__", None)
-        if exported is None:
-            continue
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        for name in modules:
+            module = importlib.import_module(name)
+            exported = getattr(module, "__all__", None)
+            if exported is None:
+                continue
 
-        result[name] = {item: _describe(getattr(module, item)) for item in sorted(exported)}
+            result[name] = {item: _describe(getattr(module, item)) for item in sorted(exported)}
 
     return result
 

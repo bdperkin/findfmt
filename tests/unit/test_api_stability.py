@@ -10,6 +10,7 @@ import re
 import subprocess
 import sys
 import tomllib
+import warnings
 from importlib.metadata import PackageNotFoundError
 from pathlib import Path
 from unittest.mock import patch
@@ -168,9 +169,11 @@ def test_all_symbols_in_all_exist_and_are_importable() -> None:
         all_symbols = getattr(mod, "__all__", None)
         assert all_symbols is not None, f"Module {mod_name} does not define __all__"
 
-        for sym in all_symbols:
-            msg = f"Symbol '{sym}' listed in {mod_name}.__all__ is missing from module"
-            assert hasattr(mod, sym), msg
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            for sym in all_symbols:
+                msg = f"Symbol '{sym}' listed in {mod_name}.__all__ is missing from module"
+                assert hasattr(mod, sym), msg
 
 
 def test_no_private_symbols_in_all() -> None:
@@ -282,6 +285,10 @@ def test_lazy_module_getattr_and_importtime() -> None:
     with pytest.raises(AttributeError, match="has no attribute 'nonexistent_formatter'"):
         findfmt.formatters.__getattr__("nonexistent_formatter")
 
+    cli_mod = importlib.import_module("findfmt.cli")
+    with pytest.raises(AttributeError, match="has no attribute 'nonexistent_cli_attr'"):
+        cli_mod.__getattr__("nonexistent_cli_attr")
+
     proc = subprocess.run(
         [sys.executable, "-X", "importtime", "-c", "import findfmt"],
         capture_output=True,
@@ -290,6 +297,38 @@ def test_lazy_module_getattr_and_importtime() -> None:
     )
     assert "typer" not in proc.stderr
     assert "rich" not in proc.stderr
+
+
+def test_core_modules_import_without_typer() -> None:
+    """Core modules (traversal, classifier, formatters) import without loading typer (#453)."""
+    script = (
+        "import findfmt.traversal, findfmt.classifier, findfmt.formatters, sys; "
+        "assert 'typer' not in sys.modules, [k for k in sys.modules if 'typer' in k]"
+    )
+    subprocess.run([sys.executable, "-c", script], check=True)
+
+
+@pytest.mark.parametrize(
+    ("shim_name", "target_name"),
+    [
+        ("findfmt.diagnostics", "findfmt.cli.diagnostics"),
+        ("findfmt.entrypoints", "findfmt.cli.entrypoints"),
+        ("findfmt.summary", "findfmt.cli.summary"),
+        ("findfmt.terminal", "findfmt.cli.terminal"),
+    ],
+)
+def test_deprecated_cli_module_shims(shim_name: str, target_name: str) -> None:
+    """Relocated CLI module shims re-export symbols and emit DeprecationWarning (#453)."""
+    shim_mod = importlib.import_module(shim_name)
+    target_mod = importlib.import_module(target_name)
+    assert shim_mod.__all__ == target_mod.__all__
+
+    for sym in shim_mod.__all__:
+        with pytest.deprecated_call(match=rf"'{shim_name}\.{sym}' is deprecated"):
+            assert getattr(shim_mod, sym) is getattr(target_mod, sym)
+
+    with pytest.raises(AttributeError, match="has no attribute 'nonexistent_symbol'"):
+        shim_mod.__getattr__("nonexistent_symbol")
 
 
 def test_import_does_not_change_process_locale() -> None:
