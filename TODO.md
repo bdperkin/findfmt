@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 198 Closed Issues | 109 Actionable Open Tasks | 32 Active Umbrella Epics **Last
+> **Tracking:** 199 Closed Issues | 108 Actionable Open Tasks | 32 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -17,7 +17,7 @@
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
-> its milestone; closed #372 and epic #336)
+> its milestone; closed #372, epic #336, and #331)
 
 ______________________________________________________________________
 
@@ -621,6 +621,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#336](https://github.com/bdperkin/findfmt/issues/336)** - [Epic] Traversal Engine
   Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety (Closed:
   2026-11-10 via PR [#612](https://github.com/bdperkin/findfmt/pull/612))
+- [x] **[#331](https://github.com/bdperkin/findfmt/issues/331)** - perf(cli): TTY output is fully
+  buffered for the pager, so nothing streams (Closed: 2026-11-10 via PR
+  [#613](https://github.com/bdperkin/findfmt/pull/613))
 
 ______________________________________________________________________
 
@@ -1009,12 +1012,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   `TraversalConfig` gained a field mid-order in 1.0.2 and the CLI callback in 1.1. Breaking, so 2.0
   only.
 
-- [ ] **[#331](https://github.com/bdperkin/findfmt/issues/331)** - perf(cli): TTY output is fully
-  buffered for the pager, so nothing streams *(Rank: 70 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Milestone: v1.2.1)* - **Value:** Medium | **Effort:** L - **Rationale:** Streaming UX
-  improvement; sizeable refactor.
-
 ### 2.3. Future / Low-Priority / Backlog
 
 - [ ] **[#342](https://github.com/bdperkin/findfmt/issues/342)** - refactor(cli): pass click.Context
@@ -1348,8 +1345,7 @@ linked natively on GitHub.
   [#342](https://github.com/bdperkin/findfmt/issues/342),
   [#355](https://github.com/bdperkin/findfmt/issues/355)
 - [ ] **[#386](https://github.com/bdperkin/findfmt/issues/386)** - [Epic] CLI Architecture, Terminal
-  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 2)* -
-  [#331](https://github.com/bdperkin/findfmt/issues/331),
+  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 1)* -
   [#334](https://github.com/bdperkin/findfmt/issues/334)
 - [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
   Architecture: Layered Precedence, Schemas & Validation Diagnostics *(Milestone: v1.3.0 | Open
@@ -1537,7 +1533,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                               | 4           |
+| v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                               | 3           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |

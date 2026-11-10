@@ -3,8 +3,14 @@
 from __future__ import annotations
 
 import io
+import os
+import select
+import shutil
 import sys
-from typing import Any
+import threading
+import time
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, TextIO
 from unittest.mock import MagicMock
 
 if sys.version_info >= (3, 12):
@@ -13,8 +19,9 @@ else:
     from typing_extensions import override
 
 import pytest
+import typer
 import typer.core
-from rich.pager import Pager
+from rich.pager import Pager, SystemPager
 from typer.testing import CliRunner
 
 from findfmt.cli import app
@@ -26,7 +33,15 @@ from findfmt.cli.pager import (
     resolve_color_flag,
     resolve_pager_flag,
 )
+from findfmt.cli.runner import execute_findfmt
 from findfmt.cli.terminal import PagerController, strip_ansi
+from findfmt.formatters import OutputFormat
+from findfmt.models import FileInfo, TraversalConfig
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
+    from pytest_mock import MockerFixture
 
 
 class MockInteractiveStream(io.StringIO):
@@ -284,3 +299,162 @@ def test_cli_runner_help_and_diagnostics_paging() -> None:
     res_diagnostics = runner.invoke(app, ["--diagnostics", "--no-pager"])
     assert res_diagnostics.exit_code == 0
     assert "findfmt " in res_diagnostics.stdout
+
+
+def _make_file_info(idx: int) -> FileInfo:
+    """Create a synthetic FileInfo record for streaming pager tests."""
+    return FileInfo(
+        path=Path(f"/workspace/file_{idx}.py"),
+        relative_path=Path(f"file_{idx}.py"),
+        tags=frozenset({"python", "text"}),
+        shebang=None,
+        mime_type="text/x-python",
+        is_executable=False,
+        is_symlink=False,
+        size_bytes=100 + idx,
+    )
+
+
+def _run_streaming_findfmt(
+    stream: TextIO,
+    find_files_func: Callable[[TraversalConfig], Iterable[FileInfo]],
+) -> None:
+    """Execute findfmt with TEXT format on a provided stream and generator."""
+    execute_findfmt(
+        paths=[Path()],
+        tags=None,
+        exclude_tags=None,
+        all_tags=False,
+        shebang=None,
+        no_ignore=False,
+        hidden=False,
+        follow_symlinks=False,
+        output_format=OutputFormat.TEXT,
+        print0=False,
+        list_tags=False,
+        summary=False,
+        find_files_func=find_files_func,
+        stream=stream,
+    )
+
+
+def test_tty_output_streams_before_pager_threshold(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify TTY output streams entries immediately before reaching terminal height."""
+    tty_stream = MockInteractiveStream()
+    monkeypatch.setattr(
+        shutil,
+        "get_terminal_size",
+        lambda *_args, **_kwargs: os.terminal_size((80, 10)),
+    )
+    ready_event = threading.Event()
+    unblock_event = threading.Event()
+
+    def _blocking_files(_cfg: TraversalConfig) -> Iterable[FileInfo]:
+        for idx in range(5):
+            yield _make_file_info(idx)
+
+        ready_event.set()
+        unblock_event.wait(timeout=5.0)
+
+    worker = threading.Thread(
+        target=lambda: _run_streaming_findfmt(tty_stream, _blocking_files),
+    )
+    worker.start()
+    try:
+        assert ready_event.wait(timeout=5.0)
+        assert tty_stream.getvalue().splitlines() == [f"file_{i}.py" for i in range(5)]
+    finally:
+        unblock_event.set()
+        worker.join(timeout=5.0)
+
+    assert tty_stream.getvalue().splitlines() == [f"file_{i}.py" for i in range(5)]
+
+
+def test_pager_engaged_after_screenful(
+    monkeypatch: pytest.MonkeyPatch,
+    mocker: MockerFixture,
+) -> None:
+    """Verify output exceeding terminal height engages the pager with full content."""
+    tty_stream = MockInteractiveStream()
+    monkeypatch.setattr(
+        shutil,
+        "get_terminal_size",
+        lambda *_args, **_kwargs: os.terminal_size((80, 10)),
+    )
+    pager_spy = mocker.patch.object(SystemPager, "show")
+    streamed_at_ten: list[str] = []
+
+    def _fifteen_files(_cfg: TraversalConfig) -> Iterable[FileInfo]:
+        for idx in range(15):
+            if idx == 10:
+                streamed_at_ten.extend(tty_stream.getvalue().splitlines())
+
+            yield _make_file_info(idx)
+
+    _run_streaming_findfmt(tty_stream, _fifteen_files)
+
+    assert streamed_at_ten == [f"file_{i}.py" for i in range(10)]
+    pager_spy.assert_called_once()
+    paged_text = pager_spy.call_args.args[0]
+    assert paged_text.splitlines() == [f"file_{i}.py" for i in range(15)]
+
+
+def test_keyboard_interrupt_preserves_streamed_output(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify KeyboardInterrupt mid-stream leaves already-emitted lines on stdout and exits 130."""
+    tty_stream = MockInteractiveStream()
+    monkeypatch.setattr(
+        shutil,
+        "get_terminal_size",
+        lambda *_args, **_kwargs: os.terminal_size((80, 10)),
+    )
+
+    def _interrupted_files(_cfg: TraversalConfig) -> Iterable[FileInfo]:
+        for idx in range(4):
+            yield _make_file_info(idx)
+
+        raise KeyboardInterrupt
+
+    with pytest.raises(typer.Exit) as exc_info:
+        _run_streaming_findfmt(tty_stream, _interrupted_files)
+
+    assert exc_info.value.exit_code == 130
+    assert tty_stream.getvalue().splitlines() == [f"file_{i}.py" for i in range(4)]
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX pty test")
+def test_tty_first_line_appears_under_250ms_in_pty(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify the first line appears in under 250 ms on a large tree in a real POSIX PTY."""
+    monkeypatch.setattr(
+        shutil,
+        "get_terminal_size",
+        lambda *_args, **_kwargs: os.terminal_size((80, 24)),
+    )
+    master_fd, slave_fd = os.openpty()
+    unblock_event = threading.Event()
+
+    def _slow_large_tree(_cfg: TraversalConfig) -> Iterable[FileInfo]:
+        yield _make_file_info(0)
+        unblock_event.wait(timeout=2.0)
+        for idx in range(1, 5):
+            yield _make_file_info(idx)
+
+    slave_stream = os.fdopen(slave_fd, "w", encoding="utf-8", buffering=1)
+    worker = threading.Thread(
+        target=lambda: _run_streaming_findfmt(slave_stream, _slow_large_tree),
+    )
+    t0 = time.perf_counter()
+    worker.start()
+    try:
+        ready, _, _ = select.select([master_fd], [], [], 0.25)
+        elapsed = time.perf_counter() - t0
+        assert ready, f"First line did not appear on PTY within 250 ms (elapsed={elapsed:.3f}s)"
+        first_chunk = os.read(master_fd, 1024).decode("utf-8", errors="replace")
+        assert "file_0.py" in first_chunk
+        assert elapsed < 0.25
+    finally:
+        unblock_event.set()
+        worker.join(timeout=5.0)
+        slave_stream.close()
+        os.close(master_fd)

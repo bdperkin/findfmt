@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import os
 import shutil
 import sys
@@ -288,3 +289,38 @@ class PagerController:
         else:
             self.stream.write(out)
             self.stream.flush()
+
+
+class _StreamingPagerStream(io.StringIO):
+    """Text stream that streams directly to TTY until exceeding one screenful."""
+
+    def __init__(self, pager_ctrl: PagerController) -> None:
+        """Initialize streaming pager buffer for the given controller."""
+        super().__init__()
+        self._pager_ctrl = pager_ctrl
+        self._target = pager_ctrl.stream
+        self._color_active = is_color_enabled(
+            self._target,
+            env=pager_ctrl.env,
+            force_color=pager_ctrl.force_color,
+        )
+        self._pager_engaged = pager_ctrl.should_page(0)
+
+    @override
+    def write(self, s: str) -> int:
+        """Write chunk to buffer and stream directly while below pager threshold."""
+        out = s if self._color_active else strip_ansi(s)
+        written = super().write(out)
+        if not self._pager_engaged:
+            if self._pager_ctrl.should_page(len(self.getvalue().splitlines())):
+                self._pager_engaged = True
+            else:
+                self._target.write(out)
+                self._target.flush()
+
+        return written
+
+    def finish(self) -> None:
+        """Dispatch accumulated buffer to pager if screenful threshold was exceeded."""
+        if self._pager_engaged:
+            self._pager_ctrl.display(self.getvalue())

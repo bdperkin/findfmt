@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import io
 import sys
 from collections import Counter
 from pathlib import Path  # noqa: TC003 - runtime signature introspection
@@ -14,7 +13,12 @@ from findfmt.cli.config import build_traversal_config
 from findfmt.cli.output_sink import OutputSink, open_output_sink, reconfigure_surrogateescape
 from findfmt.cli.signals import handle_broken_pipe, install_signal_handlers, trap_cli_signals
 from findfmt.cli.summary import write_summary
-from findfmt.cli.terminal import PagerController, _reconfigure_cp437, is_color_enabled
+from findfmt.cli.terminal import (
+    PagerController,
+    _reconfigure_cp437,
+    _StreamingPagerStream,
+    is_color_enabled,
+)
 from findfmt.exceptions import FindFmtError
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.i18n import set_locale
@@ -59,9 +63,9 @@ def _deliver_output(  # noqa: PLR0913 - wide CLI/config signature
     try:
         is_tty = _is_stream_tty(target_stream)
         if custom_controller or (is_tty and pager is not False):
-            buf = io.StringIO()
+            buf = _StreamingPagerStream(pager_ctrl)
             formatter.stream(files, buf)
-            pager_ctrl.display(buf.getvalue())
+            buf.finish()
         else:
             formatter.stream(files, target_stream)
     except BrokenPipeError:
