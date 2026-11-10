@@ -613,8 +613,8 @@ Note: Ordered chronologically by completion date.
   findfmt" side-effect free and decouple the core from the CLI (Closed: 2026-11-10 via #451, #452,
   and #453)
 - [x] **[#609](https://github.com/bdperkin/findfmt/issues/609)** - build(release): automate and
-  validate fallback version synchronization across codebase and build tooling (Closed: 2026-11-10 via
-  PR [#610](https://github.com/bdperkin/findfmt/pull/610))
+  validate fallback version synchronization across codebase and build tooling (Closed: 2026-11-10
+  via PR [#610](https://github.com/bdperkin/findfmt/pull/610))
 
 ______________________________________________________________________
 
