@@ -128,11 +128,11 @@ def __getattr__(name: str) -> object:
     if name in _DEPRECATED_CLI_ENTRYPOINTS:
         warnings.warn(
             f"'findfmt.{name}' is deprecated and will be removed in v2.0; "
-            f"import '{name}' from 'findfmt.cli' or 'findfmt.entrypoints' instead.",
+            f"import '{name}' from 'findfmt.cli' or 'findfmt.cli.entrypoints' instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        from findfmt import entrypoints
+        from findfmt.cli import entrypoints
 
         return getattr(entrypoints, name)
 

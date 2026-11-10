@@ -8,7 +8,7 @@ from typing import Annotated
 import typer
 
 from findfmt.cli import help as h
-from findfmt.diagnostics import diagnostics_callback, show_config_callback, version_callback
+from findfmt.cli.diagnostics import diagnostics_callback, show_config_callback, version_callback
 from findfmt.formatters import OutputFormat
 from findfmt.i18n import _, locale_callback
 

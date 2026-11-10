@@ -21,7 +21,7 @@ from findfmt.cli import (
     known_tags_callback,
     version_callback,
 )
-from findfmt.diagnostics import _is_verbose_requested
+from findfmt.cli.diagnostics import _is_verbose_requested
 
 
 def test_get_version():
@@ -31,7 +31,7 @@ def test_get_version():
 
 
 def test_get_version_package_not_found():
-    with patch("findfmt.diagnostics.version", side_effect=PackageNotFoundError):
+    with patch("findfmt.cli.diagnostics.version", side_effect=PackageNotFoundError):
         assert get_version() == "1.1.3.dev0"
 
 
@@ -98,11 +98,11 @@ def test_get_diagnostics():
     assert "identify: " in diag
     assert "Git: " in diag
 
-    with patch("findfmt.diagnostics.version", side_effect=PackageNotFoundError):
+    with patch("findfmt.cli.diagnostics.version", side_effect=PackageNotFoundError):
         diag_no_identify = get_diagnostics()
         assert "identify: not installed" in diag_no_identify
 
-    with patch("findfmt.diagnostics.get_git_version", return_value=None):
+    with patch("findfmt.cli.diagnostics.get_git_version", return_value=None):
         diag_no_git = get_diagnostics()
         assert "Git: not found" in diag_no_git
 
@@ -151,7 +151,7 @@ def test_version_callback_direct():
     version_callback(value=False)
 
     with (
-        patch("findfmt.diagnostics._is_verbose_requested", return_value=True),
+        patch("findfmt.cli.diagnostics._is_verbose_requested", return_value=True),
         pytest.raises(typer.Exit) as exc,
     ):
         version_callback(value=True)

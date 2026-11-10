@@ -15,7 +15,7 @@ else:
 import pytest
 from rich.pager import Pager
 
-from findfmt.terminal import (
+from findfmt.cli.terminal import (
     PagerController,
     get_console,
     get_terminal_height,

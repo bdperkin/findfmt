@@ -11,10 +11,8 @@ import pytest
 import yaml
 from typer.testing import CliRunner
 
-from findfmt.cli import app
-from findfmt.cli.help import HELP_VERBOSE, get_help_all
-from findfmt.cli.pager import resolve_pager_flag
-from findfmt.entrypoints import (
+from findfmt.cli import (
+    app,
     main_findfilefmt,
     main_findfilemime,
     main_findfiles,
@@ -22,9 +20,11 @@ from findfmt.entrypoints import (
     main_findshebang,
     main_findsummary,
 )
+from findfmt.cli.help import HELP_VERBOSE, get_help_all
+from findfmt.cli.pager import resolve_pager_flag
+from findfmt.cli.summary import parse_tag_arguments
 from findfmt.exceptions import FindFmtError
 from findfmt.formatters.html_formatter import HtmlFormatter
-from findfmt.summary import parse_tag_arguments
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture

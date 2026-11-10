@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 193 Closed Issues | 111 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 195 Closed Issues | 110 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -16,7 +16,7 @@
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
-> issues #460, #366, #452, #319, and #451)
+> issues #460, #366, #452, #319, #451, #453, and #324)
 
 ______________________________________________________________________
 
@@ -603,7 +603,14 @@ Note: Ordered chronologically by completion date.
   misparse value options; findfilefmt -o x tag truncates a file named "tag" (Closed: 2026-11-09 via
   PR [#606](https://github.com/bdperkin/findfmt/pull/606))
 - [x] **[#451](https://github.com/bdperkin/findfmt/issues/451)** - fix(i18n): defer locale
-  initialisation so "import findfmt" does not change process locale (Closed: 2026-11-09)
+  initialisation so "import findfmt" does not change process locale (Closed: 2026-11-10 via PR
+  [#607](https://github.com/bdperkin/findfmt/pull/607))
+- [x] **[#453](https://github.com/bdperkin/findfmt/issues/453)** - refactor(cli): move CLI-only
+  modules (diagnostics, entrypoints, summary, terminal) under findfmt.cli with compatibility shims
+  (Closed: 2026-11-10)
+- [x] **[#324](https://github.com/bdperkin/findfmt/issues/324)** - refactor(api): make "import
+  findfmt" side-effect free and decouple the core from the CLI (Closed: 2026-11-10 via #451, #452,
+  and #453)
 
 ______________________________________________________________________
 
@@ -751,14 +758,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   compiled Rust extension nor the pure-Python fallback regresses on any OS or Python version.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#453](https://github.com/bdperkin/findfmt/issues/453)** - refactor(cli): move CLI-only
-  modules (diagnostics, entrypoints, summary, terminal) under findfmt.cli with compatibility shims
-  *(Rank: 30 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Parent: [#324](https://github.com/bdperkin/findfmt/issues/324) | Milestone: v1.2.0)* -
-  **Value:** Medium | **Effort:** M - **Rationale:** Completes the core/CLI split; medium effort and
-  risk.
 
 - [ ] **[#310](https://github.com/bdperkin/findfmt/issues/310)** - feat(config): provide sample
   config.toml, annotated reference configuration, and --generate-config CLI option *(Rank: 31 |
@@ -1316,10 +1315,6 @@ its sub-issues close.
   | Milestone: v1.6.1)* - **Sub-issues:** [#448](https://github.com/bdperkin/findfmt/issues/448),
   [#449](https://github.com/bdperkin/findfmt/issues/449),
   [#450](https://github.com/bdperkin/findfmt/issues/450)
-- [ ] **[#324](https://github.com/bdperkin/findfmt/issues/324)** - refactor(api): make "import
-  findfmt" side-effect free and decouple the core from the CLI *(Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Milestone: v1.2.0)* - **Sub-issues:** [#453](https://github.com/bdperkin/findfmt/issues/453)
 - [ ] **[#332](https://github.com/bdperkin/findfmt/issues/332)** - feat(cli): layered config
   precedence (user < project < env < CLI) and remove format booleans from config *(Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
@@ -1352,8 +1347,7 @@ linked natively on GitHub.
   [#342](https://github.com/bdperkin/findfmt/issues/342),
   [#355](https://github.com/bdperkin/findfmt/issues/355)
 - [ ] **[#386](https://github.com/bdperkin/findfmt/issues/386)** - [Epic] CLI Architecture, Terminal
-  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 3)* -
-  [#324](https://github.com/bdperkin/findfmt/issues/324),
+  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 2)* -
   [#331](https://github.com/bdperkin/findfmt/issues/331),
   [#334](https://github.com/bdperkin/findfmt/issues/334)
 - [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
@@ -1542,7 +1536,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                                                 | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 2           |
+| v1.2.0          | Core/CLI Decoupling & Validation: Side-Effect-Free Import, Wrapper Option Parsing, Numeric Option Validation & Friendly Domain Errors | 0           |
 | v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                                                  | 6           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                                         | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                                     | 8           |

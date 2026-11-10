@@ -26,7 +26,7 @@ from findfmt.cli.pager import (
     resolve_color_flag,
     resolve_pager_flag,
 )
-from findfmt.terminal import PagerController, strip_ansi
+from findfmt.cli.terminal import PagerController, strip_ansi
 
 
 class MockInteractiveStream(io.StringIO):

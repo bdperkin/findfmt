@@ -569,6 +569,62 @@
    "signature": "(raw_data: 'dict[str, Any]', path: 'Path') -> 'dict[str, Any]'"
   }
  },
+ "findfmt.cli.diagnostics": {
+  "diagnostics_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "get_diagnostics": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | None' = None) -> 'str'"
+  },
+  "get_git_version": {
+   "kind": "function",
+   "signature": "() -> 'str | None'"
+  },
+  "get_version": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "show_config_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "version_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  }
+ },
+ "findfmt.cli.entrypoints": {
+  "main": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfilefmt": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfilemime": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfiles": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findfmt0": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findshebang": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  },
+  "main_findsummary": {
+   "kind": "function",
+   "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
+  }
+ },
  "findfmt.cli.file_config": {
   "extract_config_args": {
    "kind": "function",
@@ -1378,6 +1434,47 @@
   "trap_cli_signals": {
    "kind": "function",
    "signature": "(stream: 'TextIO | None' = None, *, standalone_mode: 'bool' = False) -> 'Generator[None]'"
+  }
+ },
+ "findfmt.cli.summary": {
+  "parse_tag_arguments": {
+   "kind": "function",
+   "signature": "(tag_args: 'Sequence[str] | None') -> 'frozenset[str]'"
+  },
+  "write_summary": {
+   "kind": "function",
+   "signature": "(match_count: 'int', tag_counter: 'Counter[str]', *, total_bytes: 'int | None' = None, stream: 'TextIO | None' = None, force_color: 'bool | None' = None) -> 'None'"
+  }
+ },
+ "findfmt.cli.terminal": {
+  "PagerController": {
+   "kind": "class",
+   "members": {
+    "__init__": "(self, *, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, console: 'Console | None' = None, pager_impl: 'Pager | None' = None, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'None'",
+    "display": "(self, content: 'str') -> 'None'",
+    "should_page": "(self, line_count: 'int') -> 'bool'"
+   },
+   "signature": "(*, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None, console: 'Console | None' = None, pager_impl: 'Pager | None' = None, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'None'"
+  },
+  "get_console": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO | None' = None, *, env: 'Mapping[str, str] | None' = None, width: 'int | None' = None, force_color: 'bool | None' = None) -> 'Console'"
+  },
+  "get_terminal_height": {
+   "kind": "function",
+   "signature": "(fallback: 'int' = 24) -> 'int'"
+  },
+  "is_color_enabled": {
+   "kind": "function",
+   "signature": "(stream: 'TextIO | None' = None, *, env: 'Mapping[str, str] | None' = None, force_color: 'bool | None' = None) -> 'bool'"
+  },
+  "should_use_pager": {
+   "kind": "function",
+   "signature": "(output_lines: 'int', *, pager: 'bool | None' = None, stream: 'TextIO | None' = None, term_height: 'int | None' = None) -> 'bool'"
+  },
+  "strip_ansi": {
+   "kind": "function",
+   "signature": "(text: 'str') -> 'str'"
   }
  },
  "findfmt.diagnostics": {

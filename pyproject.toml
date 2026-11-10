@@ -141,6 +141,8 @@ lint.ignore = [
 ]
 lint.per-file-ignores."docs/**/*" = [ "A001", "INP001" ]
 lint.per-file-ignores."src/findfmt/__init__.py" = [ "PLC0415" ]
+lint.per-file-ignores."src/findfmt/cli/diagnostics.py" = [ "FBT001", "FBT002", "PLC0415" ]
+lint.per-file-ignores."src/findfmt/cli/entrypoints.py" = [ "PLC0415" ]
 lint.per-file-ignores."src/findfmt/cli/help.py" = [ "FBT001", "FBT002" ]
 lint.per-file-ignores."src/findfmt/cli/main.py" = [
   "ARG001",
@@ -149,8 +151,6 @@ lint.per-file-ignores."src/findfmt/cli/main.py" = [
   "PLR0913",
   "PLR0917",
 ]
-lint.per-file-ignores."src/findfmt/diagnostics.py" = [ "FBT001", "FBT002", "PLC0415" ]
-lint.per-file-ignores."src/findfmt/entrypoints.py" = [ "PLC0415" ]
 lint.per-file-ignores."src/findfmt/formatters/__init__.py" = [ "PLC0415" ]
 lint.per-file-ignores."src/findfmt/formatters/delimited.py" = [ "PLC0415" ]
 lint.per-file-ignores."src/findfmt/utils/strings.py" = [ "PLC0415" ]

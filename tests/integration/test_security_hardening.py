@@ -12,8 +12,8 @@ from unittest.mock import patch
 import pytest
 from typer.testing import CliRunner
 
-from findfmt import classify_file, strip_ansi_escapes, terminal
-from findfmt.cli import app
+from findfmt import classify_file, strip_ansi_escapes
+from findfmt.cli import app, terminal
 from findfmt.formatters import TextFormatter
 from findfmt.models import FileInfo
 from findfmt.utils import hyperlinks, strings

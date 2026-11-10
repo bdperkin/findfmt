@@ -15,12 +15,12 @@ else:
 import rich.markup
 from rich.tree import Tree
 
+from findfmt.cli.terminal import _reconfigure_cp437, get_console
 from findfmt.formatters.badges import format_tag_badge
 from findfmt.formatters.base import Formatter
 from findfmt.formatters.glyphs import resolve_tree_guides
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
-from findfmt.terminal import _reconfigure_cp437, get_console
 from findfmt.utils.hyperlinks import build_file_uri
 from findfmt.utils.strings import format_display_path
 

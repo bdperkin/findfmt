@@ -10,8 +10,8 @@ import pytest
 import typer
 from typer.testing import CliRunner
 
-from findfmt.cli import app
-from findfmt.entrypoints import (
+from findfmt.cli import (
+    app,
     main_findfilefmt,
     main_findfilemime,
     main_findfiles,

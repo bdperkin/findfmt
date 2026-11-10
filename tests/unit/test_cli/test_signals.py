@@ -29,12 +29,12 @@ from findfmt.cli import (
     is_broken_pipe_wrapper,
     trap_cli_signals,
 )
+from findfmt.cli.entrypoints import _invoke_with_defaults
 from findfmt.cli.runner import _deliver_output
 from findfmt.cli.signals import _sigint_handler
-from findfmt.entrypoints import _invoke_with_defaults
+from findfmt.cli.terminal import PagerController
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.models import FileInfo, TraversalConfig
-from findfmt.terminal import PagerController
 
 
 @pytest.fixture(autouse=True)

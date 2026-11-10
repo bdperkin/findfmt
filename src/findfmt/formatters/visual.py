@@ -16,6 +16,7 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
+from findfmt.cli.terminal import _reconfigure_cp437, get_console
 from findfmt.exceptions import UnsupportedBoxStyleError
 from findfmt.formatters.badges import format_tag_badge
 from findfmt.formatters.base import Formatter
@@ -24,7 +25,6 @@ from findfmt.formatters.tree import RichTreeFormatter
 from findfmt.i18n import _, format_integer, ngettext
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
-from findfmt.terminal import _reconfigure_cp437, get_console
 from findfmt.utils.hyperlinks import build_file_uri
 from findfmt.utils.strings import format_display_path
 

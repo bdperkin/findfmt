@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-11-05 20:17-0500\n"
+"POT-Creation-Date: 2026-11-10 08:18-0500\n"
 "PO-Revision-Date: 2026-10-21 11:38-0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -17,76 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
-
-#: src/findfmt/diagnostics.py:87
-msgid "not installed"
-msgstr "not installed"
-
-#: src/findfmt/diagnostics.py:92
-msgid "not found"
-msgstr "not found"
-
-#: src/findfmt/diagnostics.py:101
-msgid "none"
-msgstr "none"
-
-#: src/findfmt/entrypoints.py:196
-msgid ""
-"Find all files and directories, including hidden files respecting "
-".gitignore."
-msgstr ""
-"Find all files and directories, including hidden files respecting "
-".gitignore."
-
-#: src/findfmt/entrypoints.py:215
-msgid ""
-"Find files and list detected format and MIME tags, including hidden files"
-" respecting .gitignore."
-msgstr ""
-"Find files and list detected format and MIME tags, including hidden files"
-" respecting .gitignore."
-
-#: src/findfmt/entrypoints.py:244
-msgid ""
-"Find files by format tag, including hidden files respecting .gitignore.\n"
-"\n"
-"Optionally provide TAG as the first positional argument (e.g. "
-"'findfilefmt python')."
-msgstr ""
-"Find files by format tag, including hidden files respecting .gitignore.\n"
-"\n"
-"Optionally provide TAG as the first positional argument (e.g. "
-"'findfilefmt python')."
-
-#: src/findfmt/entrypoints.py:273
-msgid ""
-"Find files by shebang interpreter pattern, including hidden files "
-"respecting .gitignore.\n"
-"\n"
-"Optionally provide INTERPRETER as the first positional argument (e.g. "
-"'findshebang bash')."
-msgstr ""
-"Find files by shebang interpreter pattern, including hidden files "
-"respecting .gitignore.\n"
-"\n"
-"Optionally provide INTERPRETER as the first positional argument (e.g. "
-"'findshebang bash')."
-
-#: src/findfmt/entrypoints.py:295
-msgid ""
-"Find files and output NUL-delimited paths (--print0), including hidden "
-"files respecting .gitignore."
-msgstr ""
-"Find files and output NUL-delimited paths (--print0), including hidden "
-"files respecting .gitignore."
-
-#: src/findfmt/entrypoints.py:315
-msgid ""
-"Find files and print summary statistics to stderr, including hidden files"
-" respecting .gitignore."
-msgstr ""
-"Find files and print summary statistics to stderr, including hidden files"
-" respecting .gitignore."
 
 #: src/findfmt/exceptions.py:39
 #, python-brace-format
@@ -169,17 +99,17 @@ msgstr "EB"
 msgid "Error: {label} '{path}' not found."
 msgstr "Error: {label} '{path}' not found."
 
-#: src/findfmt/cli/config.py:70
+#: src/findfmt/cli/config.py:83
 #, python-brace-format
 msgid "Error: Conflicting format options: {options}."
 msgstr "Error: Conflicting format options: {options}."
 
-#: src/findfmt/cli/config.py:81
+#: src/findfmt/cli/config.py:94
 #, python-brace-format
 msgid "Error: Input file '{path}' not found."
 msgstr "Error: Input file '{path}' not found."
 
-#: src/findfmt/cli/config.py:88
+#: src/findfmt/cli/config.py:101
 msgid "Error: Cannot specify both --dirsfirst and --filesfirst."
 msgstr "Error: Cannot specify both --dirsfirst and --filesfirst."
 
@@ -230,6 +160,76 @@ msgstr "expected string, got {type_name}"
 #, python-brace-format
 msgid "Error: Unknown configuration key '{key}' in '{path}'."
 msgstr "Error: Unknown configuration key '{key}' in '{path}'."
+
+#: src/findfmt/cli/diagnostics.py:81
+msgid "not installed"
+msgstr "not installed"
+
+#: src/findfmt/cli/diagnostics.py:86
+msgid "not found"
+msgstr "not found"
+
+#: src/findfmt/cli/diagnostics.py:97
+msgid "none"
+msgstr "none"
+
+#: src/findfmt/cli/entrypoints.py:237
+msgid ""
+"Find all files and directories, including hidden files respecting "
+".gitignore."
+msgstr ""
+"Find all files and directories, including hidden files respecting "
+".gitignore."
+
+#: src/findfmt/cli/entrypoints.py:256
+msgid ""
+"Find files and list detected format and MIME tags, including hidden files"
+" respecting .gitignore."
+msgstr ""
+"Find files and list detected format and MIME tags, including hidden files"
+" respecting .gitignore."
+
+#: src/findfmt/cli/entrypoints.py:285
+msgid ""
+"Find files by format tag, including hidden files respecting .gitignore.\n"
+"\n"
+"Optionally provide TAG as the first positional argument (e.g. "
+"'findfilefmt python')."
+msgstr ""
+"Find files by format tag, including hidden files respecting .gitignore.\n"
+"\n"
+"Optionally provide TAG as the first positional argument (e.g. "
+"'findfilefmt python')."
+
+#: src/findfmt/cli/entrypoints.py:314
+msgid ""
+"Find files by shebang interpreter pattern, including hidden files "
+"respecting .gitignore.\n"
+"\n"
+"Optionally provide INTERPRETER as the first positional argument (e.g. "
+"'findshebang bash')."
+msgstr ""
+"Find files by shebang interpreter pattern, including hidden files "
+"respecting .gitignore.\n"
+"\n"
+"Optionally provide INTERPRETER as the first positional argument (e.g. "
+"'findshebang bash')."
+
+#: src/findfmt/cli/entrypoints.py:336
+msgid ""
+"Find files and output NUL-delimited paths (--print0), including hidden "
+"files respecting .gitignore."
+msgstr ""
+"Find files and output NUL-delimited paths (--print0), including hidden "
+"files respecting .gitignore."
+
+#: src/findfmt/cli/entrypoints.py:356
+msgid ""
+"Find files and print summary statistics to stderr, including hidden files"
+" respecting .gitignore."
+msgstr ""
+"Find files and print summary statistics to stderr, including hidden files"
+" respecting .gitignore."
 
 #: src/findfmt/cli/file_config.py:185
 #, python-brace-format
@@ -1246,3 +1246,4 @@ msgstr "Shebang"
 
 #~ msgid "E"
 #~ msgstr "E"
+
