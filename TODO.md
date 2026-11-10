@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 196 Closed Issues | 110 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 198 Closed Issues | 109 Actionable Open Tasks | 32 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -17,7 +17,7 @@
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
-> its milestone)
+> its milestone; closed #372 and epic #336)
 
 ______________________________________________________________________
 
@@ -615,6 +615,12 @@ Note: Ordered chronologically by completion date.
 - [x] **[#609](https://github.com/bdperkin/findfmt/issues/609)** - build(release): automate and
   validate fallback version synchronization across codebase and build tooling (Closed: 2026-11-10
   via PR [#610](https://github.com/bdperkin/findfmt/pull/610))
+- [x] **[#372](https://github.com/bdperkin/findfmt/issues/372)** - [Core] Replace recursive
+  directory traversal and size calculation with iterative depth-safe implementations (Closed:
+  2026-11-10 via PR [#612](https://github.com/bdperkin/findfmt/pull/612))
+- [x] **[#336](https://github.com/bdperkin/findfmt/issues/336)** - [Epic] Traversal Engine
+  Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety (Closed:
+  2026-11-10 via PR [#612](https://github.com/bdperkin/findfmt/pull/612))
 
 ______________________________________________________________________
 
@@ -715,12 +721,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Parent: [#229](https://github.com/bdperkin/findfmt/issues/229) | Milestone: v1.6.1)* -
   **Value:** Medium | **Effort:** S - **Rationale:** Locks in RTL behaviour cheaply; guards the
   Urdu/Arabic releases.
-- [ ] **[#372](https://github.com/bdperkin/findfmt/issues/372)** - [Core] Replace recursive
-  directory traversal and size calculation with iterative depth-safe implementations *(Rank: 22 |
-  Epic:
-  [[Epic] Traversal Engine Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety](https://github.com/bdperkin/findfmt/issues/336)
-  | Milestone: v1.2.1)* - **Value:** High | **Effort:** M - **Rationale:** Deep trees silently
-  return zero results.
 - [ ] **[#463](https://github.com/bdperkin/findfmt/issues/463)** - fix(parsers): confine --from-file
   paths to the traversal root unless explicitly allowed *(Rank: 23 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
@@ -1340,9 +1340,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are
 linked natively on GitHub.
 
-- [ ] **[#336](https://github.com/bdperkin/findfmt/issues/336)** - [Epic] Traversal Engine
-  Stability: Unicode Sorting, Scandir Leak Prevention, and Deep Tree Recursion Safety *(Milestone:
-  v1.2.1 | Open sub-issues: 1)* - [#372](https://github.com/bdperkin/findfmt/issues/372)
 - [ ] **[#346](https://github.com/bdperkin/findfmt/issues/346)** - [Epic] CLI Documentation
   Accuracy, Dynamic --help-all Generation, and Option Validation *(Milestone: v1.2.1 | Open
   sub-issues: 1)* - [#365](https://github.com/bdperkin/findfmt/issues/365)
@@ -1540,7 +1537,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                               | 6           |
+| v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                               | 4           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
