@@ -7,6 +7,38 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-10
+
+### Fixed
+
+- *(cli)* Derive value-taking options dynamically from the Click command in wrapper entry points
+  (`findfilefmt` and `findshebang`) and handle attached short flags (`-tpython`, `-sbash`) so
+  options such as `-o report.txt` or `-L 2` never misinterpret or truncate positional arguments
+  (#319).
+- *(cli)* Catch `FindFmtError` in `findfmt.cli.runner` to emit localized user-friendly error panels
+  with exit code `2` unless `--verbose` is passed, and disable Typer pretty-exceptions tracebacks by
+  default (#329).
+- *(cli)* Validate numeric CLI options (`--max-depth` / `-L` and `--filelimit` with `min=0`) and
+  clarify `--verbose` / `-V` help text (#366).
+- *(i18n)* Defer `set_locale()` initialization until CLI entry (`FindfmtCommand.make_context` and
+  wrapper entry points) so `import findfmt` leaves process `LC_ALL` / `LC_NUMERIC` unchanged, and
+  fall back cleanly when a locale candidate cannot be applied (#451).
+- *(parsers)* Read `--from-file` files and `stdin` as raw bytes (`sys.stdin.buffer`) and decode
+  individual path lines via `os.fsdecode()` (`surrogateescape`) so non-UTF-8 POSIX filenames never
+  raise `UnicodeDecodeError` (#460).
+
+### Changed
+
+- *(api)* Lazy-load `main`, `main_*`, and `_` from the `findfmt` package root and `Rich*Formatter`
+  classes from `findfmt.formatters` via module `__getattr__` with `DeprecationWarning`, eliminating
+  eager `typer` and `rich` imports on `import findfmt` (#452).
+- *(cli)* Relocate CLI-only modules (`diagnostics`, `entrypoints`, `summary`, `terminal`) under
+  `findfmt.cli` and retain lazy `DeprecationWarning` compatibility shims at `findfmt.*`, completing
+  core library decoupling from CLI dependencies (#453, #324).
+- *(release)* Centralize `_FALLBACK_VERSION` in `src/findfmt/__init__.py` and extend
+  `tools/verify_release_version.py` (`--repo` and `--write`) to synchronize and validate fallback
+  versions across `pyproject.toml` and `src/findfmt/` (#609).
+
 ## [1.1.5] - 2026-11-09
 
 ### Features
@@ -689,4 +721,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.1.3]: https://github.com/bdperkin/findfmt/compare/v1.1.2...v1.1.3
 [1.1.4]: https://github.com/bdperkin/findfmt/compare/v1.1.3...v1.1.4
 [1.1.5]: https://github.com/bdperkin/findfmt/compare/v1.1.4...v1.1.5
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.1.5...HEAD
+[1.2.0]: https://github.com/bdperkin/findfmt/compare/v1.1.5...v1.2.0
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.2.0...HEAD
