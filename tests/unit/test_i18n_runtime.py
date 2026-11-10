@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 import gettext
+import locale
 import struct
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from tools.i18n_validation import parse_po_catalog
 
 from findfmt.i18n import (
     _,
+    _try_apply_locale_candidate,
     detect_locale,
     detect_locales,
     get_current_locale,
@@ -472,3 +475,22 @@ def test_japanese_canonical_catalog_runtime(tmp_path: Path) -> None:
     )
     with override_locale("ja_JP.UTF-8", localedir=tmp_path):
         assert _("Operation failed!") == "操作に失敗しました。"
+
+
+def test_failed_locale_candidate_leaves_categories_unchanged() -> None:
+    """Verify a failing candidate in _try_apply_locale_candidate leaves categories unchanged."""
+    before_time = locale.setlocale(locale.LC_TIME)
+    before_num = locale.setlocale(locale.LC_NUMERIC)
+    calls: list[tuple[int, str | None]] = []
+
+    def fake_setlocale(cat: int, val: str | None = None) -> str:
+        calls.append((cat, val))
+        err_msg = "unsupported locale"
+        raise locale.Error(err_msg)
+
+    with patch("findfmt.i18n.locale.setlocale", side_effect=fake_setlocale):
+        assert _try_apply_locale_candidate("nonexistent_locale_xyz") is False
+
+    assert calls == [(locale.LC_ALL, "nonexistent_locale_xyz")]
+    assert locale.setlocale(locale.LC_TIME) == before_time
+    assert locale.setlocale(locale.LC_NUMERIC) == before_num
