@@ -1,12 +1,15 @@
-"""Verify a release tag, and that the built distributions carry exactly that version (#327).
+"""Verify a release tag, fallback versions, and built distribution versions (#327, #609).
 
 The release workflow runs this twice: once before the quality gate to reject anything that is not a
-``vMAJOR.MINOR.PATCH`` tag, and once after ``uv build`` so a mis-versioned build (for example a
-``.devN`` version built from a branch) fails before anything is published.
+``vMAJOR.MINOR.PATCH`` tag or has out-of-sync fallback versions, and once after ``uv build`` so a
+mis-versioned build (for example a ``.devN`` version built from a branch) fails before anything is
+published. Maintainers can also pass ``--write`` during release preparation to synchronize fallback
+versions across ``pyproject.toml`` and ``src/findfmt/__init__.py``.
 
 Usage:
-    python tools/verify_release_version.py --tag v1.1.0
-    python tools/verify_release_version.py --tag v1.1.0 --dist dist
+    python tools/verify_release_version.py --tag v1.2.0 --repo .
+    python tools/verify_release_version.py --tag v1.2.0 --write
+    python tools/verify_release_version.py --tag v1.2.0 --dist dist
 """
 
 from __future__ import annotations
@@ -19,7 +22,16 @@ import zipfile
 from email.parser import HeaderParser
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 TAG_PATTERN = re.compile(r"v(\d+\.\d+\.\d+)")
+PYPROJECT_FALLBACK_PATTERN = re.compile(
+    r'^(version\.fallback-version\s*=\s*")([^"]+)(")',
+    re.MULTILINE,
+)
+INIT_FALLBACK_PATTERN = re.compile(
+    r'^(_FALLBACK_VERSION(?:\s*:\s*str)?\s*=\s*")([^"]+)(")',
+    re.MULTILINE,
+)
 
 
 def version_from_tag(tag: str) -> str:
@@ -65,24 +77,53 @@ def _sdist_version(path: Path) -> str | None:
         return _metadata_version(handle.read().decode("utf-8"))
 
 
-def check(tag: str, dist: Path | None = None) -> list[str]:
-    """Return a list of problems with ``tag`` and, if given, the artifacts in ``dist``.
+def _extract_fallback(path: Path, pattern: re.Pattern[str]) -> str | None:
+    """Return the fallback version matched by ``pattern`` in ``path``, if present."""
+    match = pattern.search(path.read_text(encoding="utf-8"))
+    return str(match.group(2)) if match is not None else None
+
+
+def _check_repo_fallbacks(repo: Path, expected: str) -> list[str]:
+    """Verify fallback version declarations in ``repo`` match ``<expected>.dev0``."""
+    expected_fallback = f"{expected}.dev0"
+    targets = {
+        "pyproject.toml": (repo / "pyproject.toml", PYPROJECT_FALLBACK_PATTERN),
+        "src/findfmt/__init__.py": (
+            repo / "src" / "findfmt" / "__init__.py",
+            INIT_FALLBACK_PATTERN,
+        ),
+    }
+    errors: list[str] = []
+    for rel_path, (path, pattern) in targets.items():
+        actual = _extract_fallback(path, pattern)
+        if actual is None:
+            errors.append(f"{rel_path}: missing fallback version declaration")
+        elif actual != expected_fallback:
+            errors.append(f"{rel_path}: fallback version {actual} != expected {expected_fallback}")
+
+    return errors
+
+
+def sync_fallback_versions(tag: str, repo: Path = REPO_ROOT) -> None:
+    """Update fallback version declarations in ``repo`` to ``<tag_version>.dev0``.
 
     Args:
-        tag: Release tag that triggered or was passed to the workflow.
-        dist: Directory containing the built wheel and sdist, or ``None`` to check the tag only.
-
-    Returns:
-        Human-readable error messages; empty when everything matches.
+        tag: Release tag, for example ``v1.2.0``.
+        repo: Repository root containing ``pyproject.toml`` and ``src/findfmt/__init__.py``.
     """
-    try:
-        expected = version_from_tag(tag)
-    except ValueError as exc:
-        return [str(exc)]
+    expected_fallback = f"{version_from_tag(tag)}.dev0"
+    targets = (
+        (repo / "pyproject.toml", PYPROJECT_FALLBACK_PATTERN),
+        (repo / "src" / "findfmt" / "__init__.py", INIT_FALLBACK_PATTERN),
+    )
+    for path, pattern in targets:
+        text = path.read_text(encoding="utf-8")
+        updated = pattern.sub(rf"\g<1>{expected_fallback}\g<3>", text, count=1)
+        path.write_text(updated, encoding="utf-8")
 
-    if dist is None:
-        return []
 
+def _check_dist_artifacts(dist: Path, expected: str) -> list[str]:
+    """Verify the built wheel and sdist in ``dist`` declare ``expected``."""
     errors: list[str] = []
     readers = {"*.whl": _wheel_version, "*.tar.gz": _sdist_version}
     for pattern, reader in readers.items():
@@ -100,14 +141,55 @@ def check(tag: str, dist: Path | None = None) -> list[str]:
     return errors
 
 
+def check(tag: str, dist: Path | None = None, repo: Path | None = None) -> list[str]:
+    """Return a list of problems with ``tag``, ``dist``, and ``repo`` fallback declarations.
+
+    Args:
+        tag: Release tag that triggered or was passed to the workflow.
+        dist: Directory containing the built wheel and sdist, or ``None`` to skip artifact checks.
+        repo: Repository root to check fallback versions, or ``None`` to skip fallback checks.
+
+    Returns:
+        Human-readable error messages; empty when everything matches.
+    """
+    try:
+        expected = version_from_tag(tag)
+    except ValueError as exc:
+        return [str(exc)]
+
+    errors: list[str] = []
+    if repo is not None:
+        errors.extend(_check_repo_fallbacks(repo, expected))
+
+    if dist is not None:
+        errors.extend(_check_dist_artifacts(dist, expected))
+
+    return errors
+
+
 def main(argv: list[str] | None = None) -> int:
-    """Run the check from the command line and return the process exit code."""
+    """Run the check or sync from the command line and return the process exit code."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--tag", required=True, help="release tag, for example v1.1.0")
+    parser.add_argument("--tag", required=True, help="release tag, for example v1.2.0")
     parser.add_argument("--dist", type=Path, help="directory with the built wheel and sdist")
+    parser.add_argument(
+        "--repo",
+        type=Path,
+        help="repository root to verify or update fallback version declarations",
+    )
+    parser.add_argument(
+        "--write",
+        action="store_true",
+        help="update fallback versions in pyproject.toml and src/findfmt/__init__.py to <tag>.dev0",
+    )
     args = parser.parse_args(argv)
 
-    errors = check(args.tag, args.dist)
+    repo = (args.repo or REPO_ROOT) if args.write else args.repo
+    if args.write and TAG_PATTERN.fullmatch(args.tag) is not None:
+        assert repo is not None
+        sync_fallback_versions(args.tag, repo)
+
+    errors = check(args.tag, args.dist, repo)
     for error in errors:
         sys.stderr.write(f"Error: {error}\n")
 

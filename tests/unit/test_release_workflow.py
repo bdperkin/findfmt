@@ -60,7 +60,7 @@ def test_release_validates_tag_before_quality_gate() -> None:
     names = [s.get("name") for s in steps]
     check = steps[names.index("Verify Release Tag")]
     assert check.get("env", {}).get("GH_TOKEN") == "${{ github.token }}"
-    assert "tools/verify_release_version.py" in check["run"]
+    assert 'tools/verify_release_version.py --tag "$RELEASE_TAG" --repo .' in check["run"]
     assert "git rev-parse" in check["run"], "the checked-out commit must be the tag's commit"
     # The publishing environments only deploy v*.*.* tags, so a dispatch must run on the tag (#495).
     assert 'test "$GITHUB_REF" = "refs/tags/${RELEASE_TAG}"' in check["run"]

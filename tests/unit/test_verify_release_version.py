@@ -8,7 +8,12 @@ import zipfile
 from pathlib import Path
 
 import pytest
-from tools.verify_release_version import check, main, version_from_tag
+from tools.verify_release_version import (
+    check,
+    main,
+    sync_fallback_versions,
+    version_from_tag,
+)
 
 
 def _wheel(dist: Path, filename_version: str, metadata_version: str) -> Path:
@@ -125,4 +130,64 @@ def test_main_exit_codes(dist: Path, capsys: pytest.CaptureFixture[str]) -> None
     assert main(["--tag", "v1.2.0", "--dist", str(dist)]) == 1
     assert "1.2.0" in capsys.readouterr().err
     assert main(["--tag", "main"]) == 1
+    assert "vMAJOR.MINOR.PATCH" in capsys.readouterr().err
+
+
+def _mock_repo(tmp_path: Path, pyproject_ver: str | None, init_ver: str | None) -> Path:
+    """Create a minimal repository layout with pyproject.toml and src/findfmt/__init__.py."""
+    repo = tmp_path / "repo"
+    init_dir = repo / "src" / "findfmt"
+    init_dir.mkdir(parents=True)
+    pyproject_text = (
+        f'[tool.hatch]\nversion.fallback-version = "{pyproject_ver}"\n'
+        if pyproject_ver is not None
+        else "[tool.hatch]\n"
+    )
+    init_text = (
+        f'_FALLBACK_VERSION: str = "{init_ver}"\n' if init_ver is not None else "__all__ = []\n"
+    )
+    (repo / "pyproject.toml").write_text(pyproject_text, encoding="utf-8")
+    (init_dir / "__init__.py").write_text(init_text, encoding="utf-8")
+    return repo
+
+
+def test_check_repo_fallbacks_detects_skew_and_missing(tmp_path: Path) -> None:
+    """Verify repo fallback checks pass when aligned and report skew or missing declarations."""
+    repo_ok = _mock_repo(tmp_path / "ok", "1.2.0.dev0", "1.2.0.dev0")
+    assert check("v1.2.0", repo=repo_ok) == []
+
+    repo_skew = _mock_repo(tmp_path / "skew", "1.2.0.dev0", "1.1.3.dev0")
+    skew_errors = check("v1.2.0", repo=repo_skew)
+    assert len(skew_errors) == 1
+    assert (
+        "src/findfmt/__init__.py: fallback version 1.1.3.dev0 != expected 1.2.0.dev0"
+        in (skew_errors[0])
+    )
+
+    repo_missing = _mock_repo(tmp_path / "missing", None, None)
+    missing_errors = check("v1.2.0", repo=repo_missing)
+    assert len(missing_errors) == 2
+    assert all("missing fallback version declaration" in e for e in missing_errors)
+
+
+def test_sync_fallback_versions_and_cli_write(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verify --write updates fallback versions in pyproject.toml and src/findfmt/__init__.py."""
+    repo = _mock_repo(tmp_path, "1.1.5.dev0", "1.1.3.dev0")
+    assert main(["--tag", "v1.2.0", "--repo", str(repo), "--write"]) == 0
+    assert "OK: tag match version 1.2.0" in capsys.readouterr().out
+    assert check("v1.2.0", repo=repo) == []
+    assert 'version.fallback-version = "1.2.0.dev0"' in (repo / "pyproject.toml").read_text(
+        encoding="utf-8",
+    )
+    assert '_FALLBACK_VERSION: str = "1.2.0.dev0"' in (
+        repo / "src" / "findfmt" / "__init__.py"
+    ).read_text(encoding="utf-8")
+
+    sync_fallback_versions("v1.3.0", repo)
+    assert check("v1.3.0", repo=repo) == []
+
+    assert main(["--tag", "invalid-tag", "--repo", str(repo), "--write"]) == 1
     assert "vMAJOR.MINOR.PATCH" in capsys.readouterr().err

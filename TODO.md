@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 195 Closed Issues | 110 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 196 Closed Issues | 110 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -16,7 +16,7 @@
 > hybrid Python-Rust epics #576, #581, #587, #592, #595 and issues #577-#598; triaged backlog for
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
-> issues #460, #366, #452, #319, #451, #453, and #324)
+> issues #460, #366, #452, #319, #451, #453, #324, and #609)
 
 ______________________________________________________________________
 
@@ -607,10 +607,12 @@ Note: Ordered chronologically by completion date.
   [#607](https://github.com/bdperkin/findfmt/pull/607))
 - [x] **[#453](https://github.com/bdperkin/findfmt/issues/453)** - refactor(cli): move CLI-only
   modules (diagnostics, entrypoints, summary, terminal) under findfmt.cli with compatibility shims
-  (Closed: 2026-11-10)
+  (Closed: 2026-11-10 via PR [#608](https://github.com/bdperkin/findfmt/pull/608))
 - [x] **[#324](https://github.com/bdperkin/findfmt/issues/324)** - refactor(api): make "import
   findfmt" side-effect free and decouple the core from the CLI (Closed: 2026-11-10 via #451, #452,
   and #453)
+- [x] **[#609](https://github.com/bdperkin/findfmt/issues/609)** - build(release): automate and
+  validate fallback version synchronization across codebase and build tooling (Closed: 2026-11-10)
 
 ______________________________________________________________________
 

@@ -11,6 +11,7 @@ from importlib.metadata import PackageNotFoundError, version
 
 import typer
 
+from findfmt import _FALLBACK_VERSION
 from findfmt.i18n import _
 
 __all__ = [
@@ -32,7 +33,7 @@ def get_version() -> str:
     try:
         return version("findfmt")
     except PackageNotFoundError:
-        return "1.1.3.dev0"
+        return _FALLBACK_VERSION
 
 
 def get_git_version() -> str | None:
