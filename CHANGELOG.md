@@ -13,7 +13,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - *(cli)* Derive value-taking options dynamically from the Click command in wrapper entry points
   (`findfilefmt` and `findshebang`) and handle attached short flags (`-tpython`, `-sbash`) so
-  options such as `-o report.txt` or `-L 2` never misparse or truncate positional arguments (#319).
+  options such as `-o report.txt` or `-L 2` never misinterpret or truncate positional arguments
+  (#319).
 - *(cli)* Catch `FindFmtError` in `findfmt.cli.runner` to emit localized user-friendly error panels
   with exit code `2` unless `--verbose` is passed, and disable Typer pretty-exceptions tracebacks by
   default (#329).
