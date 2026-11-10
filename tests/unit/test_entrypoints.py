@@ -11,9 +11,12 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
+import typer
 
+from findfmt.cli import app
 from findfmt.cli.file_config import reset_active_config
 from findfmt.entrypoints import (
+    _OPTIONS_WITH_VALUE,
     _consume_option,
     _extract_first_positional,
     _has_option,
@@ -27,10 +30,22 @@ from findfmt.entrypoints import (
 )
 
 
+def _click_value_options() -> list[str]:
+    cmd = typer.main.get_command(app)
+    return sorted(
+        opt
+        for param in cmd.params
+        if getattr(param, "is_flag", None) is False
+        for opt in (*param.opts, *param.secondary_opts)
+    )
+
+
 def test_has_option():
     assert _has_option(["-t", "python"], {"-t", "--type", "--tag"})
+    assert _has_option(["-tpython"], {"-t", "--type", "--tag"})
     assert _has_option(["--tag=python"], {"-t", "--type", "--tag"})
     assert not _has_option(["--shebang", "bash"], {"-t", "--type", "--tag"})
+    assert not _has_option(["--", "-t", "python"], {"-t", "--type", "--tag"})
 
 
 def test_consume_option():
@@ -299,3 +314,65 @@ def test_version_and_platform_import_fallbacks(monkeypatch: pytest.MonkeyPatch) 
     assert ns_present["pwd"] is not None
     assert ns_present["grp"] is not None
     assert runpy.run_path(bench_path, run_name="_shim")["resource"] is not None
+
+
+def test_wrapper_option_list_matches_click_command() -> None:
+    """Guard that _OPTIONS_WITH_VALUE equals the Click command's non-flag options (#319)."""
+    assert set(_click_value_options()) == _OPTIONS_WITH_VALUE
+
+
+@pytest.mark.parametrize(
+    ("wrapper", "target_flag", "own_flags"),
+    [
+        (main_findfilefmt, "--tag", {"-t", "--type", "--tag"}),
+        (main_findshebang, "--shebang", {"--shebang"}),
+    ],
+)
+@pytest.mark.parametrize("form", ["separate", "attached"])
+@pytest.mark.parametrize("flag", _click_value_options())
+def test_wrapper_respects_all_value_options(
+    wrapper: Any,
+    target_flag: str,
+    own_flags: set[str],
+    form: str,
+    flag: str,
+) -> None:
+    """Every value-taking option preserves the intended positional tag/shebang (#319)."""
+    opt_tokens = (
+        ([f"{flag}=optval"] if flag.startswith("--") else [f"{flag}optval"])
+        if form == "attached"
+        else [flag, "optval"]
+    )
+    with patch("findfmt.entrypoints._invoke_with_defaults", return_value=0) as mock_invoke:
+        assert wrapper([*opt_tokens, "intended_pos", "src"]) == 0
+
+    forwarded = mock_invoke.call_args.kwargs["argv"]
+    if flag in own_flags:
+        assert forwarded == [*opt_tokens, "intended_pos", "src"]
+    else:
+        assert forwarded == [target_flag, "intended_pos", *opt_tokens, "src"]
+
+
+def test_wrapper_handles_attached_short_option(
+    sample_repo: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Attached -tpython and --tag=python are detected as explicit tags without dropping paths."""
+    for flag_token in ("-tpython", "--tag=python"):
+        assert main_findfilefmt([flag_token, str(sample_repo)]) == 0
+        out = capsys.readouterr().out.replace("\\", "/")
+        assert "src/app.py" in out
+        assert ".config/settings.yaml" not in out
+
+
+def test_wrapper_output_option_does_not_create_stray_file(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """findfilefmt -o report.txt text writes report.txt and does not create ./text (#319)."""
+    (tmp_path / "sample.txt").write_text("hello\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+    assert main_findfilefmt(["-o", "report.txt", "text"]) == 0
+    assert (tmp_path / "report.txt").is_file()
+    assert "sample.txt" in (tmp_path / "report.txt").read_text(encoding="utf-8")
+    assert not (tmp_path / "text").exists()

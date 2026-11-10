@@ -25,20 +25,57 @@ __all__ = [
 
 _OPTIONS_WITH_VALUE: frozenset[str] = frozenset(
     {
-        "-t",
-        "--type",
-        "--tag",
+        "-H",
+        "-I",
+        "-L",
+        "-P",
+        "-T",
         "-e",
-        "--exclude",
-        "--exclude-tag",
-        "--shebang",
+        "-f",
+        "-o",
+        "-t",
         "--config",
+        "--exclude",
+        "--exclude-pattern",
+        "--exclude-tag",
+        "--filelimit",
+        "--format",
+        "--from-file",
+        "--fromfile",
+        "--gitignore-file",
+        "--html",
+        "--hyperlink-authority",
+        "--hyperlink-schema",
+        "--include-pattern",
+        "--intro",
+        "--lang",
+        "--locale",
+        "--max-depth",
+        "--output",
+        "--outro",
+        "--pattern",
+        "--shebang",
+        "--sort",
+        "--table-style",
+        "--tag",
+        "--time-format",
+        "--timefmt",
+        "--title",
+        "--type",
     },
 )
 
 
+def _matches_option(arg: str, opt: str) -> bool:
+    """Return True if a single argument token matches the given option flag."""
+    if arg == opt or arg.startswith(f"{opt}="):
+        return True
+
+    return not opt.startswith("--") and arg.startswith(opt)
+
+
 def _has_option(args: Sequence[str], option_names: set[str] | frozenset[str]) -> bool:
-    """Check if any option name or prefix is present in args.
+    """Check if any option name or prefix is present in args before '--'.
 
     Args:
         args: Sequence of command-line arguments.
@@ -47,10 +84,14 @@ def _has_option(args: Sequence[str], option_names: set[str] | frozenset[str]) ->
     Returns:
         True if any option matches, False otherwise.
     """
-    return any(
-        arg in option_names or any(arg.startswith(f"{opt}=") for opt in option_names)
-        for arg in args
-    )
+    for arg in args:
+        if arg == "--":
+            break
+
+        if any(_matches_option(arg, opt) for opt in option_names):
+            return True
+
+    return False
 
 
 def _consume_option(arg: str, next_arg: str | None) -> int:
