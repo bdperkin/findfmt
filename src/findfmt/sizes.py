@@ -165,6 +165,22 @@ def _scan_dir_entries(
     return files_size, subdirs
 
 
+def _resolve_size_node(
+    curr_path: Path,
+    pre_resolved: Path | None,
+    *,
+    follow_symlinks: bool,
+) -> tuple[Path, bool]:
+    """Resolve node path and determine whether it is a directory."""
+    if pre_resolved is not None:
+        resolved = (
+            curr_path.resolve() if follow_symlinks and curr_path.is_symlink() else pre_resolved
+        )
+        return resolved, True
+
+    return curr_path.resolve(), curr_path.is_dir()
+
+
 def calculate_accumulated_sizes(
     root: Path,
     *,
@@ -172,7 +188,7 @@ def calculate_accumulated_sizes(
     include_hidden: bool = True,
     visited: set[Path] | None = None,
 ) -> dict[Path, int]:
-    """Calculate accumulated directory sizes recursively using post-order traversal.
+    """Calculate accumulated directory sizes iteratively using post-order traversal.
 
     Args:
         root: Target directory path to accumulate.
@@ -184,35 +200,43 @@ def calculate_accumulated_sizes(
         Dictionary mapping each directory path to its accumulated size in bytes.
     """
     active_visited = visited if visited is not None else set()
-    try:
-        resolved = root.resolve()
-        is_directory = root.is_dir()
-    except OSError:
-        return {root: 0}
-
-    if resolved in active_visited:
-        return {}
-
-    active_visited.add(resolved)
-    if not is_directory:
-        return {root: _get_root_file_size(root, follow_symlinks=follow_symlinks)}
-
-    current_files_size, subdirs = _scan_dir_entries(
-        root,
-        follow_symlinks=follow_symlinks,
-        include_hidden=include_hidden,
-    )
     sizes: dict[Path, int] = {}
-    subdirs_total = 0
-    for subdir in subdirs:
-        child_sizes = calculate_accumulated_sizes(
-            subdir,
+    work_stack: list[tuple[Path, Path | None, bool, int, list[Path]]] = [
+        (root, None, False, 0, []),
+    ]
+
+    while work_stack:
+        curr_path, pre_resolved, expanded, files_size, subdirs = work_stack.pop()
+        if expanded:
+            sizes[curr_path] = files_size + sum(sizes.get(s, 0) for s in subdirs)
+            continue
+
+        try:
+            resolved, is_directory = _resolve_size_node(
+                curr_path,
+                pre_resolved,
+                follow_symlinks=follow_symlinks,
+            )
+        except OSError:
+            sizes[curr_path] = 0
+            continue
+
+        if resolved in active_visited:
+            continue
+
+        active_visited.add(resolved)
+        if not is_directory:
+            sizes[curr_path] = _get_root_file_size(curr_path, follow_symlinks=follow_symlinks)
+            continue
+
+        curr_files_size, curr_subdirs = _scan_dir_entries(
+            curr_path,
             follow_symlinks=follow_symlinks,
             include_hidden=include_hidden,
-            visited=active_visited,
         )
-        sizes.update(child_sizes)
-        subdirs_total += child_sizes.get(subdir, 0)
+        work_stack.append((curr_path, None, True, curr_files_size, curr_subdirs))
+        work_stack.extend(
+            (subdir, resolved / subdir.name, False, 0, []) for subdir in reversed(curr_subdirs)
+        )
 
-    sizes[root] = current_files_size + subdirs_total
     return sizes

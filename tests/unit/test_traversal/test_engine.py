@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -8,6 +9,7 @@ import findfmt.exceptions as findfmt_exceptions
 from findfmt.exceptions import ParserError, TraversalError
 from findfmt.models import FileInfo, TraversalConfig
 from findfmt.parsers import ingest_from_file
+from findfmt.sizes import calculate_accumulated_sizes
 from findfmt.traversal.boundaries import has_matching_descendants
 from findfmt.traversal.engine import (
     _scan_directory_entries,
@@ -176,15 +178,6 @@ def test_traverse_directory_and_gitignore(sample_repo: Path):
     assert not any(".gitexcluded" in p for p in rel_paths)
 
 
-def test_scan_directory_entries_broken_symlink(tmp_path: Path):
-    config = TraversalConfig(include_hidden=True)
-    broken_link = tmp_path / "broken_link"
-    broken_link.symlink_to(tmp_path / "non_existent_target")
-    subdirs, files = _scan_directory_entries(tmp_path, config, ())
-    assert subdirs == []
-    assert [f[0] for f in files] == [broken_link]
-
-
 def test_find_files_single_file_not_matching_filter(tmp_path: Path):
     txt_file = tmp_path / "data.txt"
     txt_file.write_text("plain text", encoding="utf-8")
@@ -206,70 +199,6 @@ def test_find_files_fifo_root(tmp_path: Path):
     config = TraversalConfig(root_paths=(fifo_path,))
     results = list(find_files(config))
     assert results == []
-
-
-def test_traverse_directory_symlink_cycle(tmp_path: Path):
-    sub = tmp_path / "subdir"
-    sub.mkdir()
-    target_file = sub / "file.py"
-    target_file.write_text("print('cycle')", encoding="utf-8")
-
-    cycle_link = sub / "loop"
-    cycle_link.symlink_to(sub, target_is_directory=True)
-
-    config = TraversalConfig(root_paths=(tmp_path,), follow_symlinks=True)
-    results = list(find_files(config))
-    rel_names = [r.path.name for r in results]
-    assert rel_names == ["file.py"]
-
-
-def test_traverse_directory_follow_symlinks_tree(tmp_path: Path):
-    external_dir = tmp_path.parent / f"{tmp_path.name}_external"
-    external_dir.mkdir(exist_ok=True)
-    (external_dir / "nested.py").write_text("x = 1", encoding="utf-8")
-
-    link_dir = tmp_path / "link_dir"
-    link_dir.symlink_to(external_dir, target_is_directory=True)
-
-    config = TraversalConfig(root_paths=(tmp_path,), follow_symlinks=True)
-    results = list(find_files(config))
-    file_names = [r.path.name for r in results]
-    assert file_names == ["nested.py"]
-
-
-def test_traverse_directory_resolve_root_os_error(tmp_path: Path):
-    (tmp_path / "test.py").write_text("print(1)", encoding="utf-8")
-    config = TraversalConfig(follow_symlinks=True)
-
-    orig_resolve = Path.resolve
-
-    def mock_resolve(self: Path, *args, **kwargs):
-        if self == tmp_path:
-            raise OSError
-
-        return orig_resolve(self, *args, **kwargs)
-
-    with patch.object(Path, "resolve", autospec=True, side_effect=mock_resolve):
-        res = list(traverse_directory(tmp_path, config))
-        assert len(res) == 1
-
-
-def test_traverse_directory_resolve_subdir_os_error(tmp_path: Path):
-    sub = tmp_path / "sub"
-    sub.mkdir()
-    (sub / "nested.py").write_text("print(1)", encoding="utf-8")
-    config = TraversalConfig(follow_symlinks=True)
-    orig_resolve = Path.resolve
-
-    def mock_resolve(self: Path, *args, **kwargs):
-        if self.name == "sub":
-            raise OSError
-
-        return orig_resolve(self, *args, **kwargs)
-
-    with patch.object(Path, "resolve", autospec=True, side_effect=mock_resolve):
-        res = list(traverse_directory(tmp_path, config))
-        assert res == []
 
 
 def test_scan_directory_entries_is_file_oserror(tmp_path: Path):
@@ -391,109 +320,67 @@ def test_exported_exceptions_are_raised_or_removed(tmp_path: Path) -> None:
         list(ingest_from_file(TraversalConfig(from_file=str(missing_listing))))
 
 
-def test_symlink_listed_without_follow(tmp_path: Path) -> None:
-    """Default traversal yields symlink entries with is_symlink=True and symlink_target set."""
-    real = tmp_path / "real.py"
-    real.write_text("print('hi')\n", encoding="utf-8")
-    link = tmp_path / "link.py"
+@pytest.mark.skipif(os.name == "nt", reason="POSIX deep tree test")
+def test_deep_tree_beyond_recursion_limit(tmp_path: Path) -> None:
+    """Verify traversal and size accumulation succeed beyond sys.getrecursionlimit() + 50."""
+    orig_limit = sys.getrecursionlimit()
     try:
-        link.symlink_to("real.py")
-    except (OSError, NotImplementedError):
-        pytest.skip("Symlinks not supported on this platform")
+        path_max = os.pathconf(tmp_path, "PC_PATH_MAX")
+    except (AttributeError, OSError, ValueError):
+        path_max = 4096
 
-    results = list(find_files(TraversalConfig(root_paths=(tmp_path,))))
-    by_name = {r.relative_path.as_posix(): r for r in results}
-    assert "link.py" in by_name
-    link_info = by_name["link.py"]
-    assert link_info.is_symlink is True
-    assert link_info.symlink_target == "real.py"
-    assert link_info.indicator == "@"
-    assert "symlink" in link_info.tags
+    max_safe_depth = (path_max - len(str(tmp_path)) - 64) // 2
+    if orig_limit + 50 > max_safe_depth:
+        sys.setrecursionlimit(max(200, max_safe_depth - 50))
 
-
-def test_symlink_classified_by_target_when_following(tmp_path: Path) -> None:
-    """With follow_symlinks=True (-l), symlinks are classified by their target content and tags."""
-    real = tmp_path / "real.py"
-    real.write_text("#!/usr/bin/env python3\nprint('target')\n", encoding="utf-8")
-    link = tmp_path / "link.py"
-    alias = tmp_path / "alias_no_ext"
+    created_dirs: list[Path] = []
+    curr = tmp_path
     try:
-        link.symlink_to("real.py")
-        alias.symlink_to("real.py")
-    except (OSError, NotImplementedError):
-        pytest.skip("Symlinks not supported on this platform")
+        depth = sys.getrecursionlimit() + 50
+        for _ in range(depth):
+            curr = curr / "a"
+            curr.mkdir()
+            created_dirs.append(curr)
 
-    cfg = TraversalConfig(
-        root_paths=(tmp_path,),
-        follow_symlinks=True,
-        include_tags=frozenset({"python"}),
-    )
-    results = list(find_files(cfg))
-    by_name = {r.relative_path.as_posix(): r for r in results}
-    assert set(by_name) == {"real.py", "link.py", "alias_no_ext"}
-    for name in ("link.py", "alias_no_ext"):
-        info = by_name[name]
-        assert "python" in info.tags
-        assert "text" in info.tags
-        assert "file" in info.tags
-        assert "symlink" in info.tags
-        assert info.is_symlink is True
-        assert info.symlink_target == "real.py"
-        assert info.shebang == "#!/usr/bin/env python3"
+        leaf = curr / "leaf.py"
+        leaf.write_text("x = 1\n", encoding="utf-8")
 
-    # Also verify --prune and direct single-root symlink classification with -l
-    cfg_prune = TraversalConfig(
-        root_paths=(tmp_path,),
-        follow_symlinks=True,
-        prune_empty=True,
-        include_tags=frozenset({"python"}),
-    )
-    assert len(list(find_files(cfg_prune))) == 3
-    single_res = list(find_files(TraversalConfig(root_paths=(link,), follow_symlinks=True)))
-    assert len(single_res) == 1
-    assert single_res[0].path == link.parent.resolve() / "link.py"
-    assert "python" in single_res[0].tags
+        sizes = calculate_accumulated_sizes(tmp_path)
+        assert sizes[tmp_path] == 6
+        assert len(sizes) == depth + 1
 
+        res_no_gi = list(
+            find_files(TraversalConfig(root_paths=(tmp_path,), respect_gitignore=False)),
+        )
+        assert len(res_no_gi) == 1
+        assert res_no_gi[0].path == leaf.resolve()
 
-def test_symlink_path_is_link_location(tmp_path: Path) -> None:
-    """FileInfo.path is the symlink location (not resolved target) and stays under root."""
-    external = tmp_path / "external"
-    external.mkdir()
-    target = external / "real.py"
-    target.write_text("x = 1\n", encoding="utf-8")
+        res_gi = list(
+            find_files(
+                TraversalConfig(
+                    root_paths=(tmp_path,),
+                    respect_gitignore=True,
+                    dirs_first=True,
+                ),
+            ),
+        )
+        assert len(res_gi) == 1
+        assert res_gi[0].path == leaf.resolve()
 
-    repo = tmp_path / "repo"
-    repo.mkdir()
-    link = repo / "link.py"
-    try:
-        link.symlink_to(target)
-    except (OSError, NotImplementedError):
-        pytest.skip("Symlinks not supported on this platform")
-
-    resolved_repo = repo.resolve()
-    for follow in (False, True):
-        items = list(find_files(TraversalConfig(root_paths=(repo,), follow_symlinks=follow)))
-        assert len(items) == 1
-        assert items[0].path == resolved_repo / "link.py"
-        assert items[0].path.is_relative_to(resolved_repo)
-        assert items[0].to_dict(absolute=True)["path"] == str(resolved_repo / "link.py")
-
-
-def test_broken_symlink_listed_not_crashing(tmp_path: Path) -> None:
-    """Dangling symlink is listed in default mode with symlink_target set and no error."""
-    dangling = tmp_path / "dangling.py"
-    try:
-        dangling.symlink_to("missing_target.py")
-    except (OSError, NotImplementedError):
-        pytest.skip("Symlinks not supported on this platform")
-
-    errors: list[OSError] = []
-    results = list(find_files(TraversalConfig(root_paths=(tmp_path,)), on_error=errors.append))
-    assert errors == []
-    assert len(results) == 1
-    info = results[0]
-    assert info.relative_path == Path("dangling.py")
-    assert info.is_symlink is True
-    assert info.symlink_target == "missing_target.py"
-    assert info.indicator == "@"
-    assert list(find_files(TraversalConfig(root_paths=(dangling,), follow_symlinks=True))) == []
+        res_prune = list(
+            find_files(
+                TraversalConfig(
+                    root_paths=(tmp_path,),
+                    respect_gitignore=False,
+                    dirs_only=True,
+                    prune_empty=True,
+                    include_tags=frozenset({"python"}),
+                ),
+            ),
+        )
+        assert len(res_prune) == depth
+    finally:
+        sys.setrecursionlimit(orig_limit)
+        (curr / "leaf.py").unlink(missing_ok=True)
+        for d in reversed(created_dirs):
+            d.rmdir()

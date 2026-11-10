@@ -2,13 +2,21 @@
 
 from __future__ import annotations
 
-import contextlib
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from findfmt.classifier import _resolve_relative, classify_file
-from findfmt.exceptions import TraversalError
+from findfmt.classifier import classify_file
+from findfmt.traversal._pruning import (
+    _can_skip_candidate_file,
+    _can_skip_entry_by_tags,
+    _check_visited_or_memo,
+    _PruneFrame,
+    _scan_sorted_entries,
+    check_depth_limit,
+    check_file_limit,
+    is_candidate_file_entry,
+    should_skip_dir,
+)
 from findfmt.traversal.devices import check_device_boundary, resolve_device
 from findfmt.traversal.filters import matches_filter
 from findfmt.traversal.ignore import (
@@ -17,9 +25,10 @@ from findfmt.traversal.ignore import (
     resolve_active_specs,
 )
 from findfmt.traversal.symlinks import init_visited_dirs, should_skip_symlink_dir
-from findfmt.traversal.tags import INTERPRETER_TAGS, can_skip_file_by_tags
+from findfmt.traversal.tags import can_skip_file_by_tags
 
 if TYPE_CHECKING:
+    import os
     from collections.abc import Callable, Iterator, Sequence
 
     import pathspec
@@ -47,29 +56,6 @@ __all__ = [
     "should_skip_symlink_dir",
     "yield_matching_items",
 ]
-
-
-def check_file_limit(count: int, file_limit: int | None) -> bool:
-    """Verify whether directory entry count does not exceed filelimit threshold."""
-    if file_limit is not None and file_limit < 0:
-        msg = f"file_limit must be non-negative, got {file_limit}"
-        raise TraversalError(msg)
-
-    return file_limit is None or count <= file_limit
-
-
-def check_depth_limit(current_depth: int, max_depth: int | None) -> bool:
-    """Determine whether traversal can descend further based on maximum depth."""
-    if max_depth is not None and max_depth < 0:
-        msg = f"max_depth must be non-negative, got {max_depth}"
-        raise TraversalError(msg)
-
-    return max_depth is None or current_depth < max_depth
-
-
-def should_skip_dir(dir_name: str, *, include_hidden: bool) -> bool:
-    """Determine if a directory should be skipped during descent."""
-    return dir_name == ".git" or bool(not include_hidden and dir_name.startswith("."))
 
 
 def _is_entry_excluded(  # noqa: PLR0913 - wide CLI/config signature
@@ -132,38 +118,6 @@ def filter_directory_entry(  # noqa: PLR0913 - wide CLI/config signature
     return entry_path, is_dir
 
 
-def is_candidate_file_entry(entry: os.DirEntry[str], *, follow_symlinks: bool) -> bool:
-    """Determine if a directory entry is a candidate file or unfollowed symlink."""
-    try:
-        return entry.is_file(follow_symlinks=follow_symlinks) or (
-            not follow_symlinks and entry.is_symlink() is True
-        )
-    except (OSError, RuntimeError):
-        return False
-
-
-def _can_skip_entry_by_tags(
-    entry: os.DirEntry[str] | None,
-    config: TraversalConfig,
-    *,
-    filename: str,
-) -> bool:
-    """Determine if a directory entry can be skipped early by filename/executable tags."""
-    if entry is not None and config.follow_symlinks:
-        with contextlib.suppress(OSError, RuntimeError):
-            if entry.is_symlink() is True:
-                return False
-
-    is_exec: bool | None = None
-    if entry is not None and (config.include_tags & INTERPRETER_TAGS):
-        with contextlib.suppress(OSError, RuntimeError):
-            is_exec = bool(
-                entry.stat(follow_symlinks=config.follow_symlinks).st_mode & 0o111,
-            )
-
-    return can_skip_file_by_tags(filename, config, is_executable=is_exec)
-
-
 def _inspect_entries(  # noqa: PLR0913 - wide CLI/config signature
     entries: Sequence[os.DirEntry[str]],
     config: TraversalConfig,
@@ -207,88 +161,7 @@ def _inspect_entries(  # noqa: PLR0913 - wide CLI/config signature
     return subdirs, False
 
 
-def _check_visited_or_memo(
-    dir_key: tuple[int, int],
-    visited: set[tuple[int, int]] | None,
-    memo: dict[tuple[int, int], bool] | None,
-) -> tuple[bool, bool]:
-    """Check if directory key is already visited or cached in memo."""
-    if visited is not None and dir_key in visited:
-        return True, False
-
-    if memo is not None and dir_key in memo:
-        return True, memo[dir_key]
-
-    return False, False
-
-
-def _scan_sorted_entries(
-    directory: Path,
-    memo: dict[tuple[int, int], bool],
-    dir_key: tuple[int, int],
-    *,
-    on_error: Callable[[OSError], None] | None = None,
-) -> list[os.DirEntry[str]] | None:
-    """Scan directory entries safely, closing handle and tracking memo on error."""
-    try:
-        with os.scandir(directory) as scan_it:
-            return sorted(scan_it, key=lambda e: e.name)
-    except (OSError, RuntimeError) as err:
-        memo[dir_key] = False
-        if isinstance(err, OSError) and on_error is not None:
-            if not err.filename:
-                err.filename = str(directory)
-
-            on_error(err)
-
-        return None
-
-
-def _has_matching_in_subdirs(  # noqa: PLR0913 - wide CLI/config signature
-    subdirs: Sequence[Path],
-    config: TraversalConfig,
-    specs: tuple[tuple[Path, PathSpecType], ...],
-    *,
-    root_dev: int | None,
-    current_depth: int,
-    matcher: PatternMatcher | None,
-    inherited_match: bool,
-    effective_root: Path,
-    visited: set[tuple[int, int]],
-    memo: dict[tuple[int, int], bool],
-    on_error: Callable[[OSError], None] | None = None,
-) -> bool:
-    """Recursively search discovered child subdirectories for matching files."""
-    for subdir in subdirs:
-        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else specs
-        child_inherit = bool(
-            matcher
-            and matcher.should_inherit_match(
-                subdir,
-                base_root=effective_root,
-                parent_inherited=inherited_match,
-            ),
-        )
-        if has_matching_descendants(
-            subdir,
-            config,
-            child_specs,
-            root_dev=root_dev,
-            current_depth=current_depth + 1,
-            matcher=matcher,
-            inherited_match=child_inherit,
-            base_root=effective_root,
-            visited=visited,
-            memo=memo,
-            on_error=on_error,
-        ):
-            return True
-
-    return False
-
-
-def _eval_descendants(  # noqa: PLR0913 - wide CLI/config signature
-    entries: Sequence[os.DirEntry[str]],
+def _step_prune_directory(  # noqa: PLR0913 - wide CLI/config signature
     directory: Path,
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -298,11 +171,26 @@ def _eval_descendants(  # noqa: PLR0913 - wide CLI/config signature
     matcher: PatternMatcher | None,
     inherited_match: bool,
     base_root: Path | None,
-    visited: set[tuple[int, int]],
-    memo: dict[tuple[int, int], bool],
+    active_visited: set[tuple[int, int]],
+    active_memo: dict[tuple[int, int], bool],
+    stack: list[_PruneFrame],
     on_error: Callable[[OSError], None] | None = None,
 ) -> bool:
-    """Evaluate entries directly and descend into subdirectories if needed."""
+    """Inspect a single directory for matching files or push its subdirs onto stack."""
+    try:
+        st = directory.stat()
+        dir_key = (st.st_dev, st.st_ino)
+    except (OSError, RuntimeError):
+        return False
+
+    cached, val = _check_visited_or_memo(dir_key, active_visited, active_memo)
+    if cached:
+        return val
+
+    entries = _scan_sorted_entries(directory, active_memo, dir_key, on_error=on_error)
+    if entries is None:
+        return False
+
     subdirs, found = _inspect_entries(
         entries,
         config,
@@ -313,23 +201,63 @@ def _eval_descendants(  # noqa: PLR0913 - wide CLI/config signature
         base_root=base_root,
     )
     if found:
+        active_memo[dir_key] = True
         return True
 
-    if not check_depth_limit(current_depth, config.max_depth):
+    if not check_depth_limit(current_depth, config.max_depth) or not subdirs:
+        active_memo[dir_key] = False
         return False
 
+    active_visited.add(dir_key)
     effective_root = base_root if base_root is not None else directory
-    return _has_matching_in_subdirs(
-        subdirs,
+    stack.append(
+        _PruneFrame(
+            dir_key=dir_key,
+            subdirs=subdirs,
+            specs=specs,
+            depth=current_depth,
+            inherited_match=inherited_match,
+            effective_root=effective_root,
+        ),
+    )
+    return False
+
+
+def _step_prune_subdir(  # noqa: PLR0913 - wide CLI/config signature
+    top: _PruneFrame,
+    config: TraversalConfig,
+    *,
+    root_dev: int | None,
+    matcher: PatternMatcher | None,
+    active_visited: set[tuple[int, int]],
+    active_memo: dict[tuple[int, int], bool],
+    stack: list[_PruneFrame],
+    on_error: Callable[[OSError], None] | None = None,
+) -> bool:
+    """Advance top prune frame by one subdirectory and return True on immediate match."""
+    subdir = top.subdirs[top.idx]
+    top.idx += 1
+    child_specs = load_child_specs(subdir, top.specs) if config.respect_gitignore else top.specs
+    child_inherit = bool(
+        matcher
+        and matcher.should_inherit_match(
+            subdir,
+            base_root=top.effective_root,
+            parent_inherited=top.inherited_match,
+        ),
+    )
+    return _step_prune_directory(
+        subdir,
         config,
-        specs,
+        child_specs,
         root_dev=root_dev,
-        current_depth=current_depth,
+        current_depth=top.depth + 1,
         matcher=matcher,
-        inherited_match=inherited_match,
-        effective_root=effective_root,
-        visited=visited,
-        memo=memo,
+        inherited_match=child_inherit,
+        base_root=top.effective_root,
+        active_visited=active_visited,
+        active_memo=active_memo,
+        stack=stack,
         on_error=on_error,
     )
 
@@ -349,43 +277,52 @@ def has_matching_descendants(  # noqa: PLR0913 - wide CLI/config signature
     on_error: Callable[[OSError], None] | None = None,
 ) -> bool:
     """Determine whether a directory or any subtrees contain matching files."""
-    try:
-        st = directory.stat()
-        dir_key = (st.st_dev, st.st_ino)
-    except (OSError, RuntimeError):
-        return False
-
-    cached, val = _check_visited_or_memo(dir_key, visited, memo)
-    if cached:
-        return val
-
     active_visited = visited if visited is not None else set()
     active_memo = memo if memo is not None else {}
-    entries = _scan_sorted_entries(directory, active_memo, dir_key, on_error=on_error)
-    if entries is None:
-        return False
+    stack: list[_PruneFrame] = []
 
-    active_visited.add(dir_key)
+    if _step_prune_directory(
+        directory,
+        config,
+        specs,
+        root_dev=root_dev,
+        current_depth=current_depth,
+        matcher=matcher,
+        inherited_match=inherited_match,
+        base_root=base_root,
+        active_visited=active_visited,
+        active_memo=active_memo,
+        stack=stack,
+        on_error=on_error,
+    ):
+        return True
+
     try:
-        result = _eval_descendants(
-            entries,
-            directory,
-            config,
-            specs,
-            root_dev=root_dev,
-            current_depth=current_depth,
-            matcher=matcher,
-            inherited_match=inherited_match,
-            base_root=base_root,
-            visited=active_visited,
-            memo=active_memo,
-            on_error=on_error,
-        )
-    finally:
-        active_visited.remove(dir_key)
+        while stack:
+            top = stack[-1]
+            if top.idx >= len(top.subdirs):
+                stack.pop()
+                active_visited.discard(top.dir_key)
+                active_memo[top.dir_key] = False
+            elif _step_prune_subdir(
+                top,
+                config,
+                root_dev=root_dev,
+                matcher=matcher,
+                active_visited=active_visited,
+                active_memo=active_memo,
+                stack=stack,
+                on_error=on_error,
+            ):
+                for frame in stack:
+                    active_memo[frame.dir_key] = True
 
-    active_memo[dir_key] = result
-    return result
+                return True
+    finally:
+        for frame in stack:
+            active_visited.discard(frame.dir_key)
+
+    return False
 
 
 def _should_skip_dir_prune(  # noqa: PLR0913 - wide CLI/config signature
@@ -418,24 +355,6 @@ def _should_skip_dir_prune(  # noqa: PLR0913 - wide CLI/config signature
         memo=prune_memo,
         on_error=on_error,
     )
-
-
-def _can_skip_candidate_file(  # noqa: PLR0913 - wide CLI/config signature
-    path: Path,
-    entry: os.DirEntry[str] | None,
-    config: TraversalConfig,
-    *,
-    base_root: Path,
-    prefix: Path | None,
-    matcher: PatternMatcher | None,
-    inherited_match: bool,
-) -> bool:
-    """Check if a candidate file can be skipped before full classification."""
-    rel_path = _resolve_relative(path, base_root, prefix=prefix)
-    if matcher and not matcher.matches_file(rel_path, inherited_match=inherited_match):
-        return True
-
-    return _can_skip_entry_by_tags(entry, config, filename=path.name)
 
 
 def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
@@ -482,11 +401,7 @@ def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
         ):
             continue
 
-        accum_size = (
-            accumulated_sizes.get(path, accumulated_sizes.get(path.resolve()))
-            if accumulated_sizes is not None
-            else None
-        )
+        accum_size = accumulated_sizes.get(path) if accumulated_sizes is not None else None
         info = classify_file(
             path,
             root_path=base_root,

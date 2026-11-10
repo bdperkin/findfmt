@@ -12,6 +12,7 @@ from findfmt.classifier import classify_file, compute_relative_prefix
 from findfmt.models import SortKey
 from findfmt.parsers import ingest_from_file
 from findfmt.sizes import calculate_accumulated_sizes
+from findfmt.traversal._pruning import _TraversalFrame
 from findfmt.traversal.boundaries import (
     check_depth_limit,
     check_file_limit,
@@ -100,72 +101,109 @@ def _scan_directory_entries(  # noqa: PLR0913 - wide CLI/config signature
     return subdirs, files
 
 
-def _traverse_subdirs(  # noqa: PLR0913 - wide CLI/config signature
-    subdirs: list[Path],
+def _should_enter_subdir(  # noqa: PLR0913 - wide CLI/config signature
+    subdir: Path,
     config: TraversalConfig,
-    specs: tuple[tuple[Path, PathSpecType], ...],
+    child_specs: tuple[tuple[Path, PathSpecType], ...],
     *,
     base_root: Path,
     visited: set[Path] | None,
+    root_dev: int | None,
+    child_depth: int,
+    matcher: PatternMatcher,
+    child_inherit: bool,
+    prune_memo: dict[tuple[int, int], bool],
+    on_error: Callable[[OSError], None] | None,
+) -> bool:
+    """Return True if subdir passes empty-pruning and symlink-loop checks."""
+    if (
+        config.dirs_only
+        and config.prune_empty
+        and not has_matching_descendants(
+            subdir,
+            config,
+            child_specs,
+            root_dev=root_dev,
+            current_depth=child_depth,
+            matcher=matcher,
+            inherited_match=child_inherit,
+            base_root=base_root,
+            memo=prune_memo,
+            on_error=on_error,
+        )
+    ):
+        return False
+
+    return not should_skip_symlink_dir(
+        subdir,
+        follow_symlinks=config.follow_symlinks,
+        visited=visited,
+    )
+
+
+def _enter_directory(  # noqa: PLR0913 - wide CLI/config signature
+    curr_dir: Path,
+    config: TraversalConfig,
+    specs: tuple[tuple[Path, PathSpecType], ...],
+    *,
+    stack: list[_TraversalFrame],
+    base_root: Path,
     prefix: Path | None,
     root_dev: int | None,
     current_depth: int,
     matcher: PatternMatcher,
     inherited_match: bool,
-    accumulated_sizes: dict[Path, int] | None = None,
-    prune_memo: dict[tuple[int, int], bool] | None = None,
-    on_error: Callable[[OSError], None] | None = None,
+    accumulated_sizes: dict[Path, int] | None,
+    prune_memo: dict[tuple[int, int], bool],
+    on_error: Callable[[OSError], None] | None,
 ) -> Iterator[FileInfo]:
-    """Descend and traverse discovered subdirectories."""
-    if not check_depth_limit(current_depth, config.max_depth):
+    """Scan a directory, yield immediate items if pre-order, and push descent frame."""
+    subdirs, files = _scan_directory_entries(
+        curr_dir,
+        config,
+        specs,
+        root_dev=root_dev,
+        matcher=matcher,
+        base_root=base_root,
+        on_error=on_error,
+    )
+    targets = subdirs if config.dirs_only else files
+    current_items = yield_matching_items(
+        targets,
+        config,
+        specs,
+        base_root=base_root,
+        prefix=prefix,
+        root_dev=root_dev,
+        current_depth=current_depth,
+        matcher=matcher,
+        inherited_match=inherited_match,
+        accumulated_sizes=accumulated_sizes,
+        prune_memo=prune_memo,
+        on_error=on_error,
+    )
+    can_descend = check_depth_limit(current_depth, config.max_depth) and bool(subdirs)
+    if config.dirs_first and can_descend:
+        stack.append(
+            _TraversalFrame(
+                subdirs=subdirs,
+                specs=specs,
+                depth=current_depth,
+                inherited_match=inherited_match,
+                deferred_items=current_items,
+            ),
+        )
         return
 
-    for subdir in subdirs:
-        child_specs = load_child_specs(subdir, specs) if config.respect_gitignore else specs
-        child_inherit = matcher.should_inherit_match(
-            subdir,
-            base_root=base_root,
-            parent_inherited=inherited_match,
-        )
-        if (
-            config.dirs_only
-            and config.prune_empty
-            and not has_matching_descendants(
-                subdir,
-                config,
-                child_specs,
-                root_dev=root_dev,
-                current_depth=current_depth + 1,
-                matcher=matcher,
-                inherited_match=child_inherit,
-                base_root=base_root,
-                memo=prune_memo,
-                on_error=on_error,
-            )
-        ):
-            continue
-
-        if should_skip_symlink_dir(
-            subdir,
-            follow_symlinks=config.follow_symlinks,
-            visited=visited,
-        ):
-            continue
-
-        yield from traverse_directory(
-            subdir,
-            config,
-            active_specs=child_specs,
-            base_root=base_root,
-            visited_dirs=visited,
-            prefix=prefix,
-            root_dev=root_dev,
-            current_depth=current_depth + 1,
-            matcher=matcher,
-            inherited_match=child_inherit,
-            accumulated_sizes=accumulated_sizes,
-            prune_memo=prune_memo,
-            on_error=on_error,
+    yield from current_items
+    if can_descend:
+        stack.append(
+            _TraversalFrame(
+                subdirs=subdirs,
+                specs=specs,
+                depth=current_depth,
+                inherited_match=inherited_match,
+            ),
         )
 
 
@@ -185,7 +223,7 @@ def traverse_directory(  # noqa: PLR0913 - wide CLI/config signature
     prune_memo: dict[tuple[int, int], bool] | None = None,
     on_error: Callable[[OSError], None] | None = None,
 ) -> Iterator[FileInfo]:
-    """Recursively traverse a directory hierarchy honoring .gitignore, filters, and boundaries."""
+    """Iteratively traverse a directory hierarchy honoring .gitignore, filters, and boundaries."""
     check_depth_limit(0, config.max_depth)
     check_file_limit(0, config.file_limit)
     if base_root is None:
@@ -212,21 +250,12 @@ def traverse_directory(  # noqa: PLR0913 - wide CLI/config signature
     )
     active_prune_memo = prune_memo if prune_memo is not None else {}
 
-    subdirs, files = _scan_directory_entries(
+    stack: list[_TraversalFrame] = []
+    yield from _enter_directory(
         root,
         config,
         specs,
-        root_dev=effective_dev,
-        matcher=active_matcher,
-        base_root=effective_base,
-        on_error=on_error,
-    )
-
-    targets = subdirs if config.dirs_only else files
-    current_items = yield_matching_items(
-        targets,
-        config,
-        specs,
+        stack=stack,
         base_root=effective_base,
         prefix=prefix,
         root_dev=effective_dev,
@@ -237,28 +266,54 @@ def traverse_directory(  # noqa: PLR0913 - wide CLI/config signature
         prune_memo=active_prune_memo,
         on_error=on_error,
     )
-    descendants = _traverse_subdirs(
-        subdirs,
-        config,
-        specs,
-        base_root=effective_base,
-        visited=active_visited,
-        prefix=prefix,
-        root_dev=effective_dev,
-        current_depth=current_depth,
-        matcher=active_matcher,
-        inherited_match=inherited_match,
-        accumulated_sizes=accumulated_sizes,
-        prune_memo=active_prune_memo,
-        on_error=on_error,
-    )
 
-    if config.dirs_first:
-        yield from descendants
-        yield from current_items
-    else:
-        yield from current_items
-        yield from descendants
+    while stack:
+        top = stack[-1]
+        if top.idx >= len(top.subdirs):
+            stack.pop()
+            if top.deferred_items is not None:
+                yield from top.deferred_items
+
+            continue
+
+        subdir = top.subdirs[top.idx]
+        top.idx += 1
+        child_specs = load_child_specs(subdir, top.specs) if config.respect_gitignore else top.specs
+        child_inherit = active_matcher.should_inherit_match(
+            subdir,
+            base_root=effective_base,
+            parent_inherited=top.inherited_match,
+        )
+        if not _should_enter_subdir(
+            subdir,
+            config,
+            child_specs,
+            base_root=effective_base,
+            visited=active_visited,
+            root_dev=effective_dev,
+            child_depth=top.depth + 1,
+            matcher=active_matcher,
+            child_inherit=child_inherit,
+            prune_memo=active_prune_memo,
+            on_error=on_error,
+        ):
+            continue
+
+        yield from _enter_directory(
+            subdir,
+            config,
+            child_specs,
+            stack=stack,
+            base_root=effective_base,
+            prefix=prefix,
+            root_dev=effective_dev,
+            current_depth=top.depth + 1,
+            matcher=active_matcher,
+            inherited_match=child_inherit,
+            accumulated_sizes=accumulated_sizes,
+            prune_memo=active_prune_memo,
+            on_error=on_error,
+        )
 
 
 def _classify_root_kind(resolved_root: Path, *, follow_symlinks: bool) -> tuple[bool, bool]:
