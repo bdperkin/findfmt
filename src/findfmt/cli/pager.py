@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import codecs
 import contextlib
-import inspect
 import io
 import os
 import sys
-from typing import TYPE_CHECKING, Any, Literal, TextIO, cast
+from typing import TYPE_CHECKING, Any, TextIO
 
 if sys.version_info >= (3, 12):
     from typing import override
@@ -17,7 +16,6 @@ else:
 
 import typer
 import typer.core
-from typer import rich_utils
 
 from findfmt.cli.file_config import extract_config_args, resolve_and_load_config
 from findfmt.cli.signals import (
@@ -26,12 +24,11 @@ from findfmt.cli.signals import (
     is_broken_pipe_wrapper,
     trap_cli_signals,
 )
-from findfmt.cli.terminal import PagerController, get_console, is_color_enabled
+from findfmt.cli.terminal import PagerController, is_color_enabled
 from findfmt.i18n import set_locale
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
-    from types import FrameType
+    from collections.abc import Generator, Mapping, Sequence
 
     from rich.pager import Pager
     from typer.core import _click
@@ -105,60 +102,11 @@ def _extract_from_context(ctx: object | None) -> list[str] | None:
     return None
 
 
-def _extract_from_frame_args(frame: FrameType) -> list[str] | None:
-    """Extract argv from argv, args_list, or args in frame locals.
-
-    Args:
-        frame: Call stack frame to inspect.
-
-    Returns:
-        List of argument strings, or None if not found.
-    """
-    for key in ("argv", "args_list", "args"):
-        cand = frame.f_locals.get(key)
-        if isinstance(cand, list | tuple) and cand and all(isinstance(x, str) for x in cand):
-            return [str(x) for x in cand]
-
-    return None
-
-
-def _extract_from_frame(frame: FrameType | None) -> list[str] | None:
-    """Extract argv candidate from single call stack frame locals.
-
-    Args:
-        frame: Call stack frame to inspect.
-
-    Returns:
-        List of argument strings, or None if not found.
-    """
-    if frame is None:
-        return None
-
-    return _extract_from_context(frame.f_locals.get("ctx")) or _extract_from_frame_args(frame)
-
-
-def _extract_from_stack() -> list[str] | None:
-    """Walk caller frames to locate CLI arguments.
-
-    Returns:
-        List of argument strings, or None if not found.
-    """
-    frame = inspect.currentframe()
-    while frame:
-        cand = _extract_from_frame(frame)
-        if cand is not None:
-            return cand
-
-        frame = frame.f_back
-
-    return None
-
-
 def _extract_raw_args(
     ctx: object = None,
     args: Sequence[str] | None = None,
 ) -> list[str]:
-    """Extract raw argument string list from sequence, context, or call stack.
+    """Extract raw argument string list from sequence, context, or sys.argv.
 
     Args:
         ctx: Click/Typer context, if available.
@@ -170,7 +118,7 @@ def _extract_raw_args(
     if args is not None:
         return list(args)
 
-    cand = _extract_from_context(ctx) or _extract_from_stack()
+    cand = _extract_from_context(ctx)
     if cand is not None:
         return cand
 
@@ -272,6 +220,26 @@ def display_with_pager(  # noqa: PLR0913 - wide CLI/config signature
         handle_broken_pipe(target_stream)
 
 
+@contextlib.contextmanager
+def _help_color_env(*, color_on: bool) -> Generator[None]:
+    """Configure environment variables for Rich help color rendering without global mutation."""
+    keys = ("TTY_COMPATIBLE", "NO_COLOR", "TERM")
+    saved = {key: os.environ.get(key) for key in keys}
+    os.environ["TTY_COMPATIBLE"] = "1" if color_on else "0"
+    os.environ["NO_COLOR"] = "" if color_on else "1"
+    if color_on and os.environ.get("TERM", "").strip().lower() in ("", "dumb", "unknown"):
+        os.environ["TERM"] = "ansi"
+
+    try:
+        yield
+    finally:
+        for key, val in saved.items():
+            if val is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = val
+
+
 def _capture_help_output(
     cmd: typer.core.TyperCommand,
     ctx: _click.Context,
@@ -289,31 +257,9 @@ def _capture_help_output(
     """
     color_flag = resolve_color_flag(ctx)
     color_on = is_color_enabled(sys.stdout, force_color=color_flag)
-
-    orig_force = getattr(rich_utils, "FORCE_TERMINAL", None)
-    orig_cs = getattr(rich_utils, "COLOR_SYSTEM", None)
-
-    try:
-        if color_on:
-            rich_utils.FORCE_TERMINAL = True
-            real_console = get_console(sys.stdout, force_color=color_flag)
-            cs = real_console.color_system
-            if cs in ("standard", "256", "truecolor", "windows"):
-                rich_utils.COLOR_SYSTEM = cast(
-                    "Literal['auto', 'standard', '256', 'truecolor', 'windows']",
-                    cs,
-                )
-            else:
-                rich_utils.COLOR_SYSTEM = "standard"
-        else:
-            rich_utils.FORCE_TERMINAL = False
-
-        buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
-            typer.core.TyperCommand.format_help(cmd, ctx, formatter)
-    finally:
-        rich_utils.FORCE_TERMINAL = orig_force
-        rich_utils.COLOR_SYSTEM = orig_cs
+    buf = io.StringIO()
+    with _help_color_env(color_on=color_on), contextlib.redirect_stdout(buf):
+        typer.core.TyperCommand.format_help(cmd, ctx, formatter)
 
     content = buf.getvalue()
     if not content and formatter.getvalue():
@@ -368,6 +314,7 @@ class FindfmtCommand(typer.core.TyperCommand):
         wrapper_defaults = dict(existing_defaults) if isinstance(existing_defaults, dict) else {}
         merged_defaults = {**wrapper_defaults, **defaults}
 
+        extra["obj"] = {"argv": list(args)}
         extra["default_map"] = merged_defaults
         ctx = super().make_context(info_name, args, parent=parent, **extra)
         for key in wrapper_defaults:

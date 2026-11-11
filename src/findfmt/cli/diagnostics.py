@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import inspect
 import platform
 import shutil
 import subprocess
@@ -122,23 +121,6 @@ def _is_in_context(ctx: object) -> bool:
     return False
 
 
-def _is_in_frames() -> bool:
-    """Check if verbose output or diagnostics was requested in caller frames.
-
-    Returns:
-        True if requested in caller frames, False otherwise.
-    """
-    frame = inspect.currentframe()
-    while frame:
-        opts = frame.f_locals.get("opts")
-        if isinstance(opts, dict) and (opts.get("verbose") or opts.get("diagnostics")):
-            return True
-
-        frame = frame.f_back
-
-    return False
-
-
 def _is_verbose_requested(ctx: object = None) -> bool:
     """Check if verbose output or diagnostics was requested.
 
@@ -149,9 +131,6 @@ def _is_verbose_requested(ctx: object = None) -> bool:
         True if verbose or diagnostics is requested, False otherwise.
     """
     if ctx is not None and _is_in_context(ctx):
-        return True
-
-    if _is_in_frames():
         return True
 
     return "--verbose" in sys.argv or "--diagnostics" in sys.argv

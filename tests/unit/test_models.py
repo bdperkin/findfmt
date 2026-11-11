@@ -1,6 +1,10 @@
 from pathlib import Path
+from typing import Any
+
+import pytest
 
 from findfmt.models import FileInfo, SortKey, TraversalConfig
+from findfmt.traversal import find_files
 
 
 def test_sort_key_enum() -> None:
@@ -224,3 +228,39 @@ def test_file_info_to_dict():
     assert d_meta["mtime"] == 1700000000.0
     assert d_meta["ctime"] == 1700000001.0
     assert d_meta["indicator"] == "@"
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "match_pattern"),
+    [
+        ({"max_depth": -1}, "max_depth must be non-negative"),
+        ({"file_limit": -5}, "file_limit must be non-negative"),
+        (
+            {"dirs_first": True, "files_first": True},
+            "Cannot specify both dirs_first and files_first",
+        ),
+        ({"output_format": "bogus"}, "Unsupported output format"),
+    ],
+)
+def test_traversal_config_validation(kwargs, match_pattern):
+    with pytest.raises(ValueError, match=match_pattern):
+        TraversalConfig(**kwargs)
+
+
+def test_traversal_config_normalises_tags(tmp_path: Path) -> None:
+    py_file = tmp_path / "script.py"
+    py_file.write_text("print('ok')\n", encoding="utf-8")
+
+    raw_include: Any = ["Python"]
+    raw_exclude: Any = ["Ruby"]
+    cfg = TraversalConfig(
+        root_paths=(tmp_path,),
+        include_tags=raw_include,
+        exclude_tags=raw_exclude,
+    )
+    assert cfg.include_tags == frozenset({"python"})
+    assert cfg.exclude_tags == frozenset({"ruby"})
+
+    matched = list(find_files(cfg))
+    assert len(matched) == 1
+    assert matched[0].path == py_file.resolve()
