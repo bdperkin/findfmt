@@ -17,7 +17,8 @@
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
-> its milestone; closed #372, epic #336, #331, #342, #365, and epic #346)
+> its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, and epic #346, and released
+> v1.2.1 and closed its milestone)
 
 ______________________________________________________________________
 
@@ -1517,8 +1518,8 @@ and #469). Its remaining traversal and localization issues moved by theme: #320 
 v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 
 v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, v1.1.3 and v1.1.4 on
-2026-11-08, v1.1.5 on 2026-11-09, and v1.2.0 on 2026-11-10 (PyPI, GHCR, and GitHub Releases), and
-their milestones are closed.
+2026-11-08, v1.1.5 on 2026-11-09, v1.2.0 on 2026-11-10, and v1.2.1 on 2026-11-11 (PyPI, GHCR, and
+GitHub Releases), and their milestones are closed.
 
 Realigned on 2026-11-09 ahead of v1.2.0: pulled #366 into v1.2.0, closed #311 and #474 as not
 planned, promoted the Hybrid Python-Rust engine track (#576-#598) from v1.8.0-v1.8.4 to
@@ -1529,7 +1530,6 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.1          | Depth-Safe Traversal, Pager Streaming & Dynamic Help                                                               | 2           |
 | v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 7           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |

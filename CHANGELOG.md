@@ -7,6 +7,33 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-11
+
+### Features
+
+- *(cli)* Dynamically generate `--help-all` output from Click command parameter introspection
+  (`get_command(app)`), grouping options by `rich_help_panel` and formatting all option flags,
+  negative toggles, and `Choice` values directly from the registered CLI schema (#365, #346).
+- *(traversal)* Replace recursive directory traversal (`_traverse_subdirs`), `--prune` descendant
+  scanning (`has_matching_descendants`), and `--du` size calculation (`calculate_accumulated_sizes`)
+  with iterative explicit-stack implementations so deep directory trees never hit `RecursionError`
+  (#372, #336).
+
+### Performance
+
+- *(cli)* Stream formatted output directly to interactive TTYs via `_StreamingPagerStream` until
+  output exceeds one screenful before engaging the pager, preserving already-emitted lines on
+  `SIGINT` (#331).
+
+### Changed
+
+- *(cli)* Pass `click.Context` (`ctx.obj["argv"]`) explicitly to eager callbacks and help rendering
+  instead of walking caller stack frames via `inspect.currentframe()`, and avoid mutating
+  `typer.rich_utils` module globals during `--help` capture (#342).
+- *(models)* Validate `TraversalConfig` in `__post_init__` (rejecting negative `max_depth` and
+  `file_limit`, conflicting `dirs_first`/`files_first`, and unknown `output_format` values) and
+  normalize `include_tags` and `exclude_tags` into lowercase `frozenset[str]` sets (#342).
+
 ## [1.2.0] - 2026-11-10
 
 ### Fixed
@@ -722,4 +749,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.1.4]: https://github.com/bdperkin/findfmt/compare/v1.1.3...v1.1.4
 [1.1.5]: https://github.com/bdperkin/findfmt/compare/v1.1.4...v1.1.5
 [1.2.0]: https://github.com/bdperkin/findfmt/compare/v1.1.5...v1.2.0
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.2.0...HEAD
+[1.2.1]: https://github.com/bdperkin/findfmt/compare/v1.2.0...v1.2.1
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.2.1...HEAD
