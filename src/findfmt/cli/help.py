@@ -293,8 +293,7 @@ def _format_option_spec(param: _click.Parameter) -> str:
     secondary_opts: Sequence[str] = param.secondary_opts
     spec = f"{primary} / {', '.join(_order_flags(secondary_opts))}" if secondary_opts else primary
     if not getattr(param, "is_flag", False):
-        type_name = param.type.name.split()[0].lower()
-        return f"{spec} <{type_name}>"
+        return f"{spec} <value>"
 
     return spec
 
@@ -303,9 +302,10 @@ def _format_option_description(param: _click.Parameter) -> str:
     """Format the help description and choice list for a Click option parameter."""
     raw_help = str(getattr(param, "help", None) or "")
     description = _(raw_help).replace("-rw-r--r--", "drwxr-xr-x")
-    choices = getattr(param.type, "choices", None)
+    type_source = getattr(param, "type", None) or getattr(param, "type_descriptor", None)
+    choices = getattr(type_source, "choices", None)
     if choices is not None:
-        choices_str = ", ".join(str(choice) for choice in choices)
+        choices_str = ", ".join(str(getattr(choice, "value", choice)) for choice in choices)
         return f"{description} (choices: {choices_str})"
 
     return description

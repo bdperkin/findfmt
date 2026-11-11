@@ -454,9 +454,10 @@ def test_help_all_generated_from_click() -> None:
         for flag in (*param.opts, *param.secondary_opts):
             assert flag in manual, f"Option {param.name!r} flag {flag!r} missing from --help-all"
 
-        choices = getattr(param.type, "choices", None)
+        type_source = getattr(param, "type", None) or getattr(param, "type_descriptor", None)
+        choices = getattr(type_source, "choices", None)
         if choices is not None:
-            expected_choices = ", ".join(str(c) for c in choices)
+            expected_choices = ", ".join(str(getattr(c, "value", c)) for c in choices)
             assert f"(choices: {expected_choices})" in manual
 
     assert "time (mtime)" in manual
