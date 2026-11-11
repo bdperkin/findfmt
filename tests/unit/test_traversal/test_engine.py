@@ -10,7 +10,11 @@ from findfmt.exceptions import ParserError, TraversalError
 from findfmt.models import FileInfo, TraversalConfig
 from findfmt.parsers import ingest_from_file
 from findfmt.sizes import calculate_accumulated_sizes
-from findfmt.traversal.boundaries import has_matching_descendants
+from findfmt.traversal.boundaries import (
+    check_depth_limit,
+    check_file_limit,
+    has_matching_descendants,
+)
 from findfmt.traversal.engine import (
     _scan_directory_entries,
     _traverse_single_root,
@@ -310,10 +314,10 @@ def test_exported_exceptions_are_raised_or_removed(tmp_path: Path) -> None:
     assert "ParserError" in findfmt_exceptions.__all__
 
     with pytest.raises(TraversalError, match="max_depth must be non-negative"):
-        list(find_files(TraversalConfig(root_paths=(tmp_path,), max_depth=-1)))
+        check_depth_limit(0, -1)
 
     with pytest.raises(TraversalError, match="file_limit must be non-negative"):
-        list(find_files(TraversalConfig(root_paths=(tmp_path,), file_limit=-1)))
+        check_file_limit(0, -1)
 
     missing_listing = tmp_path / "missing_manifest.txt"
     with pytest.raises(ParserError, match="Cannot read input"):

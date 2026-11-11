@@ -5,9 +5,36 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+from findfmt.exceptions import UnsupportedFormatError
+from findfmt.formatters.base import OutputFormat
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 __all__ = ["FileInfo", "SortKey", "TraversalConfig"]
+
+
+def _validate_non_negative(name: str, value: int | None) -> None:
+    """Validate that an optional integer setting is non-negative."""
+    if value is not None and value < 0:
+        msg = f"{name} must be non-negative, got {value}"
+        raise ValueError(msg)
+
+
+def _resolve_output_format(fmt_val: OutputFormat | str) -> OutputFormat:
+    """Validate and resolve output format into an OutputFormat enum member."""
+    try:
+        return OutputFormat(str(fmt_val).strip().lower())
+    except ValueError as err:
+        valid = ", ".join(fmt.value for fmt in OutputFormat)
+        raise UnsupportedFormatError(str(fmt_val), valid) from err
+
+
+def _normalize_tags(tags: Iterable[str]) -> frozenset[str]:
+    """Normalize an iterable of tag strings into a lowercase frozenset."""
+    return frozenset(str(tag).strip().lower() for tag in tags)
 
 
 class SortKey(StrEnum):
@@ -232,3 +259,15 @@ class TraversalConfig:
     hyperlink_authority: str | None = None
     csv_safe: bool = False
     locale: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate configuration bounds, conflicting flags, format, and normalize tags."""
+        _validate_non_negative("max_depth", self.max_depth)
+        _validate_non_negative("file_limit", self.file_limit)
+        if self.dirs_first and self.files_first:
+            msg = "Cannot specify both dirs_first and files_first"
+            raise ValueError(msg)
+
+        object.__setattr__(self, "output_format", _resolve_output_format(self.output_format))
+        object.__setattr__(self, "include_tags", _normalize_tags(self.include_tags))
+        object.__setattr__(self, "exclude_tags", _normalize_tags(self.exclude_tags))

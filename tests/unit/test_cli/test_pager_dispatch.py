@@ -27,7 +27,6 @@ from typer.testing import CliRunner
 from findfmt.cli import app
 from findfmt.cli.pager import (
     FindfmtCommand,
-    _extract_from_frame,
     _extract_raw_args,
     display_with_pager,
     resolve_color_flag,
@@ -80,46 +79,8 @@ def test_extract_raw_args_explicit_and_context(monkeypatch: pytest.MonkeyPatch) 
     assert _extract_raw_args(mock_ctx_invalid) == ["--ctx-fallback"]
 
 
-def test_extract_raw_args_caller_frames() -> None:
-    """Verify extraction checks caller frame locals when ctx.obj is not present."""
-    assert _extract_from_frame(None) is None
-    mock_ctx = MagicMock()
-    mock_ctx.obj = None
-
-    frame_ctx = MagicMock()
-    frame_ctx.obj = {"argv": ["--from-frame-ctx"]}
-
-    def frame_helper_ctx() -> list[str]:
-        ctx = frame_ctx  # noqa: F841 - bound for frame.f_locals check
-        return _extract_raw_args()
-
-    assert frame_helper_ctx() == ["--from-frame-ctx"]
-
-    frame_ctx_no_argv = MagicMock()
-    frame_ctx_no_argv.obj = {"no_argv": 1}
-
-    def frame_helper_no_argv() -> list[str]:
-        ctx = frame_ctx_no_argv  # noqa: F841 - bound for frame.f_locals check
-        argv = ("--from-argv",)  # noqa: F841 - bound for frame.f_locals check
-        return _extract_raw_args()
-
-    assert frame_helper_no_argv() == ["--from-argv"]
-
-    def frame_helper_argv() -> list[str]:
-        argv = ("--frame-argv-1", "--frame-argv-2")  # noqa: F841 - bound for frame.f_locals check
-        return _extract_raw_args()
-
-    assert frame_helper_argv() == ["--frame-argv-1", "--frame-argv-2"]
-
-    def frame_helper_args_list() -> list[str]:
-        args_list = ["--frame-args-list"]  # noqa: F841 - bound for frame.f_locals check
-        return _extract_raw_args()
-
-    assert frame_helper_args_list() == ["--frame-args-list"]
-
-
 def test_extract_raw_args_fallback(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify extraction falls back to sys.argv when no args or frames match."""
+    """Verify extraction falls back to sys.argv when no args or context match."""
     monkeypatch.setattr(sys, "argv", ["findfmt", "--sys-argv-flag"])
     assert _extract_raw_args() == ["--sys-argv-flag"]
 

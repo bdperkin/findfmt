@@ -11,7 +11,12 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
+from typing import Any
+
+import pytest
+import typer.core
 from rich.pager import Pager
+from typer import rich_utils
 from typer.testing import CliRunner
 
 from findfmt.cli import PagerController, app
@@ -254,3 +259,29 @@ def test_cli_clicolor_force_enables_ansi(sample_repo: Path) -> None:
     assert res.exit_code == 0
     assert "findfmt Files" in res.stdout
     assert "\x1b[" in res.stdout
+
+
+def test_pager_does_not_mutate_rich_utils_globals(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify help rendering does not mutate typer.rich_utils module globals (#342)."""
+    before = {k: v for k, v in vars(rich_utils).items() if not k.startswith("__")}
+    during_snapshots: list[dict[str, object]] = []
+    orig_format_help = typer.core.TyperCommand.format_help
+
+    def _spy_format_help(self: Any, ctx: Any, formatter: Any) -> None:
+        during_snapshots.append(
+            {k: v for k, v in vars(rich_utils).items() if not k.startswith("__")},
+        )
+        orig_format_help(self, ctx, formatter)
+
+    monkeypatch.setattr(typer.core.TyperCommand, "format_help", _spy_format_help)
+
+    runner = CliRunner()
+    for args in (["--help"], ["--help", "--color"], ["--help", "--no-color"]):
+        res = runner.invoke(app, args)
+        assert res.exit_code == 0
+
+    after = {k: v for k, v in vars(rich_utils).items() if not k.startswith("__")}
+    assert after == before
+    assert during_snapshots
+    for snap in during_snapshots:
+        assert snap == before

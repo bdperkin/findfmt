@@ -463,3 +463,22 @@ def test_fallback_version_synchronization() -> None:
         for m in dev_literal.finditer(p.read_text(encoding="utf-8"))
     ]
     assert src_matches == [("src/findfmt/__init__.py", expected_fallback)]
+
+
+def test_no_stack_frame_introspection() -> None:
+    """Verify no module in src/findfmt uses inspect or sys._getframe (#342)."""
+    pkg_root = Path(findfmt.__file__).resolve().parent
+    forbidden_attrs = {"currentframe", "stack", "_getframe"}
+    offenders: list[str] = []
+
+    for file_path in sorted(pkg_root.rglob("*.py")):
+        tree = ast.parse(file_path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import) and any(a.name == "inspect" for a in node.names):
+                offenders.append(f"{file_path.relative_to(pkg_root)}:{node.lineno}:import inspect")
+            elif isinstance(node, ast.ImportFrom) and node.module == "inspect":
+                offenders.append(f"{file_path.relative_to(pkg_root)}:{node.lineno}:from inspect")
+            elif isinstance(node, ast.Attribute) and node.attr in forbidden_attrs:
+                offenders.append(f"{file_path.relative_to(pkg_root)}:{node.lineno}:.{node.attr}")
+
+    assert not offenders, f"Disallowed stack frame introspection in src/findfmt: {offenders}"
