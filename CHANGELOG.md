@@ -22,14 +22,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Performance
 
 - *(cli)* Stream formatted output directly to interactive TTYs via `_StreamingPagerStream` until
-  output exceeds one screenful before engaging the pager, preserving already-emitted lines on
+  output exceeds the terminal height before engaging the pager, preserving already-emitted lines on
   `SIGINT` (#331).
 
 ### Changed
 
 - *(cli)* Pass `click.Context` (`ctx.obj["argv"]`) explicitly to eager callbacks and help rendering
   instead of walking caller stack frames via `inspect.currentframe()`, and avoid mutating
-  `typer.rich_utils` module globals during `--help` capture (#342).
+  `typer.rich_utils` module-level attributes during `--help` capture (#342).
 - *(models)* Validate `TraversalConfig` in `__post_init__` (rejecting negative `max_depth` and
   `file_limit`, conflicting `dirs_first`/`files_first`, and unknown `output_format` values) and
   normalize `include_tags` and `exclude_tags` into lowercase `frozenset[str]` sets (#342).
