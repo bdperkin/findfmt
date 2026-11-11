@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 200 Closed Issues | 107 Actionable Open Tasks | 32 Active Umbrella Epics **Last
+> **Tracking:** 202 Closed Issues | 106 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -17,7 +17,7 @@
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
-> its milestone; closed #372, epic #336, #331, and #342)
+> its milestone; closed #372, epic #336, #331, #342, #365, and epic #346)
 
 ______________________________________________________________________
 
@@ -625,8 +625,14 @@ Note: Ordered chronologically by completion date.
   buffered for the pager, so nothing streams (Closed: 2026-11-10 via PR
   [#613](https://github.com/bdperkin/findfmt/pull/613))
 - [x] **[#342](https://github.com/bdperkin/findfmt/issues/342)** - refactor(cli): pass click.Context
-  explicitly instead of walking stack frames; validate TraversalConfig (Closed: 2026-11-10 via PR
-  [#614](https://github.com/bdperkin/findfmt/pull/614))
+  explicitly instead of walking stack frames; validate TraversalConfig (Closed: 2026-11-11 via PR
+  [#615](https://github.com/bdperkin/findfmt/pull/615))
+- [x] **[#365](https://github.com/bdperkin/findfmt/issues/365)** - [CLI] Dynamically generate
+  --help-all output directly from Click command introspection (Closed: 2026-11-11 via PR
+  [#616](https://github.com/bdperkin/findfmt/pull/616))
+- [x] **[#346](https://github.com/bdperkin/findfmt/issues/346)** - [Epic] CLI Documentation
+  Accuracy, Dynamic --help-all Generation, and Option Validation (Closed: 2026-11-11 via PR
+  [#616](https://github.com/bdperkin/findfmt/pull/616))
 
 ______________________________________________________________________
 
@@ -1017,10 +1023,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.3. Future / Low-Priority / Backlog
 
-- [ ] **[#365](https://github.com/bdperkin/findfmt/issues/365)** - [CLI] Dynamically generate
-  --help-all output directly from Click command introspection *(Rank: 72 | Epic:
-  [[Epic] CLI Documentation Accuracy, Dynamic --help-all Generation, and Option Validation](https://github.com/bdperkin/findfmt/issues/346)
-  | Milestone: v1.2.1)* - **Value:** Low | **Effort:** M - **Rationale:** Prevents help drift.
 - [ ] **[#340](https://github.com/bdperkin/findfmt/issues/340)** - feat(cli): improve config
   validation diagnostics (all errors, did-you-mean, reprs, alias collisions) *(Rank: 73 | Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
@@ -1335,9 +1337,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are
 linked natively on GitHub.
 
-- [ ] **[#346](https://github.com/bdperkin/findfmt/issues/346)** - [Epic] CLI Documentation
-  Accuracy, Dynamic --help-all Generation, and Option Validation *(Milestone: v1.2.1 | Open
-  sub-issues: 1)* - [#365](https://github.com/bdperkin/findfmt/issues/365)
 - [ ] **[#348](https://github.com/bdperkin/findfmt/issues/348)** - [Epic] Core Refactoring & API
   Hygiene Cleanup *(Milestone: v1.2.2 | Open sub-issues: 1)* -
   [#355](https://github.com/bdperkin/findfmt/issues/355)
