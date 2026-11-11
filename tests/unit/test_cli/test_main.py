@@ -9,6 +9,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
+from typer.main import get_command
 from typer.testing import CliRunner
 
 from findfmt.cli import (
@@ -433,6 +434,31 @@ def test_negative_numeric_options_rejected(tmp_path: Path) -> None:
 
     assert "extended runtime diagnostics" in str(HELP_VERBOSE)
     assert "verbose output" not in str(HELP_VERBOSE).lower()
-    assert "Include extended runtime diagnostics with --version." in get_help_all()
+    assert str(HELP_VERBOSE) in get_help_all()
     assert resolve_pager_flag.__doc__ is not None
     assert "-P" not in resolve_pager_flag.__doc__
+
+
+def test_help_all_generated_from_click() -> None:
+    """Verify --help-all dynamically includes every Click option, flag, and Choice value."""
+    manual = get_help_all()
+    command = get_command(app)
+    ctx = command.context_class(command)
+
+    options = [
+        param for param in command.get_params(ctx) if any(opt.startswith("-") for opt in param.opts)
+    ]
+    assert options
+
+    for param in options:
+        for flag in (*param.opts, *param.secondary_opts):
+            assert flag in manual, f"Option {param.name!r} flag {flag!r} missing from --help-all"
+
+        type_source = getattr(param, "type", None) or getattr(param, "type_descriptor", None)
+        choices = getattr(type_source, "choices", None)
+        if choices is not None:
+            expected_choices = ", ".join(str(getattr(c, "value", c)) for c in choices)
+            assert f"(choices: {expected_choices})" in manual
+
+    assert "time (mtime)" in manual
+    assert "--csv-safe / --no-csv-safe" in manual

@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+import importlib
+from typing import TYPE_CHECKING
+
 import typer
+from typer.main import get_command
 
 from findfmt.classifier import get_known_tags
 from findfmt.cli.diagnostics import get_version
 from findfmt.cli.pager import display_with_pager
 from findfmt.i18n import _
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from typer.core import _click
 
 __all__ = [
     "APP_HELP",
@@ -229,133 +238,103 @@ HELP_SHOW_CONFIG = _("Display resolved configuration settings and exit.")
 HELP_LOCALE = _("Explicitly set locale for translations and display (e.g. 'en_US', 'es', 'C').")
 
 
+_DEFAULT_PANEL = "Help & Diagnostics"
+_PANEL_ORDER: tuple[str, ...] = (
+    "Tag Filtering",
+    "Traversal Controls",
+    "Output Formatting",
+    _DEFAULT_PANEL,
+)
+
+_MANUAL_FOOTER = (
+    "Command Wrappers:\n"
+    "  findfiles [PATHS...]          Equivalent to findfmt --hidden\n"
+    "  findfilemime [PATHS...]       Equivalent to findfmt --hidden --list-tags\n"
+    "  findfilefmt [TAG] [PATHS...]  Equivalent to findfmt --hidden --tag TAG\n"
+    "  findshebang [INTERP]...       Equivalent to findfmt --hidden --shebang INTERPRETER\n"
+    "  findfmt0 [PATHS...]           Equivalent to findfmt --hidden --print0\n"
+    "  findsummary [PATHS...]        Equivalent to findfmt --hidden --summary\n\n"
+    "POSIX Double-Dash (--) Terminator:\n"
+    "  Arguments following '--' are treated strictly as positional paths:\n"
+    "  $ findfmt -- -hyphen-dir/\n"
+    "  $ findfilefmt python -- -weird-name/\n\n"
+    "Environment Variables:\n"
+    "  NO_COLOR                      When set, suppresses colored output (https://no-color.org).\n"
+    "  CLICOLOR                      When set to 0, suppresses ANSI colors; 1 enables colors.\n"
+    "  CLICOLOR_FORCE                When non-zero, forces color output even when piped.\n"
+    "  FINDFMT_CONFIG                Path to custom configuration file overriding defaults.\n\n"
+    "Exit Codes:\n"
+    "  0                             Success, even when no files match (see --exit-status).\n"
+    "  1                             Runtime error, or no matches with --exit-status.\n"
+    "  2                             Invalid command-line usage, options, or config file.\n"
+    "  130                           Interrupted by SIGINT (Ctrl+C).\n\n"
+    "Workflow Examples:\n"
+    "  $ findfmt -t python                     # Find Python files in current repository\n"
+    "  $ findfmt --shebang bash scripts/       # Find bash scripts in scripts/\n"
+    "  $ findfmt -t python -t executable --all-tags  # Require BOTH tags\n"
+    "  $ findfiles --no-hidden                 # Traverse files without hidden files\n"
+    "  $ findfilefmt json                      # Shortcut: find JSON files\n"
+    "  $ findshebang python                    # Shortcut: find Python shebang scripts\n"
+    "  $ findfmt0 -t python | xargs -0 flake8  # Pipe NUL-delimited paths safely\n"
+    "  $ findsummary                           # Print summary match statistics to stderr\n"
+)
+
+
+def _order_flags(flags: Sequence[str]) -> list[str]:
+    """Order option flags with long options preceding short options."""
+    long_flags = [flag for flag in flags if flag.startswith("--")]
+    short_flags = [flag for flag in flags if not flag.startswith("--")]
+    return [*long_flags, *short_flags]
+
+
+def _format_option_spec(param: _click.Parameter) -> str:
+    """Format the flag specification and metavar for a Click option parameter."""
+    primary = ", ".join(_order_flags(param.opts))
+    secondary_opts: Sequence[str] = param.secondary_opts
+    spec = f"{primary} / {', '.join(_order_flags(secondary_opts))}" if secondary_opts else primary
+    if not getattr(param, "is_flag", False):
+        return f"{spec} <value>"
+
+    return spec
+
+
+def _format_option_description(param: _click.Parameter) -> str:
+    """Format the help description and choice list for a Click option parameter."""
+    raw_help = str(getattr(param, "help", None) or "")
+    description = _(raw_help).replace("-rw-r--r--", "drwxr-xr-x")
+    type_source = getattr(param, "type", None) or getattr(param, "type_descriptor", None)
+    choices = getattr(type_source, "choices", None)
+    if choices is not None:
+        choices_str = ", ".join(str(getattr(choice, "value", choice)) for choice in choices)
+        return f"{description} (choices: {choices_str})"
+
+    return description
+
+
 def get_help_all() -> str:
-    """Compile comprehensive help reference manual.
+    """Compile comprehensive help reference manual from Click command introspection.
 
     Returns:
         Formatted multi-line manual text string ending in a newline.
     """
+    app = importlib.import_module("findfmt.cli.main").app
+    command = get_command(app)
+    ctx = command.context_class(command)
+    groups: dict[str, list[str]] = {panel: [] for panel in _PANEL_ORDER}
+
+    for param in command.get_params(ctx):
+        if not any(opt.startswith("-") for opt in param.opts):
+            continue
+
+        panel = str(getattr(param, "rich_help_panel", None) or _DEFAULT_PANEL)
+        spec = _format_option_spec(param)
+        desc = _format_option_description(param)
+        groups.setdefault(panel, []).append(f"  {spec:<29} {desc}\n")
+
+    sections = [f"{_(panel)}:\n{''.join(lines)}" for panel, lines in groups.items()]
     header = f"findfmt {get_version()} - {_('Comprehensive CLI Reference')}\n\n"
-    manual = _(
-        "Usage: findfmt [OPTIONS] [paths]...\n\n"
-        "Tag Filtering:\n"
-        "  --type, -t, --tag <str>       Tag or comma-separated tags to match.\n"
-        "  --exclude, -e, --exclude-tag  Tag or comma-separated tags to exclude.\n"
-        "  --all-tags / --no-all-tags    Require matching ALL specified tags\n"
-        "                                [default: no-all-tags].\n\n"
-        "Traversal Controls:\n"
-        "  --pattern, -P <pattern>       Include files matching wildcard or glob pattern.\n"
-        "  --exclude-pattern, -I <pat>   Exclude files matching wildcard or glob pattern.\n"
-        "  --ignore-case                 Case-insensitive pattern matching across -P and -I.\n"
-        "  --match-dirs, --matchdirs     Match directory names; matched dirs inherit to children.\n"
-        "  --shebang <str>               Filter files by shebang pattern.\n"
-        "  --dirs-only, -d               List directories only, suppressing regular files.\n"
-        "  --max-depth, -L <level>       Restrict descent to maximum depth level.\n"
-        "  --follow-links, --follow-symlinks, -l\n"
-        "                                Follow directory symlinks with loop detection.\n"
-        "  --symlinks / --no-symlinks    Alias for --follow-links / --no-follow-links.\n"
-        "  --one-file-system, -x         Confine traversal to root filesystem device.\n"
-        "  --filelimit <limit>           Skip directories exceeding entry count threshold.\n"
-        "  --prune                       Omit directories containing zero matching files.\n"
-        "  --no-ignore / --ignore        Do not respect .gitignore rules [default: ignore].\n"
-        "  --gitignore-file <path>       Apply custom ignore file across traversal scope.\n"
-        "  --from-file, --fromfile <p>   Read paths from file or standard input ('-').\n"
-        "  --offline                     Enforce offline filename identification.\n"
-        "  --all, --hidden, -a           Include hidden files and dirs [default: no-hidden].\n"
-        "  --sort <criteria>             Sort files (name, version, time, ctime, size, none)\n"
-        "                                [default: name].\n"
-        "  --reverse, -r                 Invert active sort order.\n"
-        "  --unsorted, -U                Raw directory order without sorting.\n"
-        "  --dirsfirst                   List directories before files within directory levels.\n"
-        "  --filesfirst                  List files before directories within directory levels.\n\n"
-        "Output Formatting:\n"
-        "  --format, -f <fmt>            Output format (text, json, jsonl, yaml, ipynb,\n"
-        "                                csv, csv-table, tsv, markdown, rst, table, tree,\n"
-        "                                xml, html) [default: text].\n"
-        "  --json, -J / --no-json        Output structured JSON representation.\n"
-        "  --xml, -X / --no-xml          Output directory tree as an XML document.\n"
-        "  --html, -H <baseHREF>         Output directory tree as an HTML document.\n"
-        "  --intro <path>                Prepend custom HTML fragment before listing.\n"
-        "  --outro <path>                Append custom HTML fragment after listing.\n"
-        "  --title, -T <title>           Set title and <h1> heading for HTML output.\n"
-        "  --nolinks / --no-nolinks      Suppress hyperlink anchors in HTML output.\n"
-        "  --hyperlink / --no-hyperlink  Wrap paths in OSC 8 terminal hyperlinks.\n"
-        "  --hyperlink-schema <schema>   URI schema prefix (default: file://).\n"
-        "  --hyperlink-authority <auth>  URI authority override (e.g. localhost).\n"
-        "  --output, -o <path>           Send command output directly to a file.\n"
-        "  --csv-safe / --no-csv-safe    Neutralize spreadsheet formulas in CSV/TSV cells.\n"
-        "  --tree / --no-tree            Render output in hierarchical tree view.\n"
-        "  --table-style <style>         Border style (rounded, cp437, ascii, etc.).\n"
-        "  --pager / --no-pager          Enable or disable interactive paging.\n"
-        "  --no-indent, -i / --indent    Omit indentation lines and strip extraneous whitespace.\n"
-        "  --ansi-lines, -A              Use ANSI/VT100 line drawing escapes.\n"
-        "  --cp437, -S                   Use CP437 console graphics line drawing characters.\n"
-        "  --color, -C / --no-color, -n  Force enable or disable ANSI color output.\n"
-        "  --absolute, --full-path       Output absolute paths rather than relative paths.\n"
-        "  --relative, --relative-path   Prepend input search path prefix to relative paths.\n"
-        "  --permissions, -p             Format file mode in standard ls -l style.\n"
-        "  --user, -u                    Display file owner username (falling back to UID).\n"
-        "  --group, -g                   Display file owner group (falling back to GID).\n"
-        "  --inodes                      Print filesystem inode number (st_ino).\n"
-        "  --device                      Print filesystem device number (st_dev).\n"
-        "  --size / --no-size            Print file size in bytes.\n"
-        "  --human-readable, -h          Print sizes in human-readable binary format.\n"
-        "  --si / --no-si                Print sizes in human-readable SI metric format.\n"
-        "  --du, --accumulate-size       Accumulate recursive directory disk usage.\n"
-        "  --mtime, -D                   Display last modification time.\n"
-        "  --ctime                       Display last status change time.\n"
-        "  --time-format, --timefmt <f>  Date and time format string (strftime syntax).\n"
-        "  --classify, -F                Append indicator (/ @ * = | >) to filenames.\n"
-        "  --hide-control-chars, -q      Mask non-printable control characters with '?'.\n"
-        "  --literal, -N                 Print non-printable characters literally.\n"
-        "  --quote-name, -Q              Enclose filenames in double quotes.\n"
-        "  --print0, -0 / --no-print0    Delimit with NUL (\\0) byte [default: no-print0].\n"
-        "  --list-tags / --no-list-tags  Display identified tags [default: no-list-tags].\n"
-        "  --summary, -s / --no-summary  Print summary statistics [default: no-summary].\n"
-        "  --exit-status                 Exit with code 1 if no matching files are found.\n\n"
-        "Help & Diagnostics:\n"
-        "  --config <path>               Path to custom configuration file overriding defaults.\n"
-        "  --no-config                   Suppress loading any configuration file.\n"
-        "  --show-config                 Display resolved configuration settings and exit.\n"
-        "  --known-tags                  List all known classification tags and exit.\n"
-        "  --locale, --lang <locale>     Set display locale (e.g. 'en_US', 'es', 'C').\n"
-        "  --version, -v, -V             Display version (use with --verbose for diagnostics).\n"
-        "  --verbose                     Include extended runtime diagnostics with --version.\n"
-        "  --diagnostics                 Display runtime environment diagnostics and exit.\n"
-        "  --help-all                    Display this comprehensive reference and exit.\n"
-        "  --help                        Display categorized help summary and exit.\n\n"
-        "Command Wrappers:\n"
-        "  findfiles [PATHS...]          Equivalent to findfmt --hidden\n"
-        "  findfilemime [PATHS...]       Equivalent to findfmt --hidden --list-tags\n"
-        "  findfilefmt [TAG] [PATHS...]  Equivalent to findfmt --hidden --tag TAG\n"
-        "  findshebang [INTERP]...       Equivalent to findfmt --hidden --shebang INTERPRETER\n"
-        "  findfmt0 [PATHS...]           Equivalent to findfmt --hidden --print0\n"
-        "  findsummary [PATHS...]        Equivalent to findfmt --hidden --summary\n\n"
-        "POSIX Double-Dash (--) Terminator:\n"
-        "  Arguments following '--' are treated strictly as positional paths:\n"
-        "  $ findfmt -- -hyphen-dir/\n"
-        "  $ findfilefmt python -- -weird-name/\n\n"
-        "Environment Variables:\n"
-        "  NO_COLOR                      When set, suppresses colored output (https://no-color.org).\n"
-        "  CLICOLOR                      When set to 0, suppresses ANSI colors; 1 enables colors.\n"
-        "  CLICOLOR_FORCE                When non-zero, forces color output even when piped.\n"
-        "  FINDFMT_CONFIG                Path to custom configuration file overriding defaults.\n\n"
-        "Exit Codes:\n"
-        "  0                             Success, even when no files match (see --exit-status).\n"
-        "  1                             Runtime error, or no matches with --exit-status.\n"
-        "  2                             Invalid command-line usage, options, or config file.\n"
-        "  130                           Interrupted by SIGINT (Ctrl+C).\n\n"
-        "Workflow Examples:\n"
-        "  $ findfmt -t python                     # Find Python files in current repository\n"
-        "  $ findfmt --shebang bash scripts/       # Find bash scripts in scripts/\n"
-        "  $ findfmt -t python -t executable --all-tags  # Require BOTH tags\n"
-        "  $ findfiles --no-hidden                 # Traverse files without hidden files\n"
-        "  $ findfilefmt json                      # Shortcut: find JSON files\n"
-        "  $ findshebang python                    # Shortcut: find Python shebang scripts\n"
-        "  $ findfmt0 -t python | xargs -0 flake8  # Pipe NUL-delimited paths safely\n"
-        "  $ findsummary                           # Print summary match statistics to stderr\n",
-    )
-    return f"{header}{manual}"
+    usage = "Usage: findfmt [OPTIONS] [paths]...\n\n"
+    return f"{header}{usage}" + "\n".join(sections) + f"\n{_MANUAL_FOOTER}"
 
 
 def help_all_callback(
