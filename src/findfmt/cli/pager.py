@@ -28,7 +28,7 @@ from findfmt.cli.terminal import PagerController, is_color_enabled
 from findfmt.i18n import set_locale
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping, Sequence
+    from collections.abc import Generator, Mapping, Sequence
 
     from rich.pager import Pager
     from typer.core import _click
@@ -220,18 +220,24 @@ def display_with_pager(  # noqa: PLR0913 - wide CLI/config signature
         handle_broken_pipe(target_stream)
 
 
-class _HelpCaptureStream(io.StringIO):
-    """In-memory text buffer reporting terminal interactivity for Rich help capture."""
+@contextlib.contextmanager
+def _help_color_env(*, color_on: bool) -> Generator[None]:
+    """Configure environment variables for Rich help color rendering without global mutation."""
+    keys = ("TTY_COMPATIBLE", "NO_COLOR", "TERM")
+    saved = {key: os.environ.get(key) for key in keys}
+    os.environ["TTY_COMPATIBLE"] = "1" if color_on else "0"
+    os.environ["NO_COLOR"] = "" if color_on else "1"
+    if color_on and os.environ.get("TERM", "").strip().lower() in ("", "dumb", "unknown"):
+        os.environ["TERM"] = "ansi"
 
-    def __init__(self, *, is_tty: bool) -> None:
-        """Initialize capture buffer with explicit TTY state."""
-        super().__init__()
-        self._is_tty = is_tty
-
-    @override
-    def isatty(self) -> bool:
-        """Return configured TTY interactivity state."""
-        return self._is_tty
+    try:
+        yield
+    finally:
+        for key, val in saved.items():
+            if val is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = val
 
 
 def _capture_help_output(
@@ -251,18 +257,9 @@ def _capture_help_output(
     """
     color_flag = resolve_color_flag(ctx)
     color_on = is_color_enabled(sys.stdout, force_color=color_flag)
-    buf = _HelpCaptureStream(is_tty=color_on)
-    orig_term = os.environ.get("TERM", "")
-    override_term = color_on and orig_term.strip().lower() in ("dumb", "unknown")
-    if override_term:
-        os.environ["TERM"] = "ansi"
-
-    try:
-        with contextlib.redirect_stdout(buf):
-            typer.core.TyperCommand.format_help(cmd, ctx, formatter)
-    finally:
-        if override_term:
-            os.environ["TERM"] = orig_term
+    buf = io.StringIO()
+    with _help_color_env(color_on=color_on), contextlib.redirect_stdout(buf):
+        typer.core.TyperCommand.format_help(cmd, ctx, formatter)
 
     content = buf.getvalue()
     if not content and formatter.getvalue():
