@@ -9,6 +9,7 @@ must be anchored to the package catalogs, or ``.mo`` files that ``make -C docs``
 
 from __future__ import annotations
 
+import re
 import shutil
 from pathlib import Path
 
@@ -65,3 +66,47 @@ def test_sdist_includes_only_package_catalog_artifacts(project: Path) -> None:
     }
     for source in ("LICENSE", "src/findfmt/py.typed", "src/findfmt/locale/findfmt.pot"):
         assert source in selected
+
+
+def test_readme_and_docs_index_use_pure_markdown_badges() -> None:
+    """README.md and docs/source/index.md use categorized pure-Markdown badges (#618)."""
+    badge_pattern = re.compile(r"^\[!\[([^\]]+)\]\((https://[^)]+)\)\]\(([^)]+)\)$", re.MULTILINE)
+    workflow_pattern = re.compile(
+        r"https://github\.com/bdperkin/findfmt/actions/workflows/([A-Za-z0-9_.-]+\.yml)$",
+    )
+
+    readme_header = (ROOT / "README.md").read_text(encoding="utf-8").split("\n___", 1)[0]
+    docs_header = (
+        (ROOT / "docs" / "source" / "index.md")
+        .read_text(encoding="utf-8")
+        .split("\n**findfmt**", 1)[0]
+    )
+
+    for label, header in (("README.md", readme_header), ("docs/source/index.md", docs_header)):
+        assert "<p " not in header, f"{label} header still contains raw HTML <p> tags"
+        assert "<img " not in header, f"{label} header still contains raw HTML <img> tags"
+
+    readme_badges = badge_pattern.findall(readme_header)
+    docs_badges = badge_pattern.findall(docs_header)
+    assert len(readme_badges) == 33
+    assert len(docs_badges) == 33
+
+    readme_imgs = [img for _, img, _ in readme_badges]
+    docs_imgs = [img for _, img, _ in docs_badges]
+    assert readme_imgs == docs_imgs
+    assert len(readme_imgs) == len(set(readme_imgs)), "Duplicate badge image URLs found"
+
+    for astral_endpoint in (
+        "https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json",
+        "https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json",
+        "https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json",
+    ):
+        assert astral_endpoint in readme_imgs
+
+    for alt, _img, target in readme_badges:
+        assert target.startswith("https://"), (
+            f"Non-absolute README target URL for {alt!r}: {target}"
+        )
+        if wf_match := workflow_pattern.match(target):
+            wf_file = ROOT / ".github" / "workflows" / wf_match.group(1)
+            assert wf_file.is_file(), f"Badge references missing workflow {wf_file}"

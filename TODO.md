@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 202 Closed Issues | 106 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 203 Closed Issues | 106 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -17,8 +17,8 @@
 > v1.2.0: closed issues #311 and #474 as not planned, moved #366 to v1.2.0, upgraded #329 to High/S,
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
-> its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, and epic #346, and released
-> v1.2.1 and closed its milestone)
+> its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, epic #346, and #618, and
+> released v1.2.1 and closed its milestone)
 
 ______________________________________________________________________
 
@@ -634,6 +634,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#346](https://github.com/bdperkin/findfmt/issues/346)** - [Epic] CLI Documentation
   Accuracy, Dynamic --help-all Generation, and Option Validation (Closed: 2026-11-11 via PR
   [#616](https://github.com/bdperkin/findfmt/pull/616))
+- [x] **[#618](https://github.com/bdperkin/findfmt/issues/618)** - docs(readme): modernize,
+  deduplicate, and categorize README badges in pure Markdown (Closed: 2026-11-11 via PR
+  [#619](https://github.com/bdperkin/findfmt/pull/619))
 
 ______________________________________________________________________
 

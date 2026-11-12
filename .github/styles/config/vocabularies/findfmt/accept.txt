@@ -201,3 +201,8 @@
 (?i)sdk
 (?i)sdks
 (?i)bom
+(?i)slsa
+(?i)codeql
+(?i)openssf
+(?i)pep
+(?i)changelog
