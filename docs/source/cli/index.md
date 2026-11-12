@@ -72,6 +72,10 @@ newlines), and tab-, space-, or `tree`-indented outlines with symlink (`link -> 
 file formats and types strictly via extension and filename heuristics, operating gracefully when
 analyzing remote manifests or containers without raising filesystem IO errors.
 
+`--allow-outside-root / --no-allow-outside-root` : Allow `--from-file` paths that resolve outside
+the traversal root directory. By default, out-of-root entries (such as `/etc/passwd` or
+`../outside.sh`) are skipped with a warning to `stderr` without reading their contents.
+
 `--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`. Use
 `--ignore` to restore `.gitignore` honoring.
 

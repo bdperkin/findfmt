@@ -173,6 +173,7 @@ class TraversalConfig:
         files_first: Whether to list files before directories within directory levels.
         from_file: Input file path or '-' for stdin to ingest directory structure from.
         offline: Whether to enforce extension-only classification without disk access.
+        allow_outside_root: Whether to allow --from-file entries that resolve outside the root.
         show_permissions: Whether to display file permissions in ls -l format.
         show_user: Whether to display file owner username or UID.
         show_group: Whether to display file owner group name or GID.
@@ -232,6 +233,7 @@ class TraversalConfig:
     files_first: bool = False
     from_file: str | None = None
     offline: bool = False
+    allow_outside_root: bool = False
     show_permissions: bool = False
     show_user: bool = False
     show_group: bool = False

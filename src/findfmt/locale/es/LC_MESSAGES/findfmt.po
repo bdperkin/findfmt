@@ -1290,3 +1290,12 @@ msgstr "Enlace simbólico"
 #: src/findfmt/formatters/visual.py:213
 msgid "Shebang"
 msgstr "Directiva shebang"
+
+#: src/findfmt/cli/help.py:66
+msgid "Allow --from-file paths that resolve outside the traversal root directory."
+msgstr "Permitir rutas de --from-file que se resuelvan fuera del directorio raíz de recorrido."
+
+#: src/findfmt/parsers/engine.py:216
+#, python-brace-format
+msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
+msgstr "findfmt: advertencia: omitiendo ruta fuera del directorio raíz de recorrido: '{path}'\n"

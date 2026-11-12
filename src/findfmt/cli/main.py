@@ -16,6 +16,7 @@ from findfmt.cli.diagnostics import (
 from findfmt.cli.entrypoints import main
 from findfmt.cli.options import (
     OptAbsolute,
+    OptAllowOutsideRoot,
     OptAllTags,
     OptAnsiLines,
     OptClassify,
@@ -146,6 +147,7 @@ def findfmt(
     gitignore_file: OptGitignoreFile = None,
     from_file: OptFromFile = None,
     offline: OptOffline = False,
+    allow_outside_root: OptAllowOutsideRoot = False,
     hidden: OptHidden = False,
     follow_symlinks: OptFollowSymlinks = False,
     dirs_only: OptDirsOnly = False,

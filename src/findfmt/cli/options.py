@@ -18,6 +18,7 @@ known_tags_callback = h.known_tags_callback
 __all__ = [
     "OptAbsolute",
     "OptAllTags",
+    "OptAllowOutsideRoot",
     "OptAnsiLines",
     "OptClassify",
     "OptColor",
@@ -158,6 +159,14 @@ OptFromFile = Annotated[
     typer.Option("--from-file", "--fromfile", rich_help_panel=_PC, help=h.HELP_FROM_FILE),
 ]
 OptOffline = Annotated[bool, typer.Option("--offline", rich_help_panel=_PC, help=h.HELP_OFFLINE)]
+OptAllowOutsideRoot = Annotated[
+    bool,
+    typer.Option(
+        "--allow-outside-root/--no-allow-outside-root",
+        rich_help_panel=_PC,
+        help=h.HELP_ALLOW_OUTSIDE_ROOT,
+    ),
+]
 OptHidden = Annotated[
     bool,
     typer.Option(

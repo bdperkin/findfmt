@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import builtins
 import io
 import os
 from pathlib import Path
@@ -299,3 +300,70 @@ def test_from_file_nul_delimited_input(tmp_path: Path) -> None:
         "normal.py",
     ]
     assert all("python" in f.tags for f in results)
+
+
+def test_from_file_rejects_paths_outside_root(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verify out-of-root paths are skipped with a warning unless allow_outside_root is set."""
+    root = tmp_path / "workspace"
+    root.mkdir()
+    inside_py = root / "inside.py"
+    inside_py.write_text("print('ok')\n", encoding="utf-8")
+    outside_sh = tmp_path / "outside.sh"
+    outside_sh.write_text("#!/bin/sh\necho secret\n", encoding="utf-8")
+
+    listing = f"/etc/passwd\n{outside_sh}\n../outside.sh\ninside.py\n{inside_py}\n"
+    with (
+        patch("builtins.open", wraps=builtins.open) as spy_open,
+        patch("os.open", wraps=os.open) as spy_os_open,
+    ):
+        cfg_default = TraversalConfig(from_file="-", root_paths=(root,), sort_by=SortKey.NONE)
+        res_default = list(ingest_from_file(cfg_default, input_stream=io.StringIO(listing)))
+
+    opened_paths = [
+        str(call.args[0])
+        for call in [*spy_open.call_args_list, *spy_os_open.call_args_list]
+        if call.args
+    ]
+    err_out = capsys.readouterr().err
+    assert [f.relative_path.as_posix() for f in res_default] == ["inside.py", "inside.py"]
+    assert not any("passwd" in p or "outside.sh" in p for p in opened_paths)
+    assert "skipping path outside traversal root: '/etc/passwd'" in err_out
+    assert "skipping path outside traversal root: '../outside.sh'" in err_out
+
+    # Offline mode also confines out-of-root entries by default
+    cfg_offline = TraversalConfig(from_file="-", root_paths=(root,), offline=True)
+    res_offline = list(ingest_from_file(cfg_offline, input_stream=io.StringIO(listing)))
+    assert [f.relative_path.as_posix() for f in res_offline] == ["inside.py", "inside.py"]
+    assert "outside.sh" in capsys.readouterr().err
+
+    # Symlink inside root resolving outside root is also rejected in online mode
+    real_resolve = Path.resolve
+    with patch.object(
+        Path,
+        "resolve",
+        autospec=True,
+        side_effect=lambda self, *a, **kw: (
+            outside_sh if self.name == "escape_link.sh" else real_resolve(self, *a, **kw)
+        ),
+    ):
+        res_sym = list(ingest_from_file(cfg_default, input_stream=io.StringIO("escape_link.sh\n")))
+
+    assert res_sym == []
+    assert "escape_link.sh" in capsys.readouterr().err
+
+    # Explicit opt-in (allow_outside_root=True) permits and classifies out-of-root entries
+    cfg_opt_in = TraversalConfig(
+        from_file="-",
+        root_paths=(root,),
+        allow_outside_root=True,
+        sort_by=SortKey.NONE,
+    )
+    res_opt_in = list(
+        ingest_from_file(cfg_opt_in, input_stream=io.StringIO(f"../outside.sh\n{outside_sh}\n")),
+    )
+    assert len(res_opt_in) == 2
+    assert res_opt_in[0].relative_path.as_posix() == "../outside.sh"
+    assert res_opt_in[0].shebang == "#!/bin/sh"

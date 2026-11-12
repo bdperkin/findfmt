@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 205 Closed Issues | 104 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 208 Closed Issues | 103 Actionable Open Tasks | 30 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -18,7 +18,7 @@
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
 > its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, epic #346, and #618, and
-> released v1.2.1 and closed its milestone; 2026-11-12 closed #459 and #461)
+> released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386)
 
 ______________________________________________________________________
 
@@ -643,6 +643,15 @@ Note: Ordered chronologically by completion date.
 - [x] **[#461](https://github.com/bdperkin/findfmt/issues/461)** - feat(parsers): add NUL-delimited
   --from-file input mode (-0 / find -print0 compatibility) (Closed: 2026-11-12 via PR
   [#621](https://github.com/bdperkin/findfmt/pull/621))
+- [x] **[#463](https://github.com/bdperkin/findfmt/issues/463)** - fix(parsers): confine --from-file
+  paths to the traversal root unless explicitly allowed (Closed: 2026-11-12 via PR
+  [#622](https://github.com/bdperkin/findfmt/pull/622))
+- [x] **[#334](https://github.com/bdperkin/findfmt/issues/334)** - fix(parsers): --from-file
+  mis-parses ASCII tree output, crashes on non-UTF-8 stdin, and lacks NUL input (Closed: 2026-11-12
+  via #459, #460, #461, #462, and #463)
+- [x] **[#386](https://github.com/bdperkin/findfmt/issues/386)** - [Epic] CLI Architecture, Terminal
+  Interactivity & Execution Ergonomics (Closed: 2026-11-12 via PR
+  [#622](https://github.com/bdperkin/findfmt/pull/622))
 
 ______________________________________________________________________
 
@@ -732,11 +741,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Parent: [#229](https://github.com/bdperkin/findfmt/issues/229) | Milestone: v1.6.1)* -
   **Value:** Medium | **Effort:** S - **Rationale:** Locks in RTL behaviour cheaply; guards the
   Urdu/Arabic releases.
-- [ ] **[#463](https://github.com/bdperkin/findfmt/issues/463)** - fix(parsers): confine --from-file
-  paths to the traversal root unless explicitly allowed *(Rank: 23 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Parent: [#334](https://github.com/bdperkin/findfmt/issues/334) | Milestone: v1.2.2)* -
-  **Value:** High | **Effort:** M - **Rationale:** Security hardening for untrusted input lists.
 - [ ] **[#577](https://github.com/bdperkin/findfmt/issues/577)** - build(rust): initialize
   findfmt_rs PyO3 crate and configure hatch-maturin-build in pyproject.toml *(Rank: 24 | Epic:
   [[Epic] Hybrid Python-Rust Foundation: findfmt_rs Crate, hatch-maturin-build & Fallback Architecture](https://github.com/bdperkin/findfmt/issues/576)
@@ -1322,10 +1326,6 @@ its sub-issues close.
   [#456](https://github.com/bdperkin/findfmt/issues/456),
   [#457](https://github.com/bdperkin/findfmt/issues/457),
   [#458](https://github.com/bdperkin/findfmt/issues/458)
-- [ ] **[#334](https://github.com/bdperkin/findfmt/issues/334)** - fix(parsers): --from-file
-  mis-parses ASCII tree output, crashes on non-UTF-8 stdin, and lacks NUL input *(Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Milestone: v1.2.2)* - **Sub-issues:** [#463](https://github.com/bdperkin/findfmt/issues/463)
 
 ______________________________________________________________________
 
@@ -1337,9 +1337,6 @@ linked natively on GitHub.
 - [ ] **[#348](https://github.com/bdperkin/findfmt/issues/348)** - [Epic] Core Refactoring & API
   Hygiene Cleanup *(Milestone: v1.2.2 | Open sub-issues: 1)* -
   [#355](https://github.com/bdperkin/findfmt/issues/355)
-- [ ] **[#386](https://github.com/bdperkin/findfmt/issues/386)** - [Epic] CLI Architecture, Terminal
-  Interactivity & Execution Ergonomics *(Milestone: v1.2.2 | Open sub-issues: 1)* -
-  [#334](https://github.com/bdperkin/findfmt/issues/334)
 - [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
   Architecture: Layered Precedence, Schemas & Validation Diagnostics *(Milestone: v1.3.0 | Open
   sub-issues: 3)* - [#310](https://github.com/bdperkin/findfmt/issues/310),
@@ -1526,7 +1523,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 5           |
+| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 2           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit & CI Config Hardening: Schema Validation, Workflow Timeouts, Meta Hooks & Markdown Linting              | 4           |

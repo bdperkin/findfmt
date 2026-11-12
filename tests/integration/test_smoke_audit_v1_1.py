@@ -120,8 +120,8 @@ def test_from_file_sorts_by_ctime(tmp_path: Path) -> None:
 
     listing = tmp_path / "list.txt"
     listing.write_text("\n".join(str(p) for p in reversed(paths)), encoding="utf-8")
-    by_ctime = _run("--from-file", str(listing), "--sort", "ctime")[1].splitlines()
-    by_mtime = _run("--from-file", str(listing), "--sort", "time")[1].splitlines()
+    by_ctime = _run(str(tmp_path), "--from-file", str(listing), "--sort", "ctime")[1].splitlines()
+    by_mtime = _run(str(tmp_path), "--from-file", str(listing), "--sort", "time")[1].splitlines()
     # Newest first, as with `ls -t`.
     assert [Path(line).name for line in by_ctime] == ["third.txt", "second.txt", "first.txt"]
     assert [Path(line).name for line in by_mtime] == ["first.txt", "second.txt", "third.txt"]
