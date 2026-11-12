@@ -36,6 +36,9 @@ def test_detect_input_format() -> None:
     assert detect_input_format([".", "+-- child.py"]) == "outline"
     assert detect_input_format([".", "\\-- child.py"]) == "outline"
 
+    assert detect_input_format(["dir/line1\nline2.py", "other.py"]) == "nul"
+    assert detect_input_format(["a.py\0b.py"]) == "nul"
+
 
 def test_classify_file_offline_posix_and_symlink() -> None:
     """Verify offline classification on POSIX with symlink attributes."""
@@ -270,3 +273,29 @@ def test_sort_file_infos_ctime_uses_status_change_time(tmp_path: Path) -> None:
             cfg_mtime = TraversalConfig(sort_by=sort_key)
             sorted_mtime = _sort_file_infos([info_b, info_a], cfg_mtime)
             assert [f.relative_path.name for f in sorted_mtime] == ["b.txt", "a.txt"]
+
+
+def test_from_file_nul_delimited_input(tmp_path: Path) -> None:
+    """Verify find -print0 / fd -0 NUL-delimited input with embedded newlines (#461)."""
+    nul_payload = "./dir/line1\nline2.py\0  spaced.py\0#hash.py\0normal.py\0"
+    f_nul = tmp_path / "print0.bin"
+    f_nul.write_bytes(nul_payload.encode("utf-8"))
+
+    lines = _read_lines(str(f_nul))
+    assert lines == ["./dir/line1\nline2.py", "  spaced.py", "#hash.py", "normal.py"]
+    assert detect_input_format(lines) == "nul"
+
+    cfg = TraversalConfig(
+        from_file=str(f_nul),
+        offline=True,
+        root_paths=(tmp_path,),
+        sort_by=SortKey.NONE,
+    )
+    results = list(ingest_from_file(cfg))
+    assert [f.relative_path.as_posix() for f in results] == [
+        "dir/line1\nline2.py",
+        "  spaced.py",
+        "#hash.py",
+        "normal.py",
+    ]
+    assert all("python" in f.tags for f in results)

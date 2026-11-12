@@ -34,15 +34,36 @@ __all__ = [
 ]
 
 
+class _NulDelimitedLines(list[str]):
+    """List of path records extracted from a NUL-delimited input stream."""
+
+    nul_delimited: bool = True
+
+
+_NUL_OR_NEWLINE_CHARS = frozenset({"\0", "\n", "\r"})
+
+
+def _is_nul_delimited_input(lines: list[str]) -> bool:
+    """Return True if lines originate from NUL-delimited input or contain embedded newlines."""
+    if getattr(lines, "nul_delimited", False):
+        return True
+
+    return any(not _NUL_OR_NEWLINE_CHARS.isdisjoint(line) for line in lines)
+
+
 def detect_input_format(lines: list[str]) -> str:
-    """Auto-detect whether input lines represent an outline or flat path listing.
+    """Auto-detect whether input lines represent NUL-delimited, outline, or flat listing.
 
     Args:
-        lines: List of raw input string lines.
+        lines: List of raw input string lines or NUL-delimited records.
 
     Returns:
+        'nul' if NUL-delimited records or embedded newlines are detected,
         'outline' if indented hierarchical structure is detected, else 'flat'.
     """
+    if _is_nul_delimited_input(lines):
+        return "nul"
+
     for line in lines:
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
@@ -164,13 +185,21 @@ def _decode_bytes(data: bytes) -> str:
         return data.decode("utf-8", errors="surrogateescape")
 
 
+def _split_input_lines(raw_text: str) -> list[str]:
+    """Split decoded input text on NUL bytes if present, otherwise on line boundaries."""
+    if "\0" in raw_text:
+        return _NulDelimitedLines(entry for entry in raw_text.split("\0") if entry)
+
+    return raw_text.splitlines()
+
+
 def _read_lines(from_file: str | None, stream: TextIO | None = None) -> list[str]:
-    """Read input lines from standard input or external file."""
+    """Read input lines or NUL-delimited records from standard input or external file."""
     if from_file == "-":
         target_stream = stream or sys.stdin
         buffer = getattr(target_stream, "buffer", None)
         raw_text = _decode_bytes(buffer.read()) if buffer is not None else str(target_stream.read())
-        return raw_text.splitlines()
+        return _split_input_lines(raw_text)
 
     if from_file is not None:
         try:
@@ -179,7 +208,7 @@ def _read_lines(from_file: str | None, stream: TextIO | None = None) -> list[str
             msg = f"Cannot read input from '{from_file}': {err}"
             raise ParserError(msg) from err
 
-        return _decode_bytes(raw_bytes).splitlines()
+        return _split_input_lines(_decode_bytes(raw_bytes))
 
     return []
 

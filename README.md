@@ -243,7 +243,7 @@ ______________________________________________________________________
 | `--shebang INTERPRETER`                                | Match shebang interpreter name or pattern                                                                                              |
 | `--no-ignore` / `--ignore`                             | Toggle respecting `.gitignore` files                                                                                                   |
 | `--gitignore-file PATH`                                | Apply a specific external ignore file across the traversal scope                                                                       |
-| `--from-file, --fromfile PATH`                         | Read paths or directory listings from a file, or standard input with `-`                                                               |
+| `--from-file, --fromfile PATH`                         | Read newline- or NUL-delimited (`-0`, `--print0`) paths or directory listings from a file, or standard input with `-`                  |
 | `--offline`                                            | Classify paths from `--from-file` input without inspecting the local filesystem                                                        |
 | `--hidden` / `--no-hidden`                             | Toggle inspecting hidden files and directories                                                                                         |
 | `-d, --dirs-only`                                      | List directories only, suppressing regular file entries                                                                                |
