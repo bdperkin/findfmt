@@ -23,8 +23,10 @@ contributing to this codebase.
   - `help.py`: Categorized `--help`, `--help-all`, and man-page help rendering.
   - `output_sink.py`, `pager.py`, `signals.py`: Atomic `--output` file writing, TTY auto-paging, and
     POSIX signal handling (`SIGINT` exit code `130`, `SIGPIPE` clean teardown).
-- `src/findfmt/entrypoints.py`: Specialized CLI wrapper commands (`findfiles`, `findfilefmt`,
-  `findfilemime`, `findfmt0`, `findshebang`, `findsummary`).
+  - `entrypoints.py`: Specialized CLI wrapper commands (`findfiles`, `findfilefmt`, `findfilemime`,
+    `findfmt0`, `findshebang`, `findsummary`).
+  - `diagnostics.py`, `summary.py`, `terminal.py`: Structured error diagnostics, summary frequency
+    tables, and terminal sanitization.
 - `src/findfmt/traversal/`: Directory walking and filtering engine:
   - `engine.py`: Core traversal loop yielding matched `FileInfo` records.
   - `ignore.py`: Hierarchical `.gitignore`, `.git/info/exclude`, and global ignore evaluation via
@@ -41,15 +43,14 @@ contributing to this codebase.
   `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `xml`, and `html`.
 - `src/findfmt/parsers/`: `--from-file` and `stdin` path-list parsers (`engine.py`,
   `flat_parser.py`, `tab_parser.py`, `symlink_parser.py`) supporting `--offline` virtual
-  classification.
-- `src/findfmt/models.py`, `metadata.py`, `sizes.py`, `summary.py`, `terminal.py`, `diagnostics.py`,
-  `exceptions.py`, `i18n.py`, `utils/`: Core data models, POSIX metadata formatting, IEC/SI size
-  formatting, summary tables, terminal sanitization, structured error diagnostics, and GNU `gettext`
-  internationalization (`src/findfmt/locale/`).
+  classification, NUL-delimited input, and root-boundary confinement (`--allow-outside-root`).
+- `src/findfmt/models.py`, `metadata.py`, `sizes.py`, `exceptions.py`, `i18n.py`, `utils/`: Core
+  data models, POSIX metadata formatting, IEC/SI size formatting, domain exceptions, and GNU
+  `gettext` internationalization (`src/findfmt/locale/`).
 - `tools/`: Maintainer and CI automation scripts (`verify_quality.py`, `dep_matrix.py`,
-  `line_linter.py`, `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_translate.py`,
-  `i18n_validation.py`, `i18n_prompts.py`, `hatch_build.py`, `smoke_wheel.py`, `release_notes.py`,
-  `benchmark.py`).
+  `line_linter.py`, `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_sync.py`,
+  `i18n_translate.py`, `i18n_validation.py`, `i18n_prompts.py`, `hatch_build.py`, `smoke_wheel.py`,
+  `release_notes.py`, `verify_release_version.py`, `benchmark.py`).
 - `tests/`: Comprehensive `pytest` suites mirroring the source layout (`tests/unit/`,
   `tests/integration/`, `tests/fuzz/`).
 
@@ -125,11 +126,11 @@ uv run python -m tools.i18n compile
   `3.16-dev`). Include `from __future__ import annotations` in every Python module and provide
   complete, strict type annotations verified by `ty`.
 - **CLI & Output:** Use `Typer` for command definitions and `Rich` (via
-  `src/findfmt/diagnostics.py`, `src/findfmt/terminal.py`, and `src/findfmt/cli/output_sink.py`) for
-  terminal tables, panels, streams, and error displays. Do not use raw `print()` statements for core
-  CLI output or errors.
+  `src/findfmt/cli/diagnostics.py`, `src/findfmt/cli/terminal.py`, and
+  `src/findfmt/cli/output_sink.py`) for terminal tables, panels, streams, and error displays. Do not
+  use raw `print()` statements for core CLI output or errors.
 - **Error Handling & Exit Codes:** Fail gracefully with descriptive, localized diagnostics via
-  `src/findfmt/diagnostics.py` rather than unhandled tracebacks, honoring the formal exit-code
+  `src/findfmt/cli/diagnostics.py` rather than unhandled tracebacks, honoring the formal exit-code
   contract (`0` success, `1` runtime error or `--exit-status` no-match, `2` usage/configuration
   error, `130` `SIGINT`).
 - **Zero Unjustified Suppressions:** `tools/suppression_auditor.py` runs in strict mode. Never add

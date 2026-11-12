@@ -6,8 +6,8 @@ Only the latest release of `findfmt` is actively supported with security updates
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.8.x   | :white_check_mark: |
-| < 0.8.0 | :x:                |
+| 1.2.x   | :white_check_mark: |
+| < 1.2.0 | :x:                |
 
 ## 2. Reporting a Vulnerability
 
@@ -41,29 +41,32 @@ mitigations implemented in `findfmt`.
 - **Threat Vector**: Malicious or accidental recursive symbolic directory structures (e.g.,
   `dir/loop -> dir`) can cause unbounded recursion, stack overflow (`RecursionError`), or heap
   exhaustion during deep filesystem traversal.
-- **Mitigation**: When `--follow-symlinks` (`-l`) is active, `findfmt` tracks canonical directory
-  paths via `visited_dirs: set[Path]` initialized with the resolved traversal root. Each candidate
+- **Mitigation**: When `--follow-links` (`-l`) is active, `findfmt` tracks canonical directory paths
+  via `visited_dirs: set[Path]` initialized with the resolved traversal root. Each candidate
   subdirectory's canonical target (`subdir.resolve()`) is checked prior to descent. If already
   visited, traversal immediately skips the entry, breaking cyclic graphs and avoiding duplicate
   processing.
 
 #### 3.1.2. Arbitrary Path Traversal & Boundary Containment
 
-- **Threat Vector**: Ingested paths or nested `.gitignore` files could attempt directory traversal
-  outside intended directory boundaries (e.g., path traversal sequences `../../`).
+- **Threat Vector**: Ingested paths (via `--from-file`) or nested `.gitignore` files could attempt
+  directory traversal outside intended directory boundaries (e.g., absolute paths `/etc/passwd`,
+  path traversal sequences `../../`, or symlinks resolving outside the root).
 - **Mitigation**: All path comparisons and exclude rules verify boundary alignment using
-  `entry_path.is_relative_to(base_dir)` and `_resolve_relative`. Path operations are scoped strictly
-  within configured root paths.
+  `entry_path.is_relative_to(base_dir)` and `_resolve_relative`. For `--from-file` ingestion,
+  `findfmt` enforces lexical and canonical (`Path.resolve()`) root confinement by default via
+  `_is_within_root()`, skipping out-of-root entries with a warning to `stderr` before opening or
+  inspecting file contents unless `--allow-outside-root` is explicitly enabled.
 
 #### 3.1.3. TOCTOU (Time-of-Check to Time-of-Use) Resiliency
 
 - **Threat Vector**: Asynchronous filesystem modifications occurring between directory scanning and
   file inspection (e.g., a file is deleted, renamed, or unlinked) could raise uncaught filesystem
   exceptions.
-- **Mitigation**: All stat, scan, and read operations in `traversal.py` and `classifier.py` are
-  resiliently wrapped in guarded exception blocks (`OSError`, `ValueError`). Inaccessible or
-  vanished entries are safely skipped or fall back to metadata defaults without crashing the runtime
-  engine.
+- **Mitigation**: All stat, scan, and read operations in `src/findfmt/traversal/` and
+  `src/findfmt/classifier.py` are resiliently wrapped in guarded exception blocks (`OSError`,
+  `ValueError`). Inaccessible or vanished entries are safely skipped or fall back to metadata
+  defaults without crashing the runtime engine.
 
 ### 3.2. File Inspection & Content Engine Security
 
@@ -98,7 +101,7 @@ mitigations implemented in `findfmt`.
   measures:
   1. Utilizes `pathspec` to compile `.gitignore` rules into linear-time matching automata.
   2. Bounded linear-time regular expressions for ANSI CSI, OSC, and C1-OSC terminal escape sequences
-     (`_ANSI_ESCAPE_RE` unified across `utils.strings`, `terminal`, and `utils.hyperlinks`). The
+     (`_ANSI_ESCAPE_RE` unified across `utils.strings`, `cli.terminal`, and `utils.hyperlinks`). The
      C1-OSC pattern eliminates nested quantified character classes, guaranteeing $O(N)$ linear-time
      sanitization even on repetitive control sequences (e.g., 50,000+ repetitive `\x9d` bytes).
 
@@ -181,7 +184,7 @@ mitigations implemented in `findfmt`.
   publishes an SBOM, build provenance, and a signed attestation, which `gh attestation verify`
   checks:
   ```bash
-  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.1.0 --owner bdperkin
+  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.2.1 --owner bdperkin
   ```
 
 #### 3.5.4. Multi-Tier Secret Scanning & Static Analysis

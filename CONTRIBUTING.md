@@ -37,8 +37,11 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
   - `area:cli`: Command line interface, arguments, output formatters.
   - `area:classifier`: File content inspection, MIME detection, shebang parsing.
   - `area:traversal`: Directory walking, `.gitignore` rules, symlinks, filtering.
+  - `area:format`: Output formatting, tables, trees, JSON, XML, HTML.
+  - `area:i18n`: Internationalization and localization catalogs.
   - `area:packaging`: PyPI packages, wheels, Docker images, dependencies.
   - `area:docs`: Documentation guides, API reference, man pages, README.
+  - `area:rust`: Rust extension crate (`findfmt_rs`), PyO3 bindings, and Maturin build integration.
 - **`os:*` (Operating Systems)**:
   - `os:linux`, `os:macos`, `os:windows`: Platform-specific behaviors and tests.
 - **`status:*` (Triage & Review Workflow)**:
@@ -49,6 +52,8 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
   - `status:ready-to-merge`: Approved and queued for merge upon CI success.
 - **`priority:*` (Urgency & Severity)**:
   - `priority:critical`, `priority:high`, `priority:medium`, `priority:low`.
+- **`size:*` (Effort Estimation)**:
+  - `size:S`, `size:M`, `size:L`, `size:XL`.
 - **`format:*` (Classification Families)**:
   - `format:python`, `format:shell`, `format:data`, `format:binary`, `format:markup`.
 - **`type:*` & Core Tags**:
@@ -129,11 +134,12 @@ All pull requests must satisfy our quality gate before merging:
   uv run python tools/api_surface.py --write
   ```
 - **Localization Tooling & Message Catalogs**: If updating translatable strings or locale catalogs,
-  extract, validate, and compile message catalogs:
+  extract, synchronize, validate, and compile message catalogs:
   ```bash
-  uv run python tools/i18n.py extract
-  uv run python tools/i18n.py validate
-  uv run python tools/i18n.py compile
+  uv run python -m tools.i18n extract
+  uv run python -m tools.i18n sync
+  uv run python -m tools.i18n validate
+  uv run python -m tools.i18n compile
   ```
   The documentation has its own Sphinx catalogs under `docs/source/locale/`. After changing
   documentation text, regenerate and check them:
