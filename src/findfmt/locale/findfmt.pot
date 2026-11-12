@@ -928,3 +928,12 @@ msgstr ""
 #: src/findfmt/formatters/visual.py:213
 msgid "Shebang"
 msgstr ""
+
+#: src/findfmt/cli/help.py:66
+msgid "Allow --from-file paths that resolve outside the traversal root directory."
+msgstr ""
+
+#: src/findfmt/parsers/engine.py:216
+#, python-brace-format
+msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
+msgstr ""

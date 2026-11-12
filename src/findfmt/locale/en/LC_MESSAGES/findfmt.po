@@ -1226,6 +1226,15 @@ msgstr "Symlink"
 msgid "Shebang"
 msgstr "Shebang"
 
+#: src/findfmt/cli/help.py:66
+msgid "Allow --from-file paths that resolve outside the traversal root directory."
+msgstr "Allow --from-file paths that resolve outside the traversal root directory."
+
+#: src/findfmt/parsers/engine.py:216
+#, python-brace-format
+msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
+msgstr "findfmt: warning: skipping path outside traversal root: '{path}'\n"
+
 #~ msgid "KB"
 #~ msgstr "KB"
 

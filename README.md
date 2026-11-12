@@ -245,6 +245,7 @@ ______________________________________________________________________
 | `--gitignore-file PATH`                                | Apply a specific external ignore file across the traversal scope                                                                       |
 | `--from-file, --fromfile PATH`                         | Read newline- or NUL-delimited (`-0`, `--print0`) paths or directory listings from a file, or standard input with `-`                  |
 | `--offline`                                            | Classify paths from `--from-file` input without inspecting the local filesystem                                                        |
+| `--allow-outside-root` / `--no-allow-outside-root`     | Allow `--from-file` paths that resolve outside the traversal root directory                                                            |
 | `--hidden` / `--no-hidden`                             | Toggle inspecting hidden files and directories                                                                                         |
 | `-d, --dirs-only`                                      | List directories only, suppressing regular file entries                                                                                |
 | `-l, --follow-links` / `--no-follow-links`             | Follow directory symlinks with loop detection                                                                                          |

@@ -1083,3 +1083,12 @@ msgstr "シンボリックリンク"
 #: src/findfmt/formatters/visual.py:213
 msgid "Shebang"
 msgstr "シェバンディレクティブ"
+
+#: src/findfmt/cli/help.py:66
+msgid "Allow --from-file paths that resolve outside the traversal root directory."
+msgstr "探索ルートディレクトリ外に解決される --from-file パスを許可する。"
+
+#: src/findfmt/parsers/engine.py:216
+#, python-brace-format
+msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
+msgstr "findfmt: 警告: 探索ルート外のパスをスキップしています: '{path}'\n"

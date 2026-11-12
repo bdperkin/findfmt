@@ -22,6 +22,7 @@ __all__ = [
     "APP_HELP",
     "CLI_EPILOG",
     "HELP_ABSOLUTE",
+    "HELP_ALLOW_OUTSIDE_ROOT",
     "HELP_ALL_TAGS",
     "HELP_ANSI_LINES",
     "HELP_CLASSIFY",
@@ -126,6 +127,9 @@ HELP_FROM_FILE = _(
     "Read directory listing from a file or standard input ('-') instead of scanning filesystem.",
 )
 HELP_OFFLINE = _("Enforce offline extension- and filename-only identification without disk IO.")
+HELP_ALLOW_OUTSIDE_ROOT = _(
+    "Allow --from-file paths that resolve outside the traversal root directory.",
+)
 HELP_HIDDEN = _("Include hidden files and directories.")
 HELP_FOLLOW_SYMLINKS = _("Follow symbolic links during traversal.")
 HELP_DIRS_ONLY = _("List directories only, suppressing regular file entries.")

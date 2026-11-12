@@ -186,6 +186,7 @@ def build_traversal_config(  # noqa: PLR0913 - wide CLI/config signature
     files_first: bool = False,
     from_file: str | None = None,
     offline: bool = False,
+    allow_outside_root: bool = False,
     permissions: bool = False,
     user: bool = False,
     group: bool = False,
@@ -250,6 +251,7 @@ def build_traversal_config(  # noqa: PLR0913 - wide CLI/config signature
         files_first: Whether files precede directories.
         from_file: Input file or '-' for stdin.
         offline: Whether to enforce offline classification.
+        allow_outside_root: Whether to allow --from-file entries outside the traversal root.
         permissions: Whether to display permissions in ls -l format.
         user: Whether to display file owner username or UID.
         group: Whether to display file owner group name or GID.
@@ -337,6 +339,7 @@ def build_traversal_config(  # noqa: PLR0913 - wide CLI/config signature
         files_first=files_first,
         from_file=from_file,
         offline=offline,
+        allow_outside_root=allow_outside_root,
         show_permissions=permissions,
         show_user=user,
         show_group=group,

@@ -13,6 +13,7 @@ import identify.identify as identify_engine
 
 from findfmt.classifier import _adjust_nt_tags, classify_file
 from findfmt.exceptions import ParserError
+from findfmt.i18n import _
 from findfmt.models import FileInfo, SortKey
 from findfmt.parsers.flat_parser import parse_flat_listing
 from findfmt.parsers.tab_parser import parse_tab_outline
@@ -133,14 +134,53 @@ def classify_file_offline(
     )
 
 
+def _lexical_candidate(
+    entry: ParsedEntry,
+    abspath_root: Path,
+    resolved_root: Path,
+) -> Path | None:
+    """Return candidate path if lexically within root, or None if it escapes."""
+    normalized = entry.path_str.replace("\\", "/")
+    raw_path = Path(normalized)
+    if raw_path.is_absolute() or normalized.startswith("/"):
+        lexical = Path(os.path.normpath(raw_path.absolute()))
+        if not (lexical.is_relative_to(resolved_root) or lexical.is_relative_to(abspath_root)):
+            return None
+
+        return lexical
+
+    candidate = Path(os.path.normpath(resolved_root / raw_path))
+    return candidate if candidate.is_relative_to(resolved_root) else None
+
+
+def _is_within_root(
+    entry: ParsedEntry,
+    root: Path,
+    resolved_root: Path,
+    *,
+    offline: bool = False,
+) -> bool:
+    """Return True if entry stays within the traversal root directory."""
+    abspath_root = Path(os.path.normpath(root.absolute()))
+    candidate = _lexical_candidate(entry, abspath_root, resolved_root)
+    if candidate is None:
+        return False
+
+    if offline:
+        return True
+
+    return candidate.resolve().is_relative_to(resolved_root)
+
+
 def _resolve_and_classify(
     entry: ParsedEntry,
     root: Path,
     config: TraversalConfig,
 ) -> FileInfo:
     """Resolve target path and classify entry via online or offline mechanisms."""
-    raw_path = Path(entry.path_str.replace("\\", "/"))
-    if raw_path.is_absolute():
+    normalized = entry.path_str.replace("\\", "/")
+    raw_path = Path(normalized)
+    if raw_path.is_absolute() or normalized.startswith("/"):
         target_path = raw_path
         rel_path = raw_path.relative_to(root) if raw_path.is_relative_to(root) else raw_path
     else:
@@ -158,6 +198,9 @@ def _resolve_and_classify(
 
     if target_path.exists():
         info = classify_file(target_path, root_path=root)
+        if not info.path.is_relative_to(root.resolve()):
+            info = replace(info, relative_path=rel_path)
+
         if entry.is_symlink or entry.symlink_target is not None:
             new_tags = info.tags | frozenset({"symlink"})
             return replace(
@@ -281,14 +324,25 @@ def ingest_from_file(
     entries = parse_tab_outline(lines) if fmt == "outline" else parse_flat_listing(lines)
 
     root = config.root_paths[0] if config.root_paths else Path()
+    resolved_root = root.resolve()
     matcher = create_pattern_matcher(config)
     matched: list[FileInfo] = []
 
     for entry in entries:
-        if config.dirs_only and not entry.is_dir:
+        if not config.allow_outside_root and not _is_within_root(
+            entry,
+            root,
+            resolved_root,
+            offline=config.offline,
+        ):
+            msg = _("findfmt: warning: skipping path outside traversal root: '{path}'\n").format(
+                path=entry.path_str,
+            )
+            sys.stderr.write(msg)
+            sys.stderr.flush()
             continue
 
-        if not config.dirs_only and entry.is_dir:
+        if entry.is_dir != config.dirs_only:
             continue
 
         info = _resolve_and_classify(entry, root, config)

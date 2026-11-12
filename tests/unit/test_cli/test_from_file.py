@@ -196,3 +196,43 @@ def test_cli_from_file_nul_delimited_embedded_newlines(tmp_path: Path) -> None:
     )
     assert res_file.exit_code == 0
     assert res_file.stdout_bytes.replace(b"\\", b"/").replace(b"\r\n", b"\n") == expected
+
+
+def test_cli_from_file_root_confinement_and_opt_in(tmp_path: Path) -> None:
+    """Verify --from-file skips out-of-root paths unless --allow-outside-root is passed (#463)."""
+    workspace = tmp_path / "repo"
+    workspace.mkdir()
+    inside = workspace / "app.py"
+    inside.write_text("print('app')\n", encoding="utf-8")
+    outside = tmp_path / "outside.sh"
+    outside.write_text("#!/bin/sh\necho hi\n", encoding="utf-8")
+
+    manifest = tmp_path / "manifest.txt"
+    manifest.write_text(f"/etc/passwd\n../outside.sh\n{outside}\napp.py\n", encoding="utf-8")
+
+    res_default = runner.invoke(
+        app,
+        [str(workspace), "--from-file", str(manifest), "--no-pager"],
+    )
+    assert res_default.exit_code == 0
+    assert _normalize_lines(res_default.stdout) == ["app.py"]
+    assert "skipping path outside traversal root: '/etc/passwd'" in res_default.stderr
+    assert "skipping path outside traversal root: '../outside.sh'" in res_default.stderr
+
+    res_allowed = runner.invoke(
+        app,
+        [
+            str(workspace),
+            "--from-file",
+            str(manifest),
+            "--allow-outside-root",
+            "--unsorted",
+            "--no-pager",
+        ],
+    )
+    assert res_allowed.exit_code == 0
+    lines_allowed = _normalize_lines(res_allowed.stdout)
+    assert "/etc/passwd" in lines_allowed
+    assert "../outside.sh" in lines_allowed
+    assert "app.py" in lines_allowed
+    assert "skipping path outside traversal root" not in res_allowed.stderr
