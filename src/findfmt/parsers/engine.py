@@ -339,6 +339,7 @@ def ingest_from_file(
                 path=entry.path_str,
             )
             sys.stderr.write(msg)
+            sys.stderr.flush()
             continue
 
         if entry.is_dir != config.dirs_only:
