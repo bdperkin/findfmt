@@ -8,6 +8,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/bdperkin/findfmt?logo=github)](https://github.com/bdperkin/findfmt/releases/latest)
 [![GHCR Container](https://img.shields.io/badge/GHCR-ghcr.io%2Fbdperkin%2Ffindfmt-2496ED?logo=docker&logoColor=white)](https://github.com/bdperkin/findfmt/pkgs/container/findfmt)
 [![Platforms](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-informational?logo=linux&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/ci.yml)
+[![Hatch](https://img.shields.io/badge/build%20system-hatch-orange?logo=python&logoColor=white)](https://hatch.pypa.io/)
 
 [![CI Status](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/ci.yml?branch=main&label=CI&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows/ci.yml)
 [![Dependency Matrix](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/dependency-matrix.yml?branch=main&label=deps%20matrix&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows/dependency-matrix.yml)
@@ -23,6 +24,11 @@
 [![Docstring Coverage: 100%](https://img.shields.io/badge/interrogate-100%25-brightgreen?logo=readthedocs&logoColor=white)](https://interrogate.readthedocs.io/)
 [![Tested with Hypothesis](https://img.shields.io/badge/hypothesis-tested-brightgreen?logo=python&logoColor=white)](https://hypothesis.readthedocs.io/)
 [![PEP 561 Typed](https://img.shields.io/badge/typing-PEP%20561%20py.typed-3776AB?logo=python&logoColor=white)](https://peps.python.org/pep-0561/)
+[![Deptry](https://img.shields.io/badge/deptry-checked-informational)](https://deptry.com/)
+[![Vulture](https://img.shields.io/badge/vulture-checked-informational)](https://github.com/jendrikseipp/vulture)
+[![Xenon](https://img.shields.io/badge/xenon-monitored-informational)](https://xenon.readthedocs.io/)
+[![Codespell](https://img.shields.io/badge/codespell-checked-informational)](https://github.com/codespell-project/codespell)
+[![PyMarkdown](https://img.shields.io/badge/pymarkdown-linted-informational?logo=markdown&logoColor=white)](https://pymarkdown.readthedocs.io/)
 
 [![CodeQL](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/codeql.yml?branch=main&label=CodeQL&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows/codeql.yml)
 [![zizmor](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/zizmor.yml?branch=main&label=zizmor&logo=githubactions&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/zizmor.yml)
@@ -33,10 +39,13 @@
 [![Security Policy](https://img.shields.io/badge/security-policy-blue?logo=securityscorecard&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)
 
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=sphinx&logoColor=white)](https://bdperkin.github.io/findfmt/)
+[![i18n Languages](https://img.shields.io/badge/i18n-en%20%C2%B7%20es%20%C2%B7%20fr%20%C2%B7%20de%20%C2%B7%20ja-blue)](https://bdperkin.github.io/findfmt/)
 [![License: MIT](https://img.shields.io/github/license/bdperkin/findfmt?color=blue&logo=opensourceinitiative&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
 [![Keep a Changelog](https://img.shields.io/badge/changelog-Keep%20a%20Changelog-E05735?logo=keepachangelog&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md)
 [![Accessibility WCAG 2.1 AA](https://img.shields.io/badge/WCAG-2.1%20AA-005A9C?logo=w3c&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/ACCESSIBILITY.md)
+[![GitHub Issues](https://img.shields.io/github/issues/bdperkin/findfmt?logo=github)](https://github.com/bdperkin/findfmt/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/bdperkin/findfmt?style=flat&logo=github)](https://github.com/bdperkin/findfmt/stargazers)
 
 ______________________________________________________________________
 
