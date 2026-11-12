@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 208 Closed Issues | 113 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 209 Closed Issues | 112 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -19,7 +19,8 @@
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
 > its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, epic #346, and #618, and
 > released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
-> added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3)
+> added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
+> closed #624)
 
 ______________________________________________________________________
 
@@ -653,6 +654,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#386](https://github.com/bdperkin/findfmt/issues/386)** - [Epic] CLI Architecture, Terminal
   Interactivity & Execution Ergonomics (Closed: 2026-11-12 via PR
   [#622](https://github.com/bdperkin/findfmt/pull/622))
+- [x] **[#624](https://github.com/bdperkin/findfmt/issues/624)** - Feature Request: Implement
+  Automatic Job Re-Runs via workflow_run (Runner/VM Timeouts) (Closed: 2026-11-12 via PR
+  [#637](https://github.com/bdperkin/findfmt/pull/637))
 
 ______________________________________________________________________
 
@@ -671,12 +675,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same
   zero-warning static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#624](https://github.com/bdperkin/findfmt/issues/624)** - Feature Request: Implement
-  Automatic Job Re-Runs via workflow_run (Runner/VM Timeouts) *(Rank: 7 | Epic:
-  [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
-  | Milestone: v1.2.2)* - **Value:** Medium | **Effort:** S - **Rationale:** Automatically retries
-  failed or queue-timed-out CI runs via `workflow_run` (`run_attempt < 3`) without manual
-  intervention.
 - [ ] **[#456](https://github.com/bdperkin/findfmt/issues/456)** - feat(config): add a FINDFMT\_\*
   environment-variable configuration layer *(Rank: 8 | Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
@@ -1416,14 +1414,13 @@ linked natively on GitHub.
   [#574](https://github.com/bdperkin/findfmt/issues/574),
   [#623](https://github.com/bdperkin/findfmt/issues/623)
 - [ ] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static
-  Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 7)* -
+  Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 6)* -
   [#292](https://github.com/bdperkin/findfmt/issues/292),
   [#313](https://github.com/bdperkin/findfmt/issues/313),
   [#314](https://github.com/bdperkin/findfmt/issues/314),
   [#470](https://github.com/bdperkin/findfmt/issues/470),
   [#471](https://github.com/bdperkin/findfmt/issues/471),
-  [#472](https://github.com/bdperkin/findfmt/issues/472),
-  [#624](https://github.com/bdperkin/findfmt/issues/624)
+  [#472](https://github.com/bdperkin/findfmt/issues/472)
 - [ ] **[#626](https://github.com/bdperkin/findfmt/issues/626)** - [Epic] Tier-1 Workflow & Quality
   Automation Apps *(Milestone: v1.3.2 | Open sub-issues: 4)* -
   [#628](https://github.com/bdperkin/findfmt/issues/628),
@@ -1607,7 +1604,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 4           |
+| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 3           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
