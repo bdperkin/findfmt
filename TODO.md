@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 208 Closed Issues | 103 Actionable Open Tasks | 30 Active Umbrella Epics **Last
+> **Tracking:** 208 Closed Issues | 113 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -18,7 +18,8 @@
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
 > its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, epic #346, and #618, and
-> released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386)
+> released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
+> added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3)
 
 ______________________________________________________________________
 
@@ -670,6 +671,12 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same
   zero-warning static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
+- [ ] **[#624](https://github.com/bdperkin/findfmt/issues/624)** - Feature Request: Implement
+  Automatic Job Re-Runs via workflow_run (Runner/VM Timeouts) *(Rank: 7 | Epic:
+  [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
+  | Milestone: v1.2.2)* - **Value:** Medium | **Effort:** S - **Rationale:** Automatically retries
+  failed or queue-timed-out CI runs via `workflow_run` (`run_attempt < 3`) without manual
+  intervention.
 - [ ] **[#456](https://github.com/bdperkin/findfmt/issues/456)** - feat(config): add a FINDFMT\_\*
   environment-variable configuration layer *(Rank: 8 | Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
@@ -695,6 +702,36 @@ sub-issues. Respect `Blocked by` links when picking up work.
   pins plugins and a shared `.mdformat.toml`. `mdformat-tables` is archived and merged into
   `mdformat-gfm`. Verified zero reformat diff. `wrap` follows
   [#314](https://github.com/bdperkin/findfmt/issues/314).
+- [ ] **[#628](https://github.com/bdperkin/findfmt/issues/628)** - Evaluate and Integrate CodeRabbit
+  AI Reviewer *(Rank: 12 | Epic:
+  [[Epic] Tier-1 Workflow & Quality Automation Apps](https://github.com/bdperkin/findfmt/issues/626)
+  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.2)* -
+  **Value:** Medium | **Effort:** S - **Rationale:** Automates AI PR reviews via `.coderabbit.yaml`
+  focused on Python best practices, `.gitignore` edge cases, and `tests/` assertions.
+- [ ] **[#629](https://github.com/bdperkin/findfmt/issues/629)** - Configure Renovate for Python and
+  Action Dependency Management *(Rank: 13 | Epic:
+  [[Epic] Tier-1 Workflow & Quality Automation Apps](https://github.com/bdperkin/findfmt/issues/626)
+  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.2)* -
+  **Value:** Medium | **Effort:** S - **Rationale:** Configures `renovate.json` to group Python
+  development dependencies and GitHub Actions updates, reducing PR noise.
+- [ ] **[#630](https://github.com/bdperkin/findfmt/issues/630)** - Set Up Mergify for Automated PR
+  Queue & Merge Triggers *(Rank: 14 | Epic:
+  [[Epic] Tier-1 Workflow & Quality Automation Apps](https://github.com/bdperkin/findfmt/issues/626)
+  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.2)* -
+  **Value:** Medium | **Effort:** S - **Rationale:** Configures `.mergify.yml` to automatically
+  queue and merge PRs once `pre-commit.ci`, Codecov, and CodeRabbit checks pass.
+- [ ] **[#632](https://github.com/bdperkin/findfmt/issues/632)** - Implement Release Drafter &
+  Conventional Commits *(Rank: 15 | Epic:
+  [[Epic] Tier-2 Community, Release & Documentation Automation Apps](https://github.com/bdperkin/findfmt/issues/627)
+  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.3)* -
+  **Value:** Medium | **Effort:** S - **Rationale:** Automates draft release changelog compilation
+  via `.github/release-drafter.yml` categorized by features, fixes, and chores.
+- [ ] **[#633](https://github.com/bdperkin/findfmt/issues/633)** - Set Up ReadTheDocs /
+  Documentation Preview Deployments *(Rank: 16 | Epic:
+  [[Epic] Tier-2 Community, Release & Documentation Automation Apps](https://github.com/bdperkin/findfmt/issues/627)
+  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.3)* -
+  **Value:** Medium | **Effort:** S - **Rationale:** Provides live preview deployment links on PRs
+  modifying `docs/source/`.
 - [ ] **[#579](https://github.com/bdperkin/findfmt/issues/579)** - docs(license): audit MIT license
   compatibility and configure cargo-deny / cargo-about for Rust crate dependencies *(Rank: 12 |
   Epic:
@@ -777,6 +814,14 @@ sub-issues. Respect `Blocked by` links when picking up work.
   compiled Rust extension nor the pure-Python fallback regresses on any OS or Python version.
 
 ### 2.2. Medium Priority / Core Deliverables
+
+- [ ] **[#623](https://github.com/bdperkin/findfmt/issues/623)** - [Task] Investigate and Enforce
+  Source-of-Truth (SoT) Synchronization for CLI Help, Configuration Docs, and README *(Rank: 30 |
+  Epic:
+  [[Epic] Documentation Architecture, Sphinx Navigation & Project Branding](https://github.com/bdperkin/findfmt/issues/379)
+  | Milestone: v1.2.2)* - **Value:** Medium | **Effort:** M - **Rationale:** Eliminates manual drift
+  between `src/findfmt/cli/options.py` and static CLI/config documentation (`README.md`,
+  `docs/source/`) via automated sync and CI drift checks.
 
 - [ ] **[#310](https://github.com/bdperkin/findfmt/issues/310)** - feat(config): provide sample
   config.toml, annotated reference configuration, and --generate-config CLI option *(Rank: 31 |
@@ -979,6 +1024,27 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
   | Milestone: v1.3.2)* - **Value:** Low | **Effort:** S - **Rationale:** `check-hooks-apply`
   currently fails on `check-symlinks` (no tracked symlinks); remove that hook in the same PR.
+
+- [ ] **[#631](https://github.com/bdperkin/findfmt/issues/631)** - Implement PR Size Labeler *(Rank:
+  63 | Epic:
+  [[Epic] Tier-1 Workflow & Quality Automation Apps](https://github.com/bdperkin/findfmt/issues/626)
+  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.2)* -
+  **Value:** Low | **Effort:** S - **Rationale:** Automatically tags PRs by diff volume (`S`, `M`,
+  `L`) on opening to improve review transparency.
+
+- [ ] **[#634](https://github.com/bdperkin/findfmt/issues/634)** - Configure Stale Issue and PR
+  Lifecycle Management *(Rank: 64 | Epic:
+  [[Epic] Tier-2 Community, Release & Documentation Automation Apps](https://github.com/bdperkin/findfmt/issues/627)
+  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.3)* -
+  **Value:** Low | **Effort:** S - **Rationale:** Configures `.github/stale.yml` to warn after 30
+  days of inactivity and close after 7 days if unresponded to.
+
+- [ ] **[#635](https://github.com/bdperkin/findfmt/issues/635)** - Automate Contributor Onboarding
+  with Welcome App *(Rank: 65 | Epic:
+  [[Epic] Tier-2 Community, Release & Documentation Automation Apps](https://github.com/bdperkin/findfmt/issues/627)
+  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.3)* -
+  **Value:** Low | **Effort:** S - **Rationale:** Welcomes first-time contributors on their initial
+  issue or PR with links to contributing guidelines and templates.
 
 - [ ] **[#445](https://github.com/bdperkin/findfmt/issues/445)** - feat(cli): add --ignore-file /
   --ignore-type options and matching config keys *(Rank: 63 | Epic:
@@ -1343,19 +1409,37 @@ linked natively on GitHub.
   [#332](https://github.com/bdperkin/findfmt/issues/332),
   [#340](https://github.com/bdperkin/findfmt/issues/340)
 - [ ] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
-  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 4)* -
+  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 5)* -
   [#302](https://github.com/bdperkin/findfmt/issues/302),
   [#309](https://github.com/bdperkin/findfmt/issues/309),
   [#312](https://github.com/bdperkin/findfmt/issues/312),
-  [#574](https://github.com/bdperkin/findfmt/issues/574)
+  [#574](https://github.com/bdperkin/findfmt/issues/574),
+  [#623](https://github.com/bdperkin/findfmt/issues/623)
 - [ ] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static
-  Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 6)* -
+  Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 7)* -
   [#292](https://github.com/bdperkin/findfmt/issues/292),
   [#313](https://github.com/bdperkin/findfmt/issues/313),
   [#314](https://github.com/bdperkin/findfmt/issues/314),
   [#470](https://github.com/bdperkin/findfmt/issues/470),
   [#471](https://github.com/bdperkin/findfmt/issues/471),
-  [#472](https://github.com/bdperkin/findfmt/issues/472)
+  [#472](https://github.com/bdperkin/findfmt/issues/472),
+  [#624](https://github.com/bdperkin/findfmt/issues/624)
+- [ ] **[#626](https://github.com/bdperkin/findfmt/issues/626)** - [Epic] Tier-1 Workflow & Quality
+  Automation Apps *(Milestone: v1.3.2 | Open sub-issues: 4)* -
+  [#628](https://github.com/bdperkin/findfmt/issues/628),
+  [#629](https://github.com/bdperkin/findfmt/issues/629),
+  [#630](https://github.com/bdperkin/findfmt/issues/630),
+  [#631](https://github.com/bdperkin/findfmt/issues/631)
+- [ ] **[#625](https://github.com/bdperkin/findfmt/issues/625)** - [Epic] GitHub Marketplace Apps
+  Evaluation & Integration *(Milestone: v1.3.3 | Open sub-issues: 2)* -
+  [#626](https://github.com/bdperkin/findfmt/issues/626),
+  [#627](https://github.com/bdperkin/findfmt/issues/627)
+- [ ] **[#627](https://github.com/bdperkin/findfmt/issues/627)** - [Epic] Tier-2 Community, Release
+  & Documentation Automation Apps *(Milestone: v1.3.3 | Open sub-issues: 4)* -
+  [#632](https://github.com/bdperkin/findfmt/issues/632),
+  [#633](https://github.com/bdperkin/findfmt/issues/633),
+  [#634](https://github.com/bdperkin/findfmt/issues/634),
+  [#635](https://github.com/bdperkin/findfmt/issues/635)
 - [ ] **[#576](https://github.com/bdperkin/findfmt/issues/576)** - [Epic] Hybrid Python-Rust
   Foundation: findfmt_rs Crate, hatch-maturin-build & Fallback Architecture *(Milestone: v1.4.0 |
   Open sub-issues: 4)* - [#577](https://github.com/bdperkin/findfmt/issues/577),
@@ -1523,10 +1607,11 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 2           |
+| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 4           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
-| v1.3.2          | Pre-commit & CI Config Hardening: Schema Validation, Workflow Timeouts, Meta Hooks & Markdown Linting              | 4           |
+| v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
+| v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
 | v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |
 | v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |

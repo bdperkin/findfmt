@@ -23,8 +23,8 @@ assistive tooling:
 - **Stream-Oriented Plain Text**: CLI output emits linear, deterministic text streams to `stdout`
   and error diagnostics to `stderr` without ANSI escape codes, cursor jumps, or animated spinners in
   standard execution modes.
-- **Machine-Readable Delimiters**: Supports `-0` / `--null` NUL-separated streaming for unambiguous
-  parsing and programmatic integration with `xargs -0` and automated scripts.
+- **Machine-Readable Delimiters**: Supports `-0` / `--print0` NUL-separated streaming for
+  unambiguous parsing and programmatic integration with `xargs -0` and automated scripts.
 - **Color Independence & `NO_COLOR` Support**: No critical information is communicated exclusively
   through color. When color styling is introduced, `findfmt` adheres to the
   [`NO_COLOR`](https://no-color.org/) standard, disabling ANSI styles whenever the `NO_COLOR`

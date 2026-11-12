@@ -7,6 +7,29 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Features
+
+- *(parsers)* Auto-detect NUL-delimited (`\0`) `--from-file` and `stdin` (`-`) input streams
+  (`find -print0`, `fd -0`, `findfmt -0`) so filenames containing embedded newlines (`\n`) or
+  carriage returns (`\r`) are preserved intact (#461).
+- *(parsers)* Add `--allow-outside-root` / `--no-allow-outside-root` (`allow_outside_root`
+  configuration key) to explicitly opt in to resolving `--from-file` paths outside the traversal
+  root directory (#463).
+
+### Fixed
+
+- *(parsers)* Strip ASCII `tree --charset=ascii` branch prefixes (`|--`, `` `-- ``, `|`) and ignore
+  `tree` summary trailer lines (`N directories, M files`, `0 directories`) in `--from-file` tab/tree
+  parser (#459).
+- *(parsers)* Confine `--from-file` paths to the traversal root by default using lexical and
+  canonical (`Path.resolve()`) boundary checks (`_is_within_root`), skipping out-of-root entries
+  with a warning to `stderr` before opening or reading file contents (#463, #334, #386).
+
+### Documentation
+
+- *(readme)* Modernize, deduplicate, and categorize `README.md` status, quality, security, and
+  metadata badges into 5 pure-Markdown thematic rows (#618).
+
 ## [1.2.1] - 2026-11-11
 
 ### Features
