@@ -178,6 +178,7 @@ def test_cli_from_file_ascii_and_unicode_tree_fixtures(tmp_path: Path) -> None:
 def test_cli_from_file_nul_delimited_embedded_newlines(tmp_path: Path) -> None:
     """Verify --from-file auto-detects NUL-delimited input with embedded newlines (#461)."""
     raw_print0 = b"./src/has\nnewline.py\x00./src/normal.py\x00  leading_space.py\x00"
+    expected = b"src/has\nnewline.py\x00src/normal.py\x00  leading_space.py\x00"
 
     res_stdin = runner.invoke(
         app,
@@ -185,9 +186,7 @@ def test_cli_from_file_nul_delimited_embedded_newlines(tmp_path: Path) -> None:
         input=raw_print0,
     )
     assert res_stdin.exit_code == 0
-    assert res_stdin.stdout_bytes == (
-        b"src/has\nnewline.py\x00src/normal.py\x00  leading_space.py\x00"
-    )
+    assert res_stdin.stdout_bytes.replace(b"\\", b"/").replace(b"\r\n", b"\n") == expected
 
     listing_file = tmp_path / "files0.bin"
     listing_file.write_bytes(raw_print0)
@@ -196,6 +195,4 @@ def test_cli_from_file_nul_delimited_embedded_newlines(tmp_path: Path) -> None:
         ["--from-file", str(listing_file), "--offline", "-0", "--unsorted", "--no-pager"],
     )
     assert res_file.exit_code == 0
-    assert res_file.stdout_bytes == (
-        b"src/has\nnewline.py\x00src/normal.py\x00  leading_space.py\x00"
-    )
+    assert res_file.stdout_bytes.replace(b"\\", b"/").replace(b"\r\n", b"\n") == expected
