@@ -138,3 +138,38 @@ def test_cli_from_file_non_utf8_round_trip(tmp_path: Path) -> None:
     assert res_err.exit_code == 2
     assert "Cannot read input from 'bad.txt'" in res_err.stderr
     assert "Traceback" not in res_err.output
+
+
+def test_cli_from_file_ascii_and_unicode_tree_fixtures(tmp_path: Path) -> None:
+    """Verify ASCII and Unicode tree fixtures strip branches and ignore summary trailers (#459)."""
+    ascii_fixture = tmp_path / "ascii_tree.txt"
+    ascii_fixture.write_text(
+        ".\n|-- src\n|   |-- app.py\n|   `-- util.py\n`-- README.md\n\n1 directory, 3 files\n",
+        encoding="utf-8",
+    )
+    res_ascii = runner.invoke(
+        app,
+        ["--from-file", str(ascii_fixture), "--offline", "--no-pager"],
+    )
+    assert res_ascii.exit_code == 0
+    assert _normalize_lines(res_ascii.output) == [
+        "README.md",
+        "src/app.py",
+        "src/util.py",
+    ]
+
+    unicode_fixture = tmp_path / "unicode_tree.txt"
+    unicode_fixture.write_text(
+        ".\n├── src\n│   ├── app.py\n│   └── util.py\n└── README.md\n\n1 directory, 3 files\n",
+        encoding="utf-8",
+    )
+    res_unicode = runner.invoke(
+        app,
+        ["--from-file", str(unicode_fixture), "--offline", "--no-pager"],
+    )
+    assert res_unicode.exit_code == 0
+    assert _normalize_lines(res_unicode.output) == [
+        "README.md",
+        "src/app.py",
+        "src/util.py",
+    ]

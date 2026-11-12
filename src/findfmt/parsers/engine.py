@@ -48,7 +48,9 @@ def detect_input_format(lines: list[str]) -> str:
         if not stripped or stripped.startswith("#"):
             continue
 
-        if line[0] in (" ", "\t") or stripped.startswith(("├──", "└──", "|--", "\\--")):
+        if line[0] in (" ", "\t") or stripped.startswith(
+            ("├──", "└──", "|--", "`--", "+--", "\\--"),
+        ):
             return "outline"
 
     return "flat"

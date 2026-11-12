@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -11,6 +12,17 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator
 
 __all__ = ["ParsedEntry", "parse_flat_listing"]
+
+_TREE_TRAILER_RE = re.compile(
+    r"^(?:[\d.,]+[A-Za-z]*\s+used\s+in\s+)?"
+    r"\d+\s+director(?:y|ies)(?:,\s+\d+\s+files?)?$",
+    re.IGNORECASE,
+)
+
+
+def is_tree_trailer(line: str) -> bool:
+    """Return True if *line* matches a Unix/ASCII tree summary trailer."""
+    return bool(_TREE_TRAILER_RE.match(line.strip()))
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,7 +57,7 @@ def parse_flat_listing(lines: Iterable[str]) -> Iterator[ParsedEntry]:
     """
     for raw_line in lines:
         stripped = raw_line.strip()
-        if not stripped or stripped.startswith("#"):
+        if not stripped or stripped.startswith("#") or is_tree_trailer(stripped):
             continue
 
         token, is_symlink, target = parse_symlink_target(stripped)
