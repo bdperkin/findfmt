@@ -70,3 +70,16 @@ def test_parse_flat_listing_directories_and_symlinks() -> None:
         symlink_target="libfoo.so.1",
         is_dir=False,
     )
+
+
+def test_parse_flat_listing_ignores_tree_summary_trailers() -> None:
+    """Verify tree summary trailers are ignored in flat mode (e.g. empty tree output) (#459)."""
+    lines = [
+        ".",
+        "src/main.py",
+        "",
+        "0 directories, 1 file",
+        "1 directory, 0 files",
+    ]
+    entries = list(parse_flat_listing(lines))
+    assert [e.path_str for e in entries] == ["src/main.py"]

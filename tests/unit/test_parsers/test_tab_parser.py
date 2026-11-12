@@ -109,3 +109,60 @@ def test_parse_tab_outline_empty_and_no_items() -> None:
     assert list(parse_tab_outline([])) == []
     assert list(parse_tab_outline(["", "  ", "# comment only"])) == []
     assert list(parse_tab_outline(["///", "  ///  "])) == []
+
+
+def test_parse_tab_outline_ascii_tree_and_summary_trailer() -> None:
+    """Verify tree --charset=ascii branches and summary trailers parse cleanly (#459)."""
+    ascii_tree_lines = [
+        ".",
+        "|-- src",
+        "|   |-- findfmt",
+        "|   |   |-- __init__.py",
+        "|   |   `-- cli.py",
+        "|   `-- helper.sh -> ../scripts/helper.sh",
+        "`-- tests",
+        "    |-- +special.py",
+        "    `-- test_cli.py",
+        "",
+        "3 directories, 4 files",
+    ]
+    entries = list(parse_tab_outline(ascii_tree_lines))
+    assert [(e.path_str, e.is_dir, e.is_symlink, e.symlink_target) for e in entries] == [
+        ("src", True, False, None),
+        ("src/findfmt", True, False, None),
+        ("src/findfmt/__init__.py", False, False, None),
+        ("src/findfmt/cli.py", False, False, None),
+        ("src/helper.sh", False, True, "../scripts/helper.sh"),
+        ("tests", True, False, None),
+        ("tests/+special.py", False, False, None),
+        ("tests/test_cli.py", False, False, None),
+    ]
+
+
+def test_parse_tab_outline_unicode_tree_and_trailer_variants() -> None:
+    """Verify Unicode tree output and singular/du/dirs-only trailers are ignored (#459)."""
+    unicode_tree_lines = [
+        "project",
+        "├── pkg",
+        "│   └── mod.py",
+        "└── README.md",
+        "",
+        "4.0K used in 1 directory, 2 files",
+    ]
+    entries = list(parse_tab_outline(unicode_tree_lines))
+    assert [(e.path_str, e.is_dir) for e in entries] == [
+        ("project", True),
+        ("project/pkg", True),
+        ("project/pkg/mod.py", False),
+        ("project/README.md", False),
+    ]
+
+    for trailer in (
+        "0 directories, 0 files",
+        "1 directory, 1 file",
+        "2 directories, 1 file",
+        "1 directory",
+        "5 directories",
+        "1024 used in 2 directories",
+    ):
+        assert list(parse_tab_outline([".", trailer])) == []

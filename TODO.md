@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 203 Closed Issues | 106 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 204 Closed Issues | 105 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -18,7 +18,7 @@
 > realigned milestones v1.4.0-v1.8.1 so hybrid Python-Rust lands in v1.4.0-v1.4.4, and closed #329,
 > issues #460, #366, #452, #319, #451, #453, #324, and #609; 2026-11-10 released v1.2.0 and closed
 > its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, epic #346, and #618, and
-> released v1.2.1 and closed its milestone)
+> released v1.2.1 and closed its milestone; 2026-11-12 closed #459)
 
 ______________________________________________________________________
 
@@ -637,6 +637,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#618](https://github.com/bdperkin/findfmt/issues/618)** - docs(readme): modernize,
   deduplicate, and categorize README badges in pure Markdown (Closed: 2026-11-11 via PR
   [#619](https://github.com/bdperkin/findfmt/pull/619))
+- [x] **[#459](https://github.com/bdperkin/findfmt/issues/459)** - fix(parsers): strip ASCII tree
+  branches and the summary trailer in --from-file tree input (Closed: 2026-11-12 via PR
+  [#620](https://github.com/bdperkin/findfmt/pull/620))
 
 ______________________________________________________________________
 
@@ -655,12 +658,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same
   zero-warning static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#459](https://github.com/bdperkin/findfmt/issues/459)** - fix(parsers): strip ASCII tree
-  branches and the summary trailer in --from-file tree input *(Rank: 6 | Epic:
-  [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Parent: [#334](https://github.com/bdperkin/findfmt/issues/334) | Milestone: v1.2.2)* -
-  **Value:** Medium | **Effort:** S - **Rationale:** Wrong output for a common input format; small
-  fix.
 - [ ] **[#461](https://github.com/bdperkin/findfmt/issues/461)** - feat(parsers): add NUL-delimited
   --from-file input mode (-0 / find -print0 compatibility) *(Rank: 7 | Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
@@ -1330,8 +1327,7 @@ its sub-issues close.
 - [ ] **[#334](https://github.com/bdperkin/findfmt/issues/334)** - fix(parsers): --from-file
   mis-parses ASCII tree output, crashes on non-UTF-8 stdin, and lacks NUL input *(Epic:
   [[Epic] CLI Architecture, Terminal Interactivity & Execution Ergonomics](https://github.com/bdperkin/findfmt/issues/386)
-  | Milestone: v1.2.2)* - **Sub-issues:** [#459](https://github.com/bdperkin/findfmt/issues/459),
-  [#461](https://github.com/bdperkin/findfmt/issues/461),
+  | Milestone: v1.2.2)* - **Sub-issues:** [#461](https://github.com/bdperkin/findfmt/issues/461),
   [#463](https://github.com/bdperkin/findfmt/issues/463)
 
 ______________________________________________________________________
@@ -1533,7 +1529,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 7           |
+| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 6           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit & CI Config Hardening: Schema Validation, Workflow Timeouts, Meta Hooks & Markdown Linting              | 4           |

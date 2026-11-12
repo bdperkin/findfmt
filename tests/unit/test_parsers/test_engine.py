@@ -31,6 +31,10 @@ def test_detect_input_format() -> None:
     assert detect_input_format(["src", "\tmain.py"]) == "outline"
     assert detect_input_format(["src", "  main.py"]) == "outline"
     assert detect_input_format(["root", "├── child.py"]) == "outline"
+    assert detect_input_format([".", "|-- child.py"]) == "outline"
+    assert detect_input_format([".", "`-- child.py"]) == "outline"
+    assert detect_input_format([".", "+-- child.py"]) == "outline"
+    assert detect_input_format([".", "\\-- child.py"]) == "outline"
 
 
 def test_classify_file_offline_posix_and_symlink() -> None:

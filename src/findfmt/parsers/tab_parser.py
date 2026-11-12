@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-from findfmt.parsers.flat_parser import ParsedEntry
+from findfmt.parsers.flat_parser import ParsedEntry, is_tree_trailer
 from findfmt.parsers.symlink_parser import parse_symlink_target
 
 if TYPE_CHECKING:
@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 
 __all__ = ["parse_tab_outline"]
 
-_TREE_BRANCH_RE = re.compile(r"^([│|`\s]*[├└──+\\]──?\s*)")
+_TREE_BRANCH_RE = re.compile(r"^([│|\s]*(?:[├└+\\|`](?:──|--)|[├└+\\][─-])\s*)")
 
 
 def _clean_outline_line(raw: str) -> tuple[int, str, bool, str | None, bool] | None:
     """Extract column indent, clean token, symlink info, and directory flag from line."""
     stripped = raw.strip()
-    if not stripped or stripped.startswith("#"):
+    if not stripped or stripped.startswith("#") or is_tree_trailer(stripped):
         return None
 
     leading_ws = raw[: len(raw) - len(raw.lstrip())]
