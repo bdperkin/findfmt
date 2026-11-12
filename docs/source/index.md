@@ -52,7 +52,7 @@
 [![License: MIT](https://img.shields.io/github/license/bdperkin/findfmt?color=blue&logo=opensourceinitiative&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/LICENSE)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
 [![Keep a Changelog](https://img.shields.io/badge/changelog-Keep%20a%20Changelog-E05735?logo=keepachangelog&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md)
-[![Accessibility WCAG 2.1 AA](https://img.shields.io/badge/WCAG-2.1%20AA-005A9C?logo=w3c&logoColor=white)](accessibility.html)
+[![Accessibility WCAG 2.1 AA](https://img.shields.io/badge/WCAG-2.1%20AA-005A9C?logo=w3c&logoColor=white)](accessibility.md)
 
 **findfmt** is a high-performance, `.gitignore`-aware file discovery and classification suite. It
 locates files by content format, shebang, and MIME tag rather than relying strictly on file

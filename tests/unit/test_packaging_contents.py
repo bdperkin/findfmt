@@ -110,3 +110,8 @@ def test_readme_and_docs_index_use_pure_markdown_badges() -> None:
         if wf_match := workflow_pattern.match(target):
             wf_file = ROOT / ".github" / "workflows" / wf_match.group(1)
             assert wf_file.is_file(), f"Badge references missing workflow {wf_file}"
+
+    for alt, _img, target in docs_badges:
+        if not target.startswith("https://"):
+            doc_file = ROOT / "docs" / "source" / target
+            assert doc_file.is_file(), f"Docs badge for {alt!r} references missing source {target}"
