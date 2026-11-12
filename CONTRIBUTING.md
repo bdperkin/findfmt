@@ -41,7 +41,8 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
   - `area:i18n`: Internationalization and localization catalogs.
   - `area:packaging`: PyPI packages, wheels, Docker images, dependencies.
   - `area:docs`: Documentation guides, API reference, man pages, README.
-  - `area:rust`: Rust extension crate (`findfmt_rs`), PyO3 bindings, and Maturin build integration.
+  - `area:rust`: Rust extension crate (`findfmt_rs`), PyO3 bindings, and `maturin` build
+    integration.
 - **`os:*` (Operating Systems)**:
   - `os:linux`, `os:macos`, `os:windows`: Platform-specific behaviors and tests.
 - **`status:*` (Triage & Review Workflow)**:
