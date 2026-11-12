@@ -1,33 +1,51 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/bdperkin/findfmt/main/assets/logo.svg" alt="findfmt Logo" width="600" />
-</p>
+![findfmt Logo](https://raw.githubusercontent.com/bdperkin/findfmt/main/assets/logo.svg)
 
-<p align="center">
-  <a href="https://github.com/bdperkin/findfmt/actions/workflows/ci.yml"><img src="https://github.com/bdperkin/findfmt/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
-  <a href="https://github.com/bdperkin/findfmt/actions/workflows/codeql.yml"><img src="https://github.com/bdperkin/findfmt/actions/workflows/codeql.yml/badge.svg" alt="CodeQL Analysis" /></a>
-  <a href="https://github.com/bdperkin/findfmt/actions/workflows/docs.yml"><img src="https://github.com/bdperkin/findfmt/actions/workflows/docs.yml/badge.svg" alt="Documentation Status" /></a>
-  <a href="https://results.pre-commit.ci/latest/github/bdperkin/findfmt/main"><img src="https://results.pre-commit.ci/badge/github/bdperkin/findfmt/main.svg" alt="pre-commit.ci status" /></a>
-  <a href="https://codecov.io/gh/bdperkin/findfmt"><img src="https://codecov.io/gh/bdperkin/findfmt/branch/main/graph/badge.svg" alt="Coverage" /></a>
-  <a href="https://www.bestpractices.dev/projects/15282"><img src="https://www.bestpractices.dev/projects/15282/badge" alt="OpenSSF Best Practices" /></a>
-</p>
+[![PyPI Version](https://img.shields.io/pypi/v/findfmt?logo=pypi&logoColor=white)](https://pypi.org/project/findfmt/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/findfmt?logo=python&logoColor=white)](https://pypi.org/project/findfmt/)
+[![PyPI Wheel](https://img.shields.io/pypi/wheel/findfmt?logo=pypi&logoColor=white)](https://pypi.org/project/findfmt/#files)
+[![PyPI Status](https://img.shields.io/pypi/status/findfmt?logo=pypi&logoColor=white)](https://pypi.org/project/findfmt/)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/findfmt?logo=pypi&logoColor=white)](https://pypistats.org/packages/findfmt)
+[![GitHub Release](https://img.shields.io/github/v/release/bdperkin/findfmt?logo=github)](https://github.com/bdperkin/findfmt/releases/latest)
+[![GHCR Container](https://img.shields.io/badge/GHCR-ghcr.io%2Fbdperkin%2Ffindfmt-2496ED?logo=docker&logoColor=white)](https://github.com/bdperkin/findfmt/pkgs/container/findfmt)
+[![Platforms](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-informational?logo=linux&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/ci.yml)
+[![Hatch](https://img.shields.io/badge/build%20system-hatch-orange?logo=python&logoColor=white)](https://hatch.pypa.io/)
 
-<p align="center">
-  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/v/findfmt?logo=pypi&logoColor=white" alt="PyPI Version" /></a>
-  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/pyversions/findfmt?logo=python&logoColor=white" alt="Python Versions" /></a>
-  <a href="https://pypi.org/project/findfmt/"><img src="https://img.shields.io/pypi/wheel/findfmt?logo=pypi&logoColor=white" alt="PyPI Wheel" /></a>
-  <a href="https://github.com/bdperkin/findfmt/pkgs/container/findfmt"><img src="https://img.shields.io/badge/GHCR-container-blue?logo=docker&logoColor=white" alt="GHCR Container" /></a>
-  <a href="https://securityscorecards.dev/viewer/?uri=github.com/bdperkin/findfmt"><img src="https://api.securityscorecards.dev/projects/github.com/bdperkin/findfmt/badge" alt="OpenSSF Scorecard" /></a>
-  <a href="https://github.com/bdperkin/findfmt/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT" /></a>
-</p>
+[![CI Status](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/ci.yml?branch=main&label=CI&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows/ci.yml)
+[![Dependency Matrix](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/dependency-matrix.yml?branch=main&label=deps%20matrix&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows/dependency-matrix.yml)
+[![Docs Build](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/docs.yml?branch=main&label=docs&logo=readthedocs&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/docs.yml)
+[![Vale Prose Lint](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/vale.yml?branch=main&label=vale&logo=markdown&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/vale.yml)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/bdperkin/findfmt/main.svg)](https://results.pre-commit.ci/latest/github/bdperkin/findfmt/main)
+[![Last Commit](https://img.shields.io/github/last-commit/bdperkin/findfmt/main?logo=git&logoColor=white)](https://github.com/bdperkin/findfmt/commits/main)
 
-<p align="center">
-  <a href="https://github.com/astral-sh/uv"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json" alt="uv" /></a>
-  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff" /></a>
-  <a href="https://github.com/astral-sh/ty"><img src="https://img.shields.io/badge/type--checked-ty-blueviolet" alt="Type-checked: ty" /></a>
-  <a href="https://interrogate.readthedocs.io/"><img src="https://img.shields.io/badge/interrogate-100%25-brightgreen" alt="Docstring Coverage: 100%" /></a>
-  <a href="https://conventionalcommits.org"><img src="https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg" alt="Conventional Commits" /></a>
-  <a href="https://github.com/bdperkin/findfmt/blob/main/ACCESSIBILITY.md"><img src="https://img.shields.io/badge/accessibility-WCAG%202.1%20AA-blue" alt="Accessibility WCAG 2.1 AA" /></a>
-</p>
+[![Coverage](https://codecov.io/gh/bdperkin/findfmt/branch/main/graph/badge.svg)](https://codecov.io/gh/bdperkin/findfmt)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
+[![Docstring Coverage: 100%](https://img.shields.io/badge/interrogate-100%25-brightgreen?logo=readthedocs&logoColor=white)](https://interrogate.readthedocs.io/)
+[![Tested with Hypothesis](https://img.shields.io/badge/hypothesis-tested-brightgreen?logo=python&logoColor=white)](https://hypothesis.readthedocs.io/)
+[![PEP 561 Typed](https://img.shields.io/badge/typing-PEP%20561%20py.typed-3776AB?logo=python&logoColor=white)](https://peps.python.org/pep-0561/)
+[![Deptry](https://img.shields.io/badge/deptry-checked-informational)](https://deptry.com/)
+[![Vulture](https://img.shields.io/badge/vulture-checked-informational)](https://github.com/jendrikseipp/vulture)
+[![Xenon](https://img.shields.io/badge/xenon-monitored-informational)](https://xenon.readthedocs.io/)
+[![Codespell](https://img.shields.io/badge/codespell-checked-informational)](https://github.com/codespell-project/codespell)
+[![PyMarkdown](https://img.shields.io/badge/pymarkdown-linted-informational?logo=markdown&logoColor=white)](https://pymarkdown.readthedocs.io/)
+
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/codeql.yml?branch=main&label=CodeQL&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows/codeql.yml)
+[![zizmor](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/zizmor.yml?branch=main&label=zizmor&logo=githubactions&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/zizmor.yml)
+[![ClusterFuzzLite](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/cflite.yml?branch=main&label=ClusterFuzzLite&logo=google&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/cflite.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/bdperkin/findfmt/badge)](https://securityscorecards.dev/viewer/?uri=github.com/bdperkin/findfmt)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15282/badge)](https://www.bestpractices.dev/projects/15282)
+[![SLSA Provenance](https://img.shields.io/badge/SLSA-build%20provenance-2088FF?logo=githubactions&logoColor=white)](https://github.com/bdperkin/findfmt/attestations)
+[![Security Policy](https://img.shields.io/badge/security-policy-blue?logo=securityscorecard&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)
+
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?logo=sphinx&logoColor=white)](https://bdperkin.github.io/findfmt/)
+[![i18n Languages](https://img.shields.io/badge/i18n-en%20%C2%B7%20es%20%C2%B7%20fr%20%C2%B7%20de%20%C2%B7%20ja-blue)](https://bdperkin.github.io/findfmt/)
+[![License: MIT](https://img.shields.io/github/license/bdperkin/findfmt?color=blue&logo=opensourceinitiative&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/LICENSE)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)
+[![Keep a Changelog](https://img.shields.io/badge/changelog-Keep%20a%20Changelog-E05735?logo=keepachangelog&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md)
+[![Accessibility WCAG 2.1 AA](https://img.shields.io/badge/WCAG-2.1%20AA-005A9C?logo=w3c&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/ACCESSIBILITY.md)
+[![GitHub Issues](https://img.shields.io/github/issues/bdperkin/findfmt?logo=github)](https://github.com/bdperkin/findfmt/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/bdperkin/findfmt?style=flat&logo=github)](https://github.com/bdperkin/findfmt/stargazers)
 
 ______________________________________________________________________
 
