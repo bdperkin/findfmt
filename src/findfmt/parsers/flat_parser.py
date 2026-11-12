@@ -42,25 +42,40 @@ class ParsedEntry:
     is_dir: bool = False
 
 
-def parse_flat_listing(lines: Iterable[str]) -> Iterator[ParsedEntry]:
-    """Parse newline-delimited flat file paths into structured ParsedEntry records.
+def _iter_records(lines: Iterable[str]) -> Iterator[tuple[str, bool]]:
+    """Yield (record, is_nul_record) pairs from raw lines or NUL-separated strings."""
+    is_nul_stream = bool(getattr(lines, "nul_delimited", False))
+    for raw_line in lines:
+        if "\0" in raw_line:
+            for part in raw_line.split("\0"):
+                yield part, True
+        else:
+            yield raw_line, is_nul_stream or "\n" in raw_line or "\r" in raw_line
 
-    Supports outputs from standard Unix tools such as 'find', 'git ls-files',
-    and 'findfmt -i', normalizing leading './' indicators and detecting directory
-    suffixes.
+
+def parse_flat_listing(lines: Iterable[str]) -> Iterator[ParsedEntry]:
+    """Parse newline- or NUL-delimited flat file paths into structured ParsedEntry records.
+
+    Supports outputs from standard Unix tools such as 'find', 'find -print0',
+    'fd -0', 'git ls-files', and 'findfmt -i' / 'findfmt -0', normalizing
+    leading './' indicators and detecting directory suffixes.
 
     Args:
-        lines: Iterable yielding raw lines of input text.
+        lines: Iterable yielding raw lines or NUL-delimited records of input text.
 
     Yields:
         ParsedEntry instances for non-empty path records.
     """
-    for raw_line in lines:
-        stripped = raw_line.strip()
-        if not stripped or stripped.startswith("#") or is_tree_trailer(stripped):
-            continue
+    for raw_record, is_nul in _iter_records(lines):
+        if is_nul:
+            token, is_symlink, target = raw_record, False, None
+        else:
+            stripped = raw_record.strip()
+            if not stripped or stripped.startswith("#") or is_tree_trailer(stripped):
+                continue
 
-        token, is_symlink, target = parse_symlink_target(stripped)
+            token, is_symlink, target = parse_symlink_target(stripped)
+
         token = token.removeprefix("./").removeprefix(".\\")
 
         if token in ("", ".", ".\\"):

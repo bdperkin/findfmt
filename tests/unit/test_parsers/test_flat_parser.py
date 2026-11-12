@@ -83,3 +83,25 @@ def test_parse_flat_listing_ignores_tree_summary_trailers() -> None:
     ]
     entries = list(parse_flat_listing(lines))
     assert [e.path_str for e in entries] == ["src/main.py"]
+
+
+def test_parse_flat_listing_nul_delimited_embedded_newlines() -> None:
+    """Verify NUL-delimited records preserve embedded newlines, spaces, and # prefixes (#461)."""
+    raw_stream = [
+        "./dir/line1\nline2.py\0  leading_space.py\0#hash_file.py\0a -> b.py\0sub/dir/\0.\0\0",
+    ]
+    entries = list(parse_flat_listing(raw_stream))
+    assert entries == [
+        ParsedEntry(path_str="dir/line1\nline2.py", is_symlink=False, symlink_target=None),
+        ParsedEntry(path_str="  leading_space.py", is_symlink=False, symlink_target=None),
+        ParsedEntry(path_str="#hash_file.py", is_symlink=False, symlink_target=None),
+        ParsedEntry(path_str="a -> b.py", is_symlink=False, symlink_target=None),
+        ParsedEntry(path_str="sub/dir", is_symlink=False, symlink_target=None, is_dir=True),
+    ]
+
+    pre_split = ["./first\nfile.py", "  second\rfile.py", "./", "///"]
+    entries_pre_split = list(parse_flat_listing(pre_split))
+    assert entries_pre_split == [
+        ParsedEntry(path_str="first\nfile.py", is_symlink=False, symlink_target=None),
+        ParsedEntry(path_str="  second\rfile.py", is_symlink=False, symlink_target=None),
+    ]

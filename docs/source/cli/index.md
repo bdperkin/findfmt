@@ -63,9 +63,10 @@ patterns. If a directory matches, pattern restrictions are disabled for its chil
 `--gitignore-file PATH` : Apply a specific external ignore file across the traversal scope.
 
 `--from-file, --fromfile PATH` : Ingest directory listings and path structures from an external file
-or standard input (`-`) instead of scanning the local filesystem. Supports both flat
-newline-delimited paths (e.g. from `find` or `git ls-files`) and tab- or space-indented outlines
-with automatic hierarchy and symlink (`link -> target`) detection.
+or standard input (`-`) instead of scanning the local filesystem. Automatically detects flat
+newline-delimited paths (e.g. from `find` or `git ls-files`), NUL-delimited records (e.g. from
+`find -print0`, `fd -0`, `git ls-files -z`, or `findfmt -0`, preserving filenames with embedded
+newlines), and tab-, space-, or `tree`-indented outlines with symlink (`link -> target`) detection.
 
 `--offline` : Enforce offline classification without inspecting the local filesystem. Identifies
 file formats and types strictly via extension and filename heuristics, operating gracefully when
