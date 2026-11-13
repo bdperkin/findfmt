@@ -184,7 +184,7 @@ mitigations implemented in `findfmt`.
   publishes an SBOM, build provenance, and a signed attestation, which `gh attestation verify`
   checks:
   ```bash
-  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.2.1 --owner bdperkin
+  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.2.2 --owner bdperkin
   ```
 
 #### 3.5.4. Multi-Tier Secret Scanning & Static Analysis

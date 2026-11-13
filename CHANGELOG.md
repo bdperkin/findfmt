@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-11-13
+
 ### Features
 
 - *(parsers)* Auto-detect NUL-delimited (`\0`) `--from-file` and `stdin` (`-`) input streams
@@ -15,6 +17,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - *(parsers)* Add `--allow-outside-root` / `--no-allow-outside-root` (`allow_outside_root`
   configuration key) to explicitly opt in to resolving `--from-file` paths outside the traversal
   root directory (#463).
+- *(ci)* Add `.github/workflows/auto-retry.yml` (`workflow_run` watcher on `CI`) to automatically
+  re-run failed or canceled CI jobs up to two times (`run_attempt < 3`) (#624).
+- *(tools)* Add `tools/sync_cli_docs.py` and extend `tools/verify_release_version.py` to enforce
+  bidirectional Source-of-Truth (`SoT`) parity across `options.py`, `config_schema.py`, `README.md`,
+  `docs/source/`, `AGENTS.md`, `SECURITY.md`, `ACCESSIBILITY.md`, and `SUPPORT.md` (#623).
 
 ### Fixed
 
@@ -24,11 +31,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - *(parsers)* Confine `--from-file` paths to the traversal root by default using lexical and
   canonical (`Path.resolve()`) boundary checks (`_is_within_root`), skipping out-of-root entries
   with a warning to `stderr` before opening or reading file contents (#463, #334, #386).
+- *(parsers)* Use quote-aware boundary scanning (`_find_last_unquoted_arrow`) in
+  `parse_symlink_target` to split on the last unquoted `' -> '` delimiter and strip only a single
+  matching outer quote pair while preserving interior quotes and whitespace (#355, #348).
 
 ### Documentation
 
 - *(readme)* Modernize, deduplicate, and categorize `README.md` status, quality, security, and
   metadata badges into 5 pure-Markdown thematic rows (#618).
+- *(config)* Document all 62 canonical configuration keys from `src/findfmt/cli/config_schema.py` in
+  `docs/source/guides/configuration.md` and synchronize top-level Markdown guides (#623, #636).
 
 ## [1.2.1] - 2026-11-11
 
@@ -773,4 +785,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.1.5]: https://github.com/bdperkin/findfmt/compare/v1.1.4...v1.1.5
 [1.2.0]: https://github.com/bdperkin/findfmt/compare/v1.1.5...v1.2.0
 [1.2.1]: https://github.com/bdperkin/findfmt/compare/v1.2.0...v1.2.1
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.2.1...HEAD
+[1.2.2]: https://github.com/bdperkin/findfmt/compare/v1.2.1...v1.2.2
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.2.2...HEAD

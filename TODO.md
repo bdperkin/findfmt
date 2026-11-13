@@ -20,7 +20,8 @@
 > its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, epic #346, and #618, and
 > released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
-> closed #624 and #623; 2026-11-13 closed #355 and epic #348)
+> closed #624 and #623; 2026-11-13 closed #355 and epic #348, and released v1.2.2 and closed its
+> milestone)
 
 ______________________________________________________________________
 
@@ -1583,8 +1584,8 @@ and #469). Its remaining traversal and localization issues moved by theme: #320 
 v1.1.2, #322 → v1.2.0, #321 → v1.2.1, #355 → v1.2.2, #215 → v1.1.5.
 
 v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, v1.1.3 and v1.1.4 on
-2026-11-08, v1.1.5 on 2026-11-09, v1.2.0 on 2026-11-10, and v1.2.1 on 2026-11-11 (PyPI, GHCR, and
-GitHub Releases), and their milestones are closed.
+2026-11-08, v1.1.5 on 2026-11-09, v1.2.0 on 2026-11-10, v1.2.1 on 2026-11-11, and v1.2.2 on
+2026-11-13 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
 
 Realigned on 2026-11-09 ahead of v1.2.0: pulled #366 into v1.2.0, closed #311 and #474 as not
 planned, promoted the Hybrid Python-Rust engine track (#576-#598) from v1.8.0-v1.8.4 to
@@ -1595,7 +1596,6 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 0           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
