@@ -137,8 +137,8 @@ export FINDFMT_TAGS="python,shell"
 
 Environment variable values are coerced and validated against the configuration schema:
 
-- **Booleans**: Case-insensitive `1`, `true`, `yes`, or `on` (`true`), and `0`, `false`, `no`, or
-  `off` (`false`).
+- **Boolean Values**: Case-insensitive `1`, `true`, `yes`, or `on` (`true`), and `0`, `false`, `no`,
+  or `off` (`false`).
 - **Integers**: Non-negative base-10 integers (e.g. `0`, `1`, `100`).
 - **String Lists**: Comma-separated items (e.g. `python,shell`) or TOML/JSON array syntax (e.g.
   `["python", "shell"]`).
