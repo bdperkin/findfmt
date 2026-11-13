@@ -461,6 +461,10 @@
    "kind": "function",
    "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   },
+  "load_env_config": {
+   "kind": "function",
+   "signature": "(env: 'Mapping[str, str] | None' = None) -> 'tuple[dict[str, Any], dict[str, Any]]'"
+  },
   "load_toml_config": {
    "kind": "function",
    "signature": "(path: 'Path', *, is_explicit: 'bool') -> 'dict[str, Any]'"
@@ -542,6 +546,10 @@
   "get_active_config_path": {
    "kind": "function",
    "signature": "() -> 'Path | None'"
+  },
+  "load_env_config": {
+   "kind": "function",
+   "signature": "(env: 'Mapping[str, str] | None' = None) -> 'tuple[dict[str, Any], dict[str, Any]]'"
   },
   "load_toml_config": {
    "kind": "function",
@@ -634,6 +642,24 @@
    "signature": "(argv: 'Sequence[str] | None' = None) -> 'int'"
   }
  },
+ "findfmt.cli.env_config": {
+  "ENV_CONFIG_PREFIX": {
+   "kind": "data",
+   "type": "str"
+  },
+  "RESERVED_ENV_VARS": {
+   "kind": "data",
+   "type": "frozenset"
+  },
+  "load_env_config": {
+   "kind": "function",
+   "signature": "(env: 'Mapping[str, str] | None' = None) -> 'tuple[dict[str, Any], dict[str, Any]]'"
+  },
+  "merge_raw_config": {
+   "kind": "function",
+   "signature": "(base_raw: 'Mapping[str, Any]', override_raw: 'Mapping[str, Any]') -> 'dict[str, Any]'"
+  }
+ },
  "findfmt.cli.file_config": {
   "extract_config_args": {
    "kind": "function",
@@ -654,6 +680,10 @@
   "get_active_config_path": {
    "kind": "function",
    "signature": "() -> 'Path | None'"
+  },
+  "load_env_config": {
+   "kind": "function",
+   "signature": "(env: 'Mapping[str, str] | None' = None) -> 'tuple[dict[str, Any], dict[str, Any]]'"
   },
   "load_toml_config": {
    "kind": "function",

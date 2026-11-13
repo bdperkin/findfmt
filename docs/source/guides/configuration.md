@@ -14,8 +14,10 @@ where higher-priority sources override lower-priority sources:
 1. **Explicit CLI arguments and flags** (Highest Priority): Direct options passed on the command
    line (e.g. `--format table`, `--no-hidden`, `-t python`) always override environment variables
    and file settings.
-2. **Environment Variables**: System environment settings such as `NO_COLOR`, `CLICOLOR`,
-   `CLICOLOR_FORCE`, `LANGUAGE`, and `LC_*` override file defaults.
+2. **Environment Variables**: `FINDFMT_<KEY>` schema environment variables (e.g. `FINDFMT_FORMAT`,
+   `FINDFMT_MAX_DEPTH`, `FINDFMT_HIDDEN`, `FINDFMT_TAGS`) and system environment settings
+   (`NO_COLOR`, `CLICOLOR`, `CLICOLOR_FORCE`, `LANGUAGE`, `LC_*`) override configuration file
+   defaults while yielding to explicit command-line flags.
 3. **Explicit Configuration File**: A custom configuration path specified via `--config <path>` or
    the `FINDFMT_CONFIG` environment variable.
 4. **Standard User Configuration Path**: User-level configuration located at
@@ -28,8 +30,8 @@ where higher-priority sources override lower-priority sources:
 
 ```{note}
 Passing `--no-config` on the command line or setting `FINDFMT_CONFIG=""` completely
-suppresses discovery and loading of configuration files, forcing `findfmt` to rely strictly on
-built-in defaults and command-line flags.
+suppresses discovery and loading of TOML configuration files, while `FINDFMT_<KEY>` environment
+variables and explicit command-line flags continue to apply.
 ```
 
 ______________________________________________________________________
@@ -119,6 +121,30 @@ ignore = true
 hidden = false
 dirs_first = true
 ```
+
+### 3.3. Environment Variables (`FINDFMT_<KEY>`)
+
+Every schema key in the reference table below can also be configured via an uppercase
+`FINDFMT_<KEY>` environment variable. Environment variables override TOML configuration files and
+are overridden by explicit CLI flags:
+
+```bash
+export FINDFMT_FORMAT="table"
+export FINDFMT_MAX_DEPTH="2"
+export FINDFMT_HIDDEN="true"
+export FINDFMT_TAGS="python,shell"
+```
+
+Environment variable values are coerced and validated against the configuration schema:
+
+- **Boolean Values**: Case-insensitive `1`, `true`, `yes`, or `on` (`true`), and `0`, `false`, `no`,
+  or `off` (`false`).
+- **Integers**: Non-negative base-10 integers (e.g. `0`, `1`, `100`).
+- **String Lists**: Comma-separated items (e.g. `python,shell`) or TOML/JSON array syntax (e.g.
+  `["python", "shell"]`).
+- **Empty Values**: Setting `FINDFMT_<KEY>=""` is treated as unset and ignored.
+- **Validation**: Unrecognized `FINDFMT_*` keys (other than `FINDFMT_CONFIG` and
+  `FINDFMT_CONTAINER_TESTS`) or invalid values exit with code `2` and a descriptive error message.
 
 ______________________________________________________________________
 

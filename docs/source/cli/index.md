@@ -342,6 +342,9 @@ findfilefmt python -- -hyphenated-dir/
   `findfmt` checks `$XDG_CONFIG_HOME/findfmt/config.toml` (or `~/.config/findfmt/config.toml`),
   followed by `pyproject.toml` (`[tool.findfmt]` table) in the working directory. Refer to the
   [Configuration Guide](../guides/configuration.md) for full schema details.
+- `FINDFMT_<KEY>`: Environment-variable overrides for any configuration schema key (e.g.
+  `FINDFMT_FORMAT=table`, `FINDFMT_MAX_DEPTH=2`, `FINDFMT_HIDDEN=true`,
+  `FINDFMT_TAGS=python,shell`), evaluated above configuration files and below explicit CLI flags.
 - `XDG_CONFIG_HOME`: Configuration directory root used to resolve
   `$XDG_CONFIG_HOME/findfmt/config.toml` and `$XDG_CONFIG_HOME/git/ignore`.
 - `PATHEXT`: Semicolon-delimited list of executable file extensions on Windows.

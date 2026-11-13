@@ -296,7 +296,7 @@ def validate_and_convert_config(raw_data: dict[str, Any], path: Path) -> dict[st
     converted: dict[str, Any] = {}
 
     for raw_key, val in raw_data.items():
-        key = raw_key.replace("-", "_")
+        key = raw_key.removeprefix("FINDFMT_").lower().replace("-", "_")
 
         if key in ("format", "output_format"):
             converted["output_format"] = _convert_format_val(raw_key, val, path)
