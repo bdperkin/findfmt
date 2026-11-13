@@ -69,6 +69,10 @@ def run_quality_suite() -> int:
             "Pre-Commit Dependency Sync",
             ["uv", "run", "python", "tools/sync_pre_commit_deps.py"],
         ),
+        (
+            "CLI & Markdown Docs SoT Sync",
+            ["uv", "run", "python", "tools/sync_cli_docs.py"],
+        ),
         ("UV Dependency Audit", ["uv", "audit", "--preview-features", "audit-command"]),
     ]
 

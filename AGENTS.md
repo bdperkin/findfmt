@@ -49,8 +49,10 @@ contributing to this codebase.
   `gettext` internationalization (`src/findfmt/locale/`).
 - `tools/`: Maintainer and CI automation scripts (`verify_quality.py`, `dep_matrix.py`,
   `line_linter.py`, `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_sync.py`,
-  `i18n_translate.py`, `i18n_validation.py`, `i18n_prompts.py`, `hatch_build.py`, `smoke_wheel.py`,
-  `release_notes.py`, `verify_release_version.py`, `benchmark.py`).
+  `i18n_translate.py`, `i18n_validation.py`, `i18n_prompts.py`, `i18n_benchmark.py`,
+  `hatch_build.py`, `smoke_wheel.py`, `release_notes.py`, `verify_release_version.py`,
+  `sync_cli_docs.py`, `sync_labels.py`, `sync_pre_commit_deps.py`, `generate_assets.py`,
+  `benchmark.py`, `benchmark_models.py`, `benchmark_topologies.py`).
 - `tests/`: Comprehensive `pytest` suites mirroring the source layout (`tests/unit/`,
   `tests/integration/`, `tests/fuzz/`).
 

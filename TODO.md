@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 209 Closed Issues | 112 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 210 Closed Issues | 111 Actionable Open Tasks | 33 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -20,7 +20,7 @@
 > its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, epic #346, and #618, and
 > released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
-> closed #624)
+> closed #624 and #623)
 
 ______________________________________________________________________
 
@@ -657,6 +657,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#624](https://github.com/bdperkin/findfmt/issues/624)** - Feature Request: Implement
   Automatic Job Re-Runs via workflow_run (Runner/VM Timeouts) (Closed: 2026-11-12 via PR
   [#637](https://github.com/bdperkin/findfmt/pull/637))
+- [x] **[#623](https://github.com/bdperkin/findfmt/issues/623)** - [Task] Investigate and Enforce
+  Source-of-Truth (SoT) Synchronization for CLI Help, Configuration Docs, and README (Closed:
+  2026-11-12 via PR [#638](https://github.com/bdperkin/findfmt/pull/638))
 
 ______________________________________________________________________
 
@@ -812,14 +815,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   compiled Rust extension nor the pure-Python fallback regresses on any OS or Python version.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#623](https://github.com/bdperkin/findfmt/issues/623)** - [Task] Investigate and Enforce
-  Source-of-Truth (SoT) Synchronization for CLI Help, Configuration Docs, and README *(Rank: 30 |
-  Epic:
-  [[Epic] Documentation Architecture, Sphinx Navigation & Project Branding](https://github.com/bdperkin/findfmt/issues/379)
-  | Milestone: v1.2.2)* - **Value:** Medium | **Effort:** M - **Rationale:** Eliminates manual drift
-  between `src/findfmt/cli/options.py` and static CLI/config documentation (`README.md`,
-  `docs/source/`) via automated sync and CI drift checks.
 
 - [ ] **[#310](https://github.com/bdperkin/findfmt/issues/310)** - feat(config): provide sample
   config.toml, annotated reference configuration, and --generate-config CLI option *(Rank: 31 |
@@ -1407,12 +1402,11 @@ linked natively on GitHub.
   [#332](https://github.com/bdperkin/findfmt/issues/332),
   [#340](https://github.com/bdperkin/findfmt/issues/340)
 - [ ] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
-  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 5)* -
+  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 4)* -
   [#302](https://github.com/bdperkin/findfmt/issues/302),
   [#309](https://github.com/bdperkin/findfmt/issues/309),
   [#312](https://github.com/bdperkin/findfmt/issues/312),
-  [#574](https://github.com/bdperkin/findfmt/issues/574),
-  [#623](https://github.com/bdperkin/findfmt/issues/623)
+  [#574](https://github.com/bdperkin/findfmt/issues/574)
 - [ ] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static
   Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 6)* -
   [#292](https://github.com/bdperkin/findfmt/issues/292),
@@ -1604,7 +1598,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 3           |
+| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 2           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
