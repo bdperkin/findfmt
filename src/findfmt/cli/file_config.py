@@ -14,6 +14,7 @@ from findfmt.cli.config_schema import (
     _extract_tool_section,
     validate_and_convert_config,
 )
+from findfmt.cli.env_config import load_env_config, merge_raw_config
 from findfmt.i18n import _
 
 __all__ = [
@@ -22,6 +23,7 @@ __all__ = [
     "format_config_dump",
     "get_active_config_data",
     "get_active_config_path",
+    "load_env_config",
     "load_toml_config",
     "reset_active_config",
     "resolve_and_load_config",
@@ -236,24 +238,22 @@ def resolve_and_load_config(
         cwd=cwd,
     )
 
-    if path is None:
-        reset_active_config()
-        return None, {}
+    file_raw: dict[str, Any] = {}
+    file_converted: dict[str, Any] = {}
+    if path is not None:
+        file_raw = load_toml_config(path, is_explicit=is_explicit)
+        if not file_raw and path.name == "pyproject.toml":
+            path = None
+        elif file_raw:
+            file_converted = validate_and_convert_config(file_raw, path)
 
-    raw_data = load_toml_config(path, is_explicit=is_explicit)
-    if not raw_data:
-        if path.name == "pyproject.toml":
-            reset_active_config()
-            return None, {}
+    env_raw, env_converted = load_env_config()
+    merged_raw = merge_raw_config(file_raw, env_raw)
+    merged_converted = {**file_converted, **env_converted}
 
-        _state.path = path
-        _state.data = {}
-        return path, {}
-
-    converted = validate_and_convert_config(raw_data, path)
     _state.path = path
-    _state.data = dict(raw_data)
-    return path, converted
+    _state.data = merged_raw
+    return path, merged_converted
 
 
 def _format_toml_value(val: object) -> str:
@@ -281,13 +281,13 @@ def format_config_dump(path: Path | None, config_dict: dict[str, Any]) -> str:
     Returns:
         Formatted multi-line diagnostic string ending in a newline.
     """
-    if path is None or not config_dict:
-        active_label = str(path) if path is not None else _("(none)")
+    active_label = str(path) if path is not None else _("(none)")
+    if not config_dict:
         return _("Active configuration: {path} (using built-in defaults)\n").format(
             path=active_label,
         )
 
-    lines = [_("Active configuration: {path}").format(path=path), "", "[tool.findfmt]"]
+    lines = [_("Active configuration: {path}").format(path=active_label), "", "[tool.findfmt]"]
     for key in sorted(config_dict):
         val_str = _format_toml_value(config_dict[key])
         lines.append(f"{key} = {val_str}")

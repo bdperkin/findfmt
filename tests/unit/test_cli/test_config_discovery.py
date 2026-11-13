@@ -8,8 +8,10 @@ from unittest.mock import patch
 
 import pytest
 import typer
+from typer.testing import CliRunner
 
 from findfmt.cli import (
+    app,
     find_config_file,
     load_toml_config,
 )
@@ -311,3 +313,34 @@ def test_load_toml_config_standalone_tool_findfmt_table(tmp_path: Path):
     cfg.write_text("[tool.findfmt]\nformat = 'json'\n")
     data = load_toml_config(cfg, is_explicit=True)
     assert data == {"format": "json"}
+
+
+def test_env_var_overrides_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """FINDFMT_MAX_DEPTH=1 beats config file, and loses to explicit CLI -L 3 (#456, #332)."""
+    cfg = tmp_path / "config.toml"
+    cfg.write_text("max_depth = 2\n", encoding="utf-8")
+
+    root = tmp_path / "tree"
+    (root / "d1" / "d2" / "d3").mkdir(parents=True)
+    (root / "root.py").write_text("x = 0\n", encoding="utf-8")
+    (root / "d1" / "lvl1.py").write_text("x = 1\n", encoding="utf-8")
+    (root / "d1" / "d2" / "lvl2.py").write_text("x = 2\n", encoding="utf-8")
+    (root / "d1" / "d2" / "d3" / "lvl3.py").write_text("x = 3\n", encoding="utf-8")
+
+    monkeypatch.setenv("FINDFMT_MAX_DEPTH", "1")
+    runner = CliRunner()
+
+    # Env (max_depth=1) overrides config file (max_depth=2): only root.py matches at depth 1.
+    res_env = runner.invoke(app, ["--config", str(cfg), str(root)])
+    assert res_env.exit_code == 0
+    assert "root.py" in res_env.stdout
+    assert "lvl1.py" not in res_env.stdout
+    assert "lvl2.py" not in res_env.stdout
+
+    # Explicit CLI flag (-L 3) overrides env (max_depth=1): root.py, lvl1.py, lvl2.py match.
+    res_cli = runner.invoke(app, ["--config", str(cfg), "-L", "3", str(root)])
+    assert res_cli.exit_code == 0
+    assert "root.py" in res_cli.stdout
+    assert "lvl1.py" in res_cli.stdout
+    assert "lvl2.py" in res_cli.stdout
+    assert "lvl3.py" not in res_cli.stdout

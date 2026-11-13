@@ -18,8 +18,9 @@ contributing to this codebase.
   - `main.py`: Primary `Typer` application (`app`) and CLI invocation entry point.
   - `options.py`: CLI option declarations (`--hidden`, `--tag`, `--list-tags`, `--format`, etc.).
   - `runner.py`: Execution pipeline coordinating traversal, classification, formatting, and paging.
-  - `config.py`, `config_schema.py`, `file_config.py`: Layered configuration resolution and schema
-    validation (`pyproject.toml`, `.findfmt.toml`, XDG user configuration, and CLI overrides).
+  - `config.py`, `config_schema.py`, `file_config.py`, `env_config.py`: Layered configuration
+    resolution and schema validation (`pyproject.toml`, `.findfmt.toml`, XDG user configuration,
+    `FINDFMT_*` environment variables, and CLI overrides).
   - `help.py`: Categorized `--help`, `--help-all`, and man-page help rendering.
   - `output_sink.py`, `pager.py`, `signals.py`: Atomic `--output` file writing, TTY auto-paging, and
     POSIX signal handling (`SIGINT` exit code `130`, `SIGPIPE` clean teardown).
