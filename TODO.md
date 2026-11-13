@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 210 Closed Issues | 111 Actionable Open Tasks | 33 Active Umbrella Epics **Last
+> **Tracking:** 212 Closed Issues | 110 Actionable Open Tasks | 32 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -20,7 +20,7 @@
 > its milestone; 2026-11-11 closed #372, epic #336, #331, #342, #365, epic #346, and #618, and
 > released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
-> closed #624 and #623)
+> closed #624 and #623; 2026-11-13 closed #355 and epic #348)
 
 ______________________________________________________________________
 
@@ -660,6 +660,11 @@ Note: Ordered chronologically by completion date.
 - [x] **[#623](https://github.com/bdperkin/findfmt/issues/623)** - [Task] Investigate and Enforce
   Source-of-Truth (SoT) Synchronization for CLI Help, Configuration Docs, and README (Closed:
   2026-11-12 via PR [#638](https://github.com/bdperkin/findfmt/pull/638))
+- [x] **[#355](https://github.com/bdperkin/findfmt/issues/355)** - [Core] Fix symlink parser
+  handling of filenames containing arrow ('->') delimiters (Closed: 2026-11-13 via PR
+  [#639](https://github.com/bdperkin/findfmt/pull/639))
+- [x] **[#348](https://github.com/bdperkin/findfmt/issues/348)** - [Epic] Core Refactoring & API
+  Hygiene Cleanup (Closed: 2026-11-13 via PR [#639](https://github.com/bdperkin/findfmt/pull/639))
 
 ______________________________________________________________________
 
@@ -974,11 +979,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Hybrid CI/CD & Release Pipeline: Dual Backend Matrix, Rust Supply-Chain Security & Multi-Platform Maturin Wheels](https://github.com/bdperkin/findfmt/issues/595)
   | Milestone: v1.4.4)* - **Value:** High | **Effort:** L - **Rationale:** Automates building and
   publishing pre-compiled binary wheels for Linux, macOS, and Windows plus sdist/fallback.
-
-- [ ] **[#355](https://github.com/bdperkin/findfmt/issues/355)** - [Core] Fix symlink parser
-  handling of filenames containing arrow ('->') delimiters *(Rank: 56 | Epic:
-  [[Epic] Core Refactoring & API Hygiene Cleanup](https://github.com/bdperkin/findfmt/issues/348) |
-  Milestone: v1.2.2)* - **Value:** Low | **Effort:** S - **Rationale:** Edge-case parser fix.
 
 - [ ] **[#458](https://github.com/bdperkin/findfmt/issues/458)** - feat(config): show value
   provenance (default/config/env/CLI) in --show-config *(Rank: 57 | Epic:
@@ -1393,9 +1393,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are
 linked natively on GitHub.
 
-- [ ] **[#348](https://github.com/bdperkin/findfmt/issues/348)** - [Epic] Core Refactoring & API
-  Hygiene Cleanup *(Milestone: v1.2.2 | Open sub-issues: 1)* -
-  [#355](https://github.com/bdperkin/findfmt/issues/355)
 - [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
   Architecture: Layered Precedence, Schemas & Validation Diagnostics *(Milestone: v1.3.0 | Open
   sub-issues: 3)* - [#310](https://github.com/bdperkin/findfmt/issues/310),
@@ -1598,7 +1595,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 2           |
+| v1.2.2          | --from-file Input Parser Hardening: Tree Parsing, Byte-Safe Input, NUL Mode, Path Confinement                      | 0           |
 | v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 8           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
