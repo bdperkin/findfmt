@@ -191,3 +191,32 @@ def test_sync_fallback_versions_and_cli_write(
 
     assert main(["--tag", "invalid-tag", "--repo", str(repo), "--write"]) == 1
     assert "vMAJOR.MINOR.PATCH" in capsys.readouterr().err
+
+
+def test_security_md_supported_versions_check_and_write(tmp_path: Path) -> None:
+    """Verify SECURITY.md supported version series is checked and updated by --write (#623)."""
+    repo = _mock_repo(tmp_path, "1.2.0.dev0", "1.2.0.dev0")
+    security_path = repo / "SECURITY.md"
+    security_path.write_text(
+        "# Security Policy\n\n"
+        "| Version | Supported          |\n"
+        "| ------- | ------------------ |\n"
+        "| 0.8.x   | :white_check_mark: |\n"
+        "| < 0.8.0 | :x:                |\n\n"
+        "gh attestation verify oci://ghcr.io/bdperkin/findfmt:0.8.0 --owner bdperkin\n",
+        encoding="utf-8",
+    )
+    errors = check("v1.2.0", repo=repo)
+    assert len(errors) == 2
+    assert any("supported version series 0.8.x != expected 1.2.x" in e for e in errors)
+    assert any("unsupported version floor 0.8.0 != expected 1.2.0" in e for e in errors)
+
+    sync_fallback_versions("v1.2.0", repo)
+    assert check("v1.2.0", repo=repo) == []
+    updated = security_path.read_text(encoding="utf-8")
+    assert "| 1.2.x" in updated
+    assert "| < 1.2.0" in updated
+    assert "ghcr.io/bdperkin/findfmt:1.2.0" in updated
+
+    security_path.write_text("# Security Policy without table\n", encoding="utf-8")
+    assert check("v1.2.0", repo=repo) == ["SECURITY.md: missing Supported Versions table"]

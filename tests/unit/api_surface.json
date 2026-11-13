@@ -565,6 +565,14 @@
   }
  },
  "findfmt.cli.config_schema": {
+  "ACCEPTED_CONFIG_KEYS": {
+   "kind": "data",
+   "type": "frozenset"
+  },
+  "CANONICAL_CONFIG_KEYS": {
+   "kind": "data",
+   "type": "frozenset"
+  },
   "validate_and_convert_config": {
    "kind": "function",
    "signature": "(raw_data: 'dict[str, Any]', path: 'Path') -> 'dict[str, Any]'"

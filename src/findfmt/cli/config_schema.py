@@ -11,6 +11,8 @@ from findfmt.formatters import OutputFormat
 from findfmt.i18n import _
 
 __all__ = [
+    "ACCEPTED_CONFIG_KEYS",
+    "CANONICAL_CONFIG_KEYS",
     "validate_and_convert_config",
 ]
 
@@ -93,6 +95,22 @@ _INT_KEYS: dict[str, str] = {
     "max_depth": "max_depth",
     "file_limit": "file_limit",
 }
+
+CANONICAL_CONFIG_KEYS: frozenset[str] = frozenset(
+    {"format", "color", "pager", "gitignore_file"}
+    | {"ignore" if target == "no_ignore" else target for target, _ in _BOOL_KEYS.values()}
+    | set(_STR_LIST_KEYS.values())
+    | set(_STR_KEYS.values())
+    | set(_INT_KEYS.values()),
+)
+
+ACCEPTED_CONFIG_KEYS: frozenset[str] = frozenset(
+    {"format", "output_format", "color", "pager", "gitignore_file"}
+    | set(_BOOL_KEYS)
+    | set(_STR_LIST_KEYS)
+    | set(_STR_KEYS)
+    | set(_INT_KEYS),
+)
 
 
 def _extract_tool_section(data: dict[str, Any], path: Path) -> dict[str, Any]:

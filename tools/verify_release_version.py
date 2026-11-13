@@ -1,10 +1,10 @@
-"""Verify a release tag, fallback versions, and built distribution versions (#327, #609).
+"""Verify a release tag, fallback versions, and built distribution versions (#327, #609, #623).
 
 The release workflow runs this twice: once before the quality gate to reject anything that is not a
 ``vMAJOR.MINOR.PATCH`` tag or has out-of-sync fallback versions, and once after ``uv build`` so a
 mis-versioned build (for example a ``.devN`` version built from a branch) fails before anything is
 published. Maintainers can also pass ``--write`` during release preparation to synchronize fallback
-versions across ``pyproject.toml`` and ``src/findfmt/__init__.py``.
+versions across ``pyproject.toml``, ``src/findfmt/__init__.py``, and ``SECURITY.md``.
 
 Usage:
     python tools/verify_release_version.py --tag v1.2.0 --repo .
@@ -31,6 +31,13 @@ PYPROJECT_FALLBACK_PATTERN = re.compile(
 INIT_FALLBACK_PATTERN = re.compile(
     r'^(_FALLBACK_VERSION(?:\s*:\s*str)?\s*=\s*")([^"]+)(")',
     re.MULTILINE,
+)
+SECURITY_SUPPORTED_PATTERN = re.compile(
+    r"^(\|\s*)(\d+\.\d+\.x)(\s*\|\s*:white_check_mark:\s*\|\s*\n\|\s*<\s*)(\d+\.\d+\.0)(\s*\|\s*:x:\s*\|)",
+    re.MULTILINE,
+)
+SECURITY_ATTESTATION_PATTERN = re.compile(
+    r"(ghcr\.io/bdperkin/findfmt:)(\d+\.\d+\.\d+)",
 )
 
 
@@ -83,6 +90,39 @@ def _extract_fallback(path: Path, pattern: re.Pattern[str]) -> str | None:
     return str(match.group(2)) if match is not None else None
 
 
+def _version_series(version: str) -> tuple[str, str]:
+    """Return ``(major.minor.x, major.minor.0)`` for a ``MAJOR.MINOR.PATCH`` version."""
+    major, minor, _ = version.split(".")
+    return f"{major}.{minor}.x", f"{major}.{minor}.0"
+
+
+def _check_security_versions(repo: Path, expected: str) -> list[str]:
+    """Verify ``SECURITY.md`` supported version series if ``SECURITY.md`` exists in ``repo``."""
+    security_path = repo / "SECURITY.md"
+    if not security_path.is_file():
+        return []
+
+    expected_series, expected_floor = _version_series(expected)
+    text = security_path.read_text(encoding="utf-8")
+    match = SECURITY_SUPPORTED_PATTERN.search(text)
+    if match is None:
+        return ["SECURITY.md: missing Supported Versions table"]
+
+    actual_series, actual_floor = str(match.group(2)), str(match.group(4))
+    errors: list[str] = []
+    if actual_series != expected_series:
+        errors.append(
+            f"SECURITY.md: supported version series {actual_series} != expected {expected_series}",
+        )
+
+    if actual_floor != expected_floor:
+        errors.append(
+            f"SECURITY.md: unsupported version floor {actual_floor} != expected {expected_floor}",
+        )
+
+    return errors
+
+
 def _check_repo_fallbacks(repo: Path, expected: str) -> list[str]:
     """Verify fallback version declarations in ``repo`` match ``<expected>.dev0``."""
     expected_fallback = f"{expected}.dev0"
@@ -101,6 +141,7 @@ def _check_repo_fallbacks(repo: Path, expected: str) -> list[str]:
         elif actual != expected_fallback:
             errors.append(f"{rel_path}: fallback version {actual} != expected {expected_fallback}")
 
+    errors.extend(_check_security_versions(repo, expected))
     return errors
 
 
@@ -109,9 +150,11 @@ def sync_fallback_versions(tag: str, repo: Path = REPO_ROOT) -> None:
 
     Args:
         tag: Release tag, for example ``v1.2.0``.
-        repo: Repository root containing ``pyproject.toml`` and ``src/findfmt/__init__.py``.
+        repo: Repository root containing ``pyproject.toml``, ``src/findfmt/__init__.py``,
+            and optionally ``SECURITY.md``.
     """
-    expected_fallback = f"{version_from_tag(tag)}.dev0"
+    expected = version_from_tag(tag)
+    expected_fallback = f"{expected}.dev0"
     targets = (
         (repo / "pyproject.toml", PYPROJECT_FALLBACK_PATTERN),
         (repo / "src" / "findfmt" / "__init__.py", INIT_FALLBACK_PATTERN),
@@ -120,6 +163,18 @@ def sync_fallback_versions(tag: str, repo: Path = REPO_ROOT) -> None:
         text = path.read_text(encoding="utf-8")
         updated = pattern.sub(rf"\g<1>{expected_fallback}\g<3>", text, count=1)
         path.write_text(updated, encoding="utf-8")
+
+    security_path = repo / "SECURITY.md"
+    if security_path.is_file():
+        expected_series, expected_floor = _version_series(expected)
+        sec_text = security_path.read_text(encoding="utf-8")
+        sec_text = SECURITY_SUPPORTED_PATTERN.sub(
+            rf"\g<1>{expected_series}\g<3>{expected_floor}\g<5>",
+            sec_text,
+            count=1,
+        )
+        sec_text = SECURITY_ATTESTATION_PATTERN.sub(rf"\g<1>{expected}", sec_text)
+        security_path.write_text(sec_text, encoding="utf-8")
 
 
 def _check_dist_artifacts(dist: Path, expected: str) -> list[str]:
