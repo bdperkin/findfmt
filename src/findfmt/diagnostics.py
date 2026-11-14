@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from findfmt.cli.diagnostics import (
         diagnostics_callback,
+        generate_config_callback,
         get_diagnostics,
         get_git_version,
         get_version,
@@ -18,6 +19,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     "diagnostics_callback",
+    "generate_config_callback",
     "get_diagnostics",
     "get_git_version",
     "get_version",

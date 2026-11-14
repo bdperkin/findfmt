@@ -1244,6 +1244,10 @@ msgstr "Allow --from-file paths that resolve outside the traversal root director
 msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
 msgstr "findfmt: warning: skipping path outside traversal root: '{path}'\n"
 
+#: src/findfmt/cli/help.py:243
+msgid "Output an annotated reference TOML configuration to stdout and exit."
+msgstr "Output an annotated reference TOML configuration to stdout and exit."
+
 #~ msgid "KB"
 #~ msgstr "KB"
 

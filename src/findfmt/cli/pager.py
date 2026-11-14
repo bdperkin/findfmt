@@ -294,7 +294,9 @@ class FindfmtCommand(typer.core.TyperCommand):
         """
         set_locale()
         config_path, no_config, _ = extract_config_args(args)
-        help_requested = any(arg in ("--help", "-h", "--help-all") for arg in args)
+        help_requested = any(
+            arg in ("--help", "-h", "--help-all", "--generate-config") for arg in args
+        )
 
         if not help_requested:
             path, defaults = resolve_and_load_config(

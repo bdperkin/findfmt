@@ -307,6 +307,7 @@ ______________________________________________________________________
 | `--config PATH`                                        | Path to a custom user configuration file overriding default settings                                                                   |
 | `--no-config`                                          | Suppress discovery and loading of any configuration file                                                                               |
 | `--show-config`                                        | Display active configuration file and resolved configuration settings                                                                  |
+| `--generate-config`                                    | Output an annotated reference TOML configuration to stdout and exit                                                                    |
 | `--known-tags`                                         | List all supported classification tags and exit                                                                                        |
 | `--locale, --lang <locale>`                            | Set display locale for localized messages and format strings (e.g. `es`, `de`, `zh_CN`)                                                |
 | `-v, -V, --version`                                    | Display version (`--verbose` adds runtime diagnostics)                                                                                 |

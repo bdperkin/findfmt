@@ -8,7 +8,12 @@ from typing import Annotated
 import typer
 
 from findfmt.cli import help as h
-from findfmt.cli.diagnostics import diagnostics_callback, show_config_callback, version_callback
+from findfmt.cli.diagnostics import (
+    diagnostics_callback,
+    generate_config_callback,
+    show_config_callback,
+    version_callback,
+)
 from findfmt.formatters import OutputFormat
 from findfmt.i18n import _, locale_callback
 
@@ -38,6 +43,7 @@ __all__ = [
     "OptFilesFirst",
     "OptFollowSymlinks",
     "OptFromFile",
+    "OptGenerateConfig",
     "OptGitignoreFile",
     "OptGroup",
     "OptHelpAll",
@@ -93,6 +99,7 @@ __all__ = [
     "OptVerbose",
     "OptVersion",
     "OptXml",
+    "generate_config_callback",
     "help_all_callback",
     "known_tags_callback",
     "show_config_callback",
@@ -467,5 +474,14 @@ OptShowConfig = Annotated[
         is_eager=True,
         callback=show_config_callback,
         help=h.HELP_SHOW_CONFIG,
+    ),
+]
+OptGenerateConfig = Annotated[
+    bool,
+    typer.Option(
+        "--generate-config",
+        is_eager=True,
+        callback=generate_config_callback,
+        help=h.HELP_GENERATE_CONFIG,
     ),
 ]

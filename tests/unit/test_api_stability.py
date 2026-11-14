@@ -21,7 +21,7 @@ from tools.verify_release_version import check as check_release_version
 import findfmt
 from findfmt import _FALLBACK_VERSION
 from findfmt.cli import diagnostics
-from findfmt.cli.file_config import _format_toml_value
+from findfmt.cli.config_template import _format_toml_value
 from findfmt.exceptions import (
     FindFmtError,
     InvalidSortCriteriaError,

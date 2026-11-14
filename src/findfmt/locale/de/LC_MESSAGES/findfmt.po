@@ -1294,3 +1294,7 @@ msgstr "Pfade aus --from-file zulassen, die außerhalb des Suchstammverzeichniss
 #, python-brace-format
 msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
 msgstr "findfmt: Warnung: Pfad außerhalb des Suchstammverzeichnisses wird übersprungen: '{path}'\n"
+
+#: src/findfmt/cli/help.py:243
+msgid "Output an annotated reference TOML configuration to stdout and exit."
+msgstr "Kommentierte TOML-Referenzkonfiguration auf stdout ausgeben und beenden."

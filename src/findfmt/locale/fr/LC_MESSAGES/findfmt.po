@@ -1315,3 +1315,7 @@ msgstr "Autoriser les chemins --from-file qui pointent hors du répertoire racin
 #, python-brace-format
 msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
 msgstr "findfmt: avertissement: chemin hors du répertoire racine de parcours ignoré: '{path}'\n"
+
+#: src/findfmt/cli/help.py:243
+msgid "Output an annotated reference TOML configuration to stdout and exit."
+msgstr "Afficher une configuration TOML de référence annotée sur stdout et quitter."

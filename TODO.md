@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 215 Closed Issues | 107 Actionable Open Tasks | 32 Active Umbrella Epics **Last
+> **Tracking:** 216 Closed Issues | 106 Actionable Open Tasks | 32 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -21,7 +21,7 @@
 > released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
 > closed #624 and #623; 2026-11-13 closed #355, epic #348, and #456, and released v1.2.2 and closed
-> its milestone; 2026-11-14 closed #457 and #455)
+> its milestone; 2026-11-14 closed #457, #455, and #310)
 
 ______________________________________________________________________
 
@@ -675,6 +675,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#455](https://github.com/bdperkin/findfmt/issues/455)** - feat(config): merge user and
   project config layers and discover pyproject.toml up to the VCS root (Closed: 2026-11-14 via PR
   [#643](https://github.com/bdperkin/findfmt/pull/643))
+- [x] **[#310](https://github.com/bdperkin/findfmt/issues/310)** - feat(config): provide sample
+  config.toml, annotated reference configuration, and --generate-config CLI option (Closed:
+  2026-11-14 via PR [#644](https://github.com/bdperkin/findfmt/pull/644))
 
 ______________________________________________________________________
 
@@ -819,13 +822,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   compiled Rust extension nor the pure-Python fallback regresses on any OS or Python version.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#310](https://github.com/bdperkin/findfmt/issues/310)** - feat(config): provide sample
-  config.toml, annotated reference configuration, and --generate-config CLI option *(Rank: 31 |
-  Epic:
-  [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
-  | Milestone: v1.3.0)* - **Value:** Medium | **Effort:** M - **Rationale:** Depends on the
-  layered-config work.
 
 - [ ] **[#292](https://github.com/bdperkin/findfmt/issues/292)** - refactor(types): resolve Ty
   truthiness-test-of-none-union diagnostics to upgrade past v0.0.84 *(Rank: 33 | Epic:
@@ -1385,8 +1381,7 @@ linked natively on GitHub.
 
 - [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
   Architecture: Layered Precedence, Schemas & Validation Diagnostics *(Milestone: v1.3.0 | Open
-  sub-issues: 3)* - [#310](https://github.com/bdperkin/findfmt/issues/310),
-  [#332](https://github.com/bdperkin/findfmt/issues/332),
+  sub-issues: 2)* - [#332](https://github.com/bdperkin/findfmt/issues/332),
   [#340](https://github.com/bdperkin/findfmt/issues/340)
 - [ ] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
   Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 4)* -
@@ -1588,7 +1583,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 5           |
+| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 4           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |

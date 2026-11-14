@@ -37,6 +37,7 @@ from findfmt.cli.options import (
     OptFilesFirst,
     OptFollowSymlinks,
     OptFromFile,
+    OptGenerateConfig,
     OptGitignoreFile,
     OptGroup,
     OptHelpAll,
@@ -92,6 +93,7 @@ from findfmt.cli.options import (
     OptVerbose,
     OptVersion,
     OptXml,
+    generate_config_callback,
     show_config_callback,
 )
 from findfmt.cli.pager import FindfmtCommand
@@ -110,6 +112,7 @@ __all__ = [
     "diagnostics_callback",
     "find_files",
     "findfmt",
+    "generate_config_callback",
     "get_diagnostics",
     "get_git_version",
     "get_help_all",
@@ -211,6 +214,7 @@ def findfmt(
     config: OptConfig = None,
     no_config: OptNoConfig = False,
     show_config: OptShowConfig = False,
+    generate_config: OptGenerateConfig = False,
 ) -> None:
     """Execute file discovery and classification matching."""
     params = {
@@ -226,6 +230,7 @@ def findfmt(
             "config",
             "no_config",
             "show_config",
+            "generate_config",
         }
     }
     runner.execute_findfmt(**params)
