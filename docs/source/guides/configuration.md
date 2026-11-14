@@ -20,11 +20,14 @@ where higher-priority sources override lower-priority sources:
    defaults while yielding to explicit command-line flags.
 3. **Explicit Configuration File**: A custom configuration path specified via `--config <path>` or
    the `FINDFMT_CONFIG` environment variable.
-4. **Standard User Configuration Path**: User-level configuration located at
+4. **Project Local Configuration**: A `.findfmt.toml` file or a `pyproject.toml` file containing a
+   `[tool.findfmt]` table, discovered by walking up from the current working directory to the
+   repository VCS root (`.git`, `.hg`, or `.svn`), or checked in the current working directory when
+   outside a repository.
+5. **Standard User Configuration Path**: User-level configuration located at
    `$XDG_CONFIG_HOME/findfmt/config.toml` (or `~/.config/findfmt/config.toml` on POSIX systems;
-   `%APPDATA%\findfmt\config.toml` on Windows).
-5. **Project Local Configuration**: A `pyproject.toml` file containing a `[tool.findfmt]` table
-   located in the current working directory.
+   `%APPDATA%\findfmt\config.toml` on Windows). When both user and project configurations exist,
+   they are merged with project settings overriding user settings (`user < project < env < CLI`).
 6. **Built-in Defaults** (Lowest Priority): Factory default options (`format = "text"`,
    `color = "auto"`, `pager = "auto"`, etc.).
 
@@ -104,10 +107,12 @@ max_depth = 5
 dirs_first = true
 ```
 
-### 3.2. Project Configuration (`pyproject.toml`)
+### 3.2. Project Configuration (`.findfmt.toml` and `pyproject.toml`)
 
-In repositories managed by modern Python tooling (`uv`, `hatch`, `flit`, `poetry`), `findfmt` reads
-the `[tool.findfmt]` table:
+In repositories managed by modern Python tooling (`uv`, `hatch`, `flit`, `poetry`), `findfmt`
+searches upward from the current working directory to the repository VCS root (`.git`, `.hg`, or
+`.svn`) for a standalone `.findfmt.toml` file or a `pyproject.toml` file containing a
+`[tool.findfmt]` table:
 
 ```toml
 # pyproject.toml

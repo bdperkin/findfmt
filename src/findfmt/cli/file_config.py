@@ -106,6 +106,9 @@ def extract_config_args(
     return config_path, no_config, show_config
 
 
+_VCS_MARKERS: tuple[str, ...] = (".git", ".hg", ".svn")
+
+
 def _get_standard_user_config_path() -> Path:
     """Determine the platform-standard path for the user configuration file."""
     if platform.system() == "Windows":
@@ -122,21 +125,63 @@ def _get_standard_user_config_path() -> Path:
     return Path.home() / ".config" / "findfmt" / "config.toml"
 
 
+def _is_vcs_root(directory: Path) -> bool:
+    """Return True if directory contains a VCS root marker (.git, .hg, or .svn)."""
+    return any((directory / marker).exists() for marker in _VCS_MARKERS)
+
+
+def _project_search_dirs(start_dir: Path) -> list[Path]:
+    """Return directories from start_dir upward to the nearest VCS root (or [start_dir])."""
+    candidates: list[Path] = []
+    for directory in (start_dir, *start_dir.parents):
+        candidates.append(directory)
+        if _is_vcs_root(directory):
+            return candidates
+
+    return [start_dir]
+
+
+def _pyproject_has_findfmt_section(path: Path) -> bool:
+    """Return True if pyproject.toml defines [tool.findfmt] or fails to parse."""
+    try:
+        with path.open("rb") as f:
+            data = tomllib.load(f)
+    except (OSError, tomllib.TOMLDecodeError):
+        return True
+
+    return bool(_extract_tool_section(data, path))
+
+
+def _find_project_config_file(cwd: Path | None = None) -> Path | None:
+    """Discover a project .findfmt.toml or pyproject.toml up to the VCS root."""
+    start_dir = (cwd if cwd is not None else Path.cwd()).resolve()
+    for directory in _project_search_dirs(start_dir):
+        dot_findfmt = directory / ".findfmt.toml"
+        if dot_findfmt.is_file():
+            return dot_findfmt
+
+        pyproject = directory / "pyproject.toml"
+        if pyproject.is_file() and _pyproject_has_findfmt_section(pyproject):
+            return pyproject
+
+    return None
+
+
 def find_config_file(
     explicit_path: Path | str | None = None,
     *,
     no_config: bool = False,
     cwd: Path | None = None,
 ) -> tuple[Path | None, bool]:
-    """Resolve the configuration file path following findfmt precedence rules.
+    """Resolve the highest-precedence configuration file path.
 
     Precedence order:
 
     1. ``--no-config`` suppresses all configuration files.
     2. Explicit path passed via ``--config``.
     3. ``FINDFMT_CONFIG`` environment variable (empty string suppresses loading).
-    4. User config file (``$XDG_CONFIG_HOME`` or ``%APPDATA%``).
-    5. Project ``pyproject.toml`` containing a ``[tool.findfmt]`` table.
+    4. Project ``.findfmt.toml`` or ``pyproject.toml`` (with ``[tool.findfmt]``) up to VCS root.
+    5. User config file (``$XDG_CONFIG_HOME`` or ``%APPDATA%``).
     6. Built-in defaults.
 
     Args:
@@ -160,12 +205,12 @@ def find_config_file(
         trimmed = env_config.strip()
         return (Path(trimmed), True) if trimmed else (None, False)
 
-    user_config = _get_standard_user_config_path()
-    if user_config.is_file():
-        return user_config, False
+    project_config = _find_project_config_file(cwd)
+    if project_config is not None:
+        return project_config, False
 
-    pyproject = (cwd if cwd is not None else Path.cwd()) / "pyproject.toml"
-    return (pyproject, False) if pyproject.is_file() else (None, False)
+    user_config = _get_standard_user_config_path()
+    return (user_config, False) if user_config.is_file() else (None, False)
 
 
 def load_toml_config(path: Path, *, is_explicit: bool) -> dict[str, Any]:
@@ -216,6 +261,17 @@ def load_toml_config(path: Path, *, is_explicit: bool) -> dict[str, Any]:
     return _extract_tool_section(data, path)
 
 
+def _load_validated_layer(
+    layer_path: Path,
+    *,
+    is_explicit: bool,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Load and validate a single TOML configuration file layer."""
+    raw = load_toml_config(layer_path, is_explicit=is_explicit)
+    converted = validate_and_convert_config(raw, layer_path) if raw else {}
+    return raw, converted
+
+
 def resolve_and_load_config(
     explicit_path: Path | str | None = None,
     *,
@@ -241,11 +297,13 @@ def resolve_and_load_config(
     file_raw: dict[str, Any] = {}
     file_converted: dict[str, Any] = {}
     if path is not None:
-        file_raw = load_toml_config(path, is_explicit=is_explicit)
-        if not file_raw and path.name == "pyproject.toml":
-            path = None
-        elif file_raw:
-            file_converted = validate_and_convert_config(file_raw, path)
+        user_config = _get_standard_user_config_path()
+        if not is_explicit and user_config != path and user_config.is_file():
+            file_raw, file_converted = _load_validated_layer(user_config, is_explicit=False)
+
+        layer_raw, layer_converted = _load_validated_layer(path, is_explicit=is_explicit)
+        file_raw = merge_raw_config(file_raw, layer_raw)
+        file_converted = {**file_converted, **layer_converted}
 
     env_raw, env_converted = load_env_config()
     merged_raw = merge_raw_config(file_raw, env_raw)
