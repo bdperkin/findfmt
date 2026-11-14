@@ -174,3 +174,28 @@ def test_cli_no_config_still_applies_env_vars_and_shows_in_show_config(
     assert "[tool.findfmt]" in res.stdout
     assert 'format = "json"' in res.stdout
     assert "max_depth = 2" in res.stdout
+
+
+def test_deprecated_format_boolean_in_env_and_cli_config(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Deprecated format boolean keys warn via FINDFMT_* env vars and CLI --config (#457)."""
+    with pytest.warns(DeprecationWarning, match="FINDFMT_TREE"):
+        raw, converted = load_env_config({"FINDFMT_TREE": "true"})
+
+    assert raw == {"tree": True}
+    assert converted == {"tree": True}
+    assert "use 'format = \"tree\"' instead." in capsys.readouterr().err
+
+    cfg = tmp_path / "config.toml"
+    cfg.write_text("json = true\n", encoding="utf-8")
+    (tmp_path / "sample.py").write_text("x = 1\n", encoding="utf-8")
+
+    runner = CliRunner()
+    with pytest.warns(DeprecationWarning, match="Configuration key 'json'"):
+        res = runner.invoke(app, ["--config", str(cfg), str(tmp_path)])
+
+    assert res.exit_code == 0
+    assert "use 'format = \"json\"' instead." in res.stderr
+    assert '"path":' in res.stdout

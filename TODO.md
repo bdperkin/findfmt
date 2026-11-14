@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 213 Closed Issues | 109 Actionable Open Tasks | 32 Active Umbrella Epics **Last
+> **Tracking:** 214 Closed Issues | 108 Actionable Open Tasks | 32 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -21,7 +21,7 @@
 > released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
 > closed #624 and #623; 2026-11-13 closed #355, epic #348, and #456, and released v1.2.2 and closed
-> its milestone)
+> its milestone; 2026-11-14 closed #457)
 
 ______________________________________________________________________
 
@@ -669,6 +669,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#456](https://github.com/bdperkin/findfmt/issues/456)** - feat(config): add a FINDFMT\_\*
   environment-variable configuration layer (Closed: 2026-11-13 via PR
   [#641](https://github.com/bdperkin/findfmt/pull/641))
+- [x] **[#457](https://github.com/bdperkin/findfmt/issues/457)** - feat(config): deprecate
+  tree/json/xml boolean config keys in favour of format = (Closed: 2026-11-14 via PR
+  [#642](https://github.com/bdperkin/findfmt/pull/642))
 
 ______________________________________________________________________
 
@@ -687,11 +690,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same
   zero-warning static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#457](https://github.com/bdperkin/findfmt/issues/457)** - feat(config): deprecate
-  tree/json/xml boolean config keys in favour of format = *(Rank: 9 | Epic:
-  [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
-  | Parent: [#332](https://github.com/bdperkin/findfmt/issues/332) | Milestone: v1.3.0)* -
-  **Value:** Medium | **Effort:** S - **Rationale:** Simplifies the config surface; small.
 - [ ] **[#470](https://github.com/bdperkin/findfmt/issues/470)** - ci(pre-commit): add
   check-jsonschema hooks to validate workflows, Dependabot, issue forms, and Codecov config *(Rank:
   8 | Epic:
@@ -1380,7 +1378,6 @@ its sub-issues close.
   precedence (user < project < env < CLI) and remove format booleans from config *(Epic:
   [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
   | Milestone: v1.3.0)* - **Sub-issues:** [#455](https://github.com/bdperkin/findfmt/issues/455),
-  [#457](https://github.com/bdperkin/findfmt/issues/457),
   [#458](https://github.com/bdperkin/findfmt/issues/458)
 
 ______________________________________________________________________
@@ -1476,13 +1473,16 @@ linked natively on GitHub.
   [#299](https://github.com/bdperkin/findfmt/issues/299),
   [#300](https://github.com/bdperkin/findfmt/issues/300)
 - [ ] **[#350](https://github.com/bdperkin/findfmt/issues/350)** - [Epic] v2.0 Breaking CLI Cleanups
-  (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing) *(Milestone: v1.8.1 | Open
-  sub-issues: 6)* - [#374](https://github.com/bdperkin/findfmt/issues/374),
+  (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing, deprecated format booleans in
+  config) *(Milestone: v1.8.1 | Open sub-issues: 6)* -
+  [#374](https://github.com/bdperkin/findfmt/issues/374),
   [#375](https://github.com/bdperkin/findfmt/issues/375),
   [#376](https://github.com/bdperkin/findfmt/issues/376),
   [#377](https://github.com/bdperkin/findfmt/issues/377),
   [#378](https://github.com/bdperkin/findfmt/issues/378),
-  [#504](https://github.com/bdperkin/findfmt/issues/504)
+  [#504](https://github.com/bdperkin/findfmt/issues/504) (plus v2.0 removal of deprecated
+  `tree`/`json`/`xml` boolean config keys from
+  [#457](https://github.com/bdperkin/findfmt/issues/457))
 - [ ] **[#197](https://github.com/bdperkin/findfmt/issues/197)** - [Epic] Add Language Support:
   Germanic (~1.83 Billion) *(Milestone: Future Features | Open sub-issues: 3)* -
   [#234](https://github.com/bdperkin/findfmt/issues/234),
@@ -1592,7 +1592,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 7           |
+| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 6           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
