@@ -34,51 +34,22 @@ def _cleanup_config_state():
 # -----------------------------------------------------------------------------
 
 
-def test_extract_config_args_empty():
-    cfg, no_cfg, show_cfg = extract_config_args([])
-    assert cfg is None
-    assert no_cfg is False
-    assert show_cfg is False
-
-
-def test_extract_config_args_flags():
-    args = ["--no-config", "--show-config", "src"]
-    cfg, no_cfg, show_cfg = extract_config_args(args)
-    assert cfg is None
-    assert no_cfg is True
-    assert show_cfg is True
-
-
-def test_extract_config_args_config_space():
-    args = ["--config", "/path/to/cfg.toml", "-t", "python"]
-    cfg, no_cfg, show_cfg = extract_config_args(args)
-    assert cfg == "/path/to/cfg.toml"
-    assert no_cfg is False
-    assert show_cfg is False
-
-
-def test_extract_config_args_config_equals():
-    args = ["--config=/path/to/cfg.toml", "-t", "python"]
-    cfg, no_cfg, show_cfg = extract_config_args(args)
-    assert cfg == "/path/to/cfg.toml"
-    assert no_cfg is False
-    assert show_cfg is False
-
-
-def test_extract_config_args_missing_value():
-    args = ["--config"]
-    cfg, no_cfg, show_cfg = extract_config_args(args)
-    assert cfg is None
-    assert no_cfg is False
-    assert show_cfg is False
-
-
-def test_extract_config_args_respects_double_dash():
-    args = ["--", "--config", "/path/to/cfg.toml", "--no-config", "--show-config"]
-    cfg, no_cfg, show_cfg = extract_config_args(args)
-    assert cfg is None
-    assert no_cfg is False
-    assert show_cfg is False
+@pytest.mark.parametrize(
+    ("args", "expected"),
+    [
+        ([], (None, False, False)),
+        (["--no-config", "--show-config", "src"], (None, True, True)),
+        (["--config", "/path/to/cfg.toml", "-t", "python"], ("/path/to/cfg.toml", False, False)),
+        (["--config=/path/to/cfg.toml", "-t", "python"], ("/path/to/cfg.toml", False, False)),
+        (["--config"], (None, False, False)),
+        (
+            ["--", "--config", "/path/to/cfg.toml", "--no-config", "--show-config"],
+            (None, False, False),
+        ),
+    ],
+)
+def test_extract_config_args(args: list[str], expected: tuple[str | None, bool, bool]) -> None:
+    assert extract_config_args(args) == expected
 
 
 # -----------------------------------------------------------------------------
@@ -273,46 +244,30 @@ def test_load_toml_config_os_error(tmp_path: Path):
         assert exc.value.exit_code == 2
 
 
-def test_load_toml_config_pyproject_with_tool_section(tmp_path: Path):
-    pyproj = tmp_path / "pyproject.toml"
-    pyproj.write_text("[tool.findfmt]\nformat = 'table'\ntable_style = 'grid'\n")
-    data = load_toml_config(pyproj, is_explicit=False)
-    assert data == {"format": "table", "table_style": "grid"}
-
-
-def test_load_toml_config_pyproject_without_tool_section(tmp_path: Path):
-    pyproj = tmp_path / "pyproject.toml"
-    pyproj.write_text("[project]\nname = 'test'\n")
-    data = load_toml_config(pyproj, is_explicit=False)
-    assert data == {}
-
-
-def test_load_toml_config_pyproject_with_other_tool_only(tmp_path: Path):
-    pyproj = tmp_path / "pyproject.toml"
-    pyproj.write_text("[tool.black]\nline-length = 88\n")
-    data = load_toml_config(pyproj, is_explicit=False)
-    assert data == {}
-
-
-def test_load_toml_config_standalone_top_level(tmp_path: Path):
-    cfg = tmp_path / "findfmt.toml"
-    cfg.write_text("format = 'table'\n")
-    data = load_toml_config(cfg, is_explicit=True)
-    assert data == {"format": "table"}
-
-
-def test_load_toml_config_standalone_findfmt_table(tmp_path: Path):
-    cfg = tmp_path / "findfmt.toml"
-    cfg.write_text("[findfmt]\nformat = 'tree'\n")
-    data = load_toml_config(cfg, is_explicit=True)
-    assert data == {"format": "tree"}
-
-
-def test_load_toml_config_standalone_tool_findfmt_table(tmp_path: Path):
-    cfg = tmp_path / "findfmt.toml"
-    cfg.write_text("[tool.findfmt]\nformat = 'json'\n")
-    data = load_toml_config(cfg, is_explicit=True)
-    assert data == {"format": "json"}
+@pytest.mark.parametrize(
+    ("filename", "content", "expected"),
+    [
+        (
+            "pyproject.toml",
+            "[tool.findfmt]\nformat = 'table'\ntable_style = 'grid'\n",
+            {"format": "table", "table_style": "grid"},
+        ),
+        ("pyproject.toml", "[project]\nname = 'test'\n", {}),
+        ("pyproject.toml", "[tool.black]\nline-length = 88\n", {}),
+        ("findfmt.toml", "format = 'table'\n", {"format": "table"}),
+        ("findfmt.toml", "[findfmt]\nformat = 'tree'\n", {"format": "tree"}),
+        ("findfmt.toml", "[tool.findfmt]\nformat = 'json'\n", {"format": "json"}),
+    ],
+)
+def test_load_toml_config_sections(
+    tmp_path: Path,
+    filename: str,
+    content: str,
+    expected: dict[str, str],
+) -> None:
+    cfg = tmp_path / filename
+    cfg.write_text(content, encoding="utf-8")
+    assert load_toml_config(cfg, is_explicit=filename != "pyproject.toml") == expected
 
 
 def test_env_var_overrides_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -344,3 +299,129 @@ def test_env_var_overrides_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
     assert "lvl1.py" in res_cli.stdout
     assert "lvl2.py" in res_cli.stdout
     assert "lvl3.py" not in res_cli.stdout
+
+
+@pytest.mark.parametrize(
+    ("layers", "expected_marker"),
+    [
+        (("csv", None, None, None), "path,relative_path,tags,mime_type"),
+        (("csv", "tsv", None, None), "path\trelative_path\ttags\tmime_type"),
+        (("csv", None, "json", None), '"path":'),
+        ((None, "tsv", "json", None), '"path":'),
+        (("csv", "tsv", "json", None), '"path":'),
+        (("csv", "tsv", "json", "yaml"), "path:"),
+        (("csv", "tsv", None, "yaml"), "path:"),
+    ],
+)
+def test_precedence_matrix(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    layers: tuple[str | None, str | None, str | None, str | None],
+    expected_marker: str,
+) -> None:
+    """Verify full configuration precedence: user < project < env < CLI (#455, #332)."""
+    user_fmt, proj_fmt, env_fmt, cli_fmt = layers
+    xdg_dir = tmp_path / "xdg"
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg_dir))
+    monkeypatch.delenv("FINDFMT_CONFIG", raising=False)
+    monkeypatch.delenv("FINDFMT_FORMAT", raising=False)
+
+    if user_fmt is not None:
+        user_cfg = xdg_dir / "findfmt" / "config.toml"
+        user_cfg.parent.mkdir(parents=True)
+        user_cfg.write_text(f'format = "{user_fmt}"\n', encoding="utf-8")
+
+    repo = tmp_path / "repo"
+    (repo / ".git").mkdir(parents=True)
+    (repo / "sample.py").write_text("x = 1\n", encoding="utf-8")
+    if proj_fmt is not None:
+        (repo / "pyproject.toml").write_text(
+            f'[tool.findfmt]\nformat = "{proj_fmt}"\n',
+            encoding="utf-8",
+        )
+
+    if env_fmt is not None:
+        monkeypatch.setenv("FINDFMT_FORMAT", env_fmt)
+
+    monkeypatch.chdir(repo)
+    cli_args: list[str] = ["-f", cli_fmt] if cli_fmt is not None else []
+    res = CliRunner().invoke(app, [*cli_args, str(repo)])
+    assert res.exit_code == 0
+    assert expected_marker in res.stdout
+
+
+def test_user_and_project_configs_merge(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """User config (hidden=true) and project config (max_depth=1) merge (#455, #332)."""
+    xdg_dir = tmp_path / "xdg"
+    user_cfg = xdg_dir / "findfmt" / "config.toml"
+    user_cfg.parent.mkdir(parents=True)
+    user_cfg.write_text('hidden = true\nformat = "csv"\n', encoding="utf-8")
+
+    repo = tmp_path / "repo"
+    (repo / ".git").mkdir(parents=True)
+    (repo / "sub").mkdir()
+    (repo / ".secret.py").write_text("x = 1\n", encoding="utf-8")
+    (repo / "sub" / "deep.py").write_text("x = 2\n", encoding="utf-8")
+    proj_cfg = repo / ".findfmt.toml"
+    proj_cfg.write_text('max_depth = 1\nformat = "json"\n', encoding="utf-8")
+
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg_dir))
+    monkeypatch.delenv("FINDFMT_CONFIG", raising=False)
+    monkeypatch.chdir(repo)
+
+    runner = CliRunner()
+    res_show = runner.invoke(app, ["--show-config"])
+    assert res_show.exit_code == 0
+    assert f"Active configuration: {proj_cfg}" in res_show.stdout
+    assert "hidden = true" in res_show.stdout
+    assert "max_depth = 1" in res_show.stdout
+    assert 'format = "json"' in res_show.stdout
+
+    res_run = runner.invoke(app, [str(repo)])
+    assert res_run.exit_code == 0
+    assert ".secret.py" in res_run.stdout
+    assert "deep.py" not in res_run.stdout
+
+
+def test_pyproject_found_by_walking_up_to_vcs_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Walk up from repo/pkg/sub to repo/pyproject.toml, stopping at VCS root (#455, #332)."""
+    outer = tmp_path / "outer"
+    outer.mkdir()
+    (outer / "pyproject.toml").write_text('[tool.findfmt]\nformat = "csv"\n', encoding="utf-8")
+
+    repo = outer / "repo"
+    (repo / ".git").mkdir(parents=True)
+    repo_pyproject = repo / "pyproject.toml"
+    repo_pyproject.write_text('[tool.findfmt]\nformat = "json"\n', encoding="utf-8")
+
+    sub = repo / "pkg" / "sub"
+    sub.mkdir(parents=True)
+    # Subpackage pyproject.toml without [tool.findfmt] is skipped during upward walk.
+    (repo / "pkg" / "pyproject.toml").write_text('[project]\nname = "pkg"\n', encoding="utf-8")
+
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "empty_xdg"))
+    monkeypatch.delenv("FINDFMT_CONFIG", raising=False)
+    monkeypatch.chdir(sub)
+
+    runner = CliRunner()
+    res = runner.invoke(app, ["--show-config"])
+    assert res.exit_code == 0
+    assert f"Active configuration: {repo_pyproject}" in res.stdout
+    assert 'format = "json"' in res.stdout
+
+    # Removing repo/pyproject.toml must NOT walk past repo/.git into outer/pyproject.toml.
+    repo_pyproject.unlink()
+    res_stopped = runner.invoke(app, ["--show-config"])
+    assert res_stopped.exit_code == 0
+    assert "Active configuration: (none)" in res_stopped.stdout
+
+    # Invalid pyproject.toml discovered via upward walk triggers TOML syntax error (exit 2).
+    repo_pyproject.write_text("invalid = = =\n", encoding="utf-8")
+    res_bad = runner.invoke(app, ["--show-config"])
+    assert res_bad.exit_code == 2
