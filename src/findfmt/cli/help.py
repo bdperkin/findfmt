@@ -44,6 +44,7 @@ __all__ = [
     "HELP_FOLLOW_SYMLINKS",
     "HELP_FORMAT",
     "HELP_FROM_FILE",
+    "HELP_GENERATE_CONFIG",
     "HELP_GITIGNORE_FILE",
     "HELP_GROUP",
     "HELP_HELP_ALL",
@@ -239,6 +240,7 @@ HELP_HELP_ALL = _(
 HELP_CONFIG = _("Path to custom configuration file overriding defaults.")
 HELP_NO_CONFIG = _("Suppress loading any configuration file.")
 HELP_SHOW_CONFIG = _("Display resolved configuration settings and exit.")
+HELP_GENERATE_CONFIG = _("Output an annotated reference TOML configuration to stdout and exit.")
 HELP_LOCALE = _("Explicitly set locale for translations and display (e.g. 'en_US', 'es', 'C').")
 
 

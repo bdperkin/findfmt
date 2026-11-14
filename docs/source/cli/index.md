@@ -275,6 +275,9 @@ defaults.
 `--show-config` : Display the active configuration file and resolved configuration settings, then
 exit immediately.
 
+`--generate-config` : Output an annotated reference TOML configuration containing all canonical
+settings and default values to standard output, then exit immediately.
+
 `--known-tags` : List all tags supported by the classifier engine and exit immediately (routed
 through the interactive pager on TTY sessions exceeding terminal height).
 

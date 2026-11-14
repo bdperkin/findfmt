@@ -1308,3 +1308,7 @@ msgstr "Permitir rutas de --from-file que se resuelvan fuera del directorio raí
 #, python-brace-format
 msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
 msgstr "findfmt: advertencia: omitiendo ruta fuera del directorio raíz de recorrido: '{path}'\n"
+
+#: src/findfmt/cli/help.py:243
+msgid "Output an annotated reference TOML configuration to stdout and exit."
+msgstr "Mostrar una configuración TOML de referencia comentada en stdout y salir."

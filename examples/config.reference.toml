@@ -1,0 +1,210 @@
+# =============================================================================
+# findfmt Annotated Reference Configuration
+#
+# Generate with: findfmt --generate-config > ~/.config/findfmt/config.toml
+# Precedence:    user < project (.findfmt.toml / pyproject.toml) < env < CLI
+# =============================================================================
+
+[tool.findfmt]
+
+# -----------------------------------------------------------------------------
+# 1. Output Serialization & Styling
+# -----------------------------------------------------------------------------
+
+# Output format (text, table, tree, json, jsonl, yaml, ipynb, csv,
+# csv-table, tsv, markdown, rst, xml, html).
+format = "text"
+
+# Table border style (rounded, simple, minimal, double, heavy,
+# markdown, ascii, cp437, square, grid).
+# table_style = "rounded"
+
+# ANSI color policy ("auto", "always", "never", or boolean).
+color = "auto"
+
+# Terminal paging policy ("auto", "always", "never", or boolean).
+pager = "auto"
+
+# Omit tree branch lines and strip whitespace in structured formats.
+no_indent = false
+
+# Use ANSI/VT100 line-drawing escapes for tree indentation lines.
+ansi_lines = false
+
+# Use CP437 console graphics characters for tree indentation lines.
+cp437 = false
+
+# Prefix formula triggers in CSV/TSV cells with a single quote.
+csv_safe = false
+
+# Render HTML5 output with hyperlinks prefixed by BASEHREF.
+# html = "https://example.com"
+
+# Custom <title> and <h1> heading for HTML document output.
+# title = "Directory Tree"
+
+# Suppress hyperlink anchors in HTML output, rendering plain paths.
+no_links = false
+
+# Wrap paths in OSC 8 clickable terminal hyperlink escape sequences.
+hyperlink = false
+
+# URI schema prefix for terminal hyperlinks (e.g. vscode://file/).
+hyperlink_schema = "file://"
+
+# Optional authority or hostname component for terminal hyperlinks.
+# hyperlink_authority = "localhost"
+
+# -----------------------------------------------------------------------------
+# 2. Traversal Scope & Boundaries
+# -----------------------------------------------------------------------------
+
+# Include dotfiles and hidden directories in traversal.
+hidden = false
+
+# Respect .gitignore and global gitignore rules (false disables).
+ignore = true
+
+# External .gitignore file path applied across the traversal scope.
+# gitignore_file = ".gitignore"
+
+# Follow symbolic links during traversal.
+follow_symlinks = false
+
+# Emit directories only and suppress regular files.
+dirs_only = false
+
+# Confine traversal to the starting directory filesystem device.
+one_file_system = false
+
+# Maximum directory descent depth limit (non-negative integer).
+# max_depth = 3
+
+# Skip directories containing more than this number of entries.
+# file_limit = 1000
+
+# Omit directories containing zero matching items.
+prune = false
+
+# Allow --from-file paths that resolve outside the traversal root.
+allow_outside_root = false
+
+# -----------------------------------------------------------------------------
+# 3. Tag, Pattern & Shebang Filtering
+# -----------------------------------------------------------------------------
+
+# Default classification tags to include (e.g. ["python"]).
+tags = []
+
+# Classification tags to exclude (e.g. ["binary"]).
+exclude_tags = []
+
+# Require matching files to have ALL specified tags instead of ANY.
+all_tags = false
+
+# Wildcard filename include patterns (e.g. ["*.py"]).
+pattern = []
+
+# Wildcard filename exclude patterns (e.g. ["*_pb2.py"]).
+exclude_pattern = []
+
+# Apply case-insensitive glob pattern matching.
+ignore_case = false
+
+# Match directory names against patterns and inherit to children.
+match_dirs = false
+
+# Filter files whose #! shebang contains this interpreter pattern.
+# shebang = "python"
+
+# -----------------------------------------------------------------------------
+# 4. Sorting & Entry Ordering
+# -----------------------------------------------------------------------------
+
+# Sort criterion ("name", "size", "mtime", "ctime", "version", "none").
+sort = "name"
+
+# Yield entries in raw filesystem order without sorting.
+unsorted = false
+
+# Reverse the active sort order.
+reverse = false
+
+# Group directories before files within each level.
+dirs_first = false
+
+# Group files before directories within each level.
+files_first = false
+
+# -----------------------------------------------------------------------------
+# 5. Path Display, Metadata & Diagnostics
+# -----------------------------------------------------------------------------
+
+# Output absolute paths instead of relative paths.
+absolute = false
+
+# Prepend input search path prefix to relative paths.
+relative = false
+
+# Delimit paths with a NUL (\0) byte for xargs -0.
+print0 = false
+
+# Display identified classification tags alongside paths.
+list_tags = false
+
+# Print match count and tag frequency statistics to stderr.
+summary = false
+
+# Exit with status code 1 when zero files match.
+exit_status = false
+
+# Display file type and permissions in ls -l style.
+permissions = false
+
+# Display file owner username or numeric UID.
+user = false
+
+# Display file group name or numeric GID.
+group = false
+
+# Display filesystem inode number (st_ino).
+inodes = false
+
+# Display filesystem device number (st_dev).
+device = false
+
+# Display file size in bytes (st_size).
+size = false
+
+# Format file sizes using binary units (KiB, MiB).
+human_readable = false
+
+# Format file sizes using SI metric units (kB, MB).
+si = false
+
+# Accumulate recursive directory disk usage.
+du = false
+
+# Display file last modification timestamp (st_mtime).
+mtime = false
+
+# Display file status change timestamp (st_ctime).
+ctime = false
+
+# Custom strftime format string for timestamps.
+# time_format = "%Y-%m-%d %H:%M:%S"
+
+# Append file type indicator characters (/, *, @, =, |, >).
+classify = false
+
+# Replace non-printable control characters in filenames with '?'.
+hide_control_chars = false
+
+# Print non-printable control characters literally.
+literal = false
+
+# Enclose filenames in double quotes.
+quote_name = false
+
+# Display and translation locale override (e.g. "en_US", "de", "es").
+# locale = "en_US"

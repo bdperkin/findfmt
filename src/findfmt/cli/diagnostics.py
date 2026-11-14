@@ -15,6 +15,7 @@ from findfmt.i18n import _
 
 __all__ = [
     "diagnostics_callback",
+    "generate_config_callback",
     "get_diagnostics",
     "get_git_version",
     "get_version",
@@ -221,4 +222,29 @@ def show_config_callback(
 
         content = format_config_dump(path, data)
         display_with_pager(content, ctx=ctx)
+        raise typer.Exit(code=0)
+
+
+def generate_config_callback(
+    ctx: typer.Context | bool | None = None,
+    value: bool = False,
+) -> None:
+    """Output the annotated reference TOML configuration and exit.
+
+    Args:
+        ctx: Typer context, if provided by Click callback.
+        value: Boolean flag indicating if generate-config flag was passed.
+
+    Raises:
+        typer.Exit: Upon printing the reference configuration.
+    """
+    if isinstance(ctx, bool):
+        value = ctx
+        ctx = None
+
+    if value:
+        from findfmt.cli.config_template import generate_reference_config
+        from findfmt.cli.pager import display_with_pager
+
+        display_with_pager(generate_reference_config(), ctx=ctx)
         raise typer.Exit(code=0)

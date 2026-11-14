@@ -1101,3 +1101,7 @@ msgstr "探索ルートディレクトリ外に解決される --from-file パ�
 #, python-brace-format
 msgid "findfmt: warning: skipping path outside traversal root: '{path}'\n"
 msgstr "findfmt: 警告: 探索ルート外のパスをスキップしています: '{path}'\n"
+
+#: src/findfmt/cli/help.py:243
+msgid "Output an annotated reference TOML configuration to stdout and exit."
+msgstr "注釈付きの参照用 TOML 設定を標準出力に出力して終了します。"

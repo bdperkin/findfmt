@@ -14,6 +14,11 @@ from findfmt.cli.config_schema import (
     _extract_tool_section,
     validate_and_convert_config,
 )
+from findfmt.cli.config_template import (
+    format_config_dump,
+    generate_reference_config,
+    generate_sample_config,
+)
 from findfmt.cli.env_config import load_env_config, merge_raw_config
 from findfmt.i18n import _
 
@@ -21,6 +26,8 @@ __all__ = [
     "extract_config_args",
     "find_config_file",
     "format_config_dump",
+    "generate_reference_config",
+    "generate_sample_config",
     "get_active_config_data",
     "get_active_config_path",
     "load_env_config",
@@ -312,42 +319,3 @@ def resolve_and_load_config(
     _state.path = path
     _state.data = merged_raw
     return path, merged_converted
-
-
-def _format_toml_value(val: object) -> str:
-    """Format a Python value as a TOML scalar or list string."""
-    if isinstance(val, bool):
-        return "true" if val else "false"
-
-    if isinstance(val, (int, float)):
-        return str(val)
-
-    if isinstance(val, list):
-        items = ", ".join(f'"{x}"' if isinstance(x, str) else str(x) for x in val)
-        return f"[{items}]"
-
-    return f'"{val}"'
-
-
-def format_config_dump(path: Path | None, config_dict: dict[str, Any]) -> str:
-    """Format active configuration settings for diagnostic display.
-
-    Args:
-        path: Path of the active configuration file or None.
-        config_dict: Dictionary of active configuration key-value pairs.
-
-    Returns:
-        Formatted multi-line diagnostic string ending in a newline.
-    """
-    active_label = str(path) if path is not None else _("(none)")
-    if not config_dict:
-        return _("Active configuration: {path} (using built-in defaults)\n").format(
-            path=active_label,
-        )
-
-    lines = [_("Active configuration: {path}").format(path=active_label), "", "[tool.findfmt]"]
-    for key in sorted(config_dict):
-        val_str = _format_toml_value(config_dict[key])
-        lines.append(f"{key} = {val_str}")
-
-    return "\n".join(lines) + "\n"

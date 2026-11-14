@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import tomllib
 from pathlib import Path
 from unittest.mock import patch
 
@@ -13,17 +14,20 @@ from typer.testing import CliRunner
 from findfmt.cli import (
     app,
     format_config_dump,
+    generate_config_callback,
+    generate_reference_config,
+    generate_sample_config,
     get_active_config_data,
     get_active_config_path,
     get_diagnostics,
     main_findfiles,
     resolve_and_load_config,
     show_config_callback,
+    validate_and_convert_config,
 )
-from findfmt.cli.file_config import (
-    _format_toml_value,
-    reset_active_config,
-)
+from findfmt.cli.config_schema import CANONICAL_CONFIG_KEYS
+from findfmt.cli.config_template import _format_toml_value
+from findfmt.cli.file_config import reset_active_config
 from findfmt.formatters import OutputFormat
 
 
@@ -289,3 +293,54 @@ def test_wrapper_defaults_do_not_override_config(
     assert ".hid" not in capsys.readouterr().out
     assert main_findfiles(["--config", str(cfg), "--show-config"]) == 0
     assert "hidden = false" in capsys.readouterr().out
+
+
+def test_sample_and_reference_config_templates(tmp_path: Path) -> None:
+    """Sample and reference TOML templates match examples/ and validate cleanly (#310)."""
+    repo_root = Path(__file__).resolve().parents[3]
+    sample_text = generate_sample_config()
+    ref_text = generate_reference_config()
+    assert (repo_root / "examples" / "config.toml").read_text(encoding="utf-8") == sample_text
+    assert (repo_root / "examples" / "config.reference.toml").read_text(
+        encoding="utf-8",
+    ) == ref_text
+
+    sample_data = tomllib.loads(sample_text)["tool"]["findfmt"]
+    sample_defaults = validate_and_convert_config(sample_data, Path("examples/config.toml"))
+    assert sample_defaults["output_format"] == OutputFormat.TABLE
+    assert sample_defaults["table_style"] == "rounded"
+    assert sample_defaults["hyperlink"] is True
+    assert sample_defaults["summary"] is True
+
+    ref_data = tomllib.loads(ref_text)["tool"]["findfmt"]
+    validate_and_convert_config(ref_data, Path("examples/config.reference.toml"))
+
+    uncommented = "\n".join(
+        line[2:] if line.startswith("# ") and " = " in line else line
+        for line in ref_text.splitlines()
+    )
+    full_ref_data = tomllib.loads(uncommented)["tool"]["findfmt"]
+    assert set(full_ref_data) == set(CANONICAL_CONFIG_KEYS)
+    validate_and_convert_config(full_ref_data, Path("examples/config.reference.toml"))
+
+    (tmp_path / "a.py").write_text("x = 1\n", encoding="utf-8")
+    runner = CliRunner()
+    res = runner.invoke(
+        app,
+        ["--config", str(repo_root / "examples" / "config.toml"), str(tmp_path)],
+    )
+    assert res.exit_code == 0
+
+
+def test_generate_config_cli_and_callback() -> None:
+    """--generate-config and generate_config_callback output reference TOML (#310)."""
+    generate_config_callback(value=False)
+    with pytest.raises(typer.Exit) as exc:
+        generate_config_callback(ctx=True)
+
+    assert exc.value.exit_code == 0
+
+    runner = CliRunner()
+    res = runner.invoke(app, ["--config", "/nonexistent/config.toml", "--generate-config"])
+    assert res.exit_code == 0
+    assert res.stdout == generate_reference_config()

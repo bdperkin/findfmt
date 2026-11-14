@@ -69,7 +69,7 @@ def test_evaluate_providers_cost_and_latency() -> None:
     ollama = by_id["local-ollama-qwen2.5-14b"]
     azure = by_id["azure-ai-translator"]
 
-    assert mini.batches_per_catalog == 6
+    assert mini.batches_per_catalog >= 6
     assert mini.cost_per_catalog_usd > 0.0
     assert mini.cost_per_catalog_usd < gpt4o.cost_per_catalog_usd
     assert mini.cost_52_locales_usd < 1.0

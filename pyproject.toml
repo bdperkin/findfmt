@@ -121,6 +121,7 @@ build.targets.sdist.include = [
   "/tests",
   "/docs",
   "/tools",
+  "/examples",
   "README.md",
   "LICENSE",
   "pyproject.toml",
@@ -196,7 +197,7 @@ known_first_party = [ "findfmt" ]
 
 [tool.vulture]
 exclude = [ "docs", "tests", "tools" ]
-ignore_names = [ "diagnostics", "help_all", "known_tags", "relative_paths", "verbose" ]
+ignore_names = [ "diagnostics", "generate_config", "help_all", "known_tags", "relative_paths", "verbose" ]
 min_confidence = 80
 
 [tool.ty]

@@ -18,8 +18,13 @@ if TYPE_CHECKING:
         validate_and_convert_config,
         validate_cli_options,
     )
+    from findfmt.cli.config_template import (
+        generate_reference_config,
+        generate_sample_config,
+    )
     from findfmt.cli.diagnostics import (
         diagnostics_callback,
+        generate_config_callback,
         get_diagnostics,
         get_git_version,
         get_version,
@@ -64,6 +69,9 @@ _LAZY_ATTRS: dict[str, str] = {
     "find_config_file": "findfmt.cli.config",
     "findfmt": "findfmt.cli.main",
     "format_config_dump": "findfmt.cli.config",
+    "generate_config_callback": "findfmt.cli.diagnostics",
+    "generate_reference_config": "findfmt.cli.config_template",
+    "generate_sample_config": "findfmt.cli.config_template",
     "get_active_config_data": "findfmt.cli.config",
     "get_active_config_path": "findfmt.cli.config",
     "get_diagnostics": "findfmt.cli.diagnostics",
@@ -106,6 +114,9 @@ __all__ = [
     "find_config_file",
     "findfmt",
     "format_config_dump",
+    "generate_config_callback",
+    "generate_reference_config",
+    "generate_sample_config",
     "get_active_config_data",
     "get_active_config_path",
     "get_diagnostics",

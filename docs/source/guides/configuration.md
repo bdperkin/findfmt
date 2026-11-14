@@ -65,6 +65,17 @@ To view configuration status as part of general system diagnostics:
 findfmt --diagnostics
 ```
 
+To generate a self-documenting, annotated reference configuration file directly from the CLI:
+
+```bash
+mkdir -p ~/.config/findfmt
+findfmt --generate-config > ~/.config/findfmt/config.toml
+```
+
+The repository and source distribution also include a practical sample configuration at
+`examples/config.toml` and the full annotated reference template at
+`examples/config.reference.toml`.
+
 ______________________________________________________________________
 
 ## 3. Configuration File Formats

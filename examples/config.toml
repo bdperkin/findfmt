@@ -1,0 +1,14 @@
+# Sample findfmt configuration (save to ~/.config/findfmt/config.toml
+# or .findfmt.toml, or copy [tool.findfmt] into pyproject.toml).
+
+[tool.findfmt]
+format = "table"
+table_style = "rounded"
+color = "auto"
+pager = "auto"
+hyperlink = true
+summary = true
+dirs_first = true
+dirs_only = false
+hidden = false
+ignore = true

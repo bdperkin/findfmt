@@ -28,6 +28,8 @@ TREE = (
     "src/findfmt/locale/de/LC_MESSAGES/findfmt.mo",
     "docs/source/locale/de/LC_MESSAGES/index.po",
     "docs/source/locale/de/LC_MESSAGES/index.mo",
+    "examples/config.toml",
+    "examples/config.reference.toml",
     "tools/i18n.py",
 )
 
@@ -64,7 +66,13 @@ def test_sdist_includes_only_package_catalog_artifacts(project: Path) -> None:
     assert {path for path in selected if path.endswith(".mo")} == {
         "src/findfmt/locale/de/LC_MESSAGES/findfmt.mo",
     }
-    for source in ("LICENSE", "src/findfmt/py.typed", "src/findfmt/locale/findfmt.pot"):
+    for source in (
+        "LICENSE",
+        "src/findfmt/py.typed",
+        "src/findfmt/locale/findfmt.pot",
+        "examples/config.toml",
+        "examples/config.reference.toml",
+    ):
         assert source in selected
 
 

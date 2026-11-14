@@ -407,11 +407,23 @@
   },
   "findfmt": {
    "kind": "function",
-   "signature": "(paths: 'OptPaths' = None, tags: 'OptTags' = None, exclude_tags: 'OptExcludeTags' = None, all_tags: 'OptAllTags' = False, pattern: 'OptPattern' = None, exclude_pattern: 'OptExcludePattern' = None, ignore_case: 'OptIgnoreCase' = False, match_dirs: 'OptMatchDirs' = False, shebang: 'OptShebang' = None, no_ignore: 'OptNoIgnore' = False, gitignore_file: 'OptGitignoreFile' = None, from_file: 'OptFromFile' = None, offline: 'OptOffline' = False, allow_outside_root: 'OptAllowOutsideRoot' = False, hidden: 'OptHidden' = False, follow_symlinks: 'OptFollowSymlinks' = False, dirs_only: 'OptDirsOnly' = False, one_file_system: 'OptOneFileSystem' = False, max_depth: 'OptMaxDepth' = None, file_limit: 'OptFileLimit' = None, prune: 'OptPrune' = False, sort: 'OptSort' = None, reverse: 'OptReverse' = False, unsorted: 'OptUnsorted' = False, dirs_first: 'OptDirsFirst' = False, files_first: 'OptFilesFirst' = False, output_format: 'OptOutputFormat' = <OutputFormat.TEXT: 'text'>, output: 'OptOutput' = None, tree: 'OptTree' = False, json: 'OptJson' = False, xml: 'OptXml' = False, html: 'OptHtml' = None, intro: 'OptIntro' = None, outro: 'OptOutro' = None, title: 'OptTitle' = None, no_links: 'OptNoLinks' = False, hyperlink: 'OptHyperlink' = False, hyperlink_schema: 'OptHyperlinkSchema' = 'file://', hyperlink_authority: 'OptHyperlinkAuthority' = None, table_style: 'OptTableStyle' = None, csv_safe: 'OptCsvSafe' = False, pager: 'OptPager' = None, no_indent: 'OptNoIndent' = False, ansi_lines: 'OptAnsiLines' = False, cp437: 'OptCp437' = False, color: 'OptColor' = None, absolute: 'OptAbsolute' = False, relative: 'OptRelative' = False, permissions: 'OptPermissions' = False, user: 'OptUser' = False, group: 'OptGroup' = False, size: 'OptSize' = False, human_readable: 'OptHumanReadable' = False, si: 'OptSi' = False, du: 'OptDu' = False, inodes: 'OptInodes' = False, device: 'OptDevice' = False, mtime: 'OptMtime' = False, ctime: 'OptCtime' = False, time_format: 'OptTimeFormat' = None, classify: 'OptClassify' = False, hide_control_chars: 'OptHideControlChars' = False, literal: 'OptLiteral' = False, quote_name: 'OptQuoteName' = False, print0: 'OptPrint0' = False, list_tags: 'OptListTags' = False, summary: 'OptSummary' = False, exit_status: 'OptExitStatus' = False, known_tags: 'OptKnownTags' = False, verbose: 'OptVerbose' = False, diagnostics: 'OptDiagnostics' = False, version: 'OptVersion' = None, help_all: 'OptHelpAll' = False, locale: 'OptLocale' = None, config: 'OptConfig' = None, no_config: 'OptNoConfig' = False, show_config: 'OptShowConfig' = False) -> 'None'"
+   "signature": "(paths: 'OptPaths' = None, tags: 'OptTags' = None, exclude_tags: 'OptExcludeTags' = None, all_tags: 'OptAllTags' = False, pattern: 'OptPattern' = None, exclude_pattern: 'OptExcludePattern' = None, ignore_case: 'OptIgnoreCase' = False, match_dirs: 'OptMatchDirs' = False, shebang: 'OptShebang' = None, no_ignore: 'OptNoIgnore' = False, gitignore_file: 'OptGitignoreFile' = None, from_file: 'OptFromFile' = None, offline: 'OptOffline' = False, allow_outside_root: 'OptAllowOutsideRoot' = False, hidden: 'OptHidden' = False, follow_symlinks: 'OptFollowSymlinks' = False, dirs_only: 'OptDirsOnly' = False, one_file_system: 'OptOneFileSystem' = False, max_depth: 'OptMaxDepth' = None, file_limit: 'OptFileLimit' = None, prune: 'OptPrune' = False, sort: 'OptSort' = None, reverse: 'OptReverse' = False, unsorted: 'OptUnsorted' = False, dirs_first: 'OptDirsFirst' = False, files_first: 'OptFilesFirst' = False, output_format: 'OptOutputFormat' = <OutputFormat.TEXT: 'text'>, output: 'OptOutput' = None, tree: 'OptTree' = False, json: 'OptJson' = False, xml: 'OptXml' = False, html: 'OptHtml' = None, intro: 'OptIntro' = None, outro: 'OptOutro' = None, title: 'OptTitle' = None, no_links: 'OptNoLinks' = False, hyperlink: 'OptHyperlink' = False, hyperlink_schema: 'OptHyperlinkSchema' = 'file://', hyperlink_authority: 'OptHyperlinkAuthority' = None, table_style: 'OptTableStyle' = None, csv_safe: 'OptCsvSafe' = False, pager: 'OptPager' = None, no_indent: 'OptNoIndent' = False, ansi_lines: 'OptAnsiLines' = False, cp437: 'OptCp437' = False, color: 'OptColor' = None, absolute: 'OptAbsolute' = False, relative: 'OptRelative' = False, permissions: 'OptPermissions' = False, user: 'OptUser' = False, group: 'OptGroup' = False, size: 'OptSize' = False, human_readable: 'OptHumanReadable' = False, si: 'OptSi' = False, du: 'OptDu' = False, inodes: 'OptInodes' = False, device: 'OptDevice' = False, mtime: 'OptMtime' = False, ctime: 'OptCtime' = False, time_format: 'OptTimeFormat' = None, classify: 'OptClassify' = False, hide_control_chars: 'OptHideControlChars' = False, literal: 'OptLiteral' = False, quote_name: 'OptQuoteName' = False, print0: 'OptPrint0' = False, list_tags: 'OptListTags' = False, summary: 'OptSummary' = False, exit_status: 'OptExitStatus' = False, known_tags: 'OptKnownTags' = False, verbose: 'OptVerbose' = False, diagnostics: 'OptDiagnostics' = False, version: 'OptVersion' = None, help_all: 'OptHelpAll' = False, locale: 'OptLocale' = None, config: 'OptConfig' = None, no_config: 'OptNoConfig' = False, show_config: 'OptShowConfig' = False, generate_config: 'OptGenerateConfig' = False) -> 'None'"
   },
   "format_config_dump": {
    "kind": "function",
    "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+  },
+  "generate_config_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "generate_reference_config": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "generate_sample_config": {
+   "kind": "function",
+   "signature": "() -> 'str'"
   },
   "get_active_config_data": {
    "kind": "function",
@@ -586,8 +598,26 @@
    "signature": "(raw_data: 'dict[str, Any]', path: 'Path') -> 'dict[str, Any]'"
   }
  },
+ "findfmt.cli.config_template": {
+  "format_config_dump": {
+   "kind": "function",
+   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+  },
+  "generate_reference_config": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "generate_sample_config": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  }
+ },
  "findfmt.cli.diagnostics": {
   "diagnostics_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "generate_config_callback": {
    "kind": "function",
    "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   },
@@ -672,6 +702,14 @@
   "format_config_dump": {
    "kind": "function",
    "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+  },
+  "generate_reference_config": {
+   "kind": "function",
+   "signature": "() -> 'str'"
+  },
+  "generate_sample_config": {
+   "kind": "function",
+   "signature": "() -> 'str'"
   },
   "get_active_config_data": {
    "kind": "function",
@@ -800,6 +838,10 @@
    "type": "str"
   },
   "HELP_FROM_FILE": {
+   "kind": "data",
+   "type": "str"
+  },
+  "HELP_GENERATE_CONFIG": {
    "kind": "data",
    "type": "str"
   },
@@ -1049,7 +1091,11 @@
   },
   "findfmt": {
    "kind": "function",
-   "signature": "(paths: 'OptPaths' = None, tags: 'OptTags' = None, exclude_tags: 'OptExcludeTags' = None, all_tags: 'OptAllTags' = False, pattern: 'OptPattern' = None, exclude_pattern: 'OptExcludePattern' = None, ignore_case: 'OptIgnoreCase' = False, match_dirs: 'OptMatchDirs' = False, shebang: 'OptShebang' = None, no_ignore: 'OptNoIgnore' = False, gitignore_file: 'OptGitignoreFile' = None, from_file: 'OptFromFile' = None, offline: 'OptOffline' = False, allow_outside_root: 'OptAllowOutsideRoot' = False, hidden: 'OptHidden' = False, follow_symlinks: 'OptFollowSymlinks' = False, dirs_only: 'OptDirsOnly' = False, one_file_system: 'OptOneFileSystem' = False, max_depth: 'OptMaxDepth' = None, file_limit: 'OptFileLimit' = None, prune: 'OptPrune' = False, sort: 'OptSort' = None, reverse: 'OptReverse' = False, unsorted: 'OptUnsorted' = False, dirs_first: 'OptDirsFirst' = False, files_first: 'OptFilesFirst' = False, output_format: 'OptOutputFormat' = <OutputFormat.TEXT: 'text'>, output: 'OptOutput' = None, tree: 'OptTree' = False, json: 'OptJson' = False, xml: 'OptXml' = False, html: 'OptHtml' = None, intro: 'OptIntro' = None, outro: 'OptOutro' = None, title: 'OptTitle' = None, no_links: 'OptNoLinks' = False, hyperlink: 'OptHyperlink' = False, hyperlink_schema: 'OptHyperlinkSchema' = 'file://', hyperlink_authority: 'OptHyperlinkAuthority' = None, table_style: 'OptTableStyle' = None, csv_safe: 'OptCsvSafe' = False, pager: 'OptPager' = None, no_indent: 'OptNoIndent' = False, ansi_lines: 'OptAnsiLines' = False, cp437: 'OptCp437' = False, color: 'OptColor' = None, absolute: 'OptAbsolute' = False, relative: 'OptRelative' = False, permissions: 'OptPermissions' = False, user: 'OptUser' = False, group: 'OptGroup' = False, size: 'OptSize' = False, human_readable: 'OptHumanReadable' = False, si: 'OptSi' = False, du: 'OptDu' = False, inodes: 'OptInodes' = False, device: 'OptDevice' = False, mtime: 'OptMtime' = False, ctime: 'OptCtime' = False, time_format: 'OptTimeFormat' = None, classify: 'OptClassify' = False, hide_control_chars: 'OptHideControlChars' = False, literal: 'OptLiteral' = False, quote_name: 'OptQuoteName' = False, print0: 'OptPrint0' = False, list_tags: 'OptListTags' = False, summary: 'OptSummary' = False, exit_status: 'OptExitStatus' = False, known_tags: 'OptKnownTags' = False, verbose: 'OptVerbose' = False, diagnostics: 'OptDiagnostics' = False, version: 'OptVersion' = None, help_all: 'OptHelpAll' = False, locale: 'OptLocale' = None, config: 'OptConfig' = None, no_config: 'OptNoConfig' = False, show_config: 'OptShowConfig' = False) -> 'None'"
+   "signature": "(paths: 'OptPaths' = None, tags: 'OptTags' = None, exclude_tags: 'OptExcludeTags' = None, all_tags: 'OptAllTags' = False, pattern: 'OptPattern' = None, exclude_pattern: 'OptExcludePattern' = None, ignore_case: 'OptIgnoreCase' = False, match_dirs: 'OptMatchDirs' = False, shebang: 'OptShebang' = None, no_ignore: 'OptNoIgnore' = False, gitignore_file: 'OptGitignoreFile' = None, from_file: 'OptFromFile' = None, offline: 'OptOffline' = False, allow_outside_root: 'OptAllowOutsideRoot' = False, hidden: 'OptHidden' = False, follow_symlinks: 'OptFollowSymlinks' = False, dirs_only: 'OptDirsOnly' = False, one_file_system: 'OptOneFileSystem' = False, max_depth: 'OptMaxDepth' = None, file_limit: 'OptFileLimit' = None, prune: 'OptPrune' = False, sort: 'OptSort' = None, reverse: 'OptReverse' = False, unsorted: 'OptUnsorted' = False, dirs_first: 'OptDirsFirst' = False, files_first: 'OptFilesFirst' = False, output_format: 'OptOutputFormat' = <OutputFormat.TEXT: 'text'>, output: 'OptOutput' = None, tree: 'OptTree' = False, json: 'OptJson' = False, xml: 'OptXml' = False, html: 'OptHtml' = None, intro: 'OptIntro' = None, outro: 'OptOutro' = None, title: 'OptTitle' = None, no_links: 'OptNoLinks' = False, hyperlink: 'OptHyperlink' = False, hyperlink_schema: 'OptHyperlinkSchema' = 'file://', hyperlink_authority: 'OptHyperlinkAuthority' = None, table_style: 'OptTableStyle' = None, csv_safe: 'OptCsvSafe' = False, pager: 'OptPager' = None, no_indent: 'OptNoIndent' = False, ansi_lines: 'OptAnsiLines' = False, cp437: 'OptCp437' = False, color: 'OptColor' = None, absolute: 'OptAbsolute' = False, relative: 'OptRelative' = False, permissions: 'OptPermissions' = False, user: 'OptUser' = False, group: 'OptGroup' = False, size: 'OptSize' = False, human_readable: 'OptHumanReadable' = False, si: 'OptSi' = False, du: 'OptDu' = False, inodes: 'OptInodes' = False, device: 'OptDevice' = False, mtime: 'OptMtime' = False, ctime: 'OptCtime' = False, time_format: 'OptTimeFormat' = None, classify: 'OptClassify' = False, hide_control_chars: 'OptHideControlChars' = False, literal: 'OptLiteral' = False, quote_name: 'OptQuoteName' = False, print0: 'OptPrint0' = False, list_tags: 'OptListTags' = False, summary: 'OptSummary' = False, exit_status: 'OptExitStatus' = False, known_tags: 'OptKnownTags' = False, verbose: 'OptVerbose' = False, diagnostics: 'OptDiagnostics' = False, version: 'OptVersion' = None, help_all: 'OptHelpAll' = False, locale: 'OptLocale' = None, config: 'OptConfig' = None, no_config: 'OptNoConfig' = False, show_config: 'OptShowConfig' = False, generate_config: 'OptGenerateConfig' = False) -> 'None'"
+  },
+  "generate_config_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   },
   "get_diagnostics": {
    "kind": "function",
@@ -1176,6 +1222,10 @@
   "OptFromFile": {
    "kind": "type alias",
    "value": "Annotated[str | None, ...]"
+  },
+  "OptGenerateConfig": {
+   "kind": "type alias",
+   "value": "Annotated[bool, ...]"
   },
   "OptGitignoreFile": {
    "kind": "type alias",
@@ -1397,6 +1447,10 @@
    "kind": "type alias",
    "value": "Annotated[bool, ...]"
   },
+  "generate_config_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
   "help_all_callback": {
    "kind": "function",
    "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
@@ -1526,6 +1580,10 @@
  },
  "findfmt.diagnostics": {
   "diagnostics_callback": {
+   "kind": "function",
+   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+  },
+  "generate_config_callback": {
    "kind": "function",
    "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   },
