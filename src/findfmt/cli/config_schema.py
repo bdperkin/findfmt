@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import Any
 
@@ -65,6 +66,8 @@ _BOOL_KEYS: dict[str, tuple[str, bool]] = {
     "allow_outside_root": ("allow_outside_root", False),
 }
 
+_DEPRECATED_FORMAT_BOOL_KEYS: frozenset[str] = frozenset({"tree", "json", "xml"})
+
 _STR_LIST_KEYS: dict[str, str] = {
     "tags": "tags",
     "tag": "tags",
@@ -97,11 +100,14 @@ _INT_KEYS: dict[str, str] = {
 }
 
 CANONICAL_CONFIG_KEYS: frozenset[str] = frozenset(
-    {"format", "color", "pager", "gitignore_file"}
-    | {"ignore" if target == "no_ignore" else target for target, _ in _BOOL_KEYS.values()}
-    | set(_STR_LIST_KEYS.values())
-    | set(_STR_KEYS.values())
-    | set(_INT_KEYS.values()),
+    (
+        {"format", "color", "pager", "gitignore_file"}
+        | {"ignore" if target == "no_ignore" else target for target, _ in _BOOL_KEYS.values()}
+        | set(_STR_LIST_KEYS.values())
+        | set(_STR_KEYS.values())
+        | set(_INT_KEYS.values())
+    )
+    - _DEPRECATED_FORMAT_BOOL_KEYS,
 )
 
 ACCEPTED_CONFIG_KEYS: frozenset[str] = frozenset(
@@ -280,6 +286,20 @@ def _convert_str_val(key: str, val: object, path: Path) -> str:
     return val
 
 
+def _warn_deprecated_format_bool(raw_key: str, canonical_key: str, path: Path) -> None:
+    """Emit a deprecation warning for deprecated format boolean config keys (#457)."""
+    msg = _(
+        "Warning: Configuration key '{key}' in '{path}' is deprecated and will be removed "
+        "in v2.0.0; use 'format = \"{fmt}\"' instead.",
+    ).format(
+        key=raw_key,
+        path=path,
+        fmt=canonical_key,
+    )
+    typer.echo(msg, err=True)
+    warnings.warn(msg, DeprecationWarning, stacklevel=3)
+
+
 def validate_and_convert_config(raw_data: dict[str, Any], path: Path) -> dict[str, Any]:
     """Validate configuration dictionary schema and map to CLI parameter defaults.
 
@@ -305,6 +325,8 @@ def validate_and_convert_config(raw_data: dict[str, Any], path: Path) -> dict[st
         elif key in _BOOL_KEYS:
             target_name, invert = _BOOL_KEYS[key]
             converted[target_name] = _convert_bool_val(raw_key, val, path, invert=invert)
+            if key in _DEPRECATED_FORMAT_BOOL_KEYS:
+                _warn_deprecated_format_bool(raw_key, target_name, path)
         elif key in _STR_LIST_KEYS:
             target_name = _STR_LIST_KEYS[key]
             converted[target_name] = _convert_str_list(raw_key, val, path)

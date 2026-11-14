@@ -8,6 +8,8 @@ import pytest
 import typer
 
 from findfmt.cli.config_schema import (
+    ACCEPTED_CONFIG_KEYS,
+    CANONICAL_CONFIG_KEYS,
     _convert_bool_val,
     _convert_format_val,
     _convert_int_val,
@@ -185,3 +187,35 @@ def test_extract_tool_section_standalone_no_findfmt(tmp_path: Path):
     p = tmp_path / "custom.toml"
     assert _extract_tool_section({"other": 123}, p) == {"other": 123}
     assert _extract_tool_section({"tool": {"other": 123}}, p) == {"tool": {"other": 123}}
+
+
+@pytest.mark.parametrize(
+    ("key", "val"),
+    [
+        ("tree", True),
+        ("json", False),
+        ("xml", True),
+    ],
+)
+def test_deprecated_format_boolean_keys_warn_and_convert(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    key: str,
+    val: object,
+) -> None:
+    """Deprecated tree/json/xml config keys warn on stderr and via DeprecationWarning (#457)."""
+    assert key not in CANONICAL_CONFIG_KEYS
+    assert key in ACCEPTED_CONFIG_KEYS
+
+    p = tmp_path / "config.toml"
+    expected_msg = (
+        f"Warning: Configuration key '{key}' in '{p}' is deprecated and will be removed "
+        f"in v2.0.0; use 'format = \"{key}\"' instead."
+    )
+    with pytest.warns(DeprecationWarning, match=f"Configuration key '{key}'") as record:
+        converted = validate_and_convert_config({key: val}, p)
+
+    assert converted == {key: val}
+    assert len(record) == 1
+    assert str(record[0].message) == expected_msg
+    assert expected_msg in capsys.readouterr().err

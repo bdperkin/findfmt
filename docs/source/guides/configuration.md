@@ -153,9 +153,6 @@ ______________________________________________________________________
 | Setting               | Type            | CLI Equivalent                                   | Description                                                                                                                                  | Default     |
 | :-------------------- | :-------------- | :----------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :---------- |
 | `format`              | string          | `-f, --format`                                   | Output serialization format (`text`, `table`, `tree`, `json`, `yaml`, `csv`, `tsv`, `xml`, `html`, `markdown`, `rst`, `jsonl`, `csv-table`). | `"text"`    |
-| `tree`                | bool            | `--tree / --no-tree`                             | Render output in a hierarchical directory tree (equivalent to `--format tree`).                                                              | `false`     |
-| `json`                | bool            | `-J, --json / --no-json`                         | Render output as structured JSON records (equivalent to `--format json`).                                                                    | `false`     |
-| `xml`                 | bool            | `-X, --xml / --no-xml`                           | Render output as a hierarchical XML document (equivalent to `--format xml`).                                                                 | `false`     |
 | `html`                | string          | `-H, --html`                                     | Render output as an HTML5 document with hyperlinks prefixed by `BASEHREF`.                                                                   | `None`      |
 | `title`               | string          | `-T, --title`                                    | Document `<title>` and `<h1>` heading for HTML output.                                                                                       | `None`      |
 | `no_links`            | bool            | `--nolinks / --no-nolinks`                       | Suppress hyperlink anchors in HTML output, rendering plain text paths.                                                                       | `false`     |
@@ -215,6 +212,13 @@ ______________________________________________________________________
 | `hyperlink_schema`    | string          | `--hyperlink-schema`                             | URI schema prefix for terminal hyperlinks.                                                                                                   | `"file://"` |
 | `hyperlink_authority` | string          | `--hyperlink-authority`                          | Authority or hostname component for terminal hyperlinks.                                                                                     | `None`      |
 | `locale`              | string          | `--locale`                                       | Default display and translation locale.                                                                                                      | `None`      |
+
+```{note}
+The legacy `tree`, `json`, and `xml` boolean configuration keys (and their `FINDFMT_TREE`,
+`FINDFMT_JSON`, and `FINDFMT_XML` environment counterparts) emit a deprecation warning in `1.x` and
+will be removed in `v2.0.0`. Use `format = "tree"`, `format = "json"`, or `format = "xml"` (or
+`FINDFMT_FORMAT`) instead.
+```
 
 ______________________________________________________________________
 

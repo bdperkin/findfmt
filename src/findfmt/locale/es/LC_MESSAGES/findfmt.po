@@ -162,6 +162,15 @@ msgstr "se esperaba un entero no negativo, se recibió {val}"
 msgid "expected string, got {type_name}"
 msgstr "se esperaba una cadena, se recibió {type_name}"
 
+#: src/findfmt/cli/config_schema.py:292
+#, python-brace-format
+msgid ""
+"Warning: Configuration key '{key}' in '{path}' is deprecated and will be "
+"removed in v2.0.0; use 'format = \"{fmt}\"' instead."
+msgstr ""
+"Advertencia: La clave de configuración '{key}' en '{path}' está obsoleta y "
+"se eliminará en v2.0.0; use 'format = \"{fmt}\"' en su lugar."
+
 #: src/findfmt/cli/config_schema.py:303
 #, python-brace-format
 msgid "Error: Unknown configuration key '{key}' in '{path}'."

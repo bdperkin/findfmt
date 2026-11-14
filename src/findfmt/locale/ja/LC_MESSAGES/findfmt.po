@@ -156,6 +156,15 @@ msgstr "非負整数が必要ですが、{val} が指定されました"
 msgid "expected string, got {type_name}"
 msgstr "文字列が必要ですが、{type_name} が指定されました"
 
+#: src/findfmt/cli/config_schema.py:292
+#, python-brace-format
+msgid ""
+"Warning: Configuration key '{key}' in '{path}' is deprecated and will be "
+"removed in v2.0.0; use 'format = \"{fmt}\"' instead."
+msgstr ""
+"警告: '{path}' 内の設定キー '{key}' は非推奨であり、v2.0.0 で削除されます。"
+"代わりに 'format = \"{fmt}\"' を使用してください。"
+
 #: src/findfmt/cli/config_schema.py:303
 #, python-brace-format
 msgid "Error: Unknown configuration key '{key}' in '{path}'."

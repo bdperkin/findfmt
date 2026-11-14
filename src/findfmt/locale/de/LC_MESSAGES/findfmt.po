@@ -164,6 +164,15 @@ msgstr "nicht-negative Ganzzahl erwartet, erhalten: {val}"
 msgid "expected string, got {type_name}"
 msgstr "Zeichenkette erwartet, erhalten: {type_name}"
 
+#: src/findfmt/cli/config_schema.py:292
+#, python-brace-format
+msgid ""
+"Warning: Configuration key '{key}' in '{path}' is deprecated and will be "
+"removed in v2.0.0; use 'format = \"{fmt}\"' instead."
+msgstr ""
+"Warnung: Konfigurationsschlüssel '{key}' in '{path}' ist veraltet und wird "
+"in v2.0.0 entfernt; verwenden Sie stattdessen 'format = \"{fmt}\"'."
+
 #: src/findfmt/cli/config_schema.py:303
 #, python-brace-format
 msgid "Error: Unknown configuration key '{key}' in '{path}'."
