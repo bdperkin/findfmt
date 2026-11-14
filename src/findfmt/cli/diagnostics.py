@@ -7,11 +7,15 @@ import shutil
 import subprocess
 import sys
 from importlib.metadata import PackageNotFoundError, version
+from typing import TYPE_CHECKING
 
 import typer
 
 from findfmt import _FALLBACK_VERSION
 from findfmt.i18n import _
+
+if TYPE_CHECKING:
+    from typer.core import _click
 
 __all__ = [
     "diagnostics_callback",
@@ -190,7 +194,7 @@ def diagnostics_callback(
 
 
 def show_config_callback(
-    ctx: typer.Context | bool | None = None,
+    ctx: typer.Context | _click.Context | bool | None = None,
     value: bool = False,
 ) -> None:
     """Display active configuration settings and exit.
@@ -207,20 +211,25 @@ def show_config_callback(
         ctx = None
 
     if value:
+        from findfmt.cli.env_config import collect_context_config_overrides
         from findfmt.cli.file_config import (
             format_config_dump,
             get_active_config_data,
             get_active_config_path,
+            get_active_config_sources,
         )
         from findfmt.cli.pager import display_with_pager
 
         path = get_active_config_path()
         data = get_active_config_data()
+        sources = get_active_config_sources()
         if ctx is not None:
             path = ctx.meta.get("findfmt_config_path", path)
             data = ctx.meta.get("findfmt_config_data", data)
+            sources = ctx.meta.get("findfmt_config_sources", sources)
+            data, sources = collect_context_config_overrides(ctx, data, sources)
 
-        content = format_config_dump(path, data)
+        content = format_config_dump(path, data, sources=sources)
         display_with_pager(content, ctx=ctx)
         raise typer.Exit(code=0)
 

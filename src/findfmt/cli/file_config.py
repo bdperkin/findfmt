@@ -19,7 +19,7 @@ from findfmt.cli.config_template import (
     generate_reference_config,
     generate_sample_config,
 )
-from findfmt.cli.env_config import load_env_config, merge_raw_config
+from findfmt.cli.env_config import load_env_config, merge_raw_config_with_sources
 from findfmt.i18n import _
 
 __all__ = [
@@ -30,6 +30,7 @@ __all__ = [
     "generate_sample_config",
     "get_active_config_data",
     "get_active_config_path",
+    "get_active_config_sources",
     "load_env_config",
     "load_toml_config",
     "reset_active_config",
@@ -39,11 +40,12 @@ __all__ = [
 
 
 class _ActiveConfigState:
-    """Internal container for the active configuration file path and settings."""
+    """Internal container for the active configuration file path, settings, and sources."""
 
     def __init__(self) -> None:
         self.path: Path | None = None
         self.data: dict[str, object] = {}
+        self.sources: dict[str, str] = {}
 
 
 _state = _ActiveConfigState()
@@ -67,10 +69,20 @@ def get_active_config_data() -> dict[str, object]:
     return dict(_state.data)
 
 
+def get_active_config_sources() -> dict[str, str]:
+    """Retrieve the provenance source labels for the currently active configuration keys.
+
+    Returns:
+        Dictionary mapping active configuration keys to their layer source label.
+    """
+    return dict(_state.sources)
+
+
 def reset_active_config() -> None:
     """Reset active configuration state back to uninitialized defaults."""
     _state.path = None
     _state.data = {}
+    _state.sources = {}
 
 
 def extract_config_args(
@@ -303,19 +315,33 @@ def resolve_and_load_config(
 
     file_raw: dict[str, Any] = {}
     file_converted: dict[str, Any] = {}
+    sources: dict[str, str] = {}
     if path is not None:
         user_config = _get_standard_user_config_path()
         if not is_explicit and user_config != path and user_config.is_file():
             file_raw, file_converted = _load_validated_layer(user_config, is_explicit=False)
+            sources = dict.fromkeys(file_raw, "user config")
 
         layer_raw, layer_converted = _load_validated_layer(path, is_explicit=is_explicit)
-        file_raw = merge_raw_config(file_raw, layer_raw)
+        layer_source = "project config" if sources else "config"
+        file_raw, sources = merge_raw_config_with_sources(
+            file_raw,
+            sources,
+            layer_raw,
+            layer_source,
+        )
         file_converted = {**file_converted, **layer_converted}
 
     env_raw, env_converted = load_env_config()
-    merged_raw = merge_raw_config(file_raw, env_raw)
+    merged_raw, sources = merge_raw_config_with_sources(
+        file_raw,
+        sources,
+        env_raw,
+        "env",
+    )
     merged_converted = {**file_converted, **env_converted}
 
     _state.path = path
     _state.data = merged_raw
+    _state.sources = sources
     return path, merged_converted

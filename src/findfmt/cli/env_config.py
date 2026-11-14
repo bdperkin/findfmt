@@ -18,11 +18,15 @@ from findfmt.cli.config_schema import (
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
+    from typer.core import _click
+
 __all__ = [
     "ENV_CONFIG_PREFIX",
     "RESERVED_ENV_VARS",
+    "collect_context_config_overrides",
     "load_env_config",
     "merge_raw_config",
+    "merge_raw_config_with_sources",
 ]
 
 ENV_CONFIG_PREFIX = "FINDFMT_"
@@ -157,3 +161,111 @@ def load_env_config(
 
     converted = validate_and_convert_config(env_for_validation, _ENV_SOURCE)
     return raw_env_data, converted
+
+
+_NON_CONFIG_CLI_PARAMS: frozenset[str] = frozenset(
+    {
+        "paths",
+        "known_tags",
+        "verbose",
+        "diagnostics",
+        "version",
+        "help_all",
+        "config",
+        "no_config",
+        "show_config",
+        "generate_config",
+    },
+)
+
+
+def merge_raw_config_with_sources(
+    base_raw: Mapping[str, Any],
+    base_sources: Mapping[str, str],
+    override_raw: Mapping[str, Any],
+    override_source: str,
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Merge raw config dictionaries and record the provenance label for each key.
+
+    Args:
+        base_raw: Lower-precedence raw configuration dictionary.
+        base_sources: Provenance labels corresponding to ``base_raw`` keys.
+        override_raw: Higher-precedence raw configuration dictionary.
+        override_source: Provenance label to assign to keys from ``override_raw``.
+
+    Returns:
+        Tuple of ``(merged_raw, merged_sources)``.
+    """
+    merged_raw = merge_raw_config(base_raw, override_raw)
+    merged_sources = {k: base_sources[k] for k in merged_raw if k in base_sources}
+    for k in override_raw:
+        merged_sources[k] = override_source
+
+    return merged_raw, merged_sources
+
+
+def _cli_param_to_config_item(param_name: str, param_val: object) -> tuple[str, Any]:
+    """Convert a Click CLI parameter name and value into a TOML config key and value."""
+    if param_name == "output_format":
+        return "format", str(param_val)
+
+    if param_name in ("tree", "json", "xml"):
+        return "format", param_name
+
+    if param_name == "no_ignore":
+        return "ignore", not bool(param_val)
+
+    if param_name in ("color", "pager") and isinstance(param_val, bool):
+        return param_name, "always" if param_val else "never"
+
+    if isinstance(param_val, (list, tuple)):
+        return param_name, list(param_val)
+
+    return param_name, param_val
+
+
+def collect_context_config_overrides(
+    ctx: _click.Context,
+    base_raw: Mapping[str, Any],
+    base_sources: Mapping[str, str],
+) -> tuple[dict[str, Any], dict[str, str]]:
+    """Layer wrapper defaults and CLI overrides from a Click Context onto raw config data.
+
+    Args:
+        ctx: Active Click/Typer Context instance.
+        base_raw: Raw configuration dictionary from config files and environment variables.
+        base_sources: Provenance labels for ``base_raw`` keys.
+
+    Returns:
+        Tuple of ``(data_with_overrides, sources_with_overrides)``.
+    """
+    data = dict(base_raw)
+    sources = dict(base_sources)
+    wrapper_defaults: Mapping[str, Any] = ctx.meta.get("findfmt_wrapper_defaults", {})
+
+    for key, val in wrapper_defaults.items():
+        src = ctx.get_parameter_source(key)
+        if src is not None and src.name == "DEFAULT":
+            raw_k, raw_v = _cli_param_to_config_item(key, val)
+            data, sources = merge_raw_config_with_sources(
+                data,
+                sources,
+                {raw_k: raw_v},
+                "default",
+            )
+
+    for param_name, param_val in ctx.params.items():
+        if param_name in _NON_CONFIG_CLI_PARAMS:
+            continue
+
+        param_source = ctx.get_parameter_source(param_name)
+        if param_source is not None and param_source.name == "COMMANDLINE":
+            raw_k, raw_v = _cli_param_to_config_item(param_name, param_val)
+            data, sources = merge_raw_config_with_sources(
+                data,
+                sources,
+                {raw_k: raw_v},
+                "cli",
+            )
+
+    return data, sources

@@ -471,8 +471,6 @@ OptShowConfig = Annotated[
     bool,
     typer.Option(
         "--show-config",
-        is_eager=True,
-        callback=show_config_callback,
         help=h.HELP_SHOW_CONFIG,
     ),
 ]

@@ -8,7 +8,14 @@ import pytest
 import typer
 from typer.testing import CliRunner
 
-from findfmt.cli import app, load_env_config, resolve_and_load_config
+from findfmt.cli import (
+    app,
+    format_config_dump,
+    get_active_config_sources,
+    load_env_config,
+    main_findfiles,
+    resolve_and_load_config,
+)
 from findfmt.cli.env_config import merge_raw_config
 from findfmt.cli.file_config import get_active_config_data, reset_active_config
 from findfmt.formatters import OutputFormat
@@ -199,3 +206,80 @@ def test_deprecated_format_boolean_in_env_and_cli_config(
     assert res.exit_code == 0
     assert "use 'format = \"json\"' instead." in res.stderr
     assert '"path":' in res.stdout
+
+
+def test_show_config_provenance_all_layers(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify --show-config annotates user config, project config, env, and cli layers (#458)."""
+    xdg_dir = tmp_path / "xdg"
+    user_cfg = xdg_dir / "findfmt" / "config.toml"
+    user_cfg.parent.mkdir(parents=True)
+    user_cfg.write_text('format = "table"\ntable_style = "rounded"\n', encoding="utf-8")
+
+    proj_dir = tmp_path / "repo"
+    (proj_dir / ".git").mkdir(parents=True)
+    (proj_dir / ".findfmt.toml").write_text(
+        'format = "tree"\nmax_depth = 5\ndirs_first = true\n',
+        encoding="utf-8",
+    )
+
+    monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg_dir))
+    monkeypatch.setenv("APPDATA", str(xdg_dir))
+    monkeypatch.setenv("FINDFMT_MAX_DEPTH", "2")
+    monkeypatch.setenv("FINDFMT_SUMMARY", "true")
+    monkeypatch.chdir(proj_dir)
+
+    runner = CliRunner()
+    res = runner.invoke(
+        app,
+        [
+            "-t",
+            "python",
+            "--no-ignore",
+            "-C",
+            "--no-pager",
+            "--gitignore-file",
+            str(proj_dir / ".gitignore"),
+            "--show-config",
+        ],
+    )
+    assert res.exit_code == 0
+    assert 'table_style = "rounded"  # user config' in res.stdout
+    assert 'format = "tree"  # project config' in res.stdout
+    assert "dirs_first = true  # project config" in res.stdout
+    assert "max_depth = 2  # env" in res.stdout
+    assert "summary = true  # env" in res.stdout
+    assert 'tags = ["python"]  # cli' in res.stdout
+    assert "ignore = false  # cli" in res.stdout
+    assert 'color = "always"  # cli' in res.stdout
+    assert 'pager = "never"  # cli' in res.stdout
+    assert f'gitignore_file = "{proj_dir / ".gitignore"}"  # cli' in res.stdout
+    assert get_active_config_sources()["table_style"] == "user config"
+
+
+def test_show_config_provenance_default_and_cli_shorthands(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Verify --show-config provenance for default, single config, and CLI format flags (#458)."""
+    assert "hidden = false  # default" in format_config_dump(None, {"hidden": False})
+
+    assert main_findfiles(["--no-config", "--show-config"]) == 0
+    assert "hidden = true  # default" in capsys.readouterr().out
+
+    assert main_findfiles(["--no-config", "--no-hidden", "--show-config"]) == 0
+    assert "hidden = false  # cli" in capsys.readouterr().out
+
+    cfg = tmp_path / "single.toml"
+    cfg.write_text("prune = true\n", encoding="utf-8")
+    runner = CliRunner()
+    res_tree = runner.invoke(app, ["--config", str(cfg), "--tree", "--show-config"])
+    assert res_tree.exit_code == 0
+    assert "prune = true  # config" in res_tree.stdout
+    assert 'format = "tree"  # cli' in res_tree.stdout
+
+    res_fmt = runner.invoke(app, ["--no-config", "-f", "json", "--show-config"])
+    assert res_fmt.exit_code == 0
+    assert 'format = "json"  # cli' in res_fmt.stdout
