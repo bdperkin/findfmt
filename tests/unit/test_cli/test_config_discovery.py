@@ -323,6 +323,7 @@ def test_precedence_matrix(
     user_fmt, proj_fmt, env_fmt, cli_fmt = layers
     xdg_dir = tmp_path / "xdg"
     monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg_dir))
+    monkeypatch.setenv("APPDATA", str(xdg_dir))
     monkeypatch.delenv("FINDFMT_CONFIG", raising=False)
     monkeypatch.delenv("FINDFMT_FORMAT", raising=False)
 
@@ -369,6 +370,7 @@ def test_user_and_project_configs_merge(
     proj_cfg.write_text('max_depth = 1\nformat = "json"\n', encoding="utf-8")
 
     monkeypatch.setenv("XDG_CONFIG_HOME", str(xdg_dir))
+    monkeypatch.setenv("APPDATA", str(xdg_dir))
     monkeypatch.delenv("FINDFMT_CONFIG", raising=False)
     monkeypatch.chdir(repo)
 
@@ -406,6 +408,7 @@ def test_pyproject_found_by_walking_up_to_vcs_root(
     (repo / "pkg" / "pyproject.toml").write_text('[project]\nname = "pkg"\n', encoding="utf-8")
 
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path / "empty_xdg"))
+    monkeypatch.setenv("APPDATA", str(tmp_path / "empty_xdg"))
     monkeypatch.delenv("FINDFMT_CONFIG", raising=False)
     monkeypatch.chdir(sub)
 
