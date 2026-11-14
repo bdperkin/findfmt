@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 from findfmt.i18n import _
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from pathlib import Path
 
 __all__ = [
@@ -263,12 +264,17 @@ def _format_toml_value(val: object) -> str:
     return f'"{val}"'
 
 
-def format_config_dump(path: Path | None, config_dict: dict[str, Any]) -> str:
-    """Format active configuration settings for diagnostic display.
+def format_config_dump(
+    path: Path | None,
+    config_dict: dict[str, Any],
+    sources: Mapping[str, str] | None = None,
+) -> str:
+    """Format active configuration settings and value provenance for diagnostic display.
 
     Args:
         path: Path of the active configuration file or None.
         config_dict: Dictionary of active configuration key-value pairs.
+        sources: Optional mapping of configuration keys to provenance labels.
 
     Returns:
         Formatted multi-line diagnostic string ending in a newline.
@@ -279,10 +285,13 @@ def format_config_dump(path: Path | None, config_dict: dict[str, Any]) -> str:
             path=active_label,
         )
 
+    fallback_source = "config" if path is not None else "default"
+    source_map = sources if sources is not None else {}
     lines = [_("Active configuration: {path}").format(path=active_label), "", "[tool.findfmt]"]
     for key in sorted(config_dict):
         val_str = _format_toml_value(config_dict[key])
-        lines.append(f"{key} = {val_str}")
+        source_label = source_map.get(key, fallback_source)
+        lines.append(f"{key} = {val_str}  # {source_label}")
 
     return "\n".join(lines) + "\n"
 

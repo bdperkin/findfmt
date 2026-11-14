@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 216 Closed Issues | 106 Actionable Open Tasks | 32 Active Umbrella Epics **Last
+> **Tracking:** 218 Closed Issues | 105 Actionable Open Tasks | 32 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -21,7 +21,7 @@
 > released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
 > closed #624 and #623; 2026-11-13 closed #355, epic #348, and #456, and released v1.2.2 and closed
-> its milestone; 2026-11-14 closed #457, #455, and #310)
+> its milestone; 2026-11-14 closed #457, #455, #310, #458, and #332)
 
 ______________________________________________________________________
 
@@ -678,6 +678,12 @@ Note: Ordered chronologically by completion date.
 - [x] **[#310](https://github.com/bdperkin/findfmt/issues/310)** - feat(config): provide sample
   config.toml, annotated reference configuration, and --generate-config CLI option (Closed:
   2026-11-14 via PR [#644](https://github.com/bdperkin/findfmt/pull/644))
+- [x] **[#458](https://github.com/bdperkin/findfmt/issues/458)** - feat(config): show value
+  provenance (default/config/env/CLI) in --show-config (Closed: 2026-11-14 via PR
+  [#645](https://github.com/bdperkin/findfmt/pull/645))
+- [x] **[#332](https://github.com/bdperkin/findfmt/issues/332)** - feat(cli): layered config
+  precedence (user < project < env < CLI) and remove format booleans from config (Closed: 2026-11-14
+  via PR [#645](https://github.com/bdperkin/findfmt/pull/645))
 
 ______________________________________________________________________
 
@@ -968,12 +974,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Hybrid CI/CD & Release Pipeline: Dual Backend Matrix, Rust Supply-Chain Security & Multi-Platform Maturin Wheels](https://github.com/bdperkin/findfmt/issues/595)
   | Milestone: v1.4.4)* - **Value:** High | **Effort:** L - **Rationale:** Automates building and
   publishing pre-compiled binary wheels for Linux, macOS, and Windows plus sdist/fallback.
-
-- [ ] **[#458](https://github.com/bdperkin/findfmt/issues/458)** - feat(config): show value
-  provenance (default/config/env/CLI) in --show-config *(Rank: 57 | Epic:
-  [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
-  | Parent: [#332](https://github.com/bdperkin/findfmt/issues/332) | Milestone: v1.3.0)* -
-  **Value:** Low | **Effort:** S - **Rationale:** Debuggability nicety once layering exists.
 
 - [ ] **[#302](https://github.com/bdperkin/findfmt/issues/302)** - feat(docs): replace top-left
   Sphinx sidebar logo with high-resolution square icon *(Rank: 58 | Epic:
@@ -1367,10 +1367,6 @@ its sub-issues close.
   | Milestone: v1.6.1)* - **Sub-issues:** [#448](https://github.com/bdperkin/findfmt/issues/448),
   [#449](https://github.com/bdperkin/findfmt/issues/449),
   [#450](https://github.com/bdperkin/findfmt/issues/450)
-- [ ] **[#332](https://github.com/bdperkin/findfmt/issues/332)** - feat(cli): layered config
-  precedence (user < project < env < CLI) and remove format booleans from config *(Epic:
-  [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
-  | Milestone: v1.3.0)* - **Sub-issues:** [#458](https://github.com/bdperkin/findfmt/issues/458)
 
 ______________________________________________________________________
 
@@ -1381,8 +1377,7 @@ linked natively on GitHub.
 
 - [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
   Architecture: Layered Precedence, Schemas & Validation Diagnostics *(Milestone: v1.3.0 | Open
-  sub-issues: 2)* - [#332](https://github.com/bdperkin/findfmt/issues/332),
-  [#340](https://github.com/bdperkin/findfmt/issues/340)
+  sub-issues: 1)* - [#340](https://github.com/bdperkin/findfmt/issues/340)
 - [ ] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
   Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 4)* -
   [#302](https://github.com/bdperkin/findfmt/issues/302),
@@ -1583,7 +1578,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 4           |
+| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 2           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |

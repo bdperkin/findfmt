@@ -17,7 +17,13 @@ else:
 import typer
 import typer.core
 
-from findfmt.cli.file_config import extract_config_args, resolve_and_load_config
+from findfmt.cli.diagnostics import show_config_callback
+from findfmt.cli.file_config import (
+    extract_config_args,
+    get_active_config_data,
+    get_active_config_sources,
+    resolve_and_load_config,
+)
 from findfmt.cli.signals import (
     handle_broken_pipe,
     install_signal_handlers,
@@ -326,7 +332,12 @@ class FindfmtCommand(typer.core.TyperCommand):
                     ctx.set_parameter_source(key, type(source)["DEFAULT"])
 
         ctx.meta["findfmt_config_path"] = path
-        ctx.meta["findfmt_config_data"] = defaults
+        ctx.meta["findfmt_config_data"] = get_active_config_data()
+        ctx.meta["findfmt_config_sources"] = get_active_config_sources()
+        ctx.meta["findfmt_wrapper_defaults"] = wrapper_defaults
+        if ctx.params.get("show_config"):
+            show_config_callback(ctx=ctx, value=True)
+
         return ctx
 
     @override

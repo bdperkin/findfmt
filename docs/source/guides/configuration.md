@@ -47,16 +47,18 @@ To inspect the currently active configuration file and resolved settings:
 findfmt --show-config
 ```
 
-When custom options are loaded, `findfmt` outputs the active path and effective configuration table:
+When custom options are active, `findfmt` outputs the active path and the effective configuration
+table, annotating each setting with an inline comment indicating its value provenance (`default`,
+`config`, `user config`, `project config`, `env`, or `cli`):
 
 ```text
 Active configuration: /home/user/.config/findfmt/config.toml
 
 [tool.findfmt]
-color = "always"
-format = "table"
-hidden = true
-table_style = "rounded"
+color = "always"  # config
+format = "table"  # env
+hidden = true  # cli
+table_style = "rounded"  # config
 ```
 
 To view configuration status as part of general system diagnostics:

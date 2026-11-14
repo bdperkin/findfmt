@@ -411,7 +411,7 @@
   },
   "format_config_dump": {
    "kind": "function",
-   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]', sources: 'Mapping[str, str] | None' = None) -> 'str'"
   },
   "generate_config_callback": {
    "kind": "function",
@@ -432,6 +432,10 @@
   "get_active_config_path": {
    "kind": "function",
    "signature": "() -> 'Path | None'"
+  },
+  "get_active_config_sources": {
+   "kind": "function",
+   "signature": "() -> 'dict[str, str]'"
   },
   "get_diagnostics": {
    "kind": "function",
@@ -519,7 +523,7 @@
   },
   "show_config_callback": {
    "kind": "function",
-   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+   "signature": "(ctx: 'typer.Context | _click.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   },
   "trap_cli_signals": {
    "kind": "function",
@@ -549,7 +553,7 @@
   },
   "format_config_dump": {
    "kind": "function",
-   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]', sources: 'Mapping[str, str] | None' = None) -> 'str'"
   },
   "get_active_config_data": {
    "kind": "function",
@@ -558,6 +562,10 @@
   "get_active_config_path": {
    "kind": "function",
    "signature": "() -> 'Path | None'"
+  },
+  "get_active_config_sources": {
+   "kind": "function",
+   "signature": "() -> 'dict[str, str]'"
   },
   "load_env_config": {
    "kind": "function",
@@ -601,7 +609,7 @@
  "findfmt.cli.config_template": {
   "format_config_dump": {
    "kind": "function",
-   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]', sources: 'Mapping[str, str] | None' = None) -> 'str'"
   },
   "generate_reference_config": {
    "kind": "function",
@@ -635,7 +643,7 @@
   },
   "show_config_callback": {
    "kind": "function",
-   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+   "signature": "(ctx: 'typer.Context | _click.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   },
   "version_callback": {
    "kind": "function",
@@ -681,6 +689,10 @@
    "kind": "data",
    "type": "frozenset"
   },
+  "collect_context_config_overrides": {
+   "kind": "function",
+   "signature": "(ctx: '_click.Context', base_raw: 'Mapping[str, Any]', base_sources: 'Mapping[str, str]') -> 'tuple[dict[str, Any], dict[str, str]]'"
+  },
   "load_env_config": {
    "kind": "function",
    "signature": "(env: 'Mapping[str, str] | None' = None) -> 'tuple[dict[str, Any], dict[str, Any]]'"
@@ -688,6 +700,10 @@
   "merge_raw_config": {
    "kind": "function",
    "signature": "(base_raw: 'Mapping[str, Any]', override_raw: 'Mapping[str, Any]') -> 'dict[str, Any]'"
+  },
+  "merge_raw_config_with_sources": {
+   "kind": "function",
+   "signature": "(base_raw: 'Mapping[str, Any]', base_sources: 'Mapping[str, str]', override_raw: 'Mapping[str, Any]', override_source: 'str') -> 'tuple[dict[str, Any], dict[str, str]]'"
   }
  },
  "findfmt.cli.file_config": {
@@ -701,7 +717,7 @@
   },
   "format_config_dump": {
    "kind": "function",
-   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]') -> 'str'"
+   "signature": "(path: 'Path | None', config_dict: 'dict[str, Any]', sources: 'Mapping[str, str] | None' = None) -> 'str'"
   },
   "generate_reference_config": {
    "kind": "function",
@@ -718,6 +734,10 @@
   "get_active_config_path": {
    "kind": "function",
    "signature": "() -> 'Path | None'"
+  },
+  "get_active_config_sources": {
+   "kind": "function",
+   "signature": "() -> 'dict[str, str]'"
   },
   "load_env_config": {
    "kind": "function",
@@ -1127,7 +1147,7 @@
   },
   "show_config_callback": {
    "kind": "function",
-   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+   "signature": "(ctx: 'typer.Context | _click.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   },
   "version_callback": {
    "kind": "function",
@@ -1461,7 +1481,7 @@
   },
   "show_config_callback": {
    "kind": "function",
-   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+   "signature": "(ctx: 'typer.Context | _click.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   }
  },
  "findfmt.cli.output_sink": {
@@ -1601,7 +1621,7 @@
   },
   "show_config_callback": {
    "kind": "function",
-   "signature": "(ctx: 'typer.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
+   "signature": "(ctx: 'typer.Context | _click.Context | bool | None' = None, value: 'bool' = False) -> 'None'"
   },
   "version_callback": {
    "kind": "function",
