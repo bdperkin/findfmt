@@ -27,15 +27,13 @@ _REFERENCE_SECTIONS: tuple[
                 "format",
                 "text",
                 "",
-                "Output format (text, table, tree, json, jsonl, yaml, ipynb, csv,\n"
-                "# csv-table, tsv, markdown, rst, xml, html).",
+                "Output format (text, table, tree, json, jsonl, yaml, ipynb, csv, tsv, etc.).",
             ),
             (
                 "table_style",
                 None,
                 '"rounded"',
-                "Table border style (rounded, simple, minimal, double, heavy,\n"
-                "# markdown, ascii, cp437, square, grid).",
+                "Table border style (rounded, simple, minimal, double, heavy, markdown, ascii).",
             ),
             (
                 "color",

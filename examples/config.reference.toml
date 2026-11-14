@@ -11,12 +11,10 @@
 # 1. Output Serialization & Styling
 # -----------------------------------------------------------------------------
 
-# Output format (text, table, tree, json, jsonl, yaml, ipynb, csv,
-# csv-table, tsv, markdown, rst, xml, html).
+# Output format (text, table, tree, json, jsonl, yaml, ipynb, csv, tsv, etc.).
 format = "text"
 
-# Table border style (rounded, simple, minimal, double, heavy,
-# markdown, ascii, cp437, square, grid).
+# Table border style (rounded, simple, minimal, double, heavy, markdown, ascii).
 # table_style = "rounded"
 
 # ANSI color policy ("auto", "always", "never", or boolean).
