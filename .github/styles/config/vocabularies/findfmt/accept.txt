@@ -207,3 +207,13 @@
 (?i)pep
 (?i)changelog
 (?i)i18n
+(?i)furo
+(?i)myst
+(?i)autodoc
+(?i)toctree
+(?i)toctrees
+(?i)hardcode
+(?i)hardcodes
+(?i)hardcoded
+(?i)viewport
+(?i)viewports

@@ -3,7 +3,7 @@
 This section provides tutorials and guides for installing, configuring, and deploying `findfmt`.
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 4
 
 installation
 upgrading

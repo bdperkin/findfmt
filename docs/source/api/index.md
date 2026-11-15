@@ -4,7 +4,7 @@ The `findfmt` package provides programmatic access to file classification and Gi
 traversal engines.
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 4
 
 findfmt
 stability

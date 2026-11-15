@@ -169,3 +169,45 @@ def test_multilingual_sphinx_ci_and_language_switcher() -> None:
     assert ".findfmt-language-switcher" in custom_css
     assert ".findfmt-language-select" in custom_css
     assert ".findfmt-language-flag" in custom_css
+
+
+def test_hierarchical_sidebar_navigation_architecture() -> None:
+    """Verify expandable hierarchical sidebar navigation config, template, CSS, and ADR (#309)."""
+    conf_text = (SOURCE / "conf.py").read_text(encoding="utf-8")
+    assert "SIDEBAR_NAVIGATION_MAXDEPTH = 4" in conf_text
+    assert "_configure_hierarchical_sidebar" in conf_text
+    assert "titles_only=False" in conf_text
+    assert 'app.connect("html-page-context", _configure_hierarchical_sidebar, priority=600)' in (
+        conf_text
+    )
+
+    nav_template = (SOURCE / "_templates" / "sidebar" / "navigation.html").read_text(
+        encoding="utf-8",
+    )
+    assert 'class="sidebar-tree"' in nav_template
+    assert "furo_navigation_tree" in nav_template
+
+    custom_css = (SOURCE / "_static" / "custom.css").read_text(encoding="utf-8")
+    assert ".sidebar-tree .toctree-checkbox" in custom_css
+    assert ".sidebar-tree .toctree-checkbox:focus-visible + label" in custom_css
+    assert ".sidebar-tree .toctree-l2 > ul" in custom_css
+    assert ".sidebar-tree .toctree-l3 > ul" in custom_css
+
+    for index_rel in ("index.md", "guides/index.md", "api/index.md", "quality/index.md"):
+        index_text = (SOURCE / index_rel).read_text(encoding="utf-8")
+        assert ":maxdepth: 4" in index_text, f"Expected :maxdepth: 4 in {index_rel}"
+
+    adr_path = SOURCE / "quality" / "sidebar_navigation.md"
+    assert adr_path.is_file(), "docs/source/quality/sidebar_navigation.md must exist"
+    adr_text = adr_path.read_text(encoding="utf-8")
+    for required_term in (
+        "titles_only=False",
+        "get_navigation_tree",
+        "SIDEBAR_NAVIGATION_MAXDEPTH = 4",
+        'role="switch"',
+        "toctree-checkbox",
+    ):
+        assert required_term in adr_text, f"Missing {required_term!r} in {adr_path}"
+
+    quality_index = (SOURCE / "quality" / "index.md").read_text(encoding="utf-8")
+    assert "sidebar_navigation" in quality_index
