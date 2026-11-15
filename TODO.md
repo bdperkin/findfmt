@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 224 Closed Issues | 100 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 225 Closed Issues | 99 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -22,7 +22,7 @@
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
 > closed #624 and #623; 2026-11-13 closed #355, epic #348, and #456, and released v1.2.2 and closed
 > its milestone; 2026-11-14 closed #457, #455, #310, #458, #332, #340, and epic #381; 2026-11-15
-> released v1.3.0 and closed its milestone, and closed #292, #302, #312, and #313)
+> released v1.3.0 and closed its milestone, and closed #292, #302, #312, #313, and #574)
 
 ______________________________________________________________________
 
@@ -705,6 +705,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#313](https://github.com/bdperkin/findfmt/issues/313)** - chore(pre-commit): configure
   yamlfix formatting rules in pyproject.toml (Closed: 2026-11-15 via PR
   [#653](https://github.com/bdperkin/findfmt/pull/653))
+- [x] **[#574](https://github.com/bdperkin/findfmt/issues/574)** - feat(docs): display
+  representative country flag icons in the multilingual documentation language switcher (Closed:
+  2026-11-15 via PR [#657](https://github.com/bdperkin/findfmt/pull/657))
 
 ______________________________________________________________________
 
@@ -990,13 +993,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Milestone: v1.4.4)* - **Value:** High | **Effort:** L - **Rationale:** Automates building and
   publishing pre-compiled binary wheels for Linux, macOS, and Windows plus sdist/fallback.
 
-- [ ] **[#574](https://github.com/bdperkin/findfmt/issues/574)** - feat(docs): display
-  representative country flag icons in the multilingual documentation language switcher *(Rank: 61 |
-  Epic:
-  [[Epic] Documentation Architecture, Sphinx Navigation & Project Branding](https://github.com/bdperkin/findfmt/issues/379)
-  | Milestone: v1.3.1)* - **Value:** Low | **Effort:** S - **Rationale:** Visual UX polish for the
-  Sphinx sidebar language switcher.
-
 - [ ] **[#471](https://github.com/bdperkin/findfmt/issues/471)** - ci(pre-commit): enable
   check-hooks-apply and manual-stage identity meta hooks *(Rank: 62 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
@@ -1121,7 +1117,8 @@ sub-issues. Respect `Blocked by` links when picking up work.
   [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
   | Milestone: Future Features)* - **Value:** Low | **Effort:** M - **Rationale:** Backlog
   localization catalog for English - United Kingdom (`en_GB`, ~60 million); schedule once Tier 1-3
-  catalogs and AI tooling land.
+  catalogs and AI tooling land. Flip `en` flag from 🇬🇧 to 🇺🇸 and assign 🇬🇧 to `en_GB` in Sphinx
+  language switcher ([#574](https://github.com/bdperkin/findfmt/issues/574)).
 - [ ] **[#235](https://github.com/bdperkin/findfmt/issues/235)** - feat(i18n): add language support
   for Dutch (nl) (~24 million) *(Rank: 83 | Epic:
   [[Epic] Add Language Support: Germanic (~1.83 Billion)](https://github.com/bdperkin/findfmt/issues/197)
@@ -1367,9 +1364,8 @@ Note: Each epic's milestone equals the latest milestone among its open sub-issue
 linked natively on GitHub.
 
 - [ ] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
-  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 2)* -
-  [#309](https://github.com/bdperkin/findfmt/issues/309),
-  [#574](https://github.com/bdperkin/findfmt/issues/574)
+  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 1)* -
+  [#309](https://github.com/bdperkin/findfmt/issues/309)
 - [ ] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static
   Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 4)* -
   [#314](https://github.com/bdperkin/findfmt/issues/314),
@@ -1562,7 +1558,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 4           |
+| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 3           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |

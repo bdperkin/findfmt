@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 45">
+  <clipPath id="uk-clip">
+    <path d="M0,0 v45 h60 v-45 z"/>
+  </clipPath>
+  <clipPath id="uk-diag">
+    <path d="M30,22.5 h30 v22.5 z v22.5 h-30 z h-30 v-22.5 z v-22.5 h30 z"/>
+  </clipPath>
+  <g clip-path="url(#uk-clip)">
+    <path d="M0,0 v45 h60 v-45 z" fill="#012169"/>
+    <path d="M0,0 L60,45 M60,0 L0,45" stroke="#fff" stroke-width="9"/>
+    <path d="M0,0 L60,45 M60,0 L0,45" clip-path="url(#uk-diag)" stroke="#C8102E" stroke-width="6"/>
+    <path d="M30,0 v45 M0,22.5 h60" stroke="#fff" stroke-width="15"/>
+    <path d="M30,0 v45 M0,22.5 h60" stroke="#C8102E" stroke-width="9"/>
+  </g>
+</svg>

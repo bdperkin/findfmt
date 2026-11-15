@@ -55,11 +55,11 @@ html_theme_options = {
 }
 html_context = {
     "languages": [
-        ("en", "English"),
-        ("de", "Deutsch"),
-        ("es", "Español"),
-        ("fr", "Français"),
-        ("ja", "日本語"),
+        ("en", "English", "🇬🇧"),
+        ("de", "Deutsch", "🇩🇪"),
+        ("es", "Español", "🇪🇸"),
+        ("fr", "Français", "🇫🇷"),
+        ("ja", "日本語", "🇯🇵"),
     ],
 }
 
