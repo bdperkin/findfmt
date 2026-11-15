@@ -148,35 +148,35 @@ print(formatter.format(find_files(config)))
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 4
 :caption: User Guide
 
 guides/index
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 4
 :caption: CLI Reference
 
 cli/index
 ```
 
 ```{toctree}
-:maxdepth: 2
+:maxdepth: 4
 :caption: API Documentation
 
 api/index
 ```
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 4
 :caption: Quality & Architecture
 
 quality/index
 ```
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 4
 :caption: Community & Governance
 
 accessibility

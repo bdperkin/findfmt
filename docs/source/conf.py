@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import importlib
 import sys
 from pathlib import Path
+from typing import Protocol, cast
 
 # Ensure package is importable for autodoc
 sys.path.insert(0, str(Path("../..").resolve() / "src"))
@@ -53,6 +55,7 @@ html_theme_options = {
     "source_branch": "main",
     "source_directory": "docs/source/",
 }
+SIDEBAR_NAVIGATION_MAXDEPTH = 4
 html_context = {
     "languages": [
         ("en", "English", "🇬🇧"),
@@ -190,3 +193,66 @@ linkcheck_ignore = [
 locale_dirs = ["locale/"]
 gettext_compact = False
 gettext_uuid = True
+
+
+class _SphinxApp(Protocol):
+    """Minimal Sphinx application protocol for event registration."""
+
+    def connect(self, event: str, callback: object, priority: int = 500) -> int:
+        """Connect a callback to a Sphinx build lifecycle event."""
+        ...
+
+
+class _TocTreeCallable(Protocol):
+    """Protocol for Sphinx's HTML context toctree template helper."""
+
+    def __call__(
+        self,
+        *,
+        collapse: bool = False,
+        titles_only: bool = False,
+        maxdepth: int = -1,
+        includehidden: bool = True,
+    ) -> str | None:
+        """Render the global Sphinx table of contents HTML fragment."""
+        ...
+
+
+class _FuroNavigationModule(Protocol):
+    """Protocol for Furo's navigation tree post-processing module."""
+
+    def get_navigation_tree(self, toctree_html: str) -> str:
+        """Transform Sphinx toctree HTML into Furo's collapsible sidebar markup."""
+        ...
+
+
+def _configure_hierarchical_sidebar(
+    app: object,
+    pagename: str,
+    templatename: str,
+    context: dict[str, object],
+    doctree: object,
+) -> None:
+    """Populate Furo's left sidebar navigation tree with nested page headings (#309)."""
+    del app, pagename, templatename, doctree
+    raw_toctree = context.get("toctree")
+    if callable(raw_toctree):
+        toctree_callable = cast("_TocTreeCallable", raw_toctree)
+        furo_nav = cast("_FuroNavigationModule", importlib.import_module("furo.navigation"))
+        toctree_html = toctree_callable(
+            collapse=False,
+            titles_only=False,
+            maxdepth=SIDEBAR_NAVIGATION_MAXDEPTH,
+            includehidden=True,
+        )
+        context["furo_navigation_tree"] = furo_nav.get_navigation_tree(str(toctree_html or ""))
+
+
+def setup(app: _SphinxApp) -> dict[str, object]:
+    """Register Sphinx HTML context hooks for hierarchical sidebar navigation (#309)."""
+    app.connect("html-page-context", _configure_hierarchical_sidebar, priority=600)
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+        "version": release,
+    }

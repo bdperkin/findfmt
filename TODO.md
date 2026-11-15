@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 225 Closed Issues | 99 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 227 Closed Issues | 98 Actionable Open Tasks | 30 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -22,7 +22,8 @@
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
 > closed #624 and #623; 2026-11-13 closed #355, epic #348, and #456, and released v1.2.2 and closed
 > its milestone; 2026-11-14 closed #457, #455, #310, #458, #332, #340, and epic #381; 2026-11-15
-> released v1.3.0 and closed its milestone, and closed #292, #302, #312, #313, and #574)
+> released v1.3.0 and closed its milestone, and closed issues #292, #302, #312, #313, #574, #309,
+> and epic #379)
 
 ______________________________________________________________________
 
@@ -708,6 +709,12 @@ Note: Ordered chronologically by completion date.
 - [x] **[#574](https://github.com/bdperkin/findfmt/issues/574)** - feat(docs): display
   representative country flag icons in the multilingual documentation language switcher (Closed:
   2026-11-15 via PR [#657](https://github.com/bdperkin/findfmt/pull/657))
+- [x] **[#309](https://github.com/bdperkin/findfmt/issues/309)** - feat(docs): investigate
+  expandable hierarchical heading navigation in Sphinx left sidebar (Closed: 2026-11-15 via PR
+  [#658](https://github.com/bdperkin/findfmt/pull/658))
+- [x] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
+  Architecture, Sphinx Navigation & Project Branding (Closed: 2026-11-15 via PR
+  [#658](https://github.com/bdperkin/findfmt/pull/658))
 
 ______________________________________________________________________
 
@@ -1066,11 +1073,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.3. Future / Low-Priority / Backlog
 
-- [ ] **[#309](https://github.com/bdperkin/findfmt/issues/309)** - feat(docs): investigate
-  expandable hierarchical heading navigation in Sphinx left sidebar *(Rank: 74 | Epic:
-  [[Epic] Documentation Architecture, Sphinx Navigation & Project Branding](https://github.com/bdperkin/findfmt/issues/379)
-  | Milestone: v1.3.1)* - **Value:** Low | **Effort:** M - **Rationale:** Needs a Furo template
-  override; modest value.
 - [ ] **[#314](https://github.com/bdperkin/findfmt/issues/314)** - refactor(lint): standardize line
   length limit to 110 columns across all linters, checkers, and formatters *(Rank: 75 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
@@ -1363,9 +1365,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are
 linked natively on GitHub.
 
-- [ ] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
-  Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 1)* -
-  [#309](https://github.com/bdperkin/findfmt/issues/309)
 - [ ] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static
   Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 4)* -
   [#314](https://github.com/bdperkin/findfmt/issues/314),
@@ -1558,7 +1557,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 3           |
+| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 1           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |

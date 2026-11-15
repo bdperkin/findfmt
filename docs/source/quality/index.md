@@ -35,9 +35,10 @@ in CI and via `tools/verify_quality.py` (see
 and version matrix:
 
 ```{toctree}
-:maxdepth: 1
+:maxdepth: 4
 
 compatibility
 dependency_matrix
 performance
+sidebar_navigation
 ```

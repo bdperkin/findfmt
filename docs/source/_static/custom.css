@@ -69,3 +69,28 @@
   color: var(--color-brand-primary);
   font-weight: 600;
 }
+
+/* Hierarchical expandable heading navigation in left sidebar (#309) */
+.sidebar-tree .toctree-checkbox {
+  display: block;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: var(--sidebar-expander-width);
+  height: var(--sidebar-item-height);
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.sidebar-tree .toctree-checkbox:focus-visible + label {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: -2px;
+  border-radius: 2px;
+}
+
+.sidebar-tree .toctree-l2 > ul,
+.sidebar-tree .toctree-l3 > ul {
+  border-left: 1px solid var(--color-sidebar-background-border);
+}
