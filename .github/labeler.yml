@@ -2,7 +2,10 @@
 # Configuration for actions/labeler
 area:cli:
   - changed-files:
-      - any-glob-to-any-file: [src/findfmt/cli/**, src/findfmt/__main__.py]
+      - any-glob-to-any-file:
+          - src/findfmt/cli/**
+          - src/findfmt/__main__.py
+
 area:classifier:
   - changed-files:
       - any-glob-to-any-file:
@@ -10,9 +13,13 @@ area:classifier:
           - src/findfmt/metadata.py
           - src/findfmt/sizes.py
           - src/findfmt/utils/**
+
 area:traversal:
   - changed-files:
-      - any-glob-to-any-file: [src/findfmt/traversal/**, src/findfmt/parsers/**]
+      - any-glob-to-any-file:
+          - src/findfmt/traversal/**
+          - src/findfmt/parsers/**
+
 area:packaging:
   - changed-files:
       - any-glob-to-any-file:
@@ -20,9 +27,13 @@ area:packaging:
           - uv.lock
           - Dockerfile
           - .dockerignore
+
 area:docs:
   - changed-files:
-      - any-glob-to-any-file: [docs/**, '*.md']
+      - any-glob-to-any-file:
+          - docs/**
+          - '*.md'
+
 area:rust:
   - changed-files:
       - any-glob-to-any-file:
@@ -30,20 +41,29 @@ area:rust:
           - src/findfmt/core.py
           - src/findfmt/_fallback.py
           - src/findfmt/_rust_ext.pyi
+
 documentation:
   - changed-files:
-      - any-glob-to-any-file: [docs/**, '*.md']
+      - any-glob-to-any-file:
+          - docs/**
+          - '*.md'
+
 ci/cd:
   - changed-files:
-      - any-glob-to-any-file: [.github/workflows/**]
+      - any-glob-to-any-file:
+          - .github/workflows/**
+
 pre-commit:
   - changed-files:
       - any-glob-to-any-file:
           - .pre-commit-config.yaml
           - tools/sync_pre_commit_deps.py
+
 testing:
   - changed-files:
-      - any-glob-to-any-file: [tests/**]
+      - any-glob-to-any-file:
+          - tests/**
+
 security:
   - changed-files:
       - any-glob-to-any-file:
@@ -51,6 +71,10 @@ security:
           - .gitguardian.yaml
           - .secrets.baseline
           - .trivyignore.yaml
+
 type:chore:
   - changed-files:
-      - any-glob-to-any-file: [.gitignore, .gitattributes, cliff.toml]
+      - any-glob-to-any-file:
+          - .gitignore
+          - .gitattributes
+          - cliff.toml

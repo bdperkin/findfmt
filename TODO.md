@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 223 Closed Issues | 101 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 224 Closed Issues | 100 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -22,7 +22,7 @@
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
 > closed #624 and #623; 2026-11-13 closed #355, epic #348, and #456, and released v1.2.2 and closed
 > its milestone; 2026-11-14 closed #457, #455, #310, #458, #332, #340, and epic #381; 2026-11-15
-> released v1.3.0 and closed its milestone, and closed #292, #302, and #312)
+> released v1.3.0 and closed its milestone, and closed #292, #302, #312, and #313)
 
 ______________________________________________________________________
 
@@ -702,6 +702,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#312](https://github.com/bdperkin/findfmt/issues/312)** - docs(readme): audit and expand
   high-value status, security, and metadata badges in README and documentation header (Closed:
   2026-11-15 via PR [#652](https://github.com/bdperkin/findfmt/pull/652))
+- [x] **[#313](https://github.com/bdperkin/findfmt/issues/313)** - chore(pre-commit): configure
+  yamlfix formatting rules in pyproject.toml (Closed: 2026-11-15 via PR
+  [#653](https://github.com/bdperkin/findfmt/pull/653))
 
 ______________________________________________________________________
 
@@ -987,12 +990,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   | Milestone: v1.4.4)* - **Value:** High | **Effort:** L - **Rationale:** Automates building and
   publishing pre-compiled binary wheels for Linux, macOS, and Windows plus sdist/fallback.
 
-- [ ] **[#313](https://github.com/bdperkin/findfmt/issues/313)** - chore(pre-commit): configure
-  yamlfix formatting rules in pyproject.toml *(Rank: 60 | Epic:
-  [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
-  | Milestone: v1.3.1)* - **Value:** Low | **Effort:** S - **Rationale:** Small config task;
-  prerequisite for [#314](https://github.com/bdperkin/findfmt/issues/314).
-
 - [ ] **[#574](https://github.com/bdperkin/findfmt/issues/574)** - feat(docs): display
   representative country flag icons in the multilingual documentation language switcher *(Rank: 61 |
   Epic:
@@ -1082,7 +1079,7 @@ sub-issues. Respect `Blocked by` links when picking up work.
   length limit to 110 columns across all linters, checkers, and formatters *(Rank: 75 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
   | Milestone: v1.3.1)* - **Value:** Low | **Effort:** M - **Rationale:** Large reformat diff for
-  consistency only. Blocked by [#313](https://github.com/bdperkin/findfmt/issues/313).
+  consistency only.
 - [ ] **[#112](https://github.com/bdperkin/findfmt/issues/112)** - feat(classifier): support
   optional mimetypes backend for fast extension-based classification *(Rank: 76 | Epic:
   [[Epic] Pluggable Content Classification Engines & MIME Inspection Backends](https://github.com/bdperkin/findfmt/issues/382)
@@ -1374,8 +1371,7 @@ linked natively on GitHub.
   [#309](https://github.com/bdperkin/findfmt/issues/309),
   [#574](https://github.com/bdperkin/findfmt/issues/574)
 - [ ] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static
-  Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 5)* -
-  [#313](https://github.com/bdperkin/findfmt/issues/313),
+  Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 4)* -
   [#314](https://github.com/bdperkin/findfmt/issues/314),
   [#470](https://github.com/bdperkin/findfmt/issues/470),
   [#471](https://github.com/bdperkin/findfmt/issues/471),
@@ -1566,7 +1562,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 5           |
+| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 4           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |

@@ -1,19 +1,24 @@
 ---
 name: Release & Publish
+
 on:
   push:
-    tags: [v*.*.*]
+    tags:
+      - v*.*.*
   workflow_dispatch:
     inputs:
       tag:
         description: Release tag (e.g. v0.1.0)
         required: true
         type: string
+
 permissions:
   contents: read
+
 env:
   # The tag being released: the workflow_dispatch input, or the pushed tag (#327).
   RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
 jobs:
   verify-release:
     name: Verify Release Quality Gate
@@ -116,7 +121,9 @@ jobs:
           skip-existing: true
   publish-pypi:
     name: Publish to Production PyPI
-    needs: [build-distributions, publish-testpypi]
+    needs:
+      - build-distributions
+      - publish-testpypi
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -133,7 +140,9 @@ jobs:
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086  # release/v1
   create-github-release:
     name: Create GitHub Release
-    needs: [build-distributions, publish-pypi]
+    needs:
+      - build-distributions
+      - publish-pypi
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -174,7 +183,9 @@ jobs:
           gh api -X PATCH "repos/${GITHUB_REPOSITORY}/milestones/${milestone_num}" -f state=closed
   containerize:
     name: Build & Publish Container to GHCR
-    needs: [build-distributions, publish-pypi]
+    needs:
+      - build-distributions
+      - publish-pypi
     runs-on: ubuntu-latest
     permissions:
       contents: read

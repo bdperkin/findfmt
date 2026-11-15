@@ -2,7 +2,10 @@
 name: Feature Request
 description: Propose a new feature, CLI flag, or API enhancement for findfmt
 title: 'feat: '
-labels: [enhancement]
+
+labels:
+  - enhancement
+
 body:
   - type: markdown
     attributes:
@@ -12,8 +15,7 @@ body:
     id: problem
     attributes:
       label: Problem & Motivation
-      description: Is your feature request related to a specific limitation or use
-        case? Please describe.
+      description: Is your feature request related to a specific limitation or use case? Please describe.
       placeholder: A clear description of the problem or limitation...
     validations:
       required: true
@@ -21,8 +23,7 @@ body:
     id: proposed_solution
     attributes:
       label: Proposed Solution & Interface
-      description: Describe the proposed CLI syntax (e.g. new flags, arguments, output
-        formats) or Python API interface.
+      description: Describe the proposed CLI syntax (e.g. new flags, arguments, output formats) or Python API interface.
       placeholder: |
         CLI syntax:
         `findfmt --json ...`
@@ -32,8 +33,7 @@ body:
     id: alternatives
     attributes:
       label: Alternatives Considered
-      description: Any alternative designs, workarounds, or existing tools you have
-        considered.
+      description: Any alternative designs, workarounds, or existing tools you have considered.
   - type: checkboxes
     id: contribution
     attributes:

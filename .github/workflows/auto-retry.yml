@@ -1,11 +1,16 @@
 ---
 name: Auto-Retry Timed Out Workflow
+
 on:
   # zizmor: ignore[dangerous-triggers] -- re-runs failed CI jobs by ID without code checkout
   workflow_run:
-    workflows: [CI]
-    types: [completed]
+    workflows:
+      - CI
+    types:
+      - completed
+
 permissions: {}
+
 jobs:
   rerun:
     if: >-

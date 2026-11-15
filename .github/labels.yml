@@ -95,8 +95,7 @@
   description: Sphinx documentation site, man pages, README, and guides
 - name: area:rust
   color: dea584
-  description: Rust extension crate (findfmt_rs), PyO3 bindings, and Maturin build
-    integration
+  description: Rust extension crate (findfmt_rs), PyO3 bindings, and Maturin build integration
 - name: pre-commit
   color: f43f5e
   description: Pre-commit hook configuration, overrides, and upstream sync

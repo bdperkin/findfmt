@@ -1,12 +1,16 @@
 ---
 name: Vale
+
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
+
 permissions:
   contents: read
   pull-requests: write
+
 jobs:
   vale:
     name: Lint Prose (Vale)
