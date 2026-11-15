@@ -7,6 +7,37 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-15
+
+### Features
+
+- *(config)* Add a `FINDFMT_*` environment-variable configuration layer (`findfmt.cli.env_config`)
+  between TOML configuration files and CLI flags (`CLI > FINDFMT_* > TOML > default`), supporting
+  boolean, integer, path, string, choice, and comma/colon-separated list settings with validation
+  errors naming the offending `FINDFMT_*` variable (#456).
+- *(config)* Layer XDG user configuration (`~/.config/findfmt/config.toml`) with project
+  configuration (`.findfmt.toml` or `pyproject.toml` `[tool.findfmt]`) discovered by walking up from
+  the current working directory to the `.git`/`.hg`/`.svn` repository root, merging layers per key
+  while treating `--config` / `FINDFMT_CONFIG` as an explicit single-file override (#455).
+- *(config)* Provide a production-ready sample `examples/config.toml`, an annotated reference
+  `examples/config.reference.toml` (`findfmt.data`), and a `--generate-config` /
+  `--dump-default-config` CLI flag (`render_reference_config()`) that emits a self-documenting,
+  schema-synchronized TOML configuration template (#310).
+- *(config)* Annotate every `--show-config` entry with its effective provenance (`# (default)`,
+  `# (<path>)`, `# (env: FINDFMT_<KEY>)`, `# (CLI)`) using `click.Context.get_parameter_source` and
+  per-key configuration layer tracking (#458, #332).
+- *(cli)* Improve configuration validation diagnostics (`findfmt.cli.config_schema`) to report all
+  validation errors in a single pass, suggest close matches for unknown keys via
+  `difflib.get_close_matches`, include `{value!r} ({type(value).__name__})` in type error messages,
+  and reject duplicate alias and hyphen/underscore key collisions in the same configuration table
+  (#340, #381).
+
+### Deprecated
+
+- *(config)* Deprecate legacy boolean format keys (`tree = true`, `json = true`, `xml = true`) in
+  favour of `format = "tree" | "json" | "xml"`, emitting a `DeprecationWarning` when enabled and
+  ignoring `false` values so they never clobber an explicit `format = "..."` setting (#457).
+
 ## [1.2.2] - 2026-11-13
 
 ### Features
@@ -786,4 +817,5 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 [1.2.0]: https://github.com/bdperkin/findfmt/compare/v1.1.5...v1.2.0
 [1.2.1]: https://github.com/bdperkin/findfmt/compare/v1.2.0...v1.2.1
 [1.2.2]: https://github.com/bdperkin/findfmt/compare/v1.2.1...v1.2.2
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.2.2...HEAD
+[1.3.0]: https://github.com/bdperkin/findfmt/compare/v1.2.2...v1.3.0
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.3.0...HEAD
