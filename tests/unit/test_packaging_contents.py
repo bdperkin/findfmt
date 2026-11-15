@@ -96,8 +96,8 @@ def test_readme_and_docs_index_use_pure_markdown_badges() -> None:
 
     readme_badges = badge_pattern.findall(readme_header)
     docs_badges = badge_pattern.findall(docs_header)
-    assert len(readme_badges) == 42
-    assert len(docs_badges) == 42
+    assert len(readme_badges) == 46
+    assert len(docs_badges) == 46
 
     readme_imgs = [img for _, img, _ in readme_badges]
     docs_imgs = [img for _, img, _ in docs_badges]
