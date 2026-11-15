@@ -32,7 +32,7 @@ modes when constructing the global navigation tree:
 - **`titles_only=False`**: Includes nested document headings (`H2`, `H3`, `H4`) and Python autodoc
   object anchors up to the active `maxdepth` ceiling.
 
-By default, Furo's `_compute_navigation_tree(context)` function in `furo/__init__.py` hardcodes
+By default, Furo's `_compute_navigation_tree(context)` function in `furo/__init__.py` sets
 `titles_only=True`:
 
 ```python
@@ -69,7 +69,7 @@ Inspection of `furo.navigation` confirms that this post-processor is completely 
 
 | Architecture Candidate                                              | Mechanism                                                                                                             | Accessibility & Mobile Drawer Behavior                                                         | Maintenance Overhead                                           | Verdict      |
 | :------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------- | :----------- |
-| **Option A: `:maxdepth:` Directive Audit Only**                     | Increase `:maxdepth:` in `index.md`, `guides/index.md`, `api/index.md`, and `quality/index.md`.                       | No change; Furo's hardcoded `titles_only=True` suppresses all in-page headings.                | None, but fails to meet functional requirements.               | **Rejected** |
+| **Option A: `:maxdepth:` Directive Audit Only**                     | Increase `:maxdepth:` in `index.md`, `guides/index.md`, `api/index.md`, and `quality/index.md`.                       | No change; Furo's default `titles_only=True` suppresses all in-page headings.                  | None, but fails to meet functional requirements.               | **Rejected** |
 | **Option B: Client-Side DOM Mirroring (Custom JS)**                 | Inject custom JavaScript to clone `.toc-tree` headings into `.sidebar-tree` after page load.                          | Only populates headings for the currently loaded page; causes layout shift without JavaScript. | High; fragile across Furo DOM updates.                         | **Rejected** |
 | **Option C: Document Splitting into Micro-Pages**                   | Split every `H2`/`H3` section in `cli/index.md` and `api/findfmt.md` into separate `.md` files.                       | Works with `titles_only=True`, but fragments single-page reading, man-page builds, and i18n.   | High; multiplies `.po` translation catalogs and cross-links.   | **Rejected** |
 | **Option D: Sphinx `html-page-context` Hook + Template/CSS Polish** | Rebuild `furo_navigation_tree` with `titles_only=False` and `maxdepth=4` via `get_navigation_tree` at `priority=600`. | Preserves native CSS-only checkboxes, mobile drawer behavior, and `role="switch"` semantics.   | Low; uses public Sphinx events and standard Furo transformers. | **Selected** |
@@ -114,5 +114,5 @@ event at `priority=600` (running immediately after Furo's built-in `_html_page_c
    sibling `<label>`, enabling keyboard users to tab through and toggle any nested heading branch
    with `Space`.
 3. **Visual Hierarchy & Mobile Drawer:** Subtle left border guides on `.toctree-l2 > ul` and
-   `.toctree-l3 > ul` visually distinguish nested heading levels in both desktop viewports and the
+   `.toctree-l3 > ul` visually distinguish nested heading levels in both desktop layouts and the
    slide-out mobile navigation drawer across light and dark Furo themes.
