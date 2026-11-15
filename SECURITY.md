@@ -6,8 +6,8 @@ Only the latest release of `findfmt` is actively supported with security updates
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.2.x   | :white_check_mark: |
-| < 1.2.0 | :x:                |
+| 1.3.x   | :white_check_mark: |
+| < 1.3.0 | :x:                |
 
 ## 2. Reporting a Vulnerability
 
@@ -184,7 +184,7 @@ mitigations implemented in `findfmt`.
   publishes an SBOM, build provenance, and a signed attestation, which `gh attestation verify`
   checks:
   ```bash
-  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.2.2 --owner bdperkin
+  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.3.0 --owner bdperkin
   ```
 
 #### 3.5.4. Multi-Tier Secret Scanning & Static Analysis
