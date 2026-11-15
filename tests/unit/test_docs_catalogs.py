@@ -130,7 +130,7 @@ def test_localization_platforms_adr_documentation() -> None:
 
 
 def test_multilingual_sphinx_ci_and_language_switcher() -> None:
-    """Verify CI docs workflow, Makefile html-all, conf.py languages, and switcher UI (#233)."""
+    """Verify CI docs workflow, Makefile html-all, conf.py languages, and switcher (#233, #574)."""
     docs_workflow = (ROOT / ".github" / "workflows" / "docs.yml").read_text(encoding="utf-8")
     assert "html-all" in docs_workflow
 
@@ -138,18 +138,34 @@ def test_multilingual_sphinx_ci_and_language_switcher() -> None:
     assert "html-all: html intl-build" in makefile
     assert "-A in_lang_subdir=1" in makefile
 
+    expected_flags = {
+        "en": ("English", "🇬🇧"),
+        "de": ("Deutsch", "🇩🇪"),
+        "es": ("Español", "🇪🇸"),
+        "fr": ("Français", "🇫🇷"),
+        "ja": ("日本語", "🇯🇵"),
+    }
     conf_text = (SOURCE / "conf.py").read_text(encoding="utf-8")
     assert 'templates_path = ["_templates"]' in conf_text
     for lang in _languages():
-        assert f'("{lang}",' in conf_text
+        label, flag = expected_flags[lang]
+        assert f'("{lang}", "{label}", "{flag}")' in conf_text
+        svg_path = SOURCE / "_static" / "flags" / f"{lang}.svg"
+        assert svg_path.is_file(), f"Missing flag SVG for {lang}: {svg_path}"
+        assert "<svg" in svg_path.read_text(encoding="utf-8")
 
     switcher = (SOURCE / "_templates" / "sidebar" / "variant-selector.html").read_text(
         encoding="utf-8",
     )
     assert "findfmt-language-switcher" in switcher
     assert "findfmt-language-select" in switcher
+    assert "findfmt-language-flag" in switcher
+    assert "for code, label, flag in languages" in switcher
+    assert "_static/flags/" in switcher
+    assert 'aria-hidden="true"' in switcher
     assert "in_lang_subdir" in switcher
 
     custom_css = (SOURCE / "_static" / "custom.css").read_text(encoding="utf-8")
     assert ".findfmt-language-switcher" in custom_css
     assert ".findfmt-language-select" in custom_css
+    assert ".findfmt-language-flag" in custom_css

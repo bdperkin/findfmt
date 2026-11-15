@@ -49,9 +49,20 @@
 }
 
 .findfmt-language-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   color: var(--color-sidebar-link-text);
   text-decoration: none;
   font-size: 0.75rem;
+}
+
+.findfmt-language-flag {
+  width: 1rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--color-background-border);
+  flex-shrink: 0;
 }
 
 .findfmt-language-links a[aria-current="true"] {
