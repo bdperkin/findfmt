@@ -57,6 +57,7 @@ def test_auto_retry_rerun_job_conditions_and_step() -> None:
     assert step.get("name") == "Re-run failed jobs"
     assert step.get("env") == {
         "GH_TOKEN": "${{ secrets.GITHUB_TOKEN }}",
+        "GH_REPO": "${{ github.repository }}",
         "RUN_ID": "${{ github.event.workflow_run.id }}",
     }
-    assert step.get("run") == 'gh run rerun "$RUN_ID" --failed'
+    assert step.get("run") == 'gh run rerun "$RUN_ID" --failed --repo "$GH_REPO"'
