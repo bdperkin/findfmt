@@ -83,3 +83,24 @@ def test_follow_symlinks_documented_flags(cli_options):
 )
 def test_option_declaration_tokens(declaration, expected):
     assert _flags(declaration) == expected
+
+
+def test_sphinx_sidebar_uses_square_icon_logo() -> None:
+    """Verify Sphinx conf.py configures html_logo to _static/icon.svg and CSS sizes it (#302)."""
+    repo = DOCS.parents[1]
+    conf_text = (DOCS / "conf.py").read_text(encoding="utf-8")
+    assert 'html_logo = "_static/icon.svg"' in conf_text
+    assert 'html_logo = "_static/logo.svg"' not in conf_text
+
+    static_icon = DOCS / "_static" / "icon.svg"
+    assets_icon = repo / "assets" / "icon.svg"
+    assert static_icon.is_file()
+    assert assets_icon.is_file()
+    assert static_icon.read_bytes() == assets_icon.read_bytes()
+    assert 'viewBox="0 0 200 200"' in static_icon.read_text(encoding="utf-8")
+
+    css_text = (DOCS / "_static" / "custom.css").read_text(encoding="utf-8")
+    assert ".sidebar-brand img" in css_text
+    assert "width: 48px;" in css_text
+    assert "height: 48px;" in css_text
+    assert "max-height: 48px;" in css_text
