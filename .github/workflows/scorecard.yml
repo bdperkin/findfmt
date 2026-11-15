@@ -1,13 +1,17 @@
 ---
 name: OpenSSF Scorecard
+
 on:
   branch_protection_rule:
   schedule:
     - cron: 30 4 * * 1
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
+
 permissions: {}
+
 jobs:
   analysis:
     name: Scorecard Analysis

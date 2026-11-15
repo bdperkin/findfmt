@@ -1,5 +1,6 @@
 ---
 version: 2
+
 updates:
   # Dependabot for GitHub Actions
   - package-ecosystem: github-actions
@@ -12,11 +13,14 @@ updates:
       prefix: chore(deps)
     groups:
       codeql-action:
-        patterns: [github/codeql-action*]
+        patterns:
+          - github/codeql-action*
       actions:
-        patterns: [actions/*]
+        patterns:
+          - actions/*
       docker:
-        patterns: [docker/*]
+        patterns:
+          - docker/*
       clusterfuzzlite:
         patterns:
           - google/clusterfuzzlite*

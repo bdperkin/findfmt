@@ -5,6 +5,7 @@ codecov:
   notify:
     after_n_builds: 15
     wait_for_ci: true
+
 coverage:
   precision: 2
   round: down
@@ -18,6 +19,7 @@ coverage:
       default:
         target: 100%
         threshold: 0%
+
 parsers:
   gcov:
     branch_detection:
@@ -25,12 +27,14 @@ parsers:
       loop: true
       method: false
       macro: false
+
 comment:
   layout: reach, diff, flags, components, files
   behavior: default
   require_changes: false
   require_base: false
   require_head: true
+
 component_management:
   individual_components:
     - component_id: classifier
@@ -42,15 +46,26 @@ component_management:
         - src/findfmt/utils/**
     - component_id: traversal
       name: traversal
-      paths: [src/findfmt/traversal/**, src/findfmt/parsers/**]
+      paths:
+        - src/findfmt/traversal/**
+        - src/findfmt/parsers/**
     - component_id: cli
       name: cli
-      paths: [src/findfmt/cli/**, src/findfmt/__main__.py]
+      paths:
+        - src/findfmt/cli/**
+        - src/findfmt/__main__.py
     - component_id: models
       name: models
-      paths: [src/findfmt/models.py]
-ignore: [tests/**/*, docs/**/*, tools/**/*]
+      paths:
+        - src/findfmt/models.py
+
+ignore:
+  - tests/**/*
+  - docs/**/*
+  - tools/**/*
+
 flags:
   unittests:
-    paths: [src/findfmt]
+    paths:
+      - src/findfmt
     carryforward: true

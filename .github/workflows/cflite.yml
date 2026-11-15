@@ -1,15 +1,20 @@
 ---
 name: ClusterFuzzLite
+
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   schedule:
     - cron: 0 0/6 * * *  # Every 6 hours
   workflow_dispatch:
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 permissions: {}
+
 jobs:
   fuzzing:
     name: Fuzzing (${{ matrix.sanitizer }})
@@ -20,7 +25,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sanitizer: [address]
+        sanitizer:
+          - address
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
