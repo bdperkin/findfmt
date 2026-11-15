@@ -302,3 +302,20 @@ def test_sync_pre_commit_deps_modes(
 
     monkeypatch.setattr(sync_pre_commit_deps, "__file__", str(tmp_path / "tools" / "sync.py"))
     assert sync_pre_commit_deps.main([]) == 0
+
+
+def test_ty_strict_rules_and_pre_commit_sync() -> None:
+    """Validate [tool.ty] enforces truthiness-test-of-none-union and syncs with uv.lock (#292)."""
+    repo = _repo_root()
+    with (repo / "pyproject.toml").open("rb") as f:
+        data = tomllib.load(f)
+
+    ty_cfg = data.get("tool", {}).get("ty", {})
+    rules = ty_cfg.get("rules", {})
+    assert rules.get("all") == "error"
+    assert "truthiness-test-of-none-union" not in rules
+    assert ty_cfg.get("terminal", {}).get("error-on-warning") is True
+
+    lint_deps = data.get("dependency-groups", {}).get("lint", [])
+    assert any(dep.startswith("ty>=0.0.104") for dep in lint_deps)
+    assert sync_pre_commit_deps.sync_deps(repo) == 0
