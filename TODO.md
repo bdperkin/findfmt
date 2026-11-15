@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 220 Closed Issues | 104 Actionable Open Tasks | 31 Active Umbrella Epics **Last
+> **Tracking:** 221 Closed Issues | 103 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -22,7 +22,7 @@
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
 > closed #624 and #623; 2026-11-13 closed #355, epic #348, and #456, and released v1.2.2 and closed
 > its milestone; 2026-11-14 closed #457, #455, #310, #458, #332, #340, and epic #381; 2026-11-15
-> released v1.3.0 and closed its milestone)
+> released v1.3.0 and closed its milestone, and closed #292)
 
 ______________________________________________________________________
 
@@ -691,6 +691,10 @@ Note: Ordered chronologically by completion date.
 - [x] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
   Architecture: Layered Precedence, Schemas & Validation Diagnostics (Closed: 2026-11-14 via PR
   [#646](https://github.com/bdperkin/findfmt/pull/646))
+- [x] **[#292](https://github.com/bdperkin/findfmt/issues/292)** - refactor(types): resolve Ty
+  truthiness-test-of-none-union diagnostics to upgrade past v0.0.84 (Closed: 2026-11-15 via PR
+  [#513](https://github.com/bdperkin/findfmt/pull/513) and PR
+  [#649](https://github.com/bdperkin/findfmt/pull/649))
 
 ______________________________________________________________________
 
@@ -835,12 +839,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
   compiled Rust extension nor the pure-Python fallback regresses on any OS or Python version.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#292](https://github.com/bdperkin/findfmt/issues/292)** - refactor(types): resolve Ty
-  truthiness-test-of-none-union diagnostics to upgrade past v0.0.84 *(Rank: 33 | Epic:
-  [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
-  | Milestone: v1.3.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Unblocks Ty upgrades;
-  mechanical but spread over 23 files.
 
 - [ ] **[#585](https://github.com/bdperkin/findfmt/issues/585)** - test(fuzz): extend
   ClusterFuzzLite and add cargo-fuzz / proptest targets for findfmt_rs traversal and classification
@@ -1384,8 +1382,7 @@ linked natively on GitHub.
   [#312](https://github.com/bdperkin/findfmt/issues/312),
   [#574](https://github.com/bdperkin/findfmt/issues/574)
 - [ ] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static
-  Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 6)* -
-  [#292](https://github.com/bdperkin/findfmt/issues/292),
+  Analysis & Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 5)* -
   [#313](https://github.com/bdperkin/findfmt/issues/313),
   [#314](https://github.com/bdperkin/findfmt/issues/314),
   [#470](https://github.com/bdperkin/findfmt/issues/470),
@@ -1577,7 +1574,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
+| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 7           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
