@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import difflib
 import warnings
 from pathlib import Path
-from typing import Any
+from typing import Any, NoReturn
 
 import typer
 
@@ -143,11 +144,16 @@ def _extract_tool_section(data: dict[str, Any], path: Path) -> dict[str, Any]:
     return data
 
 
+def _describe_val(val: object) -> str:
+    """Return a diagnostic representation of a value and its Python type name."""
+    return f"{val!r} ({type(val).__name__})"
+
+
 def _convert_format_val(key: str, val: object, path: Path) -> OutputFormat:
     """Validate and convert format setting string into canonical OutputFormat enum."""
     if not isinstance(val, str):
         msg = _("expected string format name, got {type_name}").format(
-            type_name=type(val).__name__,
+            type_name=_describe_val(val),
         )
         typer.echo(
             _("Error: Invalid value for '{key}' in '{path}': {error}").format(
@@ -166,7 +172,7 @@ def _convert_format_val(key: str, val: object, path: Path) -> OutputFormat:
 
     valid = ", ".join(m.value for m in OutputFormat)
     msg = _("unsupported format '{val}'. Valid options: {valid}").format(
-        val=val,
+        val=f"{val} ({type(val).__name__})",
         valid=valid,
     )
     typer.echo(
@@ -199,7 +205,9 @@ def _convert_tri_state(key: str, val: object, path: Path) -> bool | None:
         if lowered == "auto":
             return None
 
-    msg = _("expected 'auto', 'always', 'never', or boolean, got '{val}'").format(val=val)
+    msg = _("expected 'auto', 'always', 'never', or boolean, got '{val}'").format(
+        val=_describe_val(val),
+    )
     typer.echo(
         _("Error: Invalid value for '{key}' in '{path}': {error}").format(
             key=key,
@@ -215,7 +223,7 @@ def _convert_bool_val(key: str, val: object, path: Path, *, invert: bool = False
     """Validate boolean configuration value."""
     if not isinstance(val, bool):
         msg = _("expected boolean (true/false), got {type_name}").format(
-            type_name=type(val).__name__,
+            type_name=_describe_val(val),
         )
         typer.echo(
             _("Error: Invalid value for '{key}' in '{path}': {error}").format(
@@ -239,7 +247,7 @@ def _convert_str_list(key: str, val: object, path: Path) -> list[str]:
         return [str(x) for x in val]
 
     msg = _("expected string or list of strings, got {type_name}").format(
-        type_name=type(val).__name__,
+        type_name=_describe_val(val),
     )
     typer.echo(
         _("Error: Invalid value for '{key}' in '{path}': {error}").format(
@@ -255,7 +263,7 @@ def _convert_str_list(key: str, val: object, path: Path) -> list[str]:
 def _convert_int_val(key: str, val: object, path: Path) -> int:
     """Validate non-negative integer configuration value."""
     if not isinstance(val, int) or isinstance(val, bool) or val < 0:
-        msg = _("expected non-negative integer, got {val}").format(val=val)
+        msg = _("expected non-negative integer, got {val}").format(val=_describe_val(val))
         typer.echo(
             _("Error: Invalid value for '{key}' in '{path}': {error}").format(
                 key=key,
@@ -272,7 +280,7 @@ def _convert_int_val(key: str, val: object, path: Path) -> int:
 def _convert_str_val(key: str, val: object, path: Path) -> str:
     """Validate string configuration value."""
     if not isinstance(val, str):
-        msg = _("expected string, got {type_name}").format(type_name=type(val).__name__)
+        msg = _("expected string, got {type_name}").format(type_name=_describe_val(val))
         typer.echo(
             _("Error: Invalid value for '{key}' in '{path}': {error}").format(
                 key=key,
@@ -300,6 +308,54 @@ def _warn_deprecated_format_bool(raw_key: str, canonical_key: str, path: Path) -
     warnings.warn(msg, DeprecationWarning, stacklevel=3)
 
 
+def _report_unknown_key(raw_key: str, key: str, path: Path) -> NoReturn:
+    """Emit an unknown configuration key error with an optional close-match suggestion."""
+    matches = difflib.get_close_matches(key, sorted(ACCEPTED_CONFIG_KEYS), n=1, cutoff=0.6)
+    if matches:
+        msg = _(
+            "Error: Unknown configuration key '{key}' in '{path}'. Did you mean '{suggestion}'?",
+        ).format(
+            key=raw_key,
+            path=path,
+            suggestion=matches[0],
+        )
+    else:
+        msg = _("Error: Unknown configuration key '{key}' in '{path}'.").format(
+            key=raw_key,
+            path=path,
+        )
+
+    typer.echo(msg, err=True)
+    raise typer.Exit(code=2)
+
+
+def _convert_single_key(raw_key: str, key: str, val: object, path: Path) -> tuple[str, Any]:
+    """Validate and convert a single configuration entry to (target_name, converted_val)."""
+    if key in ("format", "output_format"):
+        result: tuple[str, Any] = ("output_format", _convert_format_val(raw_key, val, path))
+    elif key in ("color", "pager"):
+        result = (key, _convert_tri_state(raw_key, val, path))
+    elif key in _BOOL_KEYS:
+        target_name, invert = _BOOL_KEYS[key]
+        converted_val = _convert_bool_val(raw_key, val, path, invert=invert)
+        if key in _DEPRECATED_FORMAT_BOOL_KEYS:
+            _warn_deprecated_format_bool(raw_key, target_name, path)
+
+        result = (target_name, converted_val)
+    elif key in _STR_LIST_KEYS:
+        result = (_STR_LIST_KEYS[key], _convert_str_list(raw_key, val, path))
+    elif key in _STR_KEYS:
+        result = (_STR_KEYS[key], _convert_str_val(raw_key, val, path))
+    elif key in _INT_KEYS:
+        result = (_INT_KEYS[key], _convert_int_val(raw_key, val, path))
+    elif key == "gitignore_file":
+        result = ("gitignore_file", Path(_convert_str_val(raw_key, val, path)))
+    else:
+        _report_unknown_key(raw_key, key, path)
+
+    return result
+
+
 def validate_and_convert_config(raw_data: dict[str, Any], path: Path) -> dict[str, Any]:
     """Validate configuration dictionary schema and map to CLI parameter defaults.
 
@@ -311,42 +367,38 @@ def validate_and_convert_config(raw_data: dict[str, Any], path: Path) -> dict[st
         Dictionary of validated option defaults ready for Click default_map.
 
     Raises:
-        typer.Exit: On encountering unrecognized keys or schema type mismatches.
+        typer.Exit: On encountering unrecognized keys, alias collisions, or type mismatches.
     """
     converted: dict[str, Any] = {}
+    seen_targets: dict[str, str] = {}
+    had_error = False
 
     for raw_key, val in raw_data.items():
         key = raw_key.removeprefix("FINDFMT_").lower().replace("-", "_")
+        try:
+            target_name, converted_val = _convert_single_key(raw_key, key, val, path)
+        except typer.Exit:
+            had_error = True
+            continue
 
-        if key in ("format", "output_format"):
-            converted["output_format"] = _convert_format_val(raw_key, val, path)
-        elif key in ("color", "pager"):
-            converted[key] = _convert_tri_state(raw_key, val, path)
-        elif key in _BOOL_KEYS:
-            target_name, invert = _BOOL_KEYS[key]
-            converted[target_name] = _convert_bool_val(raw_key, val, path, invert=invert)
-            if key in _DEPRECATED_FORMAT_BOOL_KEYS:
-                _warn_deprecated_format_bool(raw_key, target_name, path)
-        elif key in _STR_LIST_KEYS:
-            target_name = _STR_LIST_KEYS[key]
-            converted[target_name] = _convert_str_list(raw_key, val, path)
-        elif key in _STR_KEYS:
-            target_name = _STR_KEYS[key]
-            converted[target_name] = _convert_str_val(raw_key, val, path)
-        elif key in _INT_KEYS:
-            target_name = _INT_KEYS[key]
-            converted[target_name] = _convert_int_val(raw_key, val, path)
-        elif key == "gitignore_file":
-            str_val = _convert_str_val(raw_key, val, path)
-            converted["gitignore_file"] = Path(str_val)
-        else:
+        if target_name in seen_targets:
             typer.echo(
-                _("Error: Unknown configuration key '{key}' in '{path}'.").format(
-                    key=raw_key,
+                _(
+                    "Error: Conflicting configuration keys '{first}' and '{second}' in '{path}'.",
+                ).format(
+                    first=seen_targets[target_name],
+                    second=raw_key,
                     path=path,
                 ),
                 err=True,
             )
-            raise typer.Exit(code=2)
+            had_error = True
+            continue
+
+        seen_targets[target_name] = raw_key
+        converted[target_name] = converted_val
+
+    if had_error:
+        raise typer.Exit(code=2)
 
     return converted

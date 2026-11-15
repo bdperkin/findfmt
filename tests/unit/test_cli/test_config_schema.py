@@ -219,3 +219,90 @@ def test_deprecated_format_boolean_keys_warn_and_convert(
     assert len(record) == 1
     assert str(record[0].message) == expected_msg
     assert expected_msg in capsys.readouterr().err
+
+
+def test_reports_all_errors(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Validate that a config with 3 independent errors reports all 3 and exits 2 (#340)."""
+    p = tmp_path / "config.toml"
+    raw = {
+        "max_dpeth": 2,
+        "max_depth": "3",
+        "color": "bogus",
+    }
+    with pytest.raises(typer.Exit) as exc:
+        validate_and_convert_config(raw, p)
+
+    assert exc.value.exit_code == 2
+    err = capsys.readouterr().err
+    assert "Unknown configuration key 'max_dpeth'" in err
+    assert "Did you mean 'max_depth'?" in err
+    assert "Invalid value for 'max_depth'" in err
+    assert "Invalid value for 'color'" in err
+
+
+def test_unknown_key_did_you_mean(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Validate that an unknown key with a close match suggests the valid key (#340)."""
+    p = tmp_path / "config.toml"
+    with pytest.raises(typer.Exit) as exc:
+        validate_and_convert_config({"max_dpeth": 2}, p)
+
+    assert exc.value.exit_code == 2
+    err = capsys.readouterr().err
+    assert f"Error: Unknown configuration key 'max_dpeth' in '{p}'." in err
+    assert "Did you mean 'max_depth'?" in err
+
+
+def test_type_error_shows_repr_and_type(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Validate that type mismatch errors include both the value repr and type name (#340)."""
+    p = tmp_path / "config.toml"
+    with pytest.raises(typer.Exit) as exc:
+        validate_and_convert_config({"max_depth": "3"}, p)
+
+    assert exc.value.exit_code == 2
+    err = capsys.readouterr().err
+    assert "'3'" in err
+    assert "str" in err
+    assert "got '3' (str)" in err
+
+
+@pytest.mark.parametrize(
+    ("collision_dict", "first_key", "second_key"),
+    [
+        ({"tag": "python", "tags": ["rust"]}, "tag", "tags"),
+        ({"tags": ["python"], "type": "shell"}, "tags", "type"),
+        ({"exclude": "json", "exclude_tags": ["xml"]}, "exclude", "exclude_tags"),
+        ({"pattern": "*.py", "include_pattern": ["*.rs"]}, "pattern", "include_pattern"),
+        ({"hidden": True, "all": False}, "hidden", "all"),
+        ({"ignore": True, "no_ignore": False}, "ignore", "no_ignore"),
+        ({"format": "table", "output_format": "json"}, "format", "output_format"),
+        ({"max-depth": 2, "max_depth": 3}, "max-depth", "max_depth"),
+    ],
+)
+def test_alias_collision_rejected(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    collision_dict: dict[str, object],
+    first_key: str,
+    second_key: str,
+) -> None:
+    """Validate that colliding aliases or hyphen/underscore variants are rejected (#340)."""
+    p = tmp_path / "config.toml"
+    with pytest.raises(typer.Exit) as exc:
+        validate_and_convert_config(collision_dict, p)
+
+    assert exc.value.exit_code == 2
+    err = capsys.readouterr().err
+    assert f"'{first_key}'" in err
+    assert f"'{second_key}'" in err
+    assert (
+        f"Error: Conflicting configuration keys '{first_key}' and '{second_key}' in '{p}'." in err
+    )

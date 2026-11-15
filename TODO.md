@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 218 Closed Issues | 105 Actionable Open Tasks | 32 Active Umbrella Epics **Last
+> **Tracking:** 220 Closed Issues | 104 Actionable Open Tasks | 31 Active Umbrella Epics **Last
 > audit:** 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and
 > milestone re-balancing); 2026-10-22 (triaged #468-#476 and added milestone v1.2.2); 2026-10-24
 > (renumbered milestones for the 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its
@@ -21,7 +21,7 @@
 > released v1.2.1 and closed its milestone; 2026-11-12 closed #459, #461, #463, #334, and epic #386;
 > added #623, #624, GitHub Marketplace Apps epics #625-#627, issues #628-#635, and milestone v1.3.3;
 > closed #624 and #623; 2026-11-13 closed #355, epic #348, and #456, and released v1.2.2 and closed
-> its milestone; 2026-11-14 closed #457, #455, #310, #458, and #332)
+> its milestone; 2026-11-14 closed #457, #455, #310, #458, #332, #340, and epic #381)
 
 ______________________________________________________________________
 
@@ -684,6 +684,12 @@ Note: Ordered chronologically by completion date.
 - [x] **[#332](https://github.com/bdperkin/findfmt/issues/332)** - feat(cli): layered config
   precedence (user < project < env < CLI) and remove format booleans from config (Closed: 2026-11-14
   via PR [#645](https://github.com/bdperkin/findfmt/pull/645))
+- [x] **[#340](https://github.com/bdperkin/findfmt/issues/340)** - feat(cli): improve config
+  validation diagnostics (all errors, did-you-mean, reprs, alias collisions) (Closed: 2026-11-14 via
+  PR [#646](https://github.com/bdperkin/findfmt/pull/646))
+- [x] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
+  Architecture: Layered Precedence, Schemas & Validation Diagnostics (Closed: 2026-11-14 via PR
+  [#646](https://github.com/bdperkin/findfmt/pull/646))
 
 ______________________________________________________________________
 
@@ -1074,11 +1080,6 @@ sub-issues. Respect `Blocked by` links when picking up work.
 
 ### 2.3. Future / Low-Priority / Backlog
 
-- [ ] **[#340](https://github.com/bdperkin/findfmt/issues/340)** - feat(cli): improve config
-  validation diagnostics (all errors, did-you-mean, reprs, alias collisions) *(Rank: 73 | Epic:
-  [[Epic] Configuration Architecture: Layered Precedence, Schemas & Validation Diagnostics](https://github.com/bdperkin/findfmt/issues/381)
-  | Milestone: v1.3.0)* - **Value:** Low | **Effort:** M - **Rationale:** Diagnostics polish after
-  layering. Blocked by [#455](https://github.com/bdperkin/findfmt/issues/455).
 - [ ] **[#309](https://github.com/bdperkin/findfmt/issues/309)** - feat(docs): investigate
   expandable hierarchical heading navigation in Sphinx left sidebar *(Rank: 74 | Epic:
   [[Epic] Documentation Architecture, Sphinx Navigation & Project Branding](https://github.com/bdperkin/findfmt/issues/379)
@@ -1375,9 +1376,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are
 linked natively on GitHub.
 
-- [ ] **[#381](https://github.com/bdperkin/findfmt/issues/381)** - [Epic] Configuration
-  Architecture: Layered Precedence, Schemas & Validation Diagnostics *(Milestone: v1.3.0 | Open
-  sub-issues: 1)* - [#340](https://github.com/bdperkin/findfmt/issues/340)
 - [ ] **[#379](https://github.com/bdperkin/findfmt/issues/379)** - [Epic] Documentation
   Architecture, Sphinx Navigation & Project Branding *(Milestone: v1.3.1 | Open sub-issues: 4)* -
   [#302](https://github.com/bdperkin/findfmt/issues/302),
@@ -1578,7 +1576,7 @@ v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 2           |
+| v1.3.0          | Configuration Architecture: Layered Precedence, Env Layer, Sample Config & Validation Diagnostics                  | 0           |
 | v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 8           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |

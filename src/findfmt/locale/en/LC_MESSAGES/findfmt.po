@@ -170,6 +170,16 @@ msgstr ""
 msgid "Error: Unknown configuration key '{key}' in '{path}'."
 msgstr "Error: Unknown configuration key '{key}' in '{path}'."
 
+#: src/findfmt/cli/config_schema.py:315
+#, python-brace-format
+msgid "Error: Unknown configuration key '{key}' in '{path}'. Did you mean '{suggestion}'?"
+msgstr "Error: Unknown configuration key '{key}' in '{path}'. Did you mean '{suggestion}'?"
+
+#: src/findfmt/cli/config_schema.py:385
+#, python-brace-format
+msgid "Error: Conflicting configuration keys '{first}' and '{second}' in '{path}'."
+msgstr "Error: Conflicting configuration keys '{first}' and '{second}' in '{path}'."
+
 #: src/findfmt/cli/diagnostics.py:81
 msgid "not installed"
 msgstr "not installed"
