@@ -143,13 +143,10 @@ def test_sync_cli_docs_detects_drift(
         + "\nSee `src/findfmt/diagnostics.py` and `src/findfmt/missing_mod.py`.\n",
         encoding="utf-8",
     )
-    (repo / "SECURITY.md").write_text(
-        (repo / "SECURITY.md")
-        .read_text(encoding="utf-8")
-        .replace("| 1.2.x", "| 0.8.x")
-        .replace("| < 1.2.0", "| < 0.8.0"),
-        encoding="utf-8",
-    )
+    sec_text = (repo / "SECURITY.md").read_text(encoding="utf-8")
+    sec_text = re.sub(r"\| \d+\.\d+\.x", "| 0.8.x", sec_text)
+    sec_text = re.sub(r"\| < \d+\.\d+\.0", "| < 0.8.0", sec_text)
+    (repo / "SECURITY.md").write_text(sec_text, encoding="utf-8")
     (repo / "docs" / "source" / "guides" / "configuration.md").write_text(
         (repo / "docs" / "source" / "guides" / "configuration.md")
         .read_text(encoding="utf-8")
