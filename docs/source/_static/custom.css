@@ -5,7 +5,11 @@
 }
 
 .sidebar-brand img {
+  width: 48px;
+  height: 48px;
   max-height: 48px;
+  display: block;
+  margin: 0 auto;
 }
 
 .findfmt-language-switcher {
