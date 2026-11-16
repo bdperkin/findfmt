@@ -97,10 +97,13 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   uv run pytest
   ```
-- **Strict Linting and Formatting**:
+- **Strict Linting and Formatting**: Python files are linted and formatted with `ruff`, and Markdown files are
+  formatted with `mdformat` (with `mdformat-frontmatter`, `mdformat-gfm`, and `mdformat-ruff`); both
+  `uv run mdformat` and the `mdformat` pre-commit hook share `.mdformat.toml`:
   ```bash
   uv run ruff check
   uv run ruff format --check
+  uv run mdformat --check *.md docs/
   ```
 - **Strict Type Checking**:
   ```bash
