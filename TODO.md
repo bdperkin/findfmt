@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 228 Closed Issues | 97 Actionable Open Tasks | 30 Active Umbrella Epics **Last audit:**
+> **Tracking:** 229 Closed Issues | 96 Actionable Open Tasks | 30 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -23,7 +23,7 @@
 > closed `#355`, epic `#348`, and `#456`, and released v1.2.2 and closed its milestone; 2026-11-14 closed
 > `#457`, `#455`, `#310`, `#458`, `#332`, `#340`, and epic `#381`; 2026-11-15 released v1.3.0 and closed its
 > milestone, closed `#292`, `#302`, `#312`, `#313`, `#574`, `#309`, epic `#379`, and `#314`, and released
-> v1.3.1 and closed its milestone)
+> v1.3.1 and closed its milestone; 2026-11-16 closed `#470`)
 
 ______________________________________________________________________
 
@@ -692,6 +692,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#314](https://github.com/bdperkin/findfmt/issues/314)** - refactor(lint): standardize line length
   limit to 110 columns across all linters, checkers, and formatters (Closed: 2026-11-15 via PR
   [#659](https://github.com/bdperkin/findfmt/pull/659))
+- [x] **[#470](https://github.com/bdperkin/findfmt/issues/470)** - ci(pre-commit): add check-jsonschema hooks
+  to validate workflows, Dependabot, issue forms, and Codecov config (Closed: 2026-11-16 via PR
+  [#662](https://github.com/bdperkin/findfmt/pull/662))
 
 ______________________________________________________________________
 
@@ -710,12 +713,6 @@ when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same zero-warning
   static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#470](https://github.com/bdperkin/findfmt/issues/470)** - ci(pre-commit): add check-jsonschema hooks
-  to validate workflows, Dependabot, issue forms, and Codecov config *(Rank: 8 | Epic:
-  [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
-  | Milestone: v1.3.2)* - **Value:** Medium | **Effort:** S - **Rationale:** Schema-validates workflows,
-  Dependabot, issue forms and Codecov. 19 jobs lack `timeout-minutes` (6-hour default); set each from observed
-  run times.
 - [ ] **[#472](https://github.com/bdperkin/findfmt/issues/472)** - ci(markdown): run mdformat with
   frontmatter, gfm (incl. tables), and ruff plugins everywhere it is invoked *(Rank: 11 | Epic:
   [[Epic] Developer Tooling, Static Analysis & Linting Standardization](https://github.com/bdperkin/findfmt/issues/380)
@@ -1286,8 +1283,7 @@ Note: Each epic's milestone equals the latest milestone among its open sub-issue
 natively on GitHub.
 
 - [ ] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static Analysis &
-  Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 3)* -
-  [#470](https://github.com/bdperkin/findfmt/issues/470),
+  Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 2)* -
   [#471](https://github.com/bdperkin/findfmt/issues/471),
   [#472](https://github.com/bdperkin/findfmt/issues/472)
 - [ ] **[#626](https://github.com/bdperkin/findfmt/issues/626)** - [Epic] Tier-1 Workflow & Quality Automation
@@ -1470,7 +1466,7 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
+| v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 8           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
 | v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |

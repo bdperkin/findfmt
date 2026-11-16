@@ -115,14 +115,18 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   vale *.md docs/
   ```
-- **CI/CD Static Security Analysis**: GitHub Actions workflows (`.github/workflows/`),
-  `.github/dependabot.yml`, and `.pre-commit-config.yaml` are audited with
-  [zizmor](https://github.com/zizmorcore/zizmor) in pre-commit and CI:
+- **CI/CD Static Security Analysis & Schema Validation**: GitHub Actions workflows (`.github/workflows/`),
+  `.github/dependabot.yml`, `.github/ISSUE_TEMPLATE/`, `codecov.yml`, and `.pre-commit-config.yaml` are
+  audited with [zizmor](https://github.com/zizmorcore/zizmor) and validated against SchemaStore JSON schemas
+  with [check-jsonschema](https://github.com/python-jsonschema/check-jsonschema) (including mandatory per-job
+  `timeout-minutes`) in pre-commit and CI:
   ```bash
   uvx zizmor .github/ .pre-commit-config.yaml
+  uv run pre-commit run check-github-workflows --all-files
+  uv run pre-commit run check-github-workflows-require-timeout --all-files
   ```
-  Suppress accepted risks inline with `# zizmor: ignore[<audit>] -- <reason>`; every suppression must include
-  a justification comment after `--`.
+  Suppress accepted `zizmor` risks inline with `# zizmor: ignore[<audit>] -- <reason>`; every suppression must
+  include a justification comment after `--`.
 - **Public API Snapshot**: `tests/unit/test_api_surface.py` fails when a name in any module's `__all__` (or
   its signature) changes. For intentional changes, regenerate the snapshot and record the change in
   `CHANGELOG.md` (see the API stability policy in the documentation):

@@ -313,3 +313,40 @@ def test_local_runner_covers_supported_pythons(capsys: pytest.CaptureFixture[str
     assert "uv run ruff check" not in qg_runs, (
         "quality-gate must not duplicate individual linter invocations run by verify_quality.py"
     )
+
+
+def test_check_jsonschema_hooks_and_workflow_timeouts() -> None:
+    """Validate check-jsonschema pre-commit hooks and workflow job timeout-minutes (#470)."""
+    repo = _repo_root()
+    pre_commit_path = repo / ".pre-commit-config.yaml"
+    with pre_commit_path.open(encoding="utf-8") as f:
+        pc_data = yaml.safe_load(f)
+
+    expected_hooks = {
+        "check-github-workflows",
+        "check-github-workflows-require-timeout",
+        "check-dependabot",
+        "check-github-issue-forms",
+        "check-github-issue-config",
+        "check-codecov",
+    }
+    schema_repo = next(
+        (r for r in pc_data.get("repos", []) if "python-jsonschema/check-jsonschema" in str(r.get("repo"))),
+        None,
+    )
+    assert schema_repo is not None, "check-jsonschema repo must be configured in .pre-commit-config.yaml"
+    assert schema_repo.get("rev"), "check-jsonschema repo must pin rev"
+    actual_hooks = {h.get("id") for h in schema_repo.get("hooks", [])}
+    assert actual_hooks == expected_hooks
+
+    ci_skip = set(pc_data.get("ci", {}).get("skip", []))
+    assert not (expected_hooks & ci_skip), "check-jsonschema hooks work offline and must not be in ci.skip"
+
+    for wf_path in sorted((repo / ".github" / "workflows").glob("*.yml")):
+        with wf_path.open(encoding="utf-8") as f:
+            wf_data = yaml.safe_load(f)
+
+        for job_name, job_def in wf_data.get("jobs", {}).items():
+            timeout = job_def.get("timeout-minutes")
+            assert isinstance(timeout, int), f"{wf_path.name}:{job_name} missing integer timeout-minutes"
+            assert timeout > 0, f"{wf_path.name}:{job_name} timeout-minutes must be positive"

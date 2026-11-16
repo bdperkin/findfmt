@@ -227,6 +227,17 @@ repos:
     hooks:
       - id: zizmor
 
+  # JSON Schema validation for GitHub and service configuration files
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.38.2
+    hooks:
+      - id: check-github-workflows
+      - id: check-github-workflows-require-timeout
+      - id: check-dependabot
+      - id: check-github-issue-forms
+      - id: check-github-issue-config
+      - id: check-codecov
+
   # Conventional Commits verification
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.5.0
