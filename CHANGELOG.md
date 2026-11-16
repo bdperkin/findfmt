@@ -7,6 +7,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Features
+
+- *(docs)* Replace top-left Sphinx sidebar branding with the high-resolution square icon
+  (`docs/source/_static/icon.svg`, scaled up to `max-width: 240px`) while preserving the horizontal banner
+  logo on the documentation index page (#302).
+- *(docs)* Display representative country flag icons (`docs/source/_static/flags/*.svg` and emoji metadata in
+  `html_context["languages"]`) alongside each language option in the Furo sidebar language switcher (#574).
+- *(docs)* Enable expandable hierarchical heading navigation (`SIDEBAR_NAVIGATION_MAXDEPTH = 4` and
+  `titles_only=False` via Furo's `get_navigation_tree`) in the Sphinx left sidebar with keyboard-accessible
+  `role="switch"` toggles and document the architecture decision record in
+  `docs/source/quality/sidebar_navigation.md` (#309, #379).
+
+### Changed
+
+- *(types)* Upgrade Astral `ty` static type checker from `v0.0.84` to `v0.0.104` across `pyproject.toml` and
+  `.pre-commit-config.yaml` and enable `strict-equality-semantics` and `strict-generic-narrowing` (#292).
+- *(readme)* Expand status, security, and governance badges in `README.md` and `docs/source/index.md` with
+  GitGuardian, Dependabot, Semantic Versioning 2.0.0, and Pull Requests Welcome badges (#312).
+- *(pre-commit)* Configure `yamlfix` formatting rules under `[tool.yamlfix]` in `pyproject.toml` (#313).
+- *(lint)* Standardize the repository-wide line-length limit to 110 columns across `ruff`, `mdformat`,
+  `yamllint`, `yamlfix`, `pymarkdown`, and `tools/line_linter.py` (separating per-line character thresholds
+  from total file-line-count thresholds) (#314).
+
+### Fixed
+
+- *(ci)* Pass `GH_REPO` and `--repo` explicitly to `gh run rerun` in `.github/workflows/auto-retry.yml`
+  (#648).
+
 ## [1.3.0] - 2026-11-15
 
 ### Features
