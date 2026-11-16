@@ -190,9 +190,7 @@ def _check_module_paths_and_tools_inventory(repo: Path) -> list[str]:
 
     agents_text = (repo / "AGENTS.md").read_text(encoding="utf-8")
     tools_section = agents_text.split("- `tools/`:", 1)[1].split("\n- `tests/`:", 1)[0]
-    documented_tools = {
-        span for span in CODE_SPAN_PATTERN.findall(tools_section) if span.endswith(".py")
-    }
+    documented_tools = {span for span in CODE_SPAN_PATTERN.findall(tools_section) if span.endswith(".py")}
     actual_tools = {p.name for p in (repo / "tools").glob("*.py")}
     missing_tools = sorted(actual_tools - documented_tools)
     extra_tools = sorted(documented_tools - actual_tools)

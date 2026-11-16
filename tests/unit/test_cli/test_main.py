@@ -445,9 +445,7 @@ def test_help_all_generated_from_click() -> None:
     command = get_command(app)
     ctx = command.context_class(command)
 
-    options = [
-        param for param in command.get_params(ctx) if any(opt.startswith("-") for opt in param.opts)
-    ]
+    options = [param for param in command.get_params(ctx) if any(opt.startswith("-") for opt in param.opts)]
     assert options
 
     for param in options:

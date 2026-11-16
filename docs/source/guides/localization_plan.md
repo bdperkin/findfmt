@@ -1,7 +1,7 @@
 # Translation and Localization Plan (i18n & l10n)
 
-This document establishes the architecture, linguistic metadata, phased roadmap, and contribution
-workflow for internationalization (i18n) and localization (l10n) across `findfmt`.
+This document establishes the architecture, linguistic metadata, phased roadmap, and contribution workflow for
+internationalization (i18n) and localization (l10n) across `findfmt`.
 
 ```{note}
 All translation issues are aligned with the **Future Features** milestone. Active tracking issues and parent epics are cross-linked below.
@@ -11,36 +11,34 @@ ______________________________________________________________________
 
 ## 1. Core Architecture
 
-The `findfmt` internationalization architecture uses standard GNU gettext runtime protocols combined
-with custom Hatchling build hooks and Sphinx documentation tooling:
+The `findfmt` internationalization architecture uses standard GNU gettext runtime protocols combined with
+custom Hatchling build hooks and Sphinx documentation tooling:
 
-- **Runtime Engine (`src/findfmt/i18n.py`)**: Wraps `gettext.translation()` with hierarchical
-  fallback order: `LANGUAGE` → `LC_ALL` → `LC_MESSAGES` → `LANG` → `C`. Provides `_()` for standard
-  message strings and `ngettext()` for pluralized counts. Supports CLI runtime overrides via
-  `--locale <locale>` and `--lang <locale>`.
-- **Maintenance Tooling (`tools/i18n.py`)**: Automates message extraction (`extract`), catalog
-  initialization (`init <locale>`), updates (`update`), validation (`validate`), and compilation
-  (`compile`). Enforces relative path location comments (`#: src/findfmt/...`) via
-  `_sanitize_po_locations()` to ensure local build paths are never exposed.
-- **AI Translation Benchmark & Validation (`tools/i18n_validation.py`, `tools/i18n_benchmark.py`)**:
-  Provides invariant `__PH_N__` placeholder and Rich markup masking (`mask_placeholders()`,
-  `unmask_placeholders()`) and benchmarks open-source Python gettext AI translators and LLM
-  providers (see [Gettext AI Translation Benchmark](ai_translation_benchmark.md)).
+- **Runtime Engine (`src/findfmt/i18n.py`)**: Wraps `gettext.translation()` with hierarchical fallback order:
+  `LANGUAGE` → `LC_ALL` → `LC_MESSAGES` → `LANG` → `C`. Provides `_()` for standard message strings and
+  `ngettext()` for pluralized counts. Supports CLI runtime overrides via `--locale <locale>` and
+  `--lang <locale>`.
+- **Maintenance Tooling (`tools/i18n.py`)**: Automates message extraction (`extract`), catalog initialization
+  (`init <locale>`), updates (`update`), validation (`validate`), and compilation (`compile`). Enforces
+  relative path location comments (`#: src/findfmt/...`) via `_sanitize_po_locations()` to ensure local build
+  paths are never exposed.
+- **AI Translation Benchmark & Validation (`tools/i18n_validation.py`, `tools/i18n_benchmark.py`)**: Provides
+  invariant `__PH_N__` placeholder and Rich markup masking (`mask_placeholders()`, `unmask_placeholders()`)
+  and benchmarks open-source Python gettext AI translators and LLM providers (see
+  [Gettext AI Translation Benchmark](ai_translation_benchmark.md)).
 - **Packaging Build Hook (`tools/hatch_build.py`)**: Compiles `.po` message catalogs under
-  `src/findfmt/locale/*/LC_MESSAGES/*.po` into binary `.mo` catalogs during wheel and sdist
-  packaging.
-- **Documentation Localization (`docs/source/locale/`)**: Integrates with Sphinx `gettext` and
-  `sphinx-intl` to generate localized HTML sites and man pages.
-- **Security & Quality Gates**: The pre-commit hook `check-no-absolute-locale-paths` rejects any
-  absolute path location comments in `.po` files. Test suites enforce 100% statement and branch
-  coverage.
+  `src/findfmt/locale/*/LC_MESSAGES/*.po` into binary `.mo` catalogs during wheel and sdist packaging.
+- **Documentation Localization (`docs/source/locale/`)**: Integrates with Sphinx `gettext` and `sphinx-intl`
+  to generate localized HTML sites and man pages.
+- **Security & Quality Gates**: The pre-commit hook `check-no-absolute-locale-paths` rejects any absolute path
+  location comments in `.po` files. Test suites enforce 100% statement and branch coverage.
 
 ______________________________________________________________________
 
 ## 2. Implementation Phasing
 
-Languages are organized into five strategic tiers based on speaker population, linguistic diversity,
-and script complexity:
+Languages are organized into five strategic tiers based on speaker population, linguistic diversity, and
+script complexity:
 
 | Tier                         | Speaker Threshold     | Scope & Objective                                                                             | Status                                                                                                                      |
 | ---------------------------- | --------------------- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -54,23 +52,22 @@ ______________________________________________________________________
 
 ## 3. Infrastructure & Architecture Issues
 
-To support global scripts, bidirectional rendering, and regional standards, five foundational
-infrastructure issues have been established:
+To support global scripts, bidirectional rendering, and regional standards, five foundational infrastructure
+issues have been established:
 
 - **[#229: feat(i18n): implement right-to-left (RTL) and bidirectional (BiDi) terminal formatting support](https://github.com/bdperkin/findfmt/issues/229)**
-  Enables visual bidirectional reordering (Unicode BiDi algorithm) for monospace table
-  (`RichTableFormatter`) and tree (`RichTreeFormatter`) formatters when outputting Arabic (`ar`),
-  Urdu (`ur`), Persian (`fa`), Hebrew (`he`), or Kurdish (`ku`).
+  Enables visual bidirectional reordering (Unicode BiDi algorithm) for monospace table (`RichTableFormatter`)
+  and tree (`RichTreeFormatter`) formatters when outputting Arabic (`ar`), Urdu (`ur`), Persian (`fa`), Hebrew
+  (`he`), or Kurdish (`ku`).
 - **[#230: fix(format): audit and enforce cell-width alignment for CJK double-width characters across formatters](https://github.com/bdperkin/findfmt/issues/230)**
-  Audits terminal column calculation to ensure full-width East Asian glyphs (Chinese
-  `zh_CN`/`zh_TW`, Japanese `ja`, Korean `ko`) occupy two terminal cells using `wcwidth`/`cell_len`
-  instead of string length.
+  Audits terminal column calculation to ensure full-width East Asian glyphs (Chinese `zh_CN`/`zh_TW`, Japanese
+  `ja`, Korean `ko`) occupy two terminal cells using `wcwidth`/`cell_len` instead of string length.
 - **[#231: feat(i18n): localize file sizes, numeric separators, and timestamps per regional locale standards](https://github.com/bdperkin/findfmt/issues/231)**
-  Adapts decimal separators (`12.4 MB` vs `12,4 MB`), thousands separators, and date-time formats
-  according to active `LC_NUMERIC` and `LC_TIME` settings.
+  Adapts decimal separators (`12.4 MB` vs `12,4 MB`), thousands separators, and date-time formats according to
+  active `LC_NUMERIC` and `LC_TIME` settings.
 - **[#232: test(i18n): create automated verification suite for complex multi-tier gettext pluralization rules](https://github.com/bdperkin/findfmt/issues/232)**
-  Provides automated test fixtures verifying plural mapping for single-form, two-form, three-form
-  Slavic, three-form Polish, and six-form Arabic rules in `findfmt.i18n.ngettext`.
+  Provides automated test fixtures verifying plural mapping for single-form, two-form, three-form Slavic,
+  three-form Polish, and six-form Arabic rules in `findfmt.i18n.ngettext`.
 - **[#233: ci(docs): configure automated multilingual Sphinx documentation builds in CI pipeline](https://github.com/bdperkin/findfmt/issues/233)**
   Configures `.github/workflows/docs.yml` to compile and publish multilingual Sphinx documentation
   subdirectories (`docs/<locale>/`).
@@ -79,8 +76,8 @@ ______________________________________________________________________
 
 ## 4. Tier 1 Tracking Matrix (≥ 120M Speakers)
 
-Each Tier 1 language has an active GitHub sub-issue under the **Future Features** milestone attached
-to its parent epic:
+Each Tier 1 language has an active GitHub sub-issue under the **Future Features** milestone attached to its
+parent epic:
 
 | Locale Code | Language Name              | Language Family    |                      Parent Epic                       |                       Sub-Issue                        | Speakers |         Script          | Text Dir |      Plural Forms (`nplurals`)       |                            Status                            |
 | :---------: | -------------------------- | ------------------ | :----------------------------------------------------: | :----------------------------------------------------: | -------: | :---------------------: | :------: | :----------------------------------: | :----------------------------------------------------------: |
@@ -104,8 +101,8 @@ ______________________________________________________________________
 
 ## 5. Tier 2 Tracking Matrix (10M – 120M Speakers)
 
-Each Tier 2 language has an active GitHub sub-issue under the **Future Features** milestone attached
-to its parent epic:
+Each Tier 2 language has an active GitHub sub-issue under the **Future Features** milestone attached to its
+parent epic:
 
 | Locale Code | Language Name                  | Language Family     |                      Parent Epic                       |                       Sub-Issue                        | Speakers |          Script           |   Text Dir    |             Plural Forms (`nplurals`)              |
 | :---------: | ------------------------------ | ------------------- | :----------------------------------------------------: | :----------------------------------------------------: | -------: | :-----------------------: | :-----------: | :------------------------------------------------: |
@@ -315,42 +312,41 @@ The catalog is created or updated at: `src/findfmt/locale/<locale>/LC_MESSAGES/f
 
 ### 7.2. Step 2: Configure the Plural-Forms Header
 
-Edit `src/findfmt/locale/<locale>/LC_MESSAGES/findfmt.po` and set the `Plural-Forms` header
-according to gettext standards:
+Edit `src/findfmt/locale/<locale>/LC_MESSAGES/findfmt.po` and set the `Plural-Forms` header according to
+gettext standards:
 
-- **Single Form (`nplurals=1; plural=0;`)**: Applicable to Chinese (`zh_CN`, `zh_TW`), Japanese
-  (`ja`), Korean (`ko`), Indonesian (`id`), Malay (`ms`), Vietnamese (`vi`), Thai (`th`), Lao
-  (`lo`), Burmese (`my`), Khmer (`km`), N'Ko (`nqo`).
-- **Two Forms (`nplurals=2; plural=(n != 1);`)**: Applicable to English (`en`, `en_GB`), German
-  (`de`), Spanish (`es`), Italian (`it`), Catalan (`ca`), Dutch (`nl`), Swedish (`sv`), Greek
-  (`el`), Hindi (`hi`), Bengali (`bn`), Urdu (`ur`), Punjabi (`pa`), Marathi (`mr`), Gujarati
-  (`gu`), Odia (`or`), Telugu (`te`), Tamil (`ta`), Kannada (`kn`), Malayalam (`ml`), Zulu (`zu`),
-  Hungarian (`hu`).
-- **French & Brazilian Portuguese (`nplurals=2; plural=(n > 1);`)**: Applicable where 0 and 1 take
-  the singular form: French (`fr`), Brazilian Portuguese (`pt_BR`), Turkish (`tr`), Persian (`fa`),
-  Amharic (`am`).
+- **Single Form (`nplurals=1; plural=0;`)**: Applicable to Chinese (`zh_CN`, `zh_TW`), Japanese (`ja`), Korean
+  (`ko`), Indonesian (`id`), Malay (`ms`), Vietnamese (`vi`), Thai (`th`), Lao (`lo`), Burmese (`my`), Khmer
+  (`km`), N'Ko (`nqo`).
+- **Two Forms (`nplurals=2; plural=(n != 1);`)**: Applicable to English (`en`, `en_GB`), German (`de`),
+  Spanish (`es`), Italian (`it`), Catalan (`ca`), Dutch (`nl`), Swedish (`sv`), Greek (`el`), Hindi (`hi`),
+  Bengali (`bn`), Urdu (`ur`), Punjabi (`pa`), Marathi (`mr`), Gujarati (`gu`), Odia (`or`), Telugu (`te`),
+  Tamil (`ta`), Kannada (`kn`), Malayalam (`ml`), Zulu (`zu`), Hungarian (`hu`).
+- **French & Brazilian Portuguese (`nplurals=2; plural=(n > 1);`)**: Applicable where 0 and 1 take the
+  singular form: French (`fr`), Brazilian Portuguese (`pt_BR`), Turkish (`tr`), Persian (`fa`), Amharic
+  (`am`).
 - **Slavic Three Forms
   (`nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);`)**:
-  Applicable to Russian (`ru`), Ukrainian (`uk`), Belarusian (`be`), Serbian (`sr`), Croatian
-  (`hr`), Bosnian (`bs`).
+  Applicable to Russian (`ru`), Ukrainian (`uk`), Belarusian (`be`), Serbian (`sr`), Croatian (`hr`), Bosnian
+  (`bs`).
 - **Polish Three Forms
-  (`nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);`)**:
-  Applicable to Polish (`pl`).
-- **Czech Three Forms (`nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;`)**: Applicable to
-  Czech (`cs`), Slovak (`sk`).
-- **Romanian Three Forms (`nplurals=3; plural=(n==1?0:(((n%100>19)||(n%100==0&&n!=0))?2:1));`)**:
-  Applicable to Romanian (`ro`).
+  (`nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);`)**: Applicable to
+  Polish (`pl`).
+- **Czech Three Forms (`nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;`)**: Applicable to Czech
+  (`cs`), Slovak (`sk`).
+- **Romanian Three Forms (`nplurals=3; plural=(n==1?0:(((n%100>19)||(n%100==0&&n!=0))?2:1));`)**: Applicable
+  to Romanian (`ro`).
 - **Arabic Six Forms
   (`nplurals=6; plural=(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5);`)**:
   Applicable to Arabic (`ar`).
 
 ### 7.3. Step 3: Translate Strings & Validate Format Placeholders
 
-- Run `uv run python -m tools.i18n translate <locale>` (or populate `msgstr` / `msgstr[N]` entries
-  directly; see [Managed Localization Platforms vs. Local CI Automation](localization_platforms.md)
-  for AI provider setup and runtime convention registration).
-- Ensure formatting placeholders (`{count}`, `{path}`, `%s`), Rich tags (`[bold]`, `[/]`), and CLI
-  option flags (`--tree`, `-t`, `-s`) are preserved verbatim in UTF-8 without BOM.
+- Run `uv run python -m tools.i18n translate <locale>` (or populate `msgstr` / `msgstr[N]` entries directly;
+  see [Managed Localization Platforms vs. Local CI Automation](localization_platforms.md) for AI provider
+  setup and runtime convention registration).
+- Ensure formatting placeholders (`{count}`, `{path}`, `%s`), Rich tags (`[bold]`, `[/]`), and CLI option
+  flags (`--tree`, `-t`, `-s`) are preserved verbatim in UTF-8 without BOM.
 
 ### 7.4. Step 4: Compile Catalogs and Test Packaging
 

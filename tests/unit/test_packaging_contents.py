@@ -85,9 +85,7 @@ def test_readme_and_docs_index_use_pure_markdown_badges() -> None:
 
     readme_header = (ROOT / "README.md").read_text(encoding="utf-8").split("\n___", 1)[0]
     docs_header = (
-        (ROOT / "docs" / "source" / "index.md")
-        .read_text(encoding="utf-8")
-        .split("\n**findfmt**", 1)[0]
+        (ROOT / "docs" / "source" / "index.md").read_text(encoding="utf-8").split("\n**findfmt**", 1)[0]
     )
 
     for label, header in (("README.md", readme_header), ("docs/source/index.md", docs_header)):
@@ -104,17 +102,16 @@ def test_readme_and_docs_index_use_pure_markdown_badges() -> None:
     assert readme_imgs == docs_imgs
     assert len(readme_imgs) == len(set(readme_imgs)), "Duplicate badge image URLs found"
 
-    for astral_endpoint in (
-        "https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json",
-        "https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json",
-        "https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json",
+    astral_prefix = "https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh"
+    for astral_suffix in (
+        "/uv/main/assets/badge/v0.json",
+        "/ruff/main/assets/badge/v2.json",
+        "/ty/main/assets/badge/v0.json",
     ):
-        assert astral_endpoint in readme_imgs
+        assert f"{astral_prefix}{astral_suffix}" in readme_imgs
 
     for alt, _img, target in readme_badges:
-        assert target.startswith("https://"), (
-            f"Non-absolute README target URL for {alt!r}: {target}"
-        )
+        assert target.startswith("https://"), f"Non-absolute README target URL for {alt!r}: {target}"
         if wf_match := workflow_pattern.match(target):
             wf_file = ROOT / ".github" / "workflows" / wf_match.group(1)
             assert wf_file.is_file(), f"Badge references missing workflow {wf_file}"

@@ -218,9 +218,7 @@ def test_markdown_escapes_html(
         elif char == ">":
             assert ">" not in row_line.replace("&gt;", "")
         elif char == "&":
-            assert "&" not in (
-                row_line.replace("&amp;", "").replace("&lt;", "").replace("&gt;", "")
-            )
+            assert "&" not in (row_line.replace("&amp;", "").replace("&lt;", "").replace("&gt;", ""))
 
 
 def test_markdown_escaped_output_renders_safely() -> None:

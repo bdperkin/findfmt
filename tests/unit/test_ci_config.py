@@ -32,9 +32,7 @@ def _get_gh_actions_groups() -> dict[str, Any]:
     """Return the groups dictionary for the github-actions ecosystem."""
     config = _load_dependabot_config()
     updates = config["updates"]
-    gh_actions = next(
-        entry for entry in updates if entry.get("package-ecosystem") == "github-actions"
-    )
+    gh_actions = next(entry for entry in updates if entry.get("package-ecosystem") == "github-actions")
     assert gh_actions.get("directory") == "/"
     groups = gh_actions.get("groups")
     assert isinstance(groups, dict), "github-actions entry must define dependency groups"
@@ -48,9 +46,7 @@ def test_dependabot_config_structure() -> None:
     updates = config.get("updates")
     assert isinstance(updates, list)
 
-    ecosystems = {
-        entry.get("package-ecosystem"): entry for entry in updates if isinstance(entry, dict)
-    }
+    ecosystems = {entry.get("package-ecosystem"): entry for entry in updates if isinstance(entry, dict)}
     assert "github-actions" in ecosystems
     assert "pip" in ecosystems
 
@@ -86,10 +82,7 @@ def test_dependabot_docker_and_fuzz_groups() -> None:
     assert "clusterfuzzlite" in groups
     fuzz_patterns = groups["clusterfuzzlite"].get("patterns")
     assert isinstance(fuzz_patterns, list)
-    assert any(
-        fnmatch.fnmatch("google/clusterfuzzlite/actions/build_fuzzers", pat)
-        for pat in fuzz_patterns
-    )
+    assert any(fnmatch.fnmatch("google/clusterfuzzlite/actions/build_fuzzers", pat) for pat in fuzz_patterns)
 
 
 def _collect_workflow_codeql_actions() -> set[str]:
@@ -103,9 +96,7 @@ def _collect_workflow_codeql_actions() -> set[str]:
             for line in f:
                 stripped = line.strip()
                 if stripped.startswith("uses:") and "github/codeql-action" in stripped:
-                    action_ref = (
-                        stripped.split("uses:")[1].strip().split("@")[0].split("#")[0].strip()
-                    )
+                    action_ref = stripped.split("uses:")[1].strip().split("@")[0].split("#")[0].strip()
                     codeql_uses.add(action_ref)
 
     return codeql_uses
@@ -265,9 +256,7 @@ def test_dependency_matrix_workflow_pruned_cells_and_steps() -> None:
     assert actual_cells == expected_cells
 
     steps = job.get("steps", [])
-    summary_step = next(
-        s for s in steps if "Record Matrix Cell Result Summary" in s.get("name", "")
-    )
+    summary_step = next(s for s in steps if "Record Matrix Cell Result Summary" in s.get("name", ""))
     assert summary_step.get("if") == "always()"
     assert "GITHUB_STEP_SUMMARY" in summary_step.get("run", "")
 
@@ -306,9 +295,7 @@ def test_local_runner_covers_supported_pythons(capsys: pytest.CaptureFixture[str
     classifier_versions = {
         c.removeprefix(prefix)
         for c in data["project"]["classifiers"]
-        if isinstance(c, str)
-        and c.startswith(prefix + "3.")
-        and c.removeprefix(prefix)[2:].isdigit()
+        if isinstance(c, str) and c.startswith(prefix + "3.") and c.removeprefix(prefix)[2:].isdigit()
     }
     runner_versions = set(load_supported_pythons(pyproject_path))
     assert runner_versions == classifier_versions

@@ -71,9 +71,7 @@ def test_tomli_not_a_dependency() -> None:
 
     def _names(specs: list[Any]) -> set[str]:
         return {
-            s.split(";")[0].split(">=")[0].split("==")[0].strip().lower()
-            for s in specs
-            if isinstance(s, str)
+            s.split(";")[0].split(">=")[0].split("==")[0].strip().lower() for s in specs if isinstance(s, str)
         }
 
     assert "tomli" not in _names(data["project"]["dependencies"])
@@ -113,9 +111,7 @@ def test_classifiers_match_required_ci_matrix() -> None:
     """Validate every advertised Python version runs in CI as a gating, non-experimental job."""
     job = _test_matrix_job()
     matrix = job["strategy"]["matrix"]
-    experimental = {
-        str(e["python-version"]) for e in matrix.get("include", []) if e.get("experimental")
-    }
+    experimental = {str(e["python-version"]) for e in matrix.get("include", []) if e.get("experimental")}
     gating = {str(v) for v in matrix["python-version"]} - experimental
 
     assert "continue-on-error" not in job, "test-matrix must not set job-level continue-on-error"
@@ -165,9 +161,7 @@ def test_test_matrix_never_falls_back_to_system_python() -> None:
     assert steps["Set up Python"].get("id") == "setup-python"
 
     install = steps["Install Dependencies"]
-    assert (
-        install.get("env", {}).get("UV_PYTHON") == "${{ steps.setup-python.outputs.python-path }}"
-    )
+    assert install.get("env", {}).get("UV_PYTHON") == "${{ steps.setup-python.outputs.python-path }}"
 
     succeeded = "${{ steps.setup-python.outcome == 'success' }}"
     for name in (
@@ -177,9 +171,7 @@ def test_test_matrix_never_falls_back_to_system_python() -> None:
     ):
         assert steps[name].get("if") == succeeded, f"Step {name!r} must require a successful setup"
 
-    reporters = [
-        s for s in steps.values() if s.get("if") == "${{ steps.setup-python.outcome != 'success' }}"
-    ]
+    reporters = [s for s in steps.values() if s.get("if") == "${{ steps.setup-python.outcome != 'success' }}"]
     assert len(reporters) == 1, "test-matrix must report when the requested Python is unavailable"
     assert "::warning" in reporters[0]["run"]
 
@@ -302,7 +294,7 @@ def test_docs_state_the_supported_range() -> None:
     stale = {
         path: text
         for path, text in expected.items()
-        if text not in (_repo_root() / path).read_text(encoding="utf-8")
+        if text not in " ".join((_repo_root() / path).read_text(encoding="utf-8").split())
     }
     assert not stale, f"Docs do not state the supported range: {stale}"
 
@@ -329,6 +321,4 @@ def test_dependency_smoke_matrix_uses_minimum_python() -> None:
         for step in job["steps"]
         if "actions/setup-python" in str(step.get("uses", ""))
     ]
-    assert versions == [minimum], (
-        f"dependency-smoke-matrix runs Python {versions}, expected {minimum}"
-    )
+    assert versions == [minimum], f"dependency-smoke-matrix runs Python {versions}, expected {minimum}"

@@ -73,9 +73,7 @@ def test_every_doc_page_has_a_catalog(language: str) -> None:
         for path in _catalogs(language)
     }
     missing = sorted(_doc_pages() - catalogs)
-    assert not missing, (
-        f"{language}: pages without a catalog (run `make -C docs intl-update`): {missing}"
-    )
+    assert not missing, f"{language}: pages without a catalog (run `make -C docs intl-update`): {missing}"
 
 
 @pytest.mark.parametrize("language", _languages())
@@ -177,9 +175,7 @@ def test_hierarchical_sidebar_navigation_architecture() -> None:
     assert "SIDEBAR_NAVIGATION_MAXDEPTH = 4" in conf_text
     assert "_configure_hierarchical_sidebar" in conf_text
     assert "titles_only=False" in conf_text
-    assert 'app.connect("html-page-context", _configure_hierarchical_sidebar, priority=600)' in (
-        conf_text
-    )
+    assert 'app.connect("html-page-context", _configure_hierarchical_sidebar, priority=600)' in (conf_text)
 
     nav_template = (SOURCE / "_templates" / "sidebar" / "navigation.html").read_text(
         encoding="utf-8",

@@ -323,9 +323,7 @@ def test_from_file_rejects_paths_outside_root(
         res_default = list(ingest_from_file(cfg_default, input_stream=io.StringIO(listing)))
 
     opened_paths = [
-        str(call.args[0])
-        for call in [*spy_open.call_args_list, *spy_os_open.call_args_list]
-        if call.args
+        str(call.args[0]) for call in [*spy_open.call_args_list, *spy_os_open.call_args_list] if call.args
     ]
     err_out = capsys.readouterr().err
     assert [f.relative_path.as_posix() for f in res_default] == ["inside.py", "inside.py"]

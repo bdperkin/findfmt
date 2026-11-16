@@ -1,6 +1,6 @@
 ---
 name: Misclassification / Traversal Edge Case
-description: Report a file that was incorrectly identified, missed, or traversal rule that didn't apply correctly
+description: Report a file that was misclassified, missed, or affected by a traversal rule
 title: 'fix(classifier): misclassification for <format/path>'
 
 labels:
@@ -11,7 +11,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Report files that are identified with incorrect tags, missed during classification, or affected by traversal filtering.
+        Report files that are identified with incorrect tags, missed during classification, or
+        affected by traversal filtering.
   - type: textarea
     id: summary
     attributes:
@@ -31,8 +32,7 @@ body:
     id: traversal_context
     attributes:
       label: Traversal Flags & Git Environment
-      description: Were `--no-ignore` or `--hidden` passed? Are there `.gitignore` or `.git/info/exclude` rules
-        affecting this path?
+      description: Were `--no-ignore` or `--hidden` passed, or do `.gitignore` rules affect this path?
       value: |
         - Command flags:
         - Relevant .gitignore patterns:

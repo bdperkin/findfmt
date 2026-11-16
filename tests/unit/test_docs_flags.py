@@ -53,9 +53,7 @@ def test_documented_flags_exist(cli_options, document):
     registered = set().union(*cli_options.values())
     assert registered
     declarations = (
-        _cli_declarations()
-        if document == "cli/index.md"
-        else list(_configuration_declarations().values())
+        _cli_declarations() if document == "cli/index.md" else list(_configuration_declarations().values())
     )
     assert declarations, document
     for declaration in declarations:

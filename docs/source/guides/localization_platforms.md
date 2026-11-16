@@ -2,17 +2,17 @@
 
 As `findfmt` scales localization coverage across Tier 1 through Tier 4 languages (see
 [Multi-Language Localization Architecture & Phased Rollout Plan](localization_plan.md) and
-[Open-Source Python AI Translation Benchmark & Architecture](ai_translation_benchmark.md)), this
-document evaluates managed cloud localization platforms with native AI assistants (**POEditor**,
-**Crowdin**, and **Localazy**) against `findfmt`'s self-hosted CLI pipeline
-(`tools/i18n.py translate`) and records our Architecture Decision Record (ADR).
+[Open-Source Python AI Translation Benchmark & Architecture](ai_translation_benchmark.md)), this document
+evaluates managed cloud localization platforms with native AI assistants (**POEditor**, **Crowdin**, and
+**Localazy**) against `findfmt`'s self-hosted CLI pipeline (`tools/i18n.py translate`) and records our
+Architecture Decision Record (ADR).
 
 ______________________________________________________________________
 
 ## 1. Platform Feature Evaluation
 
-The table below compares **POEditor**, **Crowdin**, **Localazy**, and **`tools/i18n.py translate`**
-across the technical requirements of `findfmt`'s GNU `gettext` catalog pipeline:
+The table below compares **POEditor**, **Crowdin**, **Localazy**, and **`tools/i18n.py translate`** across the
+technical requirements of `findfmt`'s GNU `gettext` catalog pipeline:
 
 | Capability / Requirement                            | POEditor                                                                                      | Crowdin                                                                                               | Localazy                                                                             | Local CLI (`tools/i18n.py translate`)                                                                 |
 | :-------------------------------------------------- | :-------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
@@ -26,23 +26,22 @@ across the technical requirements of `findfmt`'s GNU `gettext` catalog pipeline:
 
 ### 1.1. Key Technical Findings
 
-1. **Rich Markup & CLI Flag Invariants:** Managed platforms natively understand `%s` and `{name}`
-   placeholders when `#, python-format` or `#, python-brace-format` flags are present, but none
-   natively parse Rich console markup (`[bold]`, `[cyan]`, `[/]`) out of the box. In contrast,
-   `tools/i18n_validation.py` and `tools/i18n_prompts.py` enforce exact parity for `{brace}`
-   placeholders, `%s` tokens, Rich markup tags, and `--cli-flags` before any `msgstr` is written to
-   disk.
-2. **Header & Diff Hygiene:** Cloud platforms regenerate `.po` files on export using their own
-   serializers, which frequently alters header ordering, line wrapping, or `#:` source comment
-   formatting. `findfmt`'s pre-commit hooks (`i18n-validate` and `check-no-absolute-locale-paths`)
-   require deterministic `babel`/`polib` formatting with workspace-relative paths.
+1. **Rich Markup & CLI Flag Invariants:** Managed platforms natively understand `%s` and `{name}` placeholders
+   when `#, python-format` or `#, python-brace-format` flags are present, but none natively parse Rich console
+   markup (`[bold]`, `[cyan]`, `[/]`) out of the box. In contrast, `tools/i18n_validation.py` and
+   `tools/i18n_prompts.py` enforce exact parity for `{brace}` placeholders, `%s` tokens, Rich markup tags, and
+   `--cli-flags` before any `msgstr` is written to disk.
+2. **Header & Diff Hygiene:** Cloud platforms regenerate `.po` files on export using their own serializers,
+   which frequently alters header ordering, line wrapping, or `#:` source comment formatting. `findfmt`'s
+   pre-commit hooks (`i18n-validate` and `check-no-absolute-locale-paths`) require deterministic
+   `babel`/`polib` formatting with workspace-relative paths.
 
 ______________________________________________________________________
 
 ## 2. Cost, Privacy, and Open-Source Licensing Comparison
 
-All three commercial platforms offer free plans for qualifying open-source projects, subject to
-vendor approval and usage caps:
+All three commercial platforms offer free plans for qualifying open-source projects, subject to vendor
+approval and usage caps:
 
 | Dimension                         | POEditor Open Source Plan                                                     | Crowdin for Open Source                                                      | Localazy OSS Plan                                                      | Local CLI (`tools/i18n.py translate`)                                              |
 | :-------------------------------- | :---------------------------------------------------------------------------- | :--------------------------------------------------------------------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
@@ -56,29 +55,27 @@ ______________________________________________________________________
 
 ## 3. Contributor Auditing & Community Review Workflows
 
-As `findfmt` expands across 100+ locales, native-speaker community contributors need a clear path to
-audit, correct, and approve AI-generated translations:
+As `findfmt` expands across 100+ locales, native-speaker community contributors need a clear path to audit,
+correct, and approve AI-generated translations:
 
 ### 3.1. Managed Cloud Platform Workflow
 
-- **Strengths:** Non-technical translators can log into a web UI, filter by `fuzzy` or unapproved
-  strings, view side-by-side translation memory suggestions, vote on alternatives, and leave
-  per-string comments without installing Git or Python.
+- **Strengths:** Non-technical translators can log into a web UI, filter by `fuzzy` or unapproved strings,
+  view side-by-side translation memory suggestions, vote on alternatives, and leave per-string comments
+  without installing Git or Python.
 - **Drawbacks:**
-  - Introduces dual sources of truth (Git PRs vs. cloud platform state), creating merge conflicts
-    when developers run `uv run python tools/i18n.py extract` and update `.pot`/`.po` catalogs in
-    feature branches.
-  - Cloud exports can bypass local pre-commit checks until a sync PR fails in CI, requiring manual
-    maintainer intervention to fix broken Rich tags or CLI flags.
+  - Introduces dual sources of truth (Git PRs vs. cloud platform state), creating merge conflicts when
+    developers run `uv run python tools/i18n.py extract` and update `.pot`/`.po` catalogs in feature branches.
+  - Cloud exports can bypass local pre-commit checks until a sync PR fails in CI, requiring manual maintainer
+    intervention to fix broken Rich tags or CLI flags.
 
 ### 3.2. Local Git + CI Auditing Workflow (`findfmt` Standard)
 
 - **Strengths:**
-  - AI-generated translations produced by `tools/i18n.py translate` can be marked with the standard
-    GNU `gettext` `fuzzy` flag (`--mark-fuzzy`) or reviewed directly as clean `.po` diffs in GitHub
-    Pull Requests.
-  - Native speakers can edit `.po` files directly in the GitHub Web Editor (`github.dev`), Poedit
-    desktop, or any text editor and submit a standard Pull Request.
+  - AI-generated translations produced by `tools/i18n.py translate` can be marked with the standard GNU
+    `gettext` `fuzzy` flag (`--mark-fuzzy`) or reviewed directly as clean `.po` diffs in GitHub Pull Requests.
+  - Native speakers can edit `.po` files directly in the GitHub Web Editor (`github.dev`), Poedit desktop, or
+    any text editor and submit a standard Pull Request.
   - Every contribution is automatically audited in CI by `uv run python tools/i18n.py validate` and
     `msgfmt --check`, guaranteeing zero broken placeholders, Rich tags, or plural forms.
 
@@ -93,56 +90,53 @@ ______________________________________________________________________
 ### 4.1. Context
 
 `findfmt` maintains a concise, highly technical CLI catalog (~150 entries) containing Python brace
-placeholders (`{path}`, `{count}`), `printf` tokens (`%s`), Rich terminal markup (`[bold]`, `[/]`),
-and CLI flags (`--format`, `--hidden`), alongside multi-language Sphinx documentation catalogs under
+placeholders (`{path}`, `{count}`), `printf` tokens (`%s`), Rich terminal markup (`[bold]`, `[/]`), and CLI
+flags (`--format`, `--hidden`), alongside multi-language Sphinx documentation catalogs under
 `docs/source/locale/`. We must choose between two primary localization architectures:
 
-- **Option A (Local Open-Source CLI Automation + Git PRs):** Use `tools/i18n.py` (`extract`,
-  `translate`, `validate`, `compile`, `status`) backed by `polib`, `babel`, and deterministic LLM
-  batch translation (`tools/i18n_translate.py`), with all review and auditing conducted via GitHub
-  Pull Requests and CI gates.
-- **Option B (Managed Cloud Localization Platform with Bidirectional GitHub Sync):** Adopt a hosted
-  platform (Crowdin, POEditor, or Localazy) as the primary translation hub synchronized to GitHub
-  via webhooks or GitHub Actions.
+- **Option A (Local Open-Source CLI Automation + Git PRs):** Use `tools/i18n.py` (`extract`, `translate`,
+  `validate`, `compile`, `status`) backed by `polib`, `babel`, and deterministic LLM batch translation
+  (`tools/i18n_translate.py`), with all review and auditing conducted via GitHub Pull Requests and CI gates.
+- **Option B (Managed Cloud Localization Platform with Bidirectional GitHub Sync):** Adopt a hosted platform
+  (Crowdin, POEditor, or Localazy) as the primary translation hub synchronized to GitHub via webhooks or
+  GitHub Actions.
 
 ### 4.2. Decision
 
-We select **Option A: Fully local, open-source CLI automation via `tools/i18n.py translate` + Git
-Pull Requests** as `findfmt`'s authoritative localization architecture.
+We select **Option A: Fully local, open-source CLI automation via `tools/i18n.py translate` + Git Pull
+Requests** as `findfmt`'s authoritative localization architecture.
 
 ### 4.3. Rationale
 
-1. **Strict Structural Validation:** `tools/i18n_validation.py` enforces `findfmt`-specific
-   invariants (Rich `[bold]`/`[/]` markup parity, `{brace}` and `%s` placeholder sets, `ngettext`
-   plural array counts across `nplurals=1..6`, and relative `#:` location paths) both during LLM
-   generation and in pre-commit/CI.
-2. **Single Source of Truth & Zero Lock-In:** Keeping `.pot` templates, `.po` catalogs, domain
-   glossaries (`tools/i18n_prompts.py`), and validation logic inside the Git repository eliminates
-   bidirectional sync conflicts and external SaaS dependencies.
-3. **Negligible Cost & Offline Reproducibility:** Translating the entire 150-message CLI catalog
-   across 100 locales costs **~$0.35** via hosted APIs or **$0.00** using local `Ollama` models,
-   with deterministic `T = 0.0` temperature and automatic fuzzy fallback.
+1. **Strict Structural Validation:** `tools/i18n_validation.py` enforces `findfmt`-specific invariants (Rich
+   `[bold]`/`[/]` markup parity, `{brace}` and `%s` placeholder sets, `ngettext` plural array counts across
+   `nplurals=1..6`, and relative `#:` location paths) both during LLM generation and in pre-commit/CI.
+2. **Single Source of Truth & Zero Lock-In:** Keeping `.pot` templates, `.po` catalogs, domain glossaries
+   (`tools/i18n_prompts.py`), and validation logic inside the Git repository eliminates bidirectional sync
+   conflicts and external SaaS dependencies.
+3. **Negligible Cost & Offline Reproducibility:** Translating the entire 150-message CLI catalog across 100
+   locales costs **~$0.35** via hosted APIs or **$0.00** using local `Ollama` models, with deterministic
+   `T = 0.0` temperature and automatic fuzzy fallback.
 
 ### 4.4. Future Re-Evaluation Trigger (Optional Hybrid Overlay)
 
-If community translation contributions from non-developer native speakers exceed **10+ active
-external translators per release cycle** or if managing Sphinx documentation `.po` reviews via
-GitHub PRs becomes a bottleneck, `findfmt` may enable **Crowdin for Open Source** (the strongest
-managed candidate due to its full `nplurals=1..6` CLDR support and official GitHub Action) strictly
-as a **downstream PR generator**—where all exported commits must still pass
-`uv run python tools/i18n.py validate` and `pre-commit` in CI before merging.
+If community translation contributions from non-developer native speakers exceed **10+ active external
+translators per release cycle** or if managing Sphinx documentation `.po` reviews via GitHub PRs becomes a
+bottleneck, `findfmt` may enable **Crowdin for Open Source** (the strongest managed candidate due to its full
+`nplurals=1..6` CLDR support and official GitHub Action) strictly as a **downstream PR generator**—where all
+exported commits must still pass `uv run python tools/i18n.py validate` and `pre-commit` in CI before merging.
 
 ______________________________________________________________________
 
 ## 5. End-to-End AI Localization Runbook
 
-The steps below cover the complete workflow for localizing an existing or newly added language
-catalog under **Option A**.
+The steps below cover the complete workflow for localizing an existing or newly added language catalog under
+**Option A**.
 
 ### 5.1. Configuring AI Backends
 
-`tools/i18n_translate.py` uses Python's standard-library `urllib.request` with zero external SDK
-dependencies. Configure your preferred provider via environment variables:
+`tools/i18n_translate.py` uses Python's standard-library `urllib.request` with zero external SDK dependencies.
+Configure your preferred provider via environment variables:
 
 | Provider / Mode                         | Required Environment Variables                                                                                           | Example Invocation                                                                                                               |
 | :-------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
@@ -182,21 +176,20 @@ uv run python -m tools.i18n sync --backend openai
 
 ### 5.3. Runtime Locale Conventions & Test Registration
 
-When onboarding a new language `<locale>`, verify the following runtime fallbacks and test suites so
-localized formatting works even on minimal container or CI hosts without OS locale packs installed:
+When onboarding a new language `<locale>`, verify the following runtime fallbacks and test suites so localized
+formatting works even on minimal container or CI hosts without OS locale packs installed:
 
 1. **Completed-Locale Gate (`tools/i18n_sync.py`):**
    - Once `<locale>` is 100% translated, add it to `COMPLETE_LOCALES` in `tools/i18n_sync.py` so the
-     `i18n-catalog-check` pre-commit hook and `uv run python -m tools.i18n sync` enforce zero
-     untranslated or `fuzzy` entries whenever new source strings are added.
+     `i18n-catalog-check` pre-commit hook and `uv run python -m tools.i18n sync` enforce zero untranslated or
+     `fuzzy` entries whenever new source strings are added.
 2. **Territory & Numeric Grouping Fallbacks (`src/findfmt/i18n.py`):**
-   - Add `<locale>` to `_LANG_TO_TERRITORY` if its primary ISO territory code differs from
-     `<LOCALE>.upper()` (for example, `"ja": "JP"`, `"zh": "CN"`, `"hi": "IN"`).
-   - Add `<locale>`'s decimal separator, thousands separator, and digit grouping to
-     `_REGIONAL_DEFAULTS` in `src/findfmt/i18n.py` (or South Asian `[3, 2, 0]` grouping in
-     `_get_numeric_conventions()`).
+   - Add `<locale>` to `_LANG_TO_TERRITORY` if its primary ISO territory code differs from `<LOCALE>.upper()`
+     (for example, `"ja": "JP"`, `"zh": "CN"`, `"hi": "IN"`).
+   - Add `<locale>`'s decimal separator, thousands separator, and digit grouping to `_REGIONAL_DEFAULTS` in
+     `src/findfmt/i18n.py` (or South Asian `[3, 2, 0]` grouping in `_get_numeric_conventions()`).
 3. **Timestamp Format Fallback (`src/findfmt/utils/strings.py`):**
    - Add `<locale>`'s `strftime` fallback pattern to `fallback_formats` in `resolve_time_format()`.
 4. **Unit & Integration Tests (`tests/unit/test_i18n_localization.py`):**
-   - Include `<locale>` in `test_catalog_entries_placeholder_parity_and_runtime_formatting` and add
-     assertions for localized CLI `--help`, summary panels, and plural boundaries.
+   - Include `<locale>` in `test_catalog_entries_placeholder_parity_and_runtime_formatting` and add assertions
+     for localized CLI `--help`, summary panels, and plural boundaries.

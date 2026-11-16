@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import sys
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -36,6 +36,7 @@ class LinterConfig:
     include: tuple[str, ...]
     exclude: tuple[str, ...]
     overrides: dict[str, Threshold]
+    file_line_overrides: dict[str, Threshold] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -53,21 +54,27 @@ class Violation:
 
 _t = Threshold
 DEFAULT_LIMITS: dict[str, Threshold] = {
-    "python": _t(300, 500),
-    "markdown": _t(300, 600),
-    "yaml": _t(150, 300),
-    "json": _t(100, 250),
-    "shell": _t(100, 200),
-    "javascript": _t(300, 500),
-    "typescript": _t(300, 500),
-    "html": _t(250, 500),
-    "css": _t(300, 500),
-    "sql": _t(150, 300),
-    "config": _t(80, 150),
-    "dockerfile": _t(80, 150),
+    "python": _t(110, 150),
+    "markdown": _t(110, 500),
+    "yaml": _t(110, 150),
+    "json": _t(110, 250),
+    "shell": _t(110, 200),
+    "javascript": _t(110, 250),
+    "typescript": _t(110, 250),
+    "html": _t(110, 250),
+    "css": _t(110, 250),
+    "sql": _t(110, 250),
+    "config": _t(110, 150),
+    "dockerfile": _t(110, 150),
 }
 
-DEFAULT_FALLBACK_THRESHOLD = Threshold(warning=300, error=500)
+DEFAULT_FALLBACK_THRESHOLD = Threshold(warning=110, error=250)
+DEFAULT_FILE_LINE_LIMITS: dict[str, Threshold] = {
+    "python": _t(300, 500),
+    "markdown": _t(300, 600),
+    "yaml": _t(300, 500),
+}
+DEFAULT_FILE_LINE_FALLBACK = Threshold(warning=300, error=500)
 DEFAULT_INCLUDE: tuple[str, ...] = ("**/*",)
 DEFAULT_EXCLUDE: tuple[str, ...] = (
     "dist/**",
@@ -112,9 +119,21 @@ def determine_format(path: Path) -> str:
 
 
 def resolve_threshold(format_name: str, overrides: dict[str, Threshold]) -> Threshold:
-    """Resolve warning and error thresholds for a given format."""
+    """Resolve warning and error line length thresholds for a given format."""
     fallback = overrides.get("default", DEFAULT_FALLBACK_THRESHOLD)
     return overrides.get(format_name, DEFAULT_LIMITS.get(format_name, fallback))
+
+
+def resolve_file_line_threshold(
+    format_name: str,
+    file_line_overrides: dict[str, Threshold],
+) -> Threshold:
+    """Resolve warning and error total file line count thresholds for a given format."""
+    fallback = file_line_overrides.get("default", DEFAULT_FILE_LINE_FALLBACK)
+    return file_line_overrides.get(
+        format_name,
+        DEFAULT_FILE_LINE_LIMITS.get(format_name, fallback),
+    )
 
 
 def _parse_patterns(raw_val: object, default: tuple[str, ...]) -> tuple[str, ...]:
@@ -123,6 +142,19 @@ def _parse_patterns(raw_val: object, default: tuple[str, ...]) -> tuple[str, ...
         return tuple(str(p) for p in raw_val)
 
     return default
+
+
+def _parse_threshold_map(raw_overrides: object) -> dict[str, Threshold]:
+    """Parse a mapping of format names to Threshold instances from TOML config."""
+    overrides: dict[str, Threshold] = {}
+    if isinstance(raw_overrides, dict):
+        for fmt, limits in raw_overrides.items():
+            if isinstance(limits, dict):
+                w, e = limits.get("warning"), limits.get("error")
+                if isinstance(w, int) and isinstance(e, int):
+                    overrides[str(fmt).lower()] = Threshold(warning=w, error=e)
+
+    return overrides
 
 
 def load_config(config_path: Path | None = None) -> LinterConfig:
@@ -137,17 +169,15 @@ def load_config(config_path: Path | None = None) -> LinterConfig:
     tool_table = data.get("tool", {}).get("line-linter", {})
     include = _parse_patterns(tool_table.get("include"), DEFAULT_INCLUDE)
     exclude = _parse_patterns(tool_table.get("exclude"), DEFAULT_EXCLUDE)
+    overrides = _parse_threshold_map(tool_table.get("overrides", {}))
+    file_line_overrides = _parse_threshold_map(tool_table.get("file_line_overrides", {}))
 
-    raw_overrides = tool_table.get("overrides", {})
-    overrides: dict[str, Threshold] = {}
-    if isinstance(raw_overrides, dict):
-        for fmt, limits in raw_overrides.items():
-            if isinstance(limits, dict):
-                w, e = limits.get("warning"), limits.get("error")
-                if isinstance(w, int) and isinstance(e, int):
-                    overrides[fmt.lower()] = Threshold(warning=w, error=e)
-
-    return LinterConfig(include=include, exclude=exclude, overrides=overrides)
+    return LinterConfig(
+        include=include,
+        exclude=exclude,
+        overrides=overrides,
+        file_line_overrides=file_line_overrides,
+    )
 
 
 def check_file(path: Path, config: LinterConfig) -> list[Violation]:
@@ -157,6 +187,7 @@ def check_file(path: Path, config: LinterConfig) -> list[Violation]:
 
     format_name = determine_format(path)
     threshold = resolve_threshold(format_name, config.overrides)
+    file_threshold = resolve_file_line_threshold(format_name, config.file_line_overrides)
     violations: list[Violation] = []
 
     try:
@@ -179,14 +210,14 @@ def check_file(path: Path, config: LinterConfig) -> list[Violation]:
                         ),
                     )
 
-        if total_lines > threshold.error or total_lines > threshold.warning:
-            is_err = total_lines > threshold.error
+        if total_lines > file_threshold.error or total_lines > file_threshold.warning:
+            is_err = total_lines > file_threshold.error
             violations.append(
                 Violation(
                     file_path=path,
                     line_number=total_lines,
                     length=total_lines,
-                    threshold=threshold.error if is_err else threshold.warning,
+                    threshold=file_threshold.error if is_err else file_threshold.warning,
                     is_error=is_err,
                     format_name=format_name,
                     violation_type="file_line_count",
@@ -269,9 +300,7 @@ def _report_violations(all_violations: Sequence[Violation]) -> int:
 def run_linter(files: Sequence[Path] | None, config: LinterConfig, root: Path) -> int:
     """Execute line length enforcement and print notices to stderr."""
     explicit = files or ()
-    targets = (
-        _filter_explicit_files(explicit, config, root) if explicit else discover_files(root, config)
-    )
+    targets = _filter_explicit_files(explicit, config, root) if explicit else discover_files(root, config)
     all_violations: list[Violation] = []
     for target in targets:
         all_violations.extend(check_file(target, config))

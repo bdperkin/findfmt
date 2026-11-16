@@ -407,11 +407,7 @@ def main(argv: list[str] | None = None) -> int:
     """CLI entrypoint for gettext AI translator benchmarking."""
     args = build_parser().parse_args(argv)
     report = run_benchmark(pot_file=args.pot, locale_dir=args.localedir, batch_size=args.batch_size)
-    payload = (
-        json.dumps(asdict(report), indent=2) + "\n"
-        if args.json
-        else _format_markdown_summary(report)
-    )
+    payload = json.dumps(asdict(report), indent=2) + "\n" if args.json else _format_markdown_summary(report)
     if args.output is not None:
         args.output.parent.mkdir(parents=True, exist_ok=True)
         args.output.write_text(payload, encoding="utf-8")

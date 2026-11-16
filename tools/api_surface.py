@@ -74,11 +74,7 @@ def _qualified_name(cls: type) -> str:
     or ``WindowsPath`` depending on the platform, so both are canonicalized.
     """
     module = _public_module(cls.__module__)
-    name = (
-        _PATH_FLAVOURS.get(cls.__qualname__, cls.__qualname__)
-        if module == "pathlib"
-        else cls.__qualname__
-    )
+    name = _PATH_FLAVOURS.get(cls.__qualname__, cls.__qualname__) if module == "pathlib" else cls.__qualname__
     return name if module == "builtins" else f"{module}.{name}"
 
 

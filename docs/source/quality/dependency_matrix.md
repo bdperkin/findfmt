@@ -1,7 +1,7 @@
 # Dependency Resolution Matrix & Orchestration ADR
 
-This document records the Architecture Decision Record (ADR) and technical specification for
-multi-dimensional dependency resolution and Python interpreter matrix testing in `findfmt` (Issues
+This document records the Architecture Decision Record (ADR) and technical specification for multi-dimensional
+dependency resolution and Python interpreter matrix testing in `findfmt` (Issues
 [#426](https://github.com/bdperkin/findfmt/issues/426),
 [#425](https://github.com/bdperkin/findfmt/issues/425), and
 [#349](https://github.com/bdperkin/findfmt/issues/349)).
@@ -12,46 +12,44 @@ ______________________________________________________________________
 
 ### 1.1. Context & Problem Statement
 
-`findfmt` uses `hatchling` as its PEP 517 build backend in `pyproject.toml` and relies on `uv` for
-virtual environment creation, lock file synchronization (`uv.lock`), and test execution. Standard CI
-jobs execute `uv sync --locked --all-groups`, which validates only a single resolution point:
+`findfmt` uses `hatchling` as its PEP 517 build backend in `pyproject.toml` and relies on `uv` for virtual
+environment creation, lock file synchronization (`uv.lock`), and test execution. Standard CI jobs execute
+`uv sync --locked --all-groups`, which validates only a single resolution point:
 `--resolution highest --prerelease disallow --fork-strategy fewest`.
 
 Relying solely on the default lock file leaves three failure modes untested:
 
 1. **Lower-Bound Drift**: Direct dependency floors declared in `pyproject.toml` (`identify>=2.6`,
-   `pathspec>=1.0.1`, `pyyaml>=6.0.1`, `rich>=13.8`, `typer>=0.16`, `typing-extensions>=4.4`) can
-   silently bit-rot when new code relies on features added in later minor releases.
-2. **Upstream Pre-Release Breakages**: Upcoming alpha, beta, or release-candidate versions of direct
-   or transitive dependencies (`click`, `rich`, `typer`, `pathspec`, `pytest`) can introduce
-   breaking API changes before stable publication.
-3. **Multi-Interpreter & Fork-Strategy Divergence**: Marker evaluation across supported Python
-   interpreters (`3.11` through `3.15`) and `uv` resolver fork strategies can yield distinct package
-   selections on minimum versus maximum runtimes.
+   `pathspec>=1.0.1`, `pyyaml>=6.0.1`, `rich>=13.8`, `typer>=0.16`, `typing-extensions>=4.4`) can silently
+   bit-rot when new code relies on features added in later minor releases.
+2. **Upstream Pre-Release Breakages**: Upcoming alpha, beta, or release-candidate versions of direct or
+   transitive dependencies (`click`, `rich`, `typer`, `pathspec`, `pytest`) can introduce breaking API changes
+   before stable publication.
+3. **Multi-Interpreter & Fork-Strategy Divergence**: Marker evaluation across supported Python interpreters
+   (`3.11` through `3.15`) and `uv` resolver fork strategies can yield distinct package selections on minimum
+   versus maximum runtimes.
 
 ### 1.2. Architecture Decision Summary
 
-- **Status**: Accepted (Milestone `v1.1.2`, Issue
-  [#426](https://github.com/bdperkin/findfmt/issues/426)).
-- **CI Orchestrator**: Use native GitHub Actions `strategy.matrix` (`fail-fast: false`) for parallel
-  cloud execution:
-  - **PR Smoke Gate**: 2-cell `dependency-smoke-matrix` job in `.github/workflows/ci.yml`
-    (`lowest-direct` + `disallow` and `highest` + `allow`).
-  - **Scheduled Exhaustive Matrix**: 6-cell pruned matrix in
-    `.github/workflows/dependency-matrix.yml` triggered nightly via `schedule` and on-demand via
-    `workflow_dispatch` (Issue [#429](https://github.com/bdperkin/findfmt/issues/429)).
-- **Local Orchestrator**: Extend `tools/verify_quality.py` with native `uv` process orchestration
-  covering both the dependency resolution axis (Issue
-  [#427](https://github.com/bdperkin/findfmt/issues/427)) and the multi-Python interpreter axis
-  (Issue [#349](https://github.com/bdperkin/findfmt/issues/349)), adding zero external task-runner
-  dependencies or secondary configuration files.
+- **Status**: Accepted (Milestone `v1.1.2`, Issue [#426](https://github.com/bdperkin/findfmt/issues/426)).
+- **CI Orchestrator**: Use native GitHub Actions `strategy.matrix` (`fail-fast: false`) for parallel cloud
+  execution:
+  - **PR Smoke Gate**: 2-cell `dependency-smoke-matrix` job in `.github/workflows/ci.yml` (`lowest-direct` +
+    `disallow` and `highest` + `allow`).
+  - **Scheduled Exhaustive Matrix**: 6-cell pruned matrix in `.github/workflows/dependency-matrix.yml`
+    triggered nightly via `schedule` and on-demand via `workflow_dispatch` (Issue
+    [#429](https://github.com/bdperkin/findfmt/issues/429)).
+- **Local Orchestrator**: Extend `tools/verify_quality.py` with native `uv` process orchestration covering
+  both the dependency resolution axis (Issue [#427](https://github.com/bdperkin/findfmt/issues/427)) and the
+  multi-Python interpreter axis (Issue [#349](https://github.com/bdperkin/findfmt/issues/349)), adding zero
+  external task-runner dependencies or secondary configuration files.
 
 ______________________________________________________________________
 
 ## 2. Orchestration Tooling Assessment
 
-Five orchestration mechanisms were evaluated across both the dependency resolution axis
-(`--resolution`, `--prerelease`, `--fork-strategy`) and the Python interpreter axis (`3.11`–`3.15`):
+Five orchestration mechanisms were evaluated across both the dependency resolution axis (`--resolution`,
+`--prerelease`, `--fork-strategy`) and the Python interpreter axis (`3.11`–`3.15`):
 
 | Orchestrator Candidate                         | Configuration Surface                              | CI Integration & Parallelism                                                       | Local Ergonomics & Caching                                                                 | Dependency & Config Overhead                                       | Verdict              |
 | :--------------------------------------------- | :------------------------------------------------- | :--------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :----------------------------------------------------------------- | :------------------- |
@@ -64,16 +62,16 @@ Five orchestration mechanisms were evaluated across both the dependency resoluti
 
 ### 2.1. Rationale for Hybrid GitHub Actions + `tools/verify_quality.py`
 
-1. **Single Resolver & Zero Lock Drift**: `uv` is the sole environment manager and package resolver.
-   Driving ephemeral virtual environments (`uv venv` + `uv pip install`) directly from
-   `tools/verify_quality.py` locally and `strategy.matrix` in GitHub Actions guarantees identical
-   resolver semantics without translating flags through `tox` or `hatch` wrapper layers.
-2. **Single Source of Truth for Python Versions**: `tools/verify_quality.py` reads the supported
-   interpreter list (`3.11`, `3.12`, `3.13`, `3.14`, `3.15`) directly from the
-   `Programming Language :: Python :: 3.X` Trove classifiers in `pyproject.toml`, preventing drift
-   between `pyproject.toml`, `.github/workflows/ci.yml`, and local runner definitions.
-3. **Minimal Dependency Surface**: Keeping orchestration inside `tools/verify_quality.py` avoids
-   adding `nox`, `tox`, `tox-uv`, or the full `hatch` CLI to `[dependency-groups].dev`.
+1. **Single Resolver & Zero Lock Drift**: `uv` is the sole environment manager and package resolver. Driving
+   ephemeral virtual environments (`uv venv` + `uv pip install`) directly from `tools/verify_quality.py`
+   locally and `strategy.matrix` in GitHub Actions guarantees identical resolver semantics without translating
+   flags through `tox` or `hatch` wrapper layers.
+2. **Single Source of Truth for Python Versions**: `tools/verify_quality.py` reads the supported interpreter
+   list (`3.11`, `3.12`, `3.13`, `3.14`, `3.15`) directly from the `Programming Language :: Python :: 3.X`
+   Trove classifiers in `pyproject.toml`, preventing drift between `pyproject.toml`,
+   `.github/workflows/ci.yml`, and local runner definitions.
+3. **Minimal Dependency Surface**: Keeping orchestration inside `tools/verify_quality.py` avoids adding `nox`,
+   `tox`, `tox-uv`, or the full `hatch` CLI to `[dependency-groups].dev`.
 
 ______________________________________________________________________
 
@@ -84,52 +82,51 @@ ______________________________________________________________________
 `uv` exposes three primary resolution control dimensions:
 
 - **`--resolution`** (3 values): `highest`, `lowest`, `lowest-direct`
-- **`--prerelease`** (5 values): `disallow`, `allow`, `if-necessary`, `explicit`,
-  `if-necessary-or-explicit`
+- **`--prerelease`** (5 values): `disallow`, `allow`, `if-necessary`, `explicit`, `if-necessary-or-explicit`
 - **`--fork-strategy`** (2 values): `fewest`, `requires-python`
 
-The full Cartesian product yields $3 \\times 5 \\times 2 = 30$ permutations per Python interpreter
-(150 combinations across all 5 supported Python versions).
+The full Cartesian product yields $3 \\times 5 \\times 2 = 30$ permutations per Python interpreter (150
+combinations across all 5 supported Python versions).
 
 ### 3.2. Pruning `--prerelease` Permutations
 
-Inspecting `[project].dependencies` and `[dependency-groups].test` in `pyproject.toml` shows that
-every dependency specifier uses a stable lower bound (`>=X.Y` or `>=X.Y.Z`) with zero explicit
-pre-release specifiers (such as `>=1.0a1` or `>=2.0.0rc1`):
+Inspecting `[project].dependencies` and `[dependency-groups].test` in `pyproject.toml` shows that every
+dependency specifier uses a stable lower bound (`>=X.Y` or `>=X.Y.Z`) with zero explicit pre-release
+specifiers (such as `>=1.0a1` or `>=2.0.0rc1`):
 
-1. **Eliminate `explicit` and `if-necessary-or-explicit` (-12 combinations)**: Because no specifier
-   in `pyproject.toml` opts into an explicit pre-release tag, `--prerelease explicit` is
-   mathematically identical to `--prerelease disallow`, and `--prerelease if-necessary-or-explicit`
-   is identical to `--prerelease if-necessary` across all resolutions and fork strategies.
-2. **Eliminate `if-necessary` under `highest` and `lowest-direct` (-4 combinations)**: Every direct
-   and transitive dependency of `findfmt` has published stable wheels satisfying `>=3.11`. Under
-   `highest` and `lowest-direct`, the solver never lacks a stable candidate, so `if-necessary`
-   produces the exact same resolution graph as `disallow`.
-3. **Retain `(lowest, if-necessary, fewest)` and eliminate `(lowest, disallow, *)` /
-   `(lowest, allow, *)` (-5 combinations)**: Full transitive `--resolution lowest` attempts to pick
-   the oldest historical release of every transitive package (`click`, `pygments`, `markdown-it-py`,
-   `mdurl`, `packaging`). Using `if-necessary` allows the solver to fall back only when an ancient
-   transitive sdist lacks metadata, whereas `lowest` + `allow` selects broken historical alpha tags
-   from transitive dependencies that are unrelated to `findfmt`'s own version bounds.
+1. **Eliminate `explicit` and `if-necessary-or-explicit` (-12 combinations)**: Because no specifier in
+   `pyproject.toml` opts into an explicit pre-release tag, `--prerelease explicit` is mathematically identical
+   to `--prerelease disallow`, and `--prerelease if-necessary-or-explicit` is identical to
+   `--prerelease if-necessary` across all resolutions and fork strategies.
+2. **Eliminate `if-necessary` under `highest` and `lowest-direct` (-4 combinations)**: Every direct and
+   transitive dependency of `findfmt` has published stable wheels satisfying `>=3.11`. Under `highest` and
+   `lowest-direct`, the solver never lacks a stable candidate, so `if-necessary` produces the exact same
+   resolution graph as `disallow`.
+3. **Retain `(lowest, if-necessary, fewest)` and eliminate `(lowest, disallow, *)` / `(lowest, allow, *)` (-5
+   combinations)**: Full transitive `--resolution lowest` attempts to pick the oldest historical release of
+   every transitive package (`click`, `pygments`, `markdown-it-py`, `mdurl`, `packaging`). Using
+   `if-necessary` allows the solver to fall back only when an ancient transitive sdist lacks metadata, whereas
+   `lowest` + `allow` selects broken historical alpha tags from transitive dependencies that are unrelated to
+   `findfmt`'s own version bounds.
 
 ### 3.3. Pruning `--fork-strategy` Permutations
 
-`uv`'s `--fork-strategy` flag (`fewest` versus `requires-python`) controls how the universal
-resolver splits resolution forks across disjoint Python version ranges:
+`uv`'s `--fork-strategy` flag (`fewest` versus `requires-python`) controls how the universal resolver splits
+resolution forks across disjoint Python version ranges:
 
-- When resolving into a single target interpreter environment (`uv pip install --python <env>`),
-  environment markers (`python_version < '3.12'` for `typing-extensions>=4.4`) evaluate to a fixed
-  boolean for that interpreter.
-- Consequently, varying `--fork-strategy` across all `lowest-direct` and `allow` permutations
-  produces identical per-interpreter package sets (-8 combinations).
+- When resolving into a single target interpreter environment (`uv pip install --python <env>`), environment
+  markers (`python_version < '3.12'` for `typing-extensions>=4.4`) evaluate to a fixed boolean for that
+  interpreter.
+- Consequently, varying `--fork-strategy` across all `lowest-direct` and `allow` permutations produces
+  identical per-interpreter package sets (-8 combinations).
 - Retaining a single `(highest, disallow, requires-python)` cell verifies that
-  `--fork-strategy requires-python` succeeds cleanly against `findfmt`'s
-  `requires-python = ">=3.11"` metadata.
+  `--fork-strategy requires-python` succeeds cleanly against `findfmt`'s `requires-python = ">=3.11"`
+  metadata.
 
 ### 3.4. Formal Pruned Matrix Specification
 
-Pruning reduces the 30 raw combinations by **80%** to **6 canonical non-redundant cells** for the
-exhaustive matrix and **2 cells** for the fast PR smoke gate:
+Pruning reduces the 30 raw combinations by **80%** to **6 canonical non-redundant cells** for the exhaustive
+matrix and **2 cells** for the fast PR smoke gate:
 
 | Cell ID | `--resolution`  | `--prerelease` | `--fork-strategy` | Execution Tier          | Primary Verification Target                                                                     |
 | :-----: | :-------------- | :------------- | :---------------- | :---------------------- | :---------------------------------------------------------------------------------------------- |
@@ -144,47 +141,44 @@ ______________________________________________________________________
 
 ## 4. Failure Diagnostic Architecture
 
-When any resolution or `pytest` step fails in CI or local matrix execution, the runner executes a
-three-stage diagnostic pipeline:
+When any resolution or `pytest` step fails in CI or local matrix execution, the runner executes a three-stage
+diagnostic pipeline:
 
 ### 4.1. Stage 1 — Ephemeral Dependency Tree Capture
 
-Immediately upon resolution or test failure (`if: failure()` in GitHub Actions or non-zero exit code
-in `tools/verify_quality.py`), the runner captures the resolved dependency graph from the isolated
-environment:
+Immediately upon resolution or test failure (`if: failure()` in GitHub Actions or non-zero exit code in
+`tools/verify_quality.py`), the runner captures the resolved dependency graph from the isolated environment:
 
 ```bash
 uv pip tree --python <env_path>
 ```
 
-In GitHub Actions, this output is appended as a fenced Markdown block to `$GITHUB_STEP_SUMMARY`
-under the failing cell heading
-(`### Dependency Tree (<resolution> / <prerelease> / <fork-strategy>)`).
+In GitHub Actions, this output is appended as a fenced Markdown block to `$GITHUB_STEP_SUMMARY` under the
+failing cell heading (`### Dependency Tree (<resolution> / <prerelease> / <fork-strategy>)`).
 
 ### 4.2. Stage 2 — Baseline Lock File Version Diffing
 
-To isolate which package version triggered the regression, the runner compares the failing
-environment's installed package list (`uv pip list --format json --python <env_path>`) against the
-pinned versions in `uv.lock`, reporting a concise delta table of downgraded or pre-release packages.
+To isolate which package version triggered the regression, the runner compares the failing environment's
+installed package list (`uv pip list --format json --python <env_path>`) against the pinned versions in
+`uv.lock`, reporting a concise delta table of downgraded or pre-release packages.
 
 ### 4.3. Stage 3 — Offending Bound Pinpointing & Remediation
 
 The diagnostic reporter cross-references installed direct package versions against the specifiers in
 `pyproject.toml` (`[project].dependencies` and `[dependency-groups].test`):
 
-- If a failure occurs under `lowest-direct` (`M1` or `M4`), the report identifies the direct
-  dependencies pinned at their floor versions and outputs the exact `pyproject.toml` lower bound
-  that requires bumping.
-- If a failure occurs under `prerelease=allow` (`M2` or `M4`), the report highlights every installed
-  package whose version matches a pre-release segment (`a`, `b`, `rc`, `dev`) so maintainers can
-  file upstream reports or add temporary upper-bound exclusions.
+- If a failure occurs under `lowest-direct` (`M1` or `M4`), the report identifies the direct dependencies
+  pinned at their floor versions and outputs the exact `pyproject.toml` lower bound that requires bumping.
+- If a failure occurs under `prerelease=allow` (`M2` or `M4`), the report highlights every installed package
+  whose version matches a pre-release segment (`a`, `b`, `rc`, `dev`) so maintainers can file upstream reports
+  or add temporary upper-bound exclusions.
 
 ______________________________________________________________________
 
 ## 5. Local Execution & Bound Troubleshooting Playbook
 
-Contributors can run the dependency resolution matrix locally using `tools/verify_quality.py` (also
-documented in `CONTRIBUTING.md` under *Dependency Resolution Testing*):
+Contributors can run the dependency resolution matrix locally using `tools/verify_quality.py` (also documented
+in `CONTRIBUTING.md` under *Dependency Resolution Testing*):
 
 ```bash
 # Execute the 2-cell PR smoke matrix (M1 and M2)
@@ -203,17 +197,17 @@ uv run python tools/verify_quality.py \
 
 ### 5.1. Troubleshooting Lower-Bound & Pre-Release Failures
 
-1. **Read the Three-Stage Diagnostic Report**: When `uv pip install` or `pytest` exits non-zero,
-   check **Stage 1** (`uv pip tree`), **Stage 2** (installed version deltas compared to `uv.lock`),
-   and **Stage 3** (actionable `pyproject.toml` remediation lines).
+1. **Read the Three-Stage Diagnostic Report**: When `uv pip install` or `pytest` exits non-zero, check **Stage
+   1** (`uv pip tree`), **Stage 2** (installed version deltas compared to `uv.lock`), and **Stage 3**
+   (actionable `pyproject.toml` remediation lines).
 2. **Bisect Minimum Floor Regressions (`M1`, `M4`, `M5`)**:
-   - Create a temporary environment (`uv venv --python 3.11 /tmp/dep-bisect`) and install the
-     failing combination.
-   - Upgrade the implicated package (`uv pip install --python /tmp/dep-bisect "<pkg>==<version>"`)
-     until `/tmp/dep-bisect/bin/pytest` passes with 100% coverage.
-   - Raise the floor specifier in `pyproject.toml` (`[project].dependencies` or
-     `[dependency-groups].test`) and refresh `uv.lock` via `uv lock`.
+   - Create a temporary environment (`uv venv --python 3.11 /tmp/dep-bisect`) and install the failing
+     combination.
+   - Upgrade the implicated package (`uv pip install --python /tmp/dep-bisect "<pkg>==<version>"`) until
+     `/tmp/dep-bisect/bin/pytest` passes with 100% coverage.
+   - Raise the floor specifier in `pyproject.toml` (`[project].dependencies` or `[dependency-groups].test`)
+     and refresh `uv.lock` via `uv lock`.
 3. **Triage Upstream Pre-Release Regressions (`M2`, `M4`)**:
    - Inspect the pre-release package flagged in **Stage 3**.
-   - Update internal call sites if an upstream API deprecation was finalized, or add a documented
-     temporary upper bound in `pyproject.toml` while reporting the issue upstream.
+   - Update internal call sites if an upstream API deprecation was finalized, or add a documented temporary
+     upper bound in `pyproject.toml` while reporting the issue upstream.

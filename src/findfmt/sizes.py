@@ -173,9 +173,7 @@ def _resolve_size_node(
 ) -> tuple[Path, bool]:
     """Resolve node path and determine whether it is a directory."""
     if pre_resolved is not None:
-        resolved = (
-            curr_path.resolve() if follow_symlinks and curr_path.is_symlink() else pre_resolved
-        )
+        resolved = curr_path.resolve() if follow_symlinks and curr_path.is_symlink() else pre_resolved
         return resolved, True
 
     return curr_path.resolve(), curr_path.is_dir()
@@ -235,8 +233,6 @@ def calculate_accumulated_sizes(
             include_hidden=include_hidden,
         )
         work_stack.append((curr_path, None, True, curr_files_size, curr_subdirs))
-        work_stack.extend(
-            (subdir, resolved / subdir.name, False, 0, []) for subdir in reversed(curr_subdirs)
-        )
+        work_stack.extend((subdir, resolved / subdir.name, False, 0, []) for subdir in reversed(curr_subdirs))
 
     return sizes

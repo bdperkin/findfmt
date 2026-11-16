@@ -407,9 +407,7 @@ def _resolve_existing_root(
 
     if exists:
         return (
-            root.parent.resolve() / root.name
-            if is_symlink and not resolved_root.is_dir()
-            else resolved_root
+            root.parent.resolve() / root.name if is_symlink and not resolved_root.is_dir() else resolved_root
         )
 
     if not is_symlink:

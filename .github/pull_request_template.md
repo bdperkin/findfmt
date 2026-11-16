@@ -16,8 +16,7 @@ Closes #
 
 ## 3. Quality Checklist
 
-- [ ] All pre-commit hooks pass locally
-  (`uv run pre-commit run --all-files --show-diff-on-failure`).
+- [ ] All pre-commit hooks pass locally (`uv run pre-commit run --all-files --show-diff-on-failure`).
 - [ ] The full quality verification suite passes with 100% test coverage
   (`uv run python tools/verify_quality.py`).
 - [ ] Sphinx documentation builds cleanly without warnings

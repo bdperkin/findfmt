@@ -1,8 +1,8 @@
 # Installation
 
-`findfmt` supports multiple installation methods across Linux, macOS, Windows, and containerized
-environments. It requires Python 3.11 or newer and is tested on Python 3.11 through 3.15. On Python
-3.10, pin the 1.0 series with `findfmt<1.1`; see [Upgrading to findfmt 1.1](upgrading.md).
+`findfmt` supports multiple installation methods across Linux, macOS, Windows, and containerized environments.
+It requires Python 3.11 or newer and is tested on Python 3.11 through 3.15. On Python 3.10, pin the 1.0 series
+with `findfmt<1.1`; see [Upgrading to findfmt 1.1](upgrading.md).
 
 ## 1. Installation Methods
 
@@ -58,8 +58,8 @@ Pre-built minimal container images are published to the GitHub Container Registr
 docker pull ghcr.io/bdperkin/findfmt:latest
 ```
 
-Each image installs the same wheel as the PyPI release, reports that version, and carries a signed
-build provenance attestation (from 1.1.0). To verify an image before using it:
+Each image installs the same wheel as the PyPI release, reports that version, and carries a signed build
+provenance attestation (from 1.1.0). To verify an image before using it:
 
 ```bash
 gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.1.0 --owner bdperkin
@@ -90,30 +90,29 @@ uv run findfmt --help
 `findfmt` is compatible with all modern Linux distributions across `x86_64`, `aarch64`, and `armv7l`
 architectures:
 
-- **Library Compatibility**: Works seamlessly on both `glibc`-based distributions (Ubuntu, Debian,
-  Fedora, openSUSE, Arch) and `musl`-based distributions (Alpine Linux).
+- **Library Compatibility**: Works seamlessly on both `glibc`-based distributions (Ubuntu, Debian, Fedora,
+  openSUSE, Arch) and `musl`-based distributions (Alpine Linux).
 
-- **User Binary PATH**: When installing via `uv tool install` or `pipx`, ensure `~/.local/bin` is
-  present in your shell `PATH`:
+- **User Binary PATH**: When installing via `uv tool install` or `pipx`, ensure `~/.local/bin` is present in
+  your shell `PATH`:
 
   ```bash
   export PATH="$HOME/.local/bin:$PATH"
   ```
 
-- **Paging Support**: Terminal paging automatically leverages your system `PAGER` or `LESS`
-  environment settings when output exceeds the terminal window height.
+- **Paging Support**: Terminal paging automatically leverages your system `PAGER` or `LESS` environment
+  settings when output exceeds the terminal window height.
 
 ### 2.2. macOS
 
-`findfmt` supports macOS 12 (Monterey) and later across both Apple Silicon (`arm64`) and Intel
-(`x86_64`) hardware:
+`findfmt` supports macOS 12 (Monterey) and later across both Apple Silicon (`arm64`) and Intel (`x86_64`)
+hardware:
 
-- **Terminal Emulators**: Native macOS Terminal.app and third-party emulators such as iTerm2 support
-  ANSI color styling and clickable OSC 8 terminal hyperlinks (`--hyperlink`).
+- **Terminal Emulators**: Native macOS Terminal.app and third-party emulators such as iTerm2 support ANSI
+  color styling and clickable OSC 8 terminal hyperlinks (`--hyperlink`).
 
-- **File System Case-Sensitivity**: macOS defaults to APFS case-preserving but case-insensitive
-  semantics. Pattern searches (`-P`, `-I`) evaluate patterns strictly unless `--ignore-case` is
-  specified.
+- **File System Case-Sensitivity**: macOS defaults to APFS case-preserving but case-insensitive semantics.
+  Pattern searches (`-P`, `-I`) evaluate patterns strictly unless `--ignore-case` is specified.
 
 - **Homebrew Python**: Ensure that `uv` or `pipx` references your preferred Python installation:
 
@@ -126,29 +125,27 @@ architectures:
 
 `findfmt` executes natively on Windows 10/11 and within Windows Subsystem for Linux (WSL/WSL2):
 
-- **Native Windows Execution**: Run `findfmt` within PowerShell, Command Prompt, or Windows
-  Terminal:
+- **Native Windows Execution**: Run `findfmt` within PowerShell, Command Prompt, or Windows Terminal:
 
   ```powershell
   uv tool install findfmt
   findfmt -t python
   ```
 
-- **Path Separators**: Both forward slashes (`/`) and backslashes (`\`) are recognized in path
-  arguments. Output listings adhere to POSIX style for cross-platform script consistency.
+- **Path Separators**: Both forward slashes (`/`) and backslashes (`\`) are recognized in path arguments.
+  Output listings adhere to POSIX style for cross-platform script consistency.
 
-- **Symbolic Link Permissions**: Following directory symlinks (`-l` or `--follow-links`) on native
-  Windows requires either Windows Developer Mode enabled or an elevated Administrator prompt due to
-  underlying Windows security policies.
+- **Symbolic Link Permissions**: Following directory symlinks (`-l` or `--follow-links`) on native Windows
+  requires either Windows Developer Mode enabled or an elevated Administrator prompt due to underlying Windows
+  security policies.
 
-- **Windows Subsystem for Linux (WSL2)**: For workflows tightly coupled with Unix pipes and shell
-  scripts, running `findfmt` inside WSL2 provides native Linux filesystem performance and POSIX
-  semantics.
+- **Windows Subsystem for Linux (WSL2)**: For workflows tightly coupled with Unix pipes and shell scripts,
+  running `findfmt` inside WSL2 provides native Linux filesystem performance and POSIX semantics.
 
 ### 2.4. Docker & Container Environments
 
-When executing `findfmt` within containerized pipelines, mount your project directory into the
-container workspace:
+When executing `findfmt` within containerized pipelines, mount your project directory into the container
+workspace:
 
 ```bash
 # Docker invocation
@@ -164,8 +161,8 @@ podman run --rm \
   ghcr.io/bdperkin/findfmt:latest -t shell -0
 ```
 
-> [!TIP] Mount project source directories with the read-only flag (`:ro` or `:ro,Z` for container
-> volume labels) to guarantee that discovery operations cannot mutate repository files.
+> [!TIP] Mount project source directories with the read-only flag (`:ro` or `:ro,Z` for container volume
+> labels) to guarantee that discovery operations cannot mutate repository files.
 
 ## 3. Verification & Diagnostics
 

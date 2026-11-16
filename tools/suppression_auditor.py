@@ -95,9 +95,7 @@ def _parse_allowed_entries(raw_allowed: object) -> tuple[AllowedSuppression, ...
             continue
 
         raw_line, raw_code, raw_reason = item.get("line"), item.get("code"), item.get("reason")
-        line_int = (
-            raw_line if isinstance(raw_line, int) and not isinstance(raw_line, bool) else None
-        )
+        line_int = raw_line if isinstance(raw_line, int) and not isinstance(raw_line, bool) else None
         code_str = str(raw_code) if isinstance(raw_code, str) and raw_code else None
         reason_str = str(raw_reason).strip() if isinstance(raw_reason, str) else ""
         entries.append(AllowedSuppression(file_val, line_int, code_str, reason_str))
@@ -241,8 +239,7 @@ def discover_files(
     return [
         p
         for p in candidates
-        if not ignore_spec.match_file(_rel_posix(p, root))
-        and not ignore_spec.match_file(p.as_posix())
+        if not ignore_spec.match_file(_rel_posix(p, root)) and not ignore_spec.match_file(p.as_posix())
     ]
 
 
@@ -279,8 +276,7 @@ def audit(
         raise typer.Exit(code=1)
 
     console.print(
-        f"[bold green]Successfully audited {total_checked} suppression(s). "
-        "All checks passed![/bold green]",
+        f"[bold green]Successfully audited {total_checked} suppression(s). All checks passed![/bold green]",
     )
     raise typer.Exit(code=0)
 

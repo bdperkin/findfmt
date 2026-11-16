@@ -1,7 +1,7 @@
 # Gettext AI Translation Benchmark and Tool Evaluation
 
-This guide documents the comparative benchmark, domain prompt engineering, technical glossary, and
-`ngettext` pluralization rules for GNU gettext (`.po`) AI translation in `findfmt` (Issues
+This guide documents the comparative benchmark, domain prompt engineering, technical glossary, and `ngettext`
+pluralization rules for GNU gettext (`.po`) AI translation in `findfmt` (Issues
 [#303](https://github.com/bdperkin/findfmt/issues/303) and
 [#305](https://github.com/bdperkin/findfmt/issues/305)).
 
@@ -14,28 +14,25 @@ ______________________________________________________________________
 
 ## 1. Executive Summary and Primary Recommendation
 
-As `findfmt` scales localization from the Tier 0 baseline locales (`en`, `de`, `es`, `fr`, `ja`) to
-52 tracked global locales under Epic [#308](https://github.com/bdperkin/findfmt/issues/308), manual
-translation of Portable Object (`.po`) catalogs becomes a maintenance bottleneck.
+As `findfmt` scales localization from the Tier 0 baseline locales (`en`, `de`, `es`, `fr`, `ja`) to 52 tracked
+global locales under Epic [#308](https://github.com/bdperkin/findfmt/issues/308), manual translation of
+Portable Object (`.po`) catalogs becomes a maintenance bottleneck.
 
 ### 1.1. Primary Recommendation
 
-Adopt the **native `findfmt` masked-LLM translation pipeline (`findfmt-masked-llm`)** inside
-`tools/i18n.py` (backed by `tools/i18n_validation.py`), combining the best architectural patterns
-from `gettext-translator` (deduplicated batching, missing-string filtering, and model attribution
-comments) with `findfmt`'s existing invariant placeholder masking (`__PH_N__`) and relative location
-sanitization (`_sanitize_po_locations()`):
+Adopt the **native `findfmt` masked-LLM translation pipeline (`findfmt-masked-llm`)** inside `tools/i18n.py`
+(backed by `tools/i18n_validation.py`), combining the best architectural patterns from `gettext-translator`
+(deduplicated batching, missing-string filtering, and model attribution comments) with `findfmt`'s existing
+invariant placeholder masking (`__PH_N__`) and relative location sanitization (`_sanitize_po_locations()`):
 
-1. **Primary Tool Architecture**: Native `tools/i18n.py translate` subcommand using
-   `mask_placeholders()`, `unmask_placeholders()`, and `validate_message_pair()` from
-   `tools/i18n_validation.py` with zero mandatory runtime dependencies in `pyproject.toml`.
-2. **Primary Cloud LLM Backend**: `OpenAI GPT-4o-mini` (or `Anthropic Claude 3.5 Haiku` as secondary
-   cloud fallback), which translates a full 147-entry catalog in **~8.4 seconds** for **$0.00487 per
-   locale** (**$0.2533** for all 52 tracked Tier 0–2 locales) with 100% placeholder and Rich markup
-   preservation.
+1. **Primary Tool Architecture**: Native `tools/i18n.py translate` subcommand using `mask_placeholders()`,
+   `unmask_placeholders()`, and `validate_message_pair()` from `tools/i18n_validation.py` with zero mandatory
+   runtime dependencies in `pyproject.toml`.
+2. **Primary Cloud LLM Backend**: `OpenAI GPT-4o-mini` (or `Anthropic Claude 3.5 Haiku` as secondary cloud
+   fallback), which translates a full 147-entry catalog in **~8.4 seconds** for **$0.00487 per locale**
+   (**$0.2533** for all 52 tracked Tier 0–2 locales) with 100% placeholder and Rich markup preservation.
 3. **Primary Local Offline Backend**: `Ollama` / `vLLM` serving `Qwen2.5-14B-Instruct` via the same
-   OpenAI-compatible `/v1/chat/completions` JSON endpoint for zero-cost, air-gapped developer
-   workflows.
+   OpenAI-compatible `/v1/chat/completions` JSON endpoint for zero-cost, air-gapped developer workflows.
 
 ______________________________________________________________________
 
@@ -44,20 +41,18 @@ ______________________________________________________________________
 Four open-source Python gettext translation approaches were benchmarked against `findfmt`'s catalog
 requirements:
 
-- **`findfmt-masked-llm` (`tools/i18n.py` + `tools/i18n_validation.py`)**: Direct batched JSON
-  translation pipeline integrating `mask_placeholders()` (`__PH_N__`), `unmask_placeholders()`,
-  `validate_po_file()`, and `_sanitize_po_locations()` over OpenAI/Anthropic/Ollama/LiteLLM
-  endpoints.
-- **[`gettext-translator`](https://github.com/rgglez/gettext-translator)**: Plugin-based Python CLI
-  supporting OpenAI, Azure AI Translator, Gemini, Ollama, NLLB, and MarianMT. Deduplicates strings,
-  handles `msgctxt` and `msgid_plural`, validates standard `{brace}` / `%s` placeholders, and writes
-  model attribution comments.
-- **[`pytlai`](https://github.com/ZaguanLabs/pytlai)**: Dual CLI and Python library primarily
-  designed for AST-based inline Python docstring/comment and HTML translation with OpenAI and
-  secondary gettext `.po` export.
-- **[`auto-gettext-translator`](https://github.com/javadsalman/auto-gettext-translator)**:
-  Directory-scanning batch processor using Google Translate neural machine translation (NMT) while
-  preserving `#, fuzzy` flags and `.po` headers.
+- **`findfmt-masked-llm` (`tools/i18n.py` + `tools/i18n_validation.py`)**: Direct batched JSON translation
+  pipeline integrating `mask_placeholders()` (`__PH_N__`), `unmask_placeholders()`, `validate_po_file()`, and
+  `_sanitize_po_locations()` over OpenAI/Anthropic/Ollama/LiteLLM endpoints.
+- **[`gettext-translator`](https://github.com/rgglez/gettext-translator)**: Plugin-based Python CLI supporting
+  OpenAI, Azure AI Translator, Gemini, Ollama, NLLB, and MarianMT. Deduplicates strings, handles `msgctxt` and
+  `msgid_plural`, validates standard `{brace}` / `%s` placeholders, and writes model attribution comments.
+- **[`pytlai`](https://github.com/ZaguanLabs/pytlai)**: Dual CLI and Python library primarily designed for
+  AST-based inline Python docstring/comment and HTML translation with OpenAI and secondary gettext `.po`
+  export.
+- **[`auto-gettext-translator`](https://github.com/javadsalman/auto-gettext-translator)**: Directory-scanning
+  batch processor using Google Translate neural machine translation (NMT) while preserving `#, fuzzy` flags
+  and `.po` headers.
 
 ### 2.1. Architectural Evaluation Matrix
 
@@ -77,27 +72,24 @@ requirements:
 
 ### 2.2. Key Findings per Candidate Tool
 
-1. **`gettext-translator` (`82.5 / 100`)**: The strongest third-party standalone CLI. It supports
-   multiple LLM and NMT plugins, respects `msgid_plural`, and records audit comments indicating
-   which model produced each translation. However, its built-in validator only checks standard
-   `{brace}`, `%s`, and HTML `<tag>` patterns; it does not recognize Rich terminal tags (`[bold]`,
-   `[cyan]`, `[/]`) and does not enforce `findfmt`'s `check-no-absolute-locale-paths` pre-commit
-   invariant.
-2. **`pytlai` (`61.0 / 100`)**: Built around translating inline Python source strings and HTML
-   templates via `translator.process()` before exporting `.po` files. It lacks native gettext
-   `ngettext` multi-plural (`msgstr[0]` .. `msgstr[5]`) synthesis and fuzzy-flag lifecycle
-   management.
-3. **`auto-gettext-translator` (`52.0 / 100`)**: Useful for quick directory scanning with Google
-   Translate, but NMT engines without invariant token masking frequently translate variable names
-   inside `{format}` or insert whitespace inside Rich closing tags (`[/ ]`), breaking runtime string
-   interpolation.
+1. **`gettext-translator` (`82.5 / 100`)**: The strongest third-party standalone CLI. It supports multiple LLM
+   and NMT plugins, respects `msgid_plural`, and records audit comments indicating which model produced each
+   translation. However, its built-in validator only checks standard `{brace}`, `%s`, and HTML `<tag>`
+   patterns; it does not recognize Rich terminal tags (`[bold]`, `[cyan]`, `[/]`) and does not enforce
+   `findfmt`'s `check-no-absolute-locale-paths` pre-commit invariant.
+2. **`pytlai` (`61.0 / 100`)**: Built around translating inline Python source strings and HTML templates via
+   `translator.process()` before exporting `.po` files. It lacks native gettext `ngettext` multi-plural
+   (`msgstr[0]` .. `msgstr[5]`) synthesis and fuzzy-flag lifecycle management.
+3. **`auto-gettext-translator` (`52.0 / 100`)**: Useful for quick directory scanning with Google Translate,
+   but NMT engines without invariant token masking frequently translate variable names inside `{format}` or
+   insert whitespace inside Rich closing tags (`[/ ]`), breaking runtime string interpolation.
 
 ______________________________________________________________________
 
 ## 3. Baseline Locale Quality and Placeholder Benchmark (`de`, `es`, `fr`, `ja`)
 
-The benchmark evaluates `src/findfmt/locale/findfmt.pot` and the four non-English Tier 0 baseline
-catalogs (`de`, `es`, `fr`, `ja`).
+The benchmark evaluates `src/findfmt/locale/findfmt.pot` and the four non-English Tier 0 baseline catalogs
+(`de`, `es`, `fr`, `ja`).
 
 ### 3.1. Source Catalog Profile (`src/findfmt/locale/findfmt.pot`)
 
@@ -113,10 +105,9 @@ catalogs (`de`, `es`, `fr`, `ja`).
 
 ### 3.2. Baseline Locale Validation and Masking Pass Rates
 
-Using `mask_placeholders()` and `unmask_placeholders()` from `tools/i18n_validation.py`, every
-placeholder (`{format}`, `{valid_formats}`, `{count}`) and Rich tag (`[bold]`, `[cyan]`, `[/]`) is
-replaced with an invariant token (`__PH_0__`, `__PH_1__`, and so on) prior to translation and
-restored afterward:
+Using `mask_placeholders()` and `unmask_placeholders()` from `tools/i18n_validation.py`, every placeholder
+(`{format}`, `{valid_formats}`, `{count}`) and Rich tag (`[bold]`, `[cyan]`, `[/]`) is replaced with an
+invariant token (`__PH_0__`, `__PH_1__`, and so on) prior to translation and restored afterward:
 
 | Baseline Locale | Catalog Entries | Currently Translated | Catalog Validation Errors | Masked Pipeline Pass Rate | Unmasked NMT Pass Rate |
 | :-------------: | --------------: | -------------------: | ------------------------: | ------------------------: | ---------------------: |
@@ -127,25 +118,24 @@ restored afterward:
 
 ### 3.3. Concrete Placeholder Corruption Examples Prevented by Masking
 
-- **German (`de`)**: Unmasked NMT translates `{path}` to `{pfad}` and capitalizes `[bold]` to
-  `[Bold]`, raising `KeyError: 'pfad'` at runtime. Masking locks `__PH_0__`, producing valid output:
+- **German (`de`)**: Unmasked NMT translates `{path}` to `{pfad}` and capitalizes `[bold]` to `[Bold]`,
+  raising `KeyError: 'pfad'` at runtime. Masking locks `__PH_0__`, producing valid output:
   `Pfad '{path}' existiert nicht.`.
-- **Spanish (`es`)**: Unmasked NMT translates `{format}` to `{formato}` and `[bold]` to `[negrita]`.
-  Masking preserves `[bold]Archivo coincidente:[/] [cyan]{count}[/]`.
-- **French (`fr`)**: French typographic rules insert a narrow no-break space before punctuation and
-  inside closing tags (`[/ ]`), corrupting Rich markup balance. Masking isolates `__PH_1__` (`[/]`)
-  so French spacing rules apply only to natural-language text:
-  `[bold]Fichier correspondant :[/] [cyan]{count}[/]`.
-- **Japanese (`ja`)**: Unmasked NMT transliterates `{format}` to `{フォーマット}` and `[cyan]` to `[シアン]`.
-  Masking preserves `無効な形式 '{format}' です。有効な形式: {valid_formats}`.
+- **Spanish (`es`)**: Unmasked NMT translates `{format}` to `{formato}` and `[bold]` to `[negrita]`. Masking
+  preserves `[bold]Archivo coincidente:[/] [cyan]{count}[/]`.
+- **French (`fr`)**: French typographic rules insert a narrow no-break space before punctuation and inside
+  closing tags (`[/ ]`), corrupting Rich markup balance. Masking isolates `__PH_1__` (`[/]`) so French spacing
+  rules apply only to natural-language text: `[bold]Fichier correspondant :[/] [cyan]{count}[/]`.
+- **Japanese (`ja`)**: Unmasked NMT transliterates `{format}` to `{フォーマット}` and `[cyan]` to `[シアン]`. Masking
+  preserves `無効な形式 '{format}' です。有効な形式: {valid_formats}`.
 
 ______________________________________________________________________
 
 ## 4. Backend Provider Flexibility, Token Usage, Latency, and Cost
 
-The benchmark models a batch size of **25 messages per request** (**6 batches** per 147-entry
-catalog), yielding **6,313 input tokens** (including system prompt and glossary instructions) and
-**6,541 output tokens** per catalog.
+The benchmark models a batch size of **25 messages per request** (**6 batches** per 147-entry catalog),
+yielding **6,313 input tokens** (including system prompt and glossary instructions) and **6,541 output
+tokens** per catalog.
 
 | Backend Provider                        | Offline Capable | Batches / Catalog | Input Tokens | Output Tokens | Latency / Catalog | Cost / Catalog (USD) | Cost: 4 Baseline Locales | Cost: All 52 Locales |
 | --------------------------------------- | :-------------: | ----------------: | -----------: | ------------: | ----------------: | -------------------: | -----------------------: | -------------------: |
@@ -168,23 +158,20 @@ ______________________________________________________________________
 
 ## 5. PO Syntax, Header, Charset, and Fuzzy Flag Preservation
 
-To ensure `msgfmt`, `pybabel`, and Hatchling packaging (`tools/hatch_build.py`) never fail during
-wheel or sdist builds, the translation workflow enforces five `.po` syntax invariants:
+To ensure `msgfmt`, `pybabel`, and Hatchling packaging (`tools/hatch_build.py`) never fail during wheel or
+sdist builds, the translation workflow enforces five `.po` syntax invariants:
 
-1. **Header Metadata & `UTF-8` Charset Declaration**: The root `msgid ""` header block
-   (`Project-Id-Version`, `MIME-Version: 1.0`, `Content-Type: text/plain; charset=utf-8`,
-   `Content-Transfer-Encoding: 8bit`) is parsed separately and never sent to the translation
-   backend.
-2. **Plural-Forms Header Expression Awareness**: The translator reads the target locale's
-   `nplurals=N` header (for example, `nplurals=1` for `ja`, `nplurals=2` for `de`/`es`/`fr`,
-   `nplurals=3` for `ru`/`pl`, and `nplurals=6` for `ar`) and requests exactly `N` plural forms for
-   every `msgid_plural` entry.
+1. **Header Metadata & `UTF-8` Charset Declaration**: The root `msgid ""` header block (`Project-Id-Version`,
+   `MIME-Version: 1.0`, `Content-Type: text/plain; charset=utf-8`, `Content-Transfer-Encoding: 8bit`) is
+   parsed separately and never sent to the translation backend.
+2. **Plural-Forms Header Expression Awareness**: The translator reads the target locale's `nplurals=N` header
+   (for example, `nplurals=1` for `ja`, `nplurals=2` for `de`/`es`/`fr`, `nplurals=3` for `ru`/`pl`, and
+   `nplurals=6` for `ar`) and requests exactly `N` plural forms for every `msgid_plural` entry.
 3. **Multiline String Wrapping**: Multiline `msgid` blocks (such as CLI `Examples:` and
-   `Environment Variables:` help sections) preserve exact `\n` line-break counts and column
-   indentation.
-4. **Fuzzy Flag (`#, fuzzy`) Lifecycle**: Entries marked `#, fuzzy` by `msgmerge` / `pybabel update`
-   can be targeted for re-translation; once validated by `validate_message_pair()`, the `#, fuzzy`
-   flag is cleared and an attribution comment (`# AI-translated: <model>`) is recorded.
+   `Environment Variables:` help sections) preserve exact `\n` line-break counts and column indentation.
+4. **Fuzzy Flag (`#, fuzzy`) Lifecycle**: Entries marked `#, fuzzy` by `msgmerge` / `pybabel update` can be
+   targeted for re-translation; once validated by `validate_message_pair()`, the `#, fuzzy` flag is cleared
+   and an attribution comment (`# AI-translated: <model>`) is recorded.
 5. **Relative Source Location Hygiene**: Every catalog write invokes `_sanitize_po_locations()` from
    `tools/i18n.py` so `#: src/findfmt/...` comments never leak absolute developer filesystem paths.
 
@@ -205,10 +192,9 @@ ______________________________________________________________________
 ## 7. Domain Prompt Engineering, Technical Glossary, and Pluralization Rules
 
 Generic machine translation often mistranslates specialized CLI terms (`shebang`, `pruning`, `glob`,
-`symlink`, `MIME tag`, `pager`) or corrupts CLI flags (`--format`, `-t`). `tools/i18n_prompts.py`
-defines the reusable prompt templates, authoritative terminology glossary, and `ngettext`
-pluralization rules consumed by the translation pipeline (Issue
-[#305](https://github.com/bdperkin/findfmt/issues/305)).
+`symlink`, `MIME tag`, `pager`) or corrupts CLI flags (`--format`, `-t`). `tools/i18n_prompts.py` defines the
+reusable prompt templates, authoritative terminology glossary, and `ngettext` pluralization rules consumed by
+the translation pipeline (Issue [#305](https://github.com/bdperkin/findfmt/issues/305)).
 
 ### 7.1. Authoritative Technical Terminology Glossary (`CLI_GLOSSARY`)
 
@@ -227,8 +213,8 @@ pluralization rules consumed by the translation pipeline (Issue
 
 ### 7.2. Domain Context System Prompt (`build_system_prompt`)
 
-`build_system_prompt(locale)` in `tools/i18n_prompts.py` generates the system instruction attached
-to every translation batch:
+`build_system_prompt(locale)` in `tools/i18n_prompts.py` generates the system instruction attached to every
+translation batch:
 
 ```text
 You are an expert technical software localizer translating GNU gettext (.po) messages into locale '<locale>'.
@@ -246,9 +232,9 @@ Strict Formatting & Invariant Rules:
 
 ### 7.3. Multi-Form `ngettext` Pluralization Prompt Rules (`build_plural_prompt`)
 
-`parse_plural_forms_header()` and `get_plural_rule_spec()` inspect the target `.po` header's
-`Plural-Forms:` declaration and construct a locale-specific `ngettext` prompt requesting a JSON
-array of exact length `nplurals`:
+`parse_plural_forms_header()` and `get_plural_rule_spec()` inspect the target `.po` header's `Plural-Forms:`
+declaration and construct a locale-specific `ngettext` prompt requesting a JSON array of exact length
+`nplurals`:
 
 | Plural Rule Family       | `nplurals` | Representative Locales                         | Required `msgstr[0..N-1]` Array Slots                                                                                             |
 | :----------------------- | :--------: | :--------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
@@ -261,9 +247,9 @@ array of exact length `nplurals`:
 
 ### 7.4. Temperature & Prompt Token Overhead Evaluation
 
-`evaluate_temperature_profiles()` and `estimate_prompt_token_overhead()` measure the token overhead
-of the domain system prompt + glossary (~490 tokens per 25-entry batch, or ~2,940 tokens across a
-6-batch catalog) and compare sampling temperatures:
+`evaluate_temperature_profiles()` and `estimate_prompt_token_overhead()` measure the token overhead of the
+domain system prompt + glossary (~490 tokens per 25-entry batch, or ~2,940 tokens across a 6-batch catalog)
+and compare sampling temperatures:
 
 | Sampling Temperature | Determinism Score | CLI Flag Preservation | Glossary Adherence | Batch Token Overhead | Recommendation |
 | :------------------: | ----------------: | --------------------: | -----------------: | -------------------: | :------------: |
@@ -276,8 +262,7 @@ ______________________________________________________________________
 
 ## 8. Running the Benchmark Utility
 
-Run the deterministic benchmark CLI to inspect catalog metrics, tool rankings, and provider cost
-tables:
+Run the deterministic benchmark CLI to inspect catalog metrics, tool rankings, and provider cost tables:
 
 ```bash
 # Print human-readable Markdown benchmark summary

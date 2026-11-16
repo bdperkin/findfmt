@@ -76,9 +76,7 @@ def _wheel_version(path: Path) -> str | None:
 def _sdist_version(path: Path) -> str | None:
     """Return the version declared in an sdist's top-level ``PKG-INFO``."""
     with tarfile.open(path, "r:gz") as tf:
-        member = next(
-            m for m in tf.getmembers() if m.name.count("/") == 1 and m.name.endswith("/PKG-INFO")
-        )
+        member = next(m for m in tf.getmembers() if m.name.count("/") == 1 and m.name.endswith("/PKG-INFO"))
         handle = tf.extractfile(member)
         assert handle is not None
         return _metadata_version(handle.read().decode("utf-8"))

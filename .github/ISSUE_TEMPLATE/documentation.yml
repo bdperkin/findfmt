@@ -15,8 +15,7 @@ body:
     id: page_location
     attributes:
       label: Documentation Page or Location
-      description: URL to hosted doc (https://bdperkin.github.io/findfmt/...), Sphinx source path (docs/source/...),
-        README, or man page.
+      description: Hosted doc URL, Sphinx source path (docs/source/...), README, or man page.
       placeholder: e.g. docs/source/guides/quickstart.md or README.md
     validations:
       required: true

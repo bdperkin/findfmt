@@ -43,9 +43,7 @@ def test_pre_commit_includes_zizmor_hook() -> None:
         (r for r in repos if r.get("repo") == "https://github.com/zizmorcore/zizmor-pre-commit"),
         None,
     )
-    assert zizmor_repo is not None, (
-        "zizmor-pre-commit must be configured in .pre-commit-config.yaml"
-    )
+    assert zizmor_repo is not None, "zizmor-pre-commit must be configured in .pre-commit-config.yaml"
     rev = str(zizmor_repo.get("rev", ""))
     assert rev.startswith("v"), "zizmor-pre-commit must have a pinned vX.Y.Z rev"
     assert len(rev) > 1, "zizmor-pre-commit rev must not be empty"
@@ -273,8 +271,7 @@ def test_sync_pre_commit_deps_modes(
     lock_file = tmp_path / "uv.lock"
     pre_commit_file = tmp_path / ".pre-commit-config.yaml"
     lock_file.write_text(
-        '[[package]]\nname = "ruff"\nversion = "0.17.3"\n'
-        '[[package]]\nname = "deptry"\nversion = "0.25.1"\n',
+        '[[package]]\nname = "ruff"\nversion = "0.17.3"\n[[package]]\nname = "deptry"\nversion = "0.25.1"\n',
         encoding="utf-8",
     )
     pre_commit_file.write_text("- invalid-root-list\n", encoding="utf-8")

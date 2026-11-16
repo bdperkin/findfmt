@@ -1,7 +1,7 @@
 # CLI Reference
 
-`findfmt` provides a Unix-style command-line interface with options for tagging, filtering, and
-output formatting.
+`findfmt` provides a Unix-style command-line interface with options for tagging, filtering, and output
+formatting.
 
 ## 1. Synopsis
 
@@ -12,22 +12,21 @@ output formatting.
 
 ## 2. Description
 
-`findfmt` is a high-performance, `.gitignore`-aware file discovery and classification suite. It
-locates files by content format, shebang, and MIME tag rather than relying strictly on file
-extensions, producing clean, sorted relative paths ready for Unix pipelines and interactive terminal
-review.
+`findfmt` is a high-performance, `.gitignore`-aware file discovery and classification suite. It locates files
+by content format, shebang, and MIME tag rather than relying strictly on file extensions, producing clean,
+sorted relative paths ready for Unix pipelines and interactive terminal review.
 
 ## 3. Options
 
 ### 3.1. Tag Filtering
 
-`-t, --type, --tag TAG` : Filter files by tag (e.g. `python`, `yaml`, `json`, `shell`,
-`executable`). Can be specified multiple times or comma-separated (`-t python,shell`).
+`-t, --type, --tag TAG` : Filter files by tag (e.g. `python`, `yaml`, `json`, `shell`, `executable`). Can be
+specified multiple times or comma-separated (`-t python,shell`).
 
 `-e, --exclude, --exclude-tag TAG` : Exclude files matching this tag.
 
-`--all-tags / --no-all-tags` : Require matching files to contain **all** specified include tags
-rather than at least one (`--no-all-tags` disables this requirement).
+`--all-tags / --no-all-tags` : Require matching files to contain **all** specified include tags rather than at
+least one (`--no-all-tags` disables this requirement).
 
 `--shebang INTERPRETER` : Filter files whose shebang line contains the specified interpreter name or
 substring.
@@ -37,9 +36,9 @@ substring.
 `-d, --dirs-only` : List directories only, suppressing regular file entries.
 
 `-l, --follow-links, --follow-symlinks / --no-follow-links, --no-follow-symlinks` (alias:
-`--symlinks / --no-symlinks`) : Follow symbolic links during traversal and classify target file
-contents (with cycle and loop detection). By default, symbolic links are emitted as link entries
-without descending into symlinked directories or reading link targets.
+`--symlinks / --no-symlinks`) : Follow symbolic links during traversal and classify target file contents (with
+cycle and loop detection). By default, symbolic links are emitted as link entries without descending into
+symlinked directories or reading link targets.
 
 `-x, --one-file-system` : Confine traversal to the filesystem device of the starting directory.
 
@@ -49,59 +48,57 @@ without descending into symlinked directories or reading link targets.
 
 `--prune` : Omit empty directories and directories containing zero matching files from output.
 
-`-P, --pattern, --include-pattern PATTERN` : List only files matching the wildcard or glob
-expression. Supports multiple `-P` flags and `|` alternation (e.g. `*.py|*.md`).
+`-P, --pattern, --include-pattern PATTERN` : List only files matching the wildcard or glob expression.
+Supports multiple `-P` flags and `|` alternation (e.g. `*.py|*.md`).
 
-`-I, --exclude-pattern PATTERN` : Omit files and directories matching the wildcard or glob
-expression. Supports multiple `-I` flags and `|` alternation (e.g. `*.tmp|*.bak`).
+`-I, --exclude-pattern PATTERN` : Omit files and directories matching the wildcard or glob expression.
+Supports multiple `-I` flags and `|` alternation (e.g. `*.tmp|*.bak`).
 
 `--ignore-case / --no-ignore-case` : Apply case-insensitive matching across `-P` and `-I` patterns.
 
-`--match-dirs, --matchdirs / --no-match-dirs, --no-matchdirs` : Match directory names against
-patterns. If a directory matches, pattern restrictions are disabled for its children.
+`--match-dirs, --matchdirs / --no-match-dirs, --no-matchdirs` : Match directory names against patterns. If a
+directory matches, pattern restrictions are disabled for its children.
 
 `--gitignore-file PATH` : Apply a specific external ignore file across the traversal scope.
 
-`--from-file, --fromfile PATH` : Ingest directory listings and path structures from an external file
-or standard input (`-`) instead of scanning the local filesystem. Automatically detects flat
-newline-delimited paths (e.g. from `find` or `git ls-files`), NUL-delimited records (e.g. from
-`find -print0`, `fd -0`, `git ls-files -z`, or `findfmt -0`, preserving filenames with embedded
-newlines), and tab-, space-, or `tree`-indented outlines with symlink (`link -> target`) detection.
+`--from-file, --fromfile PATH` : Ingest directory listings and path structures from an external file or
+standard input (`-`) instead of scanning the local filesystem. Automatically detects flat newline-delimited
+paths (e.g. from `find` or `git ls-files`), NUL-delimited records (e.g. from `find -print0`, `fd -0`,
+`git ls-files -z`, or `findfmt -0`, preserving filenames with embedded newlines), and tab-, space-, or
+`tree`-indented outlines with symlink (`link -> target`) detection.
 
-`--offline` : Enforce offline classification without inspecting the local filesystem. Identifies
-file formats and types strictly via extension and filename heuristics, operating gracefully when
-analyzing remote manifests or containers without raising filesystem IO errors.
+`--offline` : Enforce offline classification without inspecting the local filesystem. Identifies file formats
+and types strictly via extension and filename heuristics, operating gracefully when analyzing remote manifests
+or containers without raising filesystem IO errors.
 
-`--allow-outside-root / --no-allow-outside-root` : Allow `--from-file` paths that resolve outside
-the traversal root directory. By default, out-of-root entries (such as `/etc/passwd` or
-`../outside.sh`) are skipped with a warning to `stderr` without reading their contents.
+`--allow-outside-root / --no-allow-outside-root` : Allow `--from-file` paths that resolve outside the
+traversal root directory. By default, out-of-root entries (such as `/etc/passwd` or `../outside.sh`) are
+skipped with a warning to `stderr` without reading their contents.
 
-`--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`. Use
-`--ignore` to restore `.gitignore` honoring.
+`--no-ignore / --ignore` : Do not prune paths matching `.gitignore` or `.git/info/exclude`. Use `--ignore` to
+restore `.gitignore` honoring.
 
-`-a, --all / --no-all` (alias: `--hidden / --no-hidden`) : Traverse hidden files and directories
-(names starting with `.`). Use `--no-all` or `--no-hidden` to exclude hidden paths.
+`-a, --all / --no-all` (alias: `--hidden / --no-hidden`) : Traverse hidden files and directories (names
+starting with `.`). Use `--no-all` or `--no-hidden` to exclude hidden paths.
 
-`--sort CRITERIA` : Sort entries by criteria: `name` (default), `version` (natural numbers), `time`
-(or `mtime`, newest first), `ctime` (status change, newest first), `size` (largest first), or `none`
-(unsorted).
+`--sort CRITERIA` : Sort entries by criteria: `name` (default), `version` (natural numbers), `time` (or
+`mtime`, newest first), `ctime` (status change, newest first), `size` (largest first), or `none` (unsorted).
 
-`-r, --reverse` : Invert active sort order (e.g. oldest first for time, smallest first for size,
-reverse alphabetical for name).
+`-r, --reverse` : Invert active sort order (e.g. oldest first for time, smallest first for size, reverse
+alphabetical for name).
 
-`-U, --unsorted` : Do not sort entries; yield files in raw filesystem order (equivalent to
-`--sort=none`). Bypasses sorting overhead and memory buffering for massive trees.
+`-U, --unsorted` : Do not sort entries; yield files in raw filesystem order (equivalent to `--sort=none`).
+Bypasses sorting overhead and memory buffering for massive trees.
 
-`--dirsfirst, --group-directories-first` : Group all directories before files within each directory
-level, sorting each group by active criteria.
+`--dirsfirst, --group-directories-first` : Group all directories before files within each directory level,
+sorting each group by active criteria.
 
 `--filesfirst` : Group all regular files before directories within each directory level.
 
 ### 3.3. Output Controls
 
-- `-f, --format FORMAT` : Choose the output serialization format (`text`, `json`, `jsonl`, `yaml`,
-  `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`, `xml`, `html`). Defaults
-  to `text`.
+- `-f, --format FORMAT` : Choose the output serialization format (`text`, `json`, `jsonl`, `yaml`, `ipynb`,
+  `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`, `xml`, `html`). Defaults to `text`.
 
 - `text`: Standard line-oriented or NUL-delimited plain text paths.
 
@@ -115,41 +112,34 @@ level, sorting each group by active criteria.
 
 - `ipynb`: Jupyter Notebook (`.ipynb`) format pre-populated with data analysis code cells.
 
-- `csv`: RFC 4180 compliant comma-separated values with header row. When consuming CSV in
-  spreadsheet applications, consider passing `--csv-safe` to neutralize spreadsheet formula
-  injection risks.
+- `csv`: RFC 4180 compliant comma-separated values with header row. When consuming CSV in spreadsheet
+  applications, consider passing `--csv-safe` to neutralize spreadsheet formula injection risks.
 
-- `csv-table`: Aligned ASCII or Unicode table constructed directly from CSV schema for terminal
-  review.
+- `csv-table`: Aligned ASCII or Unicode table constructed directly from CSV schema for terminal review.
 
-- `tsv`: Tab-separated values optimized for Unix shell pipelines (`awk`, `cut`). Pass `--csv-safe`
-  to neutralize formula injection triggers if importing into spreadsheets.
+- `tsv`: Tab-separated values optimized for Unix shell pipelines (`awk`, `cut`). Pass `--csv-safe` to
+  neutralize formula injection triggers if importing into spreadsheets.
 
-- `markdown` (or `md`): GitHub Flavored Markdown (GFM) column-aligned table with alignment
-  indicators.
+- `markdown` (or `md`): GitHub Flavored Markdown (GFM) column-aligned table with alignment indicators.
 
-- `rst`: reStructuredText grid or simple table format compatible with Sphinx `.. include::`
-  directives.
+- `rst`: reStructuredText grid or simple table format compatible with Sphinx `.. include::` directives.
 
 - `table`: Rich styled terminal table with colorful badges for tags, sizes, and MIME types.
 
 - `tree`: Hierarchical directory tree rendering files within their directory branches.
 
-- `xml`: Well-formed hierarchical XML document capturing directories, files, tags, and metadata
-  attributes.
+- `xml`: Well-formed hierarchical XML document capturing directories, files, tags, and metadata attributes.
 
 - `html`: Semantic, accessible HTML5 document with styled directory tree and hyperlinks.
 
-`--tree / --no-tree` : Render output in a hierarchical directory tree (equivalent to
-`--format tree`).
+`--tree / --no-tree` : Render output in a hierarchical directory tree (equivalent to `--format tree`).
 
 `-J, --json / --no-json` : Render output as structured JSON records (equivalent to `--format json`).
 
-`-X, --xml / --no-xml` : Render output as a hierarchical XML document (equivalent to
-`--format xml`).
+`-X, --xml / --no-xml` : Render output as a hierarchical XML document (equivalent to `--format xml`).
 
-`-H, --html BASEHREF` : Render output as a semantic HTML5 document with clickable hyperlinks
-prefixed with `BASEHREF` (equivalent to `--format html`).
+`-H, --html BASEHREF` : Render output as a semantic HTML5 document with clickable hyperlinks prefixed with
+`BASEHREF` (equivalent to `--format html`).
 
 `--intro PATH` : Prepend custom HTML fragment file before the directory listing in HTML mode.
 
@@ -158,53 +148,50 @@ prefixed with `BASEHREF` (equivalent to `--format html`).
 `-T, --title TITLE` : Configure document `<title>` and `<h1>` heading for HTML output (defaults to
 `Directory Tree`).
 
-`--nolinks / --no-nolinks` : Suppress hyperlink anchors in HTML output, rendering paths as styled
-plain text.
+`--nolinks / --no-nolinks` : Suppress hyperlink anchors in HTML output, rendering paths as styled plain text.
 
-`-o, --output PATH` : Send command output directly to a file rather than standard output. Writes
-atomically using a temporary file in the destination directory to ensure destination files are never
-left partially written or corrupted if execution is interrupted.
+`-o, --output PATH` : Send command output directly to a file rather than standard output. Writes atomically
+using a temporary file in the destination directory to ensure destination files are never left partially
+written or corrupted if execution is interrupted.
 
-`--table-style STYLE` : Configure table border styles for `table`, `csv-table`, and `rst` formats
-(`rounded`, `simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`).
-Defaults to `rounded`.
+`--table-style STYLE` : Configure table border styles for `table`, `csv-table`, and `rst` formats (`rounded`,
+`simple`, `minimal`, `double`, `heavy`, `markdown`, `ascii`, `cp437`, `square`, `grid`). Defaults to
+`rounded`.
 
-`--csv-safe / --no-csv-safe` : Neutralize spreadsheet formula injection by prefixing cells beginning
-with `=`, `+`, `-`, `@`, TAB (`\t`), or CR (`\r`) with a single quote (`'`). Useful when exporting
-file listings to spreadsheet applications where leading characters can trigger dynamic data exchange
-(DDE) or formula execution.
+`--csv-safe / --no-csv-safe` : Neutralize spreadsheet formula injection by prefixing cells beginning with `=`,
+`+`, `-`, `@`, TAB (`\t`), or CR (`\r`) with a single quote (`'`). Useful when exporting file listings to
+spreadsheet applications where leading characters can trigger dynamic data exchange (DDE) or formula
+execution.
 
-`--pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on interactive
-terminals when output line count exceeds terminal height. Applies to formatted file listings,
-`--help`, `--help-all`, `--known-tags`, and tall `--diagnostics` outputs. Bypassed automatically
-when piped or redirected.
+`--pager / --no-pager` : Control interactive terminal paging. Defaults to auto-paging on interactive terminals
+when output line count exceeds terminal height. Applies to formatted file listings, `--help`, `--help-all`,
+`--known-tags`, and tall `--diagnostics` outputs. Bypassed automatically when piped or redirected.
 
-`-i, --no-indent / --indent` : Omit branch indentation characters in tree format and strip
-extraneous whitespace and padding in structured formats.
+`-i, --no-indent / --indent` : Omit branch indentation characters in tree format and strip extraneous
+whitespace and padding in structured formats.
 
 `-A, --ansi-lines / --no-ansi-lines` : Use ANSI/VT100 alternate character set line drawing escapes
 (`\033(0...`) for tree indentation lines.
 
-`-S, --cp437 / --no-cp437` : Use Code Page 437 (IBM-PC) console graphics characters for tree
-indentation lines.
+`-S, --cp437 / --no-cp437` : Use Code Page 437 (IBM-PC) console graphics characters for tree indentation
+lines.
 
-`-C, --color / -n, --no-color` : Force enable or disable ANSI color styling across all output
-channels unconditionally.
+`-C, --color / -n, --no-color` : Force enable or disable ANSI color styling across all output channels
+unconditionally.
 
-`--absolute, --full-path / --no-absolute, --no-full-path` : Output absolute filesystem paths rather
-than relative paths.
+`--absolute, --full-path / --no-absolute, --no-full-path` : Output absolute filesystem paths rather than
+relative paths.
 
-`--relative, --relative-path / --no-relative, --no-relative-path` : Prepend input search path prefix
-to relative output paths rather than stripping the traversal root.
+`--relative, --relative-path / --no-relative, --no-relative-path` : Prepend input search path prefix to
+relative output paths rather than stripping the traversal root.
 
-`-p, --permissions / --no-permissions` : Print file type and permissions in standard `ls -l` format
-(e.g. `-rw-r--r--`, `drwxr-xr-x`).
+`-p, --permissions / --no-permissions` : Print file type and permissions in standard `ls -l` format (e.g.
+`-rw-r--r--`, `drwxr-xr-x`).
 
-`-u, --user / --no-user` : Print file owner username, falling back to numeric UID if username is
+`-u, --user / --no-user` : Print file owner username, falling back to numeric UID if username is unresolvable.
+
+`-g, --group / --no-group` : Print file owner group name, falling back to numeric GID if group name is
 unresolvable.
-
-`-g, --group / --no-group` : Print file owner group name, falling back to numeric GID if group name
-is unresolvable.
 
 `--inodes / --no-inodes` : Print filesystem inode number (`st_ino`).
 
@@ -212,118 +199,112 @@ is unresolvable.
 
 `--size / --no-size` : Print file size in bytes (`st_size`).
 
-`-h, --human-readable / --no-human-readable` : Print sizes in human-readable format with IEC/binary
-unit prefixes (`K`, `M`, `G`, `T`, `P`, `E`) using powers of 1024.
+`-h, --human-readable / --no-human-readable` : Print sizes in human-readable format with IEC/binary unit
+prefixes (`K`, `M`, `G`, `T`, `P`, `E`) using powers of 1024.
 
-`--si / --no-si` : Print sizes in human-readable format with SI unit prefixes (`kB`, `MB`, `GB`,
-`TB`, `PB`, `EB`) using powers of 1000.
+`--si / --no-si` : Print sizes in human-readable format with SI unit prefixes (`kB`, `MB`, `GB`, `TB`, `PB`,
+`EB`) using powers of 1000.
 
-`--du, --accumulate-size / --no-du, --no-accumulate-size` : Recursively calculate and accumulate
-directory disk usage sizes across all contained files and child directories. In tree format, prints
-accumulated directory sizes alongside folder nodes. In non-tree formats, lists directories with
-their total accumulated sizes.
+`--du, --accumulate-size / --no-du, --no-accumulate-size` : Recursively calculate and accumulate directory
+disk usage sizes across all contained files and child directories. In tree format, prints accumulated
+directory sizes alongside folder nodes. In non-tree formats, lists directories with their total accumulated
+sizes.
 
 `-D, --mtime / --no-mtime` : Print the date and time of the last modification (`st_mtime`).
 
 `--ctime / --no-ctime` : Print the date and time of the last status change (`st_ctime`).
 
-`--time-format, --timefmt FORMAT` : Specify custom date and time output format using `strftime`
-syntax (implies `-D` unless `--ctime` is explicitly specified).
+`--time-format, --timefmt FORMAT` : Specify custom date and time output format using `strftime` syntax
+(implies `-D` unless `--ctime` is explicitly specified).
 
-`-F, --classify / --no-classify` : Append a file classification indicator character to each filename
-(`*` for executable, `/` for directory, `@` for symbolic link, `=` for socket, `|` for FIFO, `>` for
-door).
+`-F, --classify / --no-classify` : Append a file classification indicator character to each filename (`*` for
+executable, `/` for directory, `@` for symbolic link, `=` for socket, `|` for FIFO, `>` for door).
 
-`-q, --hide-control-chars / --no-hide-control-chars` : Replace non-printable control characters in
-filenames with question marks (`?`).
+`-q, --hide-control-chars / --no-hide-control-chars` : Replace non-printable control characters in filenames
+with question marks (`?`).
 
-`-N, --literal / --no-literal` : Print non-printable control characters literally as raw bytes
-without masking.
+`-N, --literal / --no-literal` : Print non-printable control characters literally as raw bytes without
+masking.
 
-`-Q, --quote-name / --no-quote-name` : Enclose filenames in double quotes (`"..."`), escaping any
-embedded double quotes (`\"`) and backslashes (`\\`).
+`-Q, --quote-name / --no-quote-name` : Enclose filenames in double quotes (`"..."`), escaping any embedded
+double quotes (`\"`) and backslashes (`\\`).
 
-`--hyperlink / --no-hyperlink` : Wrap rendered file and directory paths in standard OSC 8 terminal
-hyperlink escape sequences (`\033]8;;URI\033\TEXT\033]8;;\033\`), enabling direct click-to-open
-navigation in modern terminal emulators.
+`--hyperlink / --no-hyperlink` : Wrap rendered file and directory paths in standard OSC 8 terminal hyperlink
+escape sequences (`\033]8;;URI\033\TEXT\033]8;;\033\`), enabling direct click-to-open navigation in modern
+terminal emulators.
 
-`--hyperlink-schema SCHEMA` : Custom URI schema prefix for terminal hyperlinks (defaults to
-`file://`). Supports standard local file schemes as well as editor URI schemas such as
-`vscode://file/`, `cursor://file/`, or `subl://`.
+`--hyperlink-schema SCHEMA` : Custom URI schema prefix for terminal hyperlinks (defaults to `file://`).
+Supports standard local file schemes as well as editor URI schemas such as `vscode://file/`, `cursor://file/`,
+or `subl://`.
 
-`--hyperlink-authority AUTHORITY` : Optional authority or hostname component for terminal hyperlinks
-(e.g., `localhost` or remote workstation hostnames).
+`--hyperlink-authority AUTHORITY` : Optional authority or hostname component for terminal hyperlinks (e.g.,
+`localhost` or remote workstation hostnames).
 
-`-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe
-consumption by `xargs -0`.
+`-0, --print0 / --no-print0` : Delimit paths with a NUL (`\0`) byte instead of a newline for safe consumption
+by `xargs -0`.
 
-`--list-tags / --no-list-tags` : Print identified format and content tags alongside each matched
-path.
+`--list-tags / --no-list-tags` : Print identified format and content tags alongside each matched path.
 
 `-s, --summary / --no-summary` : Print summary match statistics and top format tags to `stderr`.
 
-`--exit-status / --no-exit-status` : Exit with status code 1 if no matching files are found (returns
-code 0 when one or more matches are found).
+`--exit-status / --no-exit-status` : Exit with status code 1 if no matching files are found (returns code 0
+when one or more matches are found).
 
 ### 3.4. Information & Diagnostics
 
 `--config PATH` : Path to a custom user configuration file overriding default settings.
 
-`--no-config` : Suppress discovery and loading of any configuration file, enforcing built-in factory
-defaults.
+`--no-config` : Suppress discovery and loading of any configuration file, enforcing built-in factory defaults.
 
-`--show-config` : Display the active configuration file and resolved configuration settings, then
-exit immediately.
+`--show-config` : Display the active configuration file and resolved configuration settings, then exit
+immediately.
 
-`--generate-config` : Output an annotated reference TOML configuration containing all canonical
-settings and default values to standard output, then exit immediately.
+`--generate-config` : Output an annotated reference TOML configuration containing all canonical settings and
+default values to standard output, then exit immediately.
 
-`--known-tags` : List all tags supported by the classifier engine and exit immediately (routed
-through the interactive pager on TTY sessions exceeding terminal height).
+`--known-tags` : List all tags supported by the classifier engine and exit immediately (routed through the
+interactive pager on TTY sessions exceeding terminal height).
 
-`--locale, --lang LOCALE` : Set display language and locale for console messages, help descriptions,
-and diagnostic outputs (e.g. `en_US`, `es`, `fr`, `de`, `ja`, or `C` for raw untranslated strings).
+`--locale, --lang LOCALE` : Set display language and locale for console messages, help descriptions, and
+diagnostic outputs (e.g. `en_US`, `es`, `fr`, `de`, `ja`, or `C` for raw untranslated strings).
 
-`-v, -V, --version` : Display the version of `findfmt` and exit. When combined with `--verbose`,
-prints runtime environment diagnostics (Python runtime, OS platform, identify engine, and Git) via
-the interactive pager when exceeding terminal height.
+`-v, -V, --version` : Display the version of `findfmt` and exit. When combined with `--verbose`, prints
+runtime environment diagnostics (Python runtime, OS platform, identify engine, and Git) via the interactive
+pager when exceeding terminal height.
 
 `--verbose` : Enable verbose diagnostic output when paired with `--version`.
 
-`--diagnostics` : Display runtime environment diagnostics and exit immediately (routed through the
+`--diagnostics` : Display runtime environment diagnostics and exit immediately (routed through the interactive
+pager on TTY sessions exceeding terminal height).
+
+`--help-all` : Display the comprehensive CLI manual, environment variables, and exit codes (routed through the
 interactive pager on TTY sessions exceeding terminal height).
 
-`--help-all` : Display the comprehensive CLI manual, environment variables, and exit codes (routed
-through the interactive pager on TTY sessions exceeding terminal height).
-
-`--help` : Show the categorized help message and exit (automatically routed through the interactive
-pager on TTY sessions exceeding terminal height).
+`--help` : Show the categorized help message and exit (automatically routed through the interactive pager on
+TTY sessions exceeding terminal height).
 
 ## 4. Command Wrappers & Aliases
 
-In addition to `findfmt`, several specialized command-line entry points are provided to streamline
-common workflows:
+In addition to `findfmt`, several specialized command-line entry points are provided to streamline common
+workflows:
 
-- **`findfiles [PATHS...]`** : Traverse all files and directories including hidden files (`.*`),
-  respecting `.gitignore` (equivalent to `findfmt --hidden`). Negate with `--no-hidden`.
-- **`findfilemime [PATHS...]`** : List matched paths alongside their detected MIME and format tags,
-  including hidden files (equivalent to `findfmt --hidden --list-tags`). Negate with
-  `--no-list-tags`.
-- **`findfilefmt [TAG] [PATHS...]`** : Locate files matching a format tag (e.g.
-  `findfilefmt python`), including hidden files (equivalent to `findfmt --hidden --tag [TAG]`).
+- **`findfiles [PATHS...]`** : Traverse all files and directories including hidden files (`.*`), respecting
+  `.gitignore` (equivalent to `findfmt --hidden`). Negate with `--no-hidden`.
+- **`findfilemime [PATHS...]`** : List matched paths alongside their detected MIME and format tags, including
+  hidden files (equivalent to `findfmt --hidden --list-tags`). Negate with `--no-list-tags`.
+- **`findfilefmt [TAG] [PATHS...]`** : Locate files matching a format tag (e.g. `findfilefmt python`),
+  including hidden files (equivalent to `findfmt --hidden --tag [TAG]`).
 - **`findshebang [INTERPRETER] [PATHS...]`** : Discover scripts by shebang interpreter pattern (e.g.
-  `findshebang bash`), including hidden files (equivalent to
-  `findfmt --hidden --shebang [INTERPRETER]`).
-- **`findfmt0 [PATHS...]`** : Produce NUL-delimited output for pipe-safe consumption with
-  `xargs -0`, including hidden files (equivalent to `findfmt --hidden --print0`). Negate with
-  `--no-print0`.
-- **`findsummary [PATHS...]`** : Print format tag frequency statistics directly to `stderr`,
-  including hidden files (equivalent to `findfmt --hidden --summary`). Negate with `--no-summary`.
+  `findshebang bash`), including hidden files (equivalent to `findfmt --hidden --shebang [INTERPRETER]`).
+- **`findfmt0 [PATHS...]`** : Produce NUL-delimited output for pipe-safe consumption with `xargs -0`,
+  including hidden files (equivalent to `findfmt --hidden --print0`). Negate with `--no-print0`.
+- **`findsummary [PATHS...]`** : Print format tag frequency statistics directly to `stderr`, including hidden
+  files (equivalent to `findfmt --hidden --summary`). Negate with `--no-summary`.
 
 ## 5. POSIX Option Terminator (--)
 
-A standalone double-dash (`--`) halts option processing per POSIX Guideline 10. All subsequent
-tokens are treated strictly as positional filesystem paths, even if their names begin with a hyphen:
+A standalone double-dash (`--`) halts option processing per POSIX Guideline 10. All subsequent tokens are
+treated strictly as positional filesystem paths, even if their names begin with a hyphen:
 
 ```bash
 findfmt -- -weird-directory/
@@ -332,24 +313,22 @@ findfilefmt python -- -hyphenated-dir/
 
 ## 6. Environment
 
-- `NO_COLOR`: When set to any value, colored output is suppressed per
-  [no-color.org](https://no-color.org).
+- `NO_COLOR`: When set to any value, colored output is suppressed per [no-color.org](https://no-color.org).
 - `CLICOLOR`: When set to `0`, ANSI color codes are disabled; when `1`, colors are enabled.
 - `CLICOLOR_FORCE`: When non-zero, forces color output even when redirected or piped.
-- `LANGUAGE`: POSIX language lookup order (colon-separated list of locale codes, e.g.
-  `es_ES:es:en`).
+- `LANGUAGE`: POSIX language lookup order (colon-separated list of locale codes, e.g. `es_ES:es:en`).
 - `LC_ALL`: Highest-precedence locale override overriding all other `LC_*` variables.
 - `LC_MESSAGES`: Localization category determining message translation catalog selection.
 - `LANG`: Default system fallback locale identifier.
-- `FINDFMT_CONFIG`: Path to a custom user configuration file overriding defaults. When unset,
-  `findfmt` checks `$XDG_CONFIG_HOME/findfmt/config.toml` (or `~/.config/findfmt/config.toml`),
-  followed by `pyproject.toml` (`[tool.findfmt]` table) in the working directory. Refer to the
+- `FINDFMT_CONFIG`: Path to a custom user configuration file overriding defaults. When unset, `findfmt` checks
+  `$XDG_CONFIG_HOME/findfmt/config.toml` (or `~/.config/findfmt/config.toml`), followed by `pyproject.toml`
+  (`[tool.findfmt]` table) in the working directory. Refer to the
   [Configuration Guide](../guides/configuration.md) for full schema details.
 - `FINDFMT_<KEY>`: Environment-variable overrides for any configuration schema key (e.g.
-  `FINDFMT_FORMAT=table`, `FINDFMT_MAX_DEPTH=2`, `FINDFMT_HIDDEN=true`,
-  `FINDFMT_TAGS=python,shell`), evaluated above configuration files and below explicit CLI flags.
-- `XDG_CONFIG_HOME`: Configuration directory root used to resolve
-  `$XDG_CONFIG_HOME/findfmt/config.toml` and `$XDG_CONFIG_HOME/git/ignore`.
+  `FINDFMT_FORMAT=table`, `FINDFMT_MAX_DEPTH=2`, `FINDFMT_HIDDEN=true`, `FINDFMT_TAGS=python,shell`),
+  evaluated above configuration files and below explicit CLI flags.
+- `XDG_CONFIG_HOME`: Configuration directory root used to resolve `$XDG_CONFIG_HOME/findfmt/config.toml` and
+  `$XDG_CONFIG_HOME/git/ignore`.
 - `PATHEXT`: Semicolon-delimited list of executable file extensions on Windows.
 
 ## 7. Exit Status
@@ -361,10 +340,9 @@ findfilefmt python -- -hyphenated-dir/
 | `2`   | Invalid command-line arguments, conflicting options, or configuration file error.                                           |
 | `130` | Execution interrupted by `SIGINT` (`Ctrl+C`).                                                                               |
 
-Pass `--exit-status` for `grep`-style scripting, where "nothing matched" should be a failure. The
-command wrappers (`findfiles`, `findfilefmt`, `findfilemime`, `findfmt0`, `findshebang`,
-`findsummary`) follow the same exit-code contract across all status codes (`0`, `1`, `2`, and
-`130`).
+Pass `--exit-status` for `grep`-style scripting, where "nothing matched" should be a failure. The command
+wrappers (`findfiles`, `findfilefmt`, `findfilemime`, `findfmt0`, `findshebang`, `findsummary`) follow the
+same exit-code contract across all status codes (`0`, `1`, `2`, and `130`).
 
 ## 8. Examples
 

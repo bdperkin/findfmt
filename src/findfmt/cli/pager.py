@@ -300,9 +300,7 @@ class FindfmtCommand(typer.core.TyperCommand):
         """
         set_locale()
         config_path, no_config, _ = extract_config_args(args)
-        help_requested = any(
-            arg in ("--help", "-h", "--help-all", "--generate-config") for arg in args
-        )
+        help_requested = any(arg in ("--help", "-h", "--help-all", "--generate-config") for arg in args)
 
         if not help_requested:
             path, defaults = resolve_and_load_config(
@@ -376,9 +374,7 @@ class FindfmtCommand(typer.core.TyperCommand):
                     **extra,
                 )
         except SystemExit as exc:
-            if exc.code == 1 and (
-                is_broken_pipe_wrapper(sys.stdout) or is_broken_pipe_wrapper(sys.stderr)
-            ):
+            if exc.code == 1 and (is_broken_pipe_wrapper(sys.stdout) or is_broken_pipe_wrapper(sys.stderr)):
                 if standalone_mode:
                     sys.exit(0)
 

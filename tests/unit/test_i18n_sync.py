@@ -155,16 +155,14 @@ def test_sync_pending_locales_and_cli_sync(
     en_po = loc_dir / "en" / "LC_MESSAGES" / "findfmt.po"
     en_po.parent.mkdir(parents=True)
     en_po.write_text(
-        'msgid ""\nmsgstr "Content-Type: text/plain; charset=UTF-8\\n"\n\n'
-        'msgid "Hello {name}"\nmsgstr ""\n',
+        'msgid ""\nmsgstr "Content-Type: text/plain; charset=UTF-8\\n"\n\nmsgid "Hello {name}"\nmsgstr ""\n',
         encoding="utf-8",
     )
 
     es_po = loc_dir / "es" / "LC_MESSAGES" / "findfmt.po"
     es_po.parent.mkdir(parents=True)
     es_po.write_text(
-        'msgid ""\nmsgstr "Content-Type: text/plain; charset=UTF-8\\n"\n\n'
-        'msgid "Hello {name}"\nmsgstr ""\n',
+        'msgid ""\nmsgstr "Content-Type: text/plain; charset=UTF-8\\n"\n\nmsgid "Hello {name}"\nmsgstr ""\n',
         encoding="utf-8",
     )
 

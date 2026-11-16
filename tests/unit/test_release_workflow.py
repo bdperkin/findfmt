@@ -139,9 +139,7 @@ def test_release_oidc_is_confined_to_tag_publish_jobs() -> None:
 def test_release_notes_come_from_the_changelog() -> None:
     """Validate the GitHub Release uses the curated CHANGELOG.md section, checked early (#498)."""
     jobs = _load_release_workflow()["jobs"]
-    verify = next(
-        s for s in jobs["verify-release"]["steps"] if s.get("name") == "Verify Release Tag"
-    )
+    verify = next(s for s in jobs["verify-release"]["steps"] if s.get("name") == "Verify Release Tag")
     assert 'tools/release_notes.py --tag "$RELEASE_TAG"' in verify["run"]
     build = jobs["build-distributions"]
     notes = next(s for s in build["steps"] if s.get("id") == "notes")
@@ -183,9 +181,7 @@ def test_test_group_is_sufficient() -> None:
 
     test_deps = data.get("dependency-groups", {}).get("test", [])
     names = {
-        str(d).split(";")[0].split(">=")[0].split("==")[0].strip()
-        for d in test_deps
-        if isinstance(d, str)
+        str(d).split(";")[0].split(">=")[0].split("==")[0].strip() for d in test_deps if isinstance(d, str)
     }
     assert {"docutils", "hatchling", "pytest", "pytest-cov", "pytest-mock"} <= names
 

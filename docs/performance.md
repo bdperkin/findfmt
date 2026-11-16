@@ -1,124 +1,117 @@
 # Performance Architecture & Benchmarks
 
-This document outlines the performance characteristics, benchmarking architecture, and baseline
-performance metrics for `findfmt`.
+This document outlines the performance characteristics, benchmarking architecture, and baseline performance
+metrics for `findfmt`.
 
 ______________________________________________________________________
 
 ## 1. Performance Goals & Architecture
 
-`findfmt` is engineered to deliver high-throughput filesystem traversal and intelligent content
-classification across large codebases and monorepos (>100,000 files).
+`findfmt` is engineered to deliver high-throughput filesystem traversal and intelligent content classification
+across large codebases and monorepos (>100,000 files).
 
 The performance model focuses on three primary metrics:
 
-1. **Traversal Throughput (files/sec and dirs/sec)**: Maximizing file discovery and content
-   inspection throughput across large repository hierarchies while pruning excluded trees early via
-   `.gitignore` specifications.
+1. **Traversal Throughput (files/sec and dirs/sec)**: Maximizing file discovery and content inspection
+   throughput across large repository hierarchies while pruning excluded trees early via `.gitignore`
+   specifications.
 
-2. **Latency to First Yielded Result (TTFR)**: Measuring first-byte responsiveness (in milliseconds)
-   from execution start until the first matching item is yielded. Low TTFR is critical for pipe
-   streaming and interactive subshells.
+2. **Latency to First Yielded Result (TTFR)**: Measuring first-byte responsiveness (in milliseconds) from
+   execution start until the first matching item is yielded. Low TTFR is critical for pipe streaming and
+   interactive subshells.
 
-3. **Peak Heap Memory Footprint**: Tracking peak heap memory allocation using Python's `tracemalloc`
-   standard library to ensure low, bounded memory usage during multi-level directory traversal.
+3. **Peak Heap Memory Footprint**: Tracking peak heap memory allocation using Python's `tracemalloc` standard
+   library to ensure low, bounded memory usage during multi-level directory traversal.
 
 ______________________________________________________________________
 
 ## 2. Core Optimization Vectors
 
-The traversal and classification pipeline incorporates several targeted optimizations to maximize
-throughput across large repository hierarchies:
+The traversal and classification pipeline incorporates several targeted optimizations to maximize throughput
+across large repository hierarchies:
 
 ### 2.1. Redundant Syscalls & `Path.resolve()` Elimination
 
-Earlier implementations resolved relative paths by invoking `Path.resolve()` on every discovered
-file. In deep directory structures, resolving paths generates tens of thousands of redundant
-`readlink` and `stat` system calls.
+Earlier implementations resolved relative paths by invoking `Path.resolve()` on every discovered file. In deep
+directory structures, resolving paths generates tens of thousands of redundant `readlink` and `stat` system
+calls.
 
-`findfmt` optimizes this by computing directory-relative paths with `os.path.relpath()` and prefix
-operations derived from pre-computed root strings. File classification operates on the entry's
-original path without resolving symlinks for regular files, avoiding per-file link resolution
-overhead.
+`findfmt` optimizes this by computing directory-relative paths with `os.path.relpath()` and prefix operations
+derived from pre-computed root strings. File classification operates on the entry's original path without
+resolving symlinks for regular files, avoiding per-file link resolution overhead.
 
 ### 2.2. `DirEntry` Metadata Preservation & Single-Buffer Content Reads
 
 Python's `os.scandir()` yields `os.DirEntry` objects whose cached file type (`is_file`, `is_dir`,
-`is_symlink`) and `stat()` attributes are populated directly from the operating system's directory
-stream.
+`is_symlink`) and `stat()` attributes are populated directly from the operating system's directory stream.
 
 `findfmt` preserves and forwards `os.DirEntry` instances throughout traversal and classification:
 
-- **Zero-Stat Verification**: Avoids secondary `os.stat()` syscalls by reusing cached entry
-  metadata.
-- **Single-Buffer Content Inspection**: When content inspection is required (for shebang or MIME
-  detection), `findfmt` reads an initial buffer (the first 2,048 to 4,096 bytes) once into memory.
-  This buffer is shared across shebang parsing, MIME type sniffing, and tag classification,
-  eliminating duplicate `open()` and `read()` syscalls on candidate files.
+- **Zero-Stat Verification**: Avoids secondary `os.stat()` syscalls by reusing cached entry metadata.
+- **Single-Buffer Content Inspection**: When content inspection is required (for shebang or MIME detection),
+  `findfmt` reads an initial buffer (the first 2,048 to 4,096 bytes) once into memory. This buffer is shared
+  across shebang parsing, MIME type sniffing, and tag classification, eliminating duplicate `open()` and
+  `read()` syscalls on candidate files.
 
 ### 2.3. Zero-Allocation Gitignore Rule Matching Hot Loop
 
 In traversal loops evaluating multiple active `.gitignore` specifications:
 
 - Path operations avoid redundant `Path.is_relative_to()` and `Path.relative_to()` allocations.
-- Relative path representations are passed as normalized strings, leveraging fast string prefix
-  matching to evaluate directory boundaries and pruning rules.
+- Relative path representations are passed as normalized strings, leveraging fast string prefix matching to
+  evaluate directory boundaries and pruning rules.
 
 ### 2.4. Fast-Path Filter Short-Circuiting
 
 When specific tags are requested (for example, `--tag python`):
 
 - `can_skip_file_by_tags()` inspects the filename extension before opening the file.
-- If an extension definitively excludes the requested tags and indicates no executable shebang is
-  possible (such as known binary formats or fixed non-script extensions), the file read is bypassed
-  entirely.
+- If an extension definitively excludes the requested tags and indicates no executable shebang is possible
+  (such as known binary formats or fixed non-script extensions), the file read is bypassed entirely.
 
 ______________________________________________________________________
 
 ## 3. Parallel Batch Execution & Concurrency Analysis
 
-Parallelizing the content-inspection phase using `concurrent.futures.ThreadPoolExecutor` was
-evaluated against the streaming generator architecture on modern multi-core NVMe systems.
+Parallelizing the content-inspection phase using `concurrent.futures.ThreadPoolExecutor` was evaluated against
+the streaming generator architecture on modern multi-core NVMe systems.
 
 ### 3.1. ThreadPoolExecutor vs. Streaming Generator Benchmarks
 
-Empirical profiling evaluated a 4-worker `ThreadPoolExecutor` against the sequential streaming
-generator across a test suite of 1,000 files:
+Empirical profiling evaluated a 4-worker `ThreadPoolExecutor` against the sequential streaming generator
+across a test suite of 1,000 files:
 
-- **Sequential Streaming Generator**: Processed 1,000 files in 0.0584 seconds (~17,131
-  files/second).
+- **Sequential Streaming Generator**: Processed 1,000 files in 0.0584 seconds (~17,131 files/second).
 - **ThreadPoolExecutor (4 Workers)**: Processed 1,000 files in 0.1076 seconds (~9,295 files/second).
 
-Multi-threading introduced an approximate 1.84x slowdown compared to the single-threaded
-implementation.
+Multi-threading introduced an approximate 1.84x slowdown compared to the single-threaded implementation.
 
 ### 3.2. Concurrency Trade-Off Rationale
 
-Several architectural factors explain why single-threaded traversal outperforms thread pools for
-local filesystem inspection in Python:
+Several architectural factors explain why single-threaded traversal outperforms thread pools for local
+filesystem inspection in Python:
 
-1. **OS Page Cache & SSD Latency**: Reading initial file buffers (2 KB) from modern NVMe storage and
-   operating system page caches executes in microseconds. I/O wait times are negligible compared to
-   thread scheduling costs.
-2. **GIL Contention & Dispatch Overhead**: Submitting tasks to thread pools, queuing futures,
-   context switching, and Global Interpreter Lock (GIL) contention in CPython introduce
-   synchronization overhead that dwarfs the cost of reading small file headers sequentially.
-3. **Time-to-First-Result (TTFR) Degradation**: Batch thread dispatching chunks results, delaying
-   initial yields. The single-threaded generator yields matching entries immediately
-   (sub-millisecond TTFR), which is essential for interactive subshells and piping into tools like
-   `fzf` or `head`.
-4. **Bounded Memory Guarantees**: A pure generator maintains constant memory, whereas parallel
-   thread pools accumulate collections of pending futures and buffers.
+1. **OS Page Cache & SSD Latency**: Reading initial file buffers (2 KB) from modern NVMe storage and operating
+   system page caches executes in microseconds. I/O wait times are negligible compared to thread scheduling
+   costs.
+2. **GIL Contention & Dispatch Overhead**: Submitting tasks to thread pools, queuing futures, context
+   switching, and Global Interpreter Lock (GIL) contention in CPython introduce synchronization overhead that
+   dwarfs the cost of reading small file headers sequentially.
+3. **Time-to-First-Result (TTFR) Degradation**: Batch thread dispatching chunks results, delaying initial
+   yields. The single-threaded generator yields matching entries immediately (sub-millisecond TTFR), which is
+   essential for interactive subshells and piping into tools like `fzf` or `head`.
+4. **Bounded Memory Guarantees**: A pure generator maintains constant memory, whereas parallel thread pools
+   accumulate collections of pending futures and buffers.
 
-Based on these empirical results, `findfmt` retains its single-threaded streaming generator design
-as the optimal performance architecture.
+Based on these empirical results, `findfmt` retains its single-threaded streaming generator design as the
+optimal performance architecture.
 
 ______________________________________________________________________
 
 ## 4. Automated Benchmark Harness (`tools/benchmark.py`)
 
-The repository includes a dedicated, automated benchmark suite at `tools/benchmark.py` that
-generates reproducible synthetic datasets and measures traversal performance across standard tiers.
+The repository includes a dedicated, automated benchmark suite at `tools/benchmark.py` that generates
+reproducible synthetic datasets and measures traversal performance across standard tiers.
 
 ### 4.1. Tiered Datasets
 
@@ -127,49 +120,48 @@ The harness supports three standardized dataset tiers alongside custom directory
 - **Small Tier (\<1,000 files)**: Generates approximately 800 files across nested directories with
   `.gitignore` exclusion rules. Designed for fast local feedback (\<1 second execution).
 
-- **Medium Tier (10,000–50,000 files)**: Generates approximately 12,000 files across multiple
-  package subtrees, simulating standard enterprise codebases.
+- **Medium Tier (10,000–50,000 files)**: Generates approximately 12,000 files across multiple package
+  subtrees, simulating standard enterprise codebases.
 
-- **Monorepo Tier (>100,000 files)**: Stress test dataset simulating large monorepo structures with
-  deep hierarchies and mixed file types.
+- **Monorepo Tier (>100,000 files)**: Stress test dataset simulating large monorepo structures with deep
+  hierarchies and mixed file types.
 
-- **Custom Directory Target (`-d, --target-dir`)**: Benchmarks real-world directory trees directly,
-  such as the `findfmt` repository or user-specified projects.
+- **Custom Directory Target (`-d, --target-dir`)**: Benchmarks real-world directory trees directly, such as
+  the `findfmt` repository or user-specified projects.
 
 #### 4.1.1. Deterministic Reproducibility
 
-Synthetic trees are generated deterministically using a fixed random seed (`--seed 42` by default).
-The generator constructs realistic directory trees with diverse file extensions (`.py`, `.sh`,
-`.md`, `.json`, `.yaml`, `.txt`, `.bin`), executable scripts without extensions containing shebang
-headers, and root `.gitignore` exclusion specifications.
+Synthetic trees are generated deterministically using a fixed random seed (`--seed 42` by default). The
+generator constructs realistic directory trees with diverse file extensions (`.py`, `.sh`, `.md`, `.json`,
+`.yaml`, `.txt`, `.bin`), executable scripts without extensions containing shebang headers, and root
+`.gitignore` exclusion specifications.
 
 ### 4.2. Filesystem Topologies
 
-To model realistic disk structures, the benchmark harness supports representative topologies via
-`--topology` (`-T`):
+To model realistic disk structures, the benchmark harness supports representative topologies via `--topology`
+(`-T`):
 
-- **Standard (`standard`)**: A balanced multi-tier package tree (60 directories) simulating a
-  typical project directory hierarchy.
-- **Flat (`flat`)**: A single directory containing all generated files (for example, 10,000 files in
-  one folder), isolating raw directory stream parsing throughput from recursive traversal overhead.
-- **Deep (`deep`)**: A deeply nested hierarchy (20 levels of nesting with a branching factor of 2),
-  testing recursion depth limits, call-stack efficiency, and path concatenation overhead.
-- **Real-World Monorepo (`real-world`)**: A realistic monorepo topology featuring multiple
-  sub-projects alongside massive ignored directories (`node_modules/`, `.venv/`, `dist/`, `build/`)
-  containing thousands of excluded files, verifying early `.gitignore` directory pruning efficiency
-  in $O(1)$ time.
+- **Standard (`standard`)**: A balanced multi-tier package tree (60 directories) simulating a typical project
+  directory hierarchy.
+- **Flat (`flat`)**: A single directory containing all generated files (for example, 10,000 files in one
+  folder), isolating raw directory stream parsing throughput from recursive traversal overhead.
+- **Deep (`deep`)**: A deeply nested hierarchy (20 levels of nesting with a branching factor of 2), testing
+  recursion depth limits, call-stack efficiency, and path concatenation overhead.
+- **Real-World Monorepo (`real-world`)**: A realistic monorepo topology featuring multiple sub-projects
+  alongside massive ignored directories (`node_modules/`, `.venv/`, `dist/`, `build/`) containing thousands of
+  excluded files, verifying early `.gitignore` directory pruning efficiency in $O(1)$ time.
 
 ### 4.3. Output Formatters & Classification Modes
 
-The harness benchmarks output formatting throughput, streaming efficiency, and Time-to-First-Result
-(TTFR) latency via `--format` (`-F`) and `--list-tags`:
+The harness benchmarks output formatting throughput, streaming efficiency, and Time-to-First-Result (TTFR)
+latency via `--format` (`-F`) and `--list-tags`:
 
-- **Streaming Formats (`text`, `jsonl`, `tsv`, `csv`)**: Streams entries lazily directly to the sink
-  without buffering matching inventories into RAM, maintaining bounded $O(1)$ heap overhead.
-- **Buffered Formats (`json`, `tree`, `table`)**: Ingests all matching records before building
-  structured trees or serialized tabular representations.
-- **Tag & MIME Inspection (`--list-tags`)**: Measures content inspection overhead when resolving
-  MIME classifications and tag metadata across discovered files.
+- **Streaming Formats (`text`, `jsonl`, `tsv`, `csv`)**: Streams entries lazily directly to the sink without
+  buffering matching inventories into RAM, maintaining bounded $O(1)$ heap overhead.
+- **Buffered Formats (`json`, `tree`, `table`)**: Ingests all matching records before building structured
+  trees or serialized tabular representations.
+- **Tag & MIME Inspection (`--list-tags`)**: Measures content inspection overhead when resolving MIME
+  classifications and tag metadata across discovered files.
 
 ______________________________________________________________________
 
@@ -280,8 +272,7 @@ ______________________________________________________________________
 
 ## 6. Official v1.0.0 Baseline Performance Metrics
 
-The canonical v1.0.0 baselines were recorded on an x86_64 Linux environment (CPython 3.13.15, Linux
-6.12+):
+The canonical v1.0.0 baselines were recorded on an x86_64 Linux environment (CPython 3.13.15, Linux 6.12+):
 
 ### 6.1. Filesystem Topology Baselines
 
@@ -294,8 +285,8 @@ The canonical v1.0.0 baselines were recorded on an x86_64 Linux environment (CPy
 | **Real-World Monorepo (Ignored)** | 826           | 35                    | 0.3734 s     | 2,213.1 f/s          | 5.93 ms           | 0.19 MB        |
 | **findfmt Repository**            | 233           | 1,933                 | 0.1575 s     | 1,480.3 f/s          | 9.24 ms           | 0.13 MB        |
 
-*Note: In the Real-World Monorepo benchmark, 5,000+ files located in `node_modules/` and `.venv/`
-were pruned in $O(1)$ time at the directory root level, completing in 0.37 seconds.*
+*Note: In the Real-World Monorepo benchmark, 5,000+ files located in `node_modules/` and `.venv/` were pruned
+in $O(1)$ time at the directory root level, completing in 0.37 seconds.*
 
 ### 6.2. Output Formatter & Classification Performance (Medium Tier, 7,901 Files)
 
@@ -318,11 +309,9 @@ ______________________________________________________________________
 The benchmarking harness and automated test suite ensure continuous regression protection:
 
 1. Canonical v1.0.0 baselines are committed and versioned at `tests/fixtures/v1_baseline.json`.
-2. Automated integration tests in `tests/integration/test_performance_baselines.py` continuously
-   assert that:
+2. Automated integration tests in `tests/integration/test_performance_baselines.py` continuously assert that:
    - Streaming formatters (`text`, `jsonl`, `tsv`, `csv`) maintain bounded $O(1)$ heap memory.
-   - Early `.gitignore` pruning bounds traversal time and memory when skipping massive directory
-     trees.
+   - Early `.gitignore` pruning bounds traversal time and memory when skipping massive directory trees.
    - Continuous multi-run traversals exhibit zero unbounded memory leaks.
 3. Pull requests can execute regression checks via:
 
@@ -330,5 +319,5 @@ The benchmarking harness and automated test suite ensure continuous regression p
 uv run python tools/benchmark.py --baseline tests/fixtures/v1_baseline.json --threshold 10.0
 ```
 
-If throughput degrades by more than the specified threshold percentage, the tool emits a comparison
-table and exits with non-zero status code `1`, halting the quality gate.
+If throughput degrades by more than the specified threshold percentage, the tool emits a comparison table and
+exits with non-zero status code `1`, halting the quality gate.

@@ -17,9 +17,7 @@ _FORMATTER = string.Formatter()
 _PRINTF_SPEC_PATTERN = (
     r"%%|%(?:\([a-zA-Z_]\w*\))?[#0 +\-]?(?:\d+|\*)?(?:\.(?:\d+|\*))?[hlL]?[diouxXeEfFgGcrsab]"
 )
-_RICH_STYLE_WORDS = (
-    r"bold|dim|italic|underline|blink|reverse|strike|red|green|yellow|blue|magenta|cyan|white"
-)
+_RICH_STYLE_WORDS = r"bold|dim|italic|underline|blink|reverse|strike|red|green|yellow|blue|magenta|cyan|white"
 _RICH_TAG_PATTERN = rf"\[(?:/[a-z_ ]*|(?=(?:{_RICH_STYLE_WORDS})\b)[a-z_ ]+)\]"
 
 _PRINTF_RE = re.compile(_PRINTF_SPEC_PATTERN)
@@ -277,8 +275,7 @@ def validate_po_file(po_path: Path) -> list[str]:
             pair_errs = validate_message_pair(entry.msgid, msgstr, msgid_plural=entry.msgid_plural)
             suffix = f"[{idx}]" if entry.msgid_plural is not None else ""
             errors.extend(
-                f"{po_path}:{entry.line_number}: msgstr{suffix} ({entry.msgid!r}): {err}"
-                for err in pair_errs
+                f"{po_path}:{entry.line_number}: msgstr{suffix} ({entry.msgid!r}): {err}" for err in pair_errs
             )
 
     return errors

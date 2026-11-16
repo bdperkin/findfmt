@@ -303,6 +303,4 @@ def test_alias_collision_rejected(
     err = capsys.readouterr().err
     assert f"'{first_key}'" in err
     assert f"'{second_key}'" in err
-    assert (
-        f"Error: Conflicting configuration keys '{first_key}' and '{second_key}' in '{p}'." in err
-    )
+    assert f"Error: Conflicting configuration keys '{first_key}' and '{second_key}' in '{p}'." in err

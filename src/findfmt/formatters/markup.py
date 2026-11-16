@@ -106,9 +106,7 @@ def _compute_markdown_col_widths(rows: Sequence[Sequence[str]]) -> list[int]:
 
 def _render_markdown_row(cells: Sequence[str], col_widths: Sequence[int]) -> str:
     """Format a single row of cells into a Markdown table line."""
-    padded = [
-        _pad_cell(cell, col_widths[i], _MARKDOWN_ALIGNMENTS[i]) for i, cell in enumerate(cells)
-    ]
+    padded = [_pad_cell(cell, col_widths[i], _MARKDOWN_ALIGNMENTS[i]) for i, cell in enumerate(cells)]
     return f"| {' | '.join(padded)} |"
 
 
@@ -128,10 +126,7 @@ class MarkdownFormatter(Formatter):
     @override
     def format(self, files: Iterable[FileInfo]) -> str:
         """Format FileInfo objects into a GFM table string."""
-        rows = [
-            [escape_markdown_cell(c) for c in file_to_record(f, absolute=self.absolute)]
-            for f in files
-        ]
+        rows = [[escape_markdown_cell(c) for c in file_to_record(f, absolute=self.absolute)] for f in files]
         if self.no_indent:
             header_line = f"|{'|'.join(TABLE_FIELD_NAMES)}|"
             seps = [
@@ -170,9 +165,7 @@ def _format_rst_grid(
 
     header_line = (
         "| "
-        + " | ".join(
-            pad_to_cell_width(h, w, align="left") for h, w in zip(headers, col_widths, strict=True)
-        )
+        + " | ".join(pad_to_cell_width(h, w, align="left") for h, w in zip(headers, col_widths, strict=True))
         + " |"
     )
 
@@ -181,8 +174,7 @@ def _format_rst_grid(
         row_line = (
             "| "
             + " | ".join(
-                pad_to_cell_width(cell, w, align="left")
-                for cell, w in zip(row, col_widths, strict=True)
+                pad_to_cell_width(cell, w, align="left") for cell, w in zip(row, col_widths, strict=True)
             )
             + " |"
         )
@@ -209,8 +201,7 @@ def _format_rst_simple(
     lines = [border, header_line, border]
     for row in rows:
         row_line = " ".join(
-            pad_to_cell_width(cell, w, align="left")
-            for cell, w in zip(row, col_widths, strict=True)
+            pad_to_cell_width(cell, w, align="left") for cell, w in zip(row, col_widths, strict=True)
         )
         lines.append(row_line)
 

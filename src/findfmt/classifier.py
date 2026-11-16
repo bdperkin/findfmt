@@ -226,9 +226,7 @@ def _shebang_info(
 def _mime_info(str_path: str) -> tuple[str | None, set[str]]:
     """Extract MIME type and MIME-derived tags."""
     mime_type, _ = mimetypes.guess_type(str_path)
-    tags: set[str] = (
-        {f"mime:{mime_type}", mime_type.split("/", 1)[0]} if mime_type is not None else set()
-    )
+    tags: set[str] = {f"mime:{mime_type}", mime_type.split("/", 1)[0]} if mime_type is not None else set()
     return mime_type, tags
 
 
@@ -377,11 +375,7 @@ def _resolve_file_location(
     exists: bool,
 ) -> Path:
     """Return resolved path for standalone regular files, keeping link and entry locations."""
-    return (
-        path.resolve()
-        if entry is None and not is_symlink and exists and not path.is_absolute()
-        else path
-    )
+    return path.resolve() if entry is None and not is_symlink and exists and not path.is_absolute() else path
 
 
 def classify_file(  # noqa: PLR0913 - wide CLI/config signature

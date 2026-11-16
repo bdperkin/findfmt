@@ -11,7 +11,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for reporting an issue! Please verify your issue hasn't already been reported by searching existing issues.
+        Thank you for reporting an issue! Please verify your issue hasn't already been reported
+        by searching existing issues.
   - type: checkboxes
     id: preflight
     attributes:

@@ -276,10 +276,7 @@ def render_comparison_table(
         header_style="bold magenta",
     )
     table.add_column("Tier", style="cyan", justify="left")
-    cols = (
-        "Base (f/s),Curr (f/s),Throughput Δ,"
-        "Base TTFR,Curr TTFR,Latency Δ,Base Heap,Curr Heap,Memory Δ"
-    )
+    cols = "Base (f/s),Curr (f/s),Throughput Δ,Base TTFR,Curr TTFR,Latency Δ,Base Heap,Curr Heap,Memory Δ"
     for name in cols.split(","):
         table.add_column(name, justify="right")
 
