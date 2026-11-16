@@ -397,9 +397,7 @@ def translate_po_file(
     total = len(parse_po_catalog(po_text))
     blocks = po_text.split("\n\n")
     pending = [
-        (idx, entry)
-        for idx, blk in enumerate(blocks)
-        if (entry := is_untranslated_block(blk)) is not None
+        (idx, entry) for idx, blk in enumerate(blocks) if (entry := is_untranslated_block(blk)) is not None
     ]
     untrans = len(pending)
     batch_size = max(1, cfg.batch_size)
@@ -451,9 +449,7 @@ def translate_catalogs(
 ) -> int:
     """Translate one or all locale PO catalogs under `locale_dir`."""
     if all_locales:
-        targets = [
-            (p.parent.parent.name, p) for p in sorted(locale_dir.glob(f"*/LC_MESSAGES/{domain}.po"))
-        ]
+        targets = [(p.parent.parent.name, p) for p in sorted(locale_dir.glob(f"*/LC_MESSAGES/{domain}.po"))]
         if not targets:
             sys.stderr.write(f"Error: No PO catalogs found under {locale_dir}.\n")
             return 1

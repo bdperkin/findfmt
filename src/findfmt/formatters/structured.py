@@ -44,9 +44,7 @@ def escape_surrogates(text: str) -> str:
     if not any(_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX for c in text):
         return text
 
-    return "".join(
-        f"\\u{ord(c):04x}" if _SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX else c for c in text
-    )
+    return "".join(f"\\u{ord(c):04x}" if _SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX else c for c in text)
 
 
 class JsonFormatter(Formatter):

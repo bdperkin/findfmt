@@ -1,27 +1,27 @@
 # CI/CD Integration
 
-`findfmt` streamlines continuous integration pipelines by providing dynamic, content-aware file
-discovery. Rather than maintaining brittle, hard-coded file lists across configuration files, CI
-jobs can locate target files on the fly while respecting `.gitignore` rules.
+`findfmt` streamlines continuous integration pipelines by providing dynamic, content-aware file discovery.
+Rather than maintaining brittle, hard-coded file lists across configuration files, CI jobs can locate target
+files on the fly while respecting `.gitignore` rules.
 
 ## 1. CI/CD Design Principles with `findfmt`
 
 When integrating `findfmt` into automated workflows, adhere to the following best practices:
 
-- **Use Pipe-Safe NUL Delimiters (`-0` or `findfmt0`)**: Filesystems may contain files with spaces,
-  hyphens, or special characters. Always pair `-0` with `xargs -0` or `xargs -r -0` to prevent
-  argument splitting and injection issues.
-- **Leverage Ephemeral Execution via `uvx`**: Tools can run instantly in CI runners without a
-  separate virtual environment setup step using `uvx findfmt`.
-- **Mount Workspaces as Read-Only**: When running containerized jobs, mount project directories with
-  `:ro` to ensure discovery operations cannot inadvertently modify source trees.
+- **Use Pipe-Safe NUL Delimiters (`-0` or `findfmt0`)**: Filesystems may contain files with spaces, hyphens,
+  or special characters. Always pair `-0` with `xargs -0` or `xargs -r -0` to prevent argument splitting and
+  injection issues.
+- **Leverage Ephemeral Execution via `uvx`**: Tools can run instantly in CI runners without a separate virtual
+  environment setup step using `uvx findfmt`.
+- **Mount Workspaces as Read-Only**: When running containerized jobs, mount project directories with `:ro` to
+  ensure discovery operations cannot inadvertently modify source trees.
 
 ## 2. GitHub Actions Workflows
 
 ### 2.1. Dynamic Shell Script Linting with ShellCheck
 
-The following workflow discovers all shell scripts—including scripts without file extensions that
-invoke bash or sh shebangs—and verifies them with `shellcheck`:
+The following workflow discovers all shell scripts—including scripts without file extensions that invoke bash
+or sh shebangs—and verifies them with `shellcheck`:
 
 ```yaml
 name: Lint Shell Scripts
@@ -101,8 +101,8 @@ Generate a comprehensive JSON inventory of repository files and upload it as a b
 
 ## 3. GitLab CI Pipelines
 
-In GitLab CI, `findfmt` can be executed within a Python container or using the pre-built `findfmt`
-container image.
+In GitLab CI, `findfmt` can be executed within a Python container or using the pre-built `findfmt` container
+image.
 
 ### 3.1. Using the `uv` Python Image
 
@@ -185,8 +185,8 @@ Ensure an up-to-date repository inventory document is maintained:
 
 ## 5. Docker & Containerized CI Workflows
 
-For generic container platforms (Jenkins, CircleCI, Argo Workflows), execute `findfmt` as a
-containerized command:
+For generic container platforms (Jenkins, CircleCI, Argo Workflows), execute `findfmt` as a containerized
+command:
 
 ```bash
 # Execute within a Docker pipeline stage

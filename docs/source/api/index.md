@@ -1,7 +1,6 @@
 # API Reference
 
-The `findfmt` package provides programmatic access to file classification and Git-conscious
-traversal engines.
+The `findfmt` package provides programmatic access to file classification and Git-conscious traversal engines.
 
 ```{toctree}
 :maxdepth: 4

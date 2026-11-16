@@ -82,8 +82,7 @@ def find_fuzzy_entries(po_text: str) -> list[tuple[int, str]]:
             continue
 
         is_fuzzy = any(
-            ln.startswith("#,") and "fuzzy" in {tok.strip() for tok in ln[2:].split(",")}
-            for ln in lines
+            ln.startswith("#,") and "fuzzy" in {tok.strip() for tok in ln[2:].split(",")} for ln in lines
         )
         if is_fuzzy:
             fuzzy.extend((entry.line_number, entry.msgid) for entry in parse_po_catalog(block))
@@ -106,8 +105,7 @@ def _check_pot_and_po_sync(
     if source_dir is not None and source_dir.is_dir():
         missing_in_pot = sorted(scan_source_msgids(source_dir) - pot_ids)
         errors.extend(
-            f"{pot_path}: missing source string {msgid!r} "
-            "(run 'uv run python -m tools.i18n extract')"
+            f"{pot_path}: missing source string {msgid!r} (run 'uv run python -m tools.i18n extract')"
             for msgid in missing_in_pot
         )
 

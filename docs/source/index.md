@@ -69,21 +69,19 @@
 [![GitHub Stars](https://img.shields.io/github/stars/bdperkin/findfmt?style=flat&logo=github)](https://github.com/bdperkin/findfmt/stargazers)
 ```
 
-**findfmt** is a high-performance, `.gitignore`-aware file discovery and classification suite. It
-locates files by content format, shebang, and MIME tag rather than relying strictly on file
-extensions.
+**findfmt** is a high-performance, `.gitignore`-aware file discovery and classification suite. It locates
+files by content format, shebang, and MIME tag rather than relying strictly on file extensions.
 
 ## 1. Core Capabilities
 
-- **Intelligent Classification**: Powered by the `identify` engine and content heuristics to
-  identify file types (e.g. Python, Shell, YAML, JSON, Executable) even when filenames lack
-  extensions.
+- **Intelligent Classification**: Powered by the `identify` engine and content heuristics to identify file
+  types (e.g. Python, Shell, YAML, JSON, Executable) even when filenames lack extensions.
 - **Git-Aware Traversal**: Automatically prunes directories and files matched by `.gitignore` and
   `.git/info/exclude` rules early in traversal.
-- **Deterministic Output**: Always produces clean, relative, alphabetically sorted file paths ready
-  for Unix pipelines and `xargs`.
-- **Modern Python Architecture**: Built with a strict `uv`-first methodology, 100% test coverage,
-  and strict static type checking.
+- **Deterministic Output**: Always produces clean, relative, alphabetically sorted file paths ready for Unix
+  pipelines and `xargs`.
+- **Modern Python Architecture**: Built with a strict `uv`-first methodology, 100% test coverage, and strict
+  static type checking.
 
 ## 2. Quickstart
 
@@ -191,9 +189,9 @@ ______________________________________________________________________
 - **Issue Tracker**: Report bugs, request formats, or propose features on
   [GitHub Issues](https://github.com/bdperkin/findfmt/issues).
 - **Contributing**: Review the
-  [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md) to get
-  started with local development.
-- **Accessibility**: See our [Accessibility Statement](accessibility.md) for supported assistive
-  technologies and barrier reporting.
-- **Security Policy**: See our [Security Policy](security.md) for reporting vulnerabilities and
-  threat modeling details.
+  [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md) to get started with
+  local development.
+- **Accessibility**: See our [Accessibility Statement](accessibility.md) for supported assistive technologies
+  and barrier reporting.
+- **Security Policy**: See our [Security Policy](security.md) for reporting vulnerabilities and threat
+  modeling details.

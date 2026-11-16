@@ -93,10 +93,7 @@ def test_parse_plural_forms_header_and_rule_specs() -> None:
     assert get_plural_rule_spec("ja", po_text=ja_po).nplurals == 1
 
     # Matching header expression on unknown locale resolves to standard family
-    assert (
-        get_plural_rule_spec("xx", po_text="Plural-Forms: nplurals=1; plural=0;\n").family
-        == "one-form"
-    )
+    assert get_plural_rule_spec("xx", po_text="Plural-Forms: nplurals=1; plural=0;\n").family == "one-form"
     # Custom 4-form header on unknown locale constructs custom spec
     custom_spec = get_plural_rule_spec(
         "cy",

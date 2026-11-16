@@ -1,29 +1,26 @@
 # Contributing to findfmt
 
-Thank you for your interest in contributing to `findfmt`! We welcome contributions ranging from bug
-reports and documentation fixes to major features.
+Thank you for your interest in contributing to `findfmt`! We welcome contributions ranging from bug reports
+and documentation fixes to major features.
 
 For architecture guides, API reference, and user tutorials, consult our online documentation at
-[https://bdperkin.github.io/findfmt](https://bdperkin.github.io/findfmt). For the technical
-architecture reference, file decomposition policy, and behavioral standards for AI coding agents and
-developers, see [AGENTS.md](AGENTS.md).
+[https://bdperkin.github.io/findfmt](https://bdperkin.github.io/findfmt). For the technical architecture
+reference, file decomposition policy, and behavioral standards for AI coding agents and developers, see
+[AGENTS.md](AGENTS.md).
 
 ## 1. Reporting Issues & Proposing Features
 
-We use structured GitHub Issue Forms to ensure essential reproduction details and context are
-provided upfront:
+We use structured GitHub Issue Forms to ensure essential reproduction details and context are provided
+upfront:
 
-- **[Bug Reports](https://github.com/bdperkin/findfmt/issues/new?template=bug_report.yml)**: Report
-  unexpected behavior, incorrect exit codes, or CLI crashes with command invocations and environment
-  details.
+- **[Bug Reports](https://github.com/bdperkin/findfmt/issues/new?template=bug_report.yml)**: Report unexpected
+  behavior, incorrect exit codes, or CLI crashes with command invocations and environment details.
 - **[New Format / Tag Requests](https://github.com/bdperkin/findfmt/issues/new?template=new_format_request.yml)**:
-  Propose new classification tags, MIME types, or shebang patterns with a minimal snippet or
-  fixture.
+  Propose new classification tags, MIME types, or shebang patterns with a minimal snippet or fixture.
 - **[Misclassification Reports](https://github.com/bdperkin/findfmt/issues/new?template=misclassification_report.yml)**:
-  Report misidentified files or directory traversal edge cases (`.gitignore`, `--hidden`,
-  `--no-ignore`).
-- **[Feature Requests](https://github.com/bdperkin/findfmt/issues/new?template=feature_request.yml)**:
-  Propose new CLI flags, output formatters, or Python API enhancements.
+  Report misidentified files or directory traversal edge cases (`.gitignore`, `--hidden`, `--no-ignore`).
+- **[Feature Requests](https://github.com/bdperkin/findfmt/issues/new?template=feature_request.yml)**: Propose
+  new CLI flags, output formatters, or Python API enhancements.
 - **[Documentation Improvements](https://github.com/bdperkin/findfmt/issues/new?template=documentation.yml)**:
   Report typos, unclear phrasing, or missing documentation guides.
 - **Security Inquiries**: For security vulnerabilities, follow our private reporting process via
@@ -41,8 +38,7 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
   - `area:i18n`: Internationalization and localization catalogs.
   - `area:packaging`: PyPI packages, wheels, Docker images, dependencies.
   - `area:docs`: Documentation guides, API reference, man pages, README.
-  - `area:rust`: Rust extension crate (`findfmt_rs`), PyO3 bindings, and `maturin` build
-    integration.
+  - `area:rust`: Rust extension crate (`findfmt_rs`), PyO3 bindings, and `maturin` build integration.
 - **`os:*` (Operating Systems)**:
   - `os:linux`, `os:macos`, `os:windows`: Platform-specific behaviors and tests.
 - **`status:*` (Triage & Review Workflow)**:
@@ -95,8 +91,8 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   uv run pre-commit run --all-files --show-diff-on-failure
   ```
-  The flag prints the diff when hooks modify files. Stage the fixes and run the command again.
-  Include `--show-diff-on-failure` in new automated invocations of `pre-commit run --all-files`.
+  The flag prints the diff when hooks modify files. Stage the fixes and run the command again. Include
+  `--show-diff-on-failure` in new automated invocations of `pre-commit run --all-files`.
 - **100% Test Coverage**: Every line and branch must be covered.
   ```bash
   uv run pytest
@@ -114,9 +110,8 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   uv run sphinx-build -M html docs/source docs/build -W
   ```
-- **Prose and Documentation Linting**: All Markdown files (`.md`) are linted using
-  [Vale](https://vale.sh/) with style rules defined in `.vale.ini` and project vocabulary in
-  `.github/styles/`:
+- **Prose and Documentation Linting**: All Markdown files (`.md`) are linted using [Vale](https://vale.sh/)
+  with style rules defined in `.vale.ini` and project vocabulary in `.github/styles/`:
   ```bash
   vale *.md docs/
   ```
@@ -126,44 +121,42 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   uvx zizmor .github/ .pre-commit-config.yaml
   ```
-  Suppress accepted risks inline with `# zizmor: ignore[<audit>] -- <reason>`; every suppression
-  must include a justification comment after `--`.
-- **Public API Snapshot**: `tests/unit/test_api_surface.py` fails when a name in any module's
-  `__all__` (or its signature) changes. For intentional changes, regenerate the snapshot and record
-  the change in `CHANGELOG.md` (see the API stability policy in the documentation):
+  Suppress accepted risks inline with `# zizmor: ignore[<audit>] -- <reason>`; every suppression must include
+  a justification comment after `--`.
+- **Public API Snapshot**: `tests/unit/test_api_surface.py` fails when a name in any module's `__all__` (or
+  its signature) changes. For intentional changes, regenerate the snapshot and record the change in
+  `CHANGELOG.md` (see the API stability policy in the documentation):
   ```bash
   uv run python tools/api_surface.py --write
   ```
-- **Localization Tooling & Message Catalogs**: If updating translatable strings or locale catalogs,
-  extract, synchronize, validate, and compile message catalogs:
+- **Localization Tooling & Message Catalogs**: If updating translatable strings or locale catalogs, extract,
+  synchronize, validate, and compile message catalogs:
   ```bash
   uv run python -m tools.i18n extract
   uv run python -m tools.i18n sync
   uv run python -m tools.i18n validate
   uv run python -m tools.i18n compile
   ```
-  The documentation has its own Sphinx catalogs under `docs/source/locale/`. After changing
-  documentation text, regenerate and check them:
+  The documentation has its own Sphinx catalogs under `docs/source/locale/`. After changing documentation
+  text, regenerate and check them:
   ```bash
   make -C docs intl-update   # extract strings and update every language's .po catalog
   make -C docs html-all      # compile catalogs and build all languages
   ```
-  `intl-update` drops obsolete `#~` entries (`--no-obsolete`). Changed paragraphs are kept and
-  marked fuzzy for review, but a translation whose source text was removed is deleted.
-  `tests/unit/test_docs_catalogs.py` fails when a page has no catalog in some language.
+  `intl-update` drops obsolete `#~` entries (`--no-obsolete`). Changed paragraphs are kept and marked fuzzy
+  for review, but a translation whose source text was removed is deleted. `tests/unit/test_docs_catalogs.py`
+  fails when a page has no catalog in some language.
 
 ### 4.1. Dependency Resolution Testing
 
-`findfmt` validates dependency declarations in `pyproject.toml` across `uv` resolution strategies
-(`highest`, `lowest`, `lowest-direct`), pre-release policies (`disallow`, `allow`, `if-necessary`,
-`explicit`, `if-necessary-or-explicit`), and fork strategies (`fewest`, `requires-python`). Pull
-requests run a 2-cell smoke matrix in `.github/workflows/ci.yml` (**M1**: `lowest-direct` +
-`disallow`; **M2**: `highest` + `allow`), while `.github/workflows/dependency-matrix.yml` runs all 6
-pruned cells (**M1–M6**) nightly and via `workflow_dispatch` (see
-`docs/source/quality/dependency_matrix.md`).
+`findfmt` validates dependency declarations in `pyproject.toml` across `uv` resolution strategies (`highest`,
+`lowest`, `lowest-direct`), pre-release policies (`disallow`, `allow`, `if-necessary`, `explicit`,
+`if-necessary-or-explicit`), and fork strategies (`fewest`, `requires-python`). Pull requests run a 2-cell
+smoke matrix in `.github/workflows/ci.yml` (**M1**: `lowest-direct` + `disallow`; **M2**: `highest` +
+`allow`), while `.github/workflows/dependency-matrix.yml` runs all 6 pruned cells (**M1–M6**) nightly and via
+`workflow_dispatch` (see `docs/source/quality/dependency_matrix.md`).
 
-Run the dependency matrix locally in isolated temporary virtual environments via
-`tools/verify_quality.py`:
+Run the dependency matrix locally in isolated temporary virtual environments via `tools/verify_quality.py`:
 
 ```bash
 uv run python tools/verify_quality.py --smoke
@@ -173,23 +166,23 @@ uv run python tools/verify_quality.py --resolution lowest-direct --prerelease di
 
 When a matrix cell fails, `tools/verify_quality.py` prints a three-stage diagnostic report:
 
-1. **Inspect `uv pip tree` and Version Deltas**: Review Stage 1 (`uv pip tree`) and Stage 2 (deltas
-   against `uv.lock`) to identify which downgraded or pre-release package triggered the failure.
-2. **Bisect and Raise Lower Bounds**: If `lowest-direct` (**M1**/**M4**) or transitive `lowest`
-   (**M5**) fails, test candidate versions in an ephemeral environment
-   (`uv pip install --python <venv> <pkg>==<ver>`), update the minimum floor in `pyproject.toml`
-   (`[project].dependencies` or `[dependency-groups].test`), and run `uv lock`.
-3. **Handle Upstream Pre-Releases**: If `prerelease=allow` (**M2**/**M4**) fails due to an upstream
-   alpha, beta, or release candidate, update the affected call site or add a temporary upper-bound
-   constraint in `pyproject.toml`.
+1. **Inspect `uv pip tree` and Version Deltas**: Review Stage 1 (`uv pip tree`) and Stage 2 (deltas against
+   `uv.lock`) to identify which downgraded or pre-release package triggered the failure.
+2. **Bisect and Raise Lower Bounds**: If `lowest-direct` (**M1**/**M4**) or transitive `lowest` (**M5**)
+   fails, test candidate versions in an ephemeral environment (`uv pip install --python <venv> <pkg>==<ver>`),
+   update the minimum floor in `pyproject.toml` (`[project].dependencies` or `[dependency-groups].test`), and
+   run `uv lock`.
+3. **Handle Upstream Pre-Releases**: If `prerelease=allow` (**M2**/**M4**) fails due to an upstream alpha,
+   beta, or release candidate, update the affected call site or add a temporary upper-bound constraint in
+   `pyproject.toml`.
 
 ### 4.2. Multi-Python Local Test Runner
 
-`tools/verify_quality.py` serves as the unified local runner for both dependency resolution matrices
-and multi-Python interpreter testing (`3.11` through `3.15`). It reads the supported Python version
-list directly from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`,
-executes each interpreter inside an isolated temporary `uv` virtual environment, and automatically
-skips interpreters that are not installed locally:
+`tools/verify_quality.py` serves as the unified local runner for both dependency resolution matrices and
+multi-Python interpreter testing (`3.11` through `3.15`). It reads the supported Python version list directly
+from the `Programming Language :: Python :: 3.X` classifiers in `pyproject.toml`, executes each interpreter
+inside an isolated temporary `uv` virtual environment, and automatically skips interpreters that are not
+installed locally:
 
 ```bash
 # List all configured Python interpreter sessions (py3.11-py3.15) and dependency matrix cells
@@ -214,8 +207,8 @@ Five local runner candidates were evaluated (see `docs/source/quality/dependency
 
 ## 5. Commit Guidelines
 
-We use [Conventional Commits](https://www.conventionalcommits.org/) to power our automated semantic
-release and changelog pipelines:
+We use [Conventional Commits](https://www.conventionalcommits.org/) to power our automated semantic release
+and changelog pipelines:
 
 - `feat:` A new feature (triggers minor release)
 - `fix:` A bug fix (triggers patch release)
@@ -235,56 +228,54 @@ git commit -s -m "feat: add support for MIME categories"
 
 ## 6. Pull Request & Review Process
 
-1. **Branch Protection**: Direct pushes to `main` are strictly disabled and blocked for all
-   collaborators (including administrators via `enforce_admins: true`). All modifications must be
-   submitted via a Pull Request.
+1. **Branch Protection**: Direct pushes to `main` are strictly disabled and blocked for all collaborators
+   (including administrators via `enforce_admins: true`). All modifications must be submitted via a Pull
+   Request.
 2. **Feature Branches**: Create a dedicated feature branch off the latest `main` (e.g.,
    `feature/issue-number-short-description`).
-3. **Local Verification**: Ensure all tests, typing, and quality gates pass locally before opening a
-   PR:
+3. **Local Verification**: Ensure all tests, typing, and quality gates pass locally before opening a PR:
    ```bash
    uv run pre-commit run --all-files --show-diff-on-failure
    uv run python tools/verify_quality.py
    vale *.md docs/
    ```
 4. **Code Review & Quality Gates**:
-   - Every PR triggers our full automated CI suite (Linux, macOS, Windows across Python 3.11–3.15,
-     100% test and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL, zizmor,
-     ClusterFuzzLite, Vale prose linting, and dependency review). All status checks must pass before
-     merging.
+   - Every PR triggers our full automated CI suite (Linux, macOS, Windows across Python 3.11–3.15, 100% test
+     and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL, zizmor, ClusterFuzzLite, Vale
+     prose linting, and dependency review). All status checks must pass before merging.
    - Community contributions require thorough code review and approval from repository maintainers.
-   - For solo maintainer development, changesets are tracked via individual feature branches and
-     validated through GitHub Actions CI prior to squash-merging.
-5. **Linear History**: All pull requests are merged using GitHub Squash & Merge to maintain a clean,
-   linear commit history.
+   - For solo maintainer development, changesets are tracked via individual feature branches and validated
+     through GitHub Actions CI prior to squash-merging.
+5. **Linear History**: All pull requests are merged using GitHub Squash & Merge to maintain a clean, linear
+   commit history.
 
 ## 7. Release Process (Maintainers)
 
-Releases are built and published by `.github/workflows/release.yml`. The version comes from the git
-tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MINOR.PATCH` tag:
+Releases are built and published by `.github/workflows/release.yml`. The version comes from the git tag
+through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MINOR.PATCH` tag:
 
-1. Merge the release-preparation pull request and confirm CI is green on `main`. It turns the
-   CHANGELOG `[Unreleased]` entries into a `## [X.Y.Z] - YYYY-MM-DD` section, adds the comparison
-   link, and synchronizes fallback versions (`version.fallback-version` in `pyproject.toml` and
-   `_FALLBACK_VERSION` in `src/findfmt/__init__.py`) to `X.Y.Z.dev0` by running:
+1. Merge the release-preparation pull request and confirm CI is green on `main`. It turns the CHANGELOG
+   `[Unreleased]` entries into a `## [X.Y.Z] - YYYY-MM-DD` section, adds the comparison link, and synchronizes
+   fallback versions (`version.fallback-version` in `pyproject.toml` and `_FALLBACK_VERSION` in
+   `src/findfmt/__init__.py`) to `X.Y.Z.dev0` by running:
    ```bash
    uv run python tools/verify_release_version.py --tag vX.Y.Z --write
    ```
-   That CHANGELOG section becomes the GitHub Release notes (`tools/release_notes.py`), and the
-   workflow fails before building anything if it is missing or if the fallback versions are out of
-   sync. `uvx git-cliff --unreleased --tag vX.Y.Z` drafts entries from the commit history.
-2. Check the distributions locally. `twine` must report no warnings, `check-wheel-contents` must
-   pass, and the wheel must hold only the `findfmt` package (with `py.typed` and the compiled `*.mo`
-   catalogs) and its metadata:
+   That CHANGELOG section becomes the GitHub Release notes (`tools/release_notes.py`), and the workflow fails
+   before building anything if it is missing or if the fallback versions are out of sync.
+   `uvx git-cliff --unreleased --tag vX.Y.Z` drafts entries from the commit history.
+2. Check the distributions locally. `twine` must report no warnings, `check-wheel-contents` must pass, and the
+   wheel must hold only the `findfmt` package (with `py.typed` and the compiled `*.mo` catalogs) and its
+   metadata:
    ```bash
    uv build --clear
    uv run twine check --strict dist/*
    uv run check-wheel-contents --no-config dist
    unzip -l dist/*.whl
    ```
-   CI's packaging smoke test installs the wheel on the minimum and maximum supported Python on
-   Linux, macOS, and Windows (plus the sdist on Linux), runs `tools/smoke_wheel.py`, and checks that
-   `pip` refuses Python 3.10. To repeat it locally:
+   CI's packaging smoke test installs the wheel on the minimum and maximum supported Python on Linux, macOS,
+   and Windows (plus the sdist on Linux), runs `tools/smoke_wheel.py`, and checks that `pip` refuses Python
+   3.10. To repeat it locally:
    ```bash
    uv venv --python 3.11 /tmp/smoke && uv pip install --python /tmp/smoke dist/*.whl
    /tmp/smoke/bin/python tools/smoke_wheel.py --wheel dist/*.whl
@@ -296,32 +287,31 @@ tag through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MI
    git tag -a v1.1.0 -m "findfmt 1.1.0"
    git push origin v1.1.0
    ```
-4. The workflow publishes to TestPyPI before production PyPI, so the TestPyPI upload is the dry run:
-   if it fails, nothing reaches PyPI. Once the release is out, confirm that TestPyPI lists the new
-   version and that PyPI installs it (don't install from TestPyPI, which would also take the
-   dependencies from there):
+4. The workflow publishes to TestPyPI before production PyPI, so the TestPyPI upload is the dry run: if it
+   fails, nothing reaches PyPI. Once the release is out, confirm that TestPyPI lists the new version and that
+   PyPI installs it (don't install from TestPyPI, which would also take the dependencies from there):
    ```bash
    curl -s https://test.pypi.org/pypi/findfmt/1.1.0/json | jq -r .info.version
    uvx --from findfmt==1.1.0 findfmt --version
    ```
-5. Confirm that `.github/workflows/release.yml` closed the GitHub milestone for the released tag (or
-   close it manually if needed), and record the completed release and milestone closure in `TODO.md`
-   (header audit trail and `## 5. Milestone Plan`):
+5. Confirm that `.github/workflows/release.yml` closed the GitHub milestone for the released tag (or close it
+   manually if needed), and record the completed release and milestone closure in `TODO.md` (header audit
+   trail and `## 5. Milestone Plan`):
    ```bash
    milestone_num="$(gh api "repos/bdperkin/findfmt/milestones?state=all" --jq '.[] | select(.title == "v1.1.0") | .number')"
    gh api "repos/bdperkin/findfmt/milestones/${milestone_num}" -X PATCH -f state=closed
    ```
-6. To re-run a release for an existing tag, start the workflow **on the tag**: choose the tag in
-   **Actions → Release & Publish → Run workflow → Use workflow from**, and enter the same tag (for
-   example `v1.1.0`), or run `gh workflow run release.yml --ref v1.1.0 -f tag=v1.1.0`. The `pypi`
-   and `testpypi` environments only deploy `v*.*.*` tags, so a run started from a branch fails.
+6. To re-run a release for an existing tag, start the workflow **on the tag**: choose the tag in **Actions →
+   Release & Publish → Run workflow → Use workflow from**, and enter the same tag (for example `v1.1.0`), or
+   run `gh workflow run release.yml --ref v1.1.0 -f tag=v1.1.0`. The `pypi` and `testpypi` environments only
+   deploy `v*.*.*` tags, so a run started from a branch fails.
 
-The workflow refuses to publish a mismatched build. It fails before the quality gate unless the
-input is a `vMAJOR.MINOR.PATCH` tag, the workflow runs on that tag, and the checked-out commit is
-that tag, and it fails before any upload unless the built wheel and sdist both carry the tag's
-version (`tools/verify_release_version.py`). TestPyPI uploads skip files that already exist, so a
-failed release can be re-run; production PyPI uploads do not, so a duplicate upload fails loudly.
-The container image is built from the same wheel (the `dist` artifact), and the workflow checks that
-it reports the release version before pushing it to GHCR with an SBOM and a signed provenance
-attestation. CI's container smoke test builds and runs the image on every pull request; run it
-locally with `FINDFMT_CONTAINER_TESTS=1 uv run pytest tests/integration/test_container.py --no-cov`.
+The workflow refuses to publish a mismatched build. It fails before the quality gate unless the input is a
+`vMAJOR.MINOR.PATCH` tag, the workflow runs on that tag, and the checked-out commit is that tag, and it fails
+before any upload unless the built wheel and sdist both carry the tag's version
+(`tools/verify_release_version.py`). TestPyPI uploads skip files that already exist, so a failed release can
+be re-run; production PyPI uploads do not, so a duplicate upload fails loudly. The container image is built
+from the same wheel (the `dist` artifact), and the workflow checks that it reports the release version before
+pushing it to GHCR with an SBOM and a signed provenance attestation. CI's container smoke test builds and runs
+the image on every pull request; run it locally with
+`FINDFMT_CONTAINER_TESTS=1 uv run pytest tests/integration/test_container.py --no-cov`.

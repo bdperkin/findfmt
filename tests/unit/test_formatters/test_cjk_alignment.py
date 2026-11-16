@@ -143,8 +143,7 @@ def test_markdown_formatter_cjk_line_widths(cjk_file_sample: list[FileInfo]) -> 
     for idx, line in enumerate(lines):
         actual_width = cell_width(line)
         assert actual_width == expected_width, (
-            f"Line {idx} width mismatch: expected {expected_width}, got {actual_width}.\n"
-            f"Content: {line!r}"
+            f"Line {idx} width mismatch: expected {expected_width}, got {actual_width}.\nContent: {line!r}"
         )
 
 
@@ -274,8 +273,7 @@ def test_rich_table_formatter_cjk_border_alignment(
     for idx, line in enumerate(box_lines):
         actual_width = cell_width(line)
         assert actual_width == expected_width, (
-            f"Rich table ({style}) border {idx} width mismatch: "
-            f"expected {expected_width}, got {actual_width}"
+            f"Rich table ({style}) border {idx} width mismatch: expected {expected_width}, got {actual_width}"
         )
 
 

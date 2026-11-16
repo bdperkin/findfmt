@@ -47,7 +47,7 @@ permissions:
 
 jobs:
   dependency-matrix:
-    name: Matrix ${{ matrix.cell }} (${{ matrix.resolution }} / ${{ matrix.prerelease }} / ${{ matrix.fork-strategy }})
+    name: Matrix ${{ matrix.cell }} (${{ matrix.resolution }} / ${{ matrix.prerelease }})
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -120,7 +120,8 @@ jobs:
             echo ""
             echo "| Cell | Resolution | Prerelease | Fork Strategy | Status |"
             echo "| :--- | :--- | :--- | :--- | :--- |"
-            echo "| \`${CELL_ID}\` | \`${RESOLUTION}\` | \`${PRERELEASE}\` | \`${FORK_STRATEGY}\` | **${JOB_STATUS}** |"
+            row="| \`${CELL_ID}\` | \`${RESOLUTION}\` | \`${PRERELEASE}\` | \`${FORK_STRATEGY}\`"
+            echo "${row} | **${JOB_STATUS}** |"
             echo ""
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Capture Dependency Tree on Failure

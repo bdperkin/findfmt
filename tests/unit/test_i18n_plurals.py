@@ -94,10 +94,7 @@ def test_cjk_and_indonesian_single_form_plural_logic(tmp_path: Path) -> None:
     [
         (
             "polish_3_form",
-            (
-                "nplurals=3; plural=(n==1 ? 0 : "
-                "n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"
-            ),
+            ("nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);"),
             ["plik", "pliki", "plikow"],
             (((1,), 0), ((2, 3, 4, 22, 24, 102), 1), ((0, 5, 10, 11, 19, 20, 21, 25, 100, 101), 2)),
         ),

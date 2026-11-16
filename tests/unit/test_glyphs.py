@@ -74,9 +74,7 @@ def test_resolve_tree_guides_no_indent_precedence() -> None:
     assert resolve_tree_guides(no_indent=True) == TREE_GUIDE_SETS["none"]
     assert resolve_tree_guides(no_indent=True, ansi_lines=True) == TREE_GUIDE_SETS["none"]
     assert resolve_tree_guides(no_indent=True, cp437=True) == TREE_GUIDE_SETS["none"]
-    assert (
-        resolve_tree_guides(no_indent=True, ansi_lines=True, cp437=True) == TREE_GUIDE_SETS["none"]
-    )
+    assert resolve_tree_guides(no_indent=True, ansi_lines=True, cp437=True) == TREE_GUIDE_SETS["none"]
 
 
 def test_resolve_tree_guides_ansi_lines() -> None:

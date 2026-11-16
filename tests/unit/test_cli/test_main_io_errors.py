@@ -35,9 +35,7 @@ def test_output_file_written_atomically(tmp_path: Path) -> None:
     assert "sample.py" in target_file.read_text(encoding="utf-8")
 
     # Verify no temporary staging files remain in destination directory
-    tmp_files = [
-        p for p in tmp_path.iterdir() if p.name.startswith(".") and p.name.endswith(".tmp")
-    ]
+    tmp_files = [p for p in tmp_path.iterdir() if p.name.startswith(".") and p.name.endswith(".tmp")]
     assert tmp_files == []
 
     # 2. Simulated crash with pre-existing destination file: prior contents remain untouched
@@ -51,9 +49,7 @@ def test_output_file_written_atomically(tmp_path: Path) -> None:
         runner.invoke(app, [str(sample_file), "-o", str(target_file)], catch_exceptions=False)
 
     assert target_file.read_text(encoding="utf-8") == "prior pristine content"
-    tmp_files = [
-        p for p in tmp_path.iterdir() if p.name.startswith(".") and p.name.endswith(".tmp")
-    ]
+    tmp_files = [p for p in tmp_path.iterdir() if p.name.startswith(".") and p.name.endswith(".tmp")]
     assert tmp_files == []
 
     # 3. Simulated crash where target file did not previously exist: no partial file exists
@@ -65,9 +61,7 @@ def test_output_file_written_atomically(tmp_path: Path) -> None:
         runner.invoke(app, [str(sample_file), "-o", str(new_target)], catch_exceptions=False)
 
     assert not new_target.exists()
-    tmp_files = [
-        p for p in tmp_path.iterdir() if p.name.startswith(".") and p.name.endswith(".tmp")
-    ]
+    tmp_files = [p for p in tmp_path.iterdir() if p.name.startswith(".") and p.name.endswith(".tmp")]
     assert tmp_files == []
 
 

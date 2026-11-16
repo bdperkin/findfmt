@@ -45,8 +45,9 @@ def test_format_integer_and_number() -> None:
 
     # Error fallbacks
     real_format_string = locale.format_string
+    mock_fmt = MagicMock(side_effect=ValueError("Mock format error"))
     try:
-        locale.format_string = MagicMock(side_effect=ValueError("Mock format error"))  # type: ignore[assignment]
+        locale.format_string = mock_fmt  # type: ignore[assignment]
         assert format_integer(999, grouping=True) == "999"
         assert format_number(1.23, decimals=1) == "1.2"
     finally:

@@ -240,9 +240,7 @@ class PagerController:
         self.env = env
         self.force_color = force_color
         self.console = (
-            console
-            if console is not None
-            else get_console(self.stream, env=env, force_color=force_color)
+            console if console is not None else get_console(self.stream, env=env, force_color=force_color)
         )
 
     def should_page(self, line_count: int) -> bool:

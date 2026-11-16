@@ -87,12 +87,8 @@ def test_every_canonical_config_key_is_documented() -> None:
     documented = set(sync_cli_docs.extract_documented_config_table(ROOT))
     canonical = sync_cli_docs.get_canonical_config_keys()
     accepted = sync_cli_docs.get_all_accepted_config_keys()
-    assert canonical <= documented, (
-        f"Missing canonical config keys: {sorted(canonical - documented)}"
-    )
-    assert documented <= accepted, (
-        f"Unknown documented config keys: {sorted(documented - accepted)}"
-    )
+    assert canonical <= documented, f"Missing canonical config keys: {sorted(canonical - documented)}"
+    assert documented <= accepted, f"Unknown documented config keys: {sorted(documented - accepted)}"
 
 
 def test_top_level_markdown_cli_flags_and_paths_in_sync(
@@ -137,9 +133,7 @@ def test_sync_cli_docs_detects_drift(
         encoding="utf-8",
     )
     (repo / "AGENTS.md").write_text(
-        (repo / "AGENTS.md")
-        .read_text(encoding="utf-8")
-        .replace("`verify_quality.py`", "`ghost_tool.py`")
+        (repo / "AGENTS.md").read_text(encoding="utf-8").replace("`verify_quality.py`", "`ghost_tool.py`")
         + "\nSee `src/findfmt/diagnostics.py` and `src/findfmt/missing_mod.py`.\n",
         encoding="utf-8",
     )

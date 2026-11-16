@@ -16,8 +16,7 @@ body:
     id: tag_name
     attributes:
       label: Proposed Tag Name(s)
-      description: What tag identifier(s) should findfmt use to represent this format? (e.g. `dockerfile`, `toml`,
-        `lua`)
+      description: Tag identifier(s) findfmt should use for this format (e.g. `dockerfile`, `toml`, `lua`).
       placeholder: e.g. toml, dockerfile
     validations:
       required: true
@@ -25,8 +24,7 @@ body:
     id: extensions_filenames
     attributes:
       label: Typical File Extensions & Filenames
-      description: Standard extensions (e.g. `.toml`, `.tf`) and common extensionless filenames (e.g. `Dockerfile`,
-        `Makefile`).
+      description: Standard extensions (e.g. `.toml`, `.tf`) and filenames (e.g. `Dockerfile`, `Makefile`).
       placeholder: e.g. .toml, Cargo.lock
     validations:
       required: true
@@ -48,7 +46,7 @@ body:
     id: sample_snippet
     attributes:
       label: Minimal Sample Snippet / Fixture
-      description: Provide a minimal, reproducible code snippet or file header suitable for adding to test fixtures.
+      description: Provide a minimal, reproducible code snippet or file header suitable for test fixtures.
     validations:
       required: true
   - type: textarea

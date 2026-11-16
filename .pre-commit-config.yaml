@@ -94,7 +94,7 @@ repos:
       - id: ssort
 
   # Python code structure: absolufy-imports
-  - repo: https://github.com/marcogorelli/absolufy-imports  # zizmor: ignore[archived-uses] -- stable single-purpose AST import normalizer
+  - repo: https://github.com/marcogorelli/absolufy-imports  # zizmor: ignore[archived-uses] -- AST normalizer
     rev: v0.3.1
     hooks:
       - id: absolufy-imports
@@ -195,7 +195,7 @@ repos:
         args:
           - --number
           - --wrap
-          - '100'
+          - '110'
           - --end-of-line
           - lf
         additional_dependencies:

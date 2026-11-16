@@ -1,8 +1,8 @@
 # Upgrading to findfmt 1.1
 
-`findfmt` 1.1 is a minor release with a few intentional, visible changes since 1.0.x. Most users
-only need to check the Python version they run on. If you parse `findfmt` output, call it from
-scripts, or use the Python API, read the sections that apply to you.
+`findfmt` 1.1 is a minor release with a few intentional, visible changes since 1.0.x. Most users only need to
+check the Python version they run on. If you parse `findfmt` output, call it from scripts, or use the Python
+API, read the sections that apply to you.
 
 ## 1. Summary of Changes
 
@@ -17,8 +17,8 @@ scripts, or use the Python API, read the sections that apply to you.
 
 ## 2. Python 3.10 Is No Longer Supported
 
-Python 3.10 reached end of life on 2026-10-01. `findfmt` 1.1 requires Python 3.11 or newer and is
-tested on Python 3.11 through 3.15 on Linux, macOS, and Windows (#441).
+Python 3.10 reached end of life on 2026-10-01. `findfmt` 1.1 requires Python 3.11 or newer and is tested on
+Python 3.11 through 3.15 on Linux, macOS, and Windows (#441).
 
 On Python 3.10, installers keep selecting the latest compatible 1.0.x release, because 1.1 declares
 `requires-python = ">=3.11"`. To make that explicit, pin the 1.0 series:
@@ -29,17 +29,15 @@ uv add "findfmt<1.1"
 ```
 
 Only the latest release receives fixes (see the
-[security policy](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)), so upgrade Python
-when you can. See the [compatibility guide](../quality/compatibility.md) for the full support
-policy.
+[security policy](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)), so upgrade Python when you can.
+See the [compatibility guide](../quality/compatibility.md) for the full support policy.
 
 ## 3. Human-Readable Sizes Use IEC Binary Units
 
-Sizes are calculated in powers of 1024, and the labels now say so (#352). The numbers are unchanged;
-only the unit labels differ.
+Sizes are calculated in powers of 1024, and the labels now say so (#352). The numbers are unchanged; only the
+unit labels differ.
 
-On the command line, `-h` / `--human-readable` output changes from single-letter units to IEC
-labels:
+On the command line, `-h` / `--human-readable` output changes from single-letter units to IEC labels:
 
 ```text
 # findfmt 1.0.x
@@ -65,9 +63,8 @@ If you parse sizes with a regular expression, accept the new labels, for example
 
 ## 4. `SortKey` and `OutputFormat` Render as Their Value
 
-`findfmt.SortKey` and `findfmt.OutputFormat` are now `enum.StrEnum` subclasses (#441). As a result,
-`str()`, `format()`, f-strings, and `%s` formatting return the member's value instead of the
-class-qualified name:
+`findfmt.SortKey` and `findfmt.OutputFormat` are now `enum.StrEnum` subclasses (#441). As a result, `str()`,
+`format()`, f-strings, and `%s` formatting return the member's value instead of the class-qualified name:
 
 ```python
 from findfmt import OutputFormat, SortKey
@@ -76,16 +73,16 @@ str(SortKey.SIZE)  # 1.0.x: "SortKey.SIZE"   1.1: "size"
 f"{OutputFormat.JSON}"  # 1.0.x: "OutputFormat.JSON"   1.1: "json"
 ```
 
-Comparisons with strings, hashing, `repr()`, JSON output, CLI help, and configuration handling are
-unchanged, so `SortKey.SIZE == "size"` is still true. If you relied on the old text, build it
-explicitly: `f"{type(member).__name__}.{member.name}"`.
+Comparisons with strings, hashing, `repr()`, JSON output, CLI help, and configuration handling are unchanged,
+so `SortKey.SIZE == "size"` is still true. If you relied on the old text, build it explicitly:
+`f"{type(member).__name__}.{member.name}"`.
 
 ## 5. Wrapper Commands Exit Non-Zero on Errors
 
 The wrapper commands (`findfiles`, `findfilefmt`, `findfilemime`, `findfmt0`, `findshebang`, and
-`findsummary`) now exit with status 1 when they stop with an error that carries a message instead of
-a numeric status (#373). Previously they exited with status 0 in that case, hiding the failure. The
-`findfmt` command itself is not affected, and normal runs still exit with status 0.
+`findsummary`) now exit with status 1 when they stop with an error that carries a message instead of a numeric
+status (#373). Previously they exited with status 0 in that case, hiding the failure. The `findfmt` command
+itself is not affected, and normal runs still exit with status 0.
 
 If a script ran a wrapper command and ignored its exit status, treat a non-zero status as a failure.
 
@@ -102,7 +99,6 @@ fi
 
 ## 7. Platform Support
 
-Python 3.15 is now fully supported and required to pass CI on Linux, macOS, and Windows, and the
-container image (`ghcr.io/bdperkin/findfmt`) runs on Python 3.14 (#335, #440). No action is needed.
-For everything else in this release, see the
-[changelog](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md).
+Python 3.15 is now fully supported and required to pass CI on Linux, macOS, and Windows, and the container
+image (`ghcr.io/bdperkin/findfmt`) runs on Python 3.14 (#335, #440). No action is needed. For everything else
+in this release, see the [changelog](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md).

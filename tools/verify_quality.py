@@ -163,9 +163,7 @@ def run_matrix(
 ) -> int:
     """Run all selected dependency resolution matrix cells and return exit code."""
     failed = [
-        cell.cell_id
-        for cell in cells
-        if not run_matrix_cell(cell, python_spec, repo_root, pytest_args)
+        cell.cell_id for cell in cells if not run_matrix_cell(cell, python_spec, repo_root, pytest_args)
     ]
     if failed:
         sys.stderr.write(f"\n[-] Dependency matrix failed in cell(s): {', '.join(failed)}\n")
@@ -238,8 +236,7 @@ def run_multi_python(
 
     if failed or not passed:
         sys.stderr.write(
-            f"\n[-] Multi-Python matrix failed (passed={passed}, skipped={skipped}, "
-            f"failed={failed})\n",
+            f"\n[-] Multi-Python matrix failed (passed={passed}, skipped={skipped}, failed={failed})\n",
         )
         return 1
 

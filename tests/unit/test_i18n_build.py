@@ -432,9 +432,7 @@ def test_no_absolute_paths_in_tracked_locale_catalogs() -> None:
                     assert not path_part.startswith("/"), (
                         f"Absolute path token found in {catalog.name}:{idx}: {token}"
                     )
-                    is_windows_drive = (
-                        len(path_part) > 2 and path_part[1] == ":" and path_part[2] in "/\\"
-                    )
+                    is_windows_drive = len(path_part) > 2 and path_part[1] == ":" and path_part[2] in "/\\"
                     assert not is_windows_drive, (
                         f"Windows absolute path found in {catalog.name}:{idx}: {token}"
                     )

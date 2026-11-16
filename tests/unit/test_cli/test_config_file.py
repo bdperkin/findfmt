@@ -316,8 +316,7 @@ def test_sample_and_reference_config_templates(tmp_path: Path) -> None:
     validate_and_convert_config(ref_data, Path("examples/config.reference.toml"))
 
     uncommented = "\n".join(
-        line[2:] if line.startswith("# ") and " = " in line else line
-        for line in ref_text.splitlines()
+        line[2:] if line.startswith("# ") and " = " in line else line for line in ref_text.splitlines()
     )
     full_ref_data = tomllib.loads(uncommented)["tool"]["findfmt"]
     assert set(full_ref_data) == set(CANONICAL_CONFIG_KEYS)

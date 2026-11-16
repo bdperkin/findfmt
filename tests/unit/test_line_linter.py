@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 from tools.line_linter import (
     DEFAULT_FALLBACK_THRESHOLD,
+    DEFAULT_FILE_LINE_FALLBACK,
+    DEFAULT_FILE_LINE_LIMITS,
     DEFAULT_LIMITS,
     LinterConfig,
     Threshold,
@@ -16,6 +18,7 @@ from tools.line_linter import (
     discover_files,
     load_config,
     main,
+    resolve_file_line_threshold,
     resolve_threshold,
     run_linter,
 )
@@ -63,6 +66,18 @@ def test_resolve_threshold_overrides_and_defaults() -> None:
 
     # Empty overrides fall back to DEFAULT_FALLBACK_THRESHOLD for unknown formats
     assert resolve_threshold("custom", {}) == DEFAULT_FALLBACK_THRESHOLD
+    assert DEFAULT_FALLBACK_THRESHOLD.warning == 110
+    for threshold in DEFAULT_LIMITS.values():
+        assert threshold.warning == 110
+
+    file_overrides = {
+        "python": Threshold(warning=250, error=450),
+        "default": Threshold(warning=200, error=350),
+    }
+    assert resolve_file_line_threshold("python", file_overrides) == Threshold(250, 450)
+    assert resolve_file_line_threshold("markdown", file_overrides) == DEFAULT_FILE_LINE_LIMITS["markdown"]
+    assert resolve_file_line_threshold("custom", file_overrides) == Threshold(200, 350)
+    assert resolve_file_line_threshold("custom", {}) == DEFAULT_FILE_LINE_FALLBACK
 
 
 def test_load_config_missing_and_corrupt_files(tmp_path: Path) -> None:
@@ -89,9 +104,12 @@ include = ["src/**/*.py", "*.md"]
 exclude = ["build/**"]
 
 [tool.line-linter.overrides]
-python = { warning = 250, error = 450 }
-yaml = { warning = 120, error = 250 }
+python = { warning = 110, error = 150 }
+yaml = { warning = 110, error = 150 }
 invalid = "not-a-dict"
+
+[tool.line-linter.file_line_overrides]
+python = { warning = 250, error = 450 }
 """,
         encoding="utf-8",
     )
@@ -99,8 +117,9 @@ invalid = "not-a-dict"
     config = load_config(config_file)
     assert config.include == ("src/**/*.py", "*.md")
     assert config.exclude == ("build/**",)
-    assert config.overrides["python"] == Threshold(warning=250, error=450)
-    assert config.overrides["yaml"] == Threshold(warning=120, error=250)
+    assert config.overrides["python"] == Threshold(warning=110, error=150)
+    assert config.overrides["yaml"] == Threshold(warning=110, error=150)
+    assert config.file_line_overrides["python"] == Threshold(warning=250, error=450)
     assert "invalid" not in config.overrides
 
 
@@ -119,13 +138,13 @@ def test_check_file_warnings_and_errors(tmp_path: Path) -> None:
     """Test check_file detects warning and error violations correctly."""
     py_file = tmp_path / "test.py"
     # Line 1: 50 chars (clean)
-    # Line 2: 350 chars (warning for python: > 300, <= 500)
-    # Line 3: 550 chars (error for python: > 500)
+    # Line 2: 130 chars (warning for python: > 110, <= 150)
+    # Line 3: 200 chars (error for python: > 150)
     content = "\n".join(
         [
             "#" * 50,
-            "#" * 350,
-            "#" * 550,
+            "#" * 130,
+            "#" * 200,
         ],
     )
     py_file.write_text(content, encoding="utf-8")
@@ -137,14 +156,14 @@ def test_check_file_warnings_and_errors(tmp_path: Path) -> None:
     warn_violation = violations[0]
     assert not warn_violation.is_error
     assert warn_violation.line_number == 2
-    assert warn_violation.length == 350
-    assert warn_violation.threshold == 300
+    assert warn_violation.length == 130
+    assert warn_violation.threshold == 110
 
     err_violation = violations[1]
     assert err_violation.is_error
     assert err_violation.line_number == 3
-    assert err_violation.length == 550
-    assert err_violation.threshold == 500
+    assert err_violation.length == 200
+    assert err_violation.threshold == 150
 
 
 def test_check_file_os_error_handling(tmp_path: Path) -> None:
@@ -197,7 +216,7 @@ def test_run_linter_clean(tmp_path: Path) -> None:
 def test_run_linter_warnings_only(tmp_path: Path) -> None:
     """Test run_linter returns exit code 0 and logs notices when only warnings exist."""
     py_file = tmp_path / "warn.py"
-    py_file.write_text("#" * 350 + "\n", encoding="utf-8")
+    py_file.write_text("#" * 130 + "\n", encoding="utf-8")
 
     config = LinterConfig(include=("**/*",), exclude=(), overrides={})
     stderr = io.StringIO()
@@ -206,14 +225,14 @@ def test_run_linter_warnings_only(tmp_path: Path) -> None:
 
     assert exit_code == 0
     output = stderr.getvalue()
-    assert "WARNING: Line length 350 exceeds warning limit (300)" in output
+    assert "WARNING: Line length 130 exceeds warning limit (110)" in output
     assert "Line length check found 0 error(s) and 1 warning(s)." in output
 
 
 def test_run_linter_errors(tmp_path: Path) -> None:
     """Test run_linter returns exit code 1 when error violations exist."""
     py_file = tmp_path / "err.py"
-    py_file.write_text("#" * 550 + "\n", encoding="utf-8")
+    py_file.write_text("#" * 200 + "\n", encoding="utf-8")
 
     config = LinterConfig(include=("**/*",), exclude=(), overrides={})
     stderr = io.StringIO()
@@ -222,7 +241,7 @@ def test_run_linter_errors(tmp_path: Path) -> None:
 
     assert exit_code == 1
     output = stderr.getvalue()
-    assert "ERROR: Line length 550 exceeds error limit (500)" in output
+    assert "ERROR: Line length 200 exceeds error limit (150)" in output
     assert "Line length check found 1 error(s) and 0 warning(s)." in output
 
 

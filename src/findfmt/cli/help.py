@@ -187,16 +187,14 @@ HELP_CSV_SAFE = _(
 )
 HELP_PAGER = _("Enable or disable interactive paging (defaults to auto-paging on TTY).")
 HELP_NO_INDENT = _(
-    "Do not print indentation lines in tree format and strip extraneous "
-    "whitespace in structured formats.",
+    "Do not print indentation lines in tree format and strip extraneous whitespace in structured formats.",
 )
 HELP_ANSI_LINES = _(
     "Use ANSI/VT100 alternate character set line drawing escapes for tree indentation lines.",
 )
 HELP_CP437 = _("Use CP437 (IBM-PC) console graphics characters for tree indentation lines.")
 HELP_COLOR = _(
-    "Force enable or disable ANSI color output "
-    "(defaults to auto-detection with NO_COLOR compliance).",
+    "Force enable or disable ANSI color output (defaults to auto-detection with NO_COLOR compliance).",
 )
 HELP_ABSOLUTE = _("Output absolute paths rather than paths relative to the traversal root.")
 HELP_RELATIVE = _(
@@ -234,8 +232,7 @@ HELP_VERBOSE = _("Include extended runtime diagnostics when used with --version.
 HELP_DIAGNOSTICS = _("Display runtime environment diagnostics and exit.")
 HELP_VERSION = _("Display the version of findfmt and exit.")
 HELP_HELP_ALL = _(
-    "Display comprehensive help reference including environment variables, "
-    "exit codes, and examples.",
+    "Display comprehensive help reference including environment variables, exit codes, and examples.",
 )
 HELP_CONFIG = _("Path to custom configuration file overriding defaults.")
 HELP_NO_CONFIG = _("Suppress loading any configuration file.")

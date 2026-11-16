@@ -2,8 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
-adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -11,65 +11,62 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Features
 
-- *(config)* Add a `FINDFMT_*` environment-variable configuration layer (`findfmt.cli.env_config`)
-  between TOML configuration files and CLI flags (`CLI > FINDFMT_* > TOML > default`), supporting
-  boolean, integer, path, string, choice, and comma/colon-separated list settings with validation
-  errors naming the offending `FINDFMT_*` variable (#456).
-- *(config)* Layer XDG user configuration (`~/.config/findfmt/config.toml`) with project
-  configuration (`.findfmt.toml` or `pyproject.toml` `[tool.findfmt]`) discovered by walking up from
-  the current working directory to the `.git`/`.hg`/`.svn` repository root, merging layers per key
-  while treating `--config` / `FINDFMT_CONFIG` as an explicit single-file override (#455).
+- *(config)* Add a `FINDFMT_*` environment-variable configuration layer (`findfmt.cli.env_config`) between
+  TOML configuration files and CLI flags (`CLI > FINDFMT_* > TOML > default`), supporting boolean, integer,
+  path, string, choice, and comma/colon-separated list settings with validation errors naming the offending
+  `FINDFMT_*` variable (#456).
+- *(config)* Layer XDG user configuration (`~/.config/findfmt/config.toml`) with project configuration
+  (`.findfmt.toml` or `pyproject.toml` `[tool.findfmt]`) discovered by walking up from the current working
+  directory to the `.git`/`.hg`/`.svn` repository root, merging layers per key while treating `--config` /
+  `FINDFMT_CONFIG` as an explicit single-file override (#455).
 - *(config)* Provide a production-ready sample `examples/config.toml`, an annotated reference
-  `examples/config.reference.toml` (`findfmt.data`), and a `--generate-config` /
-  `--dump-default-config` CLI flag (`render_reference_config()`) that emits a self-documenting,
-  schema-synchronized TOML configuration template (#310).
-- *(config)* Annotate every `--show-config` entry with its effective provenance (`# (default)`,
-  `# (<path>)`, `# (env: FINDFMT_<KEY>)`, `# (CLI)`) using `click.Context.get_parameter_source` and
-  per-key configuration layer tracking (#458, #332).
-- *(cli)* Improve configuration validation diagnostics (`findfmt.cli.config_schema`) to report all
-  validation errors in a single pass, suggest close matches for unknown keys via
-  `difflib.get_close_matches`, include `{value!r} ({type(value).__name__})` in type error messages,
-  and reject duplicate alias and hyphen/underscore key collisions in the same configuration table
-  (#340, #381).
+  `examples/config.reference.toml` (`findfmt.data`), and a `--generate-config` / `--dump-default-config` CLI
+  flag (`render_reference_config()`) that emits a self-documenting, schema-synchronized TOML configuration
+  template (#310).
+- *(config)* Annotate every `--show-config` entry with its effective provenance (`# (default)`, `# (<path>)`,
+  `# (env: FINDFMT_<KEY>)`, `# (CLI)`) using `click.Context.get_parameter_source` and per-key configuration
+  layer tracking (#458, #332).
+- *(cli)* Improve configuration validation diagnostics (`findfmt.cli.config_schema`) to report all validation
+  errors in a single pass, suggest close matches for unknown keys via `difflib.get_close_matches`, include
+  `{value!r} ({type(value).__name__})` in type error messages, and reject duplicate alias and
+  hyphen/underscore key collisions in the same configuration table (#340, #381).
 
 ### Deprecated
 
-- *(config)* Deprecate legacy boolean format keys (`tree = true`, `json = true`, `xml = true`) in
-  favour of `format = "tree" | "json" | "xml"`, emitting a `DeprecationWarning` when enabled and
-  ignoring `false` values so they never clobber an explicit `format = "..."` setting (#457).
+- *(config)* Deprecate legacy boolean format keys (`tree = true`, `json = true`, `xml = true`) in favour of
+  `format = "tree" | "json" | "xml"`, emitting a `DeprecationWarning` when enabled and ignoring `false` values
+  so they never clobber an explicit `format = "..."` setting (#457).
 
 ## [1.2.2] - 2026-11-13
 
 ### Features
 
-- *(parsers)* Auto-detect NUL-delimited (`\0`) `--from-file` and `stdin` (`-`) input streams
-  (`find -print0`, `fd -0`, `findfmt -0`) so filenames containing embedded newlines (`\n`) or
-  carriage returns (`\r`) are preserved intact (#461).
-- *(parsers)* Add `--allow-outside-root` / `--no-allow-outside-root` (`allow_outside_root`
-  configuration key) to explicitly opt in to resolving `--from-file` paths outside the traversal
-  root directory (#463).
-- *(ci)* Add `.github/workflows/auto-retry.yml` (`workflow_run` watcher on `CI`) to automatically
-  re-run failed or canceled CI jobs up to two times (`run_attempt < 3`) (#624).
-- *(tools)* Add `tools/sync_cli_docs.py` and extend `tools/verify_release_version.py` to enforce
-  bidirectional Source-of-Truth (`SoT`) parity across `options.py`, `config_schema.py`, `README.md`,
-  `docs/source/`, `AGENTS.md`, `SECURITY.md`, `ACCESSIBILITY.md`, and `SUPPORT.md` (#623).
+- *(parsers)* Auto-detect NUL-delimited (`\0`) `--from-file` and `stdin` (`-`) input streams (`find -print0`,
+  `fd -0`, `findfmt -0`) so filenames containing embedded newlines (`\n`) or carriage returns (`\r`) are
+  preserved intact (#461).
+- *(parsers)* Add `--allow-outside-root` / `--no-allow-outside-root` (`allow_outside_root` configuration key)
+  to explicitly opt in to resolving `--from-file` paths outside the traversal root directory (#463).
+- *(ci)* Add `.github/workflows/auto-retry.yml` (`workflow_run` watcher on `CI`) to automatically re-run
+  failed or canceled CI jobs up to two times (`run_attempt < 3`) (#624).
+- *(tools)* Add `tools/sync_cli_docs.py` and extend `tools/verify_release_version.py` to enforce bidirectional
+  Source-of-Truth (`SoT`) parity across `options.py`, `config_schema.py`, `README.md`, `docs/source/`,
+  `AGENTS.md`, `SECURITY.md`, `ACCESSIBILITY.md`, and `SUPPORT.md` (#623).
 
 ### Fixed
 
-- *(parsers)* Strip ASCII `tree --charset=ascii` branch prefixes (`|--`, `` `-- ``, `|`) and ignore
-  `tree` summary trailer lines (`N directories, M files`, `0 directories`) in `--from-file` tab/tree
-  parser (#459).
-- *(parsers)* Confine `--from-file` paths to the traversal root by default using lexical and
-  canonical (`Path.resolve()`) boundary checks (`_is_within_root`), skipping out-of-root entries
-  with a warning to `stderr` before opening or reading file contents (#463, #334, #386).
-- *(parsers)* Use quote-aware boundary scanning (`_find_last_unquoted_arrow`) in
-  `parse_symlink_target` to split on the last unquoted `' -> '` delimiter and strip only a single
-  matching outer quote pair while preserving interior quotes and whitespace (#355, #348).
+- *(parsers)* Strip ASCII `tree --charset=ascii` branch prefixes (`|--`, `` `-- ``, `|`) and ignore `tree`
+  summary trailer lines (`N directories, M files`, `0 directories`) in `--from-file` tab/tree parser (#459).
+- *(parsers)* Confine `--from-file` paths to the traversal root by default using lexical and canonical
+  (`Path.resolve()`) boundary checks (`_is_within_root`), skipping out-of-root entries with a warning to
+  `stderr` before opening or reading file contents (#463, #334, #386).
+- *(parsers)* Use quote-aware boundary scanning (`_find_last_unquoted_arrow`) in `parse_symlink_target` to
+  split on the last unquoted `' -> '` delimiter and strip only a single matching outer quote pair while
+  preserving interior quotes and whitespace (#355, #348).
 
 ### Documentation
 
-- *(readme)* Modernize, deduplicate, and categorize `README.md` status, quality, security, and
-  metadata badges into 5 pure-Markdown thematic rows (#618).
+- *(readme)* Modernize, deduplicate, and categorize `README.md` status, quality, security, and metadata badges
+  into 5 pure-Markdown thematic rows (#618).
 - *(config)* Document all 62 canonical configuration keys from `src/findfmt/cli/config_schema.py` in
   `docs/source/guides/configuration.md` and synchronize top-level Markdown guides (#623, #636).
 
@@ -78,59 +75,55 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Features
 
 - *(cli)* Dynamically generate `--help-all` output from Click command parameter introspection
-  (`get_command(app)`), grouping options by `rich_help_panel` and formatting all option flags,
-  negative toggles, and `Choice` values directly from the registered CLI schema (#365, #346).
-- *(traversal)* Replace recursive directory traversal (`_traverse_subdirs`), `--prune` descendant
-  scanning (`has_matching_descendants`), and `--du` size calculation (`calculate_accumulated_sizes`)
-  with iterative explicit-stack implementations so deep directory trees never hit `RecursionError`
-  (#372, #336).
+  (`get_command(app)`), grouping options by `rich_help_panel` and formatting all option flags, negative
+  toggles, and `Choice` values directly from the registered CLI schema (#365, #346).
+- *(traversal)* Replace recursive directory traversal (`_traverse_subdirs`), `--prune` descendant scanning
+  (`has_matching_descendants`), and `--du` size calculation (`calculate_accumulated_sizes`) with iterative
+  explicit-stack implementations so deep directory trees never hit `RecursionError` (#372, #336).
 
 ### Performance
 
-- *(cli)* Stream formatted output directly to interactive TTYs via `_StreamingPagerStream` until
-  output exceeds the terminal height before engaging the pager, preserving already-emitted lines on
-  `SIGINT` (#331).
+- *(cli)* Stream formatted output directly to interactive TTYs via `_StreamingPagerStream` until output
+  exceeds the terminal height before engaging the pager, preserving already-emitted lines on `SIGINT` (#331).
 
 ### Changed
 
-- *(cli)* Pass `click.Context` (`ctx.obj["argv"]`) explicitly to eager callbacks and help rendering
-  instead of walking caller stack frames via `inspect.currentframe()`, and avoid mutating
-  `typer.rich_utils` module-level attributes during `--help` capture (#342).
-- *(models)* Validate `TraversalConfig` in `__post_init__` (rejecting negative `max_depth` and
-  `file_limit`, conflicting `dirs_first`/`files_first`, and unknown `output_format` values) and
-  normalize `include_tags` and `exclude_tags` into lowercase `frozenset[str]` sets (#342).
+- *(cli)* Pass `click.Context` (`ctx.obj["argv"]`) explicitly to eager callbacks and help rendering instead of
+  walking caller stack frames via `inspect.currentframe()`, and avoid mutating `typer.rich_utils` module-level
+  attributes during `--help` capture (#342).
+- *(models)* Validate `TraversalConfig` in `__post_init__` (rejecting negative `max_depth` and `file_limit`,
+  conflicting `dirs_first`/`files_first`, and unknown `output_format` values) and normalize `include_tags` and
+  `exclude_tags` into lowercase `frozenset[str]` sets (#342).
 
 ## [1.2.0] - 2026-11-10
 
 ### Fixed
 
 - *(cli)* Derive value-taking options dynamically from the Click command in wrapper entry points
-  (`findfilefmt` and `findshebang`) and handle attached short flags (`-tpython`, `-sbash`) so
-  options such as `-o report.txt` or `-L 2` never misinterpret or truncate positional arguments
-  (#319).
-- *(cli)* Catch `FindFmtError` in `findfmt.cli.runner` to emit localized user-friendly error panels
-  with exit code `2` unless `--verbose` is passed, and disable Typer pretty-exceptions tracebacks by
-  default (#329).
-- *(cli)* Validate numeric CLI options (`--max-depth` / `-L` and `--filelimit` with `min=0`) and
-  clarify `--verbose` / `-V` help text (#366).
-- *(i18n)* Defer `set_locale()` initialization until CLI entry (`FindfmtCommand.make_context` and
-  wrapper entry points) so `import findfmt` leaves process `LC_ALL` / `LC_NUMERIC` unchanged, and
-  fall back cleanly when a locale candidate cannot be applied (#451).
-- *(parsers)* Read `--from-file` files and `stdin` as raw bytes (`sys.stdin.buffer`) and decode
-  individual path lines via `os.fsdecode()` (`surrogateescape`) so non-UTF-8 POSIX filenames never
-  raise `UnicodeDecodeError` (#460).
+  (`findfilefmt` and `findshebang`) and handle attached short flags (`-tpython`, `-sbash`) so options such as
+  `-o report.txt` or `-L 2` never misinterpret or truncate positional arguments (#319).
+- *(cli)* Catch `FindFmtError` in `findfmt.cli.runner` to emit localized user-friendly error panels with exit
+  code `2` unless `--verbose` is passed, and disable Typer pretty-exceptions tracebacks by default (#329).
+- *(cli)* Validate numeric CLI options (`--max-depth` / `-L` and `--filelimit` with `min=0`) and clarify
+  `--verbose` / `-V` help text (#366).
+- *(i18n)* Defer `set_locale()` initialization until CLI entry (`FindfmtCommand.make_context` and wrapper
+  entry points) so `import findfmt` leaves process `LC_ALL` / `LC_NUMERIC` unchanged, and fall back cleanly
+  when a locale candidate cannot be applied (#451).
+- *(parsers)* Read `--from-file` files and `stdin` as raw bytes (`sys.stdin.buffer`) and decode individual
+  path lines via `os.fsdecode()` (`surrogateescape`) so non-UTF-8 POSIX filenames never raise
+  `UnicodeDecodeError` (#460).
 
 ### Changed
 
-- *(api)* Lazy-load `main`, `main_*`, and `_` from the `findfmt` package root and `Rich*Formatter`
-  classes from `findfmt.formatters` via module `__getattr__` with `DeprecationWarning`, eliminating
-  eager `typer` and `rich` imports on `import findfmt` (#452).
-- *(cli)* Relocate CLI-only modules (`diagnostics`, `entrypoints`, `summary`, `terminal`) under
-  `findfmt.cli` and retain lazy `DeprecationWarning` compatibility shims at `findfmt.*`, completing
-  core library decoupling from CLI dependencies (#453, #324).
+- *(api)* Lazy-load `main`, `main_*`, and `_` from the `findfmt` package root and `Rich*Formatter` classes
+  from `findfmt.formatters` via module `__getattr__` with `DeprecationWarning`, eliminating eager `typer` and
+  `rich` imports on `import findfmt` (#452).
+- *(cli)* Relocate CLI-only modules (`diagnostics`, `entrypoints`, `summary`, `terminal`) under `findfmt.cli`
+  and retain lazy `DeprecationWarning` compatibility shims at `findfmt.*`, completing core library decoupling
+  from CLI dependencies (#453, #324).
 - *(release)* Centralize `_FALLBACK_VERSION` in `src/findfmt/__init__.py` and extend
-  `tools/verify_release_version.py` (`--repo` and `--write`) to synchronize and validate fallback
-  versions across `pyproject.toml` and `src/findfmt/` (#609).
+  `tools/verify_release_version.py` (`--repo` and `--write`) to synchronize and validate fallback versions
+  across `pyproject.toml` and `src/findfmt/` (#609).
 
 ## [1.1.5] - 2026-11-09
 
@@ -138,144 +131,139 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 - *(i18n)* Complete the canonical German (`de`) localization catalog
   (`src/findfmt/locale/de/LC_MESSAGES/findfmt.po`, 147/147 messages) and localized Sphinx homepage
-  (`docs/source/locale/de/LC_MESSAGES/index.po`), and enroll `de` in `COMPLETE_LOCALES` for
-  pre-commit catalog completeness enforcement (#215).
+  (`docs/source/locale/de/LC_MESSAGES/index.po`), and enroll `de` in `COMPLETE_LOCALES` for pre-commit catalog
+  completeness enforcement (#215).
 - *(i18n)* Complete the canonical French (`fr`) localization catalog
-  (`src/findfmt/locale/fr/LC_MESSAGES/findfmt.po`, 147/147 messages with non-breaking spaces before
-  high punctuation and verified elisions) and localized Sphinx homepage
+  (`src/findfmt/locale/fr/LC_MESSAGES/findfmt.po`, 147/147 messages with non-breaking spaces before high
+  punctuation and verified elisions) and localized Sphinx homepage
   (`docs/source/locale/fr/LC_MESSAGES/index.po`), and enroll `fr` in `COMPLETE_LOCALES` (#222).
 - *(i18n)* Complete the canonical Japanese (`ja`) localization catalog
-  (`src/findfmt/locale/ja/LC_MESSAGES/findfmt.po`, 147/147 messages with single-form pluralization
-  and half-width/full-width CJK typography) and localized Sphinx homepage
+  (`src/findfmt/locale/ja/LC_MESSAGES/findfmt.po`, 147/147 messages with single-form pluralization and
+  half-width/full-width CJK typography) and localized Sphinx homepage
   (`docs/source/locale/ja/LC_MESSAGES/index.po`), and enroll `ja` in `COMPLETE_LOCALES` (#228).
 
 ### Documentation
 
-- *(docs)* Configure `.github/workflows/docs.yml` to build all localized Sphinx documentation
-  subdirectories (`docs/_build/html/{en,es,fr,de,ja}/`) via `make -C docs html-all` and add a
-  sidebar language switcher (`docs/source/_templates/sidebar/variant-selector.html`) (#233).
+- *(docs)* Configure `.github/workflows/docs.yml` to build all localized Sphinx documentation subdirectories
+  (`docs/_build/html/{en,es,fr,de,ja}/`) via `make -C docs html-all` and add a sidebar language switcher
+  (`docs/source/_templates/sidebar/variant-selector.html`) (#233).
 
 ## [1.1.4] - 2026-11-08
 
 ### Features
 
-- *(i18n)* Add `tools/i18n_translate.py` and `uv run python -m tools.i18n translate` for batch AI
-  translation of GNU `gettext` `.po` message catalogs via OpenAI, Anthropic, Ollama, and
-  deterministic mock backends with placeholder/markup validation and retry fallback (#306).
+- *(i18n)* Add `tools/i18n_translate.py` and `uv run python -m tools.i18n translate` for batch AI translation
+  of GNU `gettext` `.po` message catalogs via OpenAI, Anthropic, Ollama, and deterministic mock backends with
+  placeholder/markup validation and retry fallback (#306).
 - *(i18n)* Add `tools/i18n_sync.py`, the `i18n-catalog-check` pre-commit hook, and
-  `uv run python -m tools.i18n sync` to enforce POT/PO synchronization and 100% translation
-  completeness across completed locales (`en`, `es`) and automate one-command extraction, update, AI
-  translation, validation, and `.mo` compilation (#566).
+  `uv run python -m tools.i18n sync` to enforce POT/PO synchronization and 100% translation completeness
+  across completed locales (`en`, `es`) and automate one-command extraction, update, AI translation,
+  validation, and `.mo` compilation (#566).
 - *(deps)* Add `tools/dep_matrix.py` and extend `tools/verify_quality.py` (`--smoke`, `--full`,
-  `--resolution`, `--prerelease`, `--fork-strategy`) with a local `uv` dependency resolution matrix
-  runner and 3-stage failure diagnostic engine (#427).
+  `--resolution`, `--prerelease`, `--fork-strategy`) with a local `uv` dependency resolution matrix runner and
+  3-stage failure diagnostic engine (#427).
 
 ### Documentation
 
-- *(agents)* Add `AGENTS.md` developer and AI coding agent architecture guide, testing/linting
-  standards, and 350/500-line file decomposition policy (#556).
-- *(deps)* Document local and CI dependency resolution matrix testing and lower-bound/pre-release
-  remediation workflows in `CONTRIBUTING.md` (#430, #425).
-- *(i18n)* Add `docs/source/guides/localization_platforms.md` evaluating managed SaaS localization
-  platforms (POEditor, Crowdin, Localazy) versus local open-source CLI automation (#307, #308), and
-  document the end-to-end AI translation runbook and locale onboarding steps (#564).
+- *(agents)* Add `AGENTS.md` developer and AI coding agent architecture guide, testing/linting standards, and
+  350/500-line file decomposition policy (#556).
+- *(deps)* Document local and CI dependency resolution matrix testing and lower-bound/pre-release remediation
+  workflows in `CONTRIBUTING.md` (#430, #425).
+- *(i18n)* Add `docs/source/guides/localization_platforms.md` evaluating managed SaaS localization platforms
+  (POEditor, Crowdin, Localazy) versus local open-source CLI automation (#307, #308), and document the
+  end-to-end AI translation runbook and locale onboarding steps (#564).
 
 ### Changed
 
-- *(release)* Automatically close the matching GitHub milestone in `.github/workflows/release.yml`
-  once a release is published (#546).
-- *(ci)* Add `.github/workflows/dependency-matrix.yml` for nightly scheduled and `workflow_dispatch`
-  execution of the 6-cell pruned `uv` dependency resolution matrix with step summaries, and raise
-  test dependency lower bounds (`click>=8.2`, `pytest>=8.4`, `pytest-cov>=7`, `hatchling>=1.25`) for
-  `--resolution lowest` compatibility (#429, #425).
+- *(release)* Automatically close the matching GitHub milestone in `.github/workflows/release.yml` once a
+  release is published (#546).
+- *(ci)* Add `.github/workflows/dependency-matrix.yml` for nightly scheduled and `workflow_dispatch` execution
+  of the 6-cell pruned `uv` dependency resolution matrix with step summaries, and raise test dependency lower
+  bounds (`click>=8.2`, `pytest>=8.4`, `pytest-cov>=7`, `hatchling>=1.25`) for `--resolution lowest`
+  compatibility (#429, #425).
 - *(tools)* Add multi-Python local test runner support (`--all-pythons`, `--pythons`, `--list`) to
-  `tools/verify_quality.py` reading supported interpreters (`3.11`–`3.15`) from `pyproject.toml`,
-  and de-duplicate the `quality-gate` job in `.github/workflows/ci.yml` (#349, #385).
+  `tools/verify_quality.py` reading supported interpreters (`3.11`–`3.15`) from `pyproject.toml`, and
+  de-duplicate the `quality-gate` job in `.github/workflows/ci.yml` (#349, #385).
 
 ## [1.1.3] - 2026-11-08
 
 ### Documentation
 
-- *(release)* Document GitHub milestone closure and `TODO.md` roadmap tracking in the maintainer
-  release checklist in `CONTRIBUTING.md` (#545).
+- *(release)* Document GitHub milestone closure and `TODO.md` roadmap tracking in the maintainer release
+  checklist in `CONTRIBUTING.md` (#545).
 
 ### Security
 
-- *(ci)* Add `zizmor` static analysis pre-commit hook and `.github/workflows/zizmor.yml` SARIF
-  code-scanning workflow for GitHub Actions, Dependabot, and pre-commit configurations, and harden
-  workflows with `persist-credentials: false`, job-scoped permissions, and environment-bound
-  template expressions (#468).
+- *(ci)* Add `zizmor` static analysis pre-commit hook and `.github/workflows/zizmor.yml` SARIF code-scanning
+  workflow for GitHub Actions, Dependabot, and pre-commit configurations, and harden workflows with
+  `persist-credentials: false`, job-scoped permissions, and environment-bound template expressions (#468).
 
 ### Changed
 
-- *(deps)* Pin `dependency-smoke-matrix` in `.github/workflows/ci.yml` to the minimum supported
-  Python (`3.11`), add `typing-extensions>=4.4; python_version<'3.12'` to `[build-system].requires`,
-  and make `Dependency Smoke Matrix` a required status check on `main` (#325).
+- *(deps)* Pin `dependency-smoke-matrix` in `.github/workflows/ci.yml` to the minimum supported Python
+  (`3.11`), add `typing-extensions>=4.4; python_version<'3.12'` to `[build-system].requires`, and make
+  `Dependency Smoke Matrix` a required status check on `main` (#325).
 - *(packaging)* Add `package-check` CI job (`Package Metadata & Wheel Contents`) running `uv build`,
-  `twine check --strict`, and `check-wheel-contents --no-config` on every PR and in `release.yml`,
-  and register it as a required status check on `main` (#475, #344).
-- *(packaging)* Expand `packaging-smoke-test` in `.github/workflows/ci.yml` and
-  `tools/smoke_wheel.py` (`--sdist`) to install and smoke-test source distributions
-  (`dist/*.tar.gz`) on Linux across supported Python extremes (#358, #344).
-- *(ci)* Align `ruff` (`0.17.3`) and shared lint tool versions across `.pre-commit-config.yaml` and
-  `uv.lock`, implement drift enforcement and `--write` synchronization in
-  `tools/sync_pre_commit_deps.py` wired into `tools/verify_quality.py`, standardize
-  `codecov/codecov-action` comments, and move Sphinx `linkcheck` in `.github/workflows/docs.yml` to
-  scheduled and manual dispatch runs (#360, #344).
+  `twine check --strict`, and `check-wheel-contents --no-config` on every PR and in `release.yml`, and
+  register it as a required status check on `main` (#475, #344).
+- *(packaging)* Expand `packaging-smoke-test` in `.github/workflows/ci.yml` and `tools/smoke_wheel.py`
+  (`--sdist`) to install and smoke-test source distributions (`dist/*.tar.gz`) on Linux across supported
+  Python extremes (#358, #344).
+- *(ci)* Align `ruff` (`0.17.3`) and shared lint tool versions across `.pre-commit-config.yaml` and `uv.lock`,
+  implement drift enforcement and `--write` synchronization in `tools/sync_pre_commit_deps.py` wired into
+  `tools/verify_quality.py`, standardize `codecov/codecov-action` comments, and move Sphinx `linkcheck` in
+  `.github/workflows/docs.yml` to scheduled and manual dispatch runs (#360, #344).
 
 ## [1.1.2] - 2026-11-06
 
 ### Features
 
-- *(i18n)* Expand Spanish (`es`) gettext message catalog to 100% coverage and localize documentation
-  index (#221).
-- *(i18n)* Add `tools/i18n_prompts.py` with domain context system prompt builder, CLI terminology
-  glossary, `ngettext` multi-form pluralization prompt rules, and CLI flag preservation validator
-  (#305).
+- *(i18n)* Expand Spanish (`es`) gettext message catalog to 100% coverage and localize documentation index
+  (#221).
+- *(i18n)* Add `tools/i18n_prompts.py` with domain context system prompt builder, CLI terminology glossary,
+  `ngettext` multi-form pluralization prompt rules, and CLI flag preservation validator (#305).
 
 ### Bug Fixes
 
-- *(traversal)* Resolve relative `root` paths in `traverse_directory` so `.gitignore` rules match
-  relative roots and subdirectories (#322).
-- *(traversal)* Align global and ancestor `.gitignore` discovery with Git: drop the `~/.gitignore`
-  fallback, run `git -C <root> config --get core.excludesFile`, and stop ancestor `.gitignore`
-  collection at the Git repository root (#323).
+- *(traversal)* Resolve relative `root` paths in `traverse_directory` so `.gitignore` rules match relative
+  roots and subdirectories (#322).
+- *(traversal)* Align global and ancestor `.gitignore` discovery with Git: drop the `~/.gitignore` fallback,
+  run `git -C <root> config --get core.excludesFile`, and stop ancestor `.gitignore` collection at the Git
+  repository root (#323).
 - *(api)* Add optional `root: Path | None = None` parameter to `find_global_gitignore_path` and
   `load_global_gitignore_spec` (#323).
-- *(traversal)* Emit symbolic links by default with `FileInfo.path` preserved at the link location,
-  populate `symlink_target` via `os.readlink`, and classify target content when `follow_symlinks`
-  (`-l`) is active (#321).
-- *(api)* Add optional keyword-only `follow_symlinks: bool = False` parameter to `classify_file`
+- *(traversal)* Emit symbolic links by default with `FileInfo.path` preserved at the link location, populate
+  `symlink_target` via `os.readlink`, and classify target content when `follow_symlinks` (`-l`) is active
   (#321).
-- *(api)* Add optional keyword-only `entry` and `follow_symlinks` parameters to
-  `check_device_boundary` (#337).
+- *(api)* Add optional keyword-only `follow_symlinks: bool = False` parameter to `classify_file` (#321).
+- *(api)* Add optional keyword-only `entry` and `follow_symlinks` parameters to `check_device_boundary`
+  (#337).
 
 ### Performance
 
-- *(traversal)* Eliminate redundant per-file `os.stat`, `os.access`, and `Path.is_dir` syscalls
-  across classification, pattern matching, and `-x` device boundary checks, and eliminate double
-  classification of files under `--prune` (#337).
+- *(traversal)* Eliminate redundant per-file `os.stat`, `os.access`, and `Path.is_dir` syscalls across
+  classification, pattern matching, and `-x` device boundary checks, and eliminate double classification of
+  files under `--prune` (#337).
 
 ### Documentation
 
-- *(deps)* Add Architecture Decision Record (`docs/source/quality/dependency_matrix.md`) evaluating
-  matrix orchestration runners and defining the pruned 6-cell `uv` dependency resolution matrix and
-  failure diagnostic pipeline (#426).
+- *(deps)* Add Architecture Decision Record (`docs/source/quality/dependency_matrix.md`) evaluating matrix
+  orchestration runners and defining the pruned 6-cell `uv` dependency resolution matrix and failure
+  diagnostic pipeline (#426).
 
 ### Changed
 
-- *(tests)* Eliminate all 53 `# pragma: no cover` annotations across `src/`, `tests/`, and `tools/`,
-  remove the unreachable trailing `return 0` in `entrypoints.py`, add unit tests covering
-  `terminal.py` height fallbacks, `__main__` execution (`findfmt.__main__` and `findfmt.cli.main`),
-  `< 3.12` / `>= 3.12` `override` version gates, and POSIX `ImportError` (`pwd`, `grp`, `resource`)
-  shims, and enforce zero `# pragma: no cover` usage in `test_api_stability.py` (#353).
-- *(lint)* Add `tools/suppression_auditor.py`, `[tool.suppression-auditor]` configuration in
-  `pyproject.toml`, and the `suppression-audit` pre-commit hook to audit and enforce justification
-  for all inline linter and type-checker suppression directives across `src/`, `tests/`, and
-  `tools/` (#540).
-- *(tests)* Isolate `compile_locale_catalogs_for_tests` session fixture in `tests/conftest.py` to
-  compile `.mo` catalogs into `tmp_path_factory` instead of `src/findfmt/locale/` and verify test
-  dependency group sufficiency (#359).
+- *(tests)* Eliminate all 53 `# pragma: no cover` annotations across `src/`, `tests/`, and `tools/`, remove
+  the unreachable trailing `return 0` in `entrypoints.py`, add unit tests covering `terminal.py` height
+  fallbacks, `__main__` execution (`findfmt.__main__` and `findfmt.cli.main`), `< 3.12` / `>= 3.12` `override`
+  version gates, and POSIX `ImportError` (`pwd`, `grp`, `resource`) shims, and enforce zero
+  `# pragma: no cover` usage in `test_api_stability.py` (#353).
+- *(lint)* Add `tools/suppression_auditor.py`, `[tool.suppression-auditor]` configuration in `pyproject.toml`,
+  and the `suppression-audit` pre-commit hook to audit and enforce justification for all inline linter and
+  type-checker suppression directives across `src/`, `tests/`, and `tools/` (#540).
+- *(tests)* Isolate `compile_locale_catalogs_for_tests` session fixture in `tests/conftest.py` to compile
+  `.mo` catalogs into `tmp_path_factory` instead of `src/findfmt/locale/` and verify test dependency group
+  sufficiency (#359).
 
 ## [1.1.1] - 2026-11-05
 
@@ -284,63 +272,57 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - *(api)* Add optional keyword-only `on_error: Callable[[OSError], None] | None = None` callback to
   `find_files`, `traverse_directory`, `collect_directory_entries`, `has_matching_descendants`, and
   `yield_matching_items` (#320).
-- *(i18n)* Add `tools/validate_po_placeholders.py` and `--mask` / `--unmask` utilities to validate
-  and protect Python format placeholders, CLI flags, Rich markup tags, and ANSI escapes during AI
-  translation (#304).
+- *(i18n)* Add `tools/validate_po_placeholders.py` and `--mask` / `--unmask` utilities to validate and protect
+  Python format placeholders, CLI flags, Rich markup tags, and ANSI escapes during AI translation (#304).
 
 ### Bug Fixes
 
 - *(traversal)* Report missing root paths and unreadable subdirectories to stderr
-  (`findfmt: cannot open '<path>': <reason>`) and exit with status 1 while continuing to list
-  accessible paths (#320).
-- *(api)* Raise `TraversalError` on negative `max_depth` or `file_limit` and `ParserError` when
-  `--from-file` cannot read the input file (#320).
+  (`findfmt: cannot open '<path>': <reason>`) and exit with status 1 while continuing to list accessible paths
+  (#320).
+- *(api)* Raise `TraversalError` on negative `max_depth` or `file_limit` and `ParserError` when `--from-file`
+  cannot read the input file (#320).
 - *(config)* Wrapper entry-point defaults (`findfiles`, `findfilefmt`, `findfilemime`, `findfmt0`,
-  `findshebang`, `findsummary`) no longer override values configured in `.findfmt.toml` or
-  `pyproject.toml` (#454).
-- *(format)* Enforce consistent broken-pipe (`SIGPIPE` / `BrokenPipeError`) exit codes across Rich
-  visual formatters and honor `--sort` and `--reverse` in `--tree`, `--format html`, and
-  `--format xml` (#341, #384).
-- *(format)* Encode `--cp437` (`-S`) and `--table-style cp437` box-drawing glyphs as CP437 bytes
-  (`0xB3`, `0xC4`, `0xC3`, `0xC0`, etc.) instead of Latin-1 code points that rendered as mojibake
-  (#343, #384).
-- *(format)* XML output keeps the `mtime` and `ctime` attributes for files whose timestamp is the
-  Unix epoch (`0.0`) instead of dropping them (#513).
+  `findshebang`, `findsummary`) no longer override values configured in `.findfmt.toml` or `pyproject.toml`
+  (#454).
+- *(format)* Enforce consistent broken-pipe (`SIGPIPE` / `BrokenPipeError`) exit codes across Rich visual
+  formatters and honor `--sort` and `--reverse` in `--tree`, `--format html`, and `--format xml` (#341, #384).
+- *(format)* Encode `--cp437` (`-S`) and `--table-style cp437` box-drawing glyphs as CP437 bytes (`0xB3`,
+  `0xC4`, `0xC3`, `0xC0`, etc.) instead of Latin-1 code points that rendered as mojibake (#343, #384).
+- *(format)* XML output keeps the `mtime` and `ctime` attributes for files whose timestamp is the Unix epoch
+  (`0.0`) instead of dropping them (#513).
 
 ### Documentation
 
-- *(cli)* Document the formal CLI exit-code contract (`0`, `1`, `2`, `130`, `141`) in the README,
-  CLI reference, and `--help-all` with an exhaustive test matrix (#369, #347).
-- *(i18n)* Add the comparative benchmark and evaluation guide for open-source Python gettext AI
-  translators (`gettext-translator`, `pytlai`, `auto-gettext-translator`, and LiteLLM/Ollama)
-  (#303).
+- *(cli)* Document the formal CLI exit-code contract (`0`, `1`, `2`, `130`, `141`) in the README, CLI
+  reference, and `--help-all` with an exhaustive test matrix (#369, #347).
+- *(i18n)* Add the comparative benchmark and evaluation guide for open-source Python gettext AI translators
+  (`gettext-translator`, `pytlai`, `auto-gettext-translator`, and LiteLLM/Ollama) (#303).
 
 ### Changed
 
 - *(api)* `findfmt.cli.trap_cli_signals` is annotated as returning `Generator[None]` instead of
   `Iterator[None]`, which ty deprecates for `@contextmanager`. Runtime behavior is unchanged (#513).
-- *(traversal)* Remove unused internal `_load_active_specs` helper and test-only engine aliases
-  while preserving `findfmt.traversal.__all__` (#351).
+- *(traversal)* Remove unused internal `_load_active_specs` helper and test-only engine aliases while
+  preserving `findfmt.traversal.__all__` (#351).
 
 ## [1.1.0] - 2026-10-24
 
-findfmt 1.1.0 requires Python 3.11 or newer; Python 3.10 users should pin `findfmt<1.1`. Upgrading
-from 1.0.x? See [Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html) for
-what changes and what to do.
+findfmt 1.1.0 requires Python 3.11 or newer; Python 3.10 users should pin `findfmt<1.1`. Upgrading from 1.0.x?
+See [Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html) for what changes and what to
+do.
 
 ### Breaking Changes
 
-- *(build)* Dropped support for Python 3.10 (EOL 2026-10-01); the minimum supported version is now
-  Python 3.11. Removed the `tomli` dependency and the 3.10 compatibility shims (#441).
-- *(api)* `SortKey` and `OutputFormat` are now `enum.StrEnum` subclasses, so `str()`, `format()`,
-  and f-strings render a member's value (`"size"`) instead of `"SortKey.SIZE"`. Equality with
-  strings, hashing, JSON output, CLI help, and configuration handling are unchanged (#441).
-- *(format)* Human-readable sizes use IEC binary unit labels: CLI `-h` output changes from `1.5 K`
-  to `1.5 KiB`, and `findfmt.sizes.format_size()` from `1.5 KB` to `1.5 KiB`. Values are unchanged
-  (#352).
+- *(build)* Dropped support for Python 3.10 (EOL 2026-10-01); the minimum supported version is now Python
+  3.11. Removed the `tomli` dependency and the 3.10 compatibility shims (#441).
+- *(api)* `SortKey` and `OutputFormat` are now `enum.StrEnum` subclasses, so `str()`, `format()`, and
+  f-strings render a member's value (`"size"`) instead of `"SortKey.SIZE"`. Equality with strings, hashing,
+  JSON output, CLI help, and configuration handling are unchanged (#441).
+- *(format)* Human-readable sizes use IEC binary unit labels: CLI `-h` output changes from `1.5 K` to
+  `1.5 KiB`, and `findfmt.sizes.format_size()` from `1.5 KB` to `1.5 KiB`. Values are unchanged (#352).
 - *(cli)* Wrapper commands (`findfiles`, `findfilefmt`, `findfilemime`, `findfmt0`, `findshebang`,
-  `findsummary`) exit with status 1 instead of 0 when they stop with an error that carries a message
-  (#373).
+  `findsummary`) exit with status 1 instead of 0 when they stop with an error that carries a message (#373).
 
 ### Features
 
@@ -348,65 +330,58 @@ what changes and what to do.
 
 ### Bug Fixes
 
-- *(traversal)* Preserve significant leading whitespace and escaped trailing whitespace in
-  `.gitignore` patterns, matching git (#354).
-- *(parsers)* Sort `--from-file` entries by status-change time for `--sort ctime` instead of
-  modification time (#462).
+- *(traversal)* Preserve significant leading whitespace and escaped trailing whitespace in `.gitignore`
+  patterns, matching git (#354).
+- *(parsers)* Sort `--from-file` entries by status-change time for `--sort ctime` instead of modification time
+  (#462).
 - *(format)* `-f ipynb` notebooks run: the manifest cell loads its data with `json.loads` (#330).
 - *(packaging)* Correct the "A.gitignore-aware" typo in the PyPI summary (#443).
 - *(cli)* On Windows with Python 3.11–3.14, piped or redirected output no longer fails with
-  `UnicodeEncodeError` when it contains characters the ANSI code page (such as cp1252) cannot
-  encode, such as the `--help` panel borders or non-Latin file names. findfmt writes UTF-8, as
-  Python 3.15 does by default, unless `PYTHONIOENCODING` or `PYTHONUTF8=0` is set (#496).
-- *(benchmark)* `tools/benchmark.py --keep-temp` keeps the generated tree instead of deleting it
-  (#489).
+  `UnicodeEncodeError` when it contains characters the ANSI code page (such as cp1252) cannot encode, such as
+  the `--help` panel borders or non-Latin file names. findfmt writes UTF-8, as Python 3.15 does by default,
+  unless `PYTHONIOENCODING` or `PYTHONUTF8=0` is set (#496).
+- *(benchmark)* `tools/benchmark.py --keep-temp` keeps the generated tree instead of deleting it (#489).
 
 ### Documentation
 
-- *(guides)* Add the "Upgrading to 1.1" guide (#499), state the supported Python range in the
-  README, installation guide, and quickstart, and complete the README CLI options table (#494).
-- *(cli)* Correct symlink flag references in the configuration guide, CLI reference, and security
-  policy (#364), and list `--csv-safe` in `--help-all` (#494).
-- *(i18n)* Regenerate the documentation translation catalogs, drop obsolete entries on update, and
-  guard catalogs against missing pages (#469).
-- *(quality)* Document the Python version support lifecycle procedure (#442), and use
-  `--show-diff-on-failure` in every documented `pre-commit run --all-files` (#476).
-- *(api)* Document the public API stability policy, and pin the public API in a snapshot test so
-  changes are caught in review (#493).
-- *(cli)* Correct the exit-code tables in `--help-all` and the CLI reference: no matches exits 0
-  unless `--exit-status` is given (#493).
+- *(guides)* Add the "Upgrading to 1.1" guide (#499), state the supported Python range in the README,
+  installation guide, and quickstart, and complete the README CLI options table (#494).
+- *(cli)* Correct symlink flag references in the configuration guide, CLI reference, and security policy
+  (#364), and list `--csv-safe` in `--help-all` (#494).
+- *(i18n)* Regenerate the documentation translation catalogs, drop obsolete entries on update, and guard
+  catalogs against missing pages (#469).
+- *(quality)* Document the Python version support lifecycle procedure (#442), and use `--show-diff-on-failure`
+  in every documented `pre-commit run --all-files` (#476).
+- *(api)* Document the public API stability policy, and pin the public API in a snapshot test so changes are
+  caught in review (#493).
+- *(cli)* Correct the exit-code tables in `--help-all` and the CLI reference: no matches exits 0 unless
+  `--exit-status` is given (#493).
 
 ### CI/CD & Packaging
 
-- *(ci)* Python 3.15 is the supported maximum and now gates every merge on Linux, macOS, and
-  Windows; the quality gate, documentation build, release, and wheel smoke test run on 3.15. A
-  non-gating `3.16-dev` job gives early warning for the next release (#335, #440).
+- *(ci)* Python 3.15 is the supported maximum and now gates every merge on Linux, macOS, and Windows; the
+  quality gate, documentation build, release, and wheel smoke test run on 3.15. A non-gating `3.16-dev` job
+  gives early warning for the next release (#335, #440).
 - *(docker)* The container image now runs Python 3.14 (was 3.13), still on Debian bookworm (#440).
 - *(docker)* The container image installs the release wheel (the same one published to PyPI), so
-  `findfmt --version` reports the release version instead of `1.0.2.dev0`. Dependencies are
-  installed from `uv.lock`, and the image no longer ships `uv`. Releases verify the image's version
-  before pushing it and publish an SBOM, build provenance, and a signed attestation. A new CI job
-  builds and tests the image on every pull request. To build it locally, run `uv build --wheel`
-  first (#328).
-- *(release)* The release workflow always builds the requested tag (also when re-run via
-  `workflow_dispatch`), refuses anything but a `vMAJOR.MINOR.PATCH` tag, verifies that the built
-  wheel and sdist carry the tag's version before publishing, no longer skips duplicate production
-  PyPI uploads, and tags dispatched container images with the release version instead of only
-  `latest` (#327).
-- *(release)* GitHub Release notes now come from the version's CHANGELOG section instead of
-  generated commit summaries, and the release fails before building anything if that section is
-  missing (#498).
-- *(ci)* Run `uv sync --locked` everywhere (#356), fetch full history for version-sensitive jobs
-  (#357), add a dependency-resolution smoke matrix to pull requests (#428), make the test suite
-  hermetic against the developer's global git config (#326), and guard the supported Python range
-  with policy tests (#442).
-- *(ci)* The packaging smoke test installs the built wheel on the minimum and maximum supported
-  Python (3.11 and 3.15) on Linux, macOS, and Windows, runs `tools/smoke_wheel.py` against it, and
-  checks that `pip` refuses to install it on Python 3.10. End-to-end tests cover every behavior
-  change since 1.0 (#496).
-- *(packaging)* The wheel no longer ships the `*.po`/`*.pot` catalog sources (only the compiled
-  `*.mo` catalogs, which are all it reads), and the sdist no longer picks up `*.mo` files built
-  under `docs/` (#495).
+  `findfmt --version` reports the release version instead of `1.0.2.dev0`. Dependencies are installed from
+  `uv.lock`, and the image no longer ships `uv`. Releases verify the image's version before pushing it and
+  publish an SBOM, build provenance, and a signed attestation. A new CI job builds and tests the image on
+  every pull request. To build it locally, run `uv build --wheel` first (#328).
+- *(release)* The release workflow always builds the requested tag (also when re-run via `workflow_dispatch`),
+  refuses anything but a `vMAJOR.MINOR.PATCH` tag, verifies that the built wheel and sdist carry the tag's
+  version before publishing, no longer skips duplicate production PyPI uploads, and tags dispatched container
+  images with the release version instead of only `latest` (#327).
+- *(release)* GitHub Release notes now come from the version's CHANGELOG section instead of generated commit
+  summaries, and the release fails before building anything if that section is missing (#498).
+- *(ci)* Run `uv sync --locked` everywhere (#356), fetch full history for version-sensitive jobs (#357), add a
+  dependency-resolution smoke matrix to pull requests (#428), make the test suite hermetic against the
+  developer's global git config (#326), and guard the supported Python range with policy tests (#442).
+- *(ci)* The packaging smoke test installs the built wheel on the minimum and maximum supported Python (3.11
+  and 3.15) on Linux, macOS, and Windows, runs `tools/smoke_wheel.py` against it, and checks that `pip`
+  refuses to install it on Python 3.10. End-to-end tests cover every behavior change since 1.0 (#496).
+- *(packaging)* The wheel no longer ships the `*.po`/`*.pot` catalog sources (only the compiled `*.mo`
+  catalogs, which are all it reads), and the sdist no longer picks up `*.mo` files built under `docs/` (#495).
 
 ### Security
 
@@ -414,38 +389,37 @@ what changes and what to do.
   (`GHSA-cx6f-vjhg-g3cc`), `setuptools` 84.2.1 (`GHSA-xmj3-9gf7-h52w`), and `filelock` 4.2.4
   (`GHSA-v4x8-3wr5-3wq8`, `GHSA-9vhv-jxww-xfm5`, `GHSA-567q-5qvw-pf92`, `GHSA-2g95-wg33-c5x2`,
   `GHSA-jqc4-5cvw-7w85`, `GHSA-crv4-6mhj-j5jh`). The `filelock` fixes require Python 3.11+ (#441).
-- *(release)* The `pypi` and `testpypi` deployment environments only admit `v*.*.*` tags, and the
-  release workflow fails unless it runs on the requested tag, so a branch can't mint a PyPI
-  publishing token (#495).
+- *(release)* The `pypi` and `testpypi` deployment environments only admit `v*.*.*` tags, and the release
+  workflow fails unless it runs on the requested tag, so a branch can't mint a PyPI publishing token (#495).
 
 ## [1.0.2] - 2026-10-21
 
 ### Security
 
-- *(security)* Complete Security Hardening Epic covering terminal sanitization, ReDoS prevention,
-  filesystem FIFO safety, and threat model documentation (#338, #422).
-- *(classifier)* Prevent infinite hang during file type classification when regular files are
-  swapped for FIFOs/named pipes (#363, #404).
-- *(format)* Mask Unicode bidirectional control/override characters (`U+202A`–`U+202E`,
-  `U+2066`–`U+2069`) in TTY mode to prevent Trojan Source visual spoofing (#362, #403).
-- *(format)* Eliminate quadratic ReDoS vulnerability in C1-OSC terminal escape regex by strictly
-  bounding inner characters to linear-time evaluation (#361, #402).
-- *(format)* Neutralize spreadsheet formula injection by prefixing formula trigger characters (`=`,
-  `+`, `-`, `@`, `\t`, `\r`) with single quotes via `--csv-safe` flag (#339, #411, #412).
-- *(format)* Escape raw HTML metacharacters (`<`, `>`, `&`) in Markdown output table and list
-  formatters (#333, #410).
+- *(security)* Complete Security Hardening Epic covering terminal sanitization, ReDoS prevention, filesystem
+  FIFO safety, and threat model documentation (#338, #422).
+- *(classifier)* Prevent infinite hang during file type classification when regular files are swapped for
+  FIFOs/named pipes (#363, #404).
+- *(format)* Mask Unicode bidirectional control/override characters (`U+202A`–`U+202E`, `U+2066`–`U+2069`) in
+  TTY mode to prevent Trojan Source visual spoofing (#362, #403).
+- *(format)* Eliminate quadratic ReDoS vulnerability in C1-OSC terminal escape regex by strictly bounding
+  inner characters to linear-time evaluation (#361, #402).
+- *(format)* Neutralize spreadsheet formula injection by prefixing formula trigger characters (`=`, `+`, `-`,
+  `@`, `\t`, `\r`) with single quotes via `--csv-safe` flag (#339, #411, #412).
+- *(format)* Escape raw HTML metacharacters (`<`, `>`, `&`) in Markdown output table and list formatters
+  (#333, #410).
 
 ### Features
 
-- *(cli)* Ensure atomic file output for `-o`/`--output` flag using staging temporary files and
-  atomic filesystem replacement (#368, #413, #414).
-- *(i18n)* Add canonical gettext translation catalogs and Sphinx-intl localized documentation
-  support for English (`en`) (#214, #421).
+- *(cli)* Ensure atomic file output for `-o`/`--output` flag using staging temporary files and atomic
+  filesystem replacement (#368, #413, #414).
+- *(i18n)* Add canonical gettext translation catalogs and Sphinx-intl localized documentation support for
+  English (`en`) (#214, #421).
 
 ### Bug Fixes
 
-- *(format)* Audit and enforce cell-width alignment for CJK double-width characters and emoji across
-  table and tree formatters (#230, #420).
+- *(format)* Audit and enforce cell-width alignment for CJK double-width characters and emoji across table and
+  tree formatters (#230, #420).
 
 ### CI/CD & Dependencies
 
@@ -460,31 +434,28 @@ what changes and what to do.
 
 ### Features
 
-- *(i18n)* Localize file sizes, numeric separators, and timestamps per regional locale standards
-  (#231, #397).
+- *(i18n)* Localize file sizes, numeric separators, and timestamps per regional locale standards (#231, #397).
 
 ### Bug Fixes
 
-- *(format)* Handle non-UTF-8 filenames with `surrogateescape` error handling and binary stdout
-  dispatch across all output serializers and formatting modes (#315, #387, #388, #389).
-- *(cli)* Preserve raw control characters under `-0` and piped text output to avoid truncating
-  filenames containing newlines or tabs, while retaining sanitization on interactive terminals
-  (#316, #390).
-- *(i18n)* Emit `Content-Type: text/plain; charset=UTF-8` header in pure-Python MO compiler so
-  wheels built without GNU `msgfmt` decode non-ASCII translations properly (#317, #391).
-- *(traversal)* Guard symlink traversal against `OSError` and cyclic link loops across platforms,
-  preventing recursive prune loops and Windows loop `RuntimeError` (#318, #393, #394).
-- *(traversal)* Prevent crash in `--sort version` when handling non-ASCII numeric Unicode characters
-  such as superscript digits (#370, #395).
-- *(traversal)* Eliminate `os.scandir` iterator handle leaks on early traversal termination and
-  enforce `ResourceWarning` error tracking in tests (#371, #396).
-- *(test)* Support platforms without native POSIX `nl_langinfo` constants in localized timestamp
-  tests (#398).
+- *(format)* Handle non-UTF-8 filenames with `surrogateescape` error handling and binary stdout dispatch
+  across all output serializers and formatting modes (#315, #387, #388, #389).
+- *(cli)* Preserve raw control characters under `-0` and piped text output to avoid truncating filenames
+  containing newlines or tabs, while retaining sanitization on interactive terminals (#316, #390).
+- *(i18n)* Emit `Content-Type: text/plain; charset=UTF-8` header in pure-Python MO compiler so wheels built
+  without GNU `msgfmt` decode non-ASCII translations properly (#317, #391).
+- *(traversal)* Guard symlink traversal against `OSError` and cyclic link loops across platforms, preventing
+  recursive prune loops and Windows loop `RuntimeError` (#318, #393, #394).
+- *(traversal)* Prevent crash in `--sort version` when handling non-ASCII numeric Unicode characters such as
+  superscript digits (#370, #395).
+- *(traversal)* Eliminate `os.scandir` iterator handle leaks on early traversal termination and enforce
+  `ResourceWarning` error tracking in tests (#371, #396).
+- *(test)* Support platforms without native POSIX `nl_langinfo` constants in localized timestamp tests (#398).
 
 ### Testing
 
-- *(i18n)* Automated verification suite for complex multi-tier gettext pluralization rules covering
-  English, German, French, Spanish, Russian, Polish, and Arabic (#232, #399).
+- *(i18n)* Automated verification suite for complex multi-tier gettext pluralization rules covering English,
+  German, French, Spanish, Russian, Polish, and Arabic (#232, #399).
 
 ### Documentation
 
@@ -494,72 +465,68 @@ what changes and what to do.
 
 ### Overview & Stability Commitment
 
-This release represents the first major production-ready release of **findfmt** (v1.0.0 GA).
-Starting with v1.0.0, `findfmt` strictly adheres to
-[Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). All public Python APIs exported
-from the top-level `findfmt` package (`find_files`, `FileInfo`, `TraversalConfig`, `get_formatter`,
-`classify_file`, `OutputFormat`, `FindFmtError`), as well as all CLI command options, configuration
-schemas, environment variables, and exit codes, are guaranteed backwards-compatible across future
-1.x releases.
+This release represents the first major production-ready release of **findfmt** (v1.0.0 GA). Starting with
+v1.0.0, `findfmt` strictly adheres to [Semantic Versioning 2.0.0](https://semver.org/spec/v2.0.0.html). All
+public Python APIs exported from the top-level `findfmt` package (`find_files`, `FileInfo`, `TraversalConfig`,
+`get_formatter`, `classify_file`, `OutputFormat`, `FindFmtError`), as well as all CLI command options,
+configuration schemas, environment variables, and exit codes, are guaranteed backwards-compatible across
+future 1.x releases.
 
 ### Flagship Highlights
 
-- **Intelligent Content Classification**: File classification powered by `identify` and shebang
-  heuristics, reliably detecting script interpreters and MIME types even in the absence of file
-  extensions.
-- **Hierarchical Traversal Engine**: High-performance, `.gitignore`-aware directory walker with
-  early subtree pruning, maintaining constant $O(1)$ streaming memory across massive repositories.
-- **Multi-Format Serialization Suite**: Built-in support for 14 serialization formats (`text`,
-  `json`, `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`,
-  `xml`, `html`) with Rich terminal styling, customizable borders, and OSC 8 terminal hyperlinks.
-- **Hierarchical Configuration System**: Cascading configuration resolution supporting CLI
-  arguments, environment variables, user configuration files (`~/.config/findfmt/config.toml` or
-  Windows `%APPDATA%`), and `pyproject.toml` (`[tool.findfmt]`).
-- **Terminal Security & Signal Resilience**: Automatic ANSI escape sequence stripping and
-  control-character masking for untrusted filenames by default, paired with graceful Unix signal
-  handling (`SIGPIPE`, `SIGINT`).
-- **Internationalization & Localization**: Native `gettext` runtime architecture (`findfmt.i18n`)
-  supporting localized console messages, help descriptions, and locale-aware number/date formatting.
+- **Intelligent Content Classification**: File classification powered by `identify` and shebang heuristics,
+  reliably detecting script interpreters and MIME types even in the absence of file extensions.
+- **Hierarchical Traversal Engine**: High-performance, `.gitignore`-aware directory walker with early subtree
+  pruning, maintaining constant $O(1)$ streaming memory across massive repositories.
+- **Multi-Format Serialization Suite**: Built-in support for 14 serialization formats (`text`, `json`,
+  `jsonl`, `yaml`, `ipynb`, `csv`, `csv-table`, `tsv`, `markdown`, `rst`, `table`, `tree`, `xml`, `html`) with
+  Rich terminal styling, customizable borders, and OSC 8 terminal hyperlinks.
+- **Hierarchical Configuration System**: Cascading configuration resolution supporting CLI arguments,
+  environment variables, user configuration files (`~/.config/findfmt/config.toml` or Windows `%APPDATA%`),
+  and `pyproject.toml` (`[tool.findfmt]`).
+- **Terminal Security & Signal Resilience**: Automatic ANSI escape sequence stripping and control-character
+  masking for untrusted filenames by default, paired with graceful Unix signal handling (`SIGPIPE`, `SIGINT`).
+- **Internationalization & Localization**: Native `gettext` runtime architecture (`findfmt.i18n`) supporting
+  localized console messages, help descriptions, and locale-aware number/date formatting.
 
 ### Added
 
-- *(config)* Hierarchical configuration file support with `--config`, `--no-config`,
-  `--show-config`, `FINDFMT_CONFIG` environment variable, XDG and Windows AppData discovery, and
-  `pyproject.toml` `[tool.findfmt]` table integration (#281, #285).
-- *(perf)* Official v1.0.0 traversal throughput and memory baselines establishing canonical
-  performance benchmarks across flat (10k), deep (20-level hierarchy), and monorepo topologies
-  (#284, #290).
-- *(api)* Public module boundary audit, explicit `__all__` across all 49 submodules under `findfmt`,
-  and top-level package exports for seamless library integration (#277, #288).
-- *(format)* Full multi-format serialization suite supporting 14 output targets with intro/outro
-  templating and OSC 8 terminal hyperlinks (#172, #173, #174).
+- *(config)* Hierarchical configuration file support with `--config`, `--no-config`, `--show-config`,
+  `FINDFMT_CONFIG` environment variable, XDG and Windows AppData discovery, and `pyproject.toml`
+  `[tool.findfmt]` table integration (#281, #285).
+- *(perf)* Official v1.0.0 traversal throughput and memory baselines establishing canonical performance
+  benchmarks across flat (10k), deep (20-level hierarchy), and monorepo topologies (#284, #290).
+- *(api)* Public module boundary audit, explicit `__all__` across all 49 submodules under `findfmt`, and
+  top-level package exports for seamless library integration (#277, #288).
+- *(format)* Full multi-format serialization suite supporting 14 output targets with intro/outro templating
+  and OSC 8 terminal hyperlinks (#172, #173, #174).
 
 ### Changed
 
-- *(security)* Enforce automatic ANSI escape sequence stripping and control-character masking for
-  untrusted filenames by default across all formatters, Rich tables, tree views, Markdown, and XML
-  serializers, with `--literal`/`-N` for raw output (#283, #287).
-- *(signals)* Robust Unix signal handling (`SIGPIPE`, `SIGINT`) across CLI runner, entrypoints, and
-  pager dispatch, terminating gracefully with zero Python tracebacks when piped to `head`, `sed`, or
-  closed downstream processes (#282, #286).
+- *(security)* Enforce automatic ANSI escape sequence stripping and control-character masking for untrusted
+  filenames by default across all formatters, Rich tables, tree views, Markdown, and XML serializers, with
+  `--literal`/`-N` for raw output (#283, #287).
+- *(signals)* Robust Unix signal handling (`SIGPIPE`, `SIGINT`) across CLI runner, entrypoints, and pager
+  dispatch, terminating gracefully with zero Python tracebacks when piped to `head`, `sed`, or closed
+  downstream processes (#282, #286).
 - *(deps)* Updated pre-commit hooks and pinned stable dependencies (`uv-pre-commit 0.13.1`,
   `ruff-pre-commit v0.17.1`, `pymarkdown v0.9.41`, `pyroma 5.0.1`, `ty-pre-commit v0.0.84`) (#291).
 
 ### Fixed
 
-- *(audit)* Comprehensive cross-platform edge cases, broken symlink resilience, cyclic symlink loop
-  detection, and Windows drive path normalization in `build_file_uri` (#280, #289).
+- *(audit)* Comprehensive cross-platform edge cases, broken symlink resilience, cyclic symlink loop detection,
+  and Windows drive path normalization in `build_file_uri` (#280, #289).
 
 ### Documentation
 
-- *(sphinx)* Documentation, discoverability, quickstart guides, CLI reference synchronization, and
-  manual pages polish for v1.0.0 release (#278, #293).
+- *(sphinx)* Documentation, discoverability, quickstart guides, CLI reference synchronization, and manual
+  pages polish for v1.0.0 release (#278, #293).
 
 ### Packaging & Security
 
-- *(packaging)* Comprehensive packaging, distribution, and supply chain security verification for
-  v1.0.0, including OIDC Trusted Publishing, global MO catalog compilation in wheels and source
-  distributions, and release quality gate automation (#279, #294).
+- *(packaging)* Comprehensive packaging, distribution, and supply chain security verification for v1.0.0,
+  including OIDC Trusted Publishing, global MO catalog compilation in wheels and source distributions, and
+  release quality gate automation (#279, #294).
 
 ## [0.9.0] - 2026-10-15
 
@@ -579,34 +546,31 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 ### Features
 
 - *(i18n)* Implement core `gettext` runtime engine and message wrapping (#59) (#191)
-- *(i18n)* Implement message catalog extraction, Hatchling MO compilation build hook, and
-  Sphinx-intl (#60) (#192)
-- *(i18n)* Implement locale-aware date/number formatting, pluralization, and multi-locale support
-  (#36) (#193)
+- *(i18n)* Implement message catalog extraction, Hatchling MO compilation build hook, and Sphinx-intl (#60)
+  (#192)
+- *(i18n)* Implement locale-aware date/number formatting, pluralization, and multi-locale support (#36) (#193)
 
 ## [0.7.0] - 2026-10-14
 
 ### Documentation
 
-- *(sphinx)* Implement and verify Web & Digital formats (`html`, `dirhtml`, `singlehtml`, `epub`)
-  (#31) (#185)
-- *(sphinx)* Implement and verify Print & Offline formats (`latexpdf`, `text`, `man`, `texinfo`)
-  (#32) (#186)
+- *(sphinx)* Implement and verify Web & Digital formats (`html`, `dirhtml`, `singlehtml`, `epub`) (#31) (#185)
+- *(sphinx)* Implement and verify Print & Offline formats (`latexpdf`, `text`, `man`, `texinfo`) (#32) (#186)
 - *(sphinx)* Implement and verify Help System formats (`htmlhelp`, `qthelp`, `devhelp`) (#33) (#187)
-- *(sphinx)* Implement and verify Data & Serialization formats (`json`, `pickle`, `xml`,
-  `pseudoxml`) (#34) (#188)
+- *(sphinx)* Implement and verify Data & Serialization formats (`json`, `pickle`, `xml`, `pseudoxml`) (#34)
+  (#188)
 - *(sphinx)* Implement and verify Localization & Quality Control builders (#35) (#189)
 
 ## [0.6.0] - 2026-10-14
 
 ### Performance
 
-- *(benchmark)* Create automated benchmark harness (`tools/benchmark.py`) tracking throughput and
-  memory (#61) (#176)
-- *(engine)* Optimize filesystem traversal, eliminate redundant `resolve()` calls, and single-buffer
-  content reads (#62) (#182)
-- *(engine)* Analyze traversal and classification performance bottlenecks and implement
-  optimizations (#38) (#183)
+- *(benchmark)* Create automated benchmark harness (`tools/benchmark.py`) tracking throughput and memory (#61)
+  (#176)
+- *(engine)* Optimize filesystem traversal, eliminate redundant `resolve()` calls, and single-buffer content
+  reads (#62) (#182)
+- *(engine)* Analyze traversal and classification performance bottlenecks and implement optimizations (#38)
+  (#183)
 
 ### Dependencies
 
@@ -621,8 +585,7 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 ### Features
 
 - *(format)* Implement XML and HTML document serializers with intro/outro templating (#57) (#172)
-- *(cli)* Implement OSC 8 clickable terminal hyperlinks with schema and authority overrides (#58)
-  (#173)
+- *(cli)* Implement OSC 8 clickable terminal hyperlinks with schema and authority overrides (#58) (#173)
 - *(cli)* Implement JSON document serialization shortcut flag (-J, --json) (#23) (#174)
 
 ## [0.5.0] - 2026-10-14
@@ -638,8 +601,7 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 
 ### Features
 
-- *(cli)* Implement input options (`--from-file`, tab-indented parsing, symlink processing) (#24)
-  (#164)
+- *(cli)* Implement input options (`--from-file`, tab-indented parsing, symlink processing) (#24) (#164)
 - *(traversal)* Add `-a`/`--all` alias and comprehensive traversal integration tests (#19) (#165)
 - *(traversal)* Implement ignore engine extensions and file output redirection (#53) (#162)
 - *(traversal)* Implement Unix-inspired sorting options (#21) (#163)
@@ -655,11 +617,10 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 
 - *(cli)* Add interactive pager for `--help`, `--help-all`, and tall TTY diagnostic outputs (#149)
 - *(cli)* Add relative path prefix option to preserve target path in listings (#145) (#154)
-- *(traversal)* Expand `.gitignore` and `.git/info/exclude` discovery across ancestor hierarchy and
-  nested subtrees (#146) (#155)
+- *(traversal)* Expand `.gitignore` and `.git/info/exclude` discovery across ancestor hierarchy and nested
+  subtrees (#146) (#155)
 - *(traversal)* Implement traversal boundaries, depth limits, and pruning (#156)
-- *(traversal)* Implement wildcard and glob pattern matching (-P, -I, --ignore-case, --match-dirs)
-  (#157)
+- *(traversal)* Implement wildcard and glob pattern matching (-P, -I, --ignore-case, --match-dirs) (#157)
 
 ### Bug Fixes
 
@@ -705,8 +666,7 @@ schemas, environment variables, and exit codes, are guaranteed backwards-compati
 ### CI/CD
 
 - *(docs)* Integrate Vale prose linter for Markdown documentation (#117)
-- *(clusterfuzzlite)* Restrict fuzzing workflow to merges on main, scheduled runs, and manual
-  dispatch (#129)
+- *(clusterfuzzlite)* Restrict fuzzing workflow to merges on main, scheduled runs, and manual dispatch (#129)
 - *(vale)* Pin Vale binary version to 3.20.0 and provide GITHUB_TOKEN (#131)
 - *(vale)* Scope .vale.ini with negative glob to exclude internal directories (#133)
 - *(vale)* Resolve flaky Vale workflow with style caching, trigger scoping, and alert limits (#135)

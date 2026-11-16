@@ -76,10 +76,7 @@ def _normalize_format_name(format_type: OutputFormat | str) -> str:
     Returns:
         Normalized lowercase format string.
     """
-    if isinstance(format_type, OutputFormat):
-        val = format_type.value
-    else:
-        val = str(format_type).lower().strip()
+    val = format_type.value if isinstance(format_type, OutputFormat) else str(format_type).lower().strip()
 
     if val == OutputFormat.MD.value:
         return OutputFormat.MARKDOWN.value

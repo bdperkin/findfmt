@@ -192,8 +192,7 @@ class XmlFormatter(Formatter):
             if has_invalid:
                 return "".join(
                     "?"
-                    if (_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX)
-                    or c in (_NONCHAR_FFFE, _NONCHAR_FFFF)
+                    if (_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX) or c in (_NONCHAR_FFFE, _NONCHAR_FFFF)
                     else c
                     for c in val
                 )
@@ -204,16 +203,8 @@ class XmlFormatter(Formatter):
 
     def _apply_metadata_attrs(self, file_info: FileInfo, elem: ET.Element) -> None:
         """Populate optional metadata attributes on target XML element."""
-        mt = (
-            format_timestamp(file_info.mtime, self.time_format)
-            if file_info.mtime is not None
-            else None
-        )
-        ct = (
-            format_timestamp(file_info.ctime, self.time_format)
-            if file_info.ctime is not None
-            else None
-        )
+        mt = format_timestamp(file_info.mtime, self.time_format) if file_info.mtime is not None else None
+        ct = format_timestamp(file_info.ctime, self.time_format) if file_info.ctime is not None else None
         du = (
             self._format_size_val(file_info.accumulated_size)
             if file_info.accumulated_size is not None

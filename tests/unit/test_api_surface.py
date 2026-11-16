@@ -24,9 +24,7 @@ def _summarize(expected: dict[str, Any], actual: dict[str, Any]) -> str:
         before, after = expected.get(module, {}), actual.get(module, {})
         lines += [f"  + {module}.{n}" for n in sorted(set(after) - set(before))]
         lines += [f"  - {module}.{n}" for n in sorted(set(before) - set(after))]
-        lines += [
-            f"  ~ {module}.{n}" for n in sorted(set(before) & set(after)) if before[n] != after[n]
-        ]
+        lines += [f"  ~ {module}.{n}" for n in sorted(set(before) & set(after)) if before[n] != after[n]]
 
     return "\n".join(lines)
 

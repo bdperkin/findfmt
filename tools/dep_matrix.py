@@ -156,9 +156,7 @@ def load_locked_versions(lock_path: Path) -> dict[str, str]:
     return {
         normalize_pkg_name(pkg["name"]): pkg["version"]
         for pkg in packages
-        if isinstance(pkg, dict)
-        and isinstance(pkg.get("name"), str)
-        and isinstance(pkg.get("version"), str)
+        if isinstance(pkg, dict) and isinstance(pkg.get("name"), str) and isinstance(pkg.get("version"), str)
     }
 
 
@@ -202,9 +200,7 @@ def format_failure_diagnostics(cell: MatrixCell, snapshot: DiagnosticSnapshot) -
             continue
 
         is_lower_drift = (
-            cell.resolution in {"lowest-direct", "lowest"}
-            and lock_ver is not None
-            and inst_ver != lock_ver
+            cell.resolution in {"lowest-direct", "lowest"} and lock_ver is not None and inst_ver != lock_ver
         )
         if pkg in failed_mods or is_lower_drift:
             target = f">={lock_ver}" if lock_ver is not None else f">{inst_ver}"
@@ -222,9 +218,7 @@ def format_failure_diagnostics(cell: MatrixCell, snapshot: DiagnosticSnapshot) -
                 )
 
     lines.append("\n[Stage 3] Actionable pyproject.toml Bound Remediation:")
-    fallback = (
-        "  - Inspect the dependency tree above and bump the offending floor in pyproject.toml."
-    )
+    fallback = "  - Inspect the dependency tree above and bump the offending floor in pyproject.toml."
     lines.extend(recommendations or [fallback])
     return "\n".join(lines) + "\n"
 

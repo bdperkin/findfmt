@@ -280,9 +280,7 @@ def _sort_file_infos(files: list[FileInfo], config: TraversalConfig) -> list[Fil
 
             # CTIME sorts on status-change time; TIME/MTIME sort on modification time.
             # Note: on Windows st_ctime is the creation time, not the status-change time.
-            timestamp = (
-                stat_result.st_ctime if config.sort_by == SortKey.CTIME else stat_result.st_mtime
-            )
+            timestamp = stat_result.st_ctime if config.sort_by == SortKey.CTIME else stat_result.st_mtime
             return (timestamp, name)
 
         if config.sort_by == SortKey.SIZE:

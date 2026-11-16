@@ -133,7 +133,7 @@ environments = [ "python_full_version >= '3.11.5'" ]
 
 [tool.ruff]
 target-version = "py311"
-line-length = 100
+line-length = 110
 src = [ "src", "tests", "tools" ]
 lint.select = [ "ALL" ]
 lint.ignore = [
@@ -251,6 +251,7 @@ exclude = "tests/*,docs/*,tools/*"
 
 [tool.pymarkdown]
 plugins.MD013.enabled = false
+plugins.MD013.line_length = 110
 plugins.MD024.siblings_only = true
 plugins.MD031.enabled = false
 plugins.MD033.enabled = false
@@ -304,8 +305,12 @@ exclude = [
   "*.lock",
   "uv.lock",
 ]
-overrides.python = { warning = 300, error = 500 }
-overrides.yaml = { warning = 300, error = 500 }
+overrides.markdown = { warning = 110, error = 500 }
+overrides.python = { warning = 110, error = 150 }
+overrides.yaml = { warning = 110, error = 150 }
+file_line_overrides.markdown = { warning = 300, error = 600 }
+file_line_overrides.python = { warning = 300, error = 500 }
+file_line_overrides.yaml = { warning = 300, error = 500 }
 
 [tool.suppression-auditor]
 strict = true
@@ -327,12 +332,12 @@ allowed = [
   { file = "tests/integration/test_security_hardening.py", line = 31, code = "noqa: SLF001", reason = "White-box ReDoS stress test on internal C1-OSC regex" },
   { file = "tests/integration/test_security_hardening.py", line = 35, code = "noqa: SLF001", reason = "Verify terminal module shares canonical ANSI regex instance" },
   { file = "tests/integration/test_security_hardening.py", line = 36, code = "noqa: SLF001", reason = "Verify hyperlinks module shares canonical ANSI regex instance" },
-  { file = "tests/unit/test_api_surface.py", line = 182, code = "noqa: SLF001", reason = "White-box unit test for internal _qualified_name helper" },
-  { file = "tests/unit/test_api_surface.py", line = 189, code = "noqa: UP045", reason = "Intentionally test legacy typing.Optional[Path] normalization" },
+  { file = "tests/unit/test_api_surface.py", line = 180, code = "noqa: SLF001", reason = "White-box unit test for internal _qualified_name helper" },
+  { file = "tests/unit/test_api_surface.py", line = 187, code = "noqa: UP045", reason = "Intentionally test legacy typing.Optional[Path] normalization" },
   { file = "tests/unit/test_formatters/test_non_utf8.py", line = 179, code = "noqa: SLF001", reason = "White-box unit test for internal _clean_val surrogate handling" },
   { file = "tests/unit/test_formatters/test_non_utf8.py", line = 180, code = "noqa: SLF001", reason = "White-box unit test for internal _clean_val control-char preservation" },
-  { file = "tests/unit/test_i18n_localization.py", line = 49, code = "type: ignore[assignment]", reason = "Monkeypatch stdlib locale.format_string with MagicMock in test" },
-  { file = "tests/unit/test_i18n_localization.py", line = 53, code = "type: ignore[assignment]", reason = "Restore original stdlib locale.format_string function after test" },
+  { file = "tests/unit/test_i18n_localization.py", line = 50, code = "type: ignore[assignment]", reason = "Monkeypatch stdlib locale.format_string with MagicMock in test" },
+  { file = "tests/unit/test_i18n_localization.py", line = 54, code = "type: ignore[assignment]", reason = "Restore original stdlib locale.format_string function after test" },
   { file = "tests/unit/test_security/test_filename_sanitization.py", line = 361, code = "noqa: SLF001", reason = "White-box stress test on internal _ANSI_ESCAPE_RE pattern" },
   { file = "tests/unit/test_security/test_filename_sanitization.py", line = 367, code = "noqa: SLF001", reason = "White-box test on interspersed C1-OSC sequences" },
   { file = "tests/unit/test_security/test_filename_sanitization.py", line = 371, code = "noqa: SLF001", reason = "White-box test on terminated C1-OSC sequence matching" },

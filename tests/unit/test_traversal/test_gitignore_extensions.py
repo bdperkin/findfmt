@@ -435,9 +435,7 @@ def test_matches_git_check_ignore(
         p.write_text("data\n", encoding="utf-8")
 
     with patch.object(Path, "home", return_value=home_dir):
-        traversed_set = {
-            f.relative_path.as_posix() for f in traverse_directory(repo, TraversalConfig())
-        }
+        traversed_set = {f.relative_path.as_posix() for f in traverse_directory(repo, TraversalConfig())}
 
     findfmt_ignored = set(candidate_rel_paths) - traversed_set
 

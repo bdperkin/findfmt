@@ -53,27 +53,26 @@
 
 ______________________________________________________________________
 
-> **A `.gitignore`-aware file discovery and classification suite that locates files by content
-> format, shebang, and MIME tag for automated linting, formatting, and CI pipelines.**
+> **A `.gitignore`-aware file discovery and classification suite that locates files by content format,
+> shebang, and MIME tag for automated linting, formatting, and CI pipelines.**
 
 ## 1. Why findfmt?
 
 Unlike traditional `find` or globbing tools that rely strictly on file extensions, `findfmt`:
 
-- **Understands file content**: Identifies format by content, shebang (`#!/usr/bin/env python3`),
-  and MIME types using the `identify` engine.
-- **Respects Git**: Traverses trees hierarchically while pruning `.gitignore` and
-  `.git/info/exclude` paths early before descending into large directories (e.g. `node_modules/`,
-  `.venv/`).
-- **Deterministic**: Always returns clean, relative, deterministically sorted paths optimized for
-  subshells, xargs, and automation.
+- **Understands file content**: Identifies format by content, shebang (`#!/usr/bin/env python3`), and MIME
+  types using the `identify` engine.
+- **Respects Git**: Traverses trees hierarchically while pruning `.gitignore` and `.git/info/exclude` paths
+  early before descending into large directories (e.g. `node_modules/`, `.venv/`).
+- **Deterministic**: Always returns clean, relative, deterministically sorted paths optimized for subshells,
+  xargs, and automation.
 
 ______________________________________________________________________
 
 ## 2. Installation
 
-`findfmt` requires Python 3.11 or newer and is tested on Python 3.11 through 3.15 on Linux, macOS,
-and Windows. On Python 3.10, pin the 1.0 series with `findfmt<1.1`; see
+`findfmt` requires Python 3.11 or newer and is tested on Python 3.11 through 3.15 on Linux, macOS, and
+Windows. On Python 3.10, pin the 1.0 series with `findfmt<1.1`; see
 [Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html).
 
 ### 2.1. With `uv` (Recommended)
@@ -320,10 +319,9 @@ ______________________________________________________________________
 | `--help`                                               | Display the categorized help summary and exit                                                                                          |
 | `-- [PATHS...]`                                        | POSIX terminator: treat following tokens strictly as paths                                                                             |
 
-See
-[Exit Status in the CLI Reference](https://bdperkin.github.io/findfmt/cli/index.html#exit-status)
-for the formal exit-code contract (`0` success or early pipe close, `1` runtime error or no matches
-with `--exit-status`, `2` invalid CLI usage or configuration error, `130` interrupted by `SIGINT`).
+See [Exit Status in the CLI Reference](https://bdperkin.github.io/findfmt/cli/index.html#exit-status) for the
+formal exit-code contract (`0` success or early pipe close, `1` runtime error or no matches with
+`--exit-status`, `2` invalid CLI usage or configuration error, `130` interrupted by `SIGINT`).
 
 ______________________________________________________________________
 

@@ -1,35 +1,33 @@
 # Configuration
 
-`findfmt` supports flexible, structured configuration loading through standard TOML files. This
-enables setting persistent personal defaults or project-level standards for output formatting,
-visual styling, traversal boundaries, and tag filtering.
+`findfmt` supports flexible, structured configuration loading through standard TOML files. This enables
+setting persistent personal defaults or project-level standards for output formatting, visual styling,
+traversal boundaries, and tag filtering.
 
 ______________________________________________________________________
 
 ## 1. Configuration Resolution Hierarchy
 
-When `findfmt` executes, it determines effective settings according to a strict six-tier hierarchy
-where higher-priority sources override lower-priority sources:
+When `findfmt` executes, it determines effective settings according to a strict six-tier hierarchy where
+higher-priority sources override lower-priority sources:
 
-1. **Explicit CLI arguments and flags** (Highest Priority): Direct options passed on the command
-   line (e.g. `--format table`, `--no-hidden`, `-t python`) always override environment variables
-   and file settings.
+1. **Explicit CLI arguments and flags** (Highest Priority): Direct options passed on the command line (e.g.
+   `--format table`, `--no-hidden`, `-t python`) always override environment variables and file settings.
 2. **Environment Variables**: `FINDFMT_<KEY>` schema environment variables (e.g. `FINDFMT_FORMAT`,
-   `FINDFMT_MAX_DEPTH`, `FINDFMT_HIDDEN`, `FINDFMT_TAGS`) and system environment settings
-   (`NO_COLOR`, `CLICOLOR`, `CLICOLOR_FORCE`, `LANGUAGE`, `LC_*`) override configuration file
-   defaults while yielding to explicit command-line flags.
-3. **Explicit Configuration File**: A custom configuration path specified via `--config <path>` or
-   the `FINDFMT_CONFIG` environment variable.
+   `FINDFMT_MAX_DEPTH`, `FINDFMT_HIDDEN`, `FINDFMT_TAGS`) and system environment settings (`NO_COLOR`,
+   `CLICOLOR`, `CLICOLOR_FORCE`, `LANGUAGE`, `LC_*`) override configuration file defaults while yielding to
+   explicit command-line flags.
+3. **Explicit Configuration File**: A custom configuration path specified via `--config <path>` or the
+   `FINDFMT_CONFIG` environment variable.
 4. **Project Local Configuration**: A `.findfmt.toml` file or a `pyproject.toml` file containing a
-   `[tool.findfmt]` table, discovered by walking up from the current working directory to the
-   repository VCS root (`.git`, `.hg`, or `.svn`), or checked in the current working directory when
-   outside a repository.
+   `[tool.findfmt]` table, discovered by walking up from the current working directory to the repository VCS
+   root (`.git`, `.hg`, or `.svn`), or checked in the current working directory when outside a repository.
 5. **Standard User Configuration Path**: User-level configuration located at
    `$XDG_CONFIG_HOME/findfmt/config.toml` (or `~/.config/findfmt/config.toml` on POSIX systems;
-   `%APPDATA%\findfmt\config.toml` on Windows). When both user and project configurations exist,
-   they are merged with project settings overriding user settings (`user < project < env < CLI`).
-6. **Built-in Defaults** (Lowest Priority): Factory default options (`format = "text"`,
-   `color = "auto"`, `pager = "auto"`, etc.).
+   `%APPDATA%\findfmt\config.toml` on Windows). When both user and project configurations exist, they are
+   merged with project settings overriding user settings (`user < project < env < CLI`).
+6. **Built-in Defaults** (Lowest Priority): Factory default options (`format = "text"`, `color = "auto"`,
+   `pager = "auto"`, etc.).
 
 ```{note}
 Passing `--no-config` on the command line or setting `FINDFMT_CONFIG=""` completely
@@ -47,9 +45,9 @@ To inspect the currently active configuration file and resolved settings:
 findfmt --show-config
 ```
 
-When custom options are active, `findfmt` outputs the active path and the effective configuration
-table, annotating each setting with an inline comment indicating its value provenance (`default`,
-`config`, `user config`, `project config`, `env`, or `cli`):
+When custom options are active, `findfmt` outputs the active path and the effective configuration table,
+annotating each setting with an inline comment indicating its value provenance (`default`, `config`,
+`user config`, `project config`, `env`, or `cli`):
 
 ```text
 Active configuration: /home/user/.config/findfmt/config.toml
@@ -74,16 +72,15 @@ mkdir -p ~/.config/findfmt
 findfmt --generate-config > ~/.config/findfmt/config.toml
 ```
 
-The repository and source distribution also include a practical sample configuration at
-`examples/config.toml` and the full annotated reference template at
-`examples/config.reference.toml`.
+The repository and source distribution also include a practical sample configuration at `examples/config.toml`
+and the full annotated reference template at `examples/config.reference.toml`.
 
 ______________________________________________________________________
 
 ## 3. Configuration File Formats
 
-`findfmt` natively parses configuration using standard TOML. Configuration can be defined either in
-a standalone `config.toml` file or embedded inside a repository's `pyproject.toml`.
+`findfmt` natively parses configuration using standard TOML. Configuration can be defined either in a
+standalone `config.toml` file or embedded inside a repository's `pyproject.toml`.
 
 ### 3.1. Standalone `config.toml`
 
@@ -122,10 +119,9 @@ dirs_first = true
 
 ### 3.2. Project Configuration (`.findfmt.toml` and `pyproject.toml`)
 
-In repositories managed by modern Python tooling (`uv`, `hatch`, `flit`, `poetry`), `findfmt`
-searches upward from the current working directory to the repository VCS root (`.git`, `.hg`, or
-`.svn`) for a standalone `.findfmt.toml` file or a `pyproject.toml` file containing a
-`[tool.findfmt]` table:
+In repositories managed by modern Python tooling (`uv`, `hatch`, `flit`, `poetry`), `findfmt` searches upward
+from the current working directory to the repository VCS root (`.git`, `.hg`, or `.svn`) for a standalone
+`.findfmt.toml` file or a `pyproject.toml` file containing a `[tool.findfmt]` table:
 
 ```toml
 # pyproject.toml
@@ -142,9 +138,9 @@ dirs_first = true
 
 ### 3.3. Environment Variables (`FINDFMT_<KEY>`)
 
-Every schema key in the reference table below can also be configured via an uppercase
-`FINDFMT_<KEY>` environment variable. Environment variables override TOML configuration files and
-are overridden by explicit CLI flags:
+Every schema key in the reference table below can also be configured via an uppercase `FINDFMT_<KEY>`
+environment variable. Environment variables override TOML configuration files and are overridden by explicit
+CLI flags:
 
 ```bash
 export FINDFMT_FORMAT="table"
@@ -155,14 +151,14 @@ export FINDFMT_TAGS="python,shell"
 
 Environment variable values are coerced and validated against the configuration schema:
 
-- **Boolean Values**: Case-insensitive `1`, `true`, `yes`, or `on` (`true`), and `0`, `false`, `no`,
-  or `off` (`false`).
+- **Boolean Values**: Case-insensitive `1`, `true`, `yes`, or `on` (`true`), and `0`, `false`, `no`, or `off`
+  (`false`).
 - **Integers**: Non-negative base-10 integers (e.g. `0`, `1`, `100`).
 - **String Lists**: Comma-separated items (e.g. `python,shell`) or TOML/JSON array syntax (e.g.
   `["python", "shell"]`).
 - **Empty Values**: Setting `FINDFMT_<KEY>=""` is treated as unset and ignored.
-- **Validation**: Unrecognized `FINDFMT_*` keys (other than `FINDFMT_CONFIG` and
-  `FINDFMT_CONTAINER_TESTS`) or invalid values exit with code `2` and a descriptive error message.
+- **Validation**: Unrecognized `FINDFMT_*` keys (other than `FINDFMT_CONFIG` and `FINDFMT_CONTAINER_TESTS`) or
+  invalid values exit with code `2` and a descriptive error message.
 
 ______________________________________________________________________
 
@@ -242,23 +238,22 @@ ______________________________________________________________________
 
 ## 5. Troubleshooting & Diagnostics
 
-- **Syntax Errors**: If a configuration file contains invalid TOML syntax, `findfmt` displays an
-  informative syntax error and exits with code `2`:
+- **Syntax Errors**: If a configuration file contains invalid TOML syntax, `findfmt` displays an informative
+  syntax error and exits with code `2`:
   ```text
   Error: Invalid TOML in configuration file '/home/user/.config/findfmt/config.toml': Expected '=' after a key in a key/value pair (at line 4, column 1)
   ```
-- **Unknown Keys**: If an unsupported or misspelled key is provided, `findfmt` rejects the
-  configuration:
+- **Unknown Keys**: If an unsupported or misspelled key is provided, `findfmt` rejects the configuration:
   ```text
   Error: Unknown configuration key 'frmat' in '/home/user/.config/findfmt/config.toml'.
   ```
-- **Type Mismatches**: Supplying an unexpected type (e.g., a string where a boolean is required)
-  triggers a clear validation error:
+- **Type Mismatches**: Supplying an unexpected type (e.g., a string where a boolean is required) triggers a
+  clear validation error:
   ```text
   Error: Invalid value for 'hidden' in '/home/user/.config/findfmt/config.toml': expected boolean (true/false), got str
   ```
-- **Bypassing Configuration**: In scripts or CI environments where deterministic, clean-room
-  behavior is required regardless of existing user configurations, supply `--no-config`:
+- **Bypassing Configuration**: In scripts or CI environments where deterministic, clean-room behavior is
+  required regardless of existing user configurations, supply `--no-config`:
   ```bash
   findfmt --no-config -t python
   ```

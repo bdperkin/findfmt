@@ -26,9 +26,7 @@ def _matches_tags(tags: frozenset[str], config: TraversalConfig) -> bool:
     if not config.include_tags:
         return True
 
-    return (
-        config.include_tags.issubset(tags) if config.all_tags else bool(tags & config.include_tags)
-    )
+    return config.include_tags.issubset(tags) if config.all_tags else bool(tags & config.include_tags)
 
 
 def matches_filter(

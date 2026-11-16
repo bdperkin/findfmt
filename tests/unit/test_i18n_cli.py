@@ -42,10 +42,7 @@ def mock_locale_catalog(tmp_path: Path) -> Path:
 
     mo_data = _generate_mo_bytes(
         {
-            "": (
-                "Content-Type: text/plain; charset=UTF-8\n"
-                "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-            ),
+            "": ("Content-Type: text/plain; charset=UTF-8\nPlural-Forms: nplurals=2; plural=(n != 1);\n"),
             "Path": "Ruta",
             "Inode": "Inodo",
             "Device": "Dispositivo",
@@ -61,10 +58,7 @@ def mock_locale_catalog(tmp_path: Path) -> Path:
             "Symlink": "Enlace simbolico",
             "Shebang": "Directiva shebang",
             "--- findfmt summary ---": "--- resumen findfmt ---",
-            (
-                "[bold]Matched file:[/] [cyan]{count}[/]\x00"
-                "[bold]Matched files:[/] [cyan]{count}[/]"
-            ): (
+            ("[bold]Matched file:[/] [cyan]{count}[/]\x00[bold]Matched files:[/] [cyan]{count}[/]"): (
                 "[bold]Archivo coincidente:[/] [cyan]{count}[/]\x00"
                 "[bold]Archivos coincidentes:[/] [cyan]{count}[/]"
             ),

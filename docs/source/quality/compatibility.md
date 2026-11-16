@@ -1,15 +1,15 @@
 # Python Compatibility & Runtime Matrix
 
-This document defines the formal Python runtime compatibility matrix for `findfmt`, detailing
-verified runtimes, dependency constraints, language-level requirements, and technical justifications
-across Python 3.6 through 3.16.
+This document defines the formal Python runtime compatibility matrix for `findfmt`, detailing verified
+runtimes, dependency constraints, language-level requirements, and technical justifications across Python 3.6
+through 3.16.
 
 ______________________________________________________________________
 
 ## 1. Compatibility Overview & Runtime Matrix
 
-`findfmt` enforces `requires-python = ">=3.11"`. The runtime compatibility status across modern and
-legacy Python interpreters is summarized below:
+`findfmt` enforces `requires-python = ">=3.11"`. The runtime compatibility status across modern and legacy
+Python interpreters is summarized below:
 
 | Python Version |  Release / EOL Status  | Tested on Fedora 44 | Build & CLI Execution | Test Suite & 100% Coverage | Compatibility Verdict & Primary Rationale                                                                                                                                                 |
 | :------------: | :--------------------: | :-----------------: | :-------------------: | :------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -60,28 +60,27 @@ A critical factor in determining the minimum supported runtime is the upstream d
    - `src/findfmt/models.py` defines core data structures (`FileInfo`, `TraversalStats`) using
      `@dataclass(frozen=True, slots=True)` for high performance and reduced memory footprint.
    - The `slots` argument was introduced in Python 3.10. On Python 3.9 and earlier, invoking
-     `@dataclass(slots=True)` raises
-     `TypeError: dataclass() got an unexpected keyword argument 'slots'`.
+     `@dataclass(slots=True)` raises `TypeError: dataclass() got an unexpected keyword argument 'slots'`.
 
 2. **PEP 604 Union Syntax (`str | None`, `Path | str`)**:
 
-   - While `from __future__ import annotations` postpones evaluation of type annotations in standard
-     code on Python 3.7+, frameworks like Typer and Click inspect type annotations at runtime to
-     construct CLI options and type coercion logic.
+   - While `from __future__ import annotations` postpones evaluation of type annotations in standard code on
+     Python 3.7+, frameworks like Typer and Click inspect type annotations at runtime to construct CLI options
+     and type coercion logic.
    - Evaluating union syntax (`str | None`) at runtime in Python 3.9 and earlier triggers
      `TypeError: unsupported operand type(s) for |: 'type' and 'type'`.
 
 3. **Standard Library Configuration Parsing**:
 
-   - Python 3.11+ includes `tomllib` (PEP 680) in the standard library, so `findfmt` imports it
-     directly. The `tomli` shim that Python 3.10 required has been removed.
+   - Python 3.11+ includes `tomllib` (PEP 680) in the standard library, so `findfmt` imports it directly. The
+     `tomli` shim that Python 3.10 required has been removed.
 
 4. **`typing.Self` (PEP 673)**:
 
    - Python 3.11+ provides `typing.Self`, which `findfmt` uses for context-manager return types. The
      `typing_extensions.Self` fallback that Python 3.10 required has been removed.
-   - `typing.override` (PEP 698) only arrived in Python 3.12, so `typing-extensions` remains a
-     dependency on Python 3.11.
+   - `typing.override` (PEP 698) only arrived in Python 3.12, so `typing-extensions` remains a dependency on
+     Python 3.11.
 
 ### 2.3. Tooling and Linter Floors
 
@@ -98,15 +97,15 @@ The project's verification suite relies on modern developer tooling:
 - Python 3.8 reached EOL in October 2024.
 - Python 3.9 reached EOL in October 2025.
 - Python 3.10 reached EOL on October 1, 2026.
-- Python 3.11 is the oldest currently maintained Python version receiving security updates (through
-  October 2027).
+- Python 3.11 is the oldest currently maintained Python version receiving security updates (through October
+  2027).
 
-Supporting Python < 3.10 would require downgrading data models, discarding `slots=True`, introducing
-verbose `typing.Union` constructs, and freezing dependencies to outdated versions with unpatched
-vulnerabilities. Python 3.10 itself no longer receives security fixes, and dependencies have started
-shipping security fixes only for Python 3.11+ (for example, `filelock` 4.2.1). Supporting it would
-also keep the `tomli` and `typing_extensions.Self` shims alive. Therefore,
-`requires-python = ">=3.11"` is technically sound and necessary.
+Supporting Python < 3.10 would require downgrading data models, discarding `slots=True`, introducing verbose
+`typing.Union` constructs, and freezing dependencies to outdated versions with unpatched vulnerabilities.
+Python 3.10 itself no longer receives security fixes, and dependencies have started shipping security fixes
+only for Python 3.11+ (for example, `filelock` 4.2.1). Supporting it would also keep the `tomli` and
+`typing_extensions.Self` shims alive. Therefore, `requires-python = ">=3.11"` is technically sound and
+necessary.
 
 ______________________________________________________________________
 
@@ -116,38 +115,35 @@ ______________________________________________________________________
 
 Python 3.15 is the maximum supported version and a certified tier-1 runtime:
 
-- **CI Quality Gate**: Serves as the Python version for the `quality-gate`, documentation build, and
-  release verification and build jobs in GitHub Actions. The packaging smoke test installs the built
-  wheel on both the minimum (3.11) and maximum (3.15) versions.
-- **CI Test Matrix**: Runs as a gating `python-version: '3.15'` job on `ubuntu-latest`,
-  `macos-latest`, and `windows-latest`, and uploads coverage like the other supported versions.
-- **Local Testing**: Verified under Fedora 44 with `CPython 3.15.0`: all 904 unit and integration
-  tests pass with 100.00% statement and branch coverage, including with `DeprecationWarning` treated
-  as an error. The full quality gate (`tools/verify_quality.py`) and the strict Sphinx build also
-  pass.
-- **Trove Classifier**: Officially published on PyPI as `Programming Language :: Python :: 3.15`,
-  and `pyproject-fmt --max-supported-python` is set to `3.15`.
+- **CI Quality Gate**: Serves as the Python version for the `quality-gate`, documentation build, and release
+  verification and build jobs in GitHub Actions. The packaging smoke test installs the built wheel on both the
+  minimum (3.11) and maximum (3.15) versions.
+- **CI Test Matrix**: Runs as a gating `python-version: '3.15'` job on `ubuntu-latest`, `macos-latest`, and
+  `windows-latest`, and uploads coverage like the other supported versions.
+- **Local Testing**: Verified under Fedora 44 with `CPython 3.15.0`: all 904 unit and integration tests pass
+  with 100.00% statement and branch coverage, including with `DeprecationWarning` treated as an error. The
+  full quality gate (`tools/verify_quality.py`) and the strict Sphinx build also pass.
+- **Trove Classifier**: Officially published on PyPI as `Programming Language :: Python :: 3.15`, and
+  `pyproject-fmt --max-supported-python` is set to `3.15`.
 
 ### 3.2. Python 3.16 Preview
 
-Python 3.16 (first release scheduled for October 2027) is tracked only as a preview that gives early
-warning:
+Python 3.16 (first release scheduled for October 2027) is tracked only as a preview that gives early warning:
 
-- **CI Test Matrix**: Runs as an experimental `3.16-dev` job on `ubuntu-latest` that may use
-  pre-release interpreters, never blocks a merge, and skips the Codecov upload. Until a 3.16 build
-  is available on the runners, the job reports a warning and skips the test run.
+- **CI Test Matrix**: Runs as an experimental `3.16-dev` job on `ubuntu-latest` that may use pre-release
+  interpreters, never blocks a merge, and skips the Codecov upload. Until a 3.16 build is available on the
+  runners, the job reports a warning and skips the test run.
 - **Trove Classifier**: Not published until Python 3.16.0 is released and certified.
 
 ______________________________________________________________________
 
 ## 4. Multi-Platform CI Matrix
 
-Automated verification runs across all certified runtimes and operating systems. Every advertised
-version (3.11–3.15) is a gating job on all three operating systems. The next feature release runs as
-an experimental `3.16-dev` job: it may use pre-release interpreters, never blocks a merge, skips the
-Codecov upload, and is not advertised with a Trove classifier. Until a 3.16 build is available on
-the runners, the job reports a warning and skips the test run instead of falling back to the
-runner's default Python.
+Automated verification runs across all certified runtimes and operating systems. Every advertised version
+(3.11–3.15) is a gating job on all three operating systems. The next feature release runs as an experimental
+`3.16-dev` job: it may use pre-release interpreters, never blocks a merge, skips the Codecov upload, and is
+not advertised with a Trove classifier. Until a 3.16 build is available on the runners, the job reports a
+warning and skips the test run instead of falling back to the runner's default Python.
 
 ```yaml
 matrix:
@@ -163,35 +159,32 @@ ______________________________________________________________________
 
 ## 5. Python Version Support Lifecycle
 
-`findfmt` supports every CPython feature release from the oldest version still receiving security
-fixes to the newest stable release, and tests the next release early without advertising it. Each
-change below is guarded by `tests/unit/test_python_support_policy.py`, so a partial update fails CI.
+`findfmt` supports every CPython feature release from the oldest version still receiving security fixes to the
+newest stable release, and tests the next release early without advertising it. Each change below is guarded
+by `tests/unit/test_python_support_policy.py`, so a partial update fails CI.
 
 ### 5.1. When the Oldest Version Reaches End of Life
 
 1. Raise `requires-python` in `pyproject.toml`, remove the old Trove classifier, and raise ruff's
    `target-version`. Re-lock with `uv lock` and regenerate `.clusterfuzzlite/requirements.txt`.
-2. Remove the version from the `test-matrix` in `.github/workflows/ci.yml`, and remove compatibility
-   code that only the old version needed (`sys.version_info` guards and fallback imports). In the
-   `packaging-smoke-test` job, raise the minimum `python-version` and the Python that `pip` must
-   refuse.
-3. **Just before merging**, remove the three `Test (<os> - Python <old>)` required status checks
-   from branch protection on `main`. Otherwise the pull request waits for checks that no longer run.
-4. Update the supported range in this guide, `docs/source/quality/index.md`, `CONTRIBUTING.md`,
-   `SECURITY.md`, and `assets/social-preview.svg` (then regenerate the PNG), regenerate the
-   documentation catalogs (`make -C docs intl-update`), and record the change as breaking in the
-   changelog. Python 3.10 was dropped this way in #441.
+2. Remove the version from the `test-matrix` in `.github/workflows/ci.yml`, and remove compatibility code that
+   only the old version needed (`sys.version_info` guards and fallback imports). In the `packaging-smoke-test`
+   job, raise the minimum `python-version` and the Python that `pip` must refuse.
+3. **Just before merging**, remove the three `Test (<os> - Python <old>)` required status checks from branch
+   protection on `main`. Otherwise the pull request waits for checks that no longer run.
+4. Update the supported range in this guide, `docs/source/quality/index.md`, `CONTRIBUTING.md`, `SECURITY.md`,
+   and `assets/social-preview.svg` (then regenerate the PNG), regenerate the documentation catalogs
+   (`make -C docs intl-update`), and record the change as breaking in the changelog. Python 3.10 was dropped
+   this way in #441.
 
 ### 5.2. When a New Version Is Released
 
-1. Move the version from the experimental `<version>-dev` matrix entry into the gating
-   `python-version` list, and point the experimental entry at the next feature release.
-2. Add the new Trove classifier and raise `pyproject-fmt --max-supported-python` in
-   `.pre-commit-config.yaml`.
+1. Move the version from the experimental `<version>-dev` matrix entry into the gating `python-version` list,
+   and point the experimental entry at the next feature release.
+2. Add the new Trove classifier and raise `pyproject-fmt --max-supported-python` in `.pre-commit-config.yaml`.
 3. Move the single-interpreter jobs (quality gate, documentation, and release) and the maximum
-   `python-version` of the packaging smoke test to the new version once the toolchain passes on it.
-   Update the container image when matching `uv` builder and Python runtime images exist for the
-   same Debian release.
-4. **After the new jobs report green**, add the three `Test (<os> - Python <new>)` checks to the
-   required status checks on `main`. Never require the experimental job.
+   `python-version` of the packaging smoke test to the new version once the toolchain passes on it. Update the
+   container image when matching `uv` builder and Python runtime images exist for the same Debian release.
+4. **After the new jobs report green**, add the three `Test (<os> - Python <new>)` checks to the required
+   status checks on `main`. Never require the experimental job.
 5. Update the docs as in step 4 of §5.1. Python 3.15 was added this way in #335 and #440.

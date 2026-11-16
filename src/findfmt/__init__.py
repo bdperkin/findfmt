@@ -140,8 +140,7 @@ def __getattr__(name: str) -> object:
 
     if name == "_":
         warnings.warn(
-            "'findfmt._' is deprecated and will be removed in v2.0; "
-            "import '_' from 'findfmt.i18n' instead.",
+            "'findfmt._' is deprecated and will be removed in v2.0; import '_' from 'findfmt.i18n' instead.",
             DeprecationWarning,
             stacklevel=2,
         )

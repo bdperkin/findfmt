@@ -110,8 +110,7 @@ def test_version_sort_unicode_superscript_digits(tmp_path: Path) -> None:
 
     # Verify end-to-end traversal with find_files
     results = [
-        f.path.name
-        for f in find_files(TraversalConfig(root_paths=(tmp_path,), sort_by=SortKey.VERSION))
+        f.path.name for f in find_files(TraversalConfig(root_paths=(tmp_path,), sort_by=SortKey.VERSION))
     ]
     assert results == ["a²", "file2", "file10", "²"]
 

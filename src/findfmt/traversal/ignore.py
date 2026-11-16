@@ -360,10 +360,7 @@ def resolve_active_specs(
     if respect_gitignore:
         specs.extend(load_ancestor_specs(root))
 
-    if (
-        gitignore_file is not None
-        and (custom_spec := load_custom_gitignore_spec(gitignore_file)) is not None
-    ):
+    if gitignore_file is not None and (custom_spec := load_custom_gitignore_spec(gitignore_file)) is not None:
         specs.append((root, custom_spec))
 
     return tuple(specs)

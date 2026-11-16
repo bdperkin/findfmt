@@ -192,7 +192,8 @@ jobs:
       - name: Capture Dependency Tree on Failure
         if: failure()
         run: |
-          echo "### Dependency Tree (${{ matrix.resolution }} / ${{ matrix.prerelease }})" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Dependency Tree (${{ matrix.resolution }} / ${{ matrix.prerelease }})" \
+            >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           uv pip tree --python smoke_env >> "$GITHUB_STEP_SUMMARY" 2>&1 || true
           echo '```' >> "$GITHUB_STEP_SUMMARY"
@@ -242,8 +243,11 @@ jobs:
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
         run: |
-          echo "::warning title=Python ${PYTHON_VERSION} unavailable::No Python ${PYTHON_VERSION} build is available on this runner yet; dependency installation and tests were skipped."
-          echo "Python ${PYTHON_VERSION} was not tested: no runner build is available yet." >> "$GITHUB_STEP_SUMMARY"
+          msg="No Python ${PYTHON_VERSION} build is available on this runner yet;"
+          skip_msg="dependency installation and tests were skipped."
+          echo "::warning title=Python ${PYTHON_VERSION} unavailable::${msg} ${skip_msg}"
+          echo "Python ${PYTHON_VERSION} was not tested: no runner build is available yet." \
+            >> "$GITHUB_STEP_SUMMARY"
       - name: Install Dependencies
         if: ${{ steps.setup-python.outcome == 'success' }}
         env:
@@ -254,7 +258,8 @@ jobs:
       - name: Populate Global Gitignore to Verify Hermeticity
         if: ${{ steps.setup-python.outcome == 'success' }}
         run: |
-          uv run python -c "from pathlib import Path; p = Path.home() / '.config' / 'git'; p.mkdir(parents=True, exist_ok=True); (p / 'ignore').write_text('*\n', encoding='utf-8')"
+          uv run python -c "from pathlib import Path; p = Path.home() / '.config' / 'git';
+          p.mkdir(parents=True, exist_ok=True); (p / 'ignore').write_text('*\n', encoding='utf-8')"
         continue-on-error: ${{ matrix.experimental || false }}
       - name: Run Pytest with 100% Coverage Enforcement
         if: ${{ steps.setup-python.outcome == 'success' }}

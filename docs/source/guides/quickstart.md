@@ -1,8 +1,8 @@
 # Quickstart
 
-`findfmt` identifies files by format, shebang pattern, and MIME type rather than relying strictly on
-filename extensions. This guide demonstrates common discovery, filtering, and reporting workflows.
-It runs on Python 3.11 through 3.15; see [Installation](installation.md) for requirements.
+`findfmt` identifies files by format, shebang pattern, and MIME type rather than relying strictly on filename
+extensions. This guide demonstrates common discovery, filtering, and reporting workflows. It runs on Python
+3.11 through 3.15; see [Installation](installation.md) for requirements.
 
 ## 1. Installation & Direct Execution
 
@@ -58,8 +58,8 @@ findfmt -t markdown
 
 ### 2.2. Multiple Tags (OR Condition)
 
-Match files that contain *any* of the specified tags by providing multiple `-t` flags or a
-comma-separated list:
+Match files that contain *any* of the specified tags by providing multiple `-t` flags or a comma-separated
+list:
 
 ```bash
 # Find files that are either Python or Shell scripts
@@ -142,8 +142,8 @@ findfilemime
 
 ### 4.1. Offline Mode
 
-When running in environments where file contents cannot or should not be read from disk (e.g.
-analyzing remote directory manifests or when filesystem reads must be avoided), enable `--offline`:
+When running in environments where file contents cannot or should not be read from disk (e.g. analyzing remote
+directory manifests or when filesystem reads must be avoided), enable `--offline`:
 
 ```bash
 findfmt --offline -t python
@@ -227,8 +227,8 @@ findfmt -Q
 
 ### 6.1. Clickable Terminal Hyperlinks
 
-On modern terminal emulators supporting OSC 8 escape sequences (such as iTerm2, Windows Terminal,
-and VS Code), enable interactive click-to-open navigation:
+On modern terminal emulators supporting OSC 8 escape sequences (such as iTerm2, Windows Terminal, and VS
+Code), enable interactive click-to-open navigation:
 
 ```bash
 # Generate file:// terminal hyperlinks
@@ -255,8 +255,8 @@ findfmt --tree --table-style rounded
 
 ## 8. Multi-Format Serialization Suite
 
-`findfmt` supports 14 output serialization formats for terminal visualization, documentation, and
-automation pipelines:
+`findfmt` supports 14 output serialization formats for terminal visualization, documentation, and automation
+pipelines:
 
 ### 8.1. Line & Streaming Formats
 
