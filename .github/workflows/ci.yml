@@ -21,6 +21,7 @@ jobs:
   quality-gate:
     name: Code Quality & Gatekeeping
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
@@ -71,6 +72,7 @@ jobs:
     name: Packaging Smoke Test (${{ matrix.os }} - Python ${{ matrix.python-version }})
     needs: quality-gate
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -130,6 +132,7 @@ jobs:
     name: Container Smoke Test
     needs: quality-gate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
@@ -154,6 +157,7 @@ jobs:
     name: Dependency Smoke Matrix (${{ matrix.resolution }} - ${{ matrix.prerelease }})
     needs: quality-gate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -201,6 +205,7 @@ jobs:
     name: Test (${{ matrix.os }} - Python ${{ matrix.python-version }})
     needs: quality-gate
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -288,6 +293,7 @@ jobs:
     name: Performance Benchmarks
     needs: quality-gate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7

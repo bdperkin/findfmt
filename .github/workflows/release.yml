@@ -23,6 +23,7 @@ jobs:
   verify-release:
     name: Verify Release Quality Gate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7
@@ -59,6 +60,7 @@ jobs:
     name: Build Distributions
     needs: verify-release
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       release_body: ${{ steps.notes.outputs.content }}
     steps:
@@ -102,6 +104,7 @@ jobs:
     name: Publish to TestPyPI
     needs: build-distributions
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: testpypi
       url: https://test.pypi.org/project/findfmt/
@@ -125,6 +128,7 @@ jobs:
       - build-distributions
       - publish-testpypi
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: pypi
       url: https://pypi.org/project/findfmt/
@@ -144,6 +148,7 @@ jobs:
       - build-distributions
       - publish-pypi
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: write
       issues: write
@@ -187,6 +192,7 @@ jobs:
       - build-distributions
       - publish-pypi
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       packages: write
