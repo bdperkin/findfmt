@@ -22,7 +22,8 @@
 > Apps epics `#625`-`#627`, issues `#628`-`#635`, and milestone v1.3.3; closed `#624` and `#623`; 2026-11-13
 > closed `#355`, epic `#348`, and `#456`, and released v1.2.2 and closed its milestone; 2026-11-14 closed
 > `#457`, `#455`, `#310`, `#458`, `#332`, `#340`, and epic `#381`; 2026-11-15 released v1.3.0 and closed its
-> milestone, and closed `#292`, `#302`, `#312`, `#313`, `#574`, `#309`, epic `#379`, and `#314`)
+> milestone, closed `#292`, `#302`, `#312`, `#313`, `#574`, `#309`, epic `#379`, and `#314`, and released
+> v1.3.1 and closed its milestone)
 
 ______________________________________________________________________
 
@@ -1459,7 +1460,7 @@ issue #321 → v1.2.1, #355 → v1.2.2, and #215 → v1.1.5.
 
 v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, v1.1.3 and v1.1.4 on
 2026-11-08, v1.1.5 on 2026-11-09, v1.2.0 on 2026-11-10, v1.2.1 on 2026-11-11, v1.2.2 on 2026-11-13, and v1.3.0
-on 2026-11-15 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
+and v1.3.1 on 2026-11-15 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
 
 Realigned on 2026-11-09 ahead of v1.2.0: pulled #366 into v1.2.0, closed #311 and #474 as not planned,
 promoted the Hybrid Python-Rust engine track (#576-#598) from v1.8.0-v1.8.4 to v1.4.0-v1.4.4 so native Rust
@@ -1469,7 +1470,6 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.1          | Docs Site Navigation & Branding, Ty Upgrade, Lint/Format Standardisation                                           | 0           |
 | v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 9           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
