@@ -186,6 +186,7 @@ linkcheck_anchors = True
 linkcheck_ignore = [
     r"https://github\.com/.*/security/.*",
     r"https://github\.com/.*/advisories/.*",
+    r"https://github\.com/.*/stargazers",  # GitHub returns 404 to unauthenticated clients
     r"https://github\.com/bdperkin/findfmt/pull/\d+",  # Skip dynamic PRs
 ]
 
