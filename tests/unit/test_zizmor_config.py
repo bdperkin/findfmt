@@ -259,6 +259,9 @@ def test_docs_linkcheck_scheduled_not_on_prs() -> None:
     assert "workflow_dispatch" in cond
     assert "pull_request" not in cond
 
+    conf_text = (_repo_root() / "docs" / "source" / "conf.py").read_text(encoding="utf-8")
+    assert r"https://github\.com/.*/stargazers" in conf_text
+
 
 def test_sync_pre_commit_deps_modes(
     tmp_path: Path,
