@@ -283,7 +283,13 @@ def test_sync_pre_commit_deps_modes(
         "  - repo: https://github.com/astral-sh/ruff-pre-commit\n"
         "    rev: v0.16.10  # comment\n"
         "  - repo: https://github.com/osprey-oss/deptry\n"
-        "    rev: 0.25.0\n",
+        "    rev: 0.25.0\n"
+        "  - repo: https://github.com/hukkin/mdformat\n"
+        "    rev: 1.0.0\n"
+        "    hooks:\n"
+        "      - id: mdformat\n"
+        "        additional_dependencies:\n"
+        "          - ruff==0.16.10  # keep in sync\n",
         encoding="utf-8",
     )
     assert sync_pre_commit_deps.sync_deps(tmp_path) == 1
@@ -295,6 +301,7 @@ def test_sync_pre_commit_deps_modes(
     updated = pre_commit_file.read_text(encoding="utf-8")
     assert "rev: v0.17.3  # comment" in updated
     assert "rev: 0.25.1" in updated
+    assert "- ruff==0.17.3  # keep in sync" in updated
     assert sync_pre_commit_deps.sync_deps(tmp_path) == 0
 
     monkeypatch.setattr(sync_pre_commit_deps, "__file__", str(tmp_path / "tools" / "sync.py"))
@@ -316,3 +323,30 @@ def test_ty_strict_rules_and_pre_commit_sync() -> None:
     lint_deps = data.get("dependency-groups", {}).get("lint", [])
     assert any(dep.startswith("ty>=0.0.104") for dep in lint_deps)
     assert sync_pre_commit_deps.sync_deps(repo) == 0
+
+
+def test_mdformat_config_and_plugins() -> None:
+    """Validate shared .mdformat.toml, lint group plugins, and pinned hook deps (#472)."""
+    repo = _repo_root()
+    with (repo / ".mdformat.toml").open("rb") as f:
+        mdformat_cfg = tomllib.load(f)
+
+    assert mdformat_cfg == {"wrap": 110, "number": True, "end_of_line": "lf"}
+
+    with (repo / "pyproject.toml").open("rb") as f:
+        pyproject_data = tomllib.load(f)
+
+    lint_deps = [str(d) for d in pyproject_data.get("dependency-groups", {}).get("lint", [])]
+    for pkg in ("mdformat>=", "mdformat-frontmatter>=", "mdformat-gfm>=", "mdformat-ruff>="):
+        assert any(d.startswith(pkg) for d in lint_deps), f"Missing {pkg} in [dependency-groups].lint"
+
+    pc_raw = (repo / ".pre-commit-config.yaml").read_text(encoding="utf-8")
+    assert "mdformat-tables is archived and merged here" in pc_raw
+    pc_data = yaml.safe_load(pc_raw)
+    mdformat_repo = next(r for r in pc_data["repos"] if "hukkin/mdformat" in str(r.get("repo")))
+    mdformat_hook = mdformat_repo["hooks"][0]
+    assert "args" not in mdformat_hook
+    add_deps = [str(d) for d in mdformat_hook.get("additional_dependencies", [])]
+    pinned_names = {d.split("==", 1)[0] for d in add_deps if "==" in d}
+    assert pinned_names == {"mdformat-frontmatter", "mdformat-gfm", "mdformat-ruff", "ruff"}
+    assert not any("mdformat-tables" in d for d in add_deps)
