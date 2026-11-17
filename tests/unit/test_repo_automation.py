@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -78,3 +79,59 @@ def test_coderabbit_path_filters_and_instructions() -> None:
     assert "tests/**/*.py" in by_path
     assert "coverage" in by_path["tests/**/*.py"]
     assert "assert" in by_path["tests/**/*.py"]
+
+
+def _load_renovate_config() -> dict[str, Any]:
+    """Load and parse renovate.json from the repository root."""
+    cfg_path = _repo_root() / "renovate.json"
+    assert cfg_path.is_file(), f"Missing Renovate configuration at {cfg_path}"
+    with cfg_path.open(encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert isinstance(data, dict), "renovate.json must parse to a JSON object"
+    return data
+
+
+def test_renovate_top_level_and_package_groups() -> None:
+    """Validate renovate.json schema, presets, schedule, and dependency groups (#629)."""
+    cfg = _load_renovate_config()
+    assert cfg.get("$schema") == "https://docs.renovatebot.com/renovate-schema.json"
+
+    extends = cfg.get("extends")
+    assert isinstance(extends, list)
+    assert "config:recommended" in extends
+    assert ":semanticCommits" in extends
+    assert "helpers:pinGitHubActionDigestsToSemver" in extends
+
+    assert cfg.get("rangeStrategy") == "update-lockfile"
+    assert cfg.get("minimumReleaseAge") == "7 days"
+    assert cfg.get("labels") == ["dependencies"]
+
+    lock_maint = cfg.get("lockFileMaintenance")
+    assert isinstance(lock_maint, dict)
+    assert lock_maint.get("enabled") is True
+
+    rules = cfg.get("packageRules")
+    assert isinstance(rules, list)
+    groups = {str(r.get("groupName")): r for r in rules if isinstance(r, dict)}
+
+    assert "python-dev-dependencies" in groups
+    dev_rule = groups["python-dev-dependencies"]
+    assert dev_rule.get("matchManagers") == ["pep621"]
+    assert "dependency-groups" in dev_rule.get("matchDepTypes", [])
+
+    assert "python-production-dependencies" in groups
+    prod_rule = groups["python-production-dependencies"]
+    assert prod_rule.get("matchManagers") == ["pep621"]
+    assert "dependencies" in prod_rule.get("matchDepTypes", [])
+
+    assert "github-actions" in groups
+    gha_rule = groups["github-actions"]
+    assert gha_rule.get("matchManagers") == ["github-actions"]
+
+    dependabot_path = _repo_root() / ".github" / "dependabot.yml"
+    with dependabot_path.open(encoding="utf-8") as f:
+        dep_cfg = yaml.safe_load(f)
+
+    for entry in dep_cfg.get("updates", []):
+        assert entry.get("open-pull-requests-limit") == 0

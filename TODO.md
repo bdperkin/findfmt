@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 231 Closed Issues | 94 Actionable Open Tasks | 30 Active Umbrella Epics **Last audit:**
+> **Tracking:** 232 Closed Issues | 93 Actionable Open Tasks | 30 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -23,7 +23,7 @@
 > closed `#355`, epic `#348`, and `#456`, and released v1.2.2 and closed its milestone; 2026-11-14 closed
 > `#457`, `#455`, `#310`, `#458`, `#332`, `#340`, and epic `#381`; 2026-11-15 released v1.3.0 and closed its
 > milestone, closed `#292`, `#302`, `#312`, `#313`, `#574`, `#309`, epic `#379`, and `#314`, and released
-> v1.3.1 and closed its milestone; 2026-11-16 closed `#470`, `#472`, and `#628`)
+> v1.3.1 and closed its milestone; 2026-11-16 closed `#470`, `#472`, and `#628`; 2026-11-17 closed `#629`)
 
 ______________________________________________________________________
 
@@ -699,7 +699,9 @@ Note: Ordered chronologically by completion date.
   frontmatter, gfm (incl. tables), and ruff plugins everywhere it is invoked (Closed: 2026-11-16 via PR
   [#664](https://github.com/bdperkin/findfmt/pull/664))
 - [x] **[#628](https://github.com/bdperkin/findfmt/issues/628)** - Evaluate and Integrate CodeRabbit AI
-  Reviewer (Closed: 2026-11-16)
+  Reviewer (Closed: 2026-11-16 via PR [#666](https://github.com/bdperkin/findfmt/pull/666))
+- [x] **[#629](https://github.com/bdperkin/findfmt/issues/629)** - Configure Renovate for Python and Action
+  Dependency Management (Closed: 2026-11-17)
 
 ______________________________________________________________________
 
@@ -718,12 +720,6 @@ when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same zero-warning
   static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#629](https://github.com/bdperkin/findfmt/issues/629)** - Configure Renovate for Python and Action
-  Dependency Management *(Rank: 13 | Epic:
-  [[Epic] Tier-1 Workflow & Quality Automation Apps](https://github.com/bdperkin/findfmt/issues/626) | Parent:
-  [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.2)* - **Value:** Medium |
-  **Effort:** S - **Rationale:** Configures `renovate.json` to group Python development dependencies and
-  GitHub Actions updates, reducing PR noise.
 - [ ] **[#630](https://github.com/bdperkin/findfmt/issues/630)** - Set Up Mergify for Automated PR Queue &
   Merge Triggers *(Rank: 14 | Epic:
   [[Epic] Tier-1 Workflow & Quality Automation Apps](https://github.com/bdperkin/findfmt/issues/626) | Parent:
@@ -1279,8 +1275,7 @@ natively on GitHub.
   Linting Standardization *(Milestone: v1.3.2 | Open sub-issues: 1)* -
   [#471](https://github.com/bdperkin/findfmt/issues/471)
 - [ ] **[#626](https://github.com/bdperkin/findfmt/issues/626)** - [Epic] Tier-1 Workflow & Quality Automation
-  Apps *(Milestone: v1.3.2 | Open sub-issues: 3)* - [#629](https://github.com/bdperkin/findfmt/issues/629),
-  [#630](https://github.com/bdperkin/findfmt/issues/630),
+  Apps *(Milestone: v1.3.2 | Open sub-issues: 2)* - [#630](https://github.com/bdperkin/findfmt/issues/630),
   [#631](https://github.com/bdperkin/findfmt/issues/631)
 - [ ] **[#625](https://github.com/bdperkin/findfmt/issues/625)** - [Epic] GitHub Marketplace Apps Evaluation &
   Integration *(Milestone: v1.3.3 | Open sub-issues: 2)* -
@@ -1457,7 +1452,7 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 6           |
+| v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 5           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
 | v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |
