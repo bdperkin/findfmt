@@ -113,13 +113,14 @@ def test_renovate_top_level_and_package_groups() -> None:
 
     rules = cfg.get("packageRules")
     assert isinstance(rules, list)
-    groups = {str(r.get("groupName")): r for r in rules if isinstance(r, dict)}
+    dev_rules = [r for r in rules if isinstance(r, dict) and r.get("groupName") == "python-dev-dependencies"]
+    assert len(dev_rules) == 2
+    dev_managers = {mgr for r in dev_rules for mgr in r.get("matchManagers", [])}
+    assert dev_managers == {"pep621", "pip_requirements"}
+    pep621_dev_rule = next(r for r in dev_rules if r.get("matchManagers") == ["pep621"])
+    assert "dependency-groups" in pep621_dev_rule.get("matchDepTypes", [])
 
-    assert "python-dev-dependencies" in groups
-    dev_rule = groups["python-dev-dependencies"]
-    assert dev_rule.get("matchManagers") == ["pep621"]
-    assert "dependency-groups" in dev_rule.get("matchDepTypes", [])
-
+    groups = {str(r.get("groupName")): r for r in rules if isinstance(r, dict) and "groupName" in r}
     assert "python-production-dependencies" in groups
     prod_rule = groups["python-production-dependencies"]
     assert prod_rule.get("matchManagers") == ["pep621"]
@@ -128,6 +129,18 @@ def test_renovate_top_level_and_package_groups() -> None:
     assert "github-actions" in groups
     gha_rule = groups["github-actions"]
     assert gha_rule.get("matchManagers") == ["github-actions"]
+
+    disabled_rules = [r for r in rules if isinstance(r, dict) and r.get("enabled") is False]
+    assert any(
+        r.get("matchManagers") == ["github-actions"] and "python" in r.get("matchPackageNames", [])
+        for r in disabled_rules
+    )
+    assert any(
+        r.get("matchManagers") == ["dockerfile"]
+        and r.get("matchPackageNames") == ["python"]
+        and r.get("matchUpdateTypes") == ["major", "minor"]
+        for r in disabled_rules
+    )
 
     dependabot_path = _repo_root() / ".github" / "dependabot.yml"
     with dependabot_path.open(encoding="utf-8") as f:
