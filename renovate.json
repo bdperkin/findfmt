@@ -39,6 +39,14 @@
       "groupSlug": "python-dev-deps"
     },
     {
+      "description": "Group pinned ClusterFuzzLite requirements with Python development dependencies",
+      "matchManagers": [
+        "pip_requirements"
+      ],
+      "groupName": "python-dev-dependencies",
+      "groupSlug": "python-dev-deps"
+    },
+    {
       "description": "Group Python production dependency updates",
       "matchManagers": [
         "pep621"
@@ -57,6 +65,31 @@
       ],
       "groupName": "github-actions",
       "groupSlug": "github-actions"
+    },
+    {
+      "description": "Preserve explicit Python version matrix floors and pins in GitHub Actions workflows",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchPackageNames": [
+        "python",
+        "actions/python-versions"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Restrict Dockerfile Python base image updates to patch and digest pins to keep multi-stage Python versions aligned",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchPackageNames": [
+        "python"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ],
+      "enabled": false
     }
   ]
 }

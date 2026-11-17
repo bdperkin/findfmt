@@ -72,6 +72,6 @@ def test_release_container_publishes_sbom_and_provenance() -> None:
     push = next(step for step in steps if step.get("name") == "Build and Push Docker Image")
     assert push["with"]["provenance"] == "mode=max"
     assert push["with"]["sbom"] is True
-    attest = next(s for s in steps if "actions/attest-build-provenance" in str(s.get("uses")))
+    attest = next(s for s in steps if "actions/attest@" in str(s.get("uses")))
     assert attest["with"]["subject-digest"] == "${{ steps.push.outputs.digest }}"
     assert attest["with"]["push-to-registry"] is True
