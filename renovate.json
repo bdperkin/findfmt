@@ -1,6 +1,62 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":semanticCommitScope(deps)",
+    "helpers:pinGitHubActionDigestsToSemver"
+  ],
+  "timezone": "UTC",
+  "schedule": [
+    "before 6am on monday"
+  ],
+  "minimumReleaseAge": "7 days",
+  "labels": [
+    "dependencies"
+  ],
+  "rangeStrategy": "update-lockfile",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "before 6am on monday"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": "Group Python development dependency updates (dev, test, docs, lint groups)",
+      "matchManagers": [
+        "pep621"
+      ],
+      "matchDepTypes": [
+        "dependency-groups",
+        "dev",
+        "test",
+        "docs",
+        "lint"
+      ],
+      "groupName": "python-dev-dependencies",
+      "groupSlug": "python-dev-deps"
+    },
+    {
+      "description": "Group Python production dependency updates",
+      "matchManagers": [
+        "pep621"
+      ],
+      "matchDepTypes": [
+        "dependencies",
+        "project.dependencies"
+      ],
+      "groupName": "python-production-dependencies",
+      "groupSlug": "python-prod-deps"
+    },
+    {
+      "description": "Group GitHub Actions updates",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "groupName": "github-actions",
+      "groupSlug": "github-actions"
+    }
   ]
 }
