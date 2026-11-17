@@ -1,0 +1,67 @@
+---
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit AI PR review configuration for findfmt (#628)
+
+language: en-US
+early_access: false
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    drafts: false
+    base_branches:
+      - main
+
+  path_filters:
+    - '!uv.lock'
+    - '!*.lock'
+    - '!dist/**'
+    - '!build/**'
+    - '!.clusterfuzzlite/requirements.txt'
+    - '!src/findfmt/locale/**/*.mo'
+    - '!docs/source/locale/**/*.mo'
+
+  path_instructions:
+    - path: src/findfmt/**/*.py
+      instructions: |
+        - Enforce modern Python (>=3.11) best practices, including `from __future__ import annotations` and
+          strict, complete type annotations compatible with Astral `ty`.
+        - Flag any unjustified `# noqa`, `# type: ignore`, or `# pragma: no cover` suppressions; root causes
+          must be resolved directly in code and types.
+        - Preserve strict separation of concerns between directory traversal (`src/findfmt/traversal/`),
+          content/MIME classification (`src/findfmt/classifier.py`), and CLI/formatter presentation
+          (`src/findfmt/cli/` and `src/findfmt/formatters/`).
+        - Flag modules approaching or exceeding the 350-line operational ceiling (500-line hard limit) and
+          recommend modular decomposition rather than dense one-liners.
+
+    - path: src/findfmt/traversal/**/*.py
+      instructions: |
+        - Scrutinize `.gitignore`, `.git/info/exclude`, and global gitignore evaluation edge cases carefully:
+          negated `!` patterns, anchored vs. relative globs, trailing-slash directory-only rules, and
+          hierarchical nested `.gitignore` precedence.
+        - Verify early directory pruning, symlink loop detection (`-l`), single-filesystem confinement (`-x`),
+          depth limits (`-L`), and deterministic sorting behavior across POSIX and Windows paths.
+
+    - path: tests/**/*.py
+      instructions: |
+        - Verify that tests assert concrete, behavioral outcomes rather than vacuous or tautological checks.
+        - Ensure new or modified functionality maintains 100% statement and branch coverage, including error
+          handling, CLI exit codes (`0`, `1`, `2`, `130`), and `.gitignore` edge cases.
+        - Confirm filesystem and git tests remain hermetic using `tmp_path` without leaking into the host
+          environment or global git configuration.
+
+    - path: .github/workflows/**/*.yml
+      instructions: |
+        - Verify least-privilege `permissions`, explicit `timeout-minutes` on every job, and `zizmor` security
+          hygiene (`persist-credentials: false`, pinned actions, and no untrusted template interpolation).
+
+chat:
+  auto_reply: true

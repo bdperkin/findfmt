@@ -249,7 +249,8 @@ git commit -s -m "feat: add support for MIME categories"
 4. **Code Review & Quality Gates**:
    - Every PR triggers our full automated CI suite (Linux, macOS, Windows across Python 3.11–3.15, 100% test
      and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL, zizmor, ClusterFuzzLite, Vale
-     prose linting, and dependency review). All status checks must pass before merging.
+     prose linting, and dependency review) and automated AI review via CodeRabbit (`.coderabbit.yaml`). All
+     status checks must pass before merging.
    - Community contributions require thorough code review and approval from repository maintainers.
    - For solo maintainer development, changesets are tracked via individual feature branches and validated
      through GitHub Actions CI prior to squash-merging.

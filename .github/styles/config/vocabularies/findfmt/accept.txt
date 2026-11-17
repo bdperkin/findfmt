@@ -218,3 +218,4 @@
 (?i)viewport
 (?i)viewports
 (?i)schemastore
+(?i)coderabbit
