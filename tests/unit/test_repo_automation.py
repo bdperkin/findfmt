@@ -128,3 +128,10 @@ def test_renovate_top_level_and_package_groups() -> None:
     assert "github-actions" in groups
     gha_rule = groups["github-actions"]
     assert gha_rule.get("matchManagers") == ["github-actions"]
+
+    dependabot_path = _repo_root() / ".github" / "dependabot.yml"
+    with dependabot_path.open(encoding="utf-8") as f:
+        dep_cfg = yaml.safe_load(f)
+
+    for entry in dep_cfg.get("updates", []):
+        assert entry.get("open-pull-requests-limit") == 0
