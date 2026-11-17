@@ -106,6 +106,7 @@ def test_renovate_top_level_and_package_groups() -> None:
     assert cfg.get("rangeStrategy") == "update-lockfile"
     assert cfg.get("minimumReleaseAge") == "7 days"
     assert cfg.get("labels") == ["dependencies"]
+    assert cfg.get("ignorePaths") == [".clusterfuzzlite/requirements.txt"]
 
     lock_maint = cfg.get("lockFileMaintenance")
     assert isinstance(lock_maint, dict)
@@ -113,14 +114,12 @@ def test_renovate_top_level_and_package_groups() -> None:
 
     rules = cfg.get("packageRules")
     assert isinstance(rules, list)
-    dev_rules = [r for r in rules if isinstance(r, dict) and r.get("groupName") == "python-dev-dependencies"]
-    assert len(dev_rules) == 2
-    dev_managers = {mgr for r in dev_rules for mgr in r.get("matchManagers", [])}
-    assert dev_managers == {"pep621", "pip_requirements"}
-    pep621_dev_rule = next(r for r in dev_rules if r.get("matchManagers") == ["pep621"])
-    assert "dependency-groups" in pep621_dev_rule.get("matchDepTypes", [])
-
     groups = {str(r.get("groupName")): r for r in rules if isinstance(r, dict) and "groupName" in r}
+
+    assert "python-dev-dependencies" in groups
+    dev_rule = groups["python-dev-dependencies"]
+    assert dev_rule.get("matchManagers") == ["pep621"]
+    assert "dependency-groups" in dev_rule.get("matchDepTypes", [])
     assert "python-production-dependencies" in groups
     prod_rule = groups["python-production-dependencies"]
     assert prod_rule.get("matchManagers") == ["pep621"]
