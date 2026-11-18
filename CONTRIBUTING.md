@@ -230,6 +230,11 @@ and changelog pipelines:
 - `test:` Test additions or fixes
 - `ci:` CI workflow changes
 - `chore:` Maintenance tasks
+- `sec:` Security hardening and vulnerability fixes
+
+Pull request titles must also follow Conventional Commits (validated in CI by
+`.github/workflows/pr-title.yml`) because squash-merged pull request titles become commit subjects on `main`
+and populate automated draft release notes.
 
 Please sign off on your commits:
 
@@ -274,8 +279,10 @@ through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MINOR.
    uv run python tools/verify_release_version.py --tag vX.Y.Z --write
    ```
    That CHANGELOG section becomes the GitHub Release notes (`tools/release_notes.py`), and the workflow fails
-   before building anything if it is missing or if the fallback versions are out of sync.
-   `uvx git-cliff --unreleased --tag vX.Y.Z` drafts entries from the commit history.
+   before building anything if it is missing or if the fallback versions are out of sync. Release Drafter
+   (`.github/release-drafter.yml` via `.github/workflows/release-drafter.yml`) continuously maintains a
+   categorized draft GitHub Release from merged pull requests, and `uvx git-cliff --unreleased --tag vX.Y.Z`
+   drafts entries from the commit history.
 2. Check the distributions locally. `twine` must report no warnings, `check-wheel-contents` must pass, and the
    wheel must hold only the `findfmt` package (with `py.typed` and the compiled `*.mo` catalogs) and its
    metadata:

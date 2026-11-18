@@ -1,0 +1,77 @@
+---
+# Release Drafter configuration for automated changelog compilation (#632)
+
+name-template: v$RESOLVED_VERSION
+tag-template: v$RESOLVED_VERSION
+change-template: '- $TITLE (#$NUMBER) @$AUTHOR'
+change-title-escapes: \<*_&
+
+version-resolver:
+  major:
+    labels:
+      - breaking change
+  minor:
+    labels:
+      - enhancement
+  patch:
+    labels:
+      - bug
+      - performance
+      - security
+      - documentation
+      - refactor
+      - testing
+      - ci/cd
+      - pre-commit
+      - dependencies
+      - github_actions
+      - type:chore
+  default: patch
+
+exclude-labels:
+  - release
+  - duplicate
+  - invalid
+  - wontfix
+
+categories:
+  - title: Breaking Changes
+    labels:
+      - breaking change
+  - title: Features
+    labels:
+      - enhancement
+  - title: Bug Fixes
+    labels:
+      - bug
+  - title: Performance
+    labels:
+      - performance
+  - title: Security
+    labels:
+      - security
+  - title: Documentation
+    labels:
+      - documentation
+  - title: Refactoring
+    labels:
+      - refactor
+  - title: Testing
+    labels:
+      - testing
+  - title: CI/CD & Maintenance
+    labels:
+      - ci/cd
+      - pre-commit
+      - type:chore
+  - title: Dependencies
+    labels:
+      - dependencies
+      - github_actions
+
+template: |-
+  ## What's Changed
+
+  $CHANGES
+
+  **Full Changelog**: https://github.com/bdperkin/findfmt/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION

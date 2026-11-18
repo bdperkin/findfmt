@@ -16,6 +16,7 @@ queue_rules:
       - check-success = CodeRabbit
       - check-success = codecov/project
       - check-success = Code Quality & Gatekeeping
+      - check-success = Validate Conventional Commit PR Title
       - check-success = Build Documentation
       - check-success = CodeQL Security Analysis
       - check-success = Dependency Review
@@ -56,6 +57,7 @@ queue_rules:
       - check-success = CodeRabbit
       - check-success = codecov/project
       - check-success = Code Quality & Gatekeeping
+      - check-success = Validate Conventional Commit PR Title
       - check-success = Build Documentation
       - check-success = CodeQL Security Analysis
       - check-success = Dependency Review
@@ -104,6 +106,7 @@ pull_request_rules:
       - check-success = CodeRabbit
       - check-success = codecov/project
       - check-success = Code Quality & Gatekeeping
+      - check-success = Validate Conventional Commit PR Title
     actions:
       queue:
         name: default
@@ -125,6 +128,7 @@ pull_request_rules:
       - check-success = CodeRabbit
       - check-success = codecov/project
       - check-success = Code Quality & Gatekeeping
+      - check-success = Validate Conventional Commit PR Title
     actions:
       queue:
         name: default
@@ -186,3 +190,124 @@ pull_request_rules:
           - size:S
           - size:M
           - size:L
+
+  - name: Label breaking-change pull requests from Conventional Commit title
+    description: Automatically label pull requests containing breaking change bang (!:) in title
+    conditions:
+      - -closed
+      - 'title ~= ^[a-z]+(\([^)]+\))?!: '
+    actions:
+      label:
+        add:
+          - breaking change
+
+  - name: Label feature pull requests from Conventional Commit title
+    description: Automatically label feat pull requests as enhancement for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^feat(\([^)]+\))?!?: '
+    actions:
+      label:
+        add:
+          - enhancement
+
+  - name: Label bug-fix pull requests from Conventional Commit title
+    description: Automatically label fix pull requests as bug for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^fix(\([^)]+\))?!?: '
+    actions:
+      label:
+        add:
+          - bug
+
+  - name: Label documentation pull requests from Conventional Commit title
+    description: Automatically label docs pull requests as documentation for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^docs(\([^)]+\))?!?: '
+    actions:
+      label:
+        add:
+          - documentation
+
+  - name: Label performance pull requests from Conventional Commit title
+    description: Automatically label perf pull requests as performance for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^perf(\([^)]+\))?!?: '
+    actions:
+      label:
+        add:
+          - performance
+
+  - name: Label refactoring pull requests from Conventional Commit title
+    description: Automatically label refactor pull requests as refactor for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^refactor(\([^)]+\))?!?: '
+    actions:
+      label:
+        add:
+          - refactor
+
+  - name: Label security pull requests from Conventional Commit title
+    description: Automatically label sec pull requests as security for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^sec(\([^)]+\))?!?: '
+    actions:
+      label:
+        add:
+          - security
+
+  - name: Label testing pull requests from Conventional Commit title
+    description: Automatically label test pull requests as testing for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^test(\([^)]+\))?!?: '
+    actions:
+      label:
+        add:
+          - testing
+
+  - name: Label CI/CD pull requests from Conventional Commit title
+    description: Automatically label ci pull requests as ci/cd for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^ci(\([^)]+\))?!?: '
+    actions:
+      label:
+        add:
+          - ci/cd
+
+  - name: Label dependency pull requests from Conventional Commit title
+    description: Automatically label chore(deps) pull requests as dependencies for Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^chore\(deps\)!?: '
+    actions:
+      label:
+        add:
+          - dependencies
+
+  - name: Label release-preparation pull requests from Conventional Commit title
+    description: Automatically label chore(release) pull requests as release to exclude from Release Drafter
+    conditions:
+      - -closed
+      - 'title ~= ^chore\(release\)!?: '
+    actions:
+      label:
+        add:
+          - release
+
+  - name: Label maintenance pull requests from Conventional Commit title
+    description: Automatically label build, style, revert, and general chore pull requests as type:chore
+    conditions:
+      - -closed
+      - 'title ~= ^(build|style|revert|chore)(\([^)]+\))?!?: '
+      - '-title ~= ^chore\((deps|release)\)'
+    actions:
+      label:
+        add:
+          - type:chore
