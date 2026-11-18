@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-import stat
 import subprocess
 import sys
 import tomllib
@@ -57,60 +56,60 @@ def _run_preview_script(
     tmp_path: Path,
     setup: FakeGhSetup,
 ) -> tuple[subprocess.CompletedProcess[str], list[dict[str, Any]]]:
-    """Execute the docs-preview script against a local mock gh binary recording API mutations."""
+    """Execute the docs-preview script cross-platform with an intercepted gh subprocess runner."""
     tmp_path.mkdir(parents=True, exist_ok=True)
     state_file = tmp_path / "gh_state.json"
     log_file = tmp_path / "gh_mutations.jsonl"
+    workflow_py = tmp_path / "workflow_script.py"
+    harness_py = tmp_path / "harness.py"
+
     state_file.write_text(
         json.dumps({"files": setup.file_pages, "comments": setup.comment_pages}),
         encoding="utf-8",
     )
-
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    gh_script = bin_dir / "gh"
-    gh_script.write_text(
-        f"""#!{sys.executable}
-import json, pathlib, sys
+    workflow_py.write_text(_extract_preview_python_script(), encoding="utf-8")
+    harness_py.write_text(
+        f"""import json, pathlib, runpy, subprocess
 
 state = json.loads(pathlib.Path({str(state_file)!r}).read_text(encoding="utf-8"))
 log_path = pathlib.Path({str(log_file)!r})
-args = sys.argv[1:]
-assert args and args[0] == "api", f"Unexpected gh subcommand: {{args}}"
-rest = args[1:]
 
-if "-X" in rest:
-    idx = rest.index("-X")
-    method = rest[idx + 1]
-    endpoint = [a for a in rest[idx + 2 :] if a not in ("--input", "-")][0]
-    body = json.loads(sys.stdin.read()) if "--input" in rest else None
-    with log_path.open("a", encoding="utf-8") as f:
-        f.write(json.dumps({{"method": method, "endpoint": endpoint, "body": body}}) + "\\n")
-    print("{{}}")
-    sys.exit(0)
 
-endpoint = [a for a in rest if not a.startswith("--")][0]
-if endpoint.endswith("/files"):
-    print(json.dumps(state["files"]))
-elif endpoint.endswith("/comments"):
-    print(json.dumps(state["comments"]))
-else:
-    sys.exit(2)
+def _fake_run(cmd, *, input=None, capture_output=False, text=False, check=False):
+    assert cmd[:2] == ["gh", "api"], f"Unexpected command: {{cmd}}"
+    assert capture_output is True and text is True and check is False
+    rest = cmd[2:]
+    if "-X" in rest:
+        idx = rest.index("-X")
+        method = rest[idx + 1]
+        endpoint = [a for a in rest[idx + 2 :] if a not in ("--input", "-")][0]
+        body = json.loads(input) if "--input" in rest and input is not None else None
+        with log_path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps({{"method": method, "endpoint": endpoint, "body": body}}) + "\\n")
+        return subprocess.CompletedProcess(cmd, 0, stdout="{{}}", stderr="")
+    endpoint = [a for a in rest if not a.startswith("--")][0]
+    if endpoint.endswith("/files"):
+        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(state["files"]), stderr="")
+    if endpoint.endswith("/comments"):
+        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(state["comments"]), stderr="")
+    return subprocess.CompletedProcess(cmd, 2, stdout="", stderr="unknown endpoint")
+
+
+subprocess.run = _fake_run
+runpy.run_path({str(workflow_py)!r}, run_name="__main__")
 """,
         encoding="utf-8",
     )
-    gh_script.chmod(gh_script.stat().st_mode | stat.S_IXUSR)
 
     env = {
         **os.environ,
-        "PATH": f"{bin_dir}{os.pathsep}{os.environ.get('PATH', '')}",
         "GH_TOKEN": "test-token",
         "REPO": "bdperkin/findfmt",
         "PR_NUMBER": setup.pr_number,
         "RTD_SLUG": setup.slug,
     }
     proc = subprocess.run(
-        [sys.executable, "-c", _extract_preview_python_script()],
+        [sys.executable, str(harness_py)],
         env=env,
         capture_output=True,
         text=True,

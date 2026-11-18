@@ -42,7 +42,7 @@ jobs:
           from pathlib import PurePosixPath
 
           MARKER = "<!-- findfmt-docs-preview -->"
-          BOT_LOGINS = {"github-actions[bot]", "app/github-actions"}
+          BOT_LOGINS = {"github-actions[bot]", "github-actions", "app/github-actions"}
           INCLUDED_PAGES = {
               "ACCESSIBILITY.md": "accessibility.html",
               "SECURITY.md": "security.html",
