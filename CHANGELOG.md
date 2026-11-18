@@ -7,6 +7,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-11-17
+
+### Changed
+
+- *(pre-commit)* Add `check-jsonschema` hooks (`check-github-workflows`,
+  `check-github-workflows-require-timeout`, `check-dependabot`, `check-github-issue-forms`,
+  `check-github-issue-config`, `check-codecov`, `check-renovate`, `check-mergify`) and enforce explicit
+  `timeout-minutes` on every GitHub Actions workflow job (#470).
+- *(pre-commit)* Enable `check-hooks-apply` and manual-stage `identity` built-in meta hooks in
+  `.pre-commit-config.yaml` and remove the no-op `check-symlinks` hook (#471, #380).
+- *(markdown)* Configure shared `.mdformat.toml` with `mdformat-frontmatter`, `mdformat-gfm`, and
+  `mdformat-ruff` plugins across `pyproject.toml`, `.pre-commit-config.yaml`, and `tools/verify_quality.py`
+  (#472).
+- *(ci)* Integrate CodeRabbit AI pull request review configuration (`.coderabbit.yaml`) with path filters and
+  subsystem-specific review instructions (#628).
+- *(deps)* Configure Renovate (`renovate.json`) for grouped Python dependency and GitHub Action updates with
+  SHA pinning, 7-day minimum release age, and `uv.lock` synchronization (#629, #671).
+- *(ci)* Configure Mergify (`.mergify.yml`) for automated PR merge queue management (`squash` merge,
+  `pre-commit.ci`, Codecov, CodeRabbit, and CI checks) and automated PR diff-size labeling (`size:S`,
+  `size:M`, `size:L`, `size:XL`) (#630, #631, #626).
+- *(ci)* Replace deprecated `actions/attest-build-provenance` with `actions/attest` (`v4.2.2`) in
+  `.github/workflows/release.yml` (#671).
+- *(deps)* Upgrade `typer` to `v0.29.0`, `ruff` to `v0.17.5`, `ty` to `v0.0.105`, and GitHub Actions workflow
+  pins (#673, #674, #675, #676).
+
+### Fixed
+
+- *(docs)* Ignore unauthenticated GitHub `/stargazers` URL in Sphinx `linkcheck_ignore` (#665).
+
 ## [1.3.1] - 2026-11-15
 
 ### Features
@@ -809,4 +838,5 @@ future 1.x releases.
 [1.2.2]: https://github.com/bdperkin/findfmt/compare/v1.2.1...v1.2.2
 [1.3.0]: https://github.com/bdperkin/findfmt/compare/v1.2.2...v1.3.0
 [1.3.1]: https://github.com/bdperkin/findfmt/compare/v1.3.0...v1.3.1
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.3.1...HEAD
+[1.3.2]: https://github.com/bdperkin/findfmt/compare/v1.3.1...v1.3.2
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.3.2...HEAD
