@@ -26,7 +26,7 @@ build:
         -A in_lang_subdir=1
         docs/source
         "${READTHEDOCS_OUTPUT}/html/${lang}"
-        -W --keep-going;
+        -W --keep-going || exit $?;
         done
 
 sphinx:
