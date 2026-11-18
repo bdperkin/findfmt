@@ -21,6 +21,8 @@ class FakeGhSetup:
     comment_pages: list[list[dict[str, Any]]]
     slug: str = "findfmt"
     pr_number: str = "633"
+    fail_suffix: str | None = None
+    fail_rc: int = 3
 
 
 def _repo_root() -> Path:
@@ -63,7 +65,14 @@ def _run_preview_script(
     harness_py = tmp_path / "harness.py"
 
     state_file.write_text(
-        json.dumps({"files": setup.file_pages, "comments": setup.comment_pages}),
+        json.dumps(
+            {
+                "files": setup.file_pages,
+                "comments": setup.comment_pages,
+                "fail_suffix": setup.fail_suffix,
+                "fail_rc": setup.fail_rc,
+            },
+        ),
         encoding="utf-8",
     )
     workflow_py.write_text(_extract_preview_python_script(), encoding="utf-8")
@@ -78,15 +87,19 @@ def _fake_run(cmd, *, input=None, capture_output=False, text=False, check=False)
     assert cmd[:2] == ["gh", "api"], f"Unexpected command: {{cmd}}"
     assert capture_output is True and text is True and check is False
     rest = cmd[2:]
+    endpoint = [a for a in rest if "/" in a][0]
+    if state["fail_suffix"] and endpoint.endswith(state["fail_suffix"]):
+        return subprocess.CompletedProcess(
+            cmd, state["fail_rc"], stdout="", stderr="gh: HTTP 502 Bad Gateway"
+        )
     if "-X" in rest:
         idx = rest.index("-X")
         method = rest[idx + 1]
-        endpoint = [a for a in rest[idx + 2 :] if a not in ("--input", "-")][0]
+        target = [a for a in rest[idx + 2 :] if a not in ("--input", "-")][0]
         body = json.loads(input) if "--input" in rest and input is not None else None
         with log_path.open("a", encoding="utf-8") as f:
-            f.write(json.dumps({{"method": method, "endpoint": endpoint, "body": body}}) + "\\n")
+            f.write(json.dumps({{"method": method, "endpoint": target, "body": body}}) + "\\n")
         return subprocess.CompletedProcess(cmd, 0, stdout="{{}}", stderr="")
-    endpoint = [a for a in rest if not a.startswith("--")][0]
     if endpoint.endswith("/files"):
         return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(state["files"]), stderr="")
     if endpoint.endswith("/comments"):
@@ -268,3 +281,16 @@ def test_docs_preview_updates_bot_comment_and_deletes_when_reverted(tmp_path: Pa
     )
     assert proc_bad.returncode == 1
     assert "Invalid READTHEDOCS_SLUG" in proc_bad.stderr
+
+    proc_api_err, mut_api_err = _run_preview_script(
+        tmp_path / "api_err",
+        FakeGhSetup(
+            file_pages=[[{"filename": "docs/source/index.md", "status": "modified"}]],
+            comment_pages=[[]],
+            fail_suffix="/comments",
+            fail_rc=4,
+        ),
+    )
+    assert proc_api_err.returncode == 4
+    assert "gh: HTTP 502 Bad Gateway" in proc_api_err.stderr
+    assert mut_api_err == []
