@@ -219,3 +219,4 @@
 (?i)viewports
 (?i)schemastore
 (?i)coderabbit
+(?i)mergify

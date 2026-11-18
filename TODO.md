@@ -24,7 +24,7 @@
 > `#457`, `#455`, `#310`, `#458`, `#332`, `#340`, and epic `#381`; 2026-11-15 released v1.3.0 and closed its
 > milestone, closed `#292`, `#302`, `#312`, `#313`, `#574`, `#309`, epic `#379`, and `#314`, and released
 > v1.3.1 and closed its milestone; 2026-11-16 closed `#470`, `#472`, and `#628`; 2026-11-17 closed `#629`,
-> `#630`, `#471`, epic `#380`, `#631`, and epic `#626`)
+> `#630`, `#471`, epic `#380`, `#631`, and epic `#626`, and released v1.3.2 and closed its milestone)
 
 ______________________________________________________________________
 
@@ -711,9 +711,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#380](https://github.com/bdperkin/findfmt/issues/380)** - [Epic] Developer Tooling, Static Analysis &
   Linting Standardization (Closed: 2026-11-17 via PR [#678](https://github.com/bdperkin/findfmt/pull/678))
 - [x] **[#631](https://github.com/bdperkin/findfmt/issues/631)** - Implement PR Size Labeler (Closed:
-  2026-11-17)
+  2026-11-17 via PR [#681](https://github.com/bdperkin/findfmt/pull/681))
 - [x] **[#626](https://github.com/bdperkin/findfmt/issues/626)** - [Epic] Tier-1 Workflow & Quality Automation
-  Apps (Closed: 2026-11-17)
+  Apps (Closed: 2026-11-17 via PR [#681](https://github.com/bdperkin/findfmt/pull/681))
 
 ______________________________________________________________________
 
@@ -1428,8 +1428,9 @@ Its remaining traversal and localization issues moved by theme: #320 → v1.1.1,
 issue #321 → v1.2.1, #355 → v1.2.2, and #215 → v1.1.5.
 
 v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, v1.1.3 and v1.1.4 on
-2026-11-08, v1.1.5 on 2026-11-09, v1.2.0 on 2026-11-10, v1.2.1 on 2026-11-11, v1.2.2 on 2026-11-13, and v1.3.0
-and v1.3.1 on 2026-11-15 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
+2026-11-08, v1.1.5 on 2026-11-09, v1.2.0 on 2026-11-10, v1.2.1 on 2026-11-11, v1.2.2 on 2026-11-13, v1.3.0 and
+v1.3.1 on 2026-11-15, and v1.3.2 on 2026-11-17 (PyPI, GHCR, and GitHub Releases), and their milestones are
+closed.
 
 Realigned on 2026-11-09 ahead of v1.2.0: pulled #366 into v1.2.0, closed #311 and #474 as not planned,
 promoted the Hybrid Python-Rust engine track (#576-#598) from v1.8.0-v1.8.4 to v1.4.0-v1.4.4 so native Rust
@@ -1439,7 +1440,6 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.2          | Pre-commit, CI Config Hardening & Tier-1 Workflow/Quality Automation Apps                                          | 0           |
 | v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
 | v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |
