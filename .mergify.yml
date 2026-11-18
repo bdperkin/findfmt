@@ -1,0 +1,138 @@
+---
+# yaml-language-server: $schema=https://docs.mergify.com/mergify-configuration-schema.json
+# Mergify automated PR queue and merge configuration for findfmt (#630)
+
+queue_rules:
+  - name: default
+    merge_method: squash
+    update_method: rebase
+    queue_conditions:
+      - base = main
+      - -draft
+      - -conflict
+      - '#changes-requested-reviews-by = 0'
+      - '#review-threads-unresolved = 0'
+      - check-success = pre-commit.ci - pr
+      - check-success = CodeRabbit
+      - check-success = codecov/project
+      - check-success = Code Quality & Gatekeeping
+      - check-success = Build Documentation
+      - check-success = CodeQL Security Analysis
+      - check-success = Dependency Review
+      - check-success = Lint Prose (Vale)
+      - check-success = Package Metadata & Wheel Contents
+      - check-success = Container Smoke Test
+      - check-success = Performance Benchmarks
+      - check-success = Dependency Smoke Matrix (lowest-direct - disallow)
+      - check-success = Dependency Smoke Matrix (highest - allow)
+      - check-success = Test (ubuntu-latest - Python 3.11)
+      - check-success = Test (ubuntu-latest - Python 3.12)
+      - check-success = Test (ubuntu-latest - Python 3.13)
+      - check-success = Test (ubuntu-latest - Python 3.14)
+      - check-success = Test (ubuntu-latest - Python 3.15)
+      - check-success = Test (macos-latest - Python 3.11)
+      - check-success = Test (macos-latest - Python 3.12)
+      - check-success = Test (macos-latest - Python 3.13)
+      - check-success = Test (macos-latest - Python 3.14)
+      - check-success = Test (macos-latest - Python 3.15)
+      - check-success = Test (windows-latest - Python 3.11)
+      - check-success = Test (windows-latest - Python 3.12)
+      - check-success = Test (windows-latest - Python 3.13)
+      - check-success = Test (windows-latest - Python 3.14)
+      - check-success = Test (windows-latest - Python 3.15)
+      - check-success = Packaging Smoke Test (ubuntu-latest - Python 3.11)
+      - check-success = Packaging Smoke Test (ubuntu-latest - Python 3.15)
+      - check-success = Packaging Smoke Test (macos-latest - Python 3.11)
+      - check-success = Packaging Smoke Test (macos-latest - Python 3.15)
+      - check-success = Packaging Smoke Test (windows-latest - Python 3.11)
+      - check-success = Packaging Smoke Test (windows-latest - Python 3.15)
+    merge_conditions:
+      - base = main
+      - -draft
+      - -conflict
+      - '#changes-requested-reviews-by = 0'
+      - '#review-threads-unresolved = 0'
+      - check-success = pre-commit.ci - pr
+      - check-success = CodeRabbit
+      - check-success = codecov/project
+      - check-success = Code Quality & Gatekeeping
+      - check-success = Build Documentation
+      - check-success = CodeQL Security Analysis
+      - check-success = Dependency Review
+      - check-success = Lint Prose (Vale)
+      - check-success = Package Metadata & Wheel Contents
+      - check-success = Container Smoke Test
+      - check-success = Performance Benchmarks
+      - check-success = Dependency Smoke Matrix (lowest-direct - disallow)
+      - check-success = Dependency Smoke Matrix (highest - allow)
+      - check-success = Test (ubuntu-latest - Python 3.11)
+      - check-success = Test (ubuntu-latest - Python 3.12)
+      - check-success = Test (ubuntu-latest - Python 3.13)
+      - check-success = Test (ubuntu-latest - Python 3.14)
+      - check-success = Test (ubuntu-latest - Python 3.15)
+      - check-success = Test (macos-latest - Python 3.11)
+      - check-success = Test (macos-latest - Python 3.12)
+      - check-success = Test (macos-latest - Python 3.13)
+      - check-success = Test (macos-latest - Python 3.14)
+      - check-success = Test (macos-latest - Python 3.15)
+      - check-success = Test (windows-latest - Python 3.11)
+      - check-success = Test (windows-latest - Python 3.12)
+      - check-success = Test (windows-latest - Python 3.13)
+      - check-success = Test (windows-latest - Python 3.14)
+      - check-success = Test (windows-latest - Python 3.15)
+      - check-success = Packaging Smoke Test (ubuntu-latest - Python 3.11)
+      - check-success = Packaging Smoke Test (ubuntu-latest - Python 3.15)
+      - check-success = Packaging Smoke Test (macos-latest - Python 3.11)
+      - check-success = Packaging Smoke Test (macos-latest - Python 3.15)
+      - check-success = Packaging Smoke Test (windows-latest - Python 3.11)
+      - check-success = Packaging Smoke Test (windows-latest - Python 3.15)
+
+pull_request_rules:
+  - name: Automatic merge queue for Renovate and pre-commit.ci bot PRs
+    description: Queue automated dependency and pre-commit PRs once pre-commit.ci, Codecov, CodeRabbit, and CI checks
+      pass
+    conditions:
+      - base = main
+      - -draft
+      - -conflict
+      - '#changes-requested-reviews-by = 0'
+      - '#review-threads-unresolved = 0'
+      - or:
+          - author = renovate[bot]
+          - author = pre-commit-ci[bot]
+      - check-success = pre-commit.ci - pr
+      - check-success = CodeRabbit
+      - check-success = codecov/project
+      - check-success = Code Quality & Gatekeeping
+    actions:
+      queue:
+        name: default
+
+  - name: Automatic merge queue for approved or automerge-labeled PRs
+    description: Queue maintainer and contributor PRs when approved or labeled once pre-commit.ci, Codecov, CodeRabbit,
+      and CI checks pass
+    conditions:
+      - base = main
+      - -draft
+      - -conflict
+      - '#changes-requested-reviews-by = 0'
+      - '#review-threads-unresolved = 0'
+      - or:
+          - label = automerge
+          - label = status:ready-to-merge
+          - '#approved-reviews-by >= 1'
+      - check-success = pre-commit.ci - pr
+      - check-success = CodeRabbit
+      - check-success = codecov/project
+      - check-success = Code Quality & Gatekeeping
+    actions:
+      queue:
+        name: default
+
+  - name: Delete head branch after merge
+    description: Automatically clean up merged PR head branches
+    conditions:
+      - base = main
+      - merged
+    actions:
+      delete_head_branch: {}

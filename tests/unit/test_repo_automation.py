@@ -147,3 +147,111 @@ def test_renovate_top_level_and_package_groups() -> None:
 
     for entry in dep_cfg.get("updates", []):
         assert entry.get("open-pull-requests-limit") == 0
+
+
+def _load_mergify_config() -> dict[str, Any]:
+    """Load and parse .mergify.yml from the repository root."""
+    cfg_path = _repo_root() / ".mergify.yml"
+    assert cfg_path.is_file(), f"Missing Mergify configuration at {cfg_path}"
+    with cfg_path.open(encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    assert isinstance(data, dict), ".mergify.yml must parse to a YAML mapping"
+    return data
+
+
+def test_mergify_queue_and_pull_request_rules() -> None:
+    """Validate .mergify.yml queue rules, bot/human PR triggers, and branch cleanup (#630)."""
+    raw = (_repo_root() / ".mergify.yml").read_text(encoding="utf-8")
+    assert "https://docs.mergify.com/mergify-configuration-schema.json" in raw
+
+    cfg = _load_mergify_config()
+    queue_rules = cfg.get("queue_rules")
+    assert isinstance(queue_rules, list)
+    assert len(queue_rules) >= 1
+
+    default_queue = queue_rules[0]
+    assert isinstance(default_queue, dict)
+    assert default_queue.get("name") == "default"
+    assert default_queue.get("merge_method") == "squash"
+    assert default_queue.get("update_method") == "rebase"
+
+    for cond_key in ("queue_conditions", "merge_conditions"):
+        conds = default_queue.get(cond_key)
+        assert isinstance(conds, list)
+        assert "base = main" in conds
+        assert "-draft" in conds
+        assert "-conflict" in conds
+        assert "#changes-requested-reviews-by = 0" in conds
+        assert "#review-threads-unresolved = 0" in conds
+        assert "check-success = pre-commit.ci - pr" in conds
+        assert "check-success = CodeRabbit" in conds
+        assert "check-success = codecov/project" in conds
+        assert "check-success = Code Quality & Gatekeeping" in conds
+
+    pr_rules = cfg.get("pull_request_rules")
+    assert isinstance(pr_rules, list)
+    by_name = {str(r.get("name")): r for r in pr_rules if isinstance(r, dict)}
+
+    bot_rule = by_name["Automatic merge queue for Renovate and pre-commit.ci bot PRs"]
+    bot_conds = bot_rule.get("conditions", [])
+    assert any(
+        isinstance(c, dict)
+        and "author = renovate[bot]" in c.get("or", [])
+        and "author = pre-commit-ci[bot]" in c.get("or", [])
+        for c in bot_conds
+    )
+    assert bot_rule.get("actions", {}).get("queue", {}).get("name") == "default"
+
+    human_rule = by_name["Automatic merge queue for approved or automerge-labeled PRs"]
+    human_conds = human_rule.get("conditions", [])
+    assert any(
+        isinstance(c, dict)
+        and "label = automerge" in c.get("or", [])
+        and "#approved-reviews-by >= 1" in c.get("or", [])
+        for c in human_conds
+    )
+    assert human_rule.get("actions", {}).get("queue", {}).get("name") == "default"
+
+    cleanup_rule = by_name["Delete head branch after merge"]
+    assert "merged" in cleanup_rule.get("conditions", [])
+    assert "delete_head_branch" in cleanup_rule.get("actions", {})
+
+
+def test_check_jsonschema_hooks_and_workflow_timeouts() -> None:
+    """Validate check-jsonschema pre-commit hooks and workflow job timeout-minutes (#470, #630)."""
+    repo = _repo_root()
+    pre_commit_path = repo / ".pre-commit-config.yaml"
+    with pre_commit_path.open(encoding="utf-8") as f:
+        pc_data = yaml.safe_load(f)
+
+    expected_hooks = {
+        "check-github-workflows",
+        "check-github-workflows-require-timeout",
+        "check-dependabot",
+        "check-github-issue-forms",
+        "check-github-issue-config",
+        "check-codecov",
+        "check-renovate",
+        "check-mergify",
+    }
+    schema_repo = next(
+        (r for r in pc_data.get("repos", []) if "python-jsonschema/check-jsonschema" in str(r.get("repo"))),
+        None,
+    )
+    assert schema_repo is not None, "check-jsonschema repo must be configured in .pre-commit-config.yaml"
+    assert schema_repo.get("rev"), "check-jsonschema repo must pin rev"
+    actual_hooks = {h.get("id") for h in schema_repo.get("hooks", [])}
+    assert actual_hooks == expected_hooks
+
+    ci_skip = set(pc_data.get("ci", {}).get("skip", []))
+    assert not (expected_hooks & ci_skip), "check-jsonschema hooks work offline and must not be in ci.skip"
+
+    for wf_path in sorted((repo / ".github" / "workflows").glob("*.yml")):
+        with wf_path.open(encoding="utf-8") as f:
+            wf_data = yaml.safe_load(f)
+
+        for job_name, job_def in wf_data.get("jobs", {}).items():
+            timeout = job_def.get("timeout-minutes")
+            assert isinstance(timeout, int), f"{wf_path.name}:{job_name} missing integer timeout-minutes"
+            assert timeout > 0, f"{wf_path.name}:{job_name} timeout-minutes must be positive"
