@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tomllib
@@ -137,6 +138,24 @@ def test_readthedocs_yaml_and_pre_commit_hook() -> None:
     install_cmds = jobs.get("install", [])
     assert len(install_cmds) == 1
     assert "uv sync --locked --no-default-groups --group docs" in install_cmds[0]
+
+    post_build_cmds = [str(cmd) for cmd in jobs.get("post_build", [])]
+    assert len(post_build_cmds) == 2
+    assert "sphinx-intl" in post_build_cmds[0]
+    assert "docs/source/locale" in post_build_cmds[0]
+    loop_cmd = post_build_cmds[1]
+    loop_match = re.search(r"for lang in ([^;]+);", loop_cmd)
+    assert loop_match is not None
+    rtd_langs = set(loop_match.group(1).split())
+    conf_text = (_repo_root() / "docs" / "source" / "conf.py").read_text(encoding="utf-8")
+    conf_langs = set(re.findall(r'\("([a-z]{2})",\s*"[^"]+",\s*"[^"]+"\)', conf_text))
+    assert rtd_langs == {"en", "es", "fr", "de", "ja"}
+    assert rtd_langs == conf_langs
+    assert "-D" in loop_cmd
+    assert "language=${lang}" in loop_cmd
+    assert "-A in_lang_subdir=1" in loop_cmd
+    assert "${READTHEDOCS_OUTPUT}/html/${lang}" in loop_cmd
+    assert "-W --keep-going" in loop_cmd
 
     sphinx_cfg = rtd.get("sphinx", {})
     assert sphinx_cfg == {

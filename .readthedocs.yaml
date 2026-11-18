@@ -15,6 +15,19 @@ build:
       - uv venv "${READTHEDOCS_VIRTUALENV_PATH}"
     install:
       - UV_PROJECT_ENVIRONMENT="${READTHEDOCS_VIRTUALENV_PATH}" uv sync --locked --no-default-groups --group docs
+    post_build:
+      - '"${READTHEDOCS_VIRTUALENV_PATH}/bin/sphinx-intl" build -d docs/source/locale'
+      - >-
+        for lang in en es fr de ja; do
+        "${READTHEDOCS_VIRTUALENV_PATH}/bin/sphinx-build"
+        -b html
+        -d "docs/_build/doctrees-${lang}"
+        -D "language=${lang}"
+        -A in_lang_subdir=1
+        docs/source
+        "${READTHEDOCS_OUTPUT}/html/${lang}"
+        -W --keep-going;
+        done
 
 sphinx:
   builder: html
