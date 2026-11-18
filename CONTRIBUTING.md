@@ -92,7 +92,11 @@ All pull requests must satisfy our quality gate before merging:
   uv run pre-commit run --all-files --show-diff-on-failure
   ```
   The flag prints the diff when hooks modify files. Stage the fixes and run the command again. Include
-  `--show-diff-on-failure` in new automated invocations of `pre-commit run --all-files`.
+  `--show-diff-on-failure` in new automated invocations of `pre-commit run --all-files`. To inspect which
+  tracked files `pre-commit` selects for hook execution, run the manual-stage `identity` meta hook:
+  ```bash
+  uv run pre-commit run identity --hook-stage manual --all-files
+  ```
 - **100% Test Coverage**: Every line and branch must be covered.
   ```bash
   uv run pytest

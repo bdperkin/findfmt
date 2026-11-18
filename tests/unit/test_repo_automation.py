@@ -255,3 +255,29 @@ def test_check_jsonschema_hooks_and_workflow_timeouts() -> None:
             timeout = job_def.get("timeout-minutes")
             assert isinstance(timeout, int), f"{wf_path.name}:{job_name} missing integer timeout-minutes"
             assert timeout > 0, f"{wf_path.name}:{job_name} timeout-minutes must be positive"
+
+
+def test_pre_commit_meta_hooks_and_no_unused_symlinks_hook() -> None:
+    """Validate pre-commit meta hooks (check-hooks-apply, check-useless-excludes, identity) (#471)."""
+    pre_commit_path = _repo_root() / ".pre-commit-config.yaml"
+    with pre_commit_path.open(encoding="utf-8") as f:
+        pc_data = yaml.safe_load(f)
+
+    repos = pc_data.get("repos", [])
+    meta_repo = next((r for r in repos if r.get("repo") == "meta"), None)
+    assert meta_repo is not None, "meta repo must be configured in .pre-commit-config.yaml"
+
+    meta_hooks = {str(h.get("id")): h for h in meta_repo.get("hooks", []) if isinstance(h, dict)}
+    assert set(meta_hooks) == {"check-hooks-apply", "check-useless-excludes", "identity"}
+    assert meta_hooks["identity"].get("stages") == ["manual"]
+
+    ci_skip = set(pc_data.get("ci", {}).get("skip", []))
+    assert not (set(meta_hooks) & ci_skip), "meta hooks must not be in ci.skip"
+
+    std_repo = next(
+        (r for r in repos if "pre-commit/pre-commit-hooks" in str(r.get("repo"))),
+        None,
+    )
+    assert std_repo is not None
+    std_hook_ids = {h.get("id") for h in std_repo.get("hooks", []) if isinstance(h, dict)}
+    assert "check-symlinks" not in std_hook_ids
