@@ -151,6 +151,20 @@
   color: 65a30d
   description: Minor improvement, polish, or cosmetic change
 
+# Effort & Diff Size (size:*)
+- name: size:S
+  color: c2e0c6
+  description: Small pull request (<100 modified lines) or small issue scope
+- name: size:M
+  color: fef2c0
+  description: Medium pull request (100-499 modified lines) or medium issue scope
+- name: size:L
+  color: f9d0c4
+  description: Large pull request (500-999 modified lines) or large issue scope
+- name: size:XL
+  color: e99695
+  description: Extra-large pull request (>=1000 modified lines) or extra-large issue scope
+
 # Format & Classification Family (format:*)
 - name: format:python
   color: 38bdf8

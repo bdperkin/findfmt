@@ -278,3 +278,43 @@ def test_pre_commit_meta_hooks_and_no_unused_symlinks_hook() -> None:
     assert std_repo is not None
     std_hook_ids = {h.get("id") for h in std_repo.get("hooks", []) if isinstance(h, dict)}
     assert "check-symlinks" not in std_hook_ids
+
+
+def test_mergify_pr_size_labeler_rules_and_labels_taxonomy() -> None:
+    """Validate PR size labeling rules in .mergify.yml and size:* entries in .github/labels.yml (#631)."""
+    cfg = _load_mergify_config()
+    pr_rules = cfg.get("pull_request_rules", [])
+    by_name = {str(r.get("name")): r for r in pr_rules if isinstance(r, dict)}
+
+    expected_size_rules = {
+        "Label small pull requests (size:S)": ("size:S", ["#modified-lines < 100"]),
+        "Label medium pull requests (size:M)": (
+            "size:M",
+            ["#modified-lines >= 100", "#modified-lines < 500"],
+        ),
+        "Label large pull requests (size:L)": (
+            "size:L",
+            ["#modified-lines >= 500", "#modified-lines < 1000"],
+        ),
+        "Label extra-large pull requests (size:XL)": ("size:XL", ["#modified-lines >= 1000"]),
+    }
+    all_size_labels = {"size:S", "size:M", "size:L", "size:XL"}
+
+    for rule_name, (target_label, expected_conds) in expected_size_rules.items():
+        assert rule_name in by_name, f"Missing Mergify size rule: {rule_name}"
+        rule = by_name[rule_name]
+        conds = rule.get("conditions", [])
+        assert "-closed" in conds
+        for cond in expected_conds:
+            assert cond in conds
+
+        label_action = rule.get("actions", {}).get("label", {})
+        assert label_action.get("add") == [target_label]
+        assert set(label_action.get("remove", [])) == all_size_labels - {target_label}
+
+    labels_path = _repo_root() / ".github" / "labels.yml"
+    with labels_path.open(encoding="utf-8") as f:
+        labels_data = yaml.safe_load(f)
+
+    defined_labels = {str(item.get("name")) for item in labels_data if isinstance(item, dict)}
+    assert all_size_labels.issubset(defined_labels)

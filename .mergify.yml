@@ -1,6 +1,6 @@
 ---
 # yaml-language-server: $schema=https://docs.mergify.com/mergify-configuration-schema.json
-# Mergify automated PR queue and merge configuration for findfmt (#630)
+# Mergify automated PR queue, merge triggers, and size labeling configuration for findfmt
 
 queue_rules:
   - name: default
@@ -128,3 +128,61 @@ pull_request_rules:
     actions:
       queue:
         name: default
+
+  - name: Label small pull requests (size:S)
+    description: Automatically label pull requests with fewer than 100 modified lines as size:S
+    conditions:
+      - -closed
+      - '#modified-lines < 100'
+    actions:
+      label:
+        add:
+          - size:S
+        remove:
+          - size:M
+          - size:L
+          - size:XL
+
+  - name: Label medium pull requests (size:M)
+    description: Automatically label pull requests with 100 to 499 modified lines as size:M
+    conditions:
+      - -closed
+      - '#modified-lines >= 100'
+      - '#modified-lines < 500'
+    actions:
+      label:
+        add:
+          - size:M
+        remove:
+          - size:S
+          - size:L
+          - size:XL
+
+  - name: Label large pull requests (size:L)
+    description: Automatically label pull requests with 500 to 999 modified lines as size:L
+    conditions:
+      - -closed
+      - '#modified-lines >= 500'
+      - '#modified-lines < 1000'
+    actions:
+      label:
+        add:
+          - size:L
+        remove:
+          - size:S
+          - size:M
+          - size:XL
+
+  - name: Label extra-large pull requests (size:XL)
+    description: Automatically label pull requests with 1000 or more modified lines as size:XL
+    conditions:
+      - -closed
+      - '#modified-lines >= 1000'
+    actions:
+      label:
+        add:
+          - size:XL
+        remove:
+          - size:S
+          - size:M
+          - size:L
