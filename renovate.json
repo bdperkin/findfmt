@@ -15,6 +15,9 @@
   "labels": [
     "dependencies"
   ],
+  "ignorePaths": [
+    ".clusterfuzzlite/requirements.txt"
+  ],
   "rangeStrategy": "update-lockfile",
   "lockFileMaintenance": {
     "enabled": true,
@@ -34,14 +37,6 @@
         "test",
         "docs",
         "lint"
-      ],
-      "groupName": "python-dev-dependencies",
-      "groupSlug": "python-dev-deps"
-    },
-    {
-      "description": "Group pinned ClusterFuzzLite requirements with Python development dependencies",
-      "matchManagers": [
-        "pip_requirements"
       ],
       "groupName": "python-dev-dependencies",
       "groupSlug": "python-dev-deps"
