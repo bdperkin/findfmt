@@ -231,6 +231,7 @@ def test_check_jsonschema_hooks_and_workflow_timeouts() -> None:
         "check-codecov",
         "check-renovate",
         "check-mergify",
+        "check-readthedocs",
     }
     schema_repo = next(
         (r for r in pc_data.get("repos", []) if "python-jsonschema/check-jsonschema" in str(r.get("repo"))),
