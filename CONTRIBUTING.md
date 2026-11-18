@@ -269,6 +269,9 @@ git commit -s -m "feat: add support for MIME categories"
      through GitHub Actions CI prior to squash-merging.
 5. **Linear History**: All pull requests are merged using GitHub Squash & Merge to maintain a clean, linear
    commit history.
+6. **Stale Lifecycle Management**: Unassigned issues without a milestone and non-draft pull requests receive a
+   polite `status:stale` reminder after 30 days of inactivity and close automatically after 7 additional days
+   without activity (`.github/workflows/stale.yml`). Any new comment or push removes `status:stale`.
 
 ## 7. Release Process (Maintainers)
 

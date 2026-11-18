@@ -133,6 +133,9 @@
 - name: status:ready-to-merge
   color: 34d399
   description: Approved and ready for merge once CI passes
+- name: status:stale
+  color: d4c5f9
+  description: Inactive for 30 days; scheduled to close after 7 days without response
 - name: automerge
   color: 0e8a16
   description: Opt pull request into Mergify automatic merge queue once checks pass
