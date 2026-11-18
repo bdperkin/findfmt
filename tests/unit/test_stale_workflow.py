@@ -48,7 +48,11 @@ def test_stale_workflow_security_and_triggers() -> None:
     job = wf["jobs"]["stale"]
     assert job.get("runs-on") == "ubuntu-latest"
     assert job.get("timeout-minutes") == 5
-    assert job.get("permissions") == {"issues": "write", "pull-requests": "write"}
+    assert job.get("permissions") == {
+        "actions": "write",
+        "issues": "write",
+        "pull-requests": "write",
+    }
 
     steps = job.get("steps", [])
     assert len(steps) == 1
