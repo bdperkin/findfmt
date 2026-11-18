@@ -234,6 +234,7 @@ repos:
       - id: check-github-issue-config
       - id: check-codecov
       - id: check-renovate
+      - id: check-mergify
 
   # Conventional Commits verification
   - repo: https://github.com/compilerla/conventional-pre-commit
