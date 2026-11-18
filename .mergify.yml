@@ -1,3 +1,4 @@
+---
 # yaml-language-server: $schema=https://docs.mergify.com/mergify-configuration-schema.json
 # Mergify automated PR queue and merge configuration for findfmt (#630)
 
@@ -88,7 +89,7 @@ queue_rules:
 
 pull_request_rules:
   - name: Automatic merge queue for Renovate and pre-commit.ci bot PRs
-    description: Queue automated dependency and pre-commit PRs once pre-commit.ci, Codecov, CodeRabbit, and CI checks 
+    description: Queue automated dependency and pre-commit PRs once pre-commit.ci, Codecov, CodeRabbit, and CI checks
       pass
     conditions:
       - base = main
@@ -127,4 +128,3 @@ pull_request_rules:
     actions:
       queue:
         name: default
-
