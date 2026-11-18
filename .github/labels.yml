@@ -151,6 +151,20 @@
   color: 65a30d
   description: Minor improvement, polish, or cosmetic change
 
+# Effort & Diff Size (size:*)
+- name: size:S
+  color: c2e0c6
+  description: 'Effort: small (under half a day)'
+- name: size:M
+  color: fef2c0
+  description: 'Effort: medium (1-2 days)'
+- name: size:L
+  color: f9d0c4
+  description: 'Effort: large (3-5 days)'
+- name: size:XL
+  color: e99695
+  description: 'Effort: extra large; decomposed into sub-issues'
+
 # Format & Classification Family (format:*)
 - name: format:python
   color: 38bdf8
