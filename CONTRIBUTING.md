@@ -123,9 +123,10 @@ All pull requests must satisfy our quality gate before merging:
   vale *.md docs/
   ```
 - **CI/CD Static Security Analysis & Schema Validation**: GitHub Actions workflows (`.github/workflows/`),
-  `.github/dependabot.yml`, `.github/ISSUE_TEMPLATE/`, `codecov.yml`, and `.pre-commit-config.yaml` are
-  audited with [zizmor](https://github.com/zizmorcore/zizmor) and validated against SchemaStore JSON schemas
-  with [check-jsonschema](https://github.com/python-jsonschema/check-jsonschema) (including mandatory per-job
+  `.github/dependabot.yml`, `.github/ISSUE_TEMPLATE/`, `.mergify.yml`, `.readthedocs.yaml`, `codecov.yml`,
+  `renovate.json`, and `.pre-commit-config.yaml` are audited with
+  [zizmor](https://github.com/zizmorcore/zizmor) and validated against SchemaStore JSON schemas with
+  [check-jsonschema](https://github.com/python-jsonschema/check-jsonschema) (including mandatory per-job
   `timeout-minutes`) in pre-commit and CI:
   ```bash
   uvx zizmor .github/ .pre-commit-config.yaml
@@ -260,6 +261,9 @@ git commit -s -m "feat: add support for MIME categories"
      and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL, zizmor, ClusterFuzzLite, Vale
      prose linting, and dependency review) and automated AI review via CodeRabbit (`.coderabbit.yaml`). All
      status checks must pass before merging.
+   - Pull requests touching `docs/source/` (or included documentation sources) receive live Sphinx preview
+     builds via Read the Docs (`.readthedocs.yaml`) and automated page-level preview links via
+     `.github/workflows/docs-preview.yml`.
    - Community contributions require thorough code review and approval from repository maintainers.
    - For solo maintainer development, changesets are tracked via individual feature branches and validated
      through GitHub Actions CI prior to squash-merging.

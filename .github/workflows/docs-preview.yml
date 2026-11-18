@@ -1,0 +1,154 @@
+---
+name: Documentation Preview Links
+
+on:
+  # zizmor: ignore[dangerous-triggers] -- posts sticky preview links via REST API without code checkout
+  pull_request_target:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions: {}
+
+concurrency:
+  group: docs-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  comment-preview-links:
+    name: Post Documentation Preview Links
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Sync Documentation Preview Comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RTD_SLUG: ${{ vars.READTHEDOCS_SLUG || 'findfmt' }}
+        run: |-
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          from pathlib import PurePosixPath
+          from urllib.parse import quote
+
+          MARKER = "<!-- findfmt-docs-preview -->"
+          BOT_LOGINS = {"github-actions[bot]", "github-actions", "app/github-actions"}
+          INCLUDED_PAGES = {
+              "ACCESSIBILITY.md": "accessibility.html",
+              "SECURITY.md": "security.html",
+              "docs/performance.md": "quality/performance.html",
+          }
+
+          repo = os.environ["REPO"]
+          pr_num = int(os.environ["PR_NUMBER"])
+          slug = os.environ.get("RTD_SLUG", "").strip() or "findfmt"
+          if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", slug):
+              print(f"::error::Invalid READTHEDOCS_SLUG: {slug!r}", file=sys.stderr)
+              sys.exit(1)
+
+          def gh_json(args: list[str], payload: dict[str, str] | None = None) -> object:
+              cmd = ["gh", "api", *args]
+              inp = json.dumps(payload) if payload is not None else None
+              proc = subprocess.run(cmd, input=inp, capture_output=True, text=True, check=False)
+              if proc.returncode != 0:
+                  print(proc.stderr, file=sys.stderr)
+                  sys.exit(proc.returncode)
+              return json.loads(proc.stdout) if proc.stdout.strip() else None
+
+          pages = gh_json(["--paginate", "--slurp", f"repos/{repo}/pulls/{pr_num}/files"])
+          files = [item for page in (pages if isinstance(pages, list) else []) for item in page]
+
+          docs_touched = False
+          page_entries: list[tuple[str, str]] = []
+          for entry in files:
+              filename = str(entry.get("filename", ""))
+              status = str(entry.get("status", ""))
+              if (
+                  filename == ".readthedocs.yaml"
+                  or filename.startswith("docs/source/")
+                  or filename in INCLUDED_PAGES
+              ):
+                  docs_touched = True
+              if status == "removed":
+                  continue
+              if filename in INCLUDED_PAGES:
+                  page_entries.append((filename, INCLUDED_PAGES[filename]))
+                  continue
+              if not filename.startswith("docs/source/"):
+                  continue
+              rel = filename.removeprefix("docs/source/")
+              if rel.startswith(("_static/", "_templates/", "locale/")):
+                  continue
+              if PurePosixPath(rel).suffix in {".md", ".rst"}:
+                  html_rel = PurePosixPath(rel).with_suffix(".html").as_posix()
+                  page_entries.append((filename, html_rel))
+
+          page_entries = sorted(set(page_entries))
+
+          comment_pages = gh_json(["--paginate", "--slurp", f"repos/{repo}/issues/{pr_num}/comments"])
+          comments = [c for page in (comment_pages if isinstance(comment_pages, list) else []) for c in page]
+          existing = next(
+              (
+                  c
+                  for c in comments
+                  if MARKER in str(c.get("body", ""))
+                  and str((c.get("user") or {}).get("login", "")) in BOT_LOGINS
+              ),
+              None,
+          )
+
+          if not docs_touched:
+              if existing is not None:
+                  gh_json(["-X", "DELETE", f"repos/{repo}/issues/comments/{existing['id']}"])
+              sys.exit(0)
+
+          base_url = f"https://{slug}--{pr_num}.org.readthedocs.build/en/{pr_num}"
+          lines = [
+              MARKER,
+              "### 📚 Documentation Preview",
+              "",
+              f"- **Live Site Root:** [{base_url}/]({base_url}/)",
+              "",
+          ]
+          if page_entries:
+              lines.extend(["| Source File | Preview Page |", "| :--- | :--- |"])
+              for src_file, html_rel in page_entries:
+                  safe_src = src_file.replace("\r", "").replace("\n", "").replace("|", "\\|").replace("`", "")
+                  safe_label = html_rel.replace("\r", "").replace("\n", "").replace("|", "\\|").replace("`", "")
+                  encoded_rel = quote(html_rel, safe="/")
+                  lines.append(f"| `{safe_src}` | [`{safe_label}`]({base_url}/{encoded_rel}) |")
+              lines.append("")
+          else:
+              lines.extend(
+                  [
+                      "_Documentation build configuration or shared assets changed; "
+                      "verify rendering from the site root above._",
+                      "",
+                  ]
+              )
+          lines.append("_Preview URLs become active once the Read the Docs pull request build completes._")
+          body = "\n".join(lines)
+
+          if existing is not None:
+              if str(existing.get("body", "")) != body:
+                  gh_json(
+                      ["-X", "PATCH", f"repos/{repo}/issues/comments/{existing['id']}", "--input", "-"],
+                      {"body": body},
+                  )
+          else:
+              gh_json(
+                  ["-X", "POST", f"repos/{repo}/issues/{pr_num}/comments", "--input", "-"],
+                  {"body": body},
+              )
+          PY
