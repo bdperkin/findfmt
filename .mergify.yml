@@ -57,7 +57,6 @@ queue_rules:
       - check-success = CodeRabbit
       - check-success = codecov/project
       - check-success = Code Quality & Gatekeeping
-      - check-success = Validate Conventional Commit PR Title
       - check-success = Build Documentation
       - check-success = CodeQL Security Analysis
       - check-success = Dependency Review
@@ -311,3 +310,81 @@ pull_request_rules:
       label:
         add:
           - type:chore
+
+  - name: Remove stale breaking-change label when open PR title changes
+    description: Reconcile breaking change label when an open pull request title no longer marks a breaking change
+    conditions:
+      - -closed
+      - '-title ~= ^[a-z]+(\([^)]+\))?!: '
+      - label = breaking change
+    actions:
+      label:
+        remove:
+          - breaking change
+
+  - name: Remove stale enhancement label when open PR title changes
+    description: Reconcile enhancement label when an open pull request title is no longer feat
+    conditions:
+      - -closed
+      - '-title ~= ^feat(\([^)]+\))?!?: '
+      - label = enhancement
+    actions:
+      label:
+        remove:
+          - enhancement
+
+  - name: Remove stale bug label when open PR title changes
+    description: Reconcile bug label when an open pull request title is no longer fix
+    conditions:
+      - -closed
+      - '-title ~= ^fix(\([^)]+\))?!?: '
+      - label = bug
+    actions:
+      label:
+        remove:
+          - bug
+
+  - name: Remove stale performance label when open PR title changes
+    description: Reconcile performance label when an open pull request title is no longer perf
+    conditions:
+      - -closed
+      - '-title ~= ^perf(\([^)]+\))?!?: '
+      - label = performance
+    actions:
+      label:
+        remove:
+          - performance
+
+  - name: Remove stale refactor label when open PR title changes
+    description: Reconcile refactor label when an open pull request title is no longer refactor
+    conditions:
+      - -closed
+      - '-title ~= ^refactor(\([^)]+\))?!?: '
+      - label = refactor
+    actions:
+      label:
+        remove:
+          - refactor
+
+  - name: Remove stale dependencies label when open PR title changes
+    description: Reconcile dependencies label when an open pull request title is no longer chore(deps)
+    conditions:
+      - -closed
+      - '-title ~= ^chore\(deps\)!?: '
+      - -author = renovate[bot]
+      - label = dependencies
+    actions:
+      label:
+        remove:
+          - dependencies
+
+  - name: Remove stale release label when open PR title changes
+    description: Reconcile release label when an open pull request title is no longer chore(release)
+    conditions:
+      - -closed
+      - '-title ~= ^chore\(release\)!?: '
+      - label = release
+    actions:
+      label:
+        remove:
+          - release

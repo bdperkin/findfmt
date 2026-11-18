@@ -155,8 +155,8 @@ def test_mergify_conventional_commit_rules_and_release_draft_cleanup() -> None:
     """Validate Mergify Conventional Commit rules and release.yml draft cleanup (#632)."""
     mergify = _load_yaml(".mergify.yml")
     default_queue = mergify["queue_rules"][0]
-    for cond_key in ("queue_conditions", "merge_conditions"):
-        assert "check-success = Validate Conventional Commit PR Title" in default_queue[cond_key]
+    assert "check-success = Validate Conventional Commit PR Title" in default_queue["queue_conditions"]
+    assert "check-success = Validate Conventional Commit PR Title" not in default_queue["merge_conditions"]
 
     pr_rules = mergify.get("pull_request_rules", [])
     by_name = {str(r.get("name")): r for r in pr_rules if isinstance(r, dict)}
@@ -181,6 +181,22 @@ def test_mergify_conventional_commit_rules_and_release_draft_cleanup() -> None:
         assert label_name in defined_labels
         added = by_name[rule_name].get("actions", {}).get("label", {}).get("add", [])
         assert added == [label_name]
+
+    expected_stale_removal_rules = {
+        "Remove stale breaking-change label when open PR title changes": "breaking change",
+        "Remove stale enhancement label when open PR title changes": "enhancement",
+        "Remove stale bug label when open PR title changes": "bug",
+        "Remove stale performance label when open PR title changes": "performance",
+        "Remove stale refactor label when open PR title changes": "refactor",
+        "Remove stale dependencies label when open PR title changes": "dependencies",
+        "Remove stale release label when open PR title changes": "release",
+    }
+    for rule_name, label_name in expected_stale_removal_rules.items():
+        assert rule_name in by_name, f"Missing Mergify stale-removal rule: {rule_name}"
+        conds = by_name[rule_name].get("conditions", [])
+        assert "-closed" in conds
+        removed = by_name[rule_name].get("actions", {}).get("label", {}).get("remove", [])
+        assert removed == [label_name]
 
     release_wf = _load_yaml(".github/workflows/release.yml")
     rel_steps = release_wf["jobs"]["create-github-release"]["steps"]
