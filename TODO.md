@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 237 Closed Issues | 90 Actionable Open Tasks | 28 Active Umbrella Epics **Last audit:**
+> **Tracking:** 238 Closed Issues | 89 Actionable Open Tasks | 28 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -24,7 +24,8 @@
 > `#457`, `#455`, `#310`, `#458`, `#332`, `#340`, and epic `#381`; 2026-11-15 released v1.3.0 and closed its
 > milestone, closed `#292`, `#302`, `#312`, `#313`, `#574`, `#309`, epic `#379`, and `#314`, and released
 > v1.3.1 and closed its milestone; 2026-11-16 closed `#470`, `#472`, and `#628`; 2026-11-17 closed `#629`,
-> `#630`, `#471`, epic `#380`, `#631`, and epic `#626`, and released v1.3.2 and closed its milestone)
+> `#630`, `#471`, epic `#380`, `#631`, and epic `#626`, and released v1.3.2 and closed its milestone;
+> 2026-11-18 closed `#632`)
 
 ______________________________________________________________________
 
@@ -714,6 +715,8 @@ Note: Ordered chronologically by completion date.
   2026-11-17 via PR [#681](https://github.com/bdperkin/findfmt/pull/681))
 - [x] **[#626](https://github.com/bdperkin/findfmt/issues/626)** - [Epic] Tier-1 Workflow & Quality Automation
   Apps (Closed: 2026-11-17 via PR [#681](https://github.com/bdperkin/findfmt/pull/681))
+- [x] **[#632](https://github.com/bdperkin/findfmt/issues/632)** - Implement Release Drafter & Conventional
+  Commits (Closed: 2026-11-18)
 
 ______________________________________________________________________
 
@@ -732,12 +735,6 @@ when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same zero-warning
   static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#632](https://github.com/bdperkin/findfmt/issues/632)** - Implement Release Drafter & Conventional
-  Commits *(Rank: 15 | Epic:
-  [[Epic] Tier-2 Community, Release & Documentation Automation Apps](https://github.com/bdperkin/findfmt/issues/627)
-  | Parent: [#625](https://github.com/bdperkin/findfmt/issues/625) | Milestone: v1.3.3)* - **Value:** Medium |
-  **Effort:** S - **Rationale:** Automates draft release changelog compilation via
-  `.github/release-drafter.yml` categorized by features, fixes, and chores.
 - [ ] **[#633](https://github.com/bdperkin/findfmt/issues/633)** - Set Up ReadTheDocs / Documentation Preview
   Deployments *(Rank: 16 | Epic:
   [[Epic] Tier-2 Community, Release & Documentation Automation Apps](https://github.com/bdperkin/findfmt/issues/627)
@@ -1269,8 +1266,7 @@ natively on GitHub.
   Integration *(Milestone: v1.3.3 | Open sub-issues: 1)* -
   [#627](https://github.com/bdperkin/findfmt/issues/627)
 - [ ] **[#627](https://github.com/bdperkin/findfmt/issues/627)** - [Epic] Tier-2 Community, Release &
-  Documentation Automation Apps *(Milestone: v1.3.3 | Open sub-issues: 4)* -
-  [#632](https://github.com/bdperkin/findfmt/issues/632),
+  Documentation Automation Apps *(Milestone: v1.3.3 | Open sub-issues: 3)* -
   [#633](https://github.com/bdperkin/findfmt/issues/633),
   [#634](https://github.com/bdperkin/findfmt/issues/634),
   [#635](https://github.com/bdperkin/findfmt/issues/635)
@@ -1440,7 +1436,7 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 6           |
+| v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 5           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
 | v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |
 | v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |

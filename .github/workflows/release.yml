@@ -166,6 +166,17 @@ jobs:
           files: dist/*
           draft: false
           prerelease: false
+      - name: Delete Superseded Draft Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          endpoint="repos/${GITHUB_REPOSITORY}/releases?per_page=100"
+          draft_ids="$(gh api --paginate "$endpoint" |
+            jq -r --arg tag "$RELEASE_TAG" \
+              '.[] | select(.draft == true and (.tag_name == $tag or .name == $tag)) | .id')"
+          for release_id in $draft_ids; do
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/releases/${release_id}"
+          done
       - name: Close Release Milestone
         env:
           GH_TOKEN: ${{ github.token }}

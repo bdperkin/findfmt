@@ -1,0 +1,50 @@
+---
+name: PR Title Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  validate-pr-title:
+    name: Validate Conventional Commit PR Title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check PR Title Follows Conventional Commits
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |-
+          python3 - <<'PY'
+          import os
+          import re
+          import sys
+
+          PATTERN = re.compile(
+              r"^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|sec|revert)"
+              r"(\([a-zA-Z0-9_.,/-]+\))?!?: \S.*$"
+          )
+          title = os.environ.get("PR_TITLE", "")
+          if not PATTERN.fullmatch(title):
+              sys.stderr.write(
+                  f"Invalid PR title: {title!r}\n"
+                  "Expected Conventional Commits format: "
+                  "<type>[optional (<scope>)][optional !]: <description>\n"
+                  "Allowed types: feat, fix, docs, style, refactor, perf, "
+                  "test, build, ci, chore, sec, revert\n"
+              )
+              sys.exit(1)
+          print(f"Valid Conventional Commit PR title: {title}")
+          PY
