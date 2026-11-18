@@ -166,15 +166,15 @@ def test_docs_preview_workflow_security_and_structure() -> None:
     wf = _load_yaml(".github/workflows/docs-preview.yml")
     triggers = wf.get("on", wf.get(True))
     assert isinstance(triggers, dict)
-    assert "pull_request_target" not in triggers
-    assert triggers.get("pull_request") == {
+    assert "pull_request" not in triggers
+    assert triggers.get("pull_request_target") == {
         "branches": ["main"],
         "types": ["opened", "synchronize", "reopened"],
     }
     assert wf.get("permissions") == {}
 
     job = wf["jobs"]["comment-preview-links"]
-    assert job.get("if") == "github.event.pull_request.head.repo.full_name == github.repository"
+    assert "if" not in job
     assert job.get("timeout-minutes") == 5
     assert job.get("permissions") == {"contents": "read", "pull-requests": "write"}
     for step in job.get("steps", []):
@@ -182,13 +182,14 @@ def test_docs_preview_workflow_security_and_structure() -> None:
 
 
 def test_docs_preview_posts_page_links_and_handles_pagination(tmp_path: Path) -> None:
-    """Verify POST with page links across paginated files, included docs, and removed files (#633)."""
+    """Verify POST with page links, URL percent-encoding, included docs, and removed files (#633)."""
     proc, mutations = _run_preview_script(
         tmp_path,
         FakeGhSetup(
             file_pages=[
                 [
                     {"filename": "docs/source/guides/quickstart.md", "status": "modified"},
+                    {"filename": "docs/source/guides/a#b.md", "status": "added"},
                     {"filename": "docs/source/old_removed.md", "status": "removed"},
                     {"filename": "docs/source/locale/es/LC_MESSAGES/index.po", "status": "modified"},
                 ],
@@ -208,6 +209,11 @@ def test_docs_preview_posts_page_links_and_handles_pagination(tmp_path: Path) ->
     assert "https://findfmt--633.org.readthedocs.build/en/633/" in body
     assert "`docs/source/guides/quickstart.md`" in body
     assert "guides/quickstart.html)" in body
+    expected_encoded_row = (
+        "| `docs/source/guides/a#b.md` | "
+        "[`guides/a#b.html`](https://findfmt--633.org.readthedocs.build/en/633/guides/a%23b.html) |"
+    )
+    assert expected_encoded_row in body
     assert "`docs/performance.md`" in body
     assert "quality/performance.html)" in body
     assert "old_removed" not in body
