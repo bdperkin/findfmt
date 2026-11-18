@@ -212,10 +212,7 @@ def test_mergify_queue_and_pull_request_rules() -> None:
         for c in human_conds
     )
     assert human_rule.get("actions", {}).get("queue", {}).get("name") == "default"
-
-    cleanup_rule = by_name["Delete head branch after merge"]
-    assert "merged" in cleanup_rule.get("conditions", [])
-    assert "delete_head_branch" in cleanup_rule.get("actions", {})
+    assert all("delete_head_branch" not in r.get("actions", {}) for r in pr_rules if isinstance(r, dict))
 
 
 def test_check_jsonschema_hooks_and_workflow_timeouts() -> None:
