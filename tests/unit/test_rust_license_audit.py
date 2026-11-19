@@ -50,6 +50,7 @@ def test_mit_license_parity_across_python_and_rust_manifests() -> None:
     cargo_pkg = _load_toml("findfmt_rs/Cargo.toml")["package"]
     assert cargo_pkg["name"] == "findfmt_rs"
     assert cargo_pkg["license"] == "MIT"
+    assert tuple(int(p) for p in str(cargo_pkg["rust-version"]).split(".")) >= (1, 85)
     assert "license-file" not in cargo_pkg, "Avoid setting both license and license-file in Cargo.toml"
     assert cargo_pkg["publish"] is False
     assert (ROOT / "findfmt_rs" / cargo_pkg["readme"]).resolve() == (ROOT / "README.md").resolve()
@@ -71,6 +72,8 @@ def test_cargo_deny_and_cargo_about_permissive_policy_parity() -> None:
     assert about["accepted"] == EXPECTED_ALLOWED_LICENSES
     assert about["ignore-build-dependencies"] is False
     assert about["ignore-transitive-dependencies"] is False
+    assert about["findfmt_rs"]["clarify"]["license"] == "MIT"
+    assert about["findfmt_rs"]["clarify"]["files"][0]["path"] == "../LICENSE"
 
     bans = deny["bans"]
     assert bans["multiple-versions"] == "deny"
@@ -94,6 +97,9 @@ def test_cargo_lock_and_third_party_licenses_completeness() -> None:
     assert len(names) == len(set(names)), "Duplicate crate versions detected in findfmt_rs/Cargo.lock"
 
     third_party_text = (ROOT / "THIRD_PARTY_LICENSES.md").read_text(encoding="utf-8")
+    assert "<year>" not in third_party_text
+    assert "<copyright holders>" not in third_party_text
+    assert "Copyright (c) 2026 Brandon Perkins" in third_party_text
     external_crates = [pkg for pkg in packages if pkg["name"] != "findfmt_rs"]
     assert external_crates, "Expected transitive PyO3 crates in findfmt_rs/Cargo.lock"
 
@@ -134,10 +140,10 @@ def test_wheel_metadata_bundles_project_and_third_party_licenses(tmp_path: Path)
         assert sorted(headers.get_all("License-File") or []) == ["LICENSE", "THIRD_PARTY_LICENSES.md"]
 
         dist_info_prefix = metadata_entry.removesuffix("METADATA")
-        bundled_mit = zf.read(f"{dist_info_prefix}licenses/LICENSE").decode("utf-8")
-        bundled_third_party = zf.read(f"{dist_info_prefix}licenses/THIRD_PARTY_LICENSES.md").decode("utf-8")
-        assert bundled_mit == (ROOT / "LICENSE").read_text(encoding="utf-8")
-        assert bundled_third_party == (ROOT / "THIRD_PARTY_LICENSES.md").read_text(encoding="utf-8")
+        bundled_mit = zf.read(f"{dist_info_prefix}licenses/LICENSE")
+        bundled_third_party = zf.read(f"{dist_info_prefix}licenses/THIRD_PARTY_LICENSES.md")
+        assert bundled_mit == (ROOT / "LICENSE").read_bytes()
+        assert bundled_third_party == (ROOT / "THIRD_PARTY_LICENSES.md").read_bytes()
 
 
 def test_security_and_contributing_docs_cover_rust_license_auditing() -> None:

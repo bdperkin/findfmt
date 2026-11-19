@@ -15,3 +15,11 @@ accepted = [
 ignore-build-dependencies = false
 ignore-dev-dependencies = true
 ignore-transitive-dependencies = false
+
+[findfmt_rs.clarify]
+license = "MIT"
+
+[[findfmt_rs.clarify.files]]
+path = "../LICENSE"
+license = "MIT"
+checksum = "dd4fba8245bbdf1fefd1073bf6bb369907d85584006b03bbb474441c390edd40"  # pragma: allowlist secret
