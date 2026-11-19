@@ -185,9 +185,12 @@ def test_mergify_queue_and_pull_request_rules() -> None:
         assert "#changes-requested-reviews-by = 0" in conds
         assert "#review-threads-unresolved = 0" in conds
         assert "check-success = pre-commit.ci - pr" in conds
-        assert "check-success = CodeRabbit" in conds
         assert "check-success = codecov/project" in conds
         assert "check-success = Code Quality & Gatekeeping" in conds
+
+    # CodeRabbit skips Draft PRs (.coderabbit.yaml drafts: false), so it must gate queue entry only (#692).
+    assert "check-success = CodeRabbit" in default_queue["queue_conditions"]
+    assert "check-success = CodeRabbit" not in default_queue["merge_conditions"]
 
     pr_rules = cfg.get("pull_request_rules")
     assert isinstance(pr_rules, list)
