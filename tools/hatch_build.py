@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ast
 import contextlib
+import os
 import re
 import struct
 import sys
@@ -22,6 +23,47 @@ try:
 except ImportError:
     mofile = None  # type: ignore[assignment] - optional dependency fallback
     pofile = None  # type: ignore[assignment] - optional dependency fallback
+
+_maturin_hook_mod: Any
+try:
+    from hatch_maturin_build import builder_hook as _maturin_hook_mod
+except ImportError:
+    _maturin_hook_mod = None
+
+_TRUTHY_ENV_VALUES = frozenset({"1", "true", "yes", "on"})
+_GUARDED_HOOK_CLASSES: set[type[Any]] = set()
+
+
+def is_maturin_disabled() -> bool:
+    """Return True when native Rust extension compilation is disabled via HATCH_MATURIN_DISABLE."""
+    return os.environ.get("HATCH_MATURIN_DISABLE", "").strip().lower() in _TRUTHY_ENV_VALUES
+
+
+def install_maturin_disable_guard(hook_cls: type[Any] | None = None) -> bool:
+    """Wrap MaturinBuildHook.initialize so HATCH_MATURIN_DISABLE=1 produces a pure-Python wheel."""
+    target_cls: type[Any] | None = (
+        getattr(_maturin_hook_mod, "MaturinBuildHook", None) if hook_cls is None else hook_cls
+    )
+    if target_cls is None:
+        return False
+
+    if target_cls in _GUARDED_HOOK_CLASSES:
+        return True
+
+    orig_initialize = target_cls.initialize
+
+    def _guarded_initialize(hook_self: object, version: str, build_data: dict[str, Any]) -> None:
+        if is_maturin_disabled():
+            return
+
+        orig_initialize(hook_self, version, build_data)
+
+    target_cls.initialize = _guarded_initialize
+    _GUARDED_HOOK_CLASSES.add(target_cls)
+    return True
+
+
+install_maturin_disable_guard()
 
 
 def _unescape_po_str(escaped: str) -> str:

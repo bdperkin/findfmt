@@ -14,7 +14,10 @@ build:
       - asdf global uv latest
       - uv venv "${READTHEDOCS_VIRTUALENV_PATH}"
     install:
-      - UV_PROJECT_ENVIRONMENT="${READTHEDOCS_VIRTUALENV_PATH}" uv sync --locked --no-default-groups --group docs
+      - >-
+        HATCH_MATURIN_DISABLE=1
+        UV_PROJECT_ENVIRONMENT="${READTHEDOCS_VIRTUALENV_PATH}"
+        uv sync --locked --no-default-groups --group docs
     post_build:
       - '"${READTHEDOCS_VIRTUALENV_PATH}/bin/sphinx-intl" build -d docs/source/locale'
       - >-

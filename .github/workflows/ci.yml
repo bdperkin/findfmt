@@ -68,6 +68,13 @@ jobs:
         run: uv run twine check --strict "$RUNNER_TEMP"/dist/*
       - name: Check wheel contents
         run: uv run check-wheel-contents --no-config "$RUNNER_TEMP/dist"
+      - name: Verify pure-Python wheel build when Maturin is disabled
+        env:
+          HATCH_MATURIN_DISABLE: '1'
+        run: |
+          uv build --wheel --out-dir "$RUNNER_TEMP/dist-pure"
+          ls "$RUNNER_TEMP/dist-pure"/findfmt-*-py3-none-any.whl
+          uv run check-wheel-contents --no-config "$RUNNER_TEMP/dist-pure"
   packaging-smoke-test:
     name: Packaging Smoke Test (${{ matrix.os }} - Python ${{ matrix.python-version }})
     needs: quality-gate
@@ -127,7 +134,7 @@ jobs:
             exit 1
           fi
           cat refused.txt
-          grep -q "requires a different Python" refused.txt
+          grep -qE "requires a different Python|is not a supported wheel" refused.txt
   container-smoke-test:
     name: Container Smoke Test
     needs: quality-gate
