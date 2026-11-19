@@ -27,6 +27,7 @@ class FakeAutoRetrySetup:
     run_id: str = "500"
     workflow_id: str = "10"
     head_branch: str = "feat/demo"
+    head_repo_id: str = "111"
     run_event: str = "pull_request"
     fail_rc: int = 0
 
@@ -138,6 +139,7 @@ finally:
         "RUN_ID": setup.run_id,
         "WORKFLOW_ID": setup.workflow_id,
         "HEAD_BRANCH": setup.head_branch,
+        "HEAD_REPO_ID": setup.head_repo_id,
         "RUN_EVENT": setup.run_event,
     }
     proc = subprocess.run(
@@ -202,12 +204,23 @@ def _scenario_definitions() -> dict[str, FakeAutoRetrySetup]:
             ],
         ),
         "startup_failure_skip": FakeAutoRetrySetup(
-            workflow_runs=[{"id": 500}],
+            workflow_runs=[{"id": 500, "head_repository": {"id": 111}}],
             job_pages=[{"jobs": [{"conclusion": "startup_failure", "steps": []}]}],
         ),
         "superseded_run_skip": FakeAutoRetrySetup(
-            workflow_runs=[{"id": 501}, {"id": 500}],
+            workflow_runs=[
+                {"id": 501, "head_repository": {"id": 111}},
+                {"id": 500, "head_repository": {"id": 111}},
+            ],
             job_pages=[{"jobs": [{"conclusion": "cancelled", "steps": []}]}],
+        ),
+        "cross_fork_same_branch_rerun": FakeAutoRetrySetup(
+            workflow_runs=[
+                {"id": 502, "head_repository": {"id": 999}},
+                {"id": 501, "head_repository": None},
+                {"id": 500, "head_repository": {"id": 111}},
+            ],
+            job_pages=[{"jobs": [{"conclusion": "timed_out", "steps": []}]}],
         ),
         "gh_error": FakeAutoRetrySetup(workflow_runs=[], job_pages=[], fail_rc=7),
     }
@@ -259,6 +272,8 @@ def test_auto_retry_workflow_triggers_and_permissions() -> None:
     steps = job.get("steps", [])
     assert len(steps) == 1
     assert "uses" not in steps[0], "auto-retry.yml must never check out repository code"
+    step_env = steps[0].get("env", {})
+    assert step_env.get("HEAD_REPO_ID") == "${{ github.event.workflow_run.head_repository.id }}"
 
 
 def test_auto_retry_reruns_timeouts_and_skips_deterministic_or_superseded_runs(
@@ -286,6 +301,10 @@ def test_auto_retry_reruns_timeouts_and_skips_deterministic_or_superseded_runs(
     proc_sup, reruns_sup = auto_retry_suite.runs["superseded_run_skip"]
     assert proc_sup.returncode == 0
     assert reruns_sup == []
+
+    proc_fork, reruns_fork = auto_retry_suite.runs["cross_fork_same_branch_rerun"]
+    assert proc_fork.returncode == 0
+    assert reruns_fork == [expected_cmd]
 
     proc_err, reruns_err = auto_retry_suite.runs["gh_error"]
     assert proc_err.returncode == 7

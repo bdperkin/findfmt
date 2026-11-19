@@ -29,6 +29,7 @@ jobs:
           RUN_ID: ${{ github.event.workflow_run.id }}
           WORKFLOW_ID: ${{ github.event.workflow_run.workflow_id }}
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_REPO_ID: ${{ github.event.workflow_run.head_repository.id }}
           RUN_EVENT: ${{ github.event.workflow_run.event }}
         run: |-
           python3 - <<'PY'
@@ -42,6 +43,7 @@ jobs:
           run_id = int(os.environ["RUN_ID"])
           workflow_id = int(os.environ["WORKFLOW_ID"])
           head_branch = os.environ.get("HEAD_BRANCH", "").strip()
+          head_repo_id = os.environ.get("HEAD_REPO_ID", "").strip()
           run_event = os.environ.get("RUN_EVENT", "").strip()
 
           def gh_run(args: list[str]) -> str:
@@ -51,16 +53,25 @@ jobs:
                   sys.exit(proc.returncode)
               return proc.stdout
 
+          def same_source_repo(cand: dict[str, object]) -> bool:
+              cand_repo = cand.get("head_repository")
+              cand_id = str(cand_repo.get("id") or "") if isinstance(cand_repo, dict) else ""
+              return cand_id == head_repo_id
+
           if head_branch and run_event:
               query = urlencode({"branch": head_branch, "event": run_event, "per_page": "10"})
               runs_raw = gh_run(["api", f"repos/{repo}/actions/workflows/{workflow_id}/runs?{query}"])
               runs_payload = json.loads(runs_raw) if runs_raw.strip() else {}
               workflow_runs = runs_payload.get("workflow_runs", []) if isinstance(runs_payload, dict) else []
-              if any(isinstance(r, dict) and int(r.get("id", 0)) > run_id for r in workflow_runs):
+              if any(
+                  isinstance(r, dict) and int(r.get("id", 0)) > run_id and same_source_repo(r)
+                  for r in workflow_runs
+              ):
                   print(f"Skipping rerun of superseded CI run {run_id}.")
                   sys.exit(0)
 
-          jobs_raw = gh_run(["api", "--paginate", "--slurp", f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=100"])
+          jobs_endpoint = f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=100"
+          jobs_raw = gh_run(["api", "--paginate", "--slurp", jobs_endpoint])
           pages = json.loads(jobs_raw) if jobs_raw.strip() else []
           jobs = [
               job
