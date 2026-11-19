@@ -2,7 +2,7 @@
 build-backend = "hatchling.build"
 requires = [
   "hatch-vcs",
-  "hatchling",
+  "hatchling>=1.27",
   "typing-extensions>=4.4; python_version<'3.12'",
 ]
 
@@ -24,7 +24,8 @@ keywords = [
   "mime",
   "shebang",
 ]
-license = { text = "MIT" }
+license = "MIT"
+license-files = [ "LICENSE", "THIRD_PARTY_LICENSES.md" ]
 authors = [
   { name = "Brandon Perkins", email = "bdperkin@gmail.com" },
 ]
@@ -33,7 +34,6 @@ classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.11",
@@ -70,7 +70,7 @@ scripts.findsummary = "findfmt.cli:main_findsummary"
 [dependency-groups]
 dev = [
   "babel>=2.14",
-  "hatchling>=1.25",
+  "hatchling>=1.27",
   "pre-commit>=4",
   { include-group = "docs" },
   { include-group = "lint" },
@@ -79,7 +79,7 @@ dev = [
 test = [
   "click>=8.2",
   "docutils>=0.20",
-  "hatchling>=1.25",
+  "hatchling>=1.27",
   "pytest>=8.4",
   "pytest-cov>=7",
   "pytest-mock>=3.14",
@@ -126,8 +126,10 @@ build.targets.sdist.include = [
   "/docs",
   "/tools",
   "/examples",
+  "/findfmt_rs",
   "README.md",
   "LICENSE",
+  "THIRD_PARTY_LICENSES.md",
   "pyproject.toml",
 ]
 build.targets.sdist.artifacts = [ "/src/findfmt/locale/*/LC_MESSAGES/*.mo" ]
@@ -295,6 +297,8 @@ include = [
 exclude = [
   "CHANGELOG.md",
   "TODO.md",
+  "THIRD_PARTY_LICENSES.md",
+  "findfmt_rs/target/**",
   "dist/**",
   "build/**",
   ".venv/**",

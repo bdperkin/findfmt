@@ -1,0 +1,25 @@
+# cargo-about configuration for generating THIRD_PARTY_LICENSES.md (#579).
+# Run from repository root:
+#   cargo about generate --manifest-path findfmt_rs/Cargo.toml \
+#     --config findfmt_rs/about.toml findfmt_rs/about.hbs -o THIRD_PARTY_LICENSES.md
+
+accepted = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "Unicode-3.0",
+    "Zlib",
+]
+ignore-build-dependencies = false
+ignore-dev-dependencies = true
+ignore-transitive-dependencies = false
+
+[findfmt_rs.clarify]
+license = "MIT"
+
+[[findfmt_rs.clarify.files]]
+path = "../LICENSE"
+license = "MIT"
+checksum = "dd4fba8245bbdf1fefd1073bf6bb369907d85584006b03bbb474441c390edd40"  # pragma: allowlist secret

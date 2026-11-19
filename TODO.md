@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 243 Closed Issues | 86 Actionable Open Tasks | 26 Active Umbrella Epics **Last audit:**
+> **Tracking:** 244 Closed Issues | 85 Actionable Open Tasks | 26 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -26,7 +26,7 @@
 > v1.3.1 and closed its milestone; 2026-11-16 closed `#470`, `#472`, and `#628`; 2026-11-17 closed `#629`,
 > `#630`, `#471`, epic `#380`, `#631`, and epic `#626`, and released v1.3.2 and closed its milestone;
 > 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`, and released v1.3.3 and
-> closed its milestone)
+> closed its milestone; 2026-11-19 closed `#579`)
 
 ______________________________________________________________________
 
@@ -729,6 +729,8 @@ Note: Ordered chronologically by completion date.
   [#686](https://github.com/bdperkin/findfmt/pull/686))
 - [x] **[#625](https://github.com/bdperkin/findfmt/issues/625)** - [Epic] GitHub Marketplace Apps Evaluation &
   Integration (Closed: 2026-11-18 via PR [#686](https://github.com/bdperkin/findfmt/pull/686))
+- [x] **[#579](https://github.com/bdperkin/findfmt/issues/579)** - docs(license): audit MIT license
+  compatibility and configure cargo-deny / cargo-about for Rust crate dependencies (Closed: 2026-11-19)
 
 ______________________________________________________________________
 
@@ -747,11 +749,6 @@ when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same zero-warning
   static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#579](https://github.com/bdperkin/findfmt/issues/579)** - docs(license): audit MIT license
-  compatibility and configure cargo-deny / cargo-about for Rust crate dependencies *(Rank: 12 | Epic:
-  [[Epic] Hybrid Python-Rust Foundation: findfmt_rs Crate, hatch-maturin-build & Fallback Architecture](https://github.com/bdperkin/findfmt/issues/576)
-  | Milestone: v1.4.0)* - **Value:** Medium | **Effort:** S - **Rationale:** Ensures all transitive Rust
-  crates bundled into binary wheels comply with MIT licensing.
 - [ ] **[#580](https://github.com/bdperkin/findfmt/issues/580)** - docs(contributing): update CONTRIBUTING.md,
   AGENTS.md, README.md, and Sphinx docs with hybrid Python-Rust developer setup and architecture FAQ *(Rank:
   13 | Epic:
@@ -1256,10 +1253,9 @@ Note: Each epic's milestone equals the latest milestone among its open sub-issue
 natively on GitHub.
 
 - [ ] **[#576](https://github.com/bdperkin/findfmt/issues/576)** - [Epic] Hybrid Python-Rust Foundation:
-  findfmt_rs Crate, hatch-maturin-build & Fallback Architecture *(Milestone: v1.4.0 | Open sub-issues: 4)* -
+  findfmt_rs Crate, hatch-maturin-build & Fallback Architecture *(Milestone: v1.4.0 | Open sub-issues: 3)* -
   [#577](https://github.com/bdperkin/findfmt/issues/577),
   [#578](https://github.com/bdperkin/findfmt/issues/578),
-  [#579](https://github.com/bdperkin/findfmt/issues/579),
   [#580](https://github.com/bdperkin/findfmt/issues/580)
 - [ ] **[#581](https://github.com/bdperkin/findfmt/issues/581)** - [Epic] Rust Core Engine (findfmt_rs):
   Directory Traversal, Classification, Parity Verification & Fuzzing *(Milestone: v1.4.1 | Open sub-issues:
@@ -1421,7 +1417,7 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
+| v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 4           |
 | v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |
 | v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 3           |

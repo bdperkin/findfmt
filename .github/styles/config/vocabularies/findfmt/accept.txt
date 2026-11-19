@@ -222,3 +222,7 @@
 (?i)mergify
 (?i)readthedocs
 (?i)asdf
+(?i)pyo3
+(?i)maturin
+(?i)spdx
+(?i)copyleft

@@ -230,3 +230,17 @@ implemented in `findfmt`.
 - **Mitigation**: `findfmt` follows Semantic Versioning with automated multi-platform CI, scheduled weekly
   dependency security audits (`uv audit`), automated CodeQL scanning, and a curated changelog whose section
   for each version becomes that release's GitHub Release notes.
+
+#### 3.6.5. Third-Party Rust Crate License & Source Auditing
+
+- **Threat Vector**: Copyleft or unapproved transitive Rust crates, wildcard version specifiers, or unverified
+  git/registry sources entering native PyO3 binary wheels (`findfmt_rs`).
+- **Mitigation**: `findfmt_rs/deny.toml` enforces [`cargo-deny`](https://github.com/EmbarkStudios/cargo-deny)
+  policy checks (`cargo deny --manifest-path findfmt_rs/Cargo.toml check licenses bans sources`) permitting
+  only OSI-approved permissive SPDX licenses (`MIT`, `Apache-2.0`, `Apache-2.0 WITH LLVM-exception`,
+  `BSD-2-Clause`, `BSD-3-Clause`, `Unicode-3.0`, and `Zlib`), rejecting duplicate or wildcard crate versions,
+  and restricting crate sources exclusively to `crates.io`. Complete third-party crate license texts and
+  copyright attributions are deterministically generated via
+  [`cargo-about`](https://github.com/EmbarkStudios/cargo-about) (`findfmt_rs/about.toml` and
+  `findfmt_rs/about.hbs`) into `THIRD_PARTY_LICENSES.md` and bundled alongside `LICENSE` in wheel
+  `.dist-info/licenses/` metadata (`project.license-files` in `pyproject.toml`).

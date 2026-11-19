@@ -179,7 +179,7 @@ repos:
     rev: 0.1.1
     hooks:
       - id: markdown-heading-numbering
-        exclude: ^CHANGELOG\.md$
+        exclude: ^(CHANGELOG|THIRD_PARTY_LICENSES)\.md$
 
   # Markdown TOC creator
   - repo: https://github.com/jsh9/markdown-toc-creator
@@ -218,7 +218,7 @@ repos:
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        exclude: package.lock.json|uv.lock
+        exclude: package\.lock\.json|uv\.lock|Cargo\.lock
 
   # Security: GitHub Actions, Dependabot, and pre-commit static analysis
   - repo: https://github.com/zizmorcore/zizmor-pre-commit

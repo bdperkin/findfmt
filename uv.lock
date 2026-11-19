@@ -732,7 +732,7 @@ dev = [
     { name = "deptry", specifier = ">=0.20" },
     { name = "docutils", specifier = ">=0.20" },
     { name = "furo", specifier = ">=2024.8.6" },
-    { name = "hatchling", specifier = ">=1.25" },
+    { name = "hatchling", specifier = ">=1.27" },
     { name = "interrogate", specifier = ">=1.7" },
     { name = "mdformat", specifier = ">=1" },
     { name = "mdformat-frontmatter", specifier = ">=2.1" },
@@ -789,7 +789,7 @@ lint = [
 test = [
     { name = "click", specifier = ">=8.2" },
     { name = "docutils", specifier = ">=0.20" },
-    { name = "hatchling", specifier = ">=1.25" },
+    { name = "hatchling", specifier = ">=1.27" },
     { name = "pytest", specifier = ">=8.4" },
     { name = "pytest-cov", specifier = ">=7" },
     { name = "pytest-mock", specifier = ">=3.14" },

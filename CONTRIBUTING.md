@@ -141,6 +141,15 @@ All pull requests must satisfy our quality gate before merging:
   ```bash
   uv run python tools/api_surface.py --write
   ```
+- **Rust Dependency License Auditing**: When adding or updating Cargo dependencies in `findfmt_rs/Cargo.toml`,
+  verify OSI-permissive license, duplicate-crate, and registry-source compliance with `cargo-deny`
+  (`findfmt_rs/deny.toml`) and regenerate `THIRD_PARTY_LICENSES.md` with `cargo-about`
+  (`findfmt_rs/about.toml`):
+  ```bash
+  cargo deny --manifest-path findfmt_rs/Cargo.toml check licenses bans sources
+  cargo about generate --manifest-path findfmt_rs/Cargo.toml --config findfmt_rs/about.toml \
+    findfmt_rs/about.hbs -o THIRD_PARTY_LICENSES.md
+  ```
 - **Localization Tooling & Message Catalogs**: If updating translatable strings or locale catalogs, extract,
   synchronize, validate, and compile message catalogs:
   ```bash
@@ -300,7 +309,7 @@ through `hatch-vcs`, so a release always starts from an annotated `vMAJOR.MINOR.
    drafts entries from the commit history.
 2. Check the distributions locally. `twine` must report no warnings, `check-wheel-contents` must pass, and the
    wheel must hold only the `findfmt` package (with `py.typed` and the compiled `*.mo` catalogs) and its
-   metadata:
+   `.dist-info` metadata (including `licenses/LICENSE` and `licenses/THIRD_PARTY_LICENSES.md`):
    ```bash
    uv build --clear
    uv run twine check --strict dist/*

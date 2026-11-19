@@ -21,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[2]
 TREE = (
     "README.md",
     "LICENSE",
+    "THIRD_PARTY_LICENSES.md",
+    "findfmt_rs/Cargo.toml",
+    "findfmt_rs/deny.toml",
     "src/findfmt/__init__.py",
     "src/findfmt/py.typed",
     "src/findfmt/locale/findfmt.pot",
@@ -68,6 +71,9 @@ def test_sdist_includes_only_package_catalog_artifacts(project: Path) -> None:
     }
     for source in (
         "LICENSE",
+        "THIRD_PARTY_LICENSES.md",
+        "findfmt_rs/Cargo.toml",
+        "findfmt_rs/deny.toml",
         "src/findfmt/py.typed",
         "src/findfmt/locale/findfmt.pot",
         "examples/config.toml",
