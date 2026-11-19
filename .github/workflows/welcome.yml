@@ -27,31 +27,110 @@ jobs:
       pull-requests: write
     steps:
       - name: Greet First-Time Issue or PR Author
-        uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d  # v3.1.0
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          issue_message: |
-            Welcome to `findfmt`, and thank you for opening your first issue! 👋
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          ITEM_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.issue.user.login || github.event.pull_request.user.login }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+          from urllib.parse import quote
 
-            To help maintainers triage and resolve your report or proposal quickly, please review:
-            - [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)
-            - [Issue Templates](https://github.com/bdperkin/findfmt/issues/new/choose)
-            - [Support Resources](https://github.com/bdperkin/findfmt/blob/main/SUPPORT.md)
-            - [Code of Conduct](https://github.com/bdperkin/findfmt/blob/main/CODE_OF_CONDUCT.md)
-          pr_message: |
-            Welcome to `findfmt`, and thank you for opening your first pull request! 🎉
+          BOT_LOGINS = {"github-actions[bot]", "github-actions", "app/github-actions"}
+          LOGIN_RE = r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?"
 
-            Before review, please double-check a few quick project conventions:
-            - **PR Title & Commits:** Follow
-              [Conventional Commits](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md#5-commit-message-conventions)
-              and include DCO sign-off (`git commit -s`).
-            - **Local Quality Suite:** Run `uv run pre-commit run --all-files` and
-              `uv run python tools/verify_quality.py` (100% statement and branch coverage).
-            - **Docs Previews:** If your PR updates `docs/source/`, Read the Docs will publish a
-              live preview automatically.
-            - **Community Standards:** Please review our
-              [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)
-              and [Code of Conduct](https://github.com/bdperkin/findfmt/blob/main/CODE_OF_CONDUCT.md).
+          repo = os.environ["REPO"]
+          event_name = os.environ["EVENT_NAME"]
+          item_num = int(os.environ["ITEM_NUMBER"])
+          author = os.environ.get("AUTHOR", "").strip()
+          if not re.fullmatch(LOGIN_RE, author):
+              print(f"::error::Invalid AUTHOR login: {author!r}", file=sys.stderr)
+              sys.exit(1)
+
+          def gh_json(args: list[str], payload: dict[str, str] | None = None) -> object:
+              cmd = ["gh", "api", *args]
+              inp = json.dumps(payload) if payload is not None else None
+              proc = subprocess.run(cmd, input=inp, capture_output=True, text=True, check=False)
+              if proc.returncode != 0:
+                  print(proc.stderr, file=sys.stderr)
+                  sys.exit(proc.returncode)
+              return json.loads(proc.stdout) if proc.stdout.strip() else None
+
+          encoded_author = quote(author, safe="")
+          endpoint = f"repos/{repo}/issues?creator={encoded_author}&state=all&per_page=100"
+          history_pages = gh_json(["--paginate", "--slurp", endpoint])
+          items = [i for page in (history_pages if isinstance(history_pages, list) else []) for i in page]
+
+          is_issue_event = event_name == "issues"
+          if is_issue_event:
+              has_prior = any(
+                  "pull_request" not in item and int(item.get("number", 0)) < item_num
+                  for item in items
+                  if isinstance(item, dict)
+              )
+              marker = "<!-- findfmt-first-issue-welcome -->"
+              body = "\n".join(
+                  [
+                      marker,
+                      f"Welcome to `findfmt`, @{author}, and thank you for opening your first issue! 👋",
+                      "",
+                      "To help maintainers triage and resolve your report or proposal quickly, please review:",
+                      f"- [Contributing Guidelines](https://github.com/{repo}/blob/main/CONTRIBUTING.md)",
+                      f"- [Issue Templates](https://github.com/{repo}/issues/new/choose)",
+                      f"- [Support Resources](https://github.com/{repo}/blob/main/SUPPORT.md)",
+                      f"- [Code of Conduct](https://github.com/{repo}/blob/main/CODE_OF_CONDUCT.md)",
+                  ]
+              )
+          else:
+              has_prior = any(
+                  "pull_request" in item and int(item.get("number", 0)) < item_num
+                  for item in items
+                  if isinstance(item, dict)
+              )
+              marker = "<!-- findfmt-first-pr-welcome -->"
+              body = "\n".join(
+                  [
+                      marker,
+                      f"Welcome to `findfmt`, @{author}, and thank you for opening your first pull request! 🎉",
+                      "",
+                      "Before review, please double-check a few quick project conventions:",
+                      "- **PR Title & Commits:** Follow",
+                      f"  [Conventional Commits](https://github.com/{repo}/blob/main/CONTRIBUTING.md#5-commit-message-conventions)",
+                      "  and include DCO sign-off (`git commit -s`).",
+                      "- **Local Quality Suite:** Run `uv run pre-commit run --all-files` and",
+                      "  `uv run python tools/verify_quality.py` (100% statement and branch coverage).",
+                      "- **Docs Previews:** If your PR updates `docs/source/`, Read the Docs will publish a",
+                      "  live preview automatically.",
+                      "- **Community Standards:** Please review our",
+                      f"  [Contributing Guidelines](https://github.com/{repo}/blob/main/CONTRIBUTING.md)",
+                      f"  and [Code of Conduct](https://github.com/{repo}/blob/main/CODE_OF_CONDUCT.md).",
+                  ]
+              )
+
+          if has_prior:
+              sys.exit(0)
+
+          comment_pages = gh_json(["--paginate", "--slurp", f"repos/{repo}/issues/{item_num}/comments"])
+          comments = [c for page in (comment_pages if isinstance(comment_pages, list) else []) for c in page]
+          already_posted = any(
+              marker in str(c.get("body", ""))
+              and str((c.get("user") or {}).get("login", "")) in BOT_LOGINS
+              for c in comments
+          )
+          if already_posted:
+              sys.exit(0)
+
+          gh_json(
+              ["-X", "POST", f"repos/{repo}/issues/{item_num}/comments", "--input", "-"],
+              {"body": body},
+          )
+          PY
 
   celebrate-first-merged-pr:
     name: Celebrate First Merged Pull Request
@@ -72,6 +151,7 @@ jobs:
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_MERGED_AT: ${{ github.event.pull_request.merged_at }}
         run: |-
           python3 - <<'PY'
           import json
@@ -79,6 +159,7 @@ jobs:
           import re
           import subprocess
           import sys
+          from datetime import datetime
 
           MARKER = "<!-- findfmt-first-merge-welcome -->"
           BOT_LOGINS = {"github-actions[bot]", "github-actions", "app/github-actions"}
@@ -97,6 +178,7 @@ jobs:
                 }
                 nodes {
                   number
+                  mergedAt
                   author {
                     login
                   }
@@ -110,6 +192,7 @@ jobs:
           owner, name = repo.split("/", 1)
           pr_num = int(os.environ["PR_NUMBER"])
           pr_author = os.environ.get("PR_AUTHOR", "").strip()
+          pr_merged_at = datetime.fromisoformat(os.environ["PR_MERGED_AT"])
           if not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?", pr_author):
               print(f"::error::Invalid PR_AUTHOR login: {pr_author!r}", file=sys.stderr)
               sys.exit(1)
@@ -144,7 +227,12 @@ jobs:
                       continue
                   author_obj = node.get("author")
                   login = str(author_obj.get("login", "")) if isinstance(author_obj, dict) else ""
-                  if login.lower() == pr_author.lower() and int(node.get("number", 0)) != pr_num:
+                  node_num = int(node.get("number", 0))
+                  if login.lower() != pr_author.lower() or node_num == pr_num:
+                      continue
+                  raw_merged = str(node.get("mergedAt") or "")
+                  node_merged = datetime.fromisoformat(raw_merged) if raw_merged else pr_merged_at
+                  if (node_merged, node_num) < (pr_merged_at, pr_num):
                       sys.exit(0)
               page_info = prs.get("pageInfo", {})
               if not page_info.get("hasNextPage"):
