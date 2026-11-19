@@ -104,9 +104,10 @@ def test_ignored_dirs_not_scanned(tmp_path: Path, mocker: MockerFixture):
         (src_dir / f"mod_{i:03d}.py").write_text(f"x = {i}\n", encoding="utf-8")
 
     config = TraversalConfig(root_paths=(tmp_path,), respect_gitignore=True)
-    # Warm up one-time module caches (e.g. mimetypes database) before tracing traversal heap
-    _ = list(find_files(config))
     scandir_spy = mocker.spy(os, "scandir")
+    # Warm up one-time module and spy caches (mimetypes, sys.monitoring) before tracing heap
+    _ = list(find_files(config))
+    scandir_spy.reset_mock()
     tracemalloc.start()
     matched_files = list(find_files(config))
     _, peak_bytes = tracemalloc.get_traced_memory()

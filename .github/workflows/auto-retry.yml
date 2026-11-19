@@ -2,7 +2,7 @@
 name: Auto-Retry Timed Out Workflow
 
 on:
-  # zizmor: ignore[dangerous-triggers] -- re-runs failed CI jobs by ID without code checkout
+  # zizmor: ignore[dangerous-triggers] -- re-runs timed-out CI jobs by ID without code checkout
   workflow_run:
     workflows:
       - CI
@@ -21,10 +21,112 @@ jobs:
     timeout-minutes: 5
     permissions:
       actions: write
+      checks: read
     steps:
-      - name: Re-run failed jobs
+      - name: Re-run timed-out or transiently cancelled jobs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           RUN_ID: ${{ github.event.workflow_run.id }}
-        run: gh run rerun "$RUN_ID" --failed --repo "$GH_REPO"
+          WORKFLOW_ID: ${{ github.event.workflow_run.workflow_id }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_REPO_ID: ${{ github.event.workflow_run.head_repository.id }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+        run: |-
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+          import sys
+          from urllib.parse import urlencode
+
+          repo = os.environ["GH_REPO"]
+          run_id = int(os.environ["RUN_ID"])
+          workflow_id = int(os.environ["WORKFLOW_ID"])
+          head_branch = os.environ.get("HEAD_BRANCH", "").strip()
+          head_repo_id = os.environ.get("HEAD_REPO_ID", "").strip()
+          run_event = os.environ.get("RUN_EVENT", "").strip()
+
+          def gh_run(args: list[str]) -> str:
+              proc = subprocess.run(["gh", *args], capture_output=True, text=True, check=False)
+              if proc.returncode != 0:
+                  print(proc.stderr, file=sys.stderr)
+                  sys.exit(proc.returncode)
+              return proc.stdout
+
+          def same_source_repo(cand: dict[str, object]) -> bool:
+              cand_repo = cand.get("head_repository")
+              cand_id = str(cand_repo.get("id") or "") if isinstance(cand_repo, dict) else ""
+              return cand_id == head_repo_id
+
+          def all_failures_timed_out(job_id: int, failed_steps: int) -> bool:
+              ann_endpoint = f"repos/{repo}/check-runs/{job_id}/annotations?per_page=100"
+              ann_raw = gh_run(["api", "--paginate", "--slurp", ann_endpoint])
+              ann_pages = json.loads(ann_raw or "[]")
+              messages = [
+                  str(item.get("message") or "").lower()
+                  for page in (ann_pages if isinstance(ann_pages, list) else [])
+                  if isinstance(page, list)
+                  for item in page
+                  if isinstance(item, dict) and item.get("annotation_level") == "failure"
+              ]
+              markers = ("timed out after", "exceeded the maximum execution time")
+              timeout_msgs = sum(1 for msg in messages if any(m in msg for m in markers))
+              has_other_failure = any(not any(m in msg for m in markers) for msg in messages)
+              return not has_other_failure and timeout_msgs >= failed_steps
+
+          if head_branch and run_event:
+              page = 1
+              while True:
+                  params = {"branch": head_branch, "event": run_event, "per_page": "50", "page": str(page)}
+                  runs_endpoint = f"repos/{repo}/actions/workflows/{workflow_id}/runs?{urlencode(params)}"
+                  runs_raw = gh_run(["api", runs_endpoint])
+                  runs_payload = json.loads(runs_raw or "{}")
+                  raw_runs = runs_payload.get("workflow_runs", []) if isinstance(runs_payload, dict) else []
+                  workflow_runs = [r for r in raw_runs if isinstance(r, dict)]
+                  newer_runs = [r for r in workflow_runs if int(r.get("id", 0)) > run_id]
+                  if any(same_source_repo(r) for r in newer_runs):
+                      print(f"Skipping rerun of superseded CI run {run_id}.")
+                      sys.exit(0)
+                  if not workflow_runs or len(newer_runs) < len(workflow_runs):
+                      break
+                  page += 1
+
+          jobs_endpoint = f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=100"
+          jobs_raw = gh_run(["api", "--paginate", "--slurp", jobs_endpoint])
+          pages = json.loads(jobs_raw or "[]")
+          jobs = [
+              job
+              for page in (pages if isinstance(pages, list) else [])
+              if isinstance(page, dict)
+              for job in (page.get("jobs") or [])
+              if isinstance(job, dict)
+          ]
+
+          deterministic_conclusions = {"startup_failure", "action_required"}
+          has_deterministic_failure = False
+          has_retryable_timeout_or_cancel = False
+
+          for job in jobs:
+              job_id = int(job.get("id") or 0)
+              conclusion = str(job.get("conclusion") or "")
+              steps = [s for s in (job.get("steps") or []) if isinstance(s, dict)]
+              failed_steps = sum(1 for s in steps if s.get("conclusion") == "failure")
+              only_step_timeouts = failed_steps > 0 and all_failures_timed_out(job_id, failed_steps)
+              if conclusion in deterministic_conclusions or (
+                  failed_steps > 0 and not only_step_timeouts
+              ):
+                  has_deterministic_failure = True
+              elif (
+                  only_step_timeouts
+                  or conclusion in {"timed_out", "cancelled"}
+                  or (conclusion == "failure" and failed_steps == 0)
+              ):
+                  has_retryable_timeout_or_cancel = True
+
+          if has_deterministic_failure or not has_retryable_timeout_or_cancel:
+              print(f"Skipping rerun for CI run {run_id}: deterministic_failure={has_deterministic_failure}.")
+              sys.exit(0)
+
+          gh_run(["run", "rerun", str(run_id), "--failed", "--repo", repo])
+          PY
