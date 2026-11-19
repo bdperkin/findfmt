@@ -10,8 +10,8 @@ import zipfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import tools.hatch_build as hatch_build
 from hatchling.builders.wheel import WheelBuilder
+from tools import hatch_build
 
 if TYPE_CHECKING:
     import pytest
