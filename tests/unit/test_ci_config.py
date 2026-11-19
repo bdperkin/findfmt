@@ -1,5 +1,7 @@
 """Tests for CI workflows and Dependabot configuration."""
 
+from __future__ import annotations
+
 import fnmatch
 import re
 import tomllib
@@ -313,3 +315,22 @@ def test_local_runner_covers_supported_pythons(capsys: pytest.CaptureFixture[str
     assert "uv run ruff check" not in qg_runs, (
         "quality-gate must not duplicate individual linter invocations run by verify_quality.py"
     )
+
+
+def test_ci_fail_fast_policy_across_gating_and_diagnostic_matrices() -> None:
+    """Validate gating OS/Python matrices fail fast while diagnostic matrices do not (#689)."""
+    ci_jobs = _load_ci_workflow()["jobs"]
+    assert ci_jobs["packaging-smoke-test"]["strategy"]["fail-fast"] is True
+    assert ci_jobs["test-matrix"]["strategy"]["fail-fast"] is True
+    assert ci_jobs["dependency-smoke-matrix"]["strategy"]["fail-fast"] is False
+
+    test_steps = ci_jobs["test-matrix"]["steps"]
+    pytest_step = next(s for s in test_steps if "Run Pytest" in s.get("name", ""))
+    assert pytest_step.get("continue-on-error") == "${{ matrix.experimental || false }}"
+
+    dep_wf = _load_dependency_matrix_workflow()
+    assert dep_wf["jobs"]["dependency-matrix"]["strategy"]["fail-fast"] is False
+
+    cflite_path = _repo_root() / ".github" / "workflows" / "cflite.yml"
+    cflite_wf = yaml.safe_load(cflite_path.read_text(encoding="utf-8"))
+    assert cflite_wf["jobs"]["fuzzing"]["strategy"]["fail-fast"] is False

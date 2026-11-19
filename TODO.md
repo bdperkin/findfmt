@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 244 Closed Issues | 85 Actionable Open Tasks | 26 Active Umbrella Epics **Last audit:**
+> **Tracking:** 245 Closed Issues | 85 Actionable Open Tasks | 26 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -26,7 +26,7 @@
 > v1.3.1 and closed its milestone; 2026-11-16 closed `#470`, `#472`, and `#628`; 2026-11-17 closed `#629`,
 > `#630`, `#471`, epic `#380`, `#631`, and epic `#626`, and released v1.3.2 and closed its milestone;
 > 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`, and released v1.3.3 and
-> closed its milestone; 2026-11-19 closed `#579`)
+> closed its milestone; 2026-11-19 closed `#579`, added and closed `#689`)
 
 ______________________________________________________________________
 
@@ -730,7 +730,10 @@ Note: Ordered chronologically by completion date.
 - [x] **[#625](https://github.com/bdperkin/findfmt/issues/625)** - [Epic] GitHub Marketplace Apps Evaluation &
   Integration (Closed: 2026-11-18 via PR [#686](https://github.com/bdperkin/findfmt/pull/686))
 - [x] **[#579](https://github.com/bdperkin/findfmt/issues/579)** - docs(license): audit MIT license
-  compatibility and configure cargo-deny / cargo-about for Rust crate dependencies (Closed: 2026-11-19)
+  compatibility and configure cargo-deny / cargo-about for Rust crate dependencies (Closed: 2026-11-19 via PR
+  [#688](https://github.com/bdperkin/findfmt/pull/688))
+- [x] **[#689](https://github.com/bdperkin/findfmt/issues/689)** - ci(workflows): enable fail-fast on OS
+  matrices and guard auto-retry against deterministic failures (Closed: 2026-11-19)
 
 ______________________________________________________________________
 
