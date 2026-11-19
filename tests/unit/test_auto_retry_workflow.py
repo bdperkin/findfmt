@@ -13,7 +13,8 @@ from typing import Any
 
 import coverage
 import pytest
-import yaml
+
+from tests.unit.test_auto_retry_workflow_schema import load_auto_retry_workflow
 
 RunOutcome = tuple[subprocess.CompletedProcess[str], list[list[str]]]
 
@@ -43,23 +44,9 @@ class AutoRetrySuiteResult:
     workflow_py: Path
 
 
-def _repo_root() -> Path:
-    """Return repository root directory."""
-    return Path(__file__).resolve().parents[2]
-
-
-def _load_auto_retry_workflow() -> dict[str, Any]:
-    """Load and parse .github/workflows/auto-retry.yml."""
-    wf_path = _repo_root() / ".github" / "workflows" / "auto-retry.yml"
-    assert wf_path.is_file(), f"Missing auto-retry workflow at {wf_path}"
-    data = yaml.safe_load(wf_path.read_text(encoding="utf-8"))
-    assert isinstance(data, dict), "Auto-retry workflow must be a YAML mapping"
-    return data
-
-
 def _extract_auto_retry_python_script() -> str:
     """Extract the embedded Python script from .github/workflows/auto-retry.yml."""
-    wf = _load_auto_retry_workflow()
+    wf = load_auto_retry_workflow()
     step = wf["jobs"]["rerun"]["steps"][0]
     run_script = str(step.get("run", ""))
     assert "${{" not in run_script, "Untrusted inputs must not be interpolated directly in run:"
@@ -229,6 +216,47 @@ def _scenario_definitions() -> dict[str, FakeAutoRetrySetup]:
                 },
             ],
         ),
+        "mixed_failure_and_timeout_skip": FakeAutoRetrySetup(
+            workflow_runs=[{"id": 500, "head_repository": {"id": 111}}],
+            annotations={
+                "705": [
+                    [
+                        {
+                            "annotation_level": "failure",
+                            "message": "The action 'Cleanup' has timed out after 5 minutes.",
+                        },
+                    ],
+                ],
+            },
+            job_pages=[
+                {
+                    "jobs": [
+                        {
+                            "id": 705,
+                            "conclusion": "failure",
+                            "steps": [{"conclusion": "failure"}, {"conclusion": "failure"}],
+                        },
+                    ],
+                },
+            ],
+        ),
+        "cancelled_job_with_failed_step_skip": FakeAutoRetrySetup(
+            workflow_runs=[{"id": 500, "head_repository": {"id": 111}}],
+            annotations={
+                "706": [[{"annotation_level": "failure", "message": "Process completed with exit code 1."}]],
+            },
+            job_pages=[
+                {
+                    "jobs": [
+                        {
+                            "id": 706,
+                            "conclusion": "cancelled",
+                            "steps": [{"conclusion": "failure"}, {"conclusion": "cancelled"}],
+                        },
+                    ],
+                },
+            ],
+        ),
         "startup_failure_skip": FakeAutoRetrySetup(
             workflow_runs=[],
             job_pages=[{"jobs": [{"conclusion": "startup_failure", "steps": []}]}],
@@ -278,36 +306,6 @@ def auto_retry_suite(tmp_path_factory: pytest.TempPathFactory) -> AutoRetrySuite
     return AutoRetrySuiteResult(runs=runs, cov_data=cov_data, workflow_py=workflow_py)
 
 
-def test_auto_retry_workflow_triggers_and_permissions() -> None:
-    """Validate workflow_run trigger, minimal permissions, zero checkout, and loop guard (#624, #689)."""
-    workflow = _load_auto_retry_workflow()
-    assert workflow.get("name") == "Auto-Retry Timed Out Workflow"
-    assert workflow.get("permissions") == {}
-
-    triggers = workflow.get("on", workflow.get(True, {}))
-    assert isinstance(triggers, dict)
-    wf_run = triggers.get("workflow_run")
-    assert isinstance(wf_run, dict)
-    assert wf_run.get("workflows") == ["CI"]
-    assert wf_run.get("types") == ["completed"]
-
-    job = workflow["jobs"]["rerun"]
-    assert job.get("runs-on") == "ubuntu-latest"
-    assert job.get("timeout-minutes") == 5
-    assert job.get("permissions") == {"actions": "write", "checks": "read"}
-
-    condition = str(job.get("if", ""))
-    assert "github.event.workflow_run.conclusion == 'failure'" in condition
-    assert "github.event.workflow_run.conclusion == 'cancelled'" in condition
-    assert "github.event.workflow_run.run_attempt < 3" in condition
-
-    steps = job.get("steps", [])
-    assert len(steps) == 1
-    assert "uses" not in steps[0], "auto-retry.yml must never check out repository code"
-    step_env = steps[0].get("env", {})
-    assert step_env.get("HEAD_REPO_ID") == "${{ github.event.workflow_run.head_repository.id }}"
-
-
 def test_auto_retry_reruns_timeouts_and_skips_deterministic_or_superseded_runs(
     auto_retry_suite: AutoRetrySuiteResult,
 ) -> None:
@@ -317,6 +315,8 @@ def test_auto_retry_reruns_timeouts_and_skips_deterministic_or_superseded_runs(
         "queue_timeout_rerun": [expected_cmd],
         "step_timeout_detached_branch": [expected_cmd],
         "deterministic_failure_with_fail_fast_cancels": [],
+        "mixed_failure_and_timeout_skip": [],
+        "cancelled_job_with_failed_step_skip": [],
         "startup_failure_skip": [],
         "superseded_run_skip": [],
         "superseded_on_second_page_skip": [],

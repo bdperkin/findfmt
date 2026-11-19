@@ -59,7 +59,7 @@ jobs:
               cand_id = str(cand_repo.get("id") or "") if isinstance(cand_repo, dict) else ""
               return cand_id == head_repo_id
 
-          def job_timed_out_by_annotation(job_id: int) -> bool:
+          def all_failures_timed_out(job_id: int, failed_steps: int) -> bool:
               ann_endpoint = f"repos/{repo}/check-runs/{job_id}/annotations?per_page=100"
               ann_raw = gh_run(["api", "--paginate", "--slurp", ann_endpoint])
               ann_pages = json.loads(ann_raw or "[]")
@@ -71,7 +71,9 @@ jobs:
                   if isinstance(item, dict) and item.get("annotation_level") == "failure"
               ]
               markers = ("timed out after", "exceeded the maximum execution time")
-              return any(any(m in msg for m in markers) for msg in messages)
+              timeout_msgs = sum(1 for msg in messages if any(m in msg for m in markers))
+              has_other_failure = any(not any(m in msg for m in markers) for msg in messages)
+              return not has_other_failure and timeout_msgs >= failed_steps
 
           if head_branch and run_event:
               page = 1
@@ -109,18 +111,16 @@ jobs:
               job_id = int(job.get("id") or 0)
               conclusion = str(job.get("conclusion") or "")
               steps = [s for s in (job.get("steps") or []) if isinstance(s, dict)]
-              step_failed = any(s.get("conclusion") == "failure" for s in steps)
-              step_timed_out = (
-                  conclusion == "failure" and step_failed and job_timed_out_by_annotation(job_id)
-              )
+              failed_steps = sum(1 for s in steps if s.get("conclusion") == "failure")
+              only_step_timeouts = failed_steps > 0 and all_failures_timed_out(job_id, failed_steps)
               if conclusion in deterministic_conclusions or (
-                  conclusion == "failure" and step_failed and not step_timed_out
+                  failed_steps > 0 and not only_step_timeouts
               ):
                   has_deterministic_failure = True
               elif (
-                  step_timed_out
+                  only_step_timeouts
                   or conclusion in {"timed_out", "cancelled"}
-                  or (conclusion == "failure" and not step_failed)
+                  or (conclusion == "failure" and failed_steps == 0)
               ):
                   has_retryable_timeout_or_cancel = True
 
