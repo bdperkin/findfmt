@@ -7,6 +7,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-11-18
+
+### Changed
+
+- *(ci)* Configure Release Drafter (`.github/release-drafter.yml`, `.github/workflows/release-drafter.yml`),
+  Conventional Commit pull request title validation (`.github/workflows/pr-title.yml`), and superseded draft
+  cleanup in `.github/workflows/release.yml` (#632).
+- *(docs)* Configure Read the Docs multilingual pull request previews (`.readthedocs.yaml` across `en`, `es`,
+  `fr`, `de`, and `ja`), automated preview link comments (`.github/workflows/docs-preview.yml`), and
+  `check-readthedocs` schema validation in `.pre-commit-config.yaml` (#633).
+- *(ci)* Update `.github/workflows/stale.yml` to warn after 30 days of inactivity and close after 7 days using
+  the `status:stale` label while exempting milestones, assignees, security/pinned items, and draft pull
+  requests (#634).
+- *(ci)* Add zero-checkout contributor onboarding workflow (`.github/workflows/welcome.yml`) greeting
+  first-time issue and pull request authors and celebrating first merged pull requests (#635, #627, #625).
+
 ## [1.3.2] - 2026-11-17
 
 ### Changed
@@ -839,4 +855,5 @@ future 1.x releases.
 [1.3.0]: https://github.com/bdperkin/findfmt/compare/v1.2.2...v1.3.0
 [1.3.1]: https://github.com/bdperkin/findfmt/compare/v1.3.0...v1.3.1
 [1.3.2]: https://github.com/bdperkin/findfmt/compare/v1.3.1...v1.3.2
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.3.2...HEAD
+[1.3.3]: https://github.com/bdperkin/findfmt/compare/v1.3.2...v1.3.3
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.3.3...HEAD
