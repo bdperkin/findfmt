@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import subprocess
@@ -10,20 +11,33 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import coverage
+import pytest
 import yaml
+
+RunOutcome = tuple[subprocess.CompletedProcess[str], list[dict[str, Any]]]
 
 
 @dataclass(frozen=True)
 class FakeMergeSetup:
     """Synthetic GitHub GraphQL and REST state for testing celebrate-first-merged-pr."""
 
-    gql_pages: list[dict[str, Any]]
+    gql_pages: list[Any]
     comment_pages: list[list[dict[str, Any]]]
     pr_author: str = "alice-dev"
     pr_number: str = "635"
     pr_merged_at: str = "2026-11-18T12:00:00Z"
     fail_rc: int = 0
     post_stdout: str = ""
+
+
+@dataclass(frozen=True)
+class CelebrateSuiteResult:
+    """Executed scenario outcomes and child-process coverage paths for celebrate-first-merged-pr."""
+
+    runs: dict[str, RunOutcome]
+    cov_data: Path
+    workflow_py: Path
 
 
 def _repo_root() -> Path:
@@ -55,15 +69,17 @@ def _extract_celebrate_python_script() -> str:
 
 
 def _run_celebrate_script(
-    tmp_path: Path,
+    case_dir: Path,
     setup: FakeMergeSetup,
-) -> tuple[subprocess.CompletedProcess[str], list[dict[str, Any]]]:
-    """Execute celebrate-first-merged-pr cross-platform with an intercepted gh runner."""
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    state_file = tmp_path / "gh_state.json"
-    log_file = tmp_path / "gh_mutations.jsonl"
-    workflow_py = tmp_path / "workflow_script.py"
-    harness_py = tmp_path / "harness.py"
+    *,
+    workflow_py: Path,
+    cov_data: Path,
+) -> RunOutcome:
+    """Execute celebrate-first-merged-pr cross-platform under branch coverage."""
+    case_dir.mkdir(parents=True, exist_ok=True)
+    state_file = case_dir / "gh_state.json"
+    log_file = case_dir / "gh_mutations.jsonl"
+    harness_py = case_dir / "harness.py"
 
     state_file.write_text(
         json.dumps(
@@ -77,9 +93,8 @@ def _run_celebrate_script(
         ),
         encoding="utf-8",
     )
-    workflow_py.write_text(_extract_celebrate_python_script(), encoding="utf-8")
     harness_py.write_text(
-        f"""import json, pathlib, runpy, subprocess
+        f"""import coverage, json, pathlib, runpy, subprocess
 
 state_path = pathlib.Path({str(state_file)!r})
 log_path = pathlib.Path({str(log_file)!r})
@@ -115,13 +130,26 @@ def _fake_run(cmd, *, input=None, capture_output=False, text=False, check=False)
 
 
 subprocess.run = _fake_run
-runpy.run_path({str(workflow_py)!r}, run_name="__main__")
+cov = coverage.Coverage(
+    data_file={str(cov_data)!r},
+    data_suffix=True,
+    branch=True,
+    config_file=False,
+    include=[{str(workflow_py)!r}],
+)
+cov.start()
+try:
+    runpy.run_path({str(workflow_py)!r}, run_name="__main__")
+finally:
+    cov.stop()
+    cov.save()
 """,
         encoding="utf-8",
     )
 
+    clean_env = {k: v for k, v in os.environ.items() if not k.startswith("COV_CORE_")}
     env = {
-        **os.environ,
+        **clean_env,
         "GH_TOKEN": "test-token",
         "REPO": "bdperkin/findfmt",
         "PR_NUMBER": setup.pr_number,
@@ -143,11 +171,10 @@ runpy.run_path({str(workflow_py)!r}, run_name="__main__")
     return proc, mutations
 
 
-def test_celebrate_first_merged_pr_and_delayed_later_merge(tmp_path: Path) -> None:
-    """Verify first merge posts even when a later merge is already visible or POST stdout is empty (#635)."""
-    proc, mutations = _run_celebrate_script(
-        tmp_path / "delayed_first_pr",
-        FakeMergeSetup(
+def _scenario_definitions() -> dict[str, FakeMergeSetup]:
+    """Build synthetic scenario matrix exercising every celebrate-first-merged-pr branch."""
+    return {
+        "delayed_first_pr": FakeMergeSetup(
             pr_number="635",
             pr_merged_at="2026-11-18T12:00:00Z",
             post_stdout="",
@@ -155,27 +182,17 @@ def test_celebrate_first_merged_pr_and_delayed_later_merge(tmp_path: Path) -> No
                 {
                     "pageInfo": {"hasNextPage": True, "endCursor": "cur1"},
                     "nodes": [
-                        {
-                            "number": 640,
-                            "mergedAt": "2026-11-18T12:05:00Z",
-                            "author": {"login": "alice-dev"},
-                        },
-                        {
-                            "number": 635,
-                            "mergedAt": "2026-11-18T12:00:00Z",
-                            "author": {"login": "alice-dev"},
-                        },
+                        None,
+                        {"number": 640, "mergedAt": "2026-11-18T12:05:00Z", "author": {"login": "alice-dev"}},
+                        {"number": 650, "mergedAt": None, "author": {"login": "alice-dev"}},
+                        {"number": 635, "mergedAt": "2026-11-18T12:00:00Z", "author": {"login": "alice-dev"}},
                         {"number": 633, "mergedAt": "2026-11-18T11:00:00Z", "author": None},
                     ],
                 },
                 {
                     "pageInfo": {"hasNextPage": True, "endCursor": ""},
                     "nodes": [
-                        {
-                            "number": 630,
-                            "mergedAt": "2026-11-18T10:00:00Z",
-                            "author": {"login": "bob-dev"},
-                        },
+                        {"number": 630, "mergedAt": "2026-11-18T10:00:00Z", "author": {"login": "bob-dev"}},
                     ],
                 },
             ],
@@ -183,52 +200,40 @@ def test_celebrate_first_merged_pr_and_delayed_later_merge(tmp_path: Path) -> No
                 [{"id": 1, "user": {"login": "evil"}, "body": "<!-- findfmt-first-merge-welcome -->"}],
             ],
         ),
-    )
-    assert proc.returncode == 0
-    assert len(mutations) == 1
-    assert mutations[0]["method"] == "POST"
-    assert mutations[0]["endpoint"] == "repos/bdperkin/findfmt/issues/635/comments"
-    assert "Congratulations @alice-dev" in mutations[0]["body"]["body"]
-
-
-def test_celebrate_skips_earlier_merges_existing_comments_and_errors(tmp_path: Path) -> None:
-    """Verify earlier merges suppress celebration and duplicates, bad logins, or errors do not post (#635)."""
-    proc_second, mut_second = _run_celebrate_script(
-        tmp_path / "second_pr",
-        FakeMergeSetup(
+        "second_pr": FakeMergeSetup(
             pr_number="640",
             pr_merged_at="2026-11-18T12:05:00Z",
             gql_pages=[
                 {
                     "pageInfo": {"hasNextPage": True, "endCursor": "cur1"},
                     "nodes": [
-                        {
-                            "number": 640,
-                            "mergedAt": "2026-11-18T12:05:00Z",
-                            "author": {"login": "alice-dev"},
-                        },
+                        {"number": 640, "mergedAt": "2026-11-18T12:05:00Z", "author": {"login": "alice-dev"}},
                     ],
                 },
                 {
                     "pageInfo": {"hasNextPage": False, "endCursor": None},
                     "nodes": [
-                        {
-                            "number": 635,
-                            "mergedAt": "2026-11-18T12:00:00Z",
-                            "author": {"login": "Alice-Dev"},
-                        },
+                        {"number": 635, "mergedAt": "2026-11-18T12:00:00Z", "author": {"login": "Alice-Dev"}},
                     ],
                 },
             ],
             comment_pages=[[]],
         ),
-    )
-    assert proc_second.returncode == 0
-    assert mut_second == []
-
-    proc_dup, mut_dup = _run_celebrate_script(
-        tmp_path / "dup",
-        FakeMergeSetup(
+        "missing_merged_at_and_non_dict": FakeMergeSetup(
+            pr_number="635",
+            pr_merged_at="2026-11-18T12:00:00Z",
+            gql_pages=[
+                {
+                    "pageInfo": {"hasNextPage": False, "endCursor": None},
+                    "nodes": [
+                        "non-dict-history-node",
+                        {"number": 630, "mergedAt": None, "author": {"login": "alice-dev"}},
+                    ],
+                },
+            ],
+            comment_pages=[[]],
+        ),
+        "dup": FakeMergeSetup(
             gql_pages=[{"pageInfo": {"hasNextPage": False, "endCursor": None}, "nodes": []}],
             comment_pages=[
                 [
@@ -240,22 +245,79 @@ def test_celebrate_skips_earlier_merges_existing_comments_and_errors(tmp_path: P
                 ],
             ],
         ),
-    )
+        "bad": FakeMergeSetup(gql_pages=[], comment_pages=[], pr_author="bad login!"),
+        "err": FakeMergeSetup(gql_pages=[], comment_pages=[], fail_rc=5),
+    }
+
+
+@pytest.fixture(scope="module")
+def celebrate_suite(tmp_path_factory: pytest.TempPathFactory) -> CelebrateSuiteResult:
+    """Execute all celebrate-first-merged-pr scenarios once and record child branch coverage."""
+    suite_dir = tmp_path_factory.mktemp("celebrate_suite").resolve()
+    workflow_py = suite_dir / "celebrate_script.py"
+    cov_data = suite_dir / ".coverage"
+    workflow_py.write_text(_extract_celebrate_python_script(), encoding="utf-8")
+
+    runs = {
+        name: _run_celebrate_script(
+            suite_dir / name,
+            setup,
+            workflow_py=workflow_py,
+            cov_data=cov_data,
+        )
+        for name, setup in _scenario_definitions().items()
+    }
+    return CelebrateSuiteResult(runs=runs, cov_data=cov_data, workflow_py=workflow_py)
+
+
+def test_celebrate_first_merged_pr_and_delayed_later_merge(celebrate_suite: CelebrateSuiteResult) -> None:
+    """Verify first merge posts despite later merges, null nodes, or missing mergedAt (#635)."""
+    proc, mutations = celebrate_suite.runs["delayed_first_pr"]
+    assert proc.returncode == 0
+    assert len(mutations) == 1
+    assert mutations[0]["method"] == "POST"
+    assert mutations[0]["endpoint"] == "repos/bdperkin/findfmt/issues/635/comments"
+    assert "Congratulations @alice-dev" in mutations[0]["body"]["body"]
+
+
+def test_celebrate_skips_earlier_merges_existing_comments_and_errors(
+    celebrate_suite: CelebrateSuiteResult,
+) -> None:
+    """Verify earlier merges, missing-mergedAt fallback, non-dict nodes, duplicates, and errors (#635)."""
+    proc_second, mut_second = celebrate_suite.runs["second_pr"]
+    assert proc_second.returncode == 0
+    assert mut_second == []
+
+    proc_fallback, mut_fallback = celebrate_suite.runs["missing_merged_at_and_non_dict"]
+    assert proc_fallback.returncode == 0
+    assert mut_fallback == []
+
+    proc_dup, mut_dup = celebrate_suite.runs["dup"]
     assert proc_dup.returncode == 0
     assert mut_dup == []
 
-    proc_bad, mut_bad = _run_celebrate_script(
-        tmp_path / "bad",
-        FakeMergeSetup(gql_pages=[], comment_pages=[], pr_author="bad login!"),
-    )
+    proc_bad, mut_bad = celebrate_suite.runs["bad"]
     assert proc_bad.returncode == 1
     assert "Invalid PR_AUTHOR" in proc_bad.stderr
     assert mut_bad == []
 
-    proc_err, mut_err = _run_celebrate_script(
-        tmp_path / "err",
-        FakeMergeSetup(gql_pages=[], comment_pages=[], fail_rc=5),
-    )
+    proc_err, mut_err = celebrate_suite.runs["err"]
     assert proc_err.returncode == 5
     assert "gh: HTTP 503" in proc_err.stderr
     assert mut_err == []
+
+
+def test_celebrate_embedded_script_100_percent_branch_coverage(
+    celebrate_suite: CelebrateSuiteResult,
+) -> None:
+    """Enforce 100% statement and branch coverage on the embedded celebrate-first-merged-pr script (#635)."""
+    cov = coverage.Coverage(
+        data_file=str(celebrate_suite.cov_data),
+        branch=True,
+        config_file=False,
+        include=[str(celebrate_suite.workflow_py)],
+    )
+    cov.combine()
+    report_buf = io.StringIO()
+    total = cov.report(file=report_buf, show_missing=True)
+    assert total == 100.0, report_buf.getvalue()

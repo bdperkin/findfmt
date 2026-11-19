@@ -65,15 +65,16 @@ jobs:
           encoded_author = quote(author, safe="")
           endpoint = f"repos/{repo}/issues?creator={encoded_author}&state=all&per_page=100"
           history_pages = gh_json(["--paginate", "--slurp", endpoint])
-          items = [i for page in (history_pages if isinstance(history_pages, list) else []) for i in page]
+          items = [
+              item
+              for page in (history_pages if isinstance(history_pages, list) else [])
+              for item in page
+              if isinstance(item, dict)
+          ]
 
           is_issue_event = event_name == "issues"
           if is_issue_event:
-              has_prior = any(
-                  "pull_request" not in item and int(item.get("number", 0)) < item_num
-                  for item in items
-                  if isinstance(item, dict)
-              )
+              has_prior = any("pull_request" not in item and int(item.get("number", 0)) < item_num for item in items)
               marker = "<!-- findfmt-first-issue-welcome -->"
               body = "\n".join(
                   [
@@ -88,11 +89,7 @@ jobs:
                   ]
               )
           else:
-              has_prior = any(
-                  "pull_request" in item and int(item.get("number", 0)) < item_num
-                  for item in items
-                  if isinstance(item, dict)
-              )
+              has_prior = any("pull_request" in item and int(item.get("number", 0)) < item_num for item in items)
               marker = "<!-- findfmt-first-pr-welcome -->"
               body = "\n".join(
                   [

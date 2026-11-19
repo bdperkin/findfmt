@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import subprocess
@@ -10,19 +11,32 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import coverage
+import pytest
 import yaml
+
+RunOutcome = tuple[subprocess.CompletedProcess[str], list[dict[str, Any]]]
 
 
 @dataclass(frozen=True)
 class FakeWelcomeSetup:
     """Synthetic GitHub REST API state for testing welcome-first-interaction."""
 
-    history_pages: list[list[dict[str, Any]]]
+    history_pages: list[list[Any]]
     comment_pages: list[list[dict[str, Any]]]
     event_name: str = "pull_request_target"
     item_number: str = "635"
     author: str = "alice-dev"
     fail_rc: int = 0
+
+
+@dataclass(frozen=True)
+class WelcomeSuiteResult:
+    """Executed scenario outcomes and child-process coverage paths for welcome-first-interaction."""
+
+    runs: dict[str, RunOutcome]
+    cov_data: Path
+    workflow_py: Path
 
 
 def _repo_root() -> Path:
@@ -54,15 +68,17 @@ def _extract_welcome_python_script() -> str:
 
 
 def _run_welcome_script(
-    tmp_path: Path,
+    case_dir: Path,
     setup: FakeWelcomeSetup,
-) -> tuple[subprocess.CompletedProcess[str], list[dict[str, Any]]]:
-    """Execute welcome-first-interaction cross-platform with an intercepted gh runner."""
-    tmp_path.mkdir(parents=True, exist_ok=True)
-    state_file = tmp_path / "gh_state.json"
-    log_file = tmp_path / "gh_mutations.jsonl"
-    workflow_py = tmp_path / "workflow_script.py"
-    harness_py = tmp_path / "harness.py"
+    *,
+    workflow_py: Path,
+    cov_data: Path,
+) -> RunOutcome:
+    """Execute welcome-first-interaction cross-platform under branch coverage."""
+    case_dir.mkdir(parents=True, exist_ok=True)
+    state_file = case_dir / "gh_state.json"
+    log_file = case_dir / "gh_mutations.jsonl"
+    harness_py = case_dir / "harness.py"
 
     state_file.write_text(
         json.dumps(
@@ -74,9 +90,8 @@ def _run_welcome_script(
         ),
         encoding="utf-8",
     )
-    workflow_py.write_text(_extract_welcome_python_script(), encoding="utf-8")
     harness_py.write_text(
-        f"""import json, pathlib, runpy, subprocess
+        f"""import coverage, json, pathlib, runpy, subprocess
 
 state = json.loads(pathlib.Path({str(state_file)!r}).read_text(encoding="utf-8"))
 log_path = pathlib.Path({str(log_file)!r})
@@ -103,13 +118,26 @@ def _fake_run(cmd, *, input=None, capture_output=False, text=False, check=False)
 
 
 subprocess.run = _fake_run
-runpy.run_path({str(workflow_py)!r}, run_name="__main__")
+cov = coverage.Coverage(
+    data_file={str(cov_data)!r},
+    data_suffix=True,
+    branch=True,
+    config_file=False,
+    include=[{str(workflow_py)!r}],
+)
+cov.start()
+try:
+    runpy.run_path({str(workflow_py)!r}, run_name="__main__")
+finally:
+    cov.stop()
+    cov.save()
 """,
         encoding="utf-8",
     )
 
+    clean_env = {k: v for k, v in os.environ.items() if not k.startswith("COV_CORE_")}
     env = {
-        **os.environ,
+        **clean_env,
         "GH_TOKEN": "test-token",
         "REPO": "bdperkin/findfmt",
         "EVENT_NAME": setup.event_name,
@@ -129,6 +157,72 @@ runpy.run_path({str(workflow_py)!r}, run_name="__main__")
         else []
     )
     return proc, mutations
+
+
+def _scenario_definitions() -> dict[str, FakeWelcomeSetup]:
+    """Build synthetic scenario matrix exercising every welcome-first-interaction branch."""
+    return {
+        "first_issue": FakeWelcomeSetup(
+            event_name="issues",
+            item_number="700",
+            history_pages=[[None, {"number": 650, "pull_request": {}}, {"number": 700}]],
+            comment_pages=[[]],
+        ),
+        "first_pr": FakeWelcomeSetup(
+            event_name="pull_request_target",
+            item_number="701",
+            history_pages=[[{"number": 600}, {"number": 701, "pull_request": {}}]],
+            comment_pages=[[]],
+        ),
+        "repeat_pr_no_issues": FakeWelcomeSetup(
+            event_name="pull_request_target",
+            item_number="702",
+            history_pages=[[{"number": 650, "pull_request": {}}, {"number": 702, "pull_request": {}}]],
+            comment_pages=[[]],
+        ),
+        "repeat_issue": FakeWelcomeSetup(
+            event_name="issues",
+            item_number="703",
+            history_pages=[[{"number": 600}, {"number": 703}]],
+            comment_pages=[[]],
+        ),
+        "dup": FakeWelcomeSetup(
+            event_name="pull_request_target",
+            item_number="704",
+            history_pages=[[{"number": 704, "pull_request": {}}]],
+            comment_pages=[
+                [
+                    {
+                        "id": 5,
+                        "user": {"login": "github-actions[bot]"},
+                        "body": "<!-- findfmt-first-pr-welcome -->",
+                    },
+                ],
+            ],
+        ),
+        "bad": FakeWelcomeSetup(history_pages=[], comment_pages=[], author="invalid author!"),
+        "err": FakeWelcomeSetup(history_pages=[], comment_pages=[], fail_rc=6),
+    }
+
+
+@pytest.fixture(scope="module")
+def welcome_suite(tmp_path_factory: pytest.TempPathFactory) -> WelcomeSuiteResult:
+    """Execute all welcome-first-interaction scenarios once and record child branch coverage."""
+    suite_dir = tmp_path_factory.mktemp("welcome_suite").resolve()
+    workflow_py = suite_dir / "welcome_script.py"
+    cov_data = suite_dir / ".coverage"
+    workflow_py.write_text(_extract_welcome_python_script(), encoding="utf-8")
+
+    runs = {
+        name: _run_welcome_script(
+            suite_dir / name,
+            setup,
+            workflow_py=workflow_py,
+            cov_data=cov_data,
+        )
+        for name, setup in _scenario_definitions().items()
+    }
+    return WelcomeSuiteResult(runs=runs, cov_data=cov_data, workflow_py=workflow_py)
 
 
 def test_welcome_workflow_security_triggers_and_links() -> None:
@@ -160,17 +254,9 @@ def test_welcome_workflow_security_triggers_and_links() -> None:
         assert (_repo_root() / doc_file).is_file()
 
 
-def test_welcome_greets_first_issue_and_first_pr_independently(tmp_path: Path) -> None:
+def test_welcome_greets_first_issue_and_first_pr_independently(welcome_suite: WelcomeSuiteResult) -> None:
     """Verify event-specific history checks greet genuine first issues and first PRs (#635)."""
-    proc_issue, mut_issue = _run_welcome_script(
-        tmp_path / "first_issue",
-        FakeWelcomeSetup(
-            event_name="issues",
-            item_number="700",
-            history_pages=[[{"number": 650, "pull_request": {}}, {"number": 700}]],
-            comment_pages=[[]],
-        ),
-    )
+    proc_issue, mut_issue = welcome_suite.runs["first_issue"]
     assert proc_issue.returncode == 0
     assert len(mut_issue) == 1
     issue_body = mut_issue[0]["body"]["body"]
@@ -180,15 +266,7 @@ def test_welcome_greets_first_issue_and_first_pr_independently(tmp_path: Path) -
     assert "SUPPORT.md" in issue_body
     assert "CODE_OF_CONDUCT.md" in issue_body
 
-    proc_pr, mut_pr = _run_welcome_script(
-        tmp_path / "first_pr",
-        FakeWelcomeSetup(
-            event_name="pull_request_target",
-            item_number="701",
-            history_pages=[[{"number": 600}, {"number": 701, "pull_request": {}}]],
-            comment_pages=[[]],
-        ),
-    )
+    proc_pr, mut_pr = welcome_suite.runs["first_pr"]
     assert proc_pr.returncode == 0
     assert len(mut_pr) == 1
     pr_body = mut_pr[0]["body"]["body"]
@@ -196,62 +274,42 @@ def test_welcome_greets_first_issue_and_first_pr_independently(tmp_path: Path) -
     assert "Conventional Commits" in pr_body
 
 
-def test_welcome_skips_repeat_pr_author_without_issues_and_handles_errors(tmp_path: Path) -> None:
+def test_welcome_skips_repeat_pr_author_without_issues_and_handles_errors(
+    welcome_suite: WelcomeSuiteResult,
+) -> None:
     """Verify repeat PR authors with zero issues are skipped and duplicates/errors do not post (#635)."""
-    proc_repeat_pr, mut_repeat_pr = _run_welcome_script(
-        tmp_path / "repeat_pr_no_issues",
-        FakeWelcomeSetup(
-            event_name="pull_request_target",
-            item_number="702",
-            history_pages=[[{"number": 650, "pull_request": {}}, {"number": 702, "pull_request": {}}]],
-            comment_pages=[[]],
-        ),
-    )
+    proc_repeat_pr, mut_repeat_pr = welcome_suite.runs["repeat_pr_no_issues"]
     assert proc_repeat_pr.returncode == 0
     assert mut_repeat_pr == []
 
-    proc_repeat_issue, mut_repeat_issue = _run_welcome_script(
-        tmp_path / "repeat_issue",
-        FakeWelcomeSetup(
-            event_name="issues",
-            item_number="703",
-            history_pages=[[{"number": 600}, {"number": 703}]],
-            comment_pages=[[]],
-        ),
-    )
+    proc_repeat_issue, mut_repeat_issue = welcome_suite.runs["repeat_issue"]
     assert proc_repeat_issue.returncode == 0
     assert mut_repeat_issue == []
 
-    proc_dup, mut_dup = _run_welcome_script(
-        tmp_path / "dup",
-        FakeWelcomeSetup(
-            event_name="pull_request_target",
-            item_number="704",
-            history_pages=[[{"number": 704, "pull_request": {}}]],
-            comment_pages=[
-                [
-                    {
-                        "id": 5,
-                        "user": {"login": "github-actions[bot]"},
-                        "body": "<!-- findfmt-first-pr-welcome -->",
-                    },
-                ],
-            ],
-        ),
-    )
+    proc_dup, mut_dup = welcome_suite.runs["dup"]
     assert proc_dup.returncode == 0
     assert mut_dup == []
 
-    proc_bad, _ = _run_welcome_script(
-        tmp_path / "bad",
-        FakeWelcomeSetup(history_pages=[], comment_pages=[], author="invalid author!"),
-    )
+    proc_bad, _ = welcome_suite.runs["bad"]
     assert proc_bad.returncode == 1
     assert "Invalid AUTHOR" in proc_bad.stderr
 
-    proc_err, _ = _run_welcome_script(
-        tmp_path / "err",
-        FakeWelcomeSetup(history_pages=[], comment_pages=[], fail_rc=6),
-    )
+    proc_err, _ = welcome_suite.runs["err"]
     assert proc_err.returncode == 6
     assert "gh: HTTP 502" in proc_err.stderr
+
+
+def test_welcome_embedded_script_100_percent_branch_coverage(
+    welcome_suite: WelcomeSuiteResult,
+) -> None:
+    """Enforce 100% statement and branch coverage on the embedded welcome-first-interaction script (#635)."""
+    cov = coverage.Coverage(
+        data_file=str(welcome_suite.cov_data),
+        branch=True,
+        config_file=False,
+        include=[str(welcome_suite.workflow_py)],
+    )
+    cov.combine()
+    report_buf = io.StringIO()
+    total = cov.report(file=report_buf, show_missing=True)
+    assert total == 100.0, report_buf.getvalue()
