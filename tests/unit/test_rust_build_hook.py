@@ -71,22 +71,30 @@ def test_maturin_disable_guard_behavior(monkeypatch: pytest.MonkeyPatch) -> None
     assert hatch_build.install_maturin_disable_guard() is False
 
     calls: list[tuple[str, dict[str, Any]]] = []
+    clean_calls: list[list[str]] = []
 
     class DummyMaturinHook:
         def initialize(self, version: str, build_data: dict[str, Any]) -> None:
             calls.append((version, build_data))
+
+        def clean(self, versions: list[str]) -> None:
+            clean_calls.append(versions)
 
     assert hatch_build.install_maturin_disable_guard(DummyMaturinHook) is True
     assert hatch_build.install_maturin_disable_guard(DummyMaturinHook) is True
 
     hook = DummyMaturinHook()
     monkeypatch.setenv("HATCH_MATURIN_DISABLE", "1")
+    hook.clean(["standard"])
     hook.initialize("standard", {"pure_python": True})
+    assert clean_calls == []
     assert calls == []
 
     monkeypatch.setenv("HATCH_MATURIN_DISABLE", "0")
     payload: dict[str, Any] = {"pure_python": True}
+    hook.clean(["standard"])
     hook.initialize("standard", payload)
+    assert clean_calls == [["standard"]]
     assert calls == [("standard", payload)]
 
 
@@ -108,8 +116,11 @@ def test_rust_ext_stub_and_compiled_module_parity() -> None:
     cargo_version = str(_load_toml("findfmt_rs/Cargo.toml")["package"]["version"])
     try:
         rust_ext = importlib.import_module("findfmt._rust_ext")
-    except ImportError:
-        return
+    except ModuleNotFoundError as exc:
+        if exc.name == "findfmt._rust_ext":
+            return
+
+        raise
 
     assert rust_ext.backend_name() == "rust"
     assert rust_ext.rust_ext_version() == cargo_version

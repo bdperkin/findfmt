@@ -57,6 +57,12 @@ def compile_locale_catalogs_for_tests(
 @pytest.fixture(autouse=True)
 def isolate_git_environment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Isolate test execution from developer's global and user git configuration and ignores."""
+    real_home = Path.home()
+    for env_var, subdir in (("RUSTUP_HOME", ".rustup"), ("CARGO_HOME", ".cargo")):
+        candidate = real_home / subdir
+        if env_var not in os.environ and candidate.is_dir():
+            monkeypatch.setenv(env_var, str(candidate))
+
     monkeypatch.setenv("HOME", str(tmp_path))
     monkeypatch.setenv("USERPROFILE", str(tmp_path))
     monkeypatch.setenv("XDG_CONFIG_HOME", str(tmp_path))

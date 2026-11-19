@@ -40,7 +40,7 @@ def is_maturin_disabled() -> bool:
 
 
 def install_maturin_disable_guard(hook_cls: type[Any] | None = None) -> bool:
-    """Wrap MaturinBuildHook.initialize so HATCH_MATURIN_DISABLE=1 produces a pure-Python wheel."""
+    """Wrap MaturinBuildHook lifecycle methods so HATCH_MATURIN_DISABLE=1 skips Maturin and Cargo."""
     target_cls: type[Any] | None = (
         getattr(_maturin_hook_mod, "MaturinBuildHook", None) if hook_cls is None else hook_cls
     )
@@ -51,6 +51,7 @@ def install_maturin_disable_guard(hook_cls: type[Any] | None = None) -> bool:
         return True
 
     orig_initialize = target_cls.initialize
+    orig_clean = target_cls.clean
 
     def _guarded_initialize(hook_self: object, version: str, build_data: dict[str, Any]) -> None:
         if is_maturin_disabled():
@@ -58,7 +59,14 @@ def install_maturin_disable_guard(hook_cls: type[Any] | None = None) -> bool:
 
         orig_initialize(hook_self, version, build_data)
 
+    def _guarded_clean(hook_self: object, versions: list[str]) -> None:
+        if is_maturin_disabled():
+            return
+
+        orig_clean(hook_self, versions)
+
     target_cls.initialize = _guarded_initialize
+    target_cls.clean = _guarded_clean
     _GUARDED_HOOK_CLASSES.add(target_cls)
     return True
 
