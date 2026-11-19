@@ -277,6 +277,9 @@ git commit -s -m "feat: add support for MIME categories"
    `security`, `epic`, `subtask`, `status:blocked`, `priority:critical`, `priority:high`, `good first issue`,
    or `help wanted`, and pull requests labeled `wip`, `status:blocked`, `status:in-review`,
    `status:ready-to-merge`, `automerge`, or `security` are exempt.
+7. **Contributor Onboarding**: First-time non-bot contributors automatically receive a welcome message with
+   project links when opening their initial issue or pull request, as well as a congratulatory note when their
+   first pull request is merged (`.github/workflows/welcome.yml`).
 
 ## 7. Release Process (Maintainers)
 

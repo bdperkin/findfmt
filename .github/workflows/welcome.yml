@@ -1,0 +1,180 @@
+---
+name: Contributor Welcome
+
+on:
+  issues:
+    types:
+      - opened
+  # zizmor: ignore[dangerous-triggers] -- posts contributor welcome messages without code checkout
+  pull_request_target:
+    types:
+      - opened
+      - closed
+
+permissions: {}
+
+jobs:
+  welcome-first-interaction:
+    name: Welcome First-Time Contributor
+    if: >-
+      (github.event_name == 'issues' ||
+      (github.event_name == 'pull_request_target' && github.event.action == 'opened')) &&
+      github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Greet First-Time Issue or PR Author
+        uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d  # v3.1.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          issue_message: |
+            Welcome to `findfmt`, and thank you for opening your first issue! 👋
+
+            To help maintainers triage and resolve your report or proposal quickly, please review:
+            - [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)
+            - [Issue Templates](https://github.com/bdperkin/findfmt/issues/new/choose)
+            - [Support Resources](https://github.com/bdperkin/findfmt/blob/main/SUPPORT.md)
+            - [Code of Conduct](https://github.com/bdperkin/findfmt/blob/main/CODE_OF_CONDUCT.md)
+          pr_message: |
+            Welcome to `findfmt`, and thank you for opening your first pull request! 🎉
+
+            Before review, please double-check a few quick project conventions:
+            - **PR Title & Commits:** Follow
+              [Conventional Commits](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md#5-commit-message-conventions)
+              and include DCO sign-off (`git commit -s`).
+            - **Local Quality Suite:** Run `uv run pre-commit run --all-files` and
+              `uv run python tools/verify_quality.py` (100% statement and branch coverage).
+            - **Docs Previews:** If your PR updates `docs/source/`, Read the Docs will publish a
+              live preview automatically.
+            - **Community Standards:** Please review our
+              [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)
+              and [Code of Conduct](https://github.com/bdperkin/findfmt/blob/main/CODE_OF_CONDUCT.md).
+
+  celebrate-first-merged-pr:
+    name: Celebrate First Merged Pull Request
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.action == 'closed' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Congratulate First-Time Merged Contributor
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |-
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import subprocess
+          import sys
+
+          MARKER = "<!-- findfmt-first-merge-welcome -->"
+          BOT_LOGINS = {"github-actions[bot]", "github-actions", "app/github-actions"}
+          QUERY = """
+          query($owner: String!, $name: String!, $cursor: String) {
+            repository(owner: $owner, name: $name) {
+              pullRequests(
+                states: MERGED,
+                first: 100,
+                after: $cursor,
+                orderBy: {field: UPDATED_AT, direction: DESC}
+              ) {
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+                nodes {
+                  number
+                  author {
+                    login
+                  }
+                }
+              }
+            }
+          }
+          """
+
+          repo = os.environ["REPO"]
+          owner, name = repo.split("/", 1)
+          pr_num = int(os.environ["PR_NUMBER"])
+          pr_author = os.environ.get("PR_AUTHOR", "").strip()
+          if not re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?", pr_author):
+              print(f"::error::Invalid PR_AUTHOR login: {pr_author!r}", file=sys.stderr)
+              sys.exit(1)
+
+          def gh_json(args: list[str], payload: dict[str, str] | None = None) -> object:
+              cmd = ["gh", "api", *args]
+              inp = json.dumps(payload) if payload is not None else None
+              proc = subprocess.run(cmd, input=inp, capture_output=True, text=True, check=False)
+              if proc.returncode != 0:
+                  print(proc.stderr, file=sys.stderr)
+                  sys.exit(proc.returncode)
+              return json.loads(proc.stdout) if proc.stdout.strip() else None
+
+          cursor: str | None = None
+          while True:
+              gql_args = [
+                  "graphql",
+                  "-f",
+                  f"query={QUERY}",
+                  "-F",
+                  f"owner={owner}",
+                  "-F",
+                  f"name={name}",
+              ]
+              if cursor is not None:
+                  gql_args.extend(["-F", f"cursor={cursor}"])
+              resp = gh_json(gql_args)
+              assert isinstance(resp, dict)
+              prs = resp["data"]["repository"]["pullRequests"]
+              for node in prs.get("nodes", []):
+                  if not isinstance(node, dict):
+                      continue
+                  author_obj = node.get("author")
+                  login = str(author_obj.get("login", "")) if isinstance(author_obj, dict) else ""
+                  if login.lower() == pr_author.lower() and int(node.get("number", 0)) != pr_num:
+                      sys.exit(0)
+              page_info = prs.get("pageInfo", {})
+              if not page_info.get("hasNextPage"):
+                  break
+              cursor = str(page_info.get("endCursor") or "")
+              if not cursor:
+                  break
+
+          comment_pages = gh_json(["--paginate", "--slurp", f"repos/{repo}/issues/{pr_num}/comments"])
+          comments = [c for page in (comment_pages if isinstance(comment_pages, list) else []) for c in page]
+          already_posted = any(
+              MARKER in str(c.get("body", ""))
+              and str((c.get("user") or {}).get("login", "")) in BOT_LOGINS
+              for c in comments
+          )
+          if already_posted:
+              sys.exit(0)
+
+          body = "\n".join(
+              [
+                  MARKER,
+                  f"Congratulations @{pr_author} on merging your first pull request into `findfmt`! 🚀🎉",
+                  "",
+                  "Thank you for helping improve the project. If you'd like to tackle another",
+                  "contribution, check out open",
+                  f"[`good first issue` and `help wanted` tasks](https://github.com/{repo}/issues).",
+              ]
+          )
+          gh_json(
+              ["-X", "POST", f"repos/{repo}/issues/{pr_num}/comments", "--input", "-"],
+              {"body": body},
+          )
+          PY
