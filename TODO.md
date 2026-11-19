@@ -25,7 +25,8 @@
 > milestone, closed `#292`, `#302`, `#312`, `#313`, `#574`, `#309`, epic `#379`, and `#314`, and released
 > v1.3.1 and closed its milestone; 2026-11-16 closed `#470`, `#472`, and `#628`; 2026-11-17 closed `#629`,
 > `#630`, `#471`, epic `#380`, `#631`, and epic `#626`, and released v1.3.2 and closed its milestone;
-> 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`)
+> 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`, and released v1.3.3 and
+> closed its milestone)
 
 ______________________________________________________________________
 
@@ -722,11 +723,12 @@ Note: Ordered chronologically by completion date.
 - [x] **[#634](https://github.com/bdperkin/findfmt/issues/634)** - Configure Stale Issue and PR Lifecycle
   Management (Closed: 2026-11-18 via PR [#685](https://github.com/bdperkin/findfmt/pull/685))
 - [x] **[#635](https://github.com/bdperkin/findfmt/issues/635)** - Automate Contributor Onboarding with
-  Welcome App (Closed: 2026-11-18)
+  Welcome App (Closed: 2026-11-18 via PR [#686](https://github.com/bdperkin/findfmt/pull/686))
 - [x] **[#627](https://github.com/bdperkin/findfmt/issues/627)** - [Epic] Tier-2 Community, Release &
-  Documentation Automation Apps (Closed: 2026-11-18)
+  Documentation Automation Apps (Closed: 2026-11-18 via PR
+  [#686](https://github.com/bdperkin/findfmt/pull/686))
 - [x] **[#625](https://github.com/bdperkin/findfmt/issues/625)** - [Epic] GitHub Marketplace Apps Evaluation &
-  Integration (Closed: 2026-11-18)
+  Integration (Closed: 2026-11-18 via PR [#686](https://github.com/bdperkin/findfmt/pull/686))
 
 ______________________________________________________________________
 
@@ -1408,8 +1410,8 @@ issue #321 → v1.2.1, #355 → v1.2.2, and #215 → v1.1.5.
 
 v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, v1.1.3 and v1.1.4 on
 2026-11-08, v1.1.5 on 2026-11-09, v1.2.0 on 2026-11-10, v1.2.1 on 2026-11-11, v1.2.2 on 2026-11-13, v1.3.0 and
-v1.3.1 on 2026-11-15, and v1.3.2 on 2026-11-17 (PyPI, GHCR, and GitHub Releases), and their milestones are
-closed.
+v1.3.1 on 2026-11-15, v1.3.2 on 2026-11-17, and v1.3.3 on 2026-11-18 (PyPI, GHCR, and GitHub Releases), and
+their milestones are closed.
 
 Realigned on 2026-11-09 ahead of v1.2.0: pulled #366 into v1.2.0, closed #311 and #474 as not planned,
 promoted the Hybrid Python-Rust engine track (#576-#598) from v1.8.0-v1.8.4 to v1.4.0-v1.4.4 so native Rust
@@ -1419,7 +1421,6 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.3.3          | Tier-2 Community, Release & Documentation Automation Apps (Release Drafter, ReadTheDocs Previews, Stale, Welcome)  | 0           |
 | v1.4.0          | Hybrid Python-Rust Foundation: findfmt_rs PyO3 Crate, hatch-maturin-build & Fallback Gateway                       | 5           |
 | v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |
 | v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |

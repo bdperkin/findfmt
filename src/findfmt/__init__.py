@@ -52,7 +52,7 @@ from findfmt.utils.strings import (
     strip_ansi_escapes,
 )
 
-_FALLBACK_VERSION: str = "1.3.2.dev0"
+_FALLBACK_VERSION: str = "1.3.3.dev0"
 
 
 def get_version() -> str:
