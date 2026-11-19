@@ -1,0 +1,315 @@
+"""Unit tests for first-issue and first-PR greeting logic in .github/workflows/welcome.yml (#635)."""
+
+from __future__ import annotations
+
+import io
+import json
+import os
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import coverage
+import pytest
+import yaml
+
+RunOutcome = tuple[subprocess.CompletedProcess[str], list[dict[str, Any]]]
+
+
+@dataclass(frozen=True)
+class FakeWelcomeSetup:
+    """Synthetic GitHub REST API state for testing welcome-first-interaction."""
+
+    history_pages: list[list[Any]]
+    comment_pages: list[list[dict[str, Any]]]
+    event_name: str = "pull_request_target"
+    item_number: str = "635"
+    author: str = "alice-dev"
+    fail_rc: int = 0
+
+
+@dataclass(frozen=True)
+class WelcomeSuiteResult:
+    """Executed scenario outcomes and child-process coverage paths for welcome-first-interaction."""
+
+    runs: dict[str, RunOutcome]
+    cov_data: Path
+    workflow_py: Path
+
+
+def _repo_root() -> Path:
+    """Return repository root directory."""
+    return Path(__file__).resolve().parents[2]
+
+
+def _load_yaml(rel_path: str) -> dict[str, Any]:
+    """Load and parse a YAML mapping relative to repository root."""
+    path = _repo_root() / rel_path
+    assert path.is_file(), f"Missing YAML file at {path}"
+    with path.open(encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    assert isinstance(data, dict), f"{rel_path} must parse to a YAML mapping"
+    return data
+
+
+def _extract_welcome_python_script() -> str:
+    """Extract the embedded Python script from welcome-first-interaction in welcome.yml."""
+    wf = _load_yaml(".github/workflows/welcome.yml")
+    step = wf["jobs"]["welcome-first-interaction"]["steps"][0]
+    run_script = str(step.get("run", ""))
+    assert "${{" not in run_script, "Untrusted inputs must not be interpolated directly in run:"
+    lines = run_script.strip().splitlines()
+    assert lines[0].strip().startswith("python3 - <<'PY'")
+    assert lines[-1].strip() == "PY"
+    return "\n".join(lines[1:-1])
+
+
+def _run_welcome_script(
+    case_dir: Path,
+    setup: FakeWelcomeSetup,
+    *,
+    workflow_py: Path,
+    cov_data: Path,
+) -> RunOutcome:
+    """Execute welcome-first-interaction cross-platform under branch coverage."""
+    case_dir.mkdir(parents=True, exist_ok=True)
+    state_file = case_dir / "gh_state.json"
+    log_file = case_dir / "gh_mutations.jsonl"
+    harness_py = case_dir / "harness.py"
+
+    state_file.write_text(
+        json.dumps(
+            {
+                "history": setup.history_pages,
+                "comments": setup.comment_pages,
+                "fail_rc": setup.fail_rc,
+            },
+        ),
+        encoding="utf-8",
+    )
+    harness_py.write_text(
+        f"""import coverage, json, pathlib, runpy, subprocess
+
+state = json.loads(pathlib.Path({str(state_file)!r}).read_text(encoding="utf-8"))
+log_path = pathlib.Path({str(log_file)!r})
+
+
+def _fake_run(cmd, *, input=None, capture_output=False, text=False, check=False):
+    assert cmd[:2] == ["gh", "api"], f"Unexpected command: {{cmd}}"
+    assert capture_output is True and text is True and check is False
+    if state["fail_rc"]:
+        return subprocess.CompletedProcess(cmd, state["fail_rc"], stdout="", stderr="gh: HTTP 502")
+    rest = cmd[2:]
+    if "-X" in rest:
+        idx = rest.index("-X")
+        method = rest[idx + 1]
+        target = [a for a in rest if "/" in a][0]
+        body = json.loads(input) if input is not None else None
+        with log_path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps({{"method": method, "endpoint": target, "body": body}}) + "\\n")
+        return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
+    endpoint = [a for a in rest if "/" in a][0]
+    if "creator=" in endpoint:
+        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(state["history"]), stderr="")
+    return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(state["comments"]), stderr="")
+
+
+subprocess.run = _fake_run
+cov = coverage.Coverage(
+    data_file={str(cov_data)!r},
+    data_suffix=True,
+    branch=True,
+    config_file=False,
+    include=[{str(workflow_py)!r}],
+)
+cov.start()
+try:
+    runpy.run_path({str(workflow_py)!r}, run_name="__main__")
+finally:
+    cov.stop()
+    cov.save()
+""",
+        encoding="utf-8",
+    )
+
+    clean_env = {k: v for k, v in os.environ.items() if not k.startswith("COV_CORE_")}
+    env = {
+        **clean_env,
+        "GH_TOKEN": "test-token",
+        "REPO": "bdperkin/findfmt",
+        "EVENT_NAME": setup.event_name,
+        "ITEM_NUMBER": setup.item_number,
+        "AUTHOR": setup.author,
+    }
+    proc = subprocess.run(
+        [sys.executable, str(harness_py)],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    mutations = (
+        [json.loads(line) for line in log_file.read_text(encoding="utf-8").splitlines() if line.strip()]
+        if log_file.is_file()
+        else []
+    )
+    return proc, mutations
+
+
+def _scenario_definitions() -> dict[str, FakeWelcomeSetup]:
+    """Build synthetic scenario matrix exercising every welcome-first-interaction branch."""
+    return {
+        "first_issue": FakeWelcomeSetup(
+            event_name="issues",
+            item_number="700",
+            history_pages=[[None, {"number": 650, "pull_request": {}}, {"number": 700}]],
+            comment_pages=[[]],
+        ),
+        "first_pr": FakeWelcomeSetup(
+            event_name="pull_request_target",
+            item_number="701",
+            history_pages=[[{"number": 600}, {"number": 701, "pull_request": {}}]],
+            comment_pages=[[]],
+        ),
+        "repeat_pr_no_issues": FakeWelcomeSetup(
+            event_name="pull_request_target",
+            item_number="702",
+            history_pages=[[{"number": 650, "pull_request": {}}, {"number": 702, "pull_request": {}}]],
+            comment_pages=[[]],
+        ),
+        "repeat_issue": FakeWelcomeSetup(
+            event_name="issues",
+            item_number="703",
+            history_pages=[[{"number": 600}, {"number": 703}]],
+            comment_pages=[[]],
+        ),
+        "dup": FakeWelcomeSetup(
+            event_name="pull_request_target",
+            item_number="704",
+            history_pages=[[{"number": 704, "pull_request": {}}]],
+            comment_pages=[
+                [
+                    {
+                        "id": 5,
+                        "user": {"login": "github-actions[bot]"},
+                        "body": "<!-- findfmt-first-pr-welcome -->",
+                    },
+                ],
+            ],
+        ),
+        "bad": FakeWelcomeSetup(history_pages=[], comment_pages=[], author="invalid author!"),
+        "err": FakeWelcomeSetup(history_pages=[], comment_pages=[], fail_rc=6),
+    }
+
+
+@pytest.fixture(scope="module")
+def welcome_suite(tmp_path_factory: pytest.TempPathFactory) -> WelcomeSuiteResult:
+    """Execute all welcome-first-interaction scenarios once and record child branch coverage."""
+    suite_dir = tmp_path_factory.mktemp("welcome_suite").resolve()
+    workflow_py = suite_dir / "welcome_script.py"
+    cov_data = suite_dir / ".coverage"
+    workflow_py.write_text(_extract_welcome_python_script(), encoding="utf-8")
+
+    runs = {
+        name: _run_welcome_script(
+            suite_dir / name,
+            setup,
+            workflow_py=workflow_py,
+            cov_data=cov_data,
+        )
+        for name, setup in _scenario_definitions().items()
+    }
+    return WelcomeSuiteResult(runs=runs, cov_data=cov_data, workflow_py=workflow_py)
+
+
+def test_welcome_workflow_security_triggers_and_links() -> None:
+    """Validate .github/workflows/welcome.yml triggers, bot guards, zero-checkout, and doc links (#635)."""
+    wf = _load_yaml(".github/workflows/welcome.yml")
+    triggers = wf.get("on", wf.get(True))
+    assert isinstance(triggers, dict)
+    assert triggers.get("issues") == {"types": ["opened"]}
+    assert triggers.get("pull_request_target") == {"types": ["opened", "closed"]}
+    assert wf.get("permissions") == {}
+
+    welcome_job = wf["jobs"]["welcome-first-interaction"]
+    assert welcome_job.get("timeout-minutes") == 5
+    assert welcome_job.get("permissions") == {"issues": "write", "pull-requests": "write"}
+    assert "github.event.sender.type != 'Bot'" in str(welcome_job.get("if", ""))
+    for step in welcome_job.get("steps", []):
+        assert "uses" not in step, "welcome-first-interaction must not check out untrusted PR code"
+
+    celebrate_job = wf["jobs"]["celebrate-first-merged-pr"]
+    assert celebrate_job.get("timeout-minutes") == 5
+    assert celebrate_job.get("permissions") == {"contents": "read", "pull-requests": "write"}
+    celebrate_if = str(celebrate_job.get("if", ""))
+    assert "github.event.pull_request.merged == true" in celebrate_if
+    assert "github.event.pull_request.user.type != 'Bot'" in celebrate_if
+    for step in celebrate_job.get("steps", []):
+        assert "uses" not in step, "celebrate-first-merged-pr must not check out untrusted PR code"
+
+    for doc_file in ("CONTRIBUTING.md", "SUPPORT.md", "CODE_OF_CONDUCT.md"):
+        assert (_repo_root() / doc_file).is_file()
+
+
+def test_welcome_greets_first_issue_and_first_pr_independently(welcome_suite: WelcomeSuiteResult) -> None:
+    """Verify event-specific history checks greet genuine first issues and first PRs (#635)."""
+    proc_issue, mut_issue = welcome_suite.runs["first_issue"]
+    assert proc_issue.returncode == 0
+    assert len(mut_issue) == 1
+    issue_body = mut_issue[0]["body"]["body"]
+    assert "thank you for opening your first issue" in issue_body
+    assert "CONTRIBUTING.md" in issue_body
+    assert "issues/new/choose" in issue_body
+    assert "SUPPORT.md" in issue_body
+    assert "CODE_OF_CONDUCT.md" in issue_body
+
+    proc_pr, mut_pr = welcome_suite.runs["first_pr"]
+    assert proc_pr.returncode == 0
+    assert len(mut_pr) == 1
+    pr_body = mut_pr[0]["body"]["body"]
+    assert "thank you for opening your first pull request" in pr_body
+    assert "Conventional Commits" in pr_body
+
+
+def test_welcome_skips_repeat_pr_author_without_issues_and_handles_errors(
+    welcome_suite: WelcomeSuiteResult,
+) -> None:
+    """Verify repeat PR authors with zero issues are skipped and duplicates/errors do not post (#635)."""
+    proc_repeat_pr, mut_repeat_pr = welcome_suite.runs["repeat_pr_no_issues"]
+    assert proc_repeat_pr.returncode == 0
+    assert mut_repeat_pr == []
+
+    proc_repeat_issue, mut_repeat_issue = welcome_suite.runs["repeat_issue"]
+    assert proc_repeat_issue.returncode == 0
+    assert mut_repeat_issue == []
+
+    proc_dup, mut_dup = welcome_suite.runs["dup"]
+    assert proc_dup.returncode == 0
+    assert mut_dup == []
+
+    proc_bad, _ = welcome_suite.runs["bad"]
+    assert proc_bad.returncode == 1
+    assert "Invalid AUTHOR" in proc_bad.stderr
+
+    proc_err, _ = welcome_suite.runs["err"]
+    assert proc_err.returncode == 6
+    assert "gh: HTTP 502" in proc_err.stderr
+
+
+def test_welcome_embedded_script_100_percent_branch_coverage(
+    welcome_suite: WelcomeSuiteResult,
+) -> None:
+    """Enforce 100% statement and branch coverage on the embedded welcome-first-interaction script (#635)."""
+    cov = coverage.Coverage(
+        data_file=str(welcome_suite.cov_data),
+        branch=True,
+        config_file=False,
+        include=[str(welcome_suite.workflow_py)],
+    )
+    cov.combine()
+    report_buf = io.StringIO()
+    total = cov.report(file=report_buf, show_missing=True)
+    assert total == 100.0, report_buf.getvalue()
