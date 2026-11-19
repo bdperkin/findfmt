@@ -109,6 +109,10 @@ def _fake_run(cmd, *, input=None, capture_output=False, text=False, check=False)
     rest = cmd[2:]
     if rest[0] == "graphql":
         idx = state["gql_idx"]
+        expected_cursor = state["gql_pages"][idx - 1]["pageInfo"]["endCursor"] if idx > 0 else None
+        cursor_args = [a.split("=", 1)[1] for a in rest if a.startswith("cursor=")]
+        actual_cursor = cursor_args[0] if cursor_args else None
+        assert actual_cursor == expected_cursor, f"Bad cursor: {{actual_cursor!r}} != {{expected_cursor!r}}"
         page = state["gql_pages"][idx]
         state["gql_idx"] = idx + 1
         state_path.write_text(json.dumps(state), encoding="utf-8")
