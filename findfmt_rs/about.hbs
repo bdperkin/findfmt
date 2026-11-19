@@ -1,0 +1,29 @@
+<!-- vale off -->
+
+# Third-Party Rust Crate Licenses
+
+This file lists the open-source licenses and copyright attributions for third-party Rust crates compiled into
+`findfmt`'s native extension (`findfmt_rs`). It is generated deterministically by `cargo-about` from
+`findfmt_rs/Cargo.lock` and `findfmt_rs/about.toml`.
+
+## Overview
+
+{{#each overview}}
+- **{{name}}** (`{{id}}`) — {{count}} crate(s)
+{{/each}}
+
+## License Texts
+{{#each licenses}}
+
+### [{{@index}}] {{name}} (`{{id}}`)
+
+Used by:
+
+{{#each used_by}}
+- [`{{crate.name}}` `{{crate.version}}`]({{#if crate.repository}}{{crate.repository}}{{else}}https://crates.io/crates/{{crate.name}}/{{crate.version}}{{/if}})
+{{/each}}
+
+````text
+{{{text}}}
+````
+{{/each}}

@@ -77,3 +77,7 @@ Thumbs.db
 # Vale synced packages
 .github/styles/Google/
 .github/styles/proselint/
+
+# Rust / Cargo build artifacts
+target/
+findfmt_rs/target/
