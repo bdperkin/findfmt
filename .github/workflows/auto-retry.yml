@@ -21,6 +21,7 @@ jobs:
     timeout-minutes: 5
     permissions:
       actions: write
+      checks: read
     steps:
       - name: Re-run timed-out or transiently cancelled jobs
         env:
@@ -58,21 +59,40 @@ jobs:
               cand_id = str(cand_repo.get("id") or "") if isinstance(cand_repo, dict) else ""
               return cand_id == head_repo_id
 
+          def job_timed_out_by_annotation(job_id: int) -> bool:
+              ann_endpoint = f"repos/{repo}/check-runs/{job_id}/annotations?per_page=100"
+              ann_raw = gh_run(["api", "--paginate", "--slurp", ann_endpoint])
+              ann_pages = json.loads(ann_raw or "[]")
+              messages = [
+                  str(item.get("message") or "").lower()
+                  for page in (ann_pages if isinstance(ann_pages, list) else [])
+                  if isinstance(page, list)
+                  for item in page
+                  if isinstance(item, dict) and item.get("annotation_level") == "failure"
+              ]
+              markers = ("timed out after", "exceeded the maximum execution time")
+              return any(any(m in msg for m in markers) for msg in messages)
+
           if head_branch and run_event:
-              query = urlencode({"branch": head_branch, "event": run_event, "per_page": "10"})
-              runs_raw = gh_run(["api", f"repos/{repo}/actions/workflows/{workflow_id}/runs?{query}"])
-              runs_payload = json.loads(runs_raw) if runs_raw.strip() else {}
-              workflow_runs = runs_payload.get("workflow_runs", []) if isinstance(runs_payload, dict) else []
-              if any(
-                  isinstance(r, dict) and int(r.get("id", 0)) > run_id and same_source_repo(r)
-                  for r in workflow_runs
-              ):
-                  print(f"Skipping rerun of superseded CI run {run_id}.")
-                  sys.exit(0)
+              page = 1
+              while True:
+                  params = {"branch": head_branch, "event": run_event, "per_page": "50", "page": str(page)}
+                  runs_endpoint = f"repos/{repo}/actions/workflows/{workflow_id}/runs?{urlencode(params)}"
+                  runs_raw = gh_run(["api", runs_endpoint])
+                  runs_payload = json.loads(runs_raw or "{}")
+                  raw_runs = runs_payload.get("workflow_runs", []) if isinstance(runs_payload, dict) else []
+                  workflow_runs = [r for r in raw_runs if isinstance(r, dict)]
+                  newer_runs = [r for r in workflow_runs if int(r.get("id", 0)) > run_id]
+                  if any(same_source_repo(r) for r in newer_runs):
+                      print(f"Skipping rerun of superseded CI run {run_id}.")
+                      sys.exit(0)
+                  if not workflow_runs or len(newer_runs) < len(workflow_runs):
+                      break
+                  page += 1
 
           jobs_endpoint = f"repos/{repo}/actions/runs/{run_id}/jobs?per_page=100"
           jobs_raw = gh_run(["api", "--paginate", "--slurp", jobs_endpoint])
-          pages = json.loads(jobs_raw) if jobs_raw.strip() else []
+          pages = json.loads(jobs_raw or "[]")
           jobs = [
               job
               for page in (pages if isinstance(pages, list) else [])
@@ -86,12 +106,22 @@ jobs:
           has_retryable_timeout_or_cancel = False
 
           for job in jobs:
+              job_id = int(job.get("id") or 0)
               conclusion = str(job.get("conclusion") or "")
               steps = [s for s in (job.get("steps") or []) if isinstance(s, dict)]
               step_failed = any(s.get("conclusion") == "failure" for s in steps)
-              if conclusion in deterministic_conclusions or (conclusion == "failure" and step_failed):
+              step_timed_out = (
+                  conclusion == "failure" and step_failed and job_timed_out_by_annotation(job_id)
+              )
+              if conclusion in deterministic_conclusions or (
+                  conclusion == "failure" and step_failed and not step_timed_out
+              ):
                   has_deterministic_failure = True
-              elif conclusion in {"timed_out", "cancelled"} or (conclusion == "failure" and not step_failed):
+              elif (
+                  step_timed_out
+                  or conclusion in {"timed_out", "cancelled"}
+                  or (conclusion == "failure" and not step_failed)
+              ):
                   has_retryable_timeout_or_cancel = True
 
           if has_deterministic_failure or not has_retryable_timeout_or_cancel:

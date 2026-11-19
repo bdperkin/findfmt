@@ -7,7 +7,7 @@ import json
 import os
 import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +23,9 @@ class FakeAutoRetrySetup:
     """Synthetic GitHub Actions REST state for testing auto-retry.yml."""
 
     job_pages: list[Any]
-    workflow_runs: list[dict[str, Any]]
+    workflow_runs: list[Any] = field(default_factory=list)
+    workflow_run_pages: list[list[Any]] = field(default_factory=list)
+    annotations: dict[str, list[Any]] = field(default_factory=dict)
     run_id: str = "500"
     workflow_id: str = "10"
     head_branch: str = "feat/demo"
@@ -80,11 +82,13 @@ def _run_auto_retry_script(
     log_file = case_dir / "gh_reruns.jsonl"
     harness_py = case_dir / "harness.py"
 
+    run_pages = setup.workflow_run_pages or [setup.workflow_runs]
     state_file.write_text(
         json.dumps(
             {
                 "job_pages": setup.job_pages,
-                "workflow_runs": setup.workflow_runs,
+                "run_pages": run_pages,
+                "annotations": setup.annotations,
                 "fail_rc": setup.fail_rc,
             },
         ),
@@ -92,6 +96,7 @@ def _run_auto_retry_script(
     )
     harness_py.write_text(
         f"""import coverage, json, pathlib, runpy, subprocess
+from urllib.parse import parse_qs, urlparse
 
 state = json.loads(pathlib.Path({str(state_file)!r}).read_text(encoding="utf-8"))
 log_path = pathlib.Path({str(log_file)!r})
@@ -107,9 +112,14 @@ def _fake_run(cmd, *, capture_output=False, text=False, check=False):
             f.write(json.dumps(cmd) + "\\n")
         return subprocess.CompletedProcess(cmd, 0, stdout="", stderr="")
     endpoint = cmd[-1]
+    if "/check-runs/" in endpoint:
+        job_id = endpoint.split("/check-runs/", 1)[1].split("/", 1)[0]
+        pages = state["annotations"].get(job_id, [[]])
+        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(pages), stderr="")
     if "/workflows/" in endpoint:
-        payload = {{"workflow_runs": state["workflow_runs"]}}
-        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(payload), stderr="")
+        page_idx = int(parse_qs(urlparse(endpoint).query).get("page", ["1"])[0]) - 1
+        runs = state["run_pages"][page_idx] if page_idx < len(state["run_pages"]) else []
+        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps({{"workflow_runs": runs}}), stderr="")
     return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps(state["job_pages"]), stderr="")
 
 
@@ -165,46 +175,62 @@ def _scenario_definitions() -> dict[str, FakeAutoRetrySetup]:
     """Build synthetic scenarios exercising timeout retries, fail-fast skips, and superseded runs."""
     return {
         "queue_timeout_rerun": FakeAutoRetrySetup(
-            workflow_runs=[{"id": 500}, {"id": 499}],
+            workflow_runs=[None, {"id": 500}, {"id": 499}],
             job_pages=[
                 None,
                 {
                     "jobs": [
                         None,
                         {"conclusion": "success", "steps": [{"conclusion": "success"}]},
-                        {"conclusion": "cancelled", "steps": []},
+                        {"conclusion": "failure", "steps": [{"conclusion": "cancelled"}]},
                     ],
                 },
             ],
         ),
         "step_timeout_detached_branch": FakeAutoRetrySetup(
             head_branch="",
-            workflow_runs=[],
+            annotations={
+                "701": [
+                    None,
+                    [
+                        None,
+                        {"annotation_level": "notice", "message": "queue info"},
+                        {
+                            "annotation_level": "failure",
+                            "message": "The action 'Run Pytest' has timed out after 15 minutes.",
+                        },
+                    ],
+                ],
+            },
             job_pages=[
                 {
                     "jobs": [
-                        {"conclusion": "failure", "steps": [{"conclusion": "cancelled"}]},
-                        {"conclusion": "cancelled", "steps": []},
+                        {"id": 701, "conclusion": "failure", "steps": [{"conclusion": "failure"}]},
+                        {"id": 702, "conclusion": "cancelled", "steps": []},
                     ],
                 },
             ],
         ),
         "deterministic_failure_with_fail_fast_cancels": FakeAutoRetrySetup(
-            workflow_runs=[{"id": 500}],
+            workflow_runs=[{"id": 500, "head_repository": {"id": 111}}],
+            annotations={
+                "703": [[{"annotation_level": "failure", "message": "Process completed with exit code 1."}]],
+            },
             job_pages=[
                 {
                     "jobs": [
                         {
+                            "id": 703,
                             "conclusion": "failure",
                             "steps": [{"conclusion": "success"}, {"conclusion": "failure"}],
                         },
-                        {"conclusion": "cancelled", "steps": []},
+                        {"id": 704, "conclusion": "cancelled", "steps": []},
                     ],
                 },
             ],
         ),
         "startup_failure_skip": FakeAutoRetrySetup(
-            workflow_runs=[{"id": 500, "head_repository": {"id": 111}}],
+            workflow_runs=[],
             job_pages=[{"jobs": [{"conclusion": "startup_failure", "steps": []}]}],
         ),
         "superseded_run_skip": FakeAutoRetrySetup(
@@ -214,15 +240,21 @@ def _scenario_definitions() -> dict[str, FakeAutoRetrySetup]:
             ],
             job_pages=[{"jobs": [{"conclusion": "cancelled", "steps": []}]}],
         ),
-        "cross_fork_same_branch_rerun": FakeAutoRetrySetup(
-            workflow_runs=[
-                {"id": 502, "head_repository": {"id": 999}},
-                {"id": 501, "head_repository": None},
-                {"id": 500, "head_repository": {"id": 111}},
+        "superseded_on_second_page_skip": FakeAutoRetrySetup(
+            workflow_run_pages=[
+                [{"id": 503, "head_repository": {"id": 999}}, {"id": 502, "head_repository": {"id": 888}}],
+                [{"id": 501, "head_repository": {"id": 111}}, {"id": 500, "head_repository": {"id": 111}}],
             ],
             job_pages=[{"jobs": [{"conclusion": "timed_out", "steps": []}]}],
         ),
-        "gh_error": FakeAutoRetrySetup(workflow_runs=[], job_pages=[], fail_rc=7),
+        "cross_fork_same_branch_rerun": FakeAutoRetrySetup(
+            workflow_run_pages=[
+                [{"id": 502, "head_repository": {"id": 999}}, {"id": 501, "head_repository": None}],
+                [],
+            ],
+            job_pages=[{"jobs": [{"conclusion": "timed_out", "steps": []}]}],
+        ),
+        "gh_error": FakeAutoRetrySetup(job_pages=[], fail_rc=7),
     }
 
 
@@ -262,7 +294,7 @@ def test_auto_retry_workflow_triggers_and_permissions() -> None:
     job = workflow["jobs"]["rerun"]
     assert job.get("runs-on") == "ubuntu-latest"
     assert job.get("timeout-minutes") == 5
-    assert job.get("permissions") == {"actions": "write"}
+    assert job.get("permissions") == {"actions": "write", "checks": "read"}
 
     condition = str(job.get("if", ""))
     assert "github.event.workflow_run.conclusion == 'failure'" in condition
@@ -281,30 +313,19 @@ def test_auto_retry_reruns_timeouts_and_skips_deterministic_or_superseded_runs(
 ) -> None:
     """Verify timeouts rerun while fail-fast step failures and superseded runs do not (#689)."""
     expected_cmd = ["gh", "run", "rerun", "500", "--failed", "--repo", "bdperkin/findfmt"]
-
-    proc_q, reruns_q = auto_retry_suite.runs["queue_timeout_rerun"]
-    assert proc_q.returncode == 0
-    assert reruns_q == [expected_cmd]
-
-    proc_step_to, reruns_step_to = auto_retry_suite.runs["step_timeout_detached_branch"]
-    assert proc_step_to.returncode == 0
-    assert reruns_step_to == [expected_cmd]
-
-    proc_det, reruns_det = auto_retry_suite.runs["deterministic_failure_with_fail_fast_cancels"]
-    assert proc_det.returncode == 0
-    assert reruns_det == []
-
-    proc_start, reruns_start = auto_retry_suite.runs["startup_failure_skip"]
-    assert proc_start.returncode == 0
-    assert reruns_start == []
-
-    proc_sup, reruns_sup = auto_retry_suite.runs["superseded_run_skip"]
-    assert proc_sup.returncode == 0
-    assert reruns_sup == []
-
-    proc_fork, reruns_fork = auto_retry_suite.runs["cross_fork_same_branch_rerun"]
-    assert proc_fork.returncode == 0
-    assert reruns_fork == [expected_cmd]
+    expected_reruns = {
+        "queue_timeout_rerun": [expected_cmd],
+        "step_timeout_detached_branch": [expected_cmd],
+        "deterministic_failure_with_fail_fast_cancels": [],
+        "startup_failure_skip": [],
+        "superseded_run_skip": [],
+        "superseded_on_second_page_skip": [],
+        "cross_fork_same_branch_rerun": [expected_cmd],
+    }
+    for scenario_name, expected in expected_reruns.items():
+        proc, reruns = auto_retry_suite.runs[scenario_name]
+        assert proc.returncode == 0, f"{scenario_name} failed: {proc.stderr}"
+        assert reruns == expected, f"Unexpected reruns for {scenario_name}: {reruns}"
 
     proc_err, reruns_err = auto_retry_suite.runs["gh_error"]
     assert proc_err.returncode == 7
