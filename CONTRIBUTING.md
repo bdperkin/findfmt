@@ -271,11 +271,12 @@ git commit -s -m "feat: add support for MIME categories"
    commit history.
 6. **Stale Lifecycle Management**: Issues and pull requests receive a polite `status:stale` reminder after 30
    days of inactivity and close automatically after 7 additional days without activity
-   (`.github/workflows/stale.yml`); any new comment or push removes `status:stale`. Items with an assignee or
-   milestone, draft pull requests, issues labeled `security`, `epic`, `subtask`, `status:blocked`,
-   `priority:critical`, `priority:high`, `good first issue`, or `help wanted`, and pull requests labeled
-   `wip`, `status:blocked`, `status:in-review`, `status:ready-to-merge`, `automerge`, or `security` are
-   exempt.
+   (`.github/workflows/stale.yml`). For non-exempt items, new comments or pushes cause the next scheduled run
+   to remove `status:stale` (if a `status:stale` item later becomes exempt, maintainers should remove
+   `status:stale` manually). Items with an assignee or milestone, draft pull requests, issues labeled
+   `security`, `epic`, `subtask`, `status:blocked`, `priority:critical`, `priority:high`, `good first issue`,
+   or `help wanted`, and pull requests labeled `wip`, `status:blocked`, `status:in-review`,
+   `status:ready-to-merge`, `automerge`, or `security` are exempt.
 
 ## 7. Release Process (Maintainers)
 
