@@ -54,7 +54,6 @@ queue_rules:
       - '#changes-requested-reviews-by = 0'
       - '#review-threads-unresolved = 0'
       - check-success = pre-commit.ci - pr
-      - check-success = CodeRabbit
       - check-success = codecov/project
       - check-success = Code Quality & Gatekeeping
       - check-success = Build Documentation
