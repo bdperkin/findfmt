@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -23,6 +24,7 @@ from findfmt.cli.pager import (
     FindfmtCommand,
     _capture_help_output,
     _extract_raw_args,
+    _help_color_env,
     resolve_color_flag,
 )
 from findfmt.cli.terminal import PagerController, strip_ansi
@@ -227,3 +229,22 @@ def test_make_context_parameter_source_tracking(tmp_path: Path) -> None:
     assert ctx_cli.params["list_tags"] is False
     assert getattr(ctx_cli.get_parameter_source("list_tags"), "name", None) == "COMMANDLINE"
     reset_active_config()
+
+
+def test_help_color_env_sets_and_restores_force_color(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Verify _help_color_env sets FORCE_COLOR for rich>=13.8 parity and restores prior state."""
+    monkeypatch.setenv("FORCE_COLOR", "prior")
+    with _help_color_env(color_on=True):
+        assert os.environ["FORCE_COLOR"] == "1"
+        assert os.environ["TTY_COMPATIBLE"] == "1"
+        assert os.environ["NO_COLOR"] == ""
+
+    assert os.environ["FORCE_COLOR"] == "prior"
+
+    monkeypatch.delenv("FORCE_COLOR", raising=False)
+    with _help_color_env(color_on=False):
+        assert os.environ["FORCE_COLOR"] == ""
+        assert os.environ["TTY_COMPATIBLE"] == "0"
+        assert os.environ["NO_COLOR"] == "1"
+
+    assert "FORCE_COLOR" not in os.environ

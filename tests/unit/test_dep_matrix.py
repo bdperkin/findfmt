@@ -27,17 +27,8 @@ from tools.dep_matrix import (
 )
 
 
-def _proc(
-    returncode: int = 0,
-    stdout: str = "",
-    stderr: str = "",
-) -> subprocess.CompletedProcess[str]:
-    return subprocess.CompletedProcess(
-        args=["cmd"],
-        returncode=returncode,
-        stdout=stdout,
-        stderr=stderr,
-    )
+def _proc(returncode: int = 0, stdout: str = "", stderr: str = "") -> subprocess.CompletedProcess[str]:
+    return subprocess.CompletedProcess(args=["cmd"], returncode=returncode, stdout=stdout, stderr=stderr)
 
 
 def test_matrix_cell_and_normalization_helpers() -> None:
@@ -71,7 +62,8 @@ def test_load_declared_bounds_and_locked_versions(tmp_path: Path) -> None:
     pyproject.write_text(
         '[project]\ndependencies = [\n  "typer>=0.16",\n'
         '  "typing_extensions>=4.4; python_version<\'3.12\'",\n  "===bad",\n]\n'
-        '[dependency-groups]\ntest = ["pytest>=8", { include-group = "other" }]\n',
+        '[dependency-groups]\ntest = ["pytest>=8", { include-group = "other" }]\n'
+        '[tool.uv]\nconstraint-dependencies = ["trove-classifiers>=2025.5.8.13"]\n',
         encoding="utf-8",
     )
     bounds = load_declared_bounds(pyproject)
@@ -79,6 +71,7 @@ def test_load_declared_bounds_and_locked_versions(tmp_path: Path) -> None:
         "typer": "typer>=0.16",
         "typing-extensions": "typing_extensions>=4.4",
         "pytest": "pytest>=8",
+        "trove-classifiers": "trove-classifiers>=2025.5.8.13",
     }
 
     lockfile = tmp_path / "uv.lock"
@@ -218,17 +211,14 @@ def test_run_step_and_quality_suite() -> None:
         assert verify_quality.run_quality_suite() == 1
 
 
-def test_run_matrix_cell_and_run_matrix(tmp_path: Path) -> None:
+def test_run_matrix_cell_and_run_matrix(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     cell = MatrixCell("M1", "lowest-direct", "disallow", "fewest")
 
     with patch("tools.verify_quality.subprocess.run", return_value=_proc(1, stderr="venv error")):
         assert verify_quality.run_matrix_cell(cell, "3.11", tmp_path) is False
 
     with (
-        patch(
-            "tools.verify_quality.subprocess.run",
-            side_effect=[_proc(0), _proc(1, stderr="resolver err")],
-        ),
+        patch("tools.verify_quality.subprocess.run", side_effect=[_proc(0), _proc(1, stderr="resolver err")]),
         patch("tools.verify_quality.capture_diagnostics", return_value="DIAG_INSTALL"),
     ):
         assert verify_quality.run_matrix_cell(cell, "3.11", tmp_path) is False
@@ -236,14 +226,23 @@ def test_run_matrix_cell_and_run_matrix(tmp_path: Path) -> None:
     with (
         patch(
             "tools.verify_quality.subprocess.run",
-            side_effect=[_proc(0), _proc(0), _proc(1, stdout="test fail")],
+            side_effect=[_proc(0), _proc(0), _proc(1, stdout="fail")],
         ),
         patch("tools.verify_quality.capture_diagnostics", return_value="DIAG_PYTEST"),
     ):
         assert verify_quality.run_matrix_cell(cell, "3.11", tmp_path) is False
 
-    with patch("tools.verify_quality.subprocess.run", side_effect=[_proc(0), _proc(0), _proc(0)]):
-        assert verify_quality.run_matrix([cell], "3.11", tmp_path) == 0
+    repo, outside = tmp_path / "repo", tmp_path / "outside"
+    repo.mkdir()
+    outside.mkdir()
+    monkeypatch.chdir(outside)
+    with patch("tools.verify_quality.subprocess.run", side_effect=[_proc(0), _proc(0), _proc(0)]) as mock_run:
+        assert verify_quality.run_matrix([cell], "3.11", Path("../repo")) == 0
+        install_call, test_call = mock_run.call_args_list[1], mock_run.call_args_list[2]
+        install_args = install_call.args[0]
+        assert install_args[install_args.index("-e") + 1] == str(repo.resolve())
+        assert install_call.kwargs["cwd"] == repo.resolve()
+        assert test_call.kwargs["cwd"] == repo.resolve()
 
     with patch("tools.verify_quality.run_matrix_cell", return_value=False):
         assert verify_quality.run_matrix([cell], "3.11", tmp_path) == 1

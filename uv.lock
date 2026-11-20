@@ -10,6 +10,9 @@ supported-markers = [
     "python_full_version >= '3.11.5'",
 ]
 
+[manifest]
+constraints = [{ name = "trove-classifiers", specifier = ">=2025.5.8.13" }]
+
 [[package]]
 name = "accessible-pygments"
 version = "0.0.5"

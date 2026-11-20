@@ -114,7 +114,7 @@ def is_prerelease_version(version: str) -> bool:
 
 
 def load_declared_bounds(pyproject_path: Path) -> dict[str, str]:
-    """Load declared direct and test dependency specifiers from pyproject.toml."""
+    """Load declared direct, test, and uv constraint specifiers from pyproject.toml."""
     if not pyproject_path.is_file():
         return {}
 
@@ -129,6 +129,11 @@ def load_declared_bounds(pyproject_path: Path) -> dict[str, str]:
     groups = data.get("dependency-groups", {})
     if isinstance(groups, dict) and isinstance(groups.get("test"), list):
         raw_specs.extend(groups["test"])
+
+    tool = data.get("tool", {})
+    uv_cfg = tool.get("uv", {}) if isinstance(tool, dict) else {}
+    if isinstance(uv_cfg, dict) and isinstance(uv_cfg.get("constraint-dependencies"), list):
+        raw_specs.extend(uv_cfg["constraint-dependencies"])
 
     bounds: dict[str, str] = {}
     for entry in raw_specs:

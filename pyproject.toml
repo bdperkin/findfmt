@@ -5,6 +5,7 @@ requires = [
   "hatch-vcs",
   "hatchling>=1.27",
   "maturin>=1.14",
+  "trove-classifiers>=2025.5.8.13",
   "typing-extensions>=4.4; python_version<'3.12'",
 ]
 
@@ -148,6 +149,7 @@ python-source = "src"
 exclude = [ "**/*.po", "**/*.pot" ]
 
 [tool.uv]
+constraint-dependencies = [ "trove-classifiers>=2025.5.8.13" ]
 environments = [ "python_full_version >= '3.11.5'" ]
 
 [tool.ruff]
