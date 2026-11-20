@@ -36,7 +36,7 @@ ______________________________________________________________________
 `findfmt` provides independent controls for package builders (`HATCH_MATURIN_DISABLE`) and end users or test
 suites (`FINDFMT_NO_EXTENSIONS`):
 
-| Variable                | Phase                                 | Accepted Truthy Values                      | Effect                                                                                                                                                                        |
+| Variable                | Phase                                 | Accepted Enabling Values                    | Effect                                                                                                                                                                        |
 | :---------------------- | :------------------------------------ | :------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `HATCH_MATURIN_DISABLE` | Package build (`uv build`, Hatchling) | `1`, `true`, `yes`, `on` (case-insensitive) | Skips `MaturinBuildHook.initialize()` and `clean()` in `tools/hatch_build.py`, producing a Cargo-free `py3-none-any` wheel containing compiled `.mo` catalogs and `py.typed`. |
 | `FINDFMT_NO_EXTENSIONS` | Runtime execution (CLI & Python API)  | `1`, `true`, `yes`, `on` (case-insensitive) | Skips importing or dispatching to `findfmt._rust_ext` in `src/findfmt/core.py`, routing all operations to `src/findfmt/_fallback.py`.                                         |
@@ -48,7 +48,7 @@ Callers can inspect extension availability and execution-backend selection from 
 - **CLI Diagnostics**: `findfmt --diagnostics` (and `findfmt --version --verbose`) prints `Backend: rust` when
   native gateway entrypoints are active or `Backend: python` when running via `src/findfmt/_fallback.py`.
 - **`findfmt.is_rust_extension_loaded() -> bool`**: Returns `True` when `findfmt._rust_ext` imported cleanly
-  and `FINDFMT_NO_EXTENSIONS` is not truthy.
+  and `FINDFMT_NO_EXTENSIONS` is not enabled.
 - **`findfmt.is_rust_backend_active() -> bool`**: Returns `True` when `findfmt._rust_ext` is enabled and
   exposes callable gateway entrypoints (`find_files` or `classify_file`).
 - **`findfmt.get_active_backend() -> Literal["rust", "python"]`**: Returns `"rust"` when
@@ -60,10 +60,12 @@ ______________________________________________________________________
 
 ### 3.1. What happens if no prebuilt binary wheel exists for a target platform?
 
-`findfmt` remains 100% functional on every Python `>=3.11` platform. When `findfmt` is installed from a
-pure-Python wheel or on an architecture without `findfmt._rust_ext`, `src/findfmt/core.py` catches
-`ImportError` during initialization and delegates all `find_files()` and `classify_file()` calls to
-`src/findfmt/_fallback.py` with zero user intervention.
+`findfmt` remains 100% functional on every Python `>=3.11` platform. Once installed from a pure-Python wheel
+or on an architecture without `findfmt._rust_ext`, `src/findfmt/core.py` catches `ImportError` during
+initialization and delegates all `find_files()` and `classify_file()` calls to `src/findfmt/_fallback.py` with
+zero user intervention. Note that runtime fallback applies after installation succeeds: building from source
+without a matching prebuilt wheel runs the Maturin build hook and requires Cargo by default. In environments
+without Cargo, set `HATCH_MATURIN_DISABLE=1` before building or installing to produce the pure-Python package.
 
 ### 3.2. Why does `findfmt_rs` use PyO3 `abi3-py311`?
 

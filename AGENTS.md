@@ -7,9 +7,11 @@ codebase.
 ## 1. Project Overview & Architecture
 
 `findfmt` is a modern, high-performance hybrid Python-Rust command-line utility and library designed for
-`.gitignore`-aware file discovery and content format, shebang, and MIME tag classification. Native
-acceleration lives in the `findfmt_rs/` PyO3 crate (`findfmt._rust_ext`), dispatched through
-`src/findfmt/core.py` with automatic fallback to the pure-Python engine (`src/findfmt/_fallback.py`).
+`.gitignore`-aware file discovery and content format, shebang, and MIME tag classification. The `findfmt_rs/`
+PyO3 crate (`findfmt._rust_ext`) currently exports extension metadata as the foundation for planned native
+traversal and classification (`get_active_backend()` remains `"python"` after a native build until
+`find_files` or `classify_file` entrypoints exist), dispatched through `src/findfmt/core.py` with automatic
+fallback to the pure-Python engine (`src/findfmt/_fallback.py`).
 
 ### 1.1. Core Module Layout
 
@@ -18,7 +20,7 @@ acceleration lives in the `findfmt_rs/` PyO3 crate (`findfmt._rust_ext`), dispat
   `is_rust_backend_active`, `get_active_backend`) and `python -m findfmt` execution entry point.
 - `findfmt_rs/` & `src/findfmt/_rust_ext.pyi`: Rust 2024 edition (`>=1.85`) PyO3 crate (`abi3-py311`, `cdylib`
   \+ `rlib`) compiled to `findfmt._rust_ext` via `hatch-maturin-build`, paired with strict PEP 484 type stubs
-  and Cargo license and supply chain configs (`deny.toml`, `about.toml`).
+  and Cargo license and supply chain configuration files (`deny.toml`, `about.toml`).
 - `src/findfmt/core.py` & `src/findfmt/_fallback.py`: Unified runtime dispatch gateway and pure-Python
   fallback module. Honors `FINDFMT_NO_EXTENSIONS=1` and routes `ImportError` or `pyo3_runtime.PanicException`
   cleanly to the pure-Python traversal and classification engines.

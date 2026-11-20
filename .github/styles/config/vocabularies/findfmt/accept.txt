@@ -235,3 +235,4 @@
 (?i)rlib
 (?i)backtraces
 (?i)ttys
+(?i)truthy
