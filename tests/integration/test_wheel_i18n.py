@@ -18,11 +18,13 @@ def test_built_wheel_loads_german_catalog(tmp_path: Path) -> None:
     # Build wheel using uv build in isolation and remove any build-time .mo artifacts from src/
     repo_locale = Path(__file__).resolve().parents[2] / "src" / "findfmt" / "locale"
     try:
-        subprocess.run(
+        build_res = subprocess.run(
             ["uv", "build", "--wheel", "--out-dir", str(dist_dir)],
-            check=True,
             capture_output=True,
+            text=True,
+            check=False,
         )
+        assert build_res.returncode == 0, f"uv build failed:\n{build_res.stderr}"
     finally:
         for mo_file in repo_locale.glob("*/LC_MESSAGES/*.mo"):
             mo_file.unlink(missing_ok=True)

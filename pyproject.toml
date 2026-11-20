@@ -1,8 +1,10 @@
 [build-system]
 build-backend = "hatchling.build"
 requires = [
+  "hatch-maturin-build>=0.1.1",
   "hatch-vcs",
   "hatchling>=1.27",
+  "maturin>=1.14",
   "typing-extensions>=4.4; python_version<'3.12'",
 ]
 
@@ -70,7 +72,9 @@ scripts.findsummary = "findfmt.cli:main_findsummary"
 [dependency-groups]
 dev = [
   "babel>=2.14",
+  "hatch-maturin-build>=0.1.1",
   "hatchling>=1.27",
+  "maturin>=1.14",
   "pre-commit>=4",
   { include-group = "docs" },
   { include-group = "lint" },
@@ -79,7 +83,9 @@ dev = [
 test = [
   "click>=8.2",
   "docutils>=0.20",
+  "hatch-maturin-build>=0.1.1",
   "hatchling>=1.27",
+  "maturin>=1.14",
   "pytest>=8.4",
   "pytest-cov>=7",
   "pytest-mock>=3.14",
@@ -120,6 +126,8 @@ build.hooks.custom.path = "tools/hatch_build.py"
 build.targets.wheel.packages = [ "src/findfmt" ]
 build.targets.wheel.exclude = [ "*.po", "*.pot" ]
 build.targets.wheel.artifacts = [ "*.mo" ]
+build.targets.wheel.hooks.maturin.locked = true
+build.targets.wheel.hooks.maturin.manifest-path = "findfmt_rs/Cargo.toml"
 build.targets.sdist.include = [
   "/src",
   "/tests",
@@ -133,6 +141,11 @@ build.targets.sdist.include = [
   "pyproject.toml",
 ]
 build.targets.sdist.artifacts = [ "/src/findfmt/locale/*/LC_MESSAGES/*.mo" ]
+
+[tool.maturin]
+module-name = "findfmt._rust_ext"
+python-source = "src"
+exclude = [ "**/*.po", "**/*.pot" ]
 
 [tool.uv]
 environments = [ "python_full_version >= '3.11.5'" ]

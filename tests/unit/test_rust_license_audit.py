@@ -10,6 +10,7 @@ from email.parser import HeaderParser
 from pathlib import Path
 from typing import Any
 
+import pytest
 from hatchling.builders.wheel import WheelBuilder
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -114,8 +115,12 @@ def test_cargo_lock_and_third_party_licenses_completeness() -> None:
         )
 
 
-def test_wheel_metadata_bundles_project_and_third_party_licenses(tmp_path: Path) -> None:
+def test_wheel_metadata_bundles_project_and_third_party_licenses(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Verify built wheels emit PEP 639 License-Expression/License-File headers and bundle both files."""
+    monkeypatch.setenv("HATCH_MATURIN_DISABLE", "1")
     proj_dir = tmp_path / "pkg"
     (proj_dir / "src" / "findfmt").mkdir(parents=True)
     pyproject_text = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
