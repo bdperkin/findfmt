@@ -40,16 +40,20 @@ def _load_toml(rel_path: str) -> dict[str, Any]:
 def _specifier_probes(req: Requirement) -> list[Version]:
     probes: list[Version] = [Version("99999999.0.0")]
     for spec in req.specifier:
-        base_str = spec.version.removesuffix(".*")
-        ver = Version(base_str)
-        next_rel = (*ver.release[:-1], ver.release[-1] + 1)
-        next_str = ".".join(str(part) for part in next_rel)
+        if spec.operator == "===":
+            continue
+
+        ver = Version(spec.version.removesuffix(".*"))
+        epoch_prefix = f"{ver.epoch}!" if ver.epoch else ""
+        rel_str = ".".join(str(part) for part in ver.release)
+        next_post = 0 if ver.post is None else ver.post + 1
+        next_rel_str = ".".join(str(part) for part in (*ver.release[:-1], ver.release[-1] + 1))
         probes.extend(
             (
                 ver,
-                Version(f"{base_str}.post0"),
-                Version(f"{base_str}.1"),
-                Version(next_str),
+                Version(f"{epoch_prefix}{rel_str}.post{next_post}"),
+                Version(f"{epoch_prefix}{rel_str}.1"),
+                Version(f"{epoch_prefix}{next_rel_str}"),
             ),
         )
 
@@ -105,6 +109,7 @@ def test_mit_license_parity_across_python_and_rust_manifests() -> None:
     assert _has_valid_trove_classifiers_floor(build_requires, supported_pythons)
     assert _has_valid_trove_classifiers_floor(uv_constraints, supported_pythons)
     assert _has_valid_trove_classifiers_floor(["trove-classifiers>=2026.9.21.13"], supported_pythons)
+    assert _has_valid_trove_classifiers_floor(["trove-classifiers>=2025.5.8.13.post1"], supported_pythons)
     assert _has_valid_trove_classifiers_floor(
         ["trove-classifiers>=2025.5.8.13,!=2025.5.8.13"],
         supported_pythons,
