@@ -79,6 +79,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --locked --all-groups
       - name: Build Distributions via uv
+        env:
+          # Ship a universal pure-Python wheel alongside sdist until cross-platform maturin wheels land (#598).
+          HATCH_MATURIN_DISABLE: '1'
         run: uv build
       - name: Verify Built Version Matches Release Tag
         run: python tools/verify_release_version.py --tag "$RELEASE_TAG" --dist dist
