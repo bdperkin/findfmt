@@ -7,12 +7,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-20
+
 ### Features
 
 - *(core)* Add hybrid Python-Rust runtime dispatch gateway (`findfmt.core`, `findfmt._fallback`,
   `get_active_backend()`, `is_rust_backend_active()`, `is_rust_extension_loaded()`, and
   `FINDFMT_NO_EXTENSIONS=1` override) with automatic `ImportError` and `pyo3_runtime.PanicException` fallback
   (#578).
+
+### Changed
+
+- *(build)* Initialize the `findfmt_rs` PyO3 (`abi3-py311`, Rust 2024 edition) crate, PEP 484 `_rust_ext.pyi`
+  type stub, `hatch-maturin-build` integration, and `HATCH_MATURIN_DISABLE=1` pure-Python wheel fallback
+  (#577).
+- *(license)* Audit MIT license parity across Python and Rust manifests, configure `cargo-deny`
+  (`findfmt_rs/deny.toml`) and `cargo-about` (`findfmt_rs/about.toml`), and bundle `THIRD_PARTY_LICENSES.md`
+  in wheels and source distributions (#579).
+- *(docs)* Document hybrid Python-Rust developer setup, build commands, and the Architecture and Fallback FAQ
+  across `CONTRIBUTING.md`, `AGENTS.md`, `README.md`, and localized Sphinx documentation (#580, #576).
+- *(ci)* Enable `fail-fast` on OS matrices, guard `auto-retry.yml` against deterministic failures, and skip PR
+  title linting and CodeRabbit status checks on Mergify merge-queue draft pull requests (#689, #692).
+
+### Fixed
+
+- *(deps)* Constrain `trove-classifiers>=2025.5.8.13` under `[build-system]` and `[tool.uv]` for
+  `--resolution lowest` matrix runs and preserve Rich `13.8` help ANSI colors outside GitHub Actions (#700).
 
 ## [1.3.3] - 2026-11-18
 
@@ -863,4 +883,5 @@ future 1.x releases.
 [1.3.1]: https://github.com/bdperkin/findfmt/compare/v1.3.0...v1.3.1
 [1.3.2]: https://github.com/bdperkin/findfmt/compare/v1.3.1...v1.3.2
 [1.3.3]: https://github.com/bdperkin/findfmt/compare/v1.3.2...v1.3.3
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.3.3...HEAD
+[1.4.0]: https://github.com/bdperkin/findfmt/compare/v1.3.3...v1.4.0
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.4.0...HEAD
