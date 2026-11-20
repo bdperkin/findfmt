@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib
 import os
+from collections import Counter
 from typing import TYPE_CHECKING, Literal
 
 from findfmt import _fallback
@@ -20,6 +21,7 @@ __all__ = [
     "find_files",
     "get_active_backend",
     "is_rust_backend_active",
+    "is_rust_extension_loaded",
 ]
 
 _DISABLE_ENV_VAR = "FINDFMT_NO_EXTENSIONS"
@@ -59,13 +61,21 @@ def _is_rust_panic(exc: BaseException) -> bool:
     return cls.__name__ == "PanicException" and cls.__module__.startswith("pyo3_runtime")
 
 
-def is_rust_backend_active() -> bool:
-    """Return True when the native findfmt._rust_ext backend is loaded and enabled."""
+def is_rust_extension_loaded() -> bool:
+    """Return True when findfmt._rust_ext imported cleanly and is not disabled."""
     return _get_rust_ext() is not None
 
 
+def is_rust_backend_active() -> bool:
+    """Return True when findfmt._rust_ext is enabled and exposes gateway entrypoints."""
+    rust_ext = _get_rust_ext()
+    return rust_ext is not None and (
+        callable(getattr(rust_ext, "find_files", None)) or callable(getattr(rust_ext, "classify_file", None))
+    )
+
+
 def get_active_backend() -> Literal["rust", "python"]:
-    """Return the active runtime backend identifier ('rust' or 'python')."""
+    """Return the active runtime execution backend identifier ('rust' or 'python')."""
     return "rust" if is_rust_backend_active() else "python"
 
 
@@ -118,17 +128,20 @@ def find_files(
         getattr(rust_ext, "find_files", None) if rust_ext is not None else None
     )
     if rust_find is not None:
-        yielded_paths: set[Path] = set()
+        remaining_skips: Counter[tuple[Path, Path]] = Counter()
         try:
             for file_info in rust_find(config, on_error=on_error):
-                yielded_paths.add(file_info.path)
+                remaining_skips[(file_info.path, file_info.relative_path)] += 1
                 yield file_info
         except BaseException as exc:
             if not _is_rust_panic(exc):
                 raise
 
             for file_info in _fallback.find_files(config, on_error=on_error):
-                if file_info.path not in yielded_paths:
+                key = (file_info.path, file_info.relative_path)
+                if remaining_skips[key] > 0:
+                    remaining_skips[key] -= 1
+                else:
                     yield file_info
 
             return

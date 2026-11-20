@@ -12,6 +12,7 @@ from findfmt.core import (
     find_files,
     get_active_backend,
     is_rust_backend_active,
+    is_rust_extension_loaded,
 )
 from findfmt.exceptions import (
     FindFmtError,
@@ -110,6 +111,7 @@ __all__ = [
     "get_known_tags",
     "get_version",
     "is_rust_backend_active",
+    "is_rust_extension_loaded",
     "mask_control_characters",
     "ngettext",
     "override_locale",

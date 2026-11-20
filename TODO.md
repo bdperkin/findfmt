@@ -26,8 +26,8 @@
 > v1.3.1 and closed its milestone; 2026-11-16 closed `#470`, `#472`, and `#628`; 2026-11-17 closed `#629`,
 > `#630`, `#471`, epic `#380`, `#631`, and epic `#626`, and released v1.3.2 and closed its milestone;
 > 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`, and released v1.3.3 and
-> closed its milestone; 2026-11-19 closed `#579`, added and closed `#689` and `#692`; 2026-11-20 closed `#577`
-> and `#578`)
+> closed its milestone; 2026-11-19 closed `#579` and `#577`, added and closed `#689` and `#692`; 2026-11-20
+> closed `#578`)
 
 ______________________________________________________________________
 
@@ -740,8 +740,7 @@ Note: Ordered chronologically by completion date.
   temporary Mergify merge-queue draft PRs (Closed: 2026-11-19 via PR
   [#693](https://github.com/bdperkin/findfmt/pull/693))
 - [x] **[#577](https://github.com/bdperkin/findfmt/issues/577)** - build(rust): initialize findfmt_rs PyO3
-  crate and configure hatch-maturin-build in pyproject.toml (Closed: 2026-11-20 via PR
-  [#697](https://github.com/bdperkin/findfmt/pull/697))
+  crate and configure hatch-maturin-build in pyproject.toml (Closed: 2026-11-19)
 - [x] **[#578](https://github.com/bdperkin/findfmt/issues/578)** - feat(core): implement src/findfmt/core.py
   and \_fallback.py runtime dispatch gateway for findfmt.\_rust_ext (Closed: 2026-11-20)
 

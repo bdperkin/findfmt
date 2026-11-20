@@ -10,8 +10,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Features
 
 - *(core)* Add hybrid Python-Rust runtime dispatch gateway (`findfmt.core`, `findfmt._fallback`,
-  `get_active_backend()`, `is_rust_backend_active()`, and `FINDFMT_NO_EXTENSIONS=1` override) with automatic
-  `ImportError` and `pyo3_runtime.PanicException` fallback (#577, #578).
+  `get_active_backend()`, `is_rust_backend_active()`, `is_rust_extension_loaded()`, and
+  `FINDFMT_NO_EXTENSIONS=1` override) with automatic `ImportError` and `pyo3_runtime.PanicException` fallback
+  (#578).
 
 ## [1.3.3] - 2026-11-18
 

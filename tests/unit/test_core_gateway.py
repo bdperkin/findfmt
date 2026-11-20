@@ -78,20 +78,45 @@ def test_extensions_disabled_env_parsing_and_import_loader(
 
 
 def test_backend_inspection_helpers(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Verify is_rust_backend_active and get_active_backend across active/missing/disabled states."""
-    fake_ext = types.ModuleType("findfmt._rust_ext")
-    monkeypatch.setattr(core, "_RUST_EXT", fake_ext)
+    """Verify extension-loaded vs active execution-backend helpers across all states (#578)."""
     monkeypatch.delenv("FINDFMT_NO_EXTENSIONS", raising=False)
 
-    assert findfmt.is_rust_backend_active() is True
-    assert findfmt.get_active_backend() == "rust"
-
-    monkeypatch.setenv("FINDFMT_NO_EXTENSIONS", "1")
+    # Metadata-only extension loaded -> extension is loaded, execution backend remains python
+    bare_ext = types.ModuleType("findfmt._rust_ext")
+    monkeypatch.setattr(core, "_RUST_EXT", bare_ext)
+    assert findfmt.is_rust_extension_loaded() is True
     assert findfmt.is_rust_backend_active() is False
     assert findfmt.get_active_backend() == "python"
 
+    # Extension exposing classify_file -> active rust backend
+    classify_only_ext = _FakeRustExt("findfmt._rust_ext")
+    classify_only_ext.classify_file = lambda *_args, **_kwargs: FileInfo(
+        path=Path("a.py"),
+        relative_path=Path("a.py"),
+    )
+    monkeypatch.setattr(core, "_RUST_EXT", classify_only_ext)
+    assert findfmt.is_rust_extension_loaded() is True
+    assert findfmt.is_rust_backend_active() is True
+    assert findfmt.get_active_backend() == "rust"
+
+    # Extension exposing find_files -> active rust backend
+    find_only_ext = _FakeRustExt("findfmt._rust_ext")
+    find_only_ext.find_files = lambda *_args, **_kwargs: iter(())
+    monkeypatch.setattr(core, "_RUST_EXT", find_only_ext)
+    assert findfmt.is_rust_extension_loaded() is True
+    assert findfmt.is_rust_backend_active() is True
+    assert findfmt.get_active_backend() == "rust"
+
+    # Disabled via FINDFMT_NO_EXTENSIONS=1 -> neither loaded nor active
+    monkeypatch.setenv("FINDFMT_NO_EXTENSIONS", "1")
+    assert findfmt.is_rust_extension_loaded() is False
+    assert findfmt.is_rust_backend_active() is False
+    assert findfmt.get_active_backend() == "python"
+
+    # Missing extension -> neither loaded nor active
     monkeypatch.delenv("FINDFMT_NO_EXTENSIONS", raising=False)
     monkeypatch.setattr(core, "_RUST_EXT", None)
+    assert findfmt.is_rust_extension_loaded() is False
     assert findfmt.is_rust_backend_active() is False
     assert findfmt.get_active_backend() == "python"
 
@@ -150,24 +175,28 @@ def test_find_files_dispatch_and_panic_fallback(
     sample_repo: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Verify find_files dispatches to _rust_ext and recovers cleanly from immediate or mid-stream panics."""
-    config = TraversalConfig(root_paths=(sample_repo,))
+    """Verify find_files dispatches to _rust_ext and recovers cleanly including overlapping roots."""
+    overlap_cfg = TraversalConfig(root_paths=(sample_repo, sample_repo / "src"))
     monkeypatch.delenv("FINDFMT_NO_EXTENSIONS", raising=False)
 
-    # 1. Missing extension -> pure-Python fallback
+    # 1. Missing extension -> pure-Python fallback with overlapping roots
     monkeypatch.setattr(core, "_RUST_EXT", None)
-    expected = list(core.find_files(config))
-    assert len(expected) >= 2
+    expected = list(core.find_files(overlap_cfg))
+    app_occurrences = [f for f in expected if f.path.name == "app.py"]
+    assert len(app_occurrences) == 2
+    assert {f.relative_path for f in app_occurrences} == {Path("src/app.py"), Path("app.py")}
 
     # 2. Native find_files succeeds -> yields native items without invoking fallback
     native_ext = _FakeRustExt("findfmt._rust_ext")
-    native_item = expected[0]
+    native_item = app_occurrences[0]
     native_ext.find_files = lambda *_args, **_kwargs: iter([native_item])
     monkeypatch.setattr(core, "_RUST_EXT", native_ext)
-    assert list(core.find_files(config)) == [native_item]
+    assert list(core.find_files(overlap_cfg)) == [native_item]
 
-    # 3. Mid-stream pyo3_runtime.PanicException after yielding first item -> deduplicates and completes
+    # 3. Mid-stream pyo3_runtime.PanicException after yielding through first overlapping-root item
+    #    skips only already-delivered (path, relative_path) entries and preserves the second root's entry
     panic_cls = _make_rust_panic_cls()
+    cutoff = expected.index(app_occurrences[0]) + 1
 
     def _midstream_panic_find(
         _cfg: TraversalConfig,
@@ -175,13 +204,13 @@ def test_find_files_dispatch_and_panic_fallback(
         on_error: Callable[[OSError], None] | None = None,
     ) -> Iterator[FileInfo]:
         _ = on_error
-        yield expected[0]
+        yield from expected[:cutoff]
         msg = "simulated Rust panic mid-traversal"
         raise panic_cls(msg)
 
     native_ext.find_files = _midstream_panic_find
-    recovered = list(core.find_files(config))
-    assert [f.path for f in recovered] == [f.path for f in expected]
+    recovered = list(core.find_files(overlap_cfg))
+    assert [(f.path, f.relative_path) for f in recovered] == [(f.path, f.relative_path) for f in expected]
 
     # 4. Non-panic exception propagates normally
     def _broken_find(
@@ -195,7 +224,7 @@ def test_find_files_dispatch_and_panic_fallback(
 
     native_ext.find_files = _broken_find
     with pytest.raises(RuntimeError, match="ordinary runtime error"):
-        list(core.find_files(config))
+        list(core.find_files(overlap_cfg))
 
 
 def test_cli_parity_across_backends_and_simulated_panic(
@@ -236,6 +265,10 @@ def test_cli_parity_across_backends_and_simulated_panic(
 
     panicking_ext.find_files = _panic_find
     monkeypatch.setattr(core, "_RUST_EXT", panicking_ext)
+    res_diag_rust = runner.invoke(app, ["--diagnostics"])
+    assert res_diag_rust.exit_code == 0
+    assert "Backend: rust" in res_diag_rust.stdout
+
     res_panic = runner.invoke(app, [str(sample_repo)])
     assert res_panic.exit_code == 0
     assert res_panic.stdout == res_missing.stdout

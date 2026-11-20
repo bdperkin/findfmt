@@ -303,6 +303,10 @@
    "kind": "function",
    "signature": "() -> 'bool'"
   },
+  "is_rust_extension_loaded": {
+   "kind": "function",
+   "signature": "() -> 'bool'"
+  },
   "mask_control_characters": {
    "kind": "function",
    "signature": "(text: 'str') -> 'str'"
@@ -1620,6 +1624,10 @@
    "signature": "() -> \"Literal['rust', 'python']\""
   },
   "is_rust_backend_active": {
+   "kind": "function",
+   "signature": "() -> 'bool'"
+  },
+  "is_rust_extension_loaded": {
    "kind": "function",
    "signature": "() -> 'bool'"
   }
