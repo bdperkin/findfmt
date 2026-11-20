@@ -34,6 +34,7 @@ RESERVED_ENV_VARS: frozenset[str] = frozenset(
     {
         "FINDFMT_CONFIG",
         "FINDFMT_CONTAINER_TESTS",
+        "FINDFMT_NO_EXTENSIONS",
     },
 )
 _ENV_SOURCE = Path("environment")

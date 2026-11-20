@@ -6,7 +6,14 @@ import warnings
 from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
 from importlib.metadata import version as _pkg_version
 
-from findfmt.classifier import classify_file, get_known_tags
+from findfmt.classifier import get_known_tags
+from findfmt.core import (
+    classify_file,
+    find_files,
+    get_active_backend,
+    is_rust_backend_active,
+    is_rust_extension_loaded,
+)
 from findfmt.exceptions import (
     FindFmtError,
     InvalidSortCriteriaError,
@@ -36,7 +43,7 @@ from findfmt.sizes import (
     format_size_bytes,
     format_size_si,
 )
-from findfmt.traversal import find_files, traverse_directory
+from findfmt.traversal import traverse_directory
 from findfmt.utils.hyperlinks import (
     build_file_uri,
     format_hyperlink,
@@ -96,12 +103,15 @@ __all__ = [
     "format_size_bytes",
     "format_size_si",
     "format_timestamp",
+    "get_active_backend",
     "get_classification_indicator",
     "get_current_locale",
     "get_current_translation",
     "get_formatter",
     "get_known_tags",
     "get_version",
+    "is_rust_backend_active",
+    "is_rust_extension_loaded",
     "mask_control_characters",
     "ngettext",
     "override_locale",

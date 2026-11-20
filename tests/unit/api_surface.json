@@ -271,6 +271,10 @@
    "kind": "function",
    "signature": "(ts: 'float | None', fmt: 'str | None' = None) -> 'str'"
   },
+  "get_active_backend": {
+   "kind": "function",
+   "signature": "() -> \"Literal['rust', 'python']\""
+  },
   "get_classification_indicator": {
    "kind": "function",
    "signature": "(*, is_dir: 'bool' = False, is_symlink: 'bool' = False, is_executable: 'bool' = False, stat_result: 'os.stat_result | None' = None) -> 'str | None'"
@@ -294,6 +298,14 @@
   "get_version": {
    "kind": "function",
    "signature": "() -> 'str'"
+  },
+  "is_rust_backend_active": {
+   "kind": "function",
+   "signature": "() -> 'bool'"
+  },
+  "is_rust_extension_loaded": {
+   "kind": "function",
+   "signature": "() -> 'bool'"
   },
   "mask_control_characters": {
    "kind": "function",
@@ -1596,6 +1608,28 @@
   "strip_ansi": {
    "kind": "function",
    "signature": "(text: 'str') -> 'str'"
+  }
+ },
+ "findfmt.core": {
+  "classify_file": {
+   "kind": "function",
+   "signature": "(path: 'Path', root_path: 'Path | None' = None, prefix: 'Path | None' = None, accumulated_size: 'int | None' = None, *, entry: 'os.DirEntry[str] | None' = None, follow_symlinks: 'bool' = False) -> 'FileInfo'"
+  },
+  "find_files": {
+   "kind": "function",
+   "signature": "(config: 'TraversalConfig', *, on_error: 'Callable[[OSError], None] | None' = None) -> 'Iterator[FileInfo]'"
+  },
+  "get_active_backend": {
+   "kind": "function",
+   "signature": "() -> \"Literal['rust', 'python']\""
+  },
+  "is_rust_backend_active": {
+   "kind": "function",
+   "signature": "() -> 'bool'"
+  },
+  "is_rust_extension_loaded": {
+   "kind": "function",
+   "signature": "() -> 'bool'"
   }
  },
  "findfmt.diagnostics": {

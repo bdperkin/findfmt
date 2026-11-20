@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING
 import typer
 
 from findfmt import _FALLBACK_VERSION
+from findfmt.core import get_active_backend
 from findfmt.i18n import _
 
 if TYPE_CHECKING:
@@ -79,6 +80,7 @@ def get_diagnostics(ctx: typer.Context | None = None) -> str:
     py_ver = sys.version.split()[0]
     plat = platform.platform()
     lines.append(f"Python: {py_ver} ({plat})")
+    lines.append(f"Backend: {get_active_backend()}")
 
     try:
         identify_ver = version("identify")

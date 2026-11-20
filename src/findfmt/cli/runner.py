@@ -19,10 +19,10 @@ from findfmt.cli.terminal import (
     _StreamingPagerStream,
     is_color_enabled,
 )
+from findfmt.core import find_files
 from findfmt.exceptions import FindFmtError
 from findfmt.formatters import OutputFormat, get_formatter
 from findfmt.i18n import set_locale
-from findfmt.traversal import find_files
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable
