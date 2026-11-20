@@ -44,6 +44,10 @@ def test_mit_license_parity_across_python_and_rust_manifests() -> None:
     assert project["license"] == "MIT"
     assert project["license-files"] == ["LICENSE", "THIRD_PARTY_LICENSES.md"]
     assert all(not str(c).startswith("License ::") for c in project.get("classifiers", []))
+    build_requires = [str(r) for r in pyproject["build-system"]["requires"]]
+    uv_constraints = [str(r) for r in pyproject["tool"]["uv"]["constraint-dependencies"]]
+    assert any(r.startswith("trove-classifiers>=2025.5.8.13") for r in build_requires)
+    assert any(r.startswith("trove-classifiers>=2025.5.8.13") for r in uv_constraints)
 
     cargo_path = ROOT / "findfmt_rs" / "Cargo.toml"
     cargo_raw = cargo_path.read_text(encoding="utf-8")

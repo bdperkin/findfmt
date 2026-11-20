@@ -229,9 +229,10 @@ def display_with_pager(  # noqa: PLR0913 - wide CLI/config signature
 @contextlib.contextmanager
 def _help_color_env(*, color_on: bool) -> Generator[None]:
     """Configure environment variables for Rich help color rendering without global mutation."""
-    keys = ("TTY_COMPATIBLE", "NO_COLOR", "TERM")
+    keys = ("TTY_COMPATIBLE", "FORCE_COLOR", "NO_COLOR", "TERM")
     saved = {key: os.environ.get(key) for key in keys}
     os.environ["TTY_COMPATIBLE"] = "1" if color_on else "0"
+    os.environ["FORCE_COLOR"] = "1" if color_on else ""
     os.environ["NO_COLOR"] = "" if color_on else "1"
     if color_on and os.environ.get("TERM", "").strip().lower() in ("", "dumb", "unknown"):
         os.environ["TERM"] = "ansi"

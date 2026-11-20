@@ -27,17 +27,8 @@ from tools.dep_matrix import (
 )
 
 
-def _proc(
-    returncode: int = 0,
-    stdout: str = "",
-    stderr: str = "",
-) -> subprocess.CompletedProcess[str]:
-    return subprocess.CompletedProcess(
-        args=["cmd"],
-        returncode=returncode,
-        stdout=stdout,
-        stderr=stderr,
-    )
+def _proc(returncode: int = 0, stdout: str = "", stderr: str = "") -> subprocess.CompletedProcess[str]:
+    return subprocess.CompletedProcess(args=["cmd"], returncode=returncode, stdout=stdout, stderr=stderr)
 
 
 def test_matrix_cell_and_normalization_helpers() -> None:
@@ -71,7 +62,8 @@ def test_load_declared_bounds_and_locked_versions(tmp_path: Path) -> None:
     pyproject.write_text(
         '[project]\ndependencies = [\n  "typer>=0.16",\n'
         '  "typing_extensions>=4.4; python_version<\'3.12\'",\n  "===bad",\n]\n'
-        '[dependency-groups]\ntest = ["pytest>=8", { include-group = "other" }]\n',
+        '[dependency-groups]\ntest = ["pytest>=8", { include-group = "other" }]\n'
+        '[tool.uv]\nconstraint-dependencies = ["trove-classifiers>=2025.5.8.13"]\n',
         encoding="utf-8",
     )
     bounds = load_declared_bounds(pyproject)
@@ -79,6 +71,7 @@ def test_load_declared_bounds_and_locked_versions(tmp_path: Path) -> None:
         "typer": "typer>=0.16",
         "typing-extensions": "typing_extensions>=4.4",
         "pytest": "pytest>=8",
+        "trove-classifiers": "trove-classifiers>=2025.5.8.13",
     }
 
     lockfile = tmp_path / "uv.lock"

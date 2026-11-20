@@ -130,7 +130,13 @@ def run_matrix_cell(
             "--fork-strategy",
             cell.fork_strategy,
         ]
-        install_proc = subprocess.run(install_cmd, capture_output=True, text=True, check=False)
+        install_proc = subprocess.run(
+            install_cmd,
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
         if install_proc.returncode != 0:
             err_text = f"{install_proc.stdout or ''}\n{install_proc.stderr or ''}"
             sys.stderr.write(f"[-] Dependency resolution failed for {cell.cell_id}:\n{err_text}")
