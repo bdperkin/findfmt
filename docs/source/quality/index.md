@@ -23,7 +23,14 @@ and confirm bounded $O(1)$ memory usage across streaming output formatters (`tex
 See [Performance Architecture & Benchmarks](performance.md) for full topology baselines and regression testing
 procedures.
 
-## 3. Python Runtime Compatibility
+## 3. Hybrid Python-Rust Architecture & Fallback Guarantees
+
+`findfmt` pairs its strictly typed Python CLI and serializer suite with the `findfmt_rs` PyO3 native extension
+(`findfmt._rust_ext`), coordinated by `src/findfmt/core.py` and backed by automatic `ImportError`,
+`FINDFMT_NO_EXTENSIONS=1`, and `pyo3_runtime.PanicException` fallback to `src/findfmt/_fallback.py` (see
+[Hybrid Python-Rust Architecture & Fallback FAQ](hybrid_architecture.md)).
+
+## 4. Python Runtime Compatibility
 
 `findfmt` officially supports Python 3.11 through 3.15, with automated CI matrices testing Ubuntu, macOS, and
 Windows. A non-gating `3.16-dev` job gives early warning for the next Python release. Direct and transitive
@@ -37,6 +44,7 @@ version matrix:
 
 compatibility
 dependency_matrix
+hybrid_architecture
 performance
 sidebar_navigation
 ```

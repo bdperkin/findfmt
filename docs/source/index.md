@@ -80,8 +80,9 @@ files by content format, shebang, and MIME tag rather than relying strictly on f
   `.git/info/exclude` rules early in traversal.
 - **Deterministic Output**: Always produces clean, relative, alphabetically sorted file paths ready for Unix
   pipelines and `xargs`.
-- **Modern Python Architecture**: Built with a strict `uv`-first methodology, 100% test coverage, and strict
-  static type checking.
+- **Hybrid Python-Rust Architecture**: Built with a strict `uv`-first methodology, PyO3 `abi3-py311` native
+  extension support (`findfmt._rust_ext`), guaranteed pure-Python fallback (`FINDFMT_NO_EXTENSIONS=1`), 100%
+  test coverage, and strict static type checking.
 
 ## 2. Quickstart
 

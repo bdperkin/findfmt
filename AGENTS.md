@@ -6,14 +6,22 @@ codebase.
 
 ## 1. Project Overview & Architecture
 
-`findfmt` is a modern, high-performance Python command-line utility and library designed for
-`.gitignore`-aware file discovery and content format, shebang, and MIME tag classification.
+`findfmt` is a modern, high-performance hybrid Python-Rust command-line utility and library designed for
+`.gitignore`-aware file discovery and content format, shebang, and MIME tag classification. Native
+acceleration lives in the `findfmt_rs/` PyO3 crate (`findfmt._rust_ext`), dispatched through
+`src/findfmt/core.py` with automatic fallback to the pure-Python engine (`src/findfmt/_fallback.py`).
 
 ### 1.1. Core Module Layout
 
 - `src/findfmt/__init__.py` & `src/findfmt/__main__.py`: Package root exporting the public Python API
-  (`FileInfo`, `TraversalConfig`, `find_files`, `classify_file`, `get_formatter`, `FormatRegistry`) and
-  `python -m findfmt` execution entry point.
+  (`FileInfo`, `TraversalConfig`, `find_files`, `classify_file`, `get_formatter`, `is_rust_extension_loaded`,
+  `is_rust_backend_active`, `get_active_backend`) and `python -m findfmt` execution entry point.
+- `findfmt_rs/` & `src/findfmt/_rust_ext.pyi`: Rust 2024 edition (`>=1.85`) PyO3 crate (`abi3-py311`, `cdylib`
+  \+ `rlib`) compiled to `findfmt._rust_ext` via `hatch-maturin-build`, paired with strict PEP 484 type stubs
+  and Cargo license and supply chain configs (`deny.toml`, `about.toml`).
+- `src/findfmt/core.py` & `src/findfmt/_fallback.py`: Unified runtime dispatch gateway and pure-Python
+  fallback module. Honors `FINDFMT_NO_EXTENSIONS=1` and routes `ImportError` or `pyo3_runtime.PanicException`
+  cleanly to the pure-Python traversal and classification engines.
 - `src/findfmt/cli/`: Command-line interface powered by `Typer` and `Rich`:
   - `main.py`: Primary `Typer` application (`app`) and CLI invocation entry point.
   - `options.py`: CLI option declarations (`--hidden`, `--tag`, `--list-tags`, `--format`, etc.).
@@ -72,23 +80,42 @@ Defined under `[project.scripts]` in `pyproject.toml`:
 
 ## 2. Development & Test Workflow
 
-This project uses a `uv`-first Python toolchain alongside strict static analysis and `pre-commit` hooks.
+This project uses a `uv`-first Python toolchain alongside a stable Rust (`rustup`, `cargo`, `maturin`)
+toolchain, strict static analysis, and `pre-commit` hooks.
 
-### 2.1. Environment Setup & Dependencies
+### 2.1. Environment Setup, Rust Prerequisites, & Hybrid Builds
+
+Install Python `>=3.11`, `uv`, and a stable Rust `>=1.85` toolchain (`rustup`, `rustfmt`, `clippy`):
 
 ```bash
-# Sync virtual environment and all development, test, lint, and docs dependency groups
+# Install stable Rust toolchain and lint components
+rustup toolchain install stable
+rustup component add rustfmt clippy
+
+# Sync virtual environment, Python groups, and editable findfmt._rust_ext build
 uv sync --all-groups
 
-# Or sync with all extras and dev dependencies
-uv sync --all-extras --dev
+# Fast incremental rebuild of findfmt._rust_ext during Rust development
+uv run maturin develop --manifest-path findfmt_rs/Cargo.toml
+
+# Build native abi3 wheel or Cargo-free pure-Python fallback wheel
+uv build
+HATCH_MATURIN_DISABLE=1 uv build --wheel
 ```
 
-### 2.2. Running Tests
+### 2.2. Running Tests & Debugging Backends
 
 ```bash
 # Execute the complete test suite with pytest (enforces 100% statement and branch coverage)
 uv run pytest
+
+# Force pure-Python fallback at runtime and inspect active backend diagnostics
+FINDFMT_NO_EXTENSIONS=1 uv run pytest
+uv run findfmt --diagnostics
+
+# Run Rust unit tests via the rlib target and capture Rust panic backtraces
+cargo test --manifest-path findfmt_rs/Cargo.toml --no-default-features
+RUST_BACKTRACE=1 uv run pytest
 
 # Run the full local quality verification suite
 uv run python tools/verify_quality.py
@@ -96,16 +123,19 @@ uv run python tools/verify_quality.py
 
 ### 2.3. Linting, Formatting, and Pre-Commit
 
-Before committing code, ensure all static analysis checks and `pre-commit` hooks pass cleanly:
+Before committing code, ensure all Python, Rust, and `pre-commit` checks pass cleanly:
 
 ```bash
-# Run all 25+ pre-commit hooks across the repository
+# Run all pre-commit hooks across the repository
 uv run pre-commit run --all-files --show-diff-on-failure
 
-# Run Ruff linter, formatter check, and ty static type checker directly
+# Run Python and Rust linters, formatters, type checkers, and license audits directly
 uv run ruff check
 uv run ruff format --check
 uv run ty check
+cargo fmt --manifest-path findfmt_rs/Cargo.toml --check
+cargo clippy --manifest-path findfmt_rs/Cargo.toml --all-targets -- -D warnings
+cargo deny --manifest-path findfmt_rs/Cargo.toml check licenses bans sources
 ```
 
 When modifying public symbols in `__all__` or translatable strings wrapped in `_()` / `ngettext()`:
@@ -152,8 +182,10 @@ uv run python -m tools.i18n compile
 ## 5. AI Agent Guidelines & Behavioral Boundaries
 
 - **Preserve Modularity:** Never dump new CLI flags, matchers, or format rules into monolithic functions. Keep
-  concerns strictly separated between discovery (`src/findfmt/traversal/`), classification
-  (`src/findfmt/classifier.py`), and presentation (`src/findfmt/formatters/` and `src/findfmt/cli/`).
+  concerns strictly separated between gateway dispatch (`src/findfmt/core.py` and `src/findfmt/_fallback.py`),
+  native acceleration (`findfmt_rs/` and `src/findfmt/_rust_ext.pyi`), discovery (`src/findfmt/traversal/`),
+  classification (`src/findfmt/classifier.py`), and presentation (`src/findfmt/formatters/` and
+  `src/findfmt/cli/`).
 - **Test Coverage:** Every bug fix, new file format tag, or CLI feature must be accompanied by corresponding
   unit tests in `tests/` maintaining **100% statement and branch coverage**.
 - **Atomic Changes:** Make clean, isolated modifications that respect `pre-commit` formatting, linting,

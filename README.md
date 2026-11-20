@@ -325,24 +325,60 @@ formal exit-code contract (`0` success or early pipe close, `1` runtime error or
 
 ______________________________________________________________________
 
-## 5. Development & Testing
+## 5. Hybrid Python-Rust Architecture & Fallback FAQ
 
-This project enforces 100% test coverage and strict type checking:
+`findfmt` combines an ergonomic, strictly typed Python CLI and formatting layer with a native Rust PyO3
+extension crate (`findfmt_rs`, compiled to `findfmt._rust_ext` as a Python `3.11+` `abi3` wheel) coordinated
+by a unified runtime dispatch gateway (`src/findfmt/core.py`) and pure-Python fallback engine
+(`src/findfmt/_fallback.py`). See the full
+[Hybrid Python-Rust Architecture & Fallback FAQ](https://bdperkin.github.io/findfmt/quality/hybrid_architecture.html)
+in the documentation for architectural details.
+
+- **Why use a hybrid Python-Rust architecture?** Directory traversal, `.gitignore` pruning, shebang parsing,
+  and magic-byte header inspection execute once per candidate filesystem entry, making I/O and syscall latency
+  the dominant cost on large repositories, while CLI UX (`Typer`/`Rich`), 14 output serializers, layered TOML
+  configuration, and `gettext` localization benefit from Python's ecosystem.
+- **What if no prebuilt binary wheel exists for a target platform or Rust is unavailable?** `findfmt` remains
+  100% functional without Rust. If `findfmt._rust_ext` is absent (`ImportError`), `src/findfmt/core.py`
+  transparently routes `find_files()` and `classify_file()` to `src/findfmt/_fallback.py`. Packagers can also
+  build a Cargo-free pure-Python `py3-none-any` wheel by setting `HATCH_MATURIN_DISABLE=1`.
+- **How to force the pure-Python backend or check which backend is active?** Set `FINDFMT_NO_EXTENSIONS=1`
+  (`1`, `true`, `yes`, or `on`) to disable native extensions at runtime without reinstalling. Inspect runtime
+  status via `findfmt --diagnostics` (`Backend: rust` or `Backend: python`) or programmatically via
+  `findfmt.is_rust_extension_loaded()`, `findfmt.is_rust_backend_active()`, and
+  `findfmt.get_active_backend()`.
+- **What happens if the Rust extension panics at runtime?** PyO3 converts Rust panics into
+  `pyo3_runtime.PanicException` (inheriting from `BaseException`). `src/findfmt/core.py` catches
+  `PanicException` at both call and iterator boundaries—deduplicating any entries already yielded across
+  single or overlapping roots—and completes execution via `src/findfmt/_fallback.py` without crashing the CLI.
+
+______________________________________________________________________
+
+## 6. Development & Testing
+
+This project uses `uv` alongside a stable Rust toolchain (`rustup`, `rustfmt`, `clippy`, `maturin`) and
+enforces 100% test coverage and strict type checking:
 
 ```bash
 # Clone the repository
 git clone https://github.com/bdperkin/findfmt.git
 cd findfmt
 
-# Install dependencies with uv
+# Install Python dependencies and build the editable findfmt._rust_ext extension
 uv sync --all-groups
 
-# Run tests and verify 100% coverage
-uv run pytest
+# Incrementally rebuild findfmt._rust_ext during Rust development
+uv run maturin develop --manifest-path findfmt_rs/Cargo.toml
 
-# Run linting and typing
+# Run tests (native + pure-Python fallback) and verify 100% coverage
+uv run pytest
+FINDFMT_NO_EXTENSIONS=1 uv run pytest
+
+# Run Python and Rust linting and type checking
 uv run ruff check
 uv run ty check
+cargo fmt --manifest-path findfmt_rs/Cargo.toml --check
+cargo clippy --manifest-path findfmt_rs/Cargo.toml --all-targets -- -D warnings
 
 # Run full verification suite
 uv run python tools/verify_quality.py
@@ -350,7 +386,7 @@ uv run python tools/verify_quality.py
 
 ______________________________________________________________________
 
-## 6. Governance & Community
+## 7. Governance & Community
 
 - [Contributing Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)
 - [Developer & AI Agent Guidelines](https://github.com/bdperkin/findfmt/blob/main/AGENTS.md)
@@ -362,6 +398,6 @@ ______________________________________________________________________
 - [Documentation & User Guides](https://bdperkin.github.io/findfmt)
 - [Upgrading to 1.1](https://bdperkin.github.io/findfmt/guides/upgrading.html)
 
-## 7. License
+## 8. License
 
 [MIT License](https://github.com/bdperkin/findfmt/blob/main/LICENSE) © 2026 Brandon Perkins.

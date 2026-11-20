@@ -226,3 +226,12 @@
 (?i)maturin
 (?i)spdx
 (?i)copyleft
+(?i)rustup
+(?i)rustfmt
+(?i)clippy
+(?i)rustc
+(?i)abi3
+(?i)cdylib
+(?i)rlib
+(?i)backtraces
+(?i)ttys

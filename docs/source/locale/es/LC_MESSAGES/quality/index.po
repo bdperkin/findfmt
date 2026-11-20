@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-08 21:59+0000\n"
+"POT-Creation-Date: 2026-11-20 13:01-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
@@ -19,58 +19,58 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/quality/index.md:1 6a20cd256f0a4d70922312956c9e69b9
+#: ../../source/quality/index.md:1 acda404caa5a446485e1a857677809bb
 msgid "Quality Metrics & Architecture"
 msgstr ""
 
-#: ../../source/quality/index.md:3 d35366e6f1bd41bc8bd44a029b627290
+#: ../../source/quality/index.md:3 42d57fe8f6c64ceb80ec37f646b35684
 msgid "`findfmt` is engineered under the strictest software quality standards."
 msgstr ""
 
-#: ../../source/quality/index.md:5 7568e723dd364d3cb34f56c08f80983b
+#: ../../source/quality/index.md:5 4dd235a991404a6fbd349243ff21cc8c
 msgid "1. Code Quality Standards"
 msgstr ""
 
-#: ../../source/quality/index.md:7 77f931f48d1144d081a964eaa9e6020f
+#: ../../source/quality/index.md:7 c6802cf175384f2e9248b1fbbd77e27e
 msgid ""
 "**100% Code Coverage**: Enforced through `pytest-cov` and Codecov CI "
 "checks."
 msgstr ""
 
-#: ../../source/quality/index.md:8 664608a7ff6c4a9ea2a6413f08ced023
+#: ../../source/quality/index.md:8 f3351198ec544804a0db587653b1e959
 msgid ""
 "**Strict Static Typing**: Verified with `ty` in pedantic mode (`all = "
 "\"error\"`) and `pyproject.toml` configuration."
 msgstr ""
 
-#: ../../source/quality/index.md:10 f9e62bda867b45caa0b886b0feac34c8
+#: ../../source/quality/index.md:10 5f286156c9ea4e90a002972995af2efa
 msgid ""
 "**Ruff Strictness**: Formatted and linted using `ruff` with `ALL` rules "
 "selected."
 msgstr ""
 
-#: ../../source/quality/index.md:11 4cad236af92e43499fe063e5401bbb8a
+#: ../../source/quality/index.md:11 253945f357fd4bbd8f236552de66246b
 msgid "**Cyclomatic Complexity**: Monitored using `radon` and capped via `xenon`."
 msgstr ""
 
-#: ../../source/quality/index.md:12 6f00c650f5734f1f8db9492818bfe5d3
+#: ../../source/quality/index.md:12 4f32191fe7884e999fa1015ed9a177a7
 #, python-format
 msgid ""
 "**Documentation Completeness**: Monitored via `interrogate` ensuring 100%"
 " docstring coverage."
 msgstr ""
 
-#: ../../source/quality/index.md:13 cd0596152f304450a4857ec7a8fc4a22
+#: ../../source/quality/index.md:13 494f330a3582477eb36f064b4c527afd
 msgid ""
 "**Prose & Style Linting**: Enforced on all Markdown documentation using "
 "Vale with Google and Proselint style standards."
 msgstr ""
 
-#: ../../source/quality/index.md:16 3365c61ac71b44cda6d341c9d20e0e22
+#: ../../source/quality/index.md:16 51195dbf92754491b91c13523240356d
 msgid "2. Traversal Complexity Optimization & Performance Baselines"
 msgstr ""
 
-#: ../../source/quality/index.md:18 235ae76c64b144a384783b647f936641
+#: ../../source/quality/index.md:18 3866bce330dc49faa5989effbce3de23
 msgid ""
 "Repository traversal performs early pruning of `.gitignore` hierarchies "
 "to prevent recursing into expansive unneeded directory trees such as "
@@ -78,7 +78,7 @@ msgid ""
 "time."
 msgstr ""
 
-#: ../../source/quality/index.md:22 460fb6ff9a6744dc9293d116dcbcb64e
+#: ../../source/quality/index.md:21 3540bc38939d4267ac377a2595b0120d
 msgid ""
 "Official v1.0.0 benchmarks establish traversal throughput exceeding 3,000"
 " files/second on standard hierarchies and confirm bounded $O(1)$ memory "
@@ -87,11 +87,25 @@ msgid ""
 "topology baselines and regression testing procedures."
 msgstr ""
 
-#: ../../source/quality/index.md:27 16d4d3c080e74ec08dcd818e3e5278f7
-msgid "3. Python Runtime Compatibility"
+#: ../../source/quality/index.md:26 8908674419644aa2b853f580f89c54cb
+msgid "3. Hybrid Python-Rust Architecture & Fallback Guarantees"
 msgstr ""
 
-#: ../../source/quality/index.md:29 c34cf929cdea4e17a1762502d214fe8a
+#: ../../source/quality/index.md:28 a355c56cdde047c2b8ef077d287eb9d9
+msgid ""
+"`findfmt` pairs its strictly typed Python CLI and serializer suite with "
+"the `findfmt_rs` PyO3 native extension (`findfmt._rust_ext`), coordinated"
+" by `src/findfmt/core.py` and backed by automatic `ImportError`, "
+"`FINDFMT_NO_EXTENSIONS=1`, and `pyo3_runtime.PanicException` fallback to "
+"`src/findfmt/_fallback.py` (see [Hybrid Python-Rust Architecture & "
+"Fallback FAQ](hybrid_architecture.md))."
+msgstr ""
+
+#: ../../source/quality/index.md:33 524b946c73aa43af9983968843a243c8
+msgid "4. Python Runtime Compatibility"
+msgstr ""
+
+#: ../../source/quality/index.md:35 cb67dfe0480a49958a0464afa08136e5
 msgid ""
 "`findfmt` officially supports Python 3.11 through 3.15, with automated CI"
 " matrices testing Ubuntu, macOS, and Windows. A non-gating `3.16-dev` job"

@@ -178,6 +178,15 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_use_ivar = True
 
+# Nitpicky (-n) ignore patterns for offline stdlib/third-party autodoc annotations
+nitpick_ignore_regex = [
+    (r"py:class", r"^(?:abc|collections\.abc|enum|gettext|nt|os|pathlib|posix|types|typer|_click)\..*"),
+    (r"py:class", r"^(?:Callable|Console|Iterable|Iterator|ModuleType|Pager|Path|PathSpecType|PurePath)$"),
+    (r"py:class", r"^tuple\[.*"),
+    (r"py:class", r"^findfmt\.traversal\.sorting\._SortChunk$"),
+    (r"py:exc", r"^typer\..*"),
+]
+
 # Linkcheck options
 linkcheck_timeout = 15
 linkcheck_retries = 3
