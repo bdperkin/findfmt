@@ -360,4 +360,3 @@ msgid ""
 "Install `uv` alongside a stable Rust `>=1.85` toolchain via "
 "[`rustup`](https://rustup.rs/):"
 msgstr ""
-
