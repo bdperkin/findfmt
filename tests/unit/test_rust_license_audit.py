@@ -12,6 +12,10 @@ from typing import Any
 
 import pytest
 from hatchling.builders.wheel import WheelBuilder
+from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
+from packaging.version import Version
+from tools.dep_matrix import load_supported_pythons
 
 ROOT = Path(__file__).resolve().parents[2]
 EXPECTED_ALLOWED_LICENSES = [
@@ -33,6 +37,29 @@ def _load_toml(rel_path: str) -> dict[str, Any]:
     return tomllib.loads(path.read_text(encoding="utf-8"))
 
 
+def _has_valid_trove_classifiers_floor(raw_specs: list[str], supported_pythons: tuple[str, ...]) -> bool:
+    min_floor = Version("2025.5.8.13")
+    for raw in raw_specs:
+        req = Requirement(raw)
+        if canonicalize_name(req.name) != "trove-classifiers":
+            continue
+
+        if req.marker is not None and not all(
+            req.marker.evaluate({"python_version": py_ver}) for py_ver in supported_pythons
+        ):
+            continue
+
+        has_floor = any(
+            (spec.operator in {">=", "==", "~="} and Version(spec.version) >= min_floor)
+            or (spec.operator == ">" and Version(spec.version) >= Version("2025.5.8.12"))
+            for spec in req.specifier
+        )
+        if has_floor and not req.specifier.contains("2025.5.8.12"):
+            return True
+
+    return False
+
+
 def test_mit_license_parity_across_python_and_rust_manifests() -> None:
     """Verify pyproject.toml, LICENSE, and findfmt_rs/Cargo.toml declare consistent MIT metadata (#579)."""
     license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
@@ -44,10 +71,18 @@ def test_mit_license_parity_across_python_and_rust_manifests() -> None:
     assert project["license"] == "MIT"
     assert project["license-files"] == ["LICENSE", "THIRD_PARTY_LICENSES.md"]
     assert all(not str(c).startswith("License ::") for c in project.get("classifiers", []))
+    supported_pythons = load_supported_pythons(ROOT / "pyproject.toml")
+    assert supported_pythons
     build_requires = [str(r) for r in pyproject["build-system"]["requires"]]
     uv_constraints = [str(r) for r in pyproject["tool"]["uv"]["constraint-dependencies"]]
-    assert any(r.startswith("trove-classifiers>=2025.5.8.13") for r in build_requires)
-    assert any(r.startswith("trove-classifiers>=2025.5.8.13") for r in uv_constraints)
+    assert _has_valid_trove_classifiers_floor(build_requires, supported_pythons)
+    assert _has_valid_trove_classifiers_floor(uv_constraints, supported_pythons)
+    assert _has_valid_trove_classifiers_floor(["trove-classifiers>=2026.9.21.13"], supported_pythons)
+    assert not _has_valid_trove_classifiers_floor(["trove-classifiers>=2025.5.8.12"], supported_pythons)
+    assert not _has_valid_trove_classifiers_floor(
+        ["trove-classifiers>=2025.5.8.13; python_version<'3.11'"],
+        supported_pythons,
+    )
 
     cargo_path = ROOT / "findfmt_rs" / "Cargo.toml"
     cargo_raw = cargo_path.read_text(encoding="utf-8")

@@ -98,6 +98,7 @@ def run_matrix_cell(
     pytest_args: Sequence[str] = (),
 ) -> bool:
     """Execute a single dependency resolution permutation in a clean temporary virtualenv."""
+    resolved_root = repo_root.resolve()
     sys.stdout.write(f"\n[+] Matrix Cell {cell.label}\n")
     sys.stdout.flush()
     with tempfile.TemporaryDirectory(prefix=f"findfmt-matrix-{cell.cell_id.lower()}-") as tmp_dir:
@@ -122,7 +123,7 @@ def run_matrix_cell(
             "--group",
             "test",
             "-e",
-            str(repo_root),
+            str(resolved_root),
             "--resolution",
             cell.resolution,
             "--prerelease",
@@ -132,7 +133,7 @@ def run_matrix_cell(
         ]
         install_proc = subprocess.run(
             install_cmd,
-            cwd=repo_root,
+            cwd=resolved_root,
             capture_output=True,
             text=True,
             check=False,
@@ -140,13 +141,13 @@ def run_matrix_cell(
         if install_proc.returncode != 0:
             err_text = f"{install_proc.stdout or ''}\n{install_proc.stderr or ''}"
             sys.stderr.write(f"[-] Dependency resolution failed for {cell.cell_id}:\n{err_text}")
-            sys.stderr.write(capture_diagnostics(cell, env_dir, repo_root, err_text))
+            sys.stderr.write(capture_diagnostics(cell, env_dir, resolved_root, err_text))
             return False
 
         test_cmd = [str(resolve_venv_python(env_dir)), "-m", "pytest", *pytest_args]
         test_proc = subprocess.run(
             test_cmd,
-            cwd=repo_root,
+            cwd=resolved_root,
             capture_output=True,
             text=True,
             check=False,
@@ -154,7 +155,7 @@ def run_matrix_cell(
         if test_proc.returncode != 0:
             err_text = f"{test_proc.stdout or ''}\n{test_proc.stderr or ''}"
             sys.stderr.write(f"[-] Pytest failed for {cell.cell_id}:\n{err_text}")
-            sys.stderr.write(capture_diagnostics(cell, env_dir, repo_root, err_text))
+            sys.stderr.write(capture_diagnostics(cell, env_dir, resolved_root, err_text))
             return False
 
         sys.stdout.write(f"[✓] Cell {cell.cell_id} passed.\n")
