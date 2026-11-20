@@ -58,26 +58,76 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
 
 ## 3. Development Setup
 
-`findfmt` uses `uv` for package and dependency management.
+`findfmt` uses `uv` for Python package management alongside a stable Rust toolchain (`>=1.85`, edition 2024)
+and `maturin` (`hatch-maturin-build`) to compile the `findfmt_rs/` PyO3 native extension into
+`findfmt._rust_ext`.
 
-1. **Fork and Clone**:
+1. **Install Rust Toolchain Prerequisites**:
+
+   Install [`rustup`](https://rustup.rs/) with `rustfmt` and `clippy` (plus `cargo-deny` and `cargo-about`
+   when modifying Cargo dependencies):
+
+   ```bash
+   rustup toolchain install stable
+   rustup component add rustfmt clippy
+   cargo install --locked cargo-deny cargo-about
+   ```
+
+2. **Fork and Clone**:
 
    ```bash
    git clone https://github.com/bdperkin/findfmt.git
    cd findfmt
    ```
 
-2. **Sync Dependencies**:
+3. **Sync Dependencies & Build Editable Extension**:
 
    ```bash
    uv sync --all-groups
    ```
 
-3. **Install Pre-Commit Hooks**:
+   During iterative Rust work in `findfmt_rs/`, recompile the in-tree `findfmt._rust_ext` extension directly
+   with `maturin`:
+
+   ```bash
+   uv run maturin develop --manifest-path findfmt_rs/Cargo.toml
+   ```
+
+   To build a pure-Python `py3-none-any` wheel without invoking `maturin` or `cargo` (for example, in
+   documentation-only or Rust-free environments), set `HATCH_MATURIN_DISABLE=1`:
+
+   ```bash
+   HATCH_MATURIN_DISABLE=1 uv build --wheel
+   ```
+
+4. **Install Pre-Commit Hooks**:
 
    ```bash
    uv run pre-commit install
    ```
+
+### 3.1. Debugging Hybrid Python-Rust Code
+
+- **Inspect Extension & Active Backend State**: Run `uv run findfmt --diagnostics` (or
+  `uv run python -c "import findfmt; print(findfmt.is_rust_extension_loaded(), findfmt.get_active_backend())"`)
+  to confirm whether `findfmt._rust_ext` is loaded and which execution backend is active.
+- **Isolate Pure-Python vs. Native Behavior**: Prefix any CLI command or `pytest` invocation with
+  `FINDFMT_NO_EXTENSIONS=1` to bypass `findfmt._rust_ext` and route execution through
+  `src/findfmt/_fallback.py` without uninstalling the compiled binary:
+  ```bash
+  FINDFMT_NO_EXTENSIONS=1 uv run pytest
+  FINDFMT_NO_EXTENSIONS=1 uv run findfmt --diagnostics
+  ```
+- **Rust Unit Tests & Backtraces**: Because `findfmt_rs/Cargo.toml` declares `crate-type = ["cdylib", "rlib"]`
+  with `extension-module` gated as a default feature, run standalone Rust unit tests with
+  `--no-default-features` and enable `RUST_BACKTRACE=1` to inspect panics across the PyO3 boundary:
+  ```bash
+  cargo test --manifest-path findfmt_rs/Cargo.toml --no-default-features
+  RUST_BACKTRACE=1 uv run pytest -k core_gateway
+  ```
+- **Interactive Native Debugging**: Build a debug extension
+  (`uv run maturin develop --manifest-path findfmt_rs/Cargo.toml`) and attach `rust-lldb` or `rust-gdb` to the
+  virtual environment interpreter (`rust-lldb -- .venv/bin/python -m pytest tests/unit/test_core_gateway.py`).
 
 ## 4. Quality and Testing Standards
 
@@ -109,9 +159,12 @@ All pull requests must satisfy our quality gate before merging:
   uv run ruff format --check
   uv run mdformat --check *.md docs/
   ```
-- **Strict Type Checking**:
+- **Strict Type Checking & Rust Static Analysis**: Verify Python type annotations (including
+  `src/findfmt/_rust_ext.pyi`) with `ty` and verify Rust formatting and lints with `rustfmt` and `clippy`:
   ```bash
   uv run ty check
+  cargo fmt --manifest-path findfmt_rs/Cargo.toml --check
+  cargo clippy --manifest-path findfmt_rs/Cargo.toml --all-targets -- -D warnings
   ```
 - **Documentation Build Verification**: Ensure Sphinx HTML builds cleanly with zero warnings (`-W`):
   ```bash

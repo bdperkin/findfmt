@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 01:04-0400\n"
+"POT-Creation-Date: 2026-11-20 13:01-0500\n"
 "PO-Revision-Date: 2026-11-05 20:20-0500\n"
 "Last-Translator: Brandon Perkins <bdperkin@gmail.com>\n"
 "Language: es\n"
@@ -18,51 +18,360 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/index.md:123
+#: ../../source/index.md:149
 msgid "User Guide"
 msgstr "Guía del usuario"
 
-#: ../../source/index.md:130
+#: ../../source/index.md:156
 msgid "CLI Reference"
 msgstr "Referencia de la CLI"
 
-#: ../../source/index.md:137
+#: ../../source/index.md:163
 msgid "API Documentation"
 msgstr "Documentación de la API"
 
-#: ../../source/index.md:144
+#: ../../source/index.md:170
 msgid "Quality & Architecture"
 msgstr "Calidad y arquitectura"
 
-#: ../../source/index.md:151
+#: ../../source/index.md:177
 msgid "Community & Governance"
 msgstr "Comunidad y gobernanza"
 
-#: ../../source/index.md:1 cb2eb9079ada4cd5840f87a7226fa056
+#: ../../source/index.md:1 9a885191aa45456eaaa2e485a98674f7
 msgid "findfmt Documentation"
 msgstr "Documentación de findfmt"
 
 #: ../../source/index.md:4 ../../source/index.md:12
-#: 35432b9b0a034b14952fcfb3c1c9c40e e90f2cd885c540deb89292d56e7c1853
+#: 25b754ef5aca4d7098ae1204b038b055 8a6928836e24489a9328f8229ee256a4
 msgid "findfmt Logo"
 msgstr "Logotipo de findfmt"
 
-#: ../../source/index.md:45 711e6201daa94a4da9128229bd3f50dc
+#: ../../source/index.md:20 ee3c41455ffe469fadc8e0ff05713a85
+#, python-format
+msgid ""
+"[![PyPI "
+"Version](https://img.shields.io/pypi/v/findfmt?logo=pypi&logoColor=white)](https://pypi.org/project/findfmt/)"
+" [![Python "
+"Versions](https://img.shields.io/pypi/pyversions/findfmt?logo=python&logoColor=white)](https://pypi.org/project/findfmt/)"
+" [![PyPI "
+"Wheel](https://img.shields.io/pypi/wheel/findfmt?logo=pypi&logoColor=white)](https://pypi.org/project/findfmt/#files)"
+" [![PyPI "
+"Status](https://img.shields.io/pypi/status/findfmt?logo=pypi&logoColor=white)](https://pypi.org/project/findfmt/)"
+" [![PyPI "
+"Downloads](https://img.shields.io/pypi/dm/findfmt?logo=pypi&logoColor=white)](https://pypistats.org/packages/findfmt)"
+" [![GitHub "
+"Release](https://img.shields.io/github/v/release/bdperkin/findfmt?logo=github)](https://github.com/bdperkin/findfmt/releases/latest)"
+" [![GHCR Container](https://img.shields.io/badge/GHCR-ghcr.io%2Fbdperkin"
+"%2Ffindfmt-"
+"2496ED?logo=docker&logoColor=white)](https://github.com/bdperkin/findfmt/pkgs/container/findfmt)"
+" [![Platforms](https://img.shields.io/badge/platform-"
+"Linux%20%7C%20macOS%20%7C%20Windows-"
+"informational?logo=linux&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/ci.yml)"
+" [![Hatch](https://img.shields.io/badge/build%20system-hatch-"
+"orange?logo=python&logoColor=white)](https://hatch.pypa.io/)"
+msgstr ""
+
+#: ../../source/index.md:20 fec0248c02624fa48f7ad2f410c5cde7
+msgid "PyPI Version"
+msgstr ""
+
+#: ../../source/index.md:20 78b4ae23bde3466d92e698523553981d
+msgid "Python Versions"
+msgstr ""
+
+#: ../../source/index.md:20 1163ea33bb6040a0a80b0c8244666737
+msgid "PyPI Wheel"
+msgstr ""
+
+#: ../../source/index.md:20 27cc3a989c49439c854ff1666057d4f8
+msgid "PyPI Status"
+msgstr ""
+
+#: ../../source/index.md:20 e2b0729263d94143909b4869c20edac1
+msgid "PyPI Downloads"
+msgstr ""
+
+#: ../../source/index.md:20 ab55e6eb74b346febf53466364a889a2
+msgid "GitHub Release"
+msgstr ""
+
+#: ../../source/index.md:20 c4797c54e3c44d5794a3ef4c3a166130
+msgid "GHCR Container"
+msgstr ""
+
+#: ../../source/index.md:20 f50caefc211b4b1fb9cafe45191dc9f5
+msgid "Platforms"
+msgstr ""
+
+#: ../../source/index.md:20 aff787788cf14751be20e3ebccbb5cf4
+msgid "Hatch"
+msgstr ""
+
+#: ../../source/index.md:30 5626ee9f511344829e3d5c0b464f212d
+msgid ""
+"[![CI "
+"Status](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/ci.yml?branch=main&label=CI&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows/ci.yml)"
+" [![Dependency "
+"Matrix](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt"
+"/dependency-"
+"matrix.yml?branch=main&label=deps%20matrix&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows"
+"/dependency-matrix.yml) [![Docs "
+"Build](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/docs.yml?branch=main&label=docs&logo=readthedocs&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/docs.yml)"
+" [![Vale Prose "
+"Lint](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/vale.yml?branch=main&label=vale&logo=markdown&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/vale.yml)"
+" [![pre-commit.ci status](https://results.pre-"
+"commit.ci/badge/github/bdperkin/findfmt/main.svg)](https://results.pre-"
+"commit.ci/latest/github/bdperkin/findfmt/main) [![Last "
+"Commit](https://img.shields.io/github/last-"
+"commit/bdperkin/findfmt/main?logo=git&logoColor=white)](https://github.com/bdperkin/findfmt/commits/main)"
+msgstr ""
+
+#: ../../source/index.md:30 baf75dc6b3ea4683a308e2f98661a1a0
+msgid "CI Status"
+msgstr ""
+
+#: ../../source/index.md:30 66b95276c23e4b0c9bc6cfe27b7d0f5b
+msgid "Dependency Matrix"
+msgstr ""
+
+#: ../../source/index.md:30 37670bcb5bbc4fd281f809baadec90f6
+msgid "Docs Build"
+msgstr ""
+
+#: ../../source/index.md:30 67a4e6cb58b349d28665773bccab2107
+msgid "Vale Prose Lint"
+msgstr ""
+
+#: ../../source/index.md:30 fba84fa65a2a4a86a9f2266a1daa460e
+msgid "pre-commit.ci status"
+msgstr ""
+
+#: ../../source/index.md:30 361638f4854b4f7ab271e47205934cb3
+msgid "Last Commit"
+msgstr ""
+
+#: ../../source/index.md:37 a212e367b3cc4e84af7ffd6f276fa2e2
+#, python-format
+msgid ""
+"[![Coverage](https://codecov.io/gh/bdperkin/findfmt/branch/main/graph/badge.svg)](https://codecov.io/gh/bdperkin/findfmt)"
+" "
+"[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com"
+"/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-"
+"sh/uv) "
+"[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com"
+"/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-"
+"sh/ruff) "
+"[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com"
+"/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-"
+"sh/ty) [![Docstring Coverage: "
+"100%](https://img.shields.io/badge/interrogate-100%25-brightgreen?logo=readthedocs&logoColor=white)](https://interrogate.readthedocs.io/)"
+" [![Tested with Hypothesis](https://img.shields.io/badge/hypothesis-"
+"tested-"
+"brightgreen?logo=python&logoColor=white)](https://hypothesis.readthedocs.io/)"
+" [![PEP 561 Typed](https://img.shields.io/badge/typing-PEP%20561%20py"
+".typed-"
+"3776AB?logo=python&logoColor=white)](https://peps.python.org/pep-0561/) "
+"[![Deptry](https://img.shields.io/badge/deptry-checked-"
+"informational)](https://deptry.com/) "
+"[![Vulture](https://img.shields.io/badge/vulture-checked-"
+"informational)](https://github.com/jendrikseipp/vulture) "
+"[![Xenon](https://img.shields.io/badge/xenon-monitored-"
+"informational)](https://xenon.readthedocs.io/) "
+"[![Codespell](https://img.shields.io/badge/codespell-checked-"
+"informational)](https://github.com/codespell-project/codespell) "
+"[![PyMarkdown](https://img.shields.io/badge/pymarkdown-linted-"
+"informational?logo=markdown&logoColor=white)](https://pymarkdown.readthedocs.io/)"
+msgstr ""
+
+#: ../../source/index.md:37 aa0ddef28fe54f709e32d36abb3e0be2
+msgid "Coverage"
+msgstr ""
+
+#: ../../source/index.md:37 969e301eaa29464f8d2dc4aa6c1ae695
+msgid "uv"
+msgstr ""
+
+#: ../../source/index.md:37 f636a1a10c304c2390b89d4bd21bde8e
+msgid "Ruff"
+msgstr ""
+
+#: ../../source/index.md:37 5d1e455010f94506a0f9d3fecaa708f6
+msgid "ty"
+msgstr ""
+
+#: ../../source/index.md:37 8b554a0ebea94fe1b3546674e56d0162
+msgid "Docstring Coverage: 100%"
+msgstr ""
+
+#: ../../source/index.md:37 2b957bf82fb64aa9acc77b78f8ece9b0
+msgid "Tested with Hypothesis"
+msgstr ""
+
+#: ../../source/index.md:37 53cba3f655174252870233aaac110b0a
+msgid "PEP 561 Typed"
+msgstr ""
+
+#: ../../source/index.md:37 3236ef6d4c2647ac9ab04f38e34c19ac
+msgid "Deptry"
+msgstr ""
+
+#: ../../source/index.md:37 80ece2207dc0485b9a5ebe5487803568
+msgid "Vulture"
+msgstr ""
+
+#: ../../source/index.md:37 8eb136b816934d708b2e81bab46ea783
+msgid "Xenon"
+msgstr ""
+
+#: ../../source/index.md:37 88e6b791df944aaaa1874b8a06b55ba5
+msgid "Codespell"
+msgstr ""
+
+#: ../../source/index.md:37 2fa0d3d338e94bc6986af2ba97bf044a
+msgid "PyMarkdown"
+msgstr ""
+
+#: ../../source/index.md:50 5a0d1d94136c48e2abc7bb4b4fbeaf15
+msgid ""
+"[![CodeQL](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/codeql.yml?branch=main&label=CodeQL&logo=github)](https://github.com/bdperkin/findfmt/actions/workflows/codeql.yml)"
+" "
+"[![zizmor](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/zizmor.yml?branch=main&label=zizmor&logo=githubactions&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/zizmor.yml)"
+" "
+"[![ClusterFuzzLite](https://img.shields.io/github/actions/workflow/status/bdperkin/findfmt/cflite.yml?branch=main&label=ClusterFuzzLite&logo=google&logoColor=white)](https://github.com/bdperkin/findfmt/actions/workflows/cflite.yml)"
+" [![GitGuardian](https://img.shields.io/badge/GitGuardian-monitored-"
+"0052CC?logo=gitguardian&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/.gitguardian.yaml)"
+" [![Dependabot](https://img.shields.io/badge/dependabot-enabled-"
+"025E8C?logo=dependabot&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/.github/dependabot.yml)"
+" [![OpenSSF "
+"Scorecard](https://api.securityscorecards.dev/projects/github.com/bdperkin/findfmt/badge)](https://securityscorecards.dev/viewer/?uri=github.com/bdperkin/findfmt)"
+" [![OpenSSF Best "
+"Practices](https://www.bestpractices.dev/projects/15282/badge)](https://www.bestpractices.dev/projects/15282)"
+" [![SLSA Provenance](https://img.shields.io/badge/SLSA-build"
+"%20provenance-"
+"2088FF?logo=githubactions&logoColor=white)](https://github.com/bdperkin/findfmt/attestations)"
+" [![Security Policy](https://img.shields.io/badge/security-policy-"
+"blue?logo=securityscorecard&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/SECURITY.md)"
+msgstr ""
+
+#: ../../source/index.md:50 5c361d0532a84d87850dc38e84f3e3c7
+msgid "CodeQL"
+msgstr ""
+
+#: ../../source/index.md:50 74bb4b7fe3b44a2d91e74a2646dbfd9e
+msgid "zizmor"
+msgstr ""
+
+#: ../../source/index.md:50 7e3c41ce086d4f38a92c70e591c4cdf3
+msgid "ClusterFuzzLite"
+msgstr ""
+
+#: ../../source/index.md:50 fb8c80f967144700b63870a4a7edeae4
+msgid "GitGuardian"
+msgstr ""
+
+#: ../../source/index.md:50 5e8b96fdf6a2428b9146e3a547188907
+msgid "Dependabot"
+msgstr ""
+
+#: ../../source/index.md:50 8a51e5033d9e4a06a94f6c79557445c2
+msgid "OpenSSF Scorecard"
+msgstr ""
+
+#: ../../source/index.md:50 700aa152a8094658950e03307220778c
+msgid "OpenSSF Best Practices"
+msgstr ""
+
+#: ../../source/index.md:50 9cad3ef9ec43465aae604bffdb938011
+msgid "SLSA Provenance"
+msgstr ""
+
+#: ../../source/index.md:50 2f05d4be366542acbb150673f2c52055
+msgid "Security Policy"
+msgstr ""
+
+#: ../../source/index.md:60 9c600db9e94f465b92e9607ae9c474ab
+#, python-format
+msgid ""
+"[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-"
+"blue?logo=sphinx&logoColor=white)](https://bdperkin.github.io/findfmt/) "
+"[![i18n Languages](https://img.shields.io/badge/i18n-"
+"en%20%C2%B7%20es%20%C2%B7%20fr%20%C2%B7%20de%20%C2%B7%20ja-"
+"blue)](https://bdperkin.github.io/findfmt/) [![License: "
+"MIT](https://img.shields.io/github/license/bdperkin/findfmt?color=blue&logo=opensourceinitiative&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/LICENSE)"
+" [![Semantic "
+"Versioning](https://img.shields.io/badge/semver-2.0.0-blue?logo=semver&logoColor=white)](https://semver.org/spec/v2.0.0.html)"
+" [![Conventional "
+"Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org/)"
+" [![Keep a Changelog](https://img.shields.io/badge/changelog-"
+"Keep%20a%20Changelog-E05735?logo=keepachangelog&logoColor=white)](https://github.com/bdperkin/findfmt/blob/main/CHANGELOG.md)"
+" [![Accessibility WCAG 2.1 AA](https://img.shields.io/badge/WCAG-2.1"
+"%20AA-005A9C?logo=w3c&logoColor=white)](accessibility.md) [![Pull "
+"Requests Welcome](https://img.shields.io/badge/PRs-welcome-"
+"brightgreen?logo=github)](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)"
+" [![GitHub "
+"Issues](https://img.shields.io/github/issues/bdperkin/findfmt?logo=github)](https://github.com/bdperkin/findfmt/issues)"
+" [![GitHub "
+"Stars](https://img.shields.io/github/stars/bdperkin/findfmt?style=flat&logo=github)](https://github.com/bdperkin/findfmt/stargazers)"
+msgstr ""
+
+#: ../../source/index.md:60 f7a403743f2a470a90527f58c126c33b
+#, fuzzy
+msgid "Documentation"
+msgstr "Documentación de la API"
+
+#: ../../source/index.md:60 9ed99b3e21774ac399474f9a85a0af12
+msgid "i18n Languages"
+msgstr ""
+
+#: ../../source/index.md:60 426371939ed44b9c9df35702670bfbef
+msgid "License: MIT"
+msgstr ""
+
+#: ../../source/index.md:60 32fb8f5b7d1c4344b02798024af4797c
+msgid "Semantic Versioning"
+msgstr ""
+
+#: ../../source/index.md:60 96bf8c15eafd4dd6adedde20e08f535a
+msgid "Conventional Commits"
+msgstr ""
+
+#: ../../source/index.md:60 c5b735c20987431ca84d389e7965ad41
+msgid "Keep a Changelog"
+msgstr ""
+
+#: ../../source/index.md:60 ff02b5869fba42869b3199c8151f3500
+msgid "Accessibility WCAG 2.1 AA"
+msgstr ""
+
+#: ../../source/index.md:60 986eaed5502f43579f770badb5a50657
+msgid "Pull Requests Welcome"
+msgstr ""
+
+#: ../../source/index.md:60 30898550b684496986806541cbbe2565
+msgid "GitHub Issues"
+msgstr ""
+
+#: ../../source/index.md:60 eb507a365a4e45e58b76a29874490c64
+msgid "GitHub Stars"
+msgstr ""
+
+#: ../../source/index.md:72 ec110c00fad4488d9ce40233ffe7bbf2
 msgid ""
 "**findfmt** is a high-performance, `.gitignore`-aware file discovery and "
 "classification suite. It locates files by content format, shebang, and "
 "MIME tag rather than relying strictly on file extensions."
 msgstr ""
-"**findfmt** es una suite de descubrimiento y clasificación de archivos de "
-"alto rendimiento compatible con `.gitignore`. Localiza archivos por "
+"**findfmt** es una suite de descubrimiento y clasificación de archivos de"
+" alto rendimiento compatible con `.gitignore`. Localiza archivos por "
 "formato de contenido, directiva shebang y etiqueta MIME en lugar de "
 "depender estrictamente de las extensiones de archivo."
 
-#: ../../source/index.md:49 772d77d92cac412683d9c64cb989d4a0
+#: ../../source/index.md:75 122b4e49677543f3a41de32add1fd26d
 msgid "1. Core Capabilities"
 msgstr "1. Capacidades principales"
 
-#: ../../source/index.md:51 6e5f9db043564f769dbe5062e4a82490
+#: ../../source/index.md:77 8ff8f928461c491b92e97809f2035ccc
 msgid ""
 "**Intelligent Classification**: Powered by the `identify` engine and "
 "content heuristics to identify file types (e.g. Python, Shell, YAML, "
@@ -73,7 +382,7 @@ msgstr ""
 "Python, Shell, YAML, JSON, Ejecutable) incluso cuando los nombres de "
 "archivo carecen de extensión."
 
-#: ../../source/index.md:54 30f2427d5d88481d89564181243a2316
+#: ../../source/index.md:79 6bac98afcf304d638df5df6976df6eaa
 msgid ""
 "**Git-Aware Traversal**: Automatically prunes directories and files "
 "matched by `.gitignore` and `.git/info/exclude` rules early in traversal."
@@ -82,7 +391,7 @@ msgstr ""
 "archivos que coinciden con las reglas de `.gitignore` y "
 "`.git/info/exclude` en una fase temprana del recorrido."
 
-#: ../../source/index.md:56 1241c9f178c04b71b30a12cbfcae4cae
+#: ../../source/index.md:81 fd26666ac90b4df5bdd2a6001b5090c0
 msgid ""
 "**Deterministic Output**: Always produces clean, relative, alphabetically"
 " sorted file paths ready for Unix pipelines and `xargs`."
@@ -91,50 +400,54 @@ msgstr ""
 "relativas y ordenadas alfabéticamente, listas para tuberías Unix y "
 "`xargs`."
 
-#: ../../source/index.md:58 b6d45648076c43e8ade785e941264ff6
+#: ../../source/index.md:83 61deb62298394b5dbcf45f0efb3b1d32
+#, fuzzy
 msgid ""
-"**Modern Python Architecture**: Built with a strict `uv`-first "
-"methodology, 100% test coverage, and strict static type checking."
+"**Hybrid Python-Rust Architecture**: Built with a strict `uv`-first "
+"methodology, PyO3 `abi3-py311` native extension support "
+"(`findfmt._rust_ext`), guaranteed pure-Python fallback "
+"(`FINDFMT_NO_EXTENSIONS=1`), 100% test coverage, and strict static type "
+"checking."
 msgstr ""
 "**Arquitectura moderna en Python**: Construida con una metodología "
 "estricta basada en `uv`, 100% de cobertura de pruebas y verificación "
 "estricta de tipos estáticos."
 
-#: ../../source/index.md:61 3c88c60e886c471f81e09ae5bf665c17
+#: ../../source/index.md:87 867aed5fceb243e5a692b1d9745cc9a4
 msgid "2. Quickstart"
 msgstr "2. Inicio rápido"
 
-#: ../../source/index.md:63 1b59420587cd44f09d0a31d25790f6e4
+#: ../../source/index.md:89 8f1cf869e3da4b1faa8cf8d3413c3029
 msgid "2.1. Direct Execution & Installation"
 msgstr "2.1. Ejecución directa e instalación"
 
-#: ../../source/index.md:65 f15bf3e7768a45fcaa002bf48e4c547e
+#: ../../source/index.md:91 37a1b9e8356c41c6a2d206febde8c8e1
 msgid "Execute immediately with `uvx` without an explicit installation step:"
 msgstr "Ejecute inmediatamente con `uvx` sin un paso de instalación explícito:"
 
-#: ../../source/index.md:72 c1964cd099154d5fbf6e9dfa3fb37345
+#: ../../source/index.md:98 a0ebdd1155144c0aac6ee579c5c8bb2a
 msgid "Install as an isolated user tool or project dependency:"
 msgstr "Instale como herramienta de usuario aislada o dependencia de proyecto:"
 
-#: ../../source/index.md:85 154ed2910df74ce998213436e6744ff8
+#: ../../source/index.md:111 609cdaaf89054b68825ce6f5945f2dec
 msgid "2.2. Core Discovery Workflows"
 msgstr "2.2. Flujos principales de descubrimiento"
 
-#: ../../source/index.md:104 db8965547fab4c049921409b7b591dc1
+#: ../../source/index.md:130 7a837965ef46457bbd065710dd47ebd3
 msgid "2.3. Programmatic Python Library Usage"
 msgstr "2.3. Uso programático como biblioteca de Python"
 
-#: ../../source/index.md:106 7b805d6101e04f4dbad5870df47cb43d
+#: ../../source/index.md:132 a8760aaa671f4b0ba0027750f437118c
 msgid "Integrate `findfmt` directly into Python scripts and automated pipelines:"
 msgstr ""
 "Integre `findfmt` directamente en scripts de Python y canalizaciones "
 "automatizadas:"
 
-#: ../../source/index.md:161 c9be0cfa63534c249883c2fc34bc902a
+#: ../../source/index.md:187 9cb9c6b26d96488da07bd053447f46e0
 msgid "3. Community & Feedback"
 msgstr "3. Comunidad y comentarios"
 
-#: ../../source/index.md:163 bb5786113abc48d0bfb0f96ce09bd890
+#: ../../source/index.md:189 81de1211183241dd9e148a99f11d5f7c
 msgid ""
 "**Source Code**: "
 "[github.com/bdperkin/findfmt](https://github.com/bdperkin/findfmt)"
@@ -142,7 +455,7 @@ msgstr ""
 "**Código fuente**: "
 "[github.com/bdperkin/findfmt](https://github.com/bdperkin/findfmt)"
 
-#: ../../source/index.md:164 db79baddd366487e9657cfefdf16e152
+#: ../../source/index.md:190 1fc8142a76024f42aaefcd9df9c55742
 msgid ""
 "**Issue Tracker**: Report bugs, request formats, or propose features on "
 "[GitHub Issues](https://github.com/bdperkin/findfmt/issues)."
@@ -151,7 +464,7 @@ msgstr ""
 "proponga funciones en [GitHub "
 "Issues](https://github.com/bdperkin/findfmt/issues)."
 
-#: ../../source/index.md:166 13739927aaf14b9d861be81f5969b9de
+#: ../../source/index.md:192 47ffc8fb665a4fa281cea98d50827761
 msgid ""
 "**Contributing**: Review the [Contributing "
 "Guidelines](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)"
@@ -161,7 +474,7 @@ msgstr ""
 "contribución](https://github.com/bdperkin/findfmt/blob/main/CONTRIBUTING.md)"
 " para comenzar con el desarrollo local."
 
-#: ../../source/index.md:169 42ae30aa03f74bf39af387cb76378725
+#: ../../source/index.md:195 5f69891d2b654e82b1442ab0b6c353ca
 msgid ""
 "**Accessibility**: See our [Accessibility Statement](accessibility.md) "
 "for supported assistive technologies and barrier reporting."
@@ -170,7 +483,7 @@ msgstr ""
 "accesibilidad](accessibility.md) para conocer las tecnologías de "
 "asistencia compatibles y el informe de barreras."
 
-#: ../../source/index.md:171 95c5846cae164ee88eac776bf73c324e
+#: ../../source/index.md:197 7c6ea66500724f348f447e9273da8753
 msgid ""
 "**Security Policy**: See our [Security Policy](security.md) for reporting"
 " vulnerabilities and threat modeling details."

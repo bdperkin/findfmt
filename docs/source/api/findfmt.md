@@ -118,3 +118,21 @@ Documentation for `findfmt` public API modules, subsystems, and data models.
    :undoc-members:
    :show-inheritance:
 ```
+
+## 14. Runtime Dispatch Gateway (`findfmt.core`)
+
+```{eval-rst}
+.. automodule:: findfmt.core
+   :members:
+   :undoc-members:
+   :show-inheritance:
+```
+
+## 15. Domain Exceptions (`findfmt.exceptions`)
+
+```{eval-rst}
+.. automodule:: findfmt.exceptions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+```
