@@ -37,10 +37,11 @@ def test_load_env_config_empty() -> None:
 
 
 def test_load_env_config_ignores_reserved_and_blank_values() -> None:
-    """Ignore FINDFMT_CONFIG, FINDFMT_CONTAINER_TESTS, and empty recognized values."""
+    """Ignore FINDFMT_CONFIG, FINDFMT_CONTAINER_TESTS, FINDFMT_NO_EXTENSIONS, and empty values."""
     env = {
         "FINDFMT_CONFIG": "/tmp/config.toml",
         "FINDFMT_CONTAINER_TESTS": "1",
+        "FINDFMT_NO_EXTENSIONS": "1",
         "FINDFMT_MAX_DEPTH": "",
         "FINDFMT_TAGS": "   ",
     }

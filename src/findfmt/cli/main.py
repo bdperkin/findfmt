@@ -98,8 +98,8 @@ from findfmt.cli.options import (
 )
 from findfmt.cli.pager import FindfmtCommand
 from findfmt.cli.terminal import PagerController
+from findfmt.core import find_files
 from findfmt.formatters import OutputFormat
-from findfmt.traversal import find_files
 
 get_help_all = h.get_help_all
 help_all_callback = h.help_all_callback

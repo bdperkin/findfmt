@@ -96,6 +96,7 @@ def test_get_diagnostics():
     diag = get_diagnostics()
     assert "findfmt " in diag
     assert "Python: " in diag
+    assert "Backend: " in diag
     assert "identify: " in diag
     assert "Git: " in diag
 
