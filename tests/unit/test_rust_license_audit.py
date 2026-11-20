@@ -37,20 +37,33 @@ def _load_toml(rel_path: str) -> dict[str, Any]:
     return tomllib.loads(path.read_text(encoding="utf-8"))
 
 
-def _candidate_witness(spec_op: str, spec_ver: str, min_floor: Version) -> Version | None:
+def _specifier_probes(req: Requirement) -> list[Version]:
+    probes: list[Version] = [Version("99999999.0.0")]
+    for spec in req.specifier:
+        base_str = spec.version.removesuffix(".*")
+        ver = Version(base_str)
+        next_rel = (*ver.release[:-1], ver.release[-1] + 1)
+        next_str = ".".join(str(part) for part in next_rel)
+        probes.extend(
+            (
+                ver,
+                Version(f"{base_str}.post0"),
+                Version(f"{base_str}.1"),
+                Version(next_str),
+            ),
+        )
+
+    return probes
+
+
+def _establishes_floor(spec_op: str, spec_ver: str, min_floor: Version) -> bool:
     if spec_op == "==" and spec_ver.endswith(".*"):
-        base = Version(spec_ver.removesuffix(".*"))
-        return base if base >= min_floor else None
+        return Version(spec_ver.removesuffix(".*")) >= min_floor
 
-    if spec_op in {">=", "~=", "=="}:
-        ver = Version(spec_ver)
-        return ver if ver >= min_floor else None
+    if spec_op in {">=", "~=", "==", ">"}:
+        return Version(spec_ver) >= min_floor
 
-    if spec_op == ">":
-        ver = Version(spec_ver)
-        return Version(f"{spec_ver}.1") if ver >= min_floor else None
-
-    return None
+    return False
 
 
 def _has_valid_trove_classifiers_floor(raw_specs: list[str], supported_pythons: tuple[str, ...]) -> bool:
@@ -65,10 +78,11 @@ def _has_valid_trove_classifiers_floor(raw_specs: list[str], supported_pythons: 
         ):
             continue
 
-        for spec in req.specifier:
-            witness = _candidate_witness(spec.operator, spec.version, min_floor)
-            if witness is not None and witness in req.specifier:
-                return True
+        has_floor = any(_establishes_floor(spec.operator, spec.version, min_floor) for spec in req.specifier)
+        if has_floor and any(
+            probe >= min_floor and probe in req.specifier for probe in _specifier_probes(req)
+        ):
+            return True
 
     return False
 
@@ -91,6 +105,10 @@ def test_mit_license_parity_across_python_and_rust_manifests() -> None:
     assert _has_valid_trove_classifiers_floor(build_requires, supported_pythons)
     assert _has_valid_trove_classifiers_floor(uv_constraints, supported_pythons)
     assert _has_valid_trove_classifiers_floor(["trove-classifiers>=2026.9.21.13"], supported_pythons)
+    assert _has_valid_trove_classifiers_floor(
+        ["trove-classifiers>=2025.5.8.13,!=2025.5.8.13"],
+        supported_pythons,
+    )
     assert _has_valid_trove_classifiers_floor(["trove-classifiers>2025.5.8.13"], supported_pythons)
     assert _has_valid_trove_classifiers_floor(["trove-classifiers==2025.5.8.13.*"], supported_pythons)
     assert not _has_valid_trove_classifiers_floor(["trove-classifiers==2025.5.8.*"], supported_pythons)
