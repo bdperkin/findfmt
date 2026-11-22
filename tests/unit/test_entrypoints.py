@@ -298,7 +298,7 @@ def test_version_and_platform_import_fallbacks(monkeypatch: pytest.MonkeyPatch) 
                     runpy.run_path(str(path), run_name="_shim")
 
     meta_path = str(root / "src" / "findfmt" / "metadata.py")
-    bench_path = str(root / "tools" / "benchmark.py")
+    bench_path = str(root / "tools" / "benchmark_runner.py")
     for mod_name in ("pwd", "grp", "resource"):
         monkeypatch.setitem(sys.modules, mod_name, None)
 

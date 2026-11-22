@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 250 Closed Issues | 82 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
+> **Tracking:** 251 Closed Issues | 81 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -27,7 +27,8 @@
 > `#630`, `#471`, epic `#380`, `#631`, and epic `#626`, and released v1.3.2 and closed its milestone;
 > 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`, and released v1.3.3 and
 > closed its milestone; 2026-11-19 closed `#579` and `#577`, added and closed `#689` and `#692`; 2026-11-20
-> closed `#578`, `#580`, and epic `#576`, and released v1.4.0 and closed its milestone)
+> closed `#578`, `#580`, and epic `#576`, and released v1.4.0 and closed its milestone; 2026-11-22 closed
+> `#586`)
 
 ______________________________________________________________________
 
@@ -751,6 +752,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#576](https://github.com/bdperkin/findfmt/issues/576)** - [Epic] Hybrid Python-Rust Foundation:
   findfmt_rs Crate, hatch-maturin-build & Fallback Architecture (Closed: 2026-11-20 via PR
   [#699](https://github.com/bdperkin/findfmt/pull/699))
+- [x] **[#586](https://github.com/bdperkin/findfmt/issues/586)** - perf(benchmark): extend tools/benchmark.py
+  to compare Rust (\_rust_ext) vs. pure-Python (\_fallback) throughput and memory (Closed: 2026-11-22 via PR
+  [#702](https://github.com/bdperkin/findfmt/pull/702))
 
 ______________________________________________________________________
 
@@ -769,11 +773,6 @@ when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enforces the same zero-warning
   static analysis bar on Rust code as `ruff` and `ty` enforce on Python.
-- [ ] **[#586](https://github.com/bdperkin/findfmt/issues/586)** - perf(benchmark): extend tools/benchmark.py
-  to compare Rust (\_rust_ext) vs. pure-Python (\_fallback) throughput and memory *(Rank: 14 | Epic:
-  [[Epic] Rust Core Engine (findfmt_rs): Directory Traversal, Classification, Parity Verification & Fuzzing](https://github.com/bdperkin/findfmt/issues/581)
-  | Milestone: v1.4.1)* - **Value:** Medium | **Effort:** S - **Rationale:** Quantifies and tracks the speedup
-  of the Rust engine against the pure-Python baseline.
 - [ ] **[#589](https://github.com/bdperkin/findfmt/issues/589)** - feat(a11y): verify terminal output
   readability, NO_COLOR/TERM=dumb compliance, and localized diagnostics across Rust/Python boundaries *(Rank:
   15 | Epic:
@@ -1258,11 +1257,10 @@ natively on GitHub.
 
 - [ ] **[#581](https://github.com/bdperkin/findfmt/issues/581)** - [Epic] Rust Core Engine (findfmt_rs):
   Directory Traversal, Classification, Parity Verification & Fuzzing *(Milestone: v1.4.1 | Open sub-issues:
-  5)* - [#582](https://github.com/bdperkin/findfmt/issues/582),
+  4)* - [#582](https://github.com/bdperkin/findfmt/issues/582),
   [#583](https://github.com/bdperkin/findfmt/issues/583),
   [#584](https://github.com/bdperkin/findfmt/issues/584),
-  [#585](https://github.com/bdperkin/findfmt/issues/585),
-  [#586](https://github.com/bdperkin/findfmt/issues/586)
+  [#585](https://github.com/bdperkin/findfmt/issues/585)
 - [ ] **[#587](https://github.com/bdperkin/findfmt/issues/587)** - [Epic] Hybrid Quality Assurance: Unified
   Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation *(Milestone: v1.4.2 | Open
   sub-issues: 4)* - [#588](https://github.com/bdperkin/findfmt/issues/588),
@@ -1416,7 +1414,7 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 6           |
+| v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 5           |
 | v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 3           |
 | v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 4           |

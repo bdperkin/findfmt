@@ -10,9 +10,12 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 __all__ = [
+    "BackendComparisonReport",
+    "BackendComparisonRow",
     "BenchmarkMetric",
     "BenchmarkReport",
     "ComparisonRow",
+    "compute_backend_comparisons",
     "compute_comparisons",
     "load_baseline_report",
     "save_baseline_report",
@@ -44,6 +47,7 @@ class BenchmarkMetric(_DictMixin):
     peak_memory_bytes: int
     peak_memory_mb: float
     peak_rss_mb: float = 0.0
+    backend: str = "python"
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,6 +61,7 @@ class BenchmarkReport(_DictMixin):
     seed: int
     metrics: list[BenchmarkMetric]
     measured_in: str = "subprocess"
+    backend: str = "python"
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,6 +79,48 @@ class ComparisonRow(_DictMixin):
     current_memory_mb: float
     memory_delta_pct: float
     regressed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class BackendComparisonRow(_DictMixin):
+    """Side-by-side comparison between Rust (_rust_ext) and pure-Python (_fallback) runs."""
+
+    tier: str
+    files_count: int
+    dirs_count: int
+    rust_backend_status: str
+    python_duration_seconds: float
+    rust_duration_seconds: float
+    duration_speedup: float
+    python_files_per_sec: float
+    rust_files_per_sec: float
+    throughput_speedup: float
+    python_first_file_latency_ms: float
+    rust_first_file_latency_ms: float
+    latency_delta_ms: float
+    python_peak_memory_mb: float
+    rust_peak_memory_mb: float
+    peak_memory_delta_mb: float
+    python_peak_rss_mb: float
+    rust_peak_rss_mb: float
+    peak_rss_delta_mb: float
+    peak_rss_delta_pct: float
+
+
+@dataclass(frozen=True, slots=True)
+class BackendComparisonReport(_DictMixin):
+    """Structured side-by-side Rust vs. Python benchmark comparison report."""
+
+    timestamp: str
+    findfmt_version: str
+    python_version: str
+    platform: str
+    seed: int
+    rust_backend_status: str
+    measured_in: str
+    python_metrics: list[BenchmarkMetric]
+    rust_metrics: list[BenchmarkMetric]
+    comparisons: list[BackendComparisonRow]
 
 
 def _pct_delta(base: float, curr: float) -> float:
@@ -120,6 +167,53 @@ def compute_comparisons(
     return comparisons
 
 
+def compute_backend_comparisons(
+    python_metrics: list[BenchmarkMetric],
+    rust_metrics: list[BenchmarkMetric],
+    *,
+    rust_backend_status: str = "native",
+) -> list[BackendComparisonRow]:
+    """Compute side-by-side throughput, wall-clock latency, and memory deltas (Rust vs. Python)."""
+    py_map = {m.tier: m for m in python_metrics}
+    rows: list[BackendComparisonRow] = []
+
+    for rust_m in rust_metrics:
+        py_m = py_map.get(rust_m.tier)
+        if py_m is None:
+            continue
+
+        duration_speedup = (
+            py_m.duration_seconds / rust_m.duration_seconds if rust_m.duration_seconds > 0 else 0.0
+        )
+        throughput_speedup = rust_m.files_per_sec / py_m.files_per_sec if py_m.files_per_sec > 0 else 0.0
+        rows.append(
+            BackendComparisonRow(
+                tier=rust_m.tier,
+                files_count=rust_m.files_count,
+                dirs_count=rust_m.dirs_count,
+                rust_backend_status=rust_backend_status,
+                python_duration_seconds=py_m.duration_seconds,
+                rust_duration_seconds=rust_m.duration_seconds,
+                duration_speedup=duration_speedup,
+                python_files_per_sec=py_m.files_per_sec,
+                rust_files_per_sec=rust_m.files_per_sec,
+                throughput_speedup=throughput_speedup,
+                python_first_file_latency_ms=py_m.first_file_latency_ms,
+                rust_first_file_latency_ms=rust_m.first_file_latency_ms,
+                latency_delta_ms=rust_m.first_file_latency_ms - py_m.first_file_latency_ms,
+                python_peak_memory_mb=py_m.peak_memory_mb,
+                rust_peak_memory_mb=rust_m.peak_memory_mb,
+                peak_memory_delta_mb=rust_m.peak_memory_mb - py_m.peak_memory_mb,
+                python_peak_rss_mb=py_m.peak_rss_mb,
+                rust_peak_rss_mb=rust_m.peak_rss_mb,
+                peak_rss_delta_mb=rust_m.peak_rss_mb - py_m.peak_rss_mb,
+                peak_rss_delta_pct=_pct_delta(py_m.peak_rss_mb, rust_m.peak_rss_mb),
+            ),
+        )
+
+    return rows
+
+
 def save_baseline_report(report: BenchmarkReport, file_path: Path) -> None:
     """Save benchmark report to a JSON baseline file."""
     file_path.write_text(json.dumps(report.to_dict(), indent=2) + "\n", encoding="utf-8")
@@ -130,9 +224,8 @@ def load_baseline_report(file_path: Path) -> list[BenchmarkMetric]:
     data = json.loads(file_path.read_text(encoding="utf-8"))
     metrics: list[BenchmarkMetric] = []
     for item in data.get("metrics", []):
-        if "peak_rss_mb" not in item:
-            item["peak_rss_mb"] = 0.0
-
+        item.setdefault("peak_rss_mb", 0.0)
+        item.setdefault("backend", "python")
         metrics.append(BenchmarkMetric(**item))
 
     return metrics
