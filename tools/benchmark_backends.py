@@ -244,7 +244,11 @@ def run_compare_mode(args: argparse.Namespace) -> BackendComparisonReport | None
             )
             rust_metrics.extend(
                 _measure_scenario_subprocess(
-                    scenario_path, rust_sub_backend, labels, rust_metric_label, args
+                    scenario_path,
+                    rust_sub_backend,
+                    labels,
+                    rust_metric_label,
+                    args,
                 ),
             )
 
