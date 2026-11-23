@@ -19,8 +19,9 @@ dispatched through `src/findfmt/core.py` with automatic fallback to the pure-Pyt
   (`FileInfo`, `TraversalConfig`, `find_files`, `classify_file`, `get_formatter`, `is_rust_extension_loaded`,
   `is_rust_backend_active`, `get_active_backend`) and `python -m findfmt` execution entry point.
 - `findfmt_rs/` & `src/findfmt/_rust_ext.pyi`: Rust 2024 edition (`>=1.85`) PyO3 crate (`abi3-py311`, `cdylib`
-  \+ `rlib`) compiled to `findfmt._rust_ext` via `hatch-maturin-build`, paired with strict PEP 484 type stubs
-  and Cargo license and supply chain configuration files (`deny.toml`, `about.toml`).
+  \+ `rlib`) compiled to `findfmt._rust_ext` via `hatch-maturin-build`, paired with strict PEP 484 type stubs,
+  `proptest` suites (`findfmt_rs/tests/`), `cargo-fuzz` targets (`findfmt_rs/fuzz/`), and Cargo license and
+  supply chain configuration files (`deny.toml`, `about.toml`).
 - `src/findfmt/core.py` & `src/findfmt/_fallback.py`: Unified runtime dispatch gateway and pure-Python
   fallback module. Honors `FINDFMT_NO_EXTENSIONS=1` and routes `ImportError` or `pyo3_runtime.PanicException`
   cleanly to the pure-Python traversal and classification engines.

@@ -318,3 +318,24 @@ jobs:
         run: uv sync --locked --all-groups
       - name: Run Performance Benchmarks
         run: uv run pytest -m perf --no-cov -v
+  rust-proptest-fuzz:
+    name: Rust Proptest & Fuzz Targets
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run Clippy Static Analysis on findfmt_rs
+        run: cargo clippy --manifest-path findfmt_rs/Cargo.toml --locked --no-default-features --all-targets --
+          -D warnings
+      - name: Run Rust Unit & Proptest Suites
+        run: cargo test --manifest-path findfmt_rs/Cargo.toml --locked --no-default-features
+      - name: Build & Execute cargo-fuzz Targets on Seed Corpus
+        run: |-
+          cargo build --manifest-path findfmt_rs/fuzz/Cargo.toml --locked --bins
+          for target in fuzz_shebang_header fuzz_classifier_tags fuzz_sort_gitignore; do
+            findfmt_rs/fuzz/target/debug/"$target" findfmt_rs/fuzz/seed_corpus/*.txt
+          done

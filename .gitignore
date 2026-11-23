@@ -83,3 +83,7 @@ Thumbs.db
 # Rust / Cargo build artifacts
 target/
 findfmt_rs/target/
+findfmt_rs/fuzz/target/
+findfmt_rs/fuzz/corpus/
+findfmt_rs/fuzz/artifacts/
+*.proptest-regressions

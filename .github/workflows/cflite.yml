@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   schedule:
     - cron: 0 0/6 * * *  # Every 6 hours
   workflow_dispatch:
@@ -46,7 +49,7 @@ jobs:
         with:
           language: python
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          fuzz-seconds: 300
+          fuzz-seconds: ${{ github.event_name == 'pull_request' && 60 || 300 }}
           mode: batch
           sanitizer: ${{ matrix.sanitizer }}
-          output-sarif: true
+          output-sarif: ${{ github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork }}

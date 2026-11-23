@@ -91,7 +91,9 @@ impl TagRegistry {
         }
         let built = Self::load_from_python(py)?;
         let _ = PYTHON_TAG_REGISTRY.set(built);
-        Ok(PYTHON_TAG_REGISTRY.get().expect("initialized TagRegistry"))
+        PYTHON_TAG_REGISTRY.get().ok_or_else(|| {
+            pyo3::exceptions::PyRuntimeError::new_err("failed to initialize TagRegistry")
+        })
     }
 
     fn load_from_python(py: Python<'_>) -> PyResult<Self> {
@@ -110,9 +112,8 @@ impl TagRegistry {
         })
     }
 
-    /// Minimal built-in registry for standalone `cargo test --no-default-features` unit tests.
-    #[cfg(test)]
-    pub fn builtin_for_tests() -> Self {
+    /// Built-in representative registry for standalone Rust unit tests, `proptest`, and `cargo-fuzz`.
+    pub fn sample_registry() -> Self {
         let mut extensions = HashMap::new();
         extensions.insert("py".into(), vec!["python".into(), "text".into()]);
         extensions.insert("rs".into(), vec!["rust".into(), "text".into()]);
@@ -142,6 +143,12 @@ impl TagRegistry {
             mime_suffix_map,
             mime_encodings_map,
         }
+    }
+
+    /// Alias preserved for internal `#[cfg(test)]` suites.
+    #[cfg(test)]
+    pub fn builtin_for_tests() -> Self {
+        Self::sample_registry()
     }
 
     /// Match `identify.identify.tags_from_filename(filename)`.

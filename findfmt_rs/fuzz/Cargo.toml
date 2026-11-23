@@ -1,0 +1,40 @@
+[package]
+name = "findfmt_rs-fuzz"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.85"
+description = "cargo-fuzz libFuzzer harnesses for findfmt_rs classification, sorting, and gitignore parsing."
+license = "MIT"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+findfmt_rs = { path = "..", default-features = false }
+libfuzzer-sys = "0.4"
+
+# Isolate cargo-fuzz from parent crate builds (`maturin`, `cargo deny`, `cargo about`).
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "fuzz_shebang_header"
+path = "fuzz_targets/fuzz_shebang_header.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_classifier_tags"
+path = "fuzz_targets/fuzz_classifier_tags.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_sort_gitignore"
+path = "fuzz_targets/fuzz_sort_gitignore.rs"
+test = false
+doc = false
+bench = false
