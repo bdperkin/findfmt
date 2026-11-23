@@ -13,14 +13,20 @@ use crate::metadata::RawStat;
 
 pub(crate) struct PyHandles {
     pub path_cls: Py<PyAny>,
+    pub path_home: Py<PyAny>,
     pub file_info_cls: Py<PyAny>,
     #[cfg(unix)]
     pub fsencode: Py<PyAny>,
     #[cfg(unix)]
     pub fsdecode: Py<PyAny>,
+    pub os_strerror: Py<PyAny>,
+    pub sorted_fn: Py<PyAny>,
     pub resolve_user_name: Py<PyAny>,
     pub resolve_group_name: Py<PyAny>,
     pub resolve_relative: Py<PyAny>,
+    pub compute_relative_prefix: Py<PyAny>,
+    pub traversal_error_cls: Py<PyAny>,
+    pub ingest_from_file: Py<PyAny>,
 }
 
 static PY_HANDLES: OnceLock<PyHandles> = OnceLock::new();
@@ -29,22 +35,31 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
     if let Some(h) = PY_HANDLES.get() {
         return Ok(h);
     }
+    let builtins = py.import("builtins")?;
+    let os_mod = py.import("os")?;
     let pathlib = py.import("pathlib")?;
     let models = py.import("findfmt.models")?;
     let metadata = py.import("findfmt.metadata")?;
     let classifier = py.import("findfmt.classifier")?;
-    #[cfg(unix)]
-    let os_mod = py.import("os")?;
+    let exceptions = py.import("findfmt.exceptions")?;
+    let parsers = py.import("findfmt.parsers")?;
+    let path_cls_bound = pathlib.getattr("Path")?;
     let built = PyHandles {
-        path_cls: pathlib.getattr("Path")?.unbind(),
+        path_home: path_cls_bound.getattr("home")?.unbind(),
+        path_cls: path_cls_bound.unbind(),
         file_info_cls: models.getattr("FileInfo")?.unbind(),
         #[cfg(unix)]
         fsencode: os_mod.getattr("fsencode")?.unbind(),
         #[cfg(unix)]
         fsdecode: os_mod.getattr("fsdecode")?.unbind(),
+        os_strerror: os_mod.getattr("strerror")?.unbind(),
+        sorted_fn: builtins.getattr("sorted")?.unbind(),
         resolve_user_name: metadata.getattr("resolve_user_name")?.unbind(),
         resolve_group_name: metadata.getattr("resolve_group_name")?.unbind(),
         resolve_relative: classifier.getattr("_resolve_relative")?.unbind(),
+        compute_relative_prefix: classifier.getattr("compute_relative_prefix")?.unbind(),
+        traversal_error_cls: exceptions.getattr("TraversalError")?.unbind(),
+        ingest_from_file: parsers.getattr("ingest_from_file")?.unbind(),
     };
     let _ = PY_HANDLES.set(built);
     PY_HANDLES.get().ok_or_else(|| {

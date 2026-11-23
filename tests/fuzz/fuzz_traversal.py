@@ -157,9 +157,10 @@ def TestOneInput(data: bytes) -> None:  # noqa: N802 - Atheris TestOneInput cont
             assert rs_items == py_items
 
             if _rust_ext is not None:
-                direct_walker = getattr(_rust_ext, "find_files", None)
-                if callable(direct_walker):
-                    assert list(direct_walker(config)) == py_items
+                for walker_attr in ("find_files_rs", "find_files"):
+                    direct_walker = getattr(_rust_ext, walker_attr, None)
+                    if callable(direct_walker):
+                        assert list(direct_walker(config)) == py_items
 
                 file_candidates = [item.path for item in py_items if "directory" not in item.tags]
                 if file_candidates:

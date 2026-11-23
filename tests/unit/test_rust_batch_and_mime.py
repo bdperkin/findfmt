@@ -202,7 +202,17 @@ def test_bounded_chunk_batch_emission_and_context_isolation(
         assert isinstance(raw, list)
         return [item for item in raw if isinstance(item, FileInfo)]
 
-    monkeypatch.setattr(rust_ext, "classify_batch_rs", _recording_batch)
+    class _ClassifierOnlyExt(types.ModuleType):
+        classify_file_rs: Callable[..., FileInfo]
+        classify_file: Callable[..., FileInfo]
+        classify_batch_rs: Callable[..., list[FileInfo]]
+
+    cls_only_ext = _ClassifierOnlyExt("findfmt._rust_ext")
+    cls_only_ext.classify_file_rs = rust_ext.classify_file_rs
+    cls_only_ext.classify_file = rust_ext.classify_file
+    cls_only_ext.classify_batch_rs = _recording_batch
+    monkeypatch.setattr(core, "_RUST_EXT", cls_only_ext)
+
     chunk_cfg = TraversalConfig(root_paths=(chunk_dir,), include_tags=frozenset({"python"}))
     it = core.find_files(chunk_cfg)
     first_item = next(it)
@@ -218,3 +228,9 @@ def test_bounded_chunk_batch_emission_and_context_isolation(
     assert isinstance(paused_it, types.GeneratorType)
     _ = next(paused_it)
     contextvars.copy_context().run(paused_it.close)
+
+    # Full native walker streaming parity over > RUST_BATCH_CHUNK_SIZE files
+    monkeypatch.setattr(core, "_RUST_EXT", rust_ext)
+    native_it = core.find_files(chunk_cfg)
+    assert next(native_it).relative_path == Path("f_0000.py")
+    assert len(list(native_it)) == total - 1

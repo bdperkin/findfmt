@@ -146,12 +146,29 @@ def test_parity_multi_root_single_file_and_missing_root_errors(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Verify multi-root, single-file root, missing-root on_error, and #582 walker hook parity."""
-    root, _ = build_symlink_and_boundary_tree(tmp_path)
+    root, symlinks_ok = build_symlink_and_boundary_tree(tmp_path)
     missing = tmp_path / "does_not_exist_root"
     single_file = root / "top.py"
     cfg = TraversalConfig(root_paths=(single_file, root / "sparse", missing))
     items = assert_traversal_parity(cfg, monkeypatch)
     assert any(item.path == single_file.resolve() for item in items)
+
+    if symlinks_ok:
+        link_root = root / "links" / "valid_script"
+        link_items = assert_traversal_parity(
+            TraversalConfig(root_paths=(link_root,), follow_symlinks=False),
+            monkeypatch,
+        )
+        assert len(link_items) == 1
+        assert link_items[0].is_symlink is True
+
+    manifest = tmp_path / "parity_manifest.txt"
+    manifest.write_text("src/app.py\nsrc/link.py -> target.py\n", encoding="utf-8")
+    manifest_items = assert_traversal_parity(
+        TraversalConfig(from_file=str(manifest), offline=True),
+        monkeypatch,
+    )
+    assert len(manifest_items) == 2
 
     rust_ext = activate_rust_backend(monkeypatch)
 

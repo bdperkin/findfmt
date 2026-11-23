@@ -97,13 +97,29 @@ def test_smoke_unreadable_directory_resilience(tmp_path: Path) -> None:
 
 
 def test_smoke_permission_error_graceful(tmp_path: Path) -> None:
-    """Verify PermissionError during directory scanning is handled without tracebacks."""
+    """Verify PermissionError during directory scanning and root resolution is handled cleanly."""
     (tmp_path / "valid.txt").write_text("ok", encoding="utf-8")
+    py_runner = CliRunner(env={"FINDFMT_NO_EXTENSIONS": "1"})
     with patch("os.scandir", side_effect=PermissionError("Access denied")):
-        res = runner.invoke(app, [str(tmp_path), "--no-pager"])
+        res = py_runner.invoke(app, [str(tmp_path), "--no-pager"])
         assert res.exit_code == 1
         assert "cannot open" in res.stderr
         assert "Traceback" not in res.output
+
+    orig_resolve = Path.resolve
+
+    def _deny_target_root(self: Path, *, strict: bool = False) -> Path:
+        if self == tmp_path:
+            msg = "Access denied"
+            raise PermissionError(msg)
+
+        return orig_resolve(self, strict=strict)
+
+    with patch.object(Path, "resolve", autospec=True, side_effect=_deny_target_root):
+        res_active = runner.invoke(app, [str(tmp_path), "--no-pager"])
+        assert res_active.exit_code == 1
+        assert "cannot open" in res_active.stderr
+        assert "Traceback" not in res_active.output
 
 
 def test_smoke_broken_symlinks_and_cycles(tmp_path: Path) -> None:

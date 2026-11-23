@@ -8,9 +8,9 @@ codebase.
 
 `findfmt` is a modern, high-performance hybrid Python-Rust command-line utility and library designed for
 `.gitignore`-aware file discovery and content format, shebang, and MIME tag classification. The `findfmt_rs/`
-PyO3 crate (`findfmt._rust_ext`) exports GIL-released native file classification (`classify_file_rs`,
-`classify_file`, and `classify_batch_rs`) alongside extension metadata as the foundation for native traversal,
-dispatched through `src/findfmt/core.py` with automatic fallback to the pure-Python engine
+PyO3 crate (`findfmt._rust_ext`) exports GIL-released native directory traversal (`find_files_rs`,
+`find_files`) and file classification (`classify_file_rs`, `classify_file`, and `classify_batch_rs`) alongside
+extension metadata, dispatched through `src/findfmt/core.py` with automatic fallback to the pure-Python engine
 (`src/findfmt/_fallback.py`).
 
 ### 1.1. Core Module Layout

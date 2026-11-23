@@ -10,16 +10,28 @@ pub mod classifier;
 pub mod fuzz_entrypoints;
 pub mod gitignore;
 pub mod header;
+pub mod ignore_stack;
 pub mod metadata;
 pub mod mime;
+pub mod patterns;
 pub mod py_bridge;
 mod py_paths;
+pub mod py_walker;
+mod py_walker_config;
 pub mod shebang;
 pub mod sorting;
 pub mod tags;
+pub mod walker;
+pub mod walker_filter;
+pub mod walker_prune;
+pub mod walker_sort;
+mod walker_step;
+pub mod walker_types;
 
 use pyo3::prelude::*;
 use pyo3::types::PyList;
+
+use crate::py_walker::RustFileIterator;
 
 /// Return the identifier of the active native backend (`"rust"`).
 #[pyfunction]
@@ -31,6 +43,26 @@ fn backend_name() -> &'static str {
 #[pyfunction]
 fn rust_ext_version() -> &'static str {
     env!("CARGO_PKG_VERSION")
+}
+
+/// Discover and classify files via the GIL-released native Rust directory walker (#582).
+#[pyfunction]
+#[pyo3(signature = (config, *, on_error=None))]
+fn find_files_rs(
+    config: &Bound<'_, PyAny>,
+    on_error: Option<&Bound<'_, PyAny>>,
+) -> RustFileIterator {
+    py_walker::find_files_py(config, on_error)
+}
+
+/// Gateway alias for `find_files_rs` dispatched by `src/findfmt/core.py` (#578, #582).
+#[pyfunction]
+#[pyo3(signature = (config, *, on_error=None))]
+fn find_files(
+    config: &Bound<'_, PyAny>,
+    on_error: Option<&Bound<'_, PyAny>>,
+) -> RustFileIterator {
+    py_walker::find_files_py(config, on_error)
 }
 
 /// Classify a single file path via the GIL-released native Rust inspection engine (#583).
@@ -111,8 +143,11 @@ fn classify_batch_rs<'py>(
 #[pymodule]
 fn _rust_ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__doc__", "Native PyO3 acceleration module for findfmt.")?;
+    m.add_class::<RustFileIterator>()?;
     m.add_function(wrap_pyfunction!(backend_name, m)?)?;
     m.add_function(wrap_pyfunction!(rust_ext_version, m)?)?;
+    m.add_function(wrap_pyfunction!(find_files_rs, m)?)?;
+    m.add_function(wrap_pyfunction!(find_files, m)?)?;
     m.add_function(wrap_pyfunction!(classify_file_rs, m)?)?;
     m.add_function(wrap_pyfunction!(classify_file, m)?)?;
     m.add_function(wrap_pyfunction!(classify_batch_rs, m)?)?;
