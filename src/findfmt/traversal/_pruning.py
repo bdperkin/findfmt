@@ -12,7 +12,7 @@ from findfmt.exceptions import TraversalError
 from findfmt.traversal.tags import INTERPRETER_TAGS, can_skip_file_by_tags
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator, Sequence
+    from collections.abc import Callable, Iterator, MutableMapping, Sequence
     from pathlib import Path
 
     import pathspec
@@ -91,6 +91,7 @@ class _PruneFrame:
         "effective_root",
         "idx",
         "inherited_match",
+        "memo_key",
         "specs",
         "subdirs",
     )
@@ -99,6 +100,7 @@ class _PruneFrame:
         self,
         *,
         dir_key: tuple[int, int],
+        memo_key: tuple[int, int] | tuple[int, int, Path],
         subdirs: list[Path],
         specs: tuple[tuple[Path, PathSpecType], ...],
         depth: int,
@@ -106,6 +108,7 @@ class _PruneFrame:
         effective_root: Path,
     ) -> None:
         self.dir_key = dir_key
+        self.memo_key = memo_key
         self.subdirs = subdirs
         self.idx = 0
         self.specs = specs
@@ -189,23 +192,24 @@ def _can_skip_candidate_file(  # noqa: PLR0913 - wide CLI/config signature
 
 def _check_visited_or_memo(
     dir_key: tuple[int, int],
+    memo_key: tuple[int, int] | tuple[int, int, Path],
     visited: set[tuple[int, int]],
-    memo: dict[tuple[int, int], bool],
+    memo: MutableMapping[Any, bool],
 ) -> tuple[bool, bool]:
     """Check if directory key is already visited or cached in memo."""
     if dir_key in visited:
         return True, False
 
-    if dir_key in memo:
-        return True, memo[dir_key]
+    if memo_key in memo:
+        return True, memo[memo_key]
 
     return False, False
 
 
 def _scan_sorted_entries(
     directory: Path,
-    memo: dict[tuple[int, int], bool],
-    dir_key: tuple[int, int],
+    memo: MutableMapping[Any, bool],
+    memo_key: tuple[int, int] | tuple[int, int, Path],
     *,
     on_error: Callable[[OSError], None] | None = None,
 ) -> list[os.DirEntry[str]] | None:
@@ -214,7 +218,7 @@ def _scan_sorted_entries(
         with os.scandir(directory) as scan_it:
             return sorted(scan_it, key=lambda e: e.name)
     except (OSError, RuntimeError) as err:
-        memo[dir_key] = False
+        memo[memo_key] = False
         if isinstance(err, OSError) and on_error is not None:
             if not err.filename:
                 err.filename = str(directory)

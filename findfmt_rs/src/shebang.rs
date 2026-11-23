@@ -1,8 +1,17 @@
 //! Shebang line extraction and `identify`-compatible interpreter token parsing (#583).
 
+fn is_py_whitespace(c: char) -> bool {
+    c.is_whitespace() || matches!(c, '\x1c'..='\x1f' | '\u{0085}')
+}
+
 /// Trim characters matching Python's `str.strip()` semantics (Unicode whitespace + ASCII FS/GS/RS/US/NEL).
 pub fn py_strip(input: &str) -> &str {
-    input.trim_matches(|c: char| c.is_whitespace() || matches!(c, '\x1c'..='\x1f' | '\u{0085}'))
+    input.trim_matches(is_py_whitespace)
+}
+
+/// Trim trailing characters matching Python's `str.rstrip()` semantics.
+pub fn py_rstrip(input: &str) -> &str {
+    input.trim_end_matches(is_py_whitespace)
 }
 
 /// Extract the raw `#!` shebang header line from a byte buffer (`extract_shebang_from_buffer` parity).

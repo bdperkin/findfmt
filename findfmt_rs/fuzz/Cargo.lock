@@ -84,6 +84,7 @@ dependencies = [
  "ignore",
  "libc",
  "pyo3",
+ "winapi-util",
 ]
 
 [[package]]

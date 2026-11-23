@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Any
 
 import pathspec
 
+from findfmt.traversal._git_dir import resolve_git_exclude_path
+
 if TYPE_CHECKING:
     PathSpecType = pathspec.PathSpec[Any]
 else:
@@ -165,8 +167,7 @@ def load_gitignore_spec(directory: Path) -> PathSpecType | None:
 def load_git_exclude_spec(root: Path) -> PathSpecType | None:
     """Load exclude patterns from .git/info/exclude if present.
 
-    Supports both standard Git repositories with a .git directory and
-    submodules or worktrees with a .git pointer file.
+    Supports standard Git repositories, submodules, and linked worktrees (via commondir).
 
     Args:
         root: Git repository root directory.
@@ -174,18 +175,8 @@ def load_git_exclude_spec(root: Path) -> PathSpecType | None:
     Returns:
         PathSpec instance if exclude patterns exist, or None.
     """
-    git_path = root / ".git"
-    with contextlib.suppress(OSError, RuntimeError):
-        if git_path.is_dir():
-            return load_spec_file(git_path / "info" / "exclude")
-
-        if git_path.is_file():
-            content = git_path.read_text(encoding="utf-8", errors="replace").strip()
-            if content.startswith("gitdir:"):
-                gitdir_str = content.split(":", 1)[1].strip()
-                return load_spec_file((root / gitdir_str).resolve() / "info" / "exclude")
-
-    return None
+    exclude_path = resolve_git_exclude_path(root)
+    return load_spec_file(exclude_path) if exclude_path is not None else None
 
 
 def find_git_repo_root(start_dir: Path) -> Path | None:

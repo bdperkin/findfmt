@@ -13,9 +13,14 @@ use crate::gitignore::{GitignoreMatcher, compile_glob_matcher, trim_gitignore_li
 use crate::header::is_text_buffer;
 use crate::metadata::{RawStat, classification_indicator, format_filemode};
 use crate::mime::py_splitext;
+use crate::patterns::PatternMatcher;
 use crate::shebang::{extract_shebang_from_buffer, parse_shebang_tokens, py_strip, shebang_split};
 use crate::sorting::{NaturalSortKey, compare_natural, natural_sort_key};
 use crate::tags::{FilterCriteria, TagRegistry};
+use crate::walker::NativeWalker;
+use crate::walker_types::{
+    GlobalIgnoreResolution, MimeSnapshot, RootTarget, WalkConfig, WalkSortKey,
+};
 
 static FUZZ_REGISTRY: OnceLock<TagRegistry> = OnceLock::new();
 static SCRATCH_SEQ: AtomicU64 = AtomicU64::new(0);
@@ -206,6 +211,44 @@ pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
         let _ = matcher.is_ignored(Path::new(candidate), is_dir);
         let joined = root.join(candidate);
         let _ = matcher.is_ignored(&joined, is_dir);
+    }
+
+    if let Some(dir) = create_private_scratch_dir() {
+        let _ = write_exclusive_sample(&dir, ".gitignore", gi_bytes);
+        let _ = write_exclusive_sample(&dir, "fuzz_a.py", paths_bytes);
+        let walk_cfg = WalkConfig {
+            respect_gitignore: true,
+            custom_gitignore_file: None,
+            include_hidden: (data.first().copied().unwrap_or(0) & 2) != 0,
+            follow_symlinks: false,
+            dirs_only: (data.first().copied().unwrap_or(0) & 4) != 0,
+            one_file_system: false,
+            max_depth: Some(3),
+            file_limit: None,
+            prune_empty: (data.first().copied().unwrap_or(0) & 8) != 0,
+            ignore_case,
+            match_dirs: false,
+            accumulate_size: false,
+            sort_by: WalkSortKey::Version,
+            reverse_sort: false,
+            dirs_first: (data.first().copied().unwrap_or(0) & 16) != 0,
+            filter: FilterCriteria::default(),
+            matcher: PatternMatcher::default(),
+            home_dir: None,
+            pathext_upper: None,
+            unicode_major: 16,
+            mime_snapshot: MimeSnapshot::default(),
+        };
+        let target = RootTarget {
+            raw_root: dir.clone(),
+            resolved_root: Some(dir.clone()),
+            prefix: None,
+            global_gitignore: GlobalIgnoreResolution::Unresolved,
+            initial_error: None,
+        };
+        let mut walker = NativeWalker::new(walk_cfg, shared_registry(), vec![target]);
+        let _ = walker.next_batch(32);
+        let _ = fs::remove_dir_all(&dir);
     }
 
     names.sort_by(|a, b| compare_natural(a, b, ignore_case));

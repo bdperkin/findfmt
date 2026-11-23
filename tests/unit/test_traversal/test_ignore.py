@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from unittest.mock import patch
 
@@ -95,6 +96,61 @@ def test_load_git_exclude_spec_pointer_file(tmp_path: Path) -> None:
     # OSError on read
     with patch.object(Path, "read_text", side_effect=OSError("Read failed")):
         assert load_git_exclude_spec(sub_worktree) is None
+
+
+def test_load_git_exclude_spec_linked_worktree_commondir(tmp_path: Path) -> None:
+    """Verify linked worktree commondir resolution, non-fallback, and OSError fallback."""
+    common_git = tmp_path / ("  common_repo_git  " if os.name != "nt" else "  common_repo_git")
+    (common_git / "info").mkdir(parents=True)
+    (common_git / "info" / "exclude").write_text("*.common_excl\n", encoding="utf-8")
+    private_wt = tmp_path / "private_wt_dir"
+    (private_wt / "info").mkdir(parents=True)
+    (private_wt / "info" / "exclude").write_text("*.stale_priv\n", encoding="utf-8")
+    (private_wt / "commondir").write_bytes(os.fsencode(str(common_git)) + b"\n")
+    linked_wt = tmp_path / "linked_worktree"
+    linked_wt.mkdir()
+    (linked_wt / ".git").write_text(f"gitdir: {private_wt}\n", encoding="utf-8")
+
+    linked_spec = load_git_exclude_spec(linked_wt)
+    assert linked_spec is not None
+    assert linked_spec.match_file("artifact.common_excl")
+    assert not linked_spec.match_file("artifact.stale_priv")
+
+    # Valid commondir with comment-only exclude does NOT fall back to stale private exclude
+    (common_git / "info" / "exclude").write_text("# comment only\n", encoding="utf-8")
+    assert load_git_exclude_spec(linked_wt) is None
+
+    # Empty, nonexistent, or unreadable commondir falls back to private gitdir exclude
+    fallback_wt_git = tmp_path / "fallback_wt_git"
+    (fallback_wt_git / "info").mkdir(parents=True)
+    (fallback_wt_git / "info" / "exclude").write_text("*.priv_excl\n", encoding="utf-8")
+    commondir_target = fallback_wt_git / "commondir"
+    commondir_target.write_bytes(b"\r\n")
+    fallback_wt = tmp_path / "fallback_wt"
+    fallback_wt.mkdir()
+    (fallback_wt / ".git").write_text(f"gitdir: {fallback_wt_git}\n", encoding="utf-8")
+    fb_spec = load_git_exclude_spec(fallback_wt)
+    assert fb_spec is not None
+    assert fb_spec.match_file("item.priv_excl")
+
+    commondir_target.write_bytes(b"nonexistent_common\n")
+    fb_spec2 = load_git_exclude_spec(fallback_wt)
+    assert fb_spec2 is not None
+    assert fb_spec2.match_file("item.priv_excl")
+
+    orig_read_bytes = Path.read_bytes
+
+    def _fail_commondir_read(self: Path) -> bytes:
+        if self.name == "commondir":
+            msg = "commondir denied"
+            raise OSError(msg)
+
+        return orig_read_bytes(self)
+
+    with patch.object(Path, "read_bytes", _fail_commondir_read):
+        fb_spec3 = load_git_exclude_spec(fallback_wt)
+        assert fb_spec3 is not None
+        assert fb_spec3.match_file("item.priv_excl")
 
 
 def test_find_git_repo_root(tmp_path: Path) -> None:

@@ -111,6 +111,8 @@ def test_rust_ext_stub_and_compiled_module_parity() -> None:
     assert stub_funcs == {
         "backend_name": "str",
         "rust_ext_version": "str",
+        "find_files_rs": "Iterator[FileInfo]",
+        "find_files": "Iterator[FileInfo]",
         "classify_file_rs": "FileInfo",
         "classify_file": "FileInfo",
         "classify_batch_rs": "list[FileInfo]",
@@ -127,6 +129,8 @@ def test_rust_ext_stub_and_compiled_module_parity() -> None:
 
     assert rust_ext.backend_name() == "rust"
     assert rust_ext.rust_ext_version() == cargo_version
+    assert callable(rust_ext.find_files_rs)
+    assert callable(rust_ext.find_files)
     assert callable(rust_ext.classify_file_rs)
     assert callable(rust_ext.classify_file)
     assert callable(rust_ext.classify_batch_rs)

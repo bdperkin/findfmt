@@ -18,7 +18,7 @@ use crate::py_paths::{
 use crate::tags::{FilterCriteria, LiveMimeDb, TagRegistry};
 
 #[allow(clippy::too_many_arguments)]
-fn build_py_file_info<'py>(
+pub(crate) fn build_py_file_info<'py>(
     py: Python<'py>,
     handles: &PyHandles,
     path_obj: &Bound<'py, PyAny>,
@@ -160,7 +160,7 @@ pub fn classify_single_py<'py>(
     )
 }
 
-fn extract_tag_set(opt: Option<&Bound<'_, PyAny>>) -> PyResult<BTreeSet<String>> {
+pub(crate) fn extract_tag_set(opt: Option<&Bound<'_, PyAny>>) -> PyResult<BTreeSet<String>> {
     let Some(obj) = opt else {
         return Ok(BTreeSet::new());
     };

@@ -86,6 +86,14 @@ def test_check_device_boundary(tmp_path: Path) -> None:
     assert check_device_boundary(tmp_path, current_dev) is True
     assert check_device_boundary(tmp_path, current_dev + 1) is False
 
+    zero_dev_entry = MagicMock(spec=os.DirEntry)
+    zero_dev_entry.stat.return_value = MagicMock(st_dev=0)
+    with patch.object(Path, "stat", wraps=tmp_path.stat) as stat_spy:
+        assert (
+            check_device_boundary(tmp_path, current_dev, entry=zero_dev_entry, follow_symlinks=False) is True
+        )
+        stat_spy.assert_called_once_with(follow_symlinks=False)
+
     with patch.object(Path, "stat", side_effect=OSError("stat error")):
         assert check_device_boundary(tmp_path, current_dev) is False
 
