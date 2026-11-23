@@ -263,6 +263,12 @@ def _handle_compare_output(report: BackendComparisonReport, args: argparse.Names
 
 def _run_compare_cli(args: argparse.Namespace) -> int:
     """Execute side-by-side Rust vs. Python comparison mode."""
+    if (args.baseline, args.save_baseline, args.threshold) != (None, None, None):
+        sys.stderr.write(
+            "Error: --baseline, --save-baseline, and --threshold are not supported with --backend compare.\n",
+        )
+        return 2
+
     try:
         compare_report = run_compare_mode(args)
     except RuntimeError as exc:

@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import gc
 import io
 import json
 import runpy
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING
@@ -29,7 +27,7 @@ from tools.benchmark import (
     resolve_find_files_backend,
     run_compare_mode,
 )
-from tools.benchmark_backends import _measure_scenario_subprocess
+from tools.benchmark_backends import ALL_FORMATS, _measure_scenario_subprocess
 
 from findfmt import _fallback, core
 
@@ -210,11 +208,8 @@ def test_compare_mode_end_to_end_cli_and_json(tmp_path: Path) -> None:
     assert "peak_rss_delta_mb" in comp
 
 
-def test_compare_mode_keep_temp_native_and_error_paths(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Verify --keep-temp, missing target-dir, native status, and subprocess error handling."""
+def test_compare_mode_error_paths_and_output_variants(tmp_path: Path) -> None:
+    """Verify missing target-dir, output variants, and subprocess error handling."""
     # Missing target-dir returns 1
     err_missing = io.StringIO()
     with patch("sys.stderr", err_missing):
@@ -222,26 +217,7 @@ def test_compare_mode_keep_temp_native_and_error_paths(
 
     assert "does not exist" in err_missing.getvalue()
 
-    # --keep-temp preserves tree in compare mode and relabels scenario tier
-    keep_root = tmp_path / "keep"
-    keep_root.mkdir()
-    monkeypatch.setattr(tempfile, "tempdir", str(keep_root))
     parser = build_parser()
-    args_keep = parser.parse_args(
-        [
-            "--backend",
-            "compare",
-            "--tier",
-            "small",
-            "--topology",
-            "flat",
-            "--format",
-            "json",
-            "--files",
-            "4",
-            "--keep-temp",
-        ],
-    )
     fake_metric = BenchmarkMetric("custom", "/p", 4, 1, 0.01, 400.0, 100.0, 0.5, 512, 0.5, 20.0, "python")
     ok_proc = subprocess.CompletedProcess(
         args=["cmd"],
@@ -249,19 +225,15 @@ def test_compare_mode_keep_temp_native_and_error_paths(
         stdout=json.dumps({"metrics": [fake_metric.to_dict()]}),
         stderr="",
     )
+    args_native = parser.parse_args(["--backend", "compare", "--tier", "small", "--files", "4"])
     with (
         patch("tools.benchmark_backends.is_native_rust_find_available", return_value=True),
         patch("tools.benchmark_backends.subprocess.run", return_value=ok_proc),
-        patch("sys.stderr", io.StringIO()) as err_keep,
     ):
-        report = run_compare_mode(args_keep)
+        report = run_compare_mode(args_native)
 
-    gc.collect()
     assert report is not None
     assert report.rust_backend_status == "native"
-    assert report.comparisons[0].tier == "small flat json"
-    assert "Keeping benchmark tree:" in err_keep.getvalue()
-    assert len(list(keep_root.glob("findfmt_bench_small_flat_*"))) == 1
 
     # Output-only and JSON-only branches for compare mode
     only_out = tmp_path / "only_out.json"
@@ -281,14 +253,14 @@ def test_compare_mode_keep_temp_native_and_error_paths(
         patch("tools.benchmark_backends.subprocess.run", return_value=bad_proc),
         pytest.raises(RuntimeError, match="Subprocess benchmark failed"),
     ):
-        _measure_scenario_subprocess(tmp_path, "python", ["small"], "python", args_sub)
+        _measure_scenario_subprocess(tmp_path, "python", ("traversal", "small"), "python", args_sub)
 
     bad_json_proc = subprocess.CompletedProcess(args=["cmd"], returncode=0, stdout="{bad", stderr="")
     with (
         patch("tools.benchmark_backends.subprocess.run", return_value=bad_json_proc),
         pytest.raises(RuntimeError, match="Invalid JSON output"),
     ):
-        _measure_scenario_subprocess(tmp_path, "python", ["small"], "python", args_sub)
+        _measure_scenario_subprocess(tmp_path, "python", ("traversal", "small"), "python", args_sub)
 
     err_sub = io.StringIO()
     with (
@@ -298,6 +270,45 @@ def test_compare_mode_keep_temp_native_and_error_paths(
         assert main(["--backend", "compare", "--files", "2"]) == 1
 
     assert "sub crash" in err_sub.getvalue()
+
+
+def test_compare_mode_rejects_baseline_and_isolates_formats(tmp_path: Path) -> None:
+    """Verify baseline option rejection (exit 2) and per-format subprocess RSS isolation."""
+    for bad_flag in (
+        ["--save-baseline", str(tmp_path / "b.json")],
+        ["--baseline", str(tmp_path / "b.json")],
+        ["--threshold", "5.0"],
+    ):
+        err_base = io.StringIO()
+        mock_run = MagicMock()
+        with patch.dict(main.__globals__, {"run_compare_mode": mock_run}), patch("sys.stderr", err_base):
+            assert main(["--backend", "compare", *bad_flag]) == 2
+            mock_run.assert_not_called()
+
+        assert "not supported with --backend compare" in err_base.getvalue()
+
+    parser = build_parser()
+    fake_metric = BenchmarkMetric("custom", "/p", 2, 1, 0.01, 200.0, 100.0, 0.5, 512, 0.5, 20.0, "python")
+    ok_proc = subprocess.CompletedProcess(
+        args=["cmd"],
+        returncode=0,
+        stdout=json.dumps({"metrics": [fake_metric.to_dict()]}),
+        stderr="",
+    )
+    args_all_fmt = parser.parse_args(
+        ["--backend", "compare", "--tier", "small", "--format", "all", "--files", "2"],
+    )
+    with (
+        patch("tools.benchmark_backends.is_native_rust_find_available", return_value=True),
+        patch("tools.benchmark_backends.subprocess.run", return_value=ok_proc) as mock_sub,
+    ):
+        all_fmt_report = run_compare_mode(args_all_fmt)
+
+    assert all_fmt_report is not None
+    assert mock_sub.call_count == 2 * len(ALL_FORMATS)
+    invoked_cmds = [c.args[0] for c in mock_sub.call_args_list]
+    assert len({cmd[cmd.index("--target-dir") + 1] for cmd in invoked_cmds}) == 1
+    assert {cmd[cmd.index("--format") + 1] for cmd in invoked_cmds} == set(ALL_FORMATS)
 
 
 def test_benchmark_script_bootstrap_and_empty_stream(

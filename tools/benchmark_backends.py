@@ -102,6 +102,7 @@ def resolve_find_files_backend(backend: str) -> tuple[str, FindFilesFn]:
 def _build_subprocess_cmd(
     target_dir: Path,
     backend: str,
+    output_format: str,
     args: argparse.Namespace,
 ) -> list[str]:
     cmd = [
@@ -112,7 +113,7 @@ def _build_subprocess_cmd(
         "--target-dir",
         str(target_dir),
         "--format",
-        str(args.format),
+        output_format,
         "--runs",
         str(args.runs),
         "--warmup",
@@ -131,18 +132,19 @@ def _build_subprocess_cmd(
 def _measure_scenario_subprocess(
     target_dir: Path,
     backend: str,
-    tier_labels: list[str],
+    fmt_pair: tuple[str, str],
     backend_label: str,
     args: argparse.Namespace,
 ) -> list[BenchmarkMetric]:
-    """Run benchmark in a fresh child subprocess to isolate OS ru_maxrss per backend."""
+    """Run benchmark in a fresh child subprocess to isolate OS ru_maxrss per backend and format."""
+    output_format, tier_label = fmt_pair
     env = os.environ.copy()
     existing_py_path = env.get("PYTHONPATH", "")
     repo_str = str(REPO_ROOT)
     env["PYTHONPATH"] = f"{repo_str}{os.pathsep}{existing_py_path}" if existing_py_path else repo_str
 
     proc = subprocess.run(
-        _build_subprocess_cmd(target_dir, backend, args),
+        _build_subprocess_cmd(target_dir, backend, output_format, args),
         cwd=REPO_ROOT,
         env=env,
         capture_output=True,
@@ -162,12 +164,11 @@ def _measure_scenario_subprocess(
         raise RuntimeError(msg) from exc
 
     parsed: list[BenchmarkMetric] = []
-    for idx, item in enumerate(raw_metrics):
+    for item in raw_metrics:
         item.setdefault("peak_rss_mb", 0.0)
         item.setdefault("backend", backend_label)
         metric = BenchmarkMetric(**item)
-        new_tier = tier_labels[idx] if idx < len(tier_labels) else metric.tier
-        parsed.append(dataclasses.replace(metric, tier=new_tier, backend=backend_label))
+        parsed.append(dataclasses.replace(metric, tier=tier_label, backend=backend_label))
 
     return parsed
 
@@ -177,8 +178,8 @@ def _build_tier_labels(
     top: str,
     selected_topologies: list[str],
     selected_formats: list[str],
-) -> list[str]:
-    labels: list[str] = []
+) -> list[tuple[str, str]]:
+    pairs: list[tuple[str, str]] = []
     for fmt in selected_formats:
         parts = [tier]
         if len(selected_topologies) > 1 or top != "standard":
@@ -187,9 +188,9 @@ def _build_tier_labels(
         if len(selected_formats) > 1 or fmt != "traversal":
             parts.append(fmt)
 
-        labels.append(" ".join(parts))
+        pairs.append((fmt, " ".join(parts)))
 
-    return labels
+    return pairs
 
 
 def run_compare_mode(args: argparse.Namespace) -> BackendComparisonReport | None:
@@ -205,7 +206,7 @@ def run_compare_mode(args: argparse.Namespace) -> BackendComparisonReport | None
             "measuring findfmt.core gateway fallback against _fallback.\n",
         )
 
-    scenarios: list[tuple[Path, list[str]]] = []
+    scenarios: list[tuple[Path, list[tuple[str, str]]]] = []
     cleanups: list[tempfile.TemporaryDirectory[str]] = []
     try:
         if args.target_dir is not None:
@@ -214,10 +215,11 @@ def run_compare_mode(args: argparse.Namespace) -> BackendComparisonReport | None
                 sys.stderr.write(f"Error: Target directory does not exist: {target}\n")
                 return None
 
-            custom_labels = [
-                f"custom [{fmt}]" if len(selected_formats) > 1 else "custom" for fmt in selected_formats
+            custom_pairs = [
+                (fmt, f"custom [{fmt}]" if len(selected_formats) > 1 else "custom")
+                for fmt in selected_formats
             ]
-            scenarios.append((target, custom_labels))
+            scenarios.append((target, custom_pairs))
         else:
             selected_tiers = list(ALL_TIERS) if args.tier == "all" else [str(args.tier)]
             selected_topologies = list(ALL_TOPOLOGIES) if args.topology == "all" else [str(args.topology)]
@@ -233,24 +235,25 @@ def run_compare_mode(args: argparse.Namespace) -> BackendComparisonReport | None
                         root_path = Path(td.name)
 
                     generate_synthetic_tree(root_path, target_files, seed=args.seed, topology=top)
-                    labels = _build_tier_labels(tier, top, selected_topologies, selected_formats)
-                    scenarios.append((root_path, labels))
+                    pairs = _build_tier_labels(tier, top, selected_topologies, selected_formats)
+                    scenarios.append((root_path, pairs))
 
         python_metrics: list[BenchmarkMetric] = []
         rust_metrics: list[BenchmarkMetric] = []
-        for scenario_path, labels in scenarios:
-            python_metrics.extend(
-                _measure_scenario_subprocess(scenario_path, "python", labels, "python", args),
-            )
-            rust_metrics.extend(
-                _measure_scenario_subprocess(
-                    scenario_path,
-                    rust_sub_backend,
-                    labels,
-                    rust_metric_label,
-                    args,
-                ),
-            )
+        for scenario_path, fmt_pairs in scenarios:
+            for fmt_pair in fmt_pairs:
+                python_metrics.extend(
+                    _measure_scenario_subprocess(scenario_path, "python", fmt_pair, "python", args),
+                )
+                rust_metrics.extend(
+                    _measure_scenario_subprocess(
+                        scenario_path,
+                        rust_sub_backend,
+                        fmt_pair,
+                        rust_metric_label,
+                        args,
+                    ),
+                )
 
         comparisons = compute_backend_comparisons(
             python_metrics,
