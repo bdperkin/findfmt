@@ -1,13 +1,15 @@
+FROM rust:1.100-slim-bookworm@sha256:7c7d4eb4d05b7781187a327809466cfddf29753f6defdc3d19a0e291951b7a37 AS rust-toolchain
 FROM gcr.io/oss-fuzz-base/base-builder-python@sha256:21f6fab17ace4dc76e1c56de91ee95d3d03da021df94b41056ba036f6c6f55e9
 
-ENV PATH="/root/.cargo/bin:/rust/bin:${PATH}"
+COPY --from=rust-toolchain /usr/local/cargo /usr/local/cargo
+COPY --from=rust-toolchain /usr/local/rustup /usr/local/rustup
+ENV RUSTUP_HOME="/usr/local/rustup" \
+    CARGO_HOME="/usr/local/cargo" \
+    PATH="/usr/local/cargo/bin:${PATH}"
 
-RUN if command -v rustup >/dev/null 2>&1; then \
-      rustup toolchain install stable --profile minimal && rustup default stable; \
-    else \
-      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal; \
-    fi \
-    && python3 -m pip install --no-cache-dir "maturin>=1.14,<2"
+COPY .clusterfuzzlite/build-requirements.txt /tmp/build-requirements.txt
+RUN python3 -m pip install --no-cache-dir --no-deps --require-hashes -r /tmp/build-requirements.txt \
+    && rm -f /tmp/build-requirements.txt
 
 COPY . $SRC/findfmt
 WORKDIR $SRC/findfmt
