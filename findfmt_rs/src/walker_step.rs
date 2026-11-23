@@ -13,16 +13,26 @@ use crate::walker_filter::{
     build_raw_classify_input, executable_hint_for_skip, filter_entry_nogil, is_valid_descent_dir,
     resolve_relative_pathbuf, should_skip_dir,
 };
-use crate::walker_prune::has_matching_descendants_nogil;
+use crate::walker_prune::{PrunePoll, PruneSearch};
 use crate::walker_sort::collect_and_sort_entries;
-use crate::walker_types::{DirKey, PruneCache, WalkConfig, WalkEvent, WalkYieldItem};
+use crate::walker_types::{DirKey, PruneCache, PruneMemoKey, WalkConfig, WalkEvent, WalkYieldItem};
 
 #[derive(Clone, Debug)]
 pub(crate) struct CandidateBatch {
     pub targets: VecDeque<(PathBuf, bool)>,
+    pub active_prune: Option<((PathBuf, bool), PruneSearch)>,
     pub specs: Arc<[GitignoreMatcher]>,
     pub depth: usize,
     pub inherited_match: bool,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct PendingSubdirPrune {
+    pub subdir: PathBuf,
+    pub child_specs: Arc<[GitignoreMatcher]>,
+    pub child_depth: usize,
+    pub child_inh: bool,
+    pub search: PruneSearch,
 }
 
 pub(crate) struct WalkFrame {
@@ -40,9 +50,10 @@ pub(crate) struct ActiveRootState {
     pub root_dev: Option<u64>,
     pub visited_dirs: HashSet<DirKey>,
     pub accumulated_sizes: Option<HashMap<PathBuf, u64>>,
-    pub prune_memo: HashMap<DirKey, PruneCache>,
+    pub prune_memo: HashMap<PruneMemoKey, PruneCache>,
     pub stack: Vec<WalkFrame>,
     pub pending_batch: Option<CandidateBatch>,
+    pub pending_subdir_prune: Option<PendingSubdirPrune>,
 }
 
 pub(crate) fn enter_directory_state(
@@ -82,6 +93,7 @@ pub(crate) fn enter_directory_state(
     };
     let batch = (!raw_targets.is_empty()).then(|| CandidateBatch {
         targets: raw_targets,
+        active_prune: None,
         specs: Arc::clone(&specs),
         depth: current_depth,
         inherited_match,
@@ -127,37 +139,57 @@ pub(crate) fn drain_candidate_batch(
     let (tag_active, needs_mime, needs_exec) = tag_prefilter_requirements(&config.filter);
 
     while events.len() < cap {
-        let Some((cand_path, is_symlink)) = batch.targets.pop_front() else {
-            break;
-        };
-        let events_before = events.len();
-        if config.dirs_only && config.prune_empty {
-            if !is_valid_descent_dir(&cand_path, config.follow_symlinks) {
-                continue;
-            }
-            let child_specs = load_child_specs(&cand_path, &batch.specs, config.respect_gitignore);
-            let has_match = has_matching_descendants_nogil(
-                &cand_path,
-                &child_specs,
-                batch.depth + 1,
-                batch.inherited_match,
+        let (cand_path, is_symlink) = if let Some((cand, mut search)) = batch.active_prune.take() {
+            match search.poll(
                 &state.base_root,
                 state.root_dev,
                 config,
                 registry,
                 &mut state.prune_memo,
                 events,
-            );
-            let emitted_error = events[events_before..]
-                .iter()
-                .any(|ev| matches!(ev, WalkEvent::Error(_)));
-            if !has_match {
-                if emitted_error {
+            ) {
+                PrunePoll::Matched => cand,
+                PrunePoll::Empty => continue,
+                PrunePoll::YieldedError => {
+                    batch.active_prune = Some((cand, search));
                     break;
                 }
-                continue;
             }
-        }
+        } else {
+            let Some(cand) = batch.targets.pop_front() else {
+                break;
+            };
+            if config.dirs_only && config.prune_empty {
+                if !is_valid_descent_dir(&cand.0, config.follow_symlinks) {
+                    continue;
+                }
+                let child_specs =
+                    load_child_specs(&cand.0, &batch.specs, config.respect_gitignore);
+                let mut search = PruneSearch::new(
+                    cand.0.clone(),
+                    child_specs,
+                    batch.depth + 1,
+                    batch.inherited_match,
+                );
+                match search.poll(
+                    &state.base_root,
+                    state.root_dev,
+                    config,
+                    registry,
+                    &mut state.prune_memo,
+                    events,
+                ) {
+                    PrunePoll::Matched => cand,
+                    PrunePoll::Empty => continue,
+                    PrunePoll::YieldedError => {
+                        batch.active_prune = Some((cand, search));
+                        break;
+                    }
+                }
+            } else {
+                cand
+            }
+        };
 
         let rel_pb =
             resolve_relative_pathbuf(&cand_path, &state.base_root, state.prefix.as_deref());
@@ -173,22 +205,22 @@ pub(crate) fn drain_candidate_batch(
                 let filename = cand_path
                     .file_name()
                     .map_or_else(String::new, |n| n.to_string_lossy().into_owned());
-                let exec_hint = if needs_exec {
-                    executable_hint_for_skip(
-                        &cand_path,
-                        &filename,
-                        is_symlink,
-                        config.follow_symlinks,
-                    )
-                } else {
-                    None
-                };
-                let guessed_mime = if needs_mime {
-                    let str_path = cand_path.to_string_lossy();
-                    config.mime_snapshot.guess_mime_type(&str_path)
-                } else {
-                    None
-                };
+                let exec_hint = needs_exec
+                    .then(|| {
+                        executable_hint_for_skip(
+                            &cand_path,
+                            &filename,
+                            is_symlink,
+                            config.follow_symlinks,
+                        )
+                    })
+                    .flatten();
+                let guessed_mime = needs_mime
+                    .then(|| {
+                        let str_path = cand_path.to_string_lossy();
+                        config.mime_snapshot.guess_mime_type(&str_path)
+                    })
+                    .flatten();
                 if can_skip_entry_by_tags(
                     &filename,
                     is_symlink,
@@ -224,7 +256,7 @@ pub(crate) fn drain_candidate_batch(
             continue;
         }
 
-        events.push(WalkEvent::Item(WalkYieldItem {
+        events.push(WalkEvent::Item(Box::new(WalkYieldItem {
             path: cand_path,
             str_path: raw_in.str_path,
             filename: raw_in.filename,
@@ -234,15 +266,9 @@ pub(crate) fn drain_candidate_batch(
             follow_symlinks: config.follow_symlinks,
             inherited_match: batch.inherited_match,
             classified,
-        }));
-        if events[events_before..]
-            .iter()
-            .any(|ev| matches!(ev, WalkEvent::Error(_)))
-        {
-            break;
-        }
+        })));
     }
-    if !batch.targets.is_empty() {
+    if batch.active_prune.is_some() || !batch.targets.is_empty() {
         state.pending_batch = Some(batch);
     }
 }

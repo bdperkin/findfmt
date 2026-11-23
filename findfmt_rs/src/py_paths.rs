@@ -25,8 +25,10 @@ pub(crate) struct PyHandles {
     pub resolve_group_name: Py<PyAny>,
     pub resolve_relative: Py<PyAny>,
     pub compute_relative_prefix: Py<PyAny>,
+    pub find_global_gitignore_path: Py<PyAny>,
     pub traversal_error_cls: Py<PyAny>,
     pub ingest_from_file: Py<PyAny>,
+    pub unicode_major: u8,
 }
 
 static PY_HANDLES: OnceLock<PyHandles> = OnceLock::new();
@@ -41,8 +43,16 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
     let models = py.import("findfmt.models")?;
     let metadata = py.import("findfmt.metadata")?;
     let classifier = py.import("findfmt.classifier")?;
+    let trav_ignore = py.import("findfmt.traversal.ignore")?;
     let exceptions = py.import("findfmt.exceptions")?;
     let parsers = py.import("findfmt.parsers")?;
+    let unicode_major = py
+        .import("unicodedata")
+        .ok()
+        .and_then(|u| u.getattr("unidata_version").ok())
+        .and_then(|v| v.extract::<String>().ok())
+        .and_then(|s| s.split('.').next()?.parse::<u8>().ok())
+        .unwrap_or(16);
     let path_cls_bound = pathlib.getattr("Path")?;
     let built = PyHandles {
         path_home: path_cls_bound.getattr("home")?.unbind(),
@@ -58,8 +68,10 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
         resolve_group_name: metadata.getattr("resolve_group_name")?.unbind(),
         resolve_relative: classifier.getattr("_resolve_relative")?.unbind(),
         compute_relative_prefix: classifier.getattr("compute_relative_prefix")?.unbind(),
+        find_global_gitignore_path: trav_ignore.getattr("find_global_gitignore_path")?.unbind(),
         traversal_error_cls: exceptions.getattr("TraversalError")?.unbind(),
         ingest_from_file: parsers.getattr("ingest_from_file")?.unbind(),
+        unicode_major,
     };
     let _ = PY_HANDLES.set(built);
     PY_HANDLES.get().ok_or_else(|| {

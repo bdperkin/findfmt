@@ -234,12 +234,14 @@ pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
             matcher: PatternMatcher::default(),
             home_dir: None,
             pathext_upper: None,
+            unicode_major: 16,
             mime_snapshot: MimeSnapshot::default(),
         };
         let target = RootTarget {
             raw_root: dir.clone(),
             resolved_root: Some(dir.clone()),
             prefix: None,
+            global_gitignore: None,
             initial_error: None,
         };
         let mut walker = NativeWalker::new(walk_cfg, shared_registry(), vec![target]);

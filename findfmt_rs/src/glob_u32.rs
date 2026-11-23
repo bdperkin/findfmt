@@ -175,28 +175,28 @@ fn parse_segment_tokens(seg: &str, ignore_case: bool) -> Result<SegPat, InvalidG
     Ok(SegPat::Seq(tokens))
 }
 
-fn compile_rule_line(line: &str, ignore_case: bool) -> Option<CompiledRuleU32> {
+fn compile_rule_line(line: &str, ignore_case: bool) -> Result<Option<CompiledRuleU32>, String> {
     if line.is_empty() || line.starts_with('#') {
-        return None;
+        return Ok(None);
     }
     let (negated, rest) = match line.strip_prefix('!') {
         Some(r) => (true, r),
         None => (false, line),
     };
     if rest.is_empty() {
-        return None;
+        return Err(format!("Invalid gitignore pattern: {line:?}"));
     }
     if rest == "/" {
-        return Some(CompiledRuleU32 {
+        return Ok(Some(CompiledRuleU32 {
             negated,
             dir_only: false,
             anchored: false,
             match_all: true,
             segments: Vec::new(),
-        });
+        }));
     }
     if rest.chars().all(|c| c == '/') {
-        return None;
+        return Ok(None);
     }
     let dir_only = rest.ends_with('/');
     let without_trailing = rest.trim_end_matches('/');
@@ -207,15 +207,17 @@ fn compile_rule_line(line: &str, ignore_case: bool) -> Option<CompiledRuleU32> {
 
     let mut segments = Vec::new();
     for raw_seg in body.split('/') {
-        segments.push(parse_segment_tokens(raw_seg, ignore_case).ok()?);
+        let seg_pat = parse_segment_tokens(raw_seg, ignore_case)
+            .map_err(|_| format!("Invalid gitignore pattern: {line:?}"))?;
+        segments.push(seg_pat);
     }
-    Some(CompiledRuleU32 {
+    Ok(Some(CompiledRuleU32 {
         negated,
         dir_only,
         anchored,
         match_all: false,
         segments,
-    })
+    }))
 }
 
 fn match_tokens_slice(tokens: &[SegToken], text: &[u32], ignore_case: bool) -> bool {
@@ -316,13 +318,18 @@ pub struct GlobSpecU32 {
 }
 
 impl GlobSpecU32 {
-    /// Compile trimmed pattern lines (`patterns.py:compile_pattern_spec` parity).
-    pub fn from_lines(lines: &[String], ignore_case: bool) -> Option<Self> {
-        let rules: Vec<CompiledRuleU32> = lines
-            .iter()
-            .filter_map(|l| compile_rule_line(l, ignore_case))
-            .collect();
-        (!rules.is_empty()).then_some(Self { rules, ignore_case })
+    /// Compile trimmed pattern lines, propagating malformed syntax errors (`patterns.py` parity).
+    pub fn try_from_lines(lines: &[String], ignore_case: bool) -> Result<Option<Self>, String> {
+        if lines.is_empty() {
+            return Ok(None);
+        }
+        let mut rules = Vec::with_capacity(lines.len());
+        for line in lines {
+            if let Some(compiled) = compile_rule_line(line, ignore_case)? {
+                rules.push(compiled);
+            }
+        }
+        Ok(Some(Self { rules, ignore_case }))
     }
 
     /// Evaluate `spec.match_file` semantics on `segs` with `is_dir` trailing-slash parity.

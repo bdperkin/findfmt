@@ -276,10 +276,7 @@ fn materialize_yield_item<'py>(
         is_abs,
         item.has_entry,
         Some((&root_obj, &item.root_path)),
-        prefix_obj
-            .as_ref()
-            .zip(item.prefix.as_deref())
-            .map(|(o, p)| (o, p)),
+        prefix_obj.as_ref().zip(item.prefix.as_deref()),
         raw_classified,
         &mut bound_uid_cache,
         &mut bound_gid_cache,
@@ -308,7 +305,7 @@ fn step_native_driver<'py>(
                     }
                 }
                 WalkEvent::Item(item) => {
-                    if let Some(info) = materialize_yield_item(py, handles, driver, item)? {
+                    if let Some(info) = materialize_yield_item(py, handles, driver, *item)? {
                         return Ok(Some(info));
                     }
                 }
@@ -335,6 +332,7 @@ fn step_native_driver<'py>(
             raw_root_py.bind(py),
             driver.walk_cfg.follow_symlinks,
             driver.relative_prefix,
+            driver.walk_cfg.respect_gitignore,
         )?;
         if let (Some(py_err), Some(cb)) = (maybe_root_err, driver.on_error.as_ref()) {
             cb.bind(py).call1((py_err.bind(py),))?;

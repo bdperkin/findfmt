@@ -13,6 +13,8 @@ use crate::walker_types::{
     surrogateescape_codepoints,
 };
 
+type MetricSortEntry = (Vec<u32>, (f64, f64, u64), ScannedEntry);
+
 fn stat_sort_metrics(entry: &ScannedEntry, follow_symlinks: bool) -> (f64, f64, u64) {
     let is_sym = entry.file_type.as_ref().is_some_and(fs::FileType::is_symlink);
     let meta_res = if is_sym && follow_symlinks {
@@ -78,7 +80,14 @@ pub fn collect_and_sort_entries(
         WalkSortKey::Version => {
             let mut keyed: Vec<(_, ScannedEntry)> = entries
                 .into_iter()
-                .map(|e| (natural_sort_key_osstr(&e.file_name, config.ignore_case), e))
+                .map(|e| {
+                    let k = natural_sort_key_osstr(
+                        &e.file_name,
+                        config.ignore_case,
+                        config.unicode_major,
+                    );
+                    (k, e)
+                })
                 .collect();
             keyed.sort_by(|a, b| {
                 let ord = a.0.cmp(&b.0);
@@ -88,7 +97,7 @@ pub fn collect_and_sort_entries(
         }
         WalkSortKey::Time | WalkSortKey::Ctime | WalkSortKey::Size => {
             let descending = !config.reverse_sort;
-            let mut keyed: Vec<(Vec<u32>, (f64, f64, u64), ScannedEntry)> = entries
+            let mut keyed: Vec<MetricSortEntry> = entries
                 .into_iter()
                 .map(|e| {
                     let nk = surrogateescape_codepoints(&e.file_name, config.ignore_case);

@@ -79,37 +79,24 @@ pub fn resolve_device_id(path: &Path, is_symlink: bool, follow_symlinks: bool) -
             fs::metadata(path).ok().map(|m| m.dev())
         }
     }
-    #[cfg(all(not(unix), feature = "extension-module"))]
-    {
-        use pyo3::prelude::*;
-        use pyo3::types::PyDict;
-        Python::attach(|py| -> Option<u64> {
-            let os_mod = py.import("os").ok()?;
-            let path_str = path.to_string_lossy();
-            let kwargs = PyDict::new(py);
-            kwargs
-                .set_item("follow_symlinks", follow_symlinks || !is_symlink)
-                .ok()?;
-            let st = os_mod
-                .call_method("stat", (path_str.as_ref(),), Some(&kwargs))
-                .ok()?;
-            let dev: u64 = st.getattr("st_dev").ok()?.extract().ok()?;
-            if dev != 0 {
-                return Some(dev);
-            }
-            let st_follow = os_mod.call_method1("stat", (path_str.as_ref(),)).ok()?;
-            st_follow.getattr("st_dev").ok()?.extract().ok()
-        })
-    }
-    #[cfg(all(not(unix), not(feature = "extension-module")))]
+    #[cfg(not(unix))]
     {
         use std::collections::hash_map::DefaultHasher;
         use std::hash::{Hash, Hasher};
-        let _ = (is_symlink, follow_symlinks);
-        let canon = fs::canonicalize(path).ok()?;
-        let first = canon.components().next()?;
+        use std::path::Component;
+
+        let target_for_volume = if is_symlink && !follow_symlinks {
+            let _ = fs::symlink_metadata(path).ok()?;
+            path.parent().unwrap_or(path)
+        } else {
+            path
+        };
+        let canon = fs::canonicalize(target_for_volume).ok()?;
         let mut hasher = DefaultHasher::new();
-        first.hash(&mut hasher);
+        match canon.components().next()? {
+            Component::Prefix(pfx) => pfx.as_os_str().to_string_lossy().to_ascii_uppercase().hash(&mut hasher),
+            other => other.hash(&mut hasher),
+        }
         Some(hasher.finish())
     }
 }

@@ -65,6 +65,9 @@ impl DirKey {
     }
 }
 
+/// Scoped memoization key for `--prune` descendant discovery.
+pub type PruneMemoKey = (DirKey, Option<PathBuf>);
+
 /// Depth-aware memoization entry for `--prune` descendant discovery.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PruneCache {
@@ -83,6 +86,7 @@ pub struct RootTarget {
     pub raw_root: PathBuf,
     pub resolved_root: Option<PathBuf>,
     pub prefix: Option<PathBuf>,
+    pub global_gitignore: Option<PathBuf>,
     pub initial_error: Option<WalkOsError>,
 }
 
@@ -108,6 +112,7 @@ pub struct WalkConfig {
     pub matcher: PatternMatcher,
     pub home_dir: Option<PathBuf>,
     pub pathext_upper: Option<Vec<String>>,
+    pub unicode_major: u8,
     pub mime_snapshot: MimeSnapshot,
 }
 
@@ -147,7 +152,7 @@ pub struct WalkYieldItem {
 #[derive(Clone, Debug)]
 pub enum WalkEvent {
     Error(WalkOsError),
-    Item(WalkYieldItem),
+    Item(Box<WalkYieldItem>),
 }
 
 /// Lightweight directory entry snapshot produced by `read_dir`.

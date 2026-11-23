@@ -6,11 +6,17 @@ use std::path::PathBuf;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
 
+use crate::ignore_stack::find_git_repo_root;
 use crate::patterns::PatternMatcher;
 use crate::py_bridge::extract_tag_set;
-use crate::py_paths::{PyHandles, py_path_to_pathbuf, windows_pathext_upper};
+use crate::py_paths::{
+    PyHandles, pathbuf_to_py_path, py_path_to_pathbuf, windows_pathext_upper,
+};
 use crate::tags::FilterCriteria;
 use crate::walker_types::{MimeSnapshot, RootTarget, WalkConfig, WalkSortKey};
+
+type ResolvedRootStep<'py> = (Option<Bound<'py, PyAny>>, Option<Py<PyAny>>);
+pub(crate) type PreparedWalk = (WalkConfig, VecDeque<Py<PyAny>>, bool);
 
 fn extract_optional_non_negative(
     py: Python<'_>,
@@ -112,10 +118,11 @@ pub(crate) fn resolve_single_root_py<'py>(
     root_obj: &Bound<'py, PyAny>,
     follow_symlinks: bool,
     relative_prefix: bool,
+    respect_gitignore: bool,
 ) -> PyResult<(RootTarget, Option<Py<PyAny>>)> {
     let (raw_root, _, _, _) = py_path_to_pathbuf(py, handles, root_obj)?;
 
-    let step = (|| -> PyResult<(Option<Bound<'py, PyAny>>, Option<Py<PyAny>>)> {
+    let step = (|| -> PyResult<ResolvedRootStep<'py>> {
         let is_symlink: bool = root_obj.call_method0("is_symlink")?.extract()?;
         if is_symlink && !follow_symlinks {
             let parent_res = root_obj.getattr("parent")?.call_method0("resolve")?;
@@ -193,11 +200,24 @@ pub(crate) fn resolve_single_root_py<'py>(
         None => (None, None),
     };
 
+    let global_gitignore = if let Some(ref rpb) = resolved_pb.as_ref().filter(|_| respect_gitignore)
+    {
+        let base_dir = find_git_repo_root(rpb).unwrap_or_else(|| (*rpb).clone());
+        pathbuf_to_py_path(py, handles, &base_dir)
+            .ok()
+            .and_then(|bp| handles.find_global_gitignore_path.bind(py).call1((bp,)).ok())
+            .filter(|res| !res.is_none())
+            .and_then(|res| py_path_to_pathbuf(py, handles, &res).ok().map(|t| t.0))
+    } else {
+        None
+    };
+
     Ok((
         RootTarget {
             raw_root,
             resolved_root: resolved_pb,
             prefix: prefix_pb,
+            global_gitignore,
             initial_error: None,
         },
         root_py_err,
@@ -213,7 +233,7 @@ pub(crate) fn prepare_walk_from_py_config<'py>(
     py: Python<'py>,
     handles: &PyHandles,
     config_obj: &Bound<'py, PyAny>,
-) -> PyResult<Option<(WalkConfig, VecDeque<Py<PyAny>>, bool)>> {
+) -> PyResult<Option<PreparedWalk>> {
     let max_depth = extract_optional_non_negative(py, handles, config_obj, "max_depth")?;
     let file_limit = extract_optional_non_negative(py, handles, config_obj, "file_limit")?;
 
@@ -243,7 +263,9 @@ pub(crate) fn prepare_walk_from_py_config<'py>(
 
     let include_patterns = extract_string_vec(&config_obj.getattr("include_patterns")?)?;
     let exclude_patterns = extract_string_vec(&config_obj.getattr("exclude_patterns")?)?;
-    let matcher = PatternMatcher::new(&include_patterns, &exclude_patterns, ignore_case, match_dirs);
+    let matcher =
+        PatternMatcher::try_new(&include_patterns, &exclude_patterns, ignore_case, match_dirs)
+            .map_err(pyo3::exceptions::PyValueError::new_err)?;
 
     let include_tags = extract_tag_set(Some(&config_obj.getattr("include_tags")?))?;
     let exclude_tags = extract_tag_set(Some(&config_obj.getattr("exclude_tags")?))?;
@@ -295,6 +317,7 @@ pub(crate) fn prepare_walk_from_py_config<'py>(
         matcher,
         home_dir,
         pathext_upper: windows_pathext_upper(),
+        unicode_major: handles.unicode_major,
         mime_snapshot: snapshot_live_mime_db(py)?,
     };
     Ok(Some((walk_cfg, pending_roots, relative_prefix)))

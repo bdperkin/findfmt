@@ -99,6 +99,7 @@ def inspect_entries_for_match(
 
             info = state.classify_fn(
                 entry_path,
+                root_path=base_root,
                 entry=entry,
                 follow_symlinks=config.follow_symlinks,
             )

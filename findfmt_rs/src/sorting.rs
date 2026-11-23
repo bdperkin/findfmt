@@ -19,9 +19,22 @@ const DECIMAL_ZERO_BASES: [u32; 76] = [
     0x1E140, 0x1E2F0, 0x1E4F0, 0x1E5F1, 0x1E950, 0x1FBF0,
 ];
 
-/// Return the decimal value (`0..=9`) when `ch` belongs to Unicode `Decimal_Number`.
+/// Return the minimum Unicode major version where decimal block `base` was introduced.
 #[inline]
-pub fn decimal_digit_value(ch: char) -> Option<u8> {
+const fn block_min_unicode_major(base: u32) -> u8 {
+    match base {
+        // Added in Unicode 15.0 (Python 3.12+): Kawi, Nag Mundari
+        0x11F50 | 0x1E4F0 => 15,
+        // Added in Unicode 16.0 (Python 3.14+): Garay, Myanmar Pao, Eastern Pwo Karen,
+        // Sunuwar, Gurung Khema, Kirat Rai, Outlined, Ol Onal
+        0x10D40 | 0x116D0 | 0x116DA | 0x11BF0 | 0x16130 | 0x16D70 | 0x1CCF0 | 0x1E5F1 => 16,
+        _ => 14,
+    }
+}
+
+/// Return the decimal value (`0..=9`) when `ch` belongs to Unicode `Decimal_Number` at `unicode_major`.
+#[inline]
+pub fn decimal_digit_value_for_unicode(ch: char, unicode_major: u8) -> Option<u8> {
     if ch.is_ascii_digit() {
         return Some((ch as u8) - b'0');
     }
@@ -34,12 +47,21 @@ pub fn decimal_digit_value(ch: char) -> Option<u8> {
         return None;
     }
     let base = DECIMAL_ZERO_BASES.get(idx - 1).copied()?;
+    if block_min_unicode_major(base) > unicode_major {
+        return None;
+    }
     let offset = cp.saturating_sub(base);
     if offset <= 9 {
         u8::try_from(offset).ok()
     } else {
         None
     }
+}
+
+/// Return the decimal value (`0..=9`) when `ch` belongs to Unicode 16 `Decimal_Number`.
+#[inline]
+pub fn decimal_digit_value(ch: char) -> Option<u8> {
+    decimal_digit_value_for_unicode(ch, 16)
 }
 
 /// Comparable token for natural version sort keys (`src/findfmt/traversal/sorting.py` `_SortChunk` parity).
@@ -152,7 +174,11 @@ fn flush_u32_text(
 }
 
 /// Generate a PEP 383 `surrogateescape`-preserving natural sort key from an `OsStr`.
-pub fn natural_sort_key_osstr(name: &OsStr, ignore_case: bool) -> NaturalSortKeyU32 {
+pub fn natural_sort_key_osstr(
+    name: &OsStr,
+    ignore_case: bool,
+    unicode_major: u8,
+) -> NaturalSortKeyU32 {
     let raw_cps = surrogateescape_codepoints(name, false);
     let normalized = surrogateescape_codepoints(name, ignore_case);
 
@@ -164,7 +190,7 @@ pub fn natural_sort_key_osstr(name: &OsStr, ignore_case: bool) -> NaturalSortKey
     for cp in raw_cps {
         match char::from_u32(cp) {
             Some(ch) => {
-                if let Some(d) = decimal_digit_value(ch) {
+                if let Some(d) = decimal_digit_value_for_unicode(ch, unicode_major) {
                     flush_u32_text(&mut chunks, &mut valid_text, &mut text_cps, ignore_case);
                     digit_buf.push(char::from(b'0' + d));
                 } else {
@@ -242,9 +268,11 @@ mod tests {
         #[cfg(unix)]
         {
             use std::os::unix::ffi::OsStrExt;
-            let k_ff = natural_sort_key_osstr(OsStr::from_bytes(b"\xff_v2"), false);
-            let k_pua = natural_sort_key_osstr(OsStr::new("\u{e000}_v2"), false);
+            let k_ff = natural_sort_key_osstr(OsStr::from_bytes(b"\xff_v2"), false, 16);
+            let k_pua = natural_sort_key_osstr(OsStr::new("\u{e000}_v2"), false, 16);
             assert!(k_ff < k_pua);
         }
+        assert_eq!(decimal_digit_value_for_unicode('\u{11F52}', 14), None);
+        assert_eq!(decimal_digit_value_for_unicode('\u{11F52}', 15), Some(2));
     }
 }
