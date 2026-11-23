@@ -64,7 +64,7 @@ dispatched through `src/findfmt/core.py` with automatic fallback to the pure-Pyt
   `sync_pre_commit_deps.py`, `generate_assets.py`, `benchmark.py`, `benchmark_backends.py`,
   `benchmark_models.py`, `benchmark_render.py`, `benchmark_runner.py`, `benchmark_topologies.py`).
 - `tests/`: Comprehensive `pytest` suites mirroring the source layout (`tests/unit/`, `tests/integration/`,
-  `tests/fuzz/`).
+  `tests/fuzz/`, `tests/test_parity.py`).
 
 ### 1.2. CLI Entry Points & Wrapper Commands
 
