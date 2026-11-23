@@ -5,8 +5,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-from findfmt.classifier import classify_file
+from findfmt.classifier import classify_file as _py_classify_file
 from findfmt.traversal._pruning import (
+    ACTIVE_RUST_BATCH_HOOKS,
     _can_skip_candidate_file,
     _can_skip_entry_by_tags,
     _check_visited_or_memo,
@@ -24,21 +25,45 @@ from findfmt.traversal.ignore import (
     load_child_specs,
     resolve_active_specs,
 )
+from findfmt.traversal.patterns import matches_pattern_criteria
 from findfmt.traversal.symlinks import init_visited_dirs, should_skip_symlink_dir
 from findfmt.traversal.tags import can_skip_file_by_tags
 
 if TYPE_CHECKING:
     import os
+    import sys
     from collections.abc import Callable, Iterator, Sequence
 
     import pathspec
 
+    if sys.version_info >= (3, 12):
+        from typing import Unpack
+    else:
+        from typing_extensions import Unpack
+
     from findfmt.models import FileInfo, TraversalConfig
+    from findfmt.traversal._pruning import ClassifyKwargs
     from findfmt.traversal.patterns import PatternMatcher
 
     PathSpecType = pathspec.PathSpec[Any]
 else:
     PathSpecType = Any
+
+
+def classify_file(
+    path: Path,
+    root_path: Path | None = None,
+    prefix: Path | None = None,
+    accumulated_size: int | None = None,
+    **kwargs: Unpack[ClassifyKwargs],
+) -> FileInfo:
+    """Classify a traversal item via the active runtime gateway or pure-Python classifier."""
+    hooks = ACTIVE_RUST_BATCH_HOOKS.get()
+    target = hooks[0] if hooks is not None else _py_classify_file
+    return target(path, root_path, prefix, accumulated_size, **kwargs)
+
+
+_DEFAULT_CLASSIFY: Callable[..., FileInfo] = classify_file
 
 __all__ = [
     "can_skip_file_by_tags",
@@ -357,6 +382,37 @@ def _should_skip_dir_prune(  # noqa: PLR0913 - wide CLI/config signature
     )
 
 
+def _emit_classified_candidates(
+    candidates: Sequence[tuple[Path, os.DirEntry[str] | None, int | None]],
+    config: TraversalConfig,
+    base_root: Path,
+    prefix: Path | None,
+    pattern_ctx: tuple[PatternMatcher | None, bool],
+) -> Iterator[FileInfo]:
+    """Emit matching FileInfo records via batch Rust hooks or per-file classification."""
+    matcher, inherited_match = pattern_ctx
+    hooks = ACTIVE_RUST_BATCH_HOOKS.get() if classify_file is _DEFAULT_CLASSIFY else None
+    batch_infos = hooks[1](candidates, config, base_root, prefix) if hooks is not None else None
+    if batch_infos is not None:
+        for info in batch_infos:
+            if matches_pattern_criteria(info, config, matcher=matcher, inherited_match=inherited_match):
+                yield info
+
+        return
+
+    for path, entry, accum_size in candidates:
+        info = classify_file(
+            path,
+            root_path=base_root,
+            prefix=prefix,
+            accumulated_size=accum_size,
+            entry=entry,
+            follow_symlinks=config.follow_symlinks,
+        )
+        if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
+            yield info
+
+
 def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
     targets: Sequence[Path | tuple[Path, os.DirEntry[str]]],
     config: TraversalConfig,
@@ -373,9 +429,9 @@ def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
     on_error: Callable[[OSError], None] | None = None,
 ) -> Iterator[FileInfo]:
     """Yield FileInfo records for candidate paths that satisfy filters and pruning."""
+    candidates: list[tuple[Path, os.DirEntry[str] | None, int | None]] = []
     for item in targets:
         path, entry = item if isinstance(item, tuple) else (item, None)
-
         if _should_skip_dir_prune(
             path,
             config,
@@ -402,13 +458,13 @@ def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
             continue
 
         accum_size = accumulated_sizes.get(path) if accumulated_sizes is not None else None
-        info = classify_file(
-            path,
-            root_path=base_root,
-            prefix=prefix,
-            accumulated_size=accum_size,
-            entry=entry,
-            follow_symlinks=config.follow_symlinks,
+        candidates.append((path, entry, accum_size))
+
+    if candidates:
+        yield from _emit_classified_candidates(
+            candidates,
+            config,
+            base_root,
+            prefix,
+            (matcher, inherited_match),
         )
-        if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
-            yield info

@@ -1,4 +1,4 @@
-"""Runtime dispatch gateway between findfmt._rust_ext and pure-Python fallback (#578)."""
+"""Runtime dispatch gateway between findfmt._rust_ext and pure-Python fallback (#578, #583)."""
 
 from __future__ import annotations
 
@@ -8,9 +8,10 @@ from collections import Counter
 from typing import TYPE_CHECKING, Literal
 
 from findfmt import _fallback
+from findfmt.traversal._pruning import ACTIVE_RUST_BATCH_HOOKS
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterable, Iterator
+    from collections.abc import Callable, Iterable, Iterator, Sequence
     from pathlib import Path
     from types import ModuleType
 
@@ -61,6 +62,11 @@ def _is_rust_panic(exc: BaseException) -> bool:
     return cls.__name__ == "PanicException" and cls.__module__.startswith("pyo3_runtime")
 
 
+def _is_native_direntry(entry: os.DirEntry[str] | None) -> bool:
+    """Return True when entry is None or an authentic OS scandir DirEntry instance."""
+    return entry is None or type(entry) is os.DirEntry
+
+
 def is_rust_extension_loaded() -> bool:
     """Return True when findfmt._rust_ext imported cleanly and is not disabled."""
     return _get_rust_ext() is not None
@@ -91,7 +97,9 @@ def classify_file(  # noqa: PLR0913 - public API signature parity
     """Classify a file via findfmt._rust_ext when available, falling back to pure Python."""
     rust_ext = _get_rust_ext()
     rust_classify: Callable[..., FileInfo] | None = (
-        getattr(rust_ext, "classify_file", None) if rust_ext is not None else None
+        getattr(rust_ext, "classify_file", None)
+        if rust_ext is not None and _is_native_direntry(entry)
+        else None
     )
     if rust_classify is not None:
         try:
@@ -115,6 +123,41 @@ def classify_file(  # noqa: PLR0913 - public API signature parity
         entry=entry,
         follow_symlinks=follow_symlinks,
     )
+
+
+def _classify_traversal_batch(
+    candidates: Sequence[tuple[Path, os.DirEntry[str] | None, int | None]],
+    config: TraversalConfig,
+    root_path: Path,
+    prefix: Path | None,
+) -> list[FileInfo] | None:
+    """Run combined GIL-released Rust header classification + tag/shebang filtering when active."""
+    rust_ext = _get_rust_ext()
+    rust_batch: Callable[..., list[FileInfo]] | None = (
+        getattr(rust_ext, "classify_batch_rs", None)
+        if rust_ext is not None and all(_is_native_direntry(entry) for _, entry, _ in candidates)
+        else None
+    )
+    if rust_batch is None:
+        return None
+
+    raw_tuples = [(p, entry is not None, accum) for p, entry, accum in candidates]
+    try:
+        return rust_batch(
+            raw_tuples,
+            root_path=root_path,
+            prefix=prefix,
+            follow_symlinks=config.follow_symlinks,
+            include_tags=config.include_tags,
+            exclude_tags=config.exclude_tags,
+            all_tags=config.all_tags,
+            shebang_filter=config.shebang_filter,
+        )
+    except BaseException as exc:
+        if not _is_rust_panic(exc):
+            raise
+
+        return None
 
 
 def find_files(
@@ -148,4 +191,9 @@ def find_files(
         else:
             return
 
-    yield from _fallback.find_files(config, on_error=on_error)
+    hooks = (classify_file, _classify_traversal_batch) if rust_ext is not None else None
+    token = ACTIVE_RUST_BATCH_HOOKS.set(hooks)
+    try:
+        yield from _fallback.find_files(config, on_error=on_error)
+    finally:
+        ACTIVE_RUST_BATCH_HOOKS.reset(token)
