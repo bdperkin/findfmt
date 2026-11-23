@@ -273,9 +273,14 @@ pub(crate) fn prepare_walk_from_py_config<'py>(
 
     let include_patterns = extract_string_vec(&config_obj.getattr("include_patterns")?)?;
     let exclude_patterns = extract_string_vec(&config_obj.getattr("exclude_patterns")?)?;
-    let matcher =
-        PatternMatcher::try_new(&include_patterns, &exclude_patterns, ignore_case, match_dirs)
-            .map_err(pyo3::exceptions::PyValueError::new_err)?;
+    let matcher = PatternMatcher::try_new_for_unicode(
+        &include_patterns,
+        &exclude_patterns,
+        ignore_case,
+        match_dirs,
+        handles.unicode_major,
+    )
+    .map_err(pyo3::exceptions::PyValueError::new_err)?;
 
     let include_tags = extract_tag_set(Some(&config_obj.getattr("include_tags")?))?;
     let exclude_tags = extract_tag_set(Some(&config_obj.getattr("exclude_tags")?))?;

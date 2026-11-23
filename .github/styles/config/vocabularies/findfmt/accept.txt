@@ -236,3 +236,5 @@
 (?i)backtraces
 (?i)ttys
 (?i)truthy
+(?i)speedup
+(?i)speedups

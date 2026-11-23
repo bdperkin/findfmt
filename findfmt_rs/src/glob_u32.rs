@@ -45,7 +45,7 @@ fn add_epsilon_states(
     false
 }
 
-fn eval_rule(kind: &RuleKind, text: &[u32], ignore_case: bool) -> bool {
+fn eval_rule(kind: &RuleKind, text: &[u32], ignore_case: bool, unicode_major: u8) -> bool {
     match kind {
         RuleKind::AnyDot => text.iter().any(|&cp| cp != u32::from('\n')),
         RuleKind::ContainsSlash => text.contains(&u32::from('/')),
@@ -71,7 +71,7 @@ fn eval_rule(kind: &RuleKind, text: &[u32], ignore_case: bool) -> bool {
                 }
                 let next_at_end = at_end_pos(text, idx + 1);
                 let (equivs, eq_len) = if ignore_case {
-                    re_ignorecase_equivalents(raw_cp)
+                    re_ignorecase_equivalents(raw_cp, unicode_major)
                 } else {
                     ([raw_cp, 0, 0, 0], 1)
                 };
@@ -138,15 +138,35 @@ pub fn build_target_u32(segs: &[Vec<u32>], is_dir: bool) -> Vec<u32> {
 }
 
 /// Compiled sequence of `GitIgnoreBasicPattern` rules operating on PEP 383 `u32` codepoints.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct GlobSpecU32 {
     rules: Vec<CompiledRuleU32>,
     ignore_case: bool,
+    unicode_major: u8,
+}
+
+impl Default for GlobSpecU32 {
+    fn default() -> Self {
+        Self {
+            rules: Vec::new(),
+            ignore_case: false,
+            unicode_major: 16,
+        }
+    }
 }
 
 impl GlobSpecU32 {
-    /// Compile trimmed pattern lines, propagating malformed syntax errors (`patterns.py` parity).
+    /// Compile trimmed pattern lines under Unicode 16 case equivalences (`patterns.py` parity).
     pub fn try_from_lines(lines: &[String], ignore_case: bool) -> Result<Option<Self>, String> {
+        Self::try_from_lines_with_unicode(lines, ignore_case, 16)
+    }
+
+    /// Compile trimmed pattern lines gated to `unicode_major` case equivalences (`#581`).
+    pub fn try_from_lines_with_unicode(
+        lines: &[String],
+        ignore_case: bool,
+        unicode_major: u8,
+    ) -> Result<Option<Self>, String> {
         if lines.is_empty() {
             return Ok(None);
         }
@@ -156,7 +176,11 @@ impl GlobSpecU32 {
                 rules.push(compiled);
             }
         }
-        Ok(Some(Self { rules, ignore_case }))
+        Ok(Some(Self {
+            rules,
+            ignore_case,
+            unicode_major,
+        }))
     }
 
     /// Compile lines leniently for fuzzing / `GitignoreMatcher::from_text`, counting invalid lines.
@@ -173,7 +197,14 @@ impl GlobSpecU32 {
                 Err(_) => errors += 1,
             }
         }
-        (Self { rules, ignore_case }, errors)
+        (
+            Self {
+                rules,
+                ignore_case,
+                unicode_major: 16,
+            },
+            errors,
+        )
     }
 
     /// Evaluate `spec.check_file` tri-state semantics (`None`, `Some(true)`, `Some(false)`).
@@ -184,7 +215,7 @@ impl GlobSpecU32 {
         }
         let mut state: Option<bool> = None;
         for rule in &self.rules {
-            if eval_rule(&rule.kind, &target, self.ignore_case) {
+            if eval_rule(&rule.kind, &target, self.ignore_case, self.unicode_major) {
                 state = Some(!rule.negated);
             }
         }

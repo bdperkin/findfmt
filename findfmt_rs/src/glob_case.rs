@@ -1,13 +1,61 @@
-//! Python `re.IGNORECASE` Unicode equivalence classes for glob NFA evaluation (#582).
+//! Python `re.IGNORECASE` Unicode equivalence classes for glob NFA evaluation (#581, #582).
 
-/// Return up to 4 codepoints in `cp`'s Python `re.IGNORECASE` equivalence class (`sre_lib.h`).
-///
-/// Because `re.IGNORECASE` partitions Unicode scalar values into equivalence classes of size
-/// at most 4, an input character `raw_cp` matches a pattern character `exp` iff `exp` appears in
-/// `re_ignorecase_equivalents(raw_cp)`, and matches a raw character range `lo..=hi` iff at least
-/// one member of `re_ignorecase_equivalents(raw_cp)` falls within `lo..=hi`.
 #[inline]
-pub(crate) fn re_ignorecase_equivalents(cp: u32) -> ([u32; 4], usize) {
+const fn unicode_16_pair(cp: u32, unicode_major: u8) -> Option<([u32; 4], usize)> {
+    let other = match cp {
+        0x019B => 0xA7DC,
+        0xA7DC => 0x019B,
+        0x0264 => 0xA7CB,
+        0xA7CB => 0x0264,
+        0x1C89 => 0x1C8A,
+        0x1C8A => 0x1C89,
+        0xA7CC => 0xA7CD,
+        0xA7CD => 0xA7CC,
+        0xA7DA => 0xA7DB,
+        0xA7DB => 0xA7DA,
+        0x10D50..=0x10D65 => cp + 0x20,
+        0x10D70..=0x10D85 => cp - 0x20,
+        _ => return None,
+    };
+    if unicode_major < 16 {
+        Some(([cp, 0, 0, 0], 1))
+    } else if cp < other {
+        Some(([cp, other, 0, 0], 2))
+    } else {
+        Some(([other, cp, 0, 0], 2))
+    }
+}
+
+#[inline]
+const fn unicode_17_pair(cp: u32, unicode_major: u8) -> Option<([u32; 4], usize)> {
+    let other = match cp {
+        0xA7CE | 0xA7D2 | 0xA7D4 => cp + 1,
+        0xA7CF | 0xA7D3 | 0xA7D5 => cp - 1,
+        0x16EA0..=0x16EB8 => cp + 0x1B,
+        0x16EBB..=0x16ED3 => cp - 0x1B,
+        _ => return None,
+    };
+    if unicode_major < 17 {
+        Some(([cp, 0, 0, 0], 1))
+    } else if cp < other {
+        Some(([cp, other, 0, 0], 2))
+    } else {
+        Some(([other, cp, 0, 0], 2))
+    }
+}
+
+/// Return up to 4 codepoints in `cp`'s Python `re.IGNORECASE` equivalence class at `unicode_major`.
+///
+/// Gates mappings introduced in Unicode 16.0 (Python 3.14+) and Unicode 17.0 (Python 3.15+) so
+/// native `ignore_case` matching agrees identically with Python `3.11` (Unicode 14.0) through `3.15+`.
+#[inline]
+pub(crate) fn re_ignorecase_equivalents(cp: u32, unicode_major: u8) -> ([u32; 4], usize) {
+    if let Some(res) = unicode_16_pair(cp, unicode_major) {
+        return res;
+    }
+    if let Some(res) = unicode_17_pair(cp, unicode_major) {
+        return res;
+    }
     match cp {
         0x0049 | 0x0069 | 0x0130 | 0x0131 => ([0x0049, 0x0069, 0x0130, 0x0131], 4),
         0x004B | 0x006B | 0x212A => ([0x004B, 0x006B, 0x212A, 0], 3),
@@ -84,15 +132,25 @@ mod tests {
     use super::*;
 
     #[test]
-    fn equivalences_cover_long_s_turkish_i_kelvin_and_ascii() {
-        let (long_s, n_s) = re_ignorecase_equivalents(u32::from('ſ'));
+    fn equivalences_cover_long_s_turkish_i_and_unicode_version_gating() {
+        let (long_s, n_s) = re_ignorecase_equivalents(u32::from('ſ'), 16);
         let exp_s = [u32::from('S'), u32::from('s'), u32::from('ſ')];
         assert_eq!(&long_s[..n_s], &exp_s);
 
-        let (dotless_i, n_i) = re_ignorecase_equivalents(u32::from('ı'));
+        let (dotless_i, n_i) = re_ignorecase_equivalents(u32::from('ı'), 16);
         assert!(dotless_i[..n_i].contains(&u32::from('i')));
 
-        let (mult, n_m) = re_ignorecase_equivalents(u32::from('×'));
+        let (mult, n_m) = re_ignorecase_equivalents(u32::from('×'), 16);
         assert_eq!(&mult[..n_m], &[u32::from('×')]);
+
+        let (tje_14, n_t14) = re_ignorecase_equivalents(0x1C89, 14);
+        assert_eq!(&tje_14[..n_t14], &[0x1C89]);
+        let (tje_16, n_t16) = re_ignorecase_equivalents(0x1C89, 16);
+        assert_eq!(&tje_16[..n_t16], &[0x1C89, 0x1C8A]);
+
+        let (beria_16, n_b16) = re_ignorecase_equivalents(0x16EA0, 16);
+        assert_eq!(&beria_16[..n_b16], &[0x16EA0]);
+        let (beria_17, n_b17) = re_ignorecase_equivalents(0x16EA0, 17);
+        assert_eq!(&beria_17[..n_b17], &[0x16EA0, 0x16EBB]);
     }
 }
