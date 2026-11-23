@@ -8,7 +8,7 @@ import os
 from pathlib import Path  # noqa: TC003 - runtime signature introspection
 from typing import TYPE_CHECKING, Any
 
-from findfmt.classifier import classify_file, compute_relative_prefix
+from findfmt.classifier import compute_relative_prefix
 from findfmt.models import SortKey
 from findfmt.parsers import ingest_from_file
 from findfmt.sizes import calculate_accumulated_sizes
@@ -16,6 +16,7 @@ from findfmt.traversal._pruning import _TraversalFrame
 from findfmt.traversal.boundaries import (
     check_depth_limit,
     check_file_limit,
+    classify_file,
     filter_directory_entry,
     has_matching_descendants,
     init_visited_dirs,

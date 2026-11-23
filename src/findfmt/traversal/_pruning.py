@@ -4,14 +4,15 @@ from __future__ import annotations
 
 import contextlib
 import os
-from typing import TYPE_CHECKING, Any
+from contextvars import ContextVar
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from findfmt.classifier import _resolve_relative
 from findfmt.exceptions import TraversalError
 from findfmt.traversal.tags import INTERPRETER_TAGS, can_skip_file_by_tags
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Callable, Iterator, Sequence
     from pathlib import Path
 
     import pathspec
@@ -20,8 +21,29 @@ if TYPE_CHECKING:
     from findfmt.traversal.patterns import PatternMatcher
 
     PathSpecType = pathspec.PathSpec[Any]
+
+    class ClassifyKwargs(TypedDict, total=False):
+        """Keyword arguments accepted by classify_file hooks."""
+
+        entry: os.DirEntry[str] | None
+        follow_symlinks: bool
+
+    BatchClassifyHook = Callable[
+        [
+            Sequence[tuple[Path, os.DirEntry[str] | None, int | None]],
+            TraversalConfig,
+            Path,
+            Path | None,
+        ],
+        list[FileInfo] | None,
+    ]
 else:
     PathSpecType = Any
+
+ACTIVE_RUST_BATCH_HOOKS: ContextVar[tuple[Callable[..., FileInfo], BatchClassifyHook] | None] = ContextVar(
+    "ACTIVE_RUST_BATCH_HOOKS",
+    default=None,
+)
 
 __all__ = [
     "check_depth_limit",

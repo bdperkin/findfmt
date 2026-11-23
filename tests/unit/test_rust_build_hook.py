@@ -111,6 +111,9 @@ def test_rust_ext_stub_and_compiled_module_parity() -> None:
     assert stub_funcs == {
         "backend_name": "str",
         "rust_ext_version": "str",
+        "classify_file_rs": "FileInfo",
+        "classify_file": "FileInfo",
+        "classify_batch_rs": "list[FileInfo]",
     }
 
     cargo_version = str(_load_toml("findfmt_rs/Cargo.toml")["package"]["version"])
@@ -124,6 +127,9 @@ def test_rust_ext_stub_and_compiled_module_parity() -> None:
 
     assert rust_ext.backend_name() == "rust"
     assert rust_ext.rust_ext_version() == cargo_version
+    assert callable(rust_ext.classify_file_rs)
+    assert callable(rust_ext.classify_file)
+    assert callable(rust_ext.classify_batch_rs)
 
 
 def test_hatch_maturin_disable_builds_pure_python_wheel(
