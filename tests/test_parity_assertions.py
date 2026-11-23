@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+from collections.abc import Iterable
 from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict
 
@@ -130,6 +131,34 @@ def assert_classify_path_parity(
         assert_file_info_parity(rs_gateway, expected)
 
 
+def _verify_direct_walker_parity(
+    rust_ext: types.ModuleType,
+    config: TraversalConfig,
+    py_items: list[FileInfo],
+    py_errors: list[tuple[int | None, str | None]],
+) -> None:
+    """Verify exported _rust_ext walker functions directly without dropping unexpected items."""
+    for walker_attr in ("find_files_rs", "find_files"):
+        walker_fn = getattr(rust_ext, walker_attr, None)
+        if not callable(walker_fn):
+            continue
+
+        direct_errors: list[tuple[int | None, str | None]] = []
+        direct_raw = walker_fn(
+            config,
+            on_error=lambda e, sink=direct_errors: sink.append((e.errno, e.filename)),
+        )
+        assert isinstance(direct_raw, Iterable), f"Expected iterable from {walker_attr}"
+        direct_items: list[FileInfo] = []
+        for raw_item in direct_raw:
+            assert isinstance(raw_item, FileInfo), f"Unexpected {walker_attr} item: {raw_item!r}"
+            direct_items.append(raw_item)
+
+        assert direct_errors == py_errors
+        for d_item, py_item in zip(direct_items, py_items, strict=True):
+            assert_file_info_parity(d_item, py_item)
+
+
 def assert_traversal_parity_with_ext(
     config: TraversalConfig,
     rust_ext: types.ModuleType,
@@ -153,19 +182,7 @@ def assert_traversal_parity_with_ext(
     for rs_item, py_item in zip(rs_items, py_items, strict=True):
         assert_file_info_parity(rs_item, py_item)
 
-    # Auto-verify native walker symbols directly once #582 exports them on _rust_ext
-    for walker_attr in ("find_files_rs", "find_files"):
-        walker_fn = getattr(rust_ext, walker_attr, None)
-        if callable(walker_fn):
-            direct_errors: list[tuple[int | None, str | None]] = []
-            direct_raw = walker_fn(
-                config,
-                on_error=lambda e, sink=direct_errors: sink.append((e.errno, e.filename)),
-            )
-            direct_items = [item for item in direct_raw if isinstance(item, FileInfo)]
-            assert direct_errors == py_errors
-            for d_item, py_item in zip(direct_items, py_items, strict=True):
-                assert_file_info_parity(d_item, py_item)
+    _verify_direct_walker_parity(rust_ext, config, py_items, py_errors)
 
     default_root = config.root_paths[0] if config.root_paths else Path.cwd()
     for py_item in py_items[:12]:

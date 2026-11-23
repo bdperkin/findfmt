@@ -127,10 +127,19 @@ def build_symlink_and_boundary_tree(tmp_path: Path) -> tuple[Path, bool]:
 def build_sorting_tree(tmp_path: Path) -> Path:
     """Build a tree with varied sizes, mtimes, cases, and Unicode-digit natural version names."""
     root = tmp_path / "sort_repo"
-    for sub_name in ("AlphaDir", "betaDir", "v2_dir", "v10_dir"):
+    dir_specs: list[tuple[str, int]] = [
+        ("AlphaDir", 1_700_000_120),
+        ("betaDir", 1_700_000_180),
+        ("v2_dir", 1_700_000_180),
+        ("v10_dir", 1_700_000_280),
+    ]
+    for sub_name, dir_ts in dir_specs:
         sub = root / sub_name
         sub.mkdir(parents=True)
-        (sub / "child.py").write_text(f"# {sub_name}\n", encoding="utf-8")
+        child = sub / "child.py"
+        child.write_text(f"# {sub_name}\n", encoding="utf-8")
+        os.utime(child, (dir_ts, dir_ts))
+        os.utime(sub, (dir_ts, dir_ts))
 
     specs: list[tuple[str, bytes, int]] = [
         ("empty_0.txt", b"", 1_700_000_300),

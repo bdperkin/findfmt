@@ -156,8 +156,8 @@ def test_parity_multi_root_single_file_and_missing_root_errors(
     rust_ext = activate_rust_backend(monkeypatch)
 
     class _WalkerExt(types.ModuleType):
-        find_files_rs: Callable[..., Iterator[FileInfo]]
-        find_files: Callable[..., Iterator[FileInfo]]
+        find_files_rs: Callable[..., Iterator[FileInfo | None]]
+        find_files: Callable[..., Iterator[FileInfo | None]]
         classify_file_rs: Callable[..., FileInfo]
         classify_file: Callable[..., FileInfo]
 
@@ -167,6 +167,13 @@ def test_parity_multi_root_single_file_and_missing_root_errors(
     synth.classify_file_rs = rust_ext.classify_file_rs
     synth.classify_file = rust_ext.classify_file
     assert assert_traversal_parity_with_ext(cfg, synth, monkeypatch) == items
+
+    bad_synth = _WalkerExt("findfmt._rust_ext")
+    bad_synth.find_files_rs = lambda *_a, **_kw: iter([None, *items])
+    bad_synth.classify_file_rs = rust_ext.classify_file_rs
+    bad_synth.classify_file = rust_ext.classify_file
+    with pytest.raises(AssertionError, match="Unexpected find_files_rs item"):
+        assert_traversal_parity_with_ext(cfg, bad_synth, monkeypatch)
 
 
 def test_parity_cross_device_one_file_system(
