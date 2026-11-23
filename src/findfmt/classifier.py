@@ -49,8 +49,35 @@ def extract_shebang_from_buffer(buffer: bytes) -> str | None:
     return None
 
 
+def _read_initial_buffer(
+    path: Path,
+    max_bytes: int = 2048,
+) -> tuple[bytes, os.stat_result | None]:
+    """Read initial bytes once for shebang, encoding, and content checks.
+
+    Opens target file non-blocking and verifies regular file status via fstat
+    to prevent hanging on unwritten FIFOs or swapped named pipes.
+    """
+    flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
+    try:
+        fd = os.open(path, flags)
+    except OSError:
+        return b"", None
+
+    try:
+        st = os.fstat(fd)
+        return (os.read(fd, max_bytes), st) if stat.S_ISREG(st.st_mode) else (b"", st)
+    except OSError:
+        return b"", None
+    finally:
+        os.close(fd)
+
+
 def extract_shebang(path: Path) -> str | None:
     """Extract the shebang interpreter from the top of an executable file.
+
+    Opens the target path using non-blocking I/O (`O_NONBLOCK`) and verifies
+    regular-file status via `fstat` so named pipes (FIFOs) never block.
 
     Args:
         path: Path to the target file.
@@ -58,14 +85,8 @@ def extract_shebang(path: Path) -> str | None:
     Returns:
         The raw shebang line string if present and readable, or None.
     """
-    try:
-        if path.is_file():
-            with path.open("rb") as f:
-                return extract_shebang_from_buffer(f.readline(512))
-    except (OSError, UnicodeDecodeError):
-        pass
-
-    return None
+    buffer, _ = _read_initial_buffer(path, max_bytes=512)
+    return extract_shebang_from_buffer(buffer)
 
 
 def compute_relative_prefix(root: Path) -> Path | None:
@@ -109,30 +130,6 @@ def _resolve_relative(
             return path
 
     return prefix / rel if prefix is not None and prefix != Path() else rel
-
-
-def _read_initial_buffer(
-    path: Path,
-    max_bytes: int = 2048,
-) -> tuple[bytes, os.stat_result | None]:
-    """Read initial bytes once for shebang, encoding, and content checks.
-
-    Opens target file non-blocking and verifies regular file status via fstat
-    to prevent hanging on unwritten FIFOs or swapped named pipes.
-    """
-    flags = os.O_RDONLY | getattr(os, "O_NONBLOCK", 0) | getattr(os, "O_BINARY", 0)
-    try:
-        fd = os.open(path, flags)
-    except OSError:
-        return b"", None
-
-    try:
-        st = os.fstat(fd)
-        return (os.read(fd, max_bytes), st) if stat.S_ISREG(st.st_mode) else (b"", st)
-    except OSError:
-        return b"", None
-    finally:
-        os.close(fd)
 
 
 def _inspect_file_content(

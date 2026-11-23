@@ -44,7 +44,7 @@ def test_extract_shebang_nonexistent(tmp_path: Path):
 def test_extract_shebang_os_error(tmp_path: Path):
     file_path = tmp_path / "unreadable.sh"
     file_path.write_text("#!/bin/sh", encoding="utf-8")
-    with patch.object(Path, "open", side_effect=OSError("Read error")):
+    with patch("os.open", side_effect=OSError("Read error")):
         assert extract_shebang(file_path) is None
 
 

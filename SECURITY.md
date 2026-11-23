@@ -24,14 +24,16 @@ Please include:
 - Steps to reproduce or proof-of-concept code.
 - Any suggested fixes or mitigations.
 
-We will acknowledge receipt within 48 hours and work with you to coordinate a disclosure and patch release.
+We will acknowledge receipt within 48 hours, provide an initial triage and severity assessment within 7 days,
+and work with you to coordinate a patch release (targeting 14 days for Critical/High findings and 30–60 days
+for Medium/Low findings) under a standard 90-day coordinated disclosure window.
 
 ______________________________________________________________________
 
 ## 3. Security Threat Model & Audit Report
 
 This section documents the formal security architecture, threat vectors analyzed, and defensive mitigations
-implemented in `findfmt`.
+implemented across `findfmt`'s hybrid Python (`src/findfmt/`) and Rust (`findfmt_rs/`) engines.
 
 ### 3.1. Filesystem Traversal & Path Security
 
@@ -40,10 +42,10 @@ implemented in `findfmt`.
 - **Threat Vector**: Malicious or accidental recursive symbolic directory structures (e.g., `dir/loop -> dir`)
   can cause unbounded recursion, stack overflow (`RecursionError`), or heap exhaustion during deep filesystem
   traversal.
-- **Mitigation**: When `--follow-links` (`-l`) is active, `findfmt` tracks canonical directory paths via
-  `visited_dirs: set[Path]` initialized with the resolved traversal root. Each candidate subdirectory's
-  canonical target (`subdir.resolve()`) is checked prior to descent. If already visited, traversal immediately
-  skips the entry, breaking cyclic graphs and avoiding duplicate processing.
+- **Mitigation**: When `--follow-links` (`-l`) is active, the pure-Python walker tracks canonical directory
+  paths (`visited_dirs: set[Path]`) and `(st_dev, st_ino)` ancestor keys, while `findfmt_rs` tracks physical
+  directory identity (`DirKey` on POSIX and canonical file identifiers on Windows) across both active
+  traversal and `--prune` descendant inspection, immediately skipping cyclic entries.
 
 #### 3.1.2. Arbitrary Path Traversal & Boundary Containment
 
@@ -56,14 +58,16 @@ implemented in `findfmt`.
   skipping out-of-root entries with a warning to `stderr` before opening or inspecting file contents unless
   `--allow-outside-root` is explicitly enabled.
 
-#### 3.1.3. TOCTOU (Time-of-Check to Time-of-Use) Resiliency
+#### 3.1.3. TOCTOU (Time-of-Check to Time-of-Use) Resiliency & Native Boundary Safety
 
 - **Threat Vector**: Asynchronous filesystem modifications occurring between directory scanning and file
-  inspection (e.g., a file is deleted, renamed, or unlinked) could raise uncaught filesystem exceptions.
-- **Mitigation**: All stat, scan, and read operations in `src/findfmt/traversal/` and
-  `src/findfmt/classifier.py` are resiliently wrapped in guarded exception blocks (`OSError`, `ValueError`).
-  Inaccessible or vanished entries are safely skipped or fall back to metadata defaults without crashing the
-  runtime engine.
+  inspection (e.g., a file is deleted, renamed, or unlinked) could raise uncaught exceptions or trigger native
+  extension panics across the FFI boundary.
+- **Mitigation**: All stat, scan, and read operations in `src/findfmt/traversal/`,
+  `src/findfmt/classifier.py`, and `findfmt_rs/` gracefully handle `OSError` / `std::io::Error` conditions.
+  `findfmt_rs` enforces `#![forbid(unsafe_code)]` and
+  `deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)`, and `src/findfmt/core.py` catches
+  `pyo3_runtime.PanicException` with automatic fallback to `src/findfmt/_fallback.py`.
 
 ### 3.2. File Inspection & Content Engine Security
 
@@ -71,9 +75,9 @@ implemented in `findfmt`.
 
 - **Threat Vector**: Reading untrusted, multi-gigabyte or stream-backed files into memory to inspect shebangs
   or content signatures can trigger out-of-memory (OOM) denial-of-service conditions.
-- **Mitigation**: Content inspection in `classifier.py` never reads entire files. Interpreter shebang
-  extraction strictly reads a bounded buffer chunk of at most 512 bytes (`f.readline(512)`). Filename
-  identification heuristics bypass disk reads entirely for known file types.
+- **Mitigation**: Content inspection never reads entire files. Both `classifier.py` (`_read_initial_buffer`)
+  and `findfmt_rs/src/header.rs` (`MAX_HEADER_BYTES`) cap regular-file header inspection to a single bounded
+  `2,048`-byte read (`512` bytes for standalone `extract_shebang` calls).
 
 #### 3.2.2. Special Files, Named Pipes (FIFOs), & TOCTOU FIFO Swapping
 
@@ -82,11 +86,12 @@ implemented in `findfmt`.
   Furthermore, a TOCTOU race where a regular file is replaced with a named pipe between directory discovery
   and file inspection could cause the process to hang indefinitely waiting for a pipe writer.
 - **Mitigation**: Directory scanning inspects directory entries using `os.DirEntry.is_file()` and
-  `os.DirEntry.is_dir()`, which evaluate to `False` for FIFOs, device nodes, and sockets. Additionally,
-  `extract_shebang` and `classify_file` explicitly open files using non-blocking I/O flags
-  (`os.O_NONBLOCK | os.O_RDONLY`). After descriptor acquisition, `findfmt` performs an `os.fstat(fd)` check
-  and verifies `stat.S_ISREG(st.st_mode)`. If the target is identified as a FIFO or non-regular node, it is
-  immediately handled safely without blocking or hanging.
+  `os.DirEntry.is_dir()` (and `FileType::is_file()` / `is_dir()` in `findfmt_rs`), which evaluate to `False`
+  for FIFOs, device nodes, and sockets. On POSIX platforms where `O_NONBLOCK` is supported, `extract_shebang`,
+  `classify_file`, and `findfmt_rs` open descriptors with `O_NONBLOCK | O_RDONLY` and verify regular-file mode
+  (`S_ISREG`) via `fstat(fd)` before reading; on Windows (where `O_NONBLOCK` is unavailable), Python opens
+  with `O_RDONLY | O_BINARY` followed by `os.fstat(fd)` `S_ISREG` checks, and `findfmt_rs` verifies
+  regular-file metadata (`is_file()`) before reading any header bytes.
 
 #### 3.2.3. Regular Expression & Pattern Safety (ReDoS Prevention)
 
@@ -94,7 +99,8 @@ implemented in `findfmt`.
   sequences in filenames could induce exponential or quadratic backtracking in regular expression engines,
   causing Denial of Service (ReDoS).
 - **Mitigation**: `findfmt` mitigates catastrophic backtracking through multi-layered defensive measures:
-  1. Utilizes `pathspec` to compile `.gitignore` rules into linear-time matching automata.
+  1. Compiles `.gitignore` and CLI glob rules via `pathspec` in Python and a linear-time Thompson `NFA`
+     automaton (`glob_nfa.rs` / `glob_u32.rs`) in `findfmt_rs`, eliminating exponential backtracking.
   2. Bounded linear-time regular expressions for ANSI CSI, OSC, and C1-OSC terminal escape sequences
      (`_ANSI_ESCAPE_RE` unified across `utils.strings`, `cli.terminal`, and `utils.hyperlinks`). The C1-OSC
      pattern eliminates nested quantified character classes, guaranteeing $O(N)$ linear-time sanitization even
@@ -130,17 +136,21 @@ implemented in `findfmt`.
 
 - **Threat Vector**: Known Common Vulnerabilities and Exposures (CVEs) in transitive dependencies could
   introduce vulnerabilities into the toolchain.
-- **Mitigation**: Continuous dependency vulnerability scanning is integrated into the primary verification
-  quality gate via `uv audit --preview-features audit-command`, cross-referencing all resolved project
-  dependencies against the Python Packaging Advisory Database.
+- **Mitigation**: Continuous Python dependency vulnerability scanning is integrated into the verification
+  quality gate via `uv audit --preview-features audit-command` against the Python Packaging Advisory Database,
+  paired with `cargo-deny` (`findfmt_rs/deny.toml`) `licenses`, `bans`, and `sources` checks and SHA-256
+  `Cargo.lock` verification for native Rust crates (with automated RustSec advisory and yanked-crate gates
+  tracked in [Issue #597](https://github.com/bdperkin/findfmt/issues/597)).
 
 #### 3.4.2. Absence of Dangerous Shell Executions
 
 - **Threat Vector**: Executing untrusted system commands or shells (`os.system`, `shell=True`) can lead to
   command injection.
-- **Mitigation**: The `findfmt` runtime contains zero invocations of `os.system` or shell-based subprocesses.
-  All path operations and traversals are conducted strictly via Python's standard `os` and `pathlib`
-  primitives.
+- **Mitigation**: Both `src/findfmt/` and `findfmt_rs/` contain zero invocations of `os.system` or
+  shell-evaluated subprocesses. Filesystem operations use Python `os`/`pathlib` and memory-safe Rust `std::fs`
+  primitives; the sole external process lookup (`git config --get core.excludesFile` when no XDG global ignore
+  file exists) executes an explicit argument vector (`shell=False` / `Command::new`) with
+  `GIT_TERMINAL_PROMPT=0` and a bounded 2-second timeout.
 
 ### 3.5. GitHub Actions & CI/CD Hardening
 
@@ -209,18 +219,18 @@ implemented in `findfmt`.
 #### 3.6.3. Continuous Fuzz Testing Architecture & ClusterFuzzLite (FuzzingID)
 
 - **Threat Vector**: Maliciously crafted inputs, corrupted file headers, truncated shebang sequences, or
-  nested cyclic filesystem structures triggering unhandled edge cases or unexpected interpreter crashes.
-- **Mitigation**: Continuous fuzz testing is actively deployed using Google's **ClusterFuzzLite** and
-  **Atheris**:
-  1. **Classification Engine Fuzzing** (`tests/fuzz/fuzz_classifier.py`): Continuous coverage-guided fuzz
-     testing targeting `classify_file`, `extract_shebang`, and MIME signature heuristics with random byte
-     sequences, corrupted headers, and synthetic files.
-  2. **Traversal Engine Fuzzing** (`tests/fuzz/fuzz_traversal.py`): Automated fuzzing of complex directory
-     trees with irregular permission bits, symlink hierarchies, `.gitignore` pathspec rules, and deep
-     directory nestings to verify bounded traversal invariants.
-  3. **Continuous CI Integration**: Deployed via `.clusterfuzzlite/` configuration and automated GitHub
-     Actions workflow (`.github/workflows/cflite.yml` for scheduled batch and main-branch fuzzing), resolving
-     OpenSSF Scorecard `FuzzingID`
+  nested cyclic filesystem structures triggering unhandled edge cases, panics, or unexpected crashes.
+- **Mitigation**: Continuous fuzz and property-based testing spans both the Python and Rust engines:
+  1. **Classification & Traversal Fuzzing** (`tests/fuzz/fuzz_classifier.py`, `tests/fuzz/fuzz_traversal.py`):
+     Coverage-guided **Atheris** harnesses bundled with the compiled `findfmt._rust_ext` extension under
+     **ClusterFuzzLite** (`address` sanitizer on the Atheris Python runtime, while the stable `abi3` Rust
+     wheel builds without sanitizer flags and relies on `cargo-fuzz` for native Rust instrumentation).
+  2. **Rust Property & `libFuzzer` Suites** (`findfmt_rs/tests/`, `findfmt_rs/fuzz/`): Deterministic
+     `proptest` suites and `cargo-fuzz` targets stress-testing arbitrary byte slices across shebang
+     extraction, magic-byte sniffing, natural version sort keys, `.gitignore` glob automata, and synthetic
+     directory trees.
+  3. **Continuous CI Integration**: Deployed via SHA-256 digest-pinned `.clusterfuzzlite/` builders and
+     `.github/workflows/cflite.yml`, resolving OpenSSF Scorecard `FuzzingID`
      ([Code Scanning Alert #48](https://github.com/bdperkin/findfmt/security/code-scanning/48)).
 
 #### 3.6.4. Active Maintenance & Release Hygiene (MaintainedID)
