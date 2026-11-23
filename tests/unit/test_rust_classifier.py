@@ -150,6 +150,7 @@ def test_classify_file_rs_symlinks_direntry_and_surrogateescape(tmp_path: Path) 
             bad_path.write_bytes(b"x = 1\n")
         except OSError:
             pytest.skip("Filesystem rejected non-UTF-8 filename")
+
         assert rust_ext.classify_file_rs(bad_path, root_path=tmp_path) == classifier.classify_file(
             bad_path,
             root_path=tmp_path,
@@ -245,7 +246,10 @@ def test_combined_traversal_batch_filtering_and_gateway_fallbacks(
     batch_ext.classify_file = classifier.classify_file
     assert list(core.find_files(cfg_all)) == list(_fallback.find_files(cfg_all))
     cfg_prune = TraversalConfig(
-        root_paths=(tmp_path,), dirs_only=True, prune_empty=True, include_tags=frozenset({"rust"})
+        root_paths=(tmp_path,),
+        dirs_only=True,
+        prune_empty=True,
+        include_tags=frozenset({"rust"}),
     )
     assert list(core.find_files(cfg_prune)) == list(_fallback.find_files(cfg_prune))
 
