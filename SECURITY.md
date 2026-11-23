@@ -87,9 +87,11 @@ implemented across `findfmt`'s hybrid Python (`src/findfmt/`) and Rust (`findfmt
   and file inspection could cause the process to hang indefinitely waiting for a pipe writer.
 - **Mitigation**: Directory scanning inspects directory entries using `os.DirEntry.is_file()` and
   `os.DirEntry.is_dir()` (and `FileType::is_file()` / `is_dir()` in `findfmt_rs`), which evaluate to `False`
-  for FIFOs, device nodes, and sockets. Additionally, `extract_shebang`, `classify_file`, and `findfmt_rs`
-  explicitly open files using non-blocking I/O flags (`O_NONBLOCK | O_RDONLY`) and verify regular-file mode
-  (`S_ISREG`) via `fstat(fd)` before reading a single byte.
+  for FIFOs, device nodes, and sockets. On POSIX platforms where `O_NONBLOCK` is supported, `extract_shebang`,
+  `classify_file`, and `findfmt_rs` open descriptors with `O_NONBLOCK | O_RDONLY` and verify regular-file mode
+  (`S_ISREG`) via `fstat(fd)` before reading; on Windows (where `O_NONBLOCK` is unavailable), Python opens
+  with `O_RDONLY | O_BINARY` followed by `os.fstat(fd)` `S_ISREG` checks, and `findfmt_rs` verifies
+  regular-file metadata (`is_file()`) before reading any header bytes.
 
 #### 3.2.3. Regular Expression & Pattern Safety (ReDoS Prevention)
 
@@ -136,9 +138,9 @@ implemented across `findfmt`'s hybrid Python (`src/findfmt/`) and Rust (`findfmt
   introduce vulnerabilities into the toolchain.
 - **Mitigation**: Continuous Python dependency vulnerability scanning is integrated into the verification
   quality gate via `uv audit --preview-features audit-command` against the Python Packaging Advisory Database,
-  paired with `cargo-deny` (`findfmt_rs/deny.toml`) yanked-crate and SHA-256 `Cargo.lock` verification for
-  native Rust crates (with automated RustSec advisory gates tracked in
-  [Issue #597](https://github.com/bdperkin/findfmt/issues/597)).
+  paired with `cargo-deny` (`findfmt_rs/deny.toml`) `licenses`, `bans`, and `sources` checks and SHA-256
+  `Cargo.lock` verification for native Rust crates (with automated RustSec advisory and yanked-crate gates
+  tracked in [Issue #597](https://github.com/bdperkin/findfmt/issues/597)).
 
 #### 3.4.2. Absence of Dangerous Shell Executions
 
@@ -221,10 +223,11 @@ implemented across `findfmt`'s hybrid Python (`src/findfmt/`) and Rust (`findfmt
 - **Mitigation**: Continuous fuzz and property-based testing spans both the Python and Rust engines:
   1. **Classification & Traversal Fuzzing** (`tests/fuzz/fuzz_classifier.py`, `tests/fuzz/fuzz_traversal.py`):
      Coverage-guided **Atheris** harnesses bundled with the compiled `findfmt._rust_ext` extension under
-     **ClusterFuzzLite** (`address` sanitizer), exercising both pure-Python and native PyO3 paths.
+     **ClusterFuzzLite** (`address` sanitizer on the Atheris Python runtime, while the stable `abi3` Rust
+     wheel builds without sanitizer flags and relies on `cargo-fuzz` for native Rust instrumentation).
   2. **Rust Property & `libFuzzer` Suites** (`findfmt_rs/tests/`, `findfmt_rs/fuzz/`): Deterministic
      `proptest` suites and `cargo-fuzz` targets stress-testing arbitrary byte slices across shebang
-     extraction, magic-byte sniffing, natural version sort keys, `.gitignore` glob NFAs, and synthetic
+     extraction, magic-byte sniffing, natural version sort keys, `.gitignore` glob automata, and synthetic
      directory trees.
   3. **Continuous CI Integration**: Deployed via SHA-256 digest-pinned `.clusterfuzzlite/` builders and
      `.github/workflows/cflite.yml`, resolving OpenSSF Scorecard `FuzzingID`

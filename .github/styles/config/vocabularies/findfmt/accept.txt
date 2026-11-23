@@ -240,3 +240,5 @@
 (?i)speedups
 (?i)worktree
 (?i)worktrees
+(?i)nfa
+(?i)nfas
