@@ -1,6 +1,8 @@
 //! POSIX mode formatting, classification indicators, and raw filesystem metadata (#583).
 
 use std::fs::Metadata;
+#[cfg(any(not(unix), test))]
+use std::time::{SystemTime, UNIX_EPOCH};
 
 const S_IFMT: u32 = 0o170_000;
 const S_IFSOCK: u32 = 0o140_000;
@@ -24,8 +26,8 @@ pub struct RawStat {
     pub size: u64,
     pub uid: Option<u32>,
     pub gid: Option<u32>,
-    pub ino: Option<u64>,
-    pub dev: Option<u64>,
+    pub ino: Option<u128>,
+    pub dev: Option<u128>,
     pub mtime: Option<f64>,
     pub ctime: Option<f64>,
 }
@@ -43,10 +45,48 @@ impl RawStat {
             size: meta.len(),
             uid: Some(meta.uid()),
             gid: Some(meta.gid()),
-            ino: Some(meta.ino()),
-            dev: Some(meta.dev()),
+            ino: Some(u128::from(meta.ino())),
+            dev: Some(u128::from(meta.dev())),
             mtime: Some(mtime),
             ctime: Some(ctime),
+        }
+    }
+
+    /// Extract a `RawStat` from `std::fs::Metadata` on non-Unix platforms (e.g., Windows).
+    #[cfg(not(unix))]
+    pub fn from_std_metadata(meta: &Metadata) -> Self {
+        Self::from_portable_metadata(meta)
+    }
+
+    /// Build a consistent `RawStat` snapshot from portable `std::fs::Metadata` fields.
+    #[cfg(any(not(unix), test))]
+    pub fn from_portable_metadata(meta: &Metadata) -> Self {
+        let readonly = meta.permissions().readonly();
+        let mode = if meta.is_dir() {
+            S_IFDIR | if readonly { 0o555 } else { 0o777 }
+        } else if meta.file_type().is_symlink() {
+            S_IFLNK | 0o777
+        } else if meta.is_file() {
+            S_IFREG | if readonly { 0o444 } else { 0o666 }
+        } else {
+            S_IFCHR | if readonly { 0o444 } else { 0o666 }
+        };
+        let to_epoch = |res: std::io::Result<SystemTime>| -> Option<f64> {
+            res.ok()
+                .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
+                .map(|d| d.as_secs_f64())
+        };
+        let mtime = to_epoch(meta.modified());
+        let ctime = to_epoch(meta.created()).or(mtime);
+        Self {
+            mode,
+            size: meta.len(),
+            uid: Some(0),
+            gid: Some(0),
+            ino: Some(0),
+            dev: Some(0),
+            mtime,
+            ctime,
         }
     }
 
@@ -197,5 +237,10 @@ mod tests {
             Some("*")
         );
         assert_eq!(classification_indicator(false, false, false, None), None);
+
+        let cur_dir_meta = std::fs::metadata(".").expect("current dir metadata");
+        let portable_dir = RawStat::from_portable_metadata(&cur_dir_meta);
+        assert!(portable_dir.is_dir());
+        assert!(!portable_dir.is_reg());
     }
 }

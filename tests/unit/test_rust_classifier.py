@@ -1,4 +1,4 @@
-"""Unit and parity tests for native Rust classification in findfmt._rust_ext (#583)."""
+"""Unit and parity tests for native Rust single-file classification in findfmt._rust_ext (#583)."""
 
 from __future__ import annotations
 
@@ -6,18 +6,16 @@ import importlib
 import os
 import socket
 import stat
-import types
 from pathlib import Path
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock
 
 import pytest
 
 from findfmt import _fallback, classifier, core
-from findfmt.models import FileInfo, TraversalConfig
+from findfmt.models import TraversalConfig
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    import types
 
 
 def _load_rust_ext() -> types.ModuleType:
@@ -26,11 +24,6 @@ def _load_rust_ext() -> types.ModuleType:
         return importlib.import_module("findfmt._rust_ext")
     except ModuleNotFoundError:
         pytest.skip("findfmt._rust_ext is not compiled in this environment")
-
-
-def _make_rust_panic_cls() -> type[BaseException]:
-    """Create a synthetic PyO3 PanicException subclassing BaseException in pyo3_runtime."""
-    return type("PanicException", (BaseException,), {"__module__": "pyo3_runtime"})
 
 
 def test_classify_file_rs_exact_parity_across_formats_and_shebangs(tmp_path: Path) -> None:
@@ -71,7 +64,6 @@ def test_classify_file_rs_exact_parity_across_formats_and_shebangs(tmp_path: Pat
         assert actual_rs == expected, f"Mismatch on {name}"
         assert actual_alias == expected, f"Alias mismatch on {name}"
 
-    # Standalone relative path, prefix, unrelated root, accumulated_size, and missing file
     rel_target = Path("pyproject.toml")
     assert rust_ext.classify_file_rs(rel_target) == classifier.classify_file(rel_target)
 
@@ -100,7 +92,7 @@ def test_classify_file_rs_exact_parity_across_formats_and_shebangs(tmp_path: Pat
 
 
 def test_classify_file_rs_symlinks_direntry_and_surrogateescape(tmp_path: Path) -> None:
-    """Verify symlink, DirEntry, directory, and non-UTF-8 filename parity in classify_file_rs."""
+    """Verify symlink, DirEntry, directory, and non-UTF-8 filename/target parity in classify_file_rs."""
     rust_ext = _load_rust_ext()
 
     target = tmp_path / "target.py"
@@ -156,9 +148,25 @@ def test_classify_file_rs_symlinks_direntry_and_surrogateescape(tmp_path: Path) 
             root_path=tmp_path,
         )
 
+        bad_link = tmp_path / "bad_target_link.py"
+        try:
+            bad_link.symlink_to(os.fsdecode(b"undecodable_target_\xff.py"))
+        except OSError:
+            pytest.skip("Filesystem rejected non-UTF-8 symlink target")
+
+        assert rust_ext.classify_file_rs(bad_link, root_path=tmp_path) == classifier.classify_file(
+            bad_link,
+            root_path=tmp_path,
+        )
+        batch_cfg = TraversalConfig(root_paths=(tmp_path,))
+        assert list(core.find_files(batch_cfg)) == list(_fallback.find_files(batch_cfg))
+
 
 @pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="POSIX FIFO/socket required")
-def test_classify_file_rs_fifo_and_socket_never_block(tmp_path: Path) -> None:
+def test_classify_file_rs_fifo_and_socket_never_block(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """Verify FIFOs and Unix sockets never hang classify_file_rs or classify_batch_rs (#583)."""
     rust_ext = _load_rust_ext()
 
@@ -171,11 +179,13 @@ def test_classify_file_rs_fifo_and_socket_never_block(tmp_path: Path) -> None:
     assert rs_fifo.shebang is None
     assert "file" not in rs_fifo.tags
 
-    sock_dir = Path("/tmp")
-    sock_path = sock_dir / f"findfmt_sock_{os.getpid()}.sock"
+    sock_dir = tmp_path / "s"
+    sock_dir.mkdir()
+    monkeypatch.chdir(sock_dir)
+    sock_path = sock_dir / "u.sock"
     srv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     try:
-        srv.bind(str(sock_path))
+        srv.bind("u.sock")
         rs_sock = rust_ext.classify_file_rs(sock_path, root_path=sock_dir)
         py_sock = classifier.classify_file(sock_path, root_path=sock_dir)
         assert rs_sock == py_sock
@@ -186,84 +196,3 @@ def test_classify_file_rs_fifo_and_socket_never_block(tmp_path: Path) -> None:
     finally:
         srv.close()
         sock_path.unlink(missing_ok=True)
-
-
-def test_combined_traversal_batch_filtering_and_gateway_fallbacks(
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Verify combined GIL-released batch pass parity and gateway fallback branches (#583)."""
-    py_script = tmp_path / "tool"
-    py_script.write_text("#!/usr/bin/env -S python3 -u\nprint('hi')\n", encoding="utf-8")
-    py_script.chmod(py_script.stat().st_mode | stat.S_IXUSR)
-    rs_file = tmp_path / "lib.rs"
-    rs_file.write_text("pub fn run() {}\n", encoding="utf-8")
-    txt_file = tmp_path / "notes.txt"
-    txt_file.write_text("hello\n", encoding="utf-8")
-
-    configs = [
-        TraversalConfig(root_paths=(tmp_path,)),
-        TraversalConfig(root_paths=(tmp_path,), include_tags=frozenset({"python"})),
-        TraversalConfig(
-            root_paths=(tmp_path,),
-            include_tags=frozenset({"python", "executable"}),
-            all_tags=True,
-            shebang_filter="python3",
-        ),
-        TraversalConfig(
-            root_paths=(tmp_path,),
-            include_tags=frozenset({"text"}),
-            exclude_tags=frozenset({"rust"}),
-            include_patterns=("*.txt",),
-        ),
-    ]
-    for cfg in configs:
-        monkeypatch.delenv("FINDFMT_NO_EXTENSIONS", raising=False)
-        rust_results = list(core.find_files(cfg))
-        py_results = list(_fallback.find_files(cfg))
-        assert rust_results == py_results
-
-    # Non-native DirEntry (MagicMock) falls back to pure-Python classifier cleanly
-    mock_entry = MagicMock(spec=os.DirEntry)
-    mock_entry.is_symlink.return_value = False
-    mock_entry.stat.return_value = txt_file.stat()
-    info_mock = core.classify_file(txt_file, root_path=tmp_path, entry=mock_entry)
-    assert "text" in info_mock.tags
-
-    # PanicException in classify_batch_rs falls back seamlessly; non-panic propagates
-    panic_cls = _make_rust_panic_cls()
-
-    class _BatchExt(types.ModuleType):
-        classify_batch_rs: Callable[..., list[FileInfo]]
-        classify_file: Callable[..., FileInfo]
-
-    batch_ext = _BatchExt("findfmt._rust_ext")
-    monkeypatch.setattr(core, "_RUST_EXT", batch_ext)
-    cfg_all = TraversalConfig(root_paths=(tmp_path,), include_patterns=("*.rs", "*.txt"))
-
-    raw_items = list(_fallback.find_files(TraversalConfig(root_paths=(tmp_path,))))
-    batch_ext.classify_batch_rs = lambda *_a, **_kw: raw_items
-    batch_ext.classify_file = classifier.classify_file
-    assert list(core.find_files(cfg_all)) == list(_fallback.find_files(cfg_all))
-    cfg_prune = TraversalConfig(
-        root_paths=(tmp_path,),
-        dirs_only=True,
-        prune_empty=True,
-        include_tags=frozenset({"rust"}),
-    )
-    assert list(core.find_files(cfg_prune)) == list(_fallback.find_files(cfg_prune))
-
-    def _panic_batch(*_args: object, **_kwargs: object) -> list[FileInfo]:
-        msg = "simulated batch panic"
-        raise panic_cls(msg)
-
-    batch_ext.classify_batch_rs = _panic_batch
-    assert list(core.find_files(cfg_all)) == list(_fallback.find_files(cfg_all))
-
-    def _error_batch(*_args: object, **_kwargs: object) -> list[FileInfo]:
-        msg = "unexpected batch runtime error"
-        raise RuntimeError(msg)
-
-    batch_ext.classify_batch_rs = _error_batch
-    with pytest.raises(RuntimeError, match="unexpected batch runtime error"):
-        list(core.find_files(cfg_all))

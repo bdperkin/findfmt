@@ -37,6 +37,7 @@ fn classify_regular_shebang_symlink_and_batch_filter() {
             follow_symlinks: false,
             accumulated_size: None,
             pre_stat: None,
+            pre_guessed_mime: None,
         },
         RawClassifyInput {
             path: plain.clone(),
@@ -45,6 +46,7 @@ fn classify_regular_shebang_symlink_and_batch_filter() {
             follow_symlinks: false,
             accumulated_size: None,
             pre_stat: None,
+            pre_guessed_mime: None,
         },
         RawClassifyInput {
             path: link.clone(),
@@ -53,6 +55,7 @@ fn classify_regular_shebang_symlink_and_batch_filter() {
             follow_symlinks: true,
             accumulated_size: None,
             pre_stat: None,
+            pre_guessed_mime: None,
         },
     ];
 
@@ -76,6 +79,34 @@ fn classify_regular_shebang_symlink_and_batch_filter() {
     let filtered = classify_batch_nogil(&inputs, Some(&py_only), &reg, None);
     assert_eq!(filtered.len(), 1);
     assert_eq!(filtered[0].0, 0);
+
+    // Simulated regular-file pre_stat swapped for a directory before header open
+    let stale_file_stat = RawStat {
+        mode: 0o100_644,
+        size: 999,
+        uid: Some(0),
+        gid: Some(0),
+        ino: Some(42),
+        dev: Some(7),
+        mtime: Some(1.0),
+        ctime: Some(1.0),
+    };
+    let swapped = classify_one_nogil(
+        &RawClassifyInput {
+            path: dir.clone(),
+            str_path: dir.to_string_lossy().into_owned(),
+            filename: "swapped_dir".into(),
+            follow_symlinks: false,
+            accumulated_size: None,
+            pre_stat: Some((false, true, true, 999, Some(stale_file_stat))),
+            pre_guessed_mime: None,
+        },
+        &reg,
+        None,
+    );
+    assert!(swapped.is_dir);
+    assert_eq!(swapped.indicator, Some("/"));
+    assert_ne!(swapped.inode, Some(42));
 
     let _ = fs::remove_dir_all(&dir);
 }

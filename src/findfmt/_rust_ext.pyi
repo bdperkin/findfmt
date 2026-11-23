@@ -25,7 +25,7 @@ def classify_file(
     follow_symlinks: bool = False,
 ) -> FileInfo: ...
 def classify_batch_rs(
-    candidates: Iterable[tuple[Path, bool, int | None]],
+    candidates: Iterable[tuple[Path, os.DirEntry[str] | None, int | None]],
     *,
     root_path: Path | None = None,
     prefix: Path | None = None,

@@ -5,6 +5,7 @@
 pub mod classifier;
 pub mod header;
 pub mod metadata;
+pub mod mime;
 pub mod py_bridge;
 mod py_paths;
 pub mod shebang;

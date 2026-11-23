@@ -141,10 +141,9 @@ def _classify_traversal_batch(
     if rust_batch is None:
         return None
 
-    raw_tuples = [(p, entry is not None, accum) for p, entry, accum in candidates]
     try:
         return rust_batch(
-            raw_tuples,
+            candidates,
             root_path=root_path,
             prefix=prefix,
             follow_symlinks=config.follow_symlinks,

@@ -115,32 +115,46 @@ pub(crate) fn pathbuf_to_py_path<'py>(
 pub(crate) fn fetch_windows_pre_stat(
     py: Python<'_>,
     path_obj: &Bound<'_, PyAny>,
+    entry: Option<&Bound<'_, PyAny>>,
     follow_symlinks: bool,
 ) -> (bool, bool, bool, u64, Option<RawStat>) {
-    let Ok(os_mod) = py.import("os") else {
-        return (false, false, false, 0, None);
-    };
-    let kwargs_no_follow = PyDict::new(py);
-    let _ = kwargs_no_follow.set_item("follow_symlinks", false);
-    let Ok(lst) = os_mod.call_method("stat", (path_obj,), Some(&kwargs_no_follow)) else {
-        return (false, false, false, 0, None);
-    };
-    let lmode: u32 = lst.getattr("st_mode").and_then(|v| v.extract()).unwrap_or(0);
-    let is_symlink = (lmode & 0o170_000) == 0o120_000;
-    let st = if is_symlink && follow_symlinks {
-        let Ok(followed) = os_mod.call_method1("stat", (path_obj,)) else {
-            return (is_symlink, false, false, 0, None);
+    let (is_symlink, st) = if let Some(ent) = entry {
+        let sym = ent
+            .call_method0("is_symlink")
+            .and_then(|v| v.extract::<bool>())
+            .unwrap_or(false);
+        let kwargs = PyDict::new(py);
+        let _ = kwargs.set_item("follow_symlinks", follow_symlinks || !sym);
+        let Ok(stat_res) = ent.call_method("stat", (), Some(&kwargs)) else {
+            return (sym, false, false, 0, None);
         };
-        followed
+        (sym, stat_res)
     } else {
-        lst
+        let Ok(os_mod) = py.import("os") else {
+            return (false, false, false, 0, None);
+        };
+        let kwargs_no_follow = PyDict::new(py);
+        let _ = kwargs_no_follow.set_item("follow_symlinks", false);
+        let Ok(lst) = os_mod.call_method("stat", (path_obj,), Some(&kwargs_no_follow)) else {
+            return (false, false, false, 0, None);
+        };
+        let lmode: u32 = lst.getattr("st_mode").and_then(|v| v.extract()).unwrap_or(0);
+        let sym = (lmode & 0o170_000) == 0o120_000;
+        if sym && follow_symlinks {
+            let Ok(followed) = os_mod.call_method1("stat", (path_obj,)) else {
+                return (sym, false, false, 0, None);
+            };
+            (sym, followed)
+        } else {
+            (sym, lst)
+        }
     };
     let mode: u32 = st.getattr("st_mode").and_then(|v| v.extract()).unwrap_or(0);
     let size: u64 = st.getattr("st_size").and_then(|v| v.extract()).unwrap_or(0);
     let uid: Option<u32> = st.getattr("st_uid").and_then(|v| v.extract()).ok();
     let gid: Option<u32> = st.getattr("st_gid").and_then(|v| v.extract()).ok();
-    let ino: Option<u64> = st.getattr("st_ino").and_then(|v| v.extract()).ok();
-    let dev: Option<u64> = st.getattr("st_dev").and_then(|v| v.extract()).ok();
+    let ino: Option<u128> = st.getattr("st_ino").and_then(|v| v.extract()).ok();
+    let dev: Option<u128> = st.getattr("st_dev").and_then(|v| v.extract()).ok();
     let mtime: Option<f64> = st.getattr("st_mtime").and_then(|v| v.extract()).ok();
     let ctime: Option<f64> = st.getattr("st_ctime").and_then(|v| v.extract()).ok();
     let raw = RawStat {

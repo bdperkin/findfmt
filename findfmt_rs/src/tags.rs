@@ -1,14 +1,17 @@
-//! `identify`-compatible filename/interpreter tag tables, MIME lookup, and filter matching (#583).
+//! `identify`-compatible filename/interpreter tag tables and filter matching (#583).
 
 use std::collections::{BTreeSet, HashMap};
 use std::sync::OnceLock;
 
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyTuple};
+use pyo3::types::PyDict;
+
+pub use crate::mime::{LiveMimeDb, py_splitext};
+use crate::mime::guess_mime_with_lookup;
 
 static PYTHON_TAG_REGISTRY: OnceLock<TagRegistry> = OnceLock::new();
 
-/// Immutable lookup tables mirroring `identify` and Python's initialized `mimetypes` database.
+/// Immutable lookup tables mirroring `identify` (with optional built-in MIME maps for Rust tests).
 #[derive(Clone, Debug, Default)]
 pub struct TagRegistry {
     pub extensions: HashMap<String, Vec<String>>,
@@ -37,9 +40,9 @@ impl FilterCriteria {
             || self.shebang_filter.as_ref().is_some_and(|s| !s.is_empty())
     }
 
-    /// Evaluate `src/findfmt/traversal/filters.py` tag and shebang predicates on a non-directory item.
+    /// Evaluate `src/findfmt/traversal/filters.py` tag and shebang predicates on an item.
     pub fn matches(&self, tags: &BTreeSet<String>, shebang: Option<&str>, is_dir: bool) -> bool {
-        if is_dir {
+        if is_dir || tags.contains("directory") {
             return true;
         }
         if !self.exclude_tags.is_empty() && !tags.is_disjoint(&self.exclude_tags) {
@@ -55,34 +58,12 @@ impl FilterCriteria {
                 return false;
             }
         }
-        if let Some(ref needle) = self.shebang_filter
-            && !needle.is_empty()
-        {
-            return shebang.is_some_and(|sb| sb.contains(needle.as_str()));
+        if let Some(ref needle) = self.shebang_filter {
+            if !needle.is_empty() {
+                return shebang.is_some_and(|sb| sb.contains(needle.as_str()));
+            }
         }
         true
-    }
-}
-
-/// Split `(root, ext)` matching Python's `os.path.splitext` leading-dot semantics.
-pub fn py_splitext(path: &str) -> (String, String) {
-    let sep_idx = if cfg!(windows) {
-        path.rfind(['/', '\\'])
-    } else {
-        path.rfind('/')
-    };
-    let name_start = sep_idx.map_or(0, |i| i + 1);
-    let filename = &path[name_start..];
-    let Some(non_dot_rel) = filename.bytes().position(|b| b != b'.') else {
-        return (path.to_owned(), String::new());
-    };
-    let search_start = name_start + non_dot_rel;
-    match path[search_start..].rfind('.') {
-        Some(dot_rel) => {
-            let dot_idx = search_start + dot_rel;
-            (path[..dot_idx].to_owned(), path[dot_idx..].to_owned())
-        }
-        None => (path.to_owned(), String::new()),
     }
 }
 
@@ -91,7 +72,10 @@ fn extract_tag_map(obj: &Bound<'_, PyAny>) -> PyResult<HashMap<String, Vec<Strin
     let mut out = HashMap::with_capacity(dict.len());
     for (k, v) in dict.iter() {
         let key: String = k.extract()?;
-        let mut vals: Vec<String> = v.try_iter()?.map(|item| item?.extract()).collect::<PyResult<_>>()?;
+        let mut vals: Vec<String> = v
+            .try_iter()?
+            .map(|item| item?.extract())
+            .collect::<PyResult<_>>()?;
         vals.sort();
         vals.dedup();
         out.insert(key, vals);
@@ -99,17 +83,8 @@ fn extract_tag_map(obj: &Bound<'_, PyAny>) -> PyResult<HashMap<String, Vec<Strin
     Ok(out)
 }
 
-fn extract_str_map(obj: &Bound<'_, PyAny>) -> PyResult<HashMap<String, String>> {
-    let dict = obj.cast::<PyDict>()?;
-    let mut out = HashMap::with_capacity(dict.len());
-    for (k, v) in dict.iter() {
-        out.insert(k.extract()?, v.extract()?);
-    }
-    Ok(out)
-}
-
 impl TagRegistry {
-    /// Obtain or initialize the process-wide `TagRegistry` synced with `identify` and `mimetypes`.
+    /// Obtain or initialize the process-wide static `identify` tables.
     pub fn global_from_python(py: Python<'_>) -> PyResult<&'static Self> {
         if let Some(reg) = PYTHON_TAG_REGISTRY.get() {
             return Ok(reg);
@@ -122,14 +97,6 @@ impl TagRegistry {
     fn load_from_python(py: Python<'_>) -> PyResult<Self> {
         let ext_mod = py.import("identify.extensions")?;
         let interp_mod = py.import("identify.interpreters")?;
-        let mime_mod = py.import("mimetypes")?;
-        if mime_mod.getattr("_db")?.is_none() {
-            mime_mod.call_method0("init")?;
-        }
-        let db = mime_mod.getattr("_db")?;
-        let types_map_tuple = db.getattr("types_map")?.cast_into::<PyTuple>()?;
-        let strict_dict = types_map_tuple.get_item(1)?;
-
         Ok(Self {
             extensions: extract_tag_map(&ext_mod.getattr("EXTENSIONS")?)?,
             extensions_need_binary_check: extract_tag_map(
@@ -137,9 +104,9 @@ impl TagRegistry {
             )?,
             names: extract_tag_map(&ext_mod.getattr("NAMES")?)?,
             interpreters: extract_tag_map(&interp_mod.getattr("INTERPRETERS")?)?,
-            mime_types_strict: extract_str_map(&strict_dict)?,
-            mime_suffix_map: extract_str_map(&db.getattr("suffix_map")?)?,
-            mime_encodings_map: extract_str_map(&db.getattr("encodings_map")?)?,
+            mime_types_strict: HashMap::new(),
+            mime_suffix_map: HashMap::new(),
+            mime_encodings_map: HashMap::new(),
         })
     }
 
@@ -224,92 +191,17 @@ impl TagRegistry {
         BTreeSet::new()
     }
 
-    /// Match `mimetypes.guess_type(str_path)[0]`.
+    /// Match `mimetypes.guess_type(str_path)[0]` against in-memory Rust maps.
     pub fn guess_mime_type(&self, str_path: &str) -> Option<String> {
-        let target = strip_url_scheme_if_any(str_path)?;
-        let (mut base, mut ext) = py_splitext(target);
-        for _ in 0..8 {
-            let lower = ext.to_lowercase();
-            let Some(mapped) = self.mime_suffix_map.get(&lower) else {
-                break;
-            };
-            let combined = format!("{base}{mapped}");
-            let (nb, ne) = py_splitext(&combined);
-            base = nb;
-            ext = ne;
-        }
-        if self.mime_encodings_map.contains_key(&ext) {
-            let (_, ne) = py_splitext(&base);
-            ext = ne;
-        }
-        if ext.is_empty() {
-            return None;
-        }
-        self.mime_types_strict
-            .get(&ext)
-            .or_else(|| self.mime_types_strict.get(&ext.to_lowercase()))
-            .cloned()
+        guess_mime_with_lookup(
+            str_path,
+            |k| self.mime_suffix_map.get(k).cloned(),
+            |k| self.mime_encodings_map.contains_key(k),
+            |k| self.mime_types_strict.get(k).cloned(),
+        )
     }
-}
-
-fn strip_url_scheme_if_any(str_path: &str) -> Option<&str> {
-    if let Some(colon_idx) = str_path.find(':')
-        && colon_idx > 1
-    {
-        let scheme = &str_path[..colon_idx];
-        let valid_scheme = scheme.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
-            && scheme
-                .bytes()
-                .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'-' | b'.'));
-        if valid_scheme {
-            let rest = &str_path[colon_idx + 1..];
-            if scheme.eq_ignore_ascii_case("data") {
-                return None;
-            }
-            let end = rest.find(['?', '#']).unwrap_or(rest.len());
-            return Some(&rest[..end]);
-        }
-    }
-    Some(str_path)
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn splitext_and_tag_lookup_parity() {
-        assert_eq!(py_splitext(".bashrc"), (".bashrc".into(), String::new()));
-        assert_eq!(py_splitext(".hidden.py"), (".hidden".into(), ".py".into()));
-        assert_eq!(py_splitext("archive.tar.gz"), ("archive.tar".into(), ".gz".into()));
-
-        let reg = TagRegistry::builtin_for_tests();
-        assert!(reg.tags_from_filename("Dockerfile.prod").contains("dockerfile"));
-        assert!(reg.tags_from_filename("app.PY").contains("python"));
-        assert!(reg.tags_from_interpreter("/usr/bin/python3.12.1").contains("python3"));
-        assert_eq!(
-            reg.guess_mime_type("bundle.tgz"),
-            Some("application/x-tar".into())
-        );
-    }
-
-    #[test]
-    fn filter_criteria_evaluation() {
-        let tags: BTreeSet<String> = ["file", "python", "text"]
-            .into_iter()
-            .map(String::from)
-            .collect();
-        let mut crit = FilterCriteria {
-            include_tags: ["python", "text"].into_iter().map(String::from).collect(),
-            exclude_tags: BTreeSet::new(),
-            all_tags: true,
-            shebang_filter: Some("python3".into()),
-        };
-        assert!(crit.is_active());
-        assert!(crit.matches(&tags, Some("#!/usr/bin/env python3"), false));
-        assert!(!crit.matches(&tags, None, false));
-        crit.exclude_tags.insert("text".into());
-        assert!(!crit.matches(&tags, Some("#!/usr/bin/env python3"), false));
-        assert!(crit.matches(&tags, None, true));
-    }
-}
+#[path = "tags_tests.rs"]
+mod tests;

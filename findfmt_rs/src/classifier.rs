@@ -21,6 +21,8 @@ pub struct RawClassifyInput {
     pub accumulated_size: Option<u64>,
     /// Pre-fetched `RawStat` on platforms where stat metadata comes from OS handle/Python.
     pub pre_stat: Option<(bool, bool, bool, u64, Option<RawStat>)>,
+    /// Optional MIME type resolved from Python's live `mimetypes._db` before releasing the GIL.
+    pub pre_guessed_mime: Option<Option<String>>,
 }
 
 /// Pure-Rust classification result produced inside `py.detach(...)` before building `FileInfo`.
@@ -39,8 +41,8 @@ pub struct RawClassifiedFile {
     pub permissions_str: Option<String>,
     pub uid: Option<u32>,
     pub gid: Option<u32>,
-    pub inode: Option<u64>,
-    pub device: Option<u64>,
+    pub inode: Option<u128>,
+    pub device: Option<u128>,
     pub mtime: Option<f64>,
     pub ctime: Option<f64>,
     pub indicator: Option<&'static str>,
@@ -104,11 +106,10 @@ fn identify_tags_from_buffer(
     let name_tags = registry.tags_from_filename(filename);
     if !name_tags.is_empty() {
         tags.extend(name_tags);
-    } else if is_executable
-        && buffer.starts_with(b"#!")
-        && let Some(first_interp) = parsed_shebang.first()
-    {
-        tags.extend(registry.tags_from_interpreter(first_interp));
+    } else if is_executable && buffer.starts_with(b"#!") {
+        if let Some(first_interp) = parsed_shebang.first() {
+            tags.extend(registry.tags_from_interpreter(first_interp));
+        }
     }
 
     if !tags.contains("text") && !tags.contains("binary") {
@@ -181,13 +182,10 @@ pub fn classify_one_nogil(
     if exists && is_file && follow_target {
         match read_header_nonblocking(&input.path, MAX_HEADER_BYTES) {
             Some(hdr) => {
-                if let Some(ref opened) = hdr.opened_meta
-                    && !opened.file_type().is_file()
-                {
-                    is_file = false;
-                    size_bytes = opened.len();
-                    #[cfg(unix)]
-                    {
+                if let Some(ref opened) = hdr.opened_meta {
+                    if !opened.file_type().is_file() {
+                        is_file = false;
+                        size_bytes = opened.len();
                         raw_stat = Some(RawStat::from_std_metadata(opened));
                     }
                 }
@@ -247,11 +245,10 @@ pub fn classify_one_nogil(
     if is_symlink {
         tags.insert("symlink".to_owned());
         tags.extend(registry.tags_from_filename(&input.filename));
-        if input.follow_symlinks
-            && let Some(ref target_pb) = symlink_target_path
-            && let Some(target_name) = target_pb.file_name()
-        {
-            tags.extend(registry.tags_from_filename(&target_name.to_string_lossy()));
+        if input.follow_symlinks {
+            if let Some(target_name) = symlink_target_path.as_deref().and_then(Path::file_name) {
+                tags.extend(registry.tags_from_filename(&target_name.to_string_lossy()));
+            }
         }
     }
 
@@ -265,7 +262,10 @@ pub fn classify_one_nogil(
         }
     }
 
-    let mime_type = registry.guess_mime_type(&input.str_path);
+    let mime_type = match input.pre_guessed_mime {
+        Some(ref pre) => pre.clone(),
+        None => registry.guess_mime_type(&input.str_path),
+    };
     if let Some(ref mt) = mime_type {
         tags.insert(format!("mime:{mt}"));
         if let Some(primary) = mt.split('/').next() {
@@ -310,9 +310,13 @@ pub fn classify_batch_nogil(
     let mut results = Vec::with_capacity(inputs.len());
     for (idx, item) in inputs.iter().enumerate() {
         let classified = classify_one_nogil(item, registry, pathext_upper);
-        if let Some(crit) = filter
-            && !crit.matches(&classified.tags, classified.shebang.as_deref(), classified.is_dir)
-        {
+        if filter.is_some_and(|crit| {
+            !crit.matches(
+                &classified.tags,
+                classified.shebang.as_deref(),
+                classified.is_dir,
+            )
+        }) {
             continue;
         }
         results.push((idx, classified));

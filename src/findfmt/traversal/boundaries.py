@@ -6,13 +6,16 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from findfmt.classifier import classify_file as _py_classify_file
+from findfmt.traversal._batch_dispatch import BatchEmitContext, stream_classified_candidates
+from findfmt.traversal._descendants import (
+    DescendantSearchState,
+    PruneStepTarget,
+    inspect_entries_for_match,
+    search_matching_descendants,
+)
 from findfmt.traversal._pruning import (
     ACTIVE_RUST_BATCH_HOOKS,
     _can_skip_candidate_file,
-    _can_skip_entry_by_tags,
-    _check_visited_or_memo,
-    _PruneFrame,
-    _scan_sorted_entries,
     check_depth_limit,
     check_file_limit,
     is_candidate_file_entry,
@@ -25,7 +28,6 @@ from findfmt.traversal.ignore import (
     load_child_specs,
     resolve_active_specs,
 )
-from findfmt.traversal.patterns import matches_pattern_criteria
 from findfmt.traversal.symlinks import init_visited_dirs, should_skip_symlink_dir
 from findfmt.traversal.tags import can_skip_file_by_tags
 
@@ -154,136 +156,23 @@ def _inspect_entries(  # noqa: PLR0913 - wide CLI/config signature
     base_root: Path | None = None,
 ) -> tuple[list[Path], bool]:
     """Inspect directory entries and return discovered subdirs or match flag."""
-    subdirs: list[Path] = []
-    for entry in entries:
-        filtered = filter_directory_entry(
-            entry,
-            config,
-            specs,
-            root_dev,
-            matcher=matcher,
-            base_root=base_root,
-        )
-        if filtered is None:
-            continue
-
-        entry_path, is_dir = filtered
-        if is_dir:
-            if not should_skip_dir(entry.name, include_hidden=config.include_hidden):
-                subdirs.append(entry_path)
-        elif is_candidate_file_entry(entry, follow_symlinks=config.follow_symlinks):
-            if _can_skip_entry_by_tags(entry, config, filename=entry.name):
-                continue
-
-            info = classify_file(
-                entry_path,
-                entry=entry,
-                follow_symlinks=config.follow_symlinks,
-            )
-            if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
-                return [], True
-
-    return subdirs, False
-
-
-def _step_prune_directory(  # noqa: PLR0913 - wide CLI/config signature
-    directory: Path,
-    config: TraversalConfig,
-    specs: tuple[tuple[Path, PathSpecType], ...],
-    *,
-    root_dev: int | None,
-    current_depth: int,
-    matcher: PatternMatcher | None,
-    inherited_match: bool,
-    base_root: Path | None,
-    active_visited: set[tuple[int, int]],
-    active_memo: dict[tuple[int, int], bool],
-    stack: list[_PruneFrame],
-    on_error: Callable[[OSError], None] | None = None,
-) -> bool:
-    """Inspect a single directory for matching files or push its subdirs onto stack."""
-    try:
-        st = directory.stat()
-        dir_key = (st.st_dev, st.st_ino)
-    except (OSError, RuntimeError):
-        return False
-
-    cached, val = _check_visited_or_memo(dir_key, active_visited, active_memo)
-    if cached:
-        return val
-
-    entries = _scan_sorted_entries(directory, active_memo, dir_key, on_error=on_error)
-    if entries is None:
-        return False
-
-    subdirs, found = _inspect_entries(
-        entries,
-        config,
-        specs,
-        root_dev,
+    state = DescendantSearchState(
+        config=config,
+        root_dev=root_dev,
         matcher=matcher,
+        filter_entry_fn=filter_directory_entry,
+        classify_fn=classify_file,
+        active_visited=set(),
+        active_memo={},
+        frames=[],
+        on_error=None,
+    )
+    return inspect_entries_for_match(
+        entries,
+        specs,
         inherited_match=inherited_match,
         base_root=base_root,
-    )
-    if found:
-        active_memo[dir_key] = True
-        return True
-
-    if not check_depth_limit(current_depth, config.max_depth) or not subdirs:
-        active_memo[dir_key] = False
-        return False
-
-    active_visited.add(dir_key)
-    effective_root = base_root if base_root is not None else directory
-    stack.append(
-        _PruneFrame(
-            dir_key=dir_key,
-            subdirs=subdirs,
-            specs=specs,
-            depth=current_depth,
-            inherited_match=inherited_match,
-            effective_root=effective_root,
-        ),
-    )
-    return False
-
-
-def _step_prune_subdir(  # noqa: PLR0913 - wide CLI/config signature
-    top: _PruneFrame,
-    config: TraversalConfig,
-    *,
-    root_dev: int | None,
-    matcher: PatternMatcher | None,
-    active_visited: set[tuple[int, int]],
-    active_memo: dict[tuple[int, int], bool],
-    stack: list[_PruneFrame],
-    on_error: Callable[[OSError], None] | None = None,
-) -> bool:
-    """Advance top prune frame by one subdirectory and return True on immediate match."""
-    subdir = top.subdirs[top.idx]
-    top.idx += 1
-    child_specs = load_child_specs(subdir, top.specs) if config.respect_gitignore else top.specs
-    child_inherit = bool(
-        matcher
-        and matcher.should_inherit_match(
-            subdir,
-            base_root=top.effective_root,
-            parent_inherited=top.inherited_match,
-        ),
-    )
-    return _step_prune_directory(
-        subdir,
-        config,
-        child_specs,
-        root_dev=root_dev,
-        current_depth=top.depth + 1,
-        matcher=matcher,
-        inherited_match=child_inherit,
-        base_root=top.effective_root,
-        active_visited=active_visited,
-        active_memo=active_memo,
-        stack=stack,
-        on_error=on_error,
+        state=state,
     )
 
 
@@ -302,52 +191,25 @@ def has_matching_descendants(  # noqa: PLR0913 - wide CLI/config signature
     on_error: Callable[[OSError], None] | None = None,
 ) -> bool:
     """Determine whether a directory or any subtrees contain matching files."""
-    active_visited = visited if visited is not None else set()
-    active_memo = memo if memo is not None else {}
-    stack: list[_PruneFrame] = []
-
-    if _step_prune_directory(
-        directory,
-        config,
-        specs,
+    state = DescendantSearchState(
+        config=config,
         root_dev=root_dev,
-        current_depth=current_depth,
         matcher=matcher,
+        filter_entry_fn=filter_directory_entry,
+        classify_fn=classify_file,
+        active_visited=visited if visited is not None else set(),
+        active_memo=memo if memo is not None else {},
+        frames=[],
+        on_error=on_error,
+    )
+    target = PruneStepTarget(
+        directory=directory,
+        specs=specs,
+        current_depth=current_depth,
         inherited_match=inherited_match,
         base_root=base_root,
-        active_visited=active_visited,
-        active_memo=active_memo,
-        stack=stack,
-        on_error=on_error,
-    ):
-        return True
-
-    try:
-        while stack:
-            top = stack[-1]
-            if top.idx >= len(top.subdirs):
-                stack.pop()
-                active_visited.discard(top.dir_key)
-                active_memo[top.dir_key] = False
-            elif _step_prune_subdir(
-                top,
-                config,
-                root_dev=root_dev,
-                matcher=matcher,
-                active_visited=active_visited,
-                active_memo=active_memo,
-                stack=stack,
-                on_error=on_error,
-            ):
-                for frame in stack:
-                    active_memo[frame.dir_key] = True
-
-                return True
-    finally:
-        for frame in stack:
-            active_visited.discard(frame.dir_key)
-
-    return False
+    )
+    return search_matching_descendants(target, state)
 
 
 def _should_skip_dir_prune(  # noqa: PLR0913 - wide CLI/config signature
@@ -382,38 +244,7 @@ def _should_skip_dir_prune(  # noqa: PLR0913 - wide CLI/config signature
     )
 
 
-def _emit_classified_candidates(
-    candidates: Sequence[tuple[Path, os.DirEntry[str] | None, int | None]],
-    config: TraversalConfig,
-    base_root: Path,
-    prefix: Path | None,
-    pattern_ctx: tuple[PatternMatcher | None, bool],
-) -> Iterator[FileInfo]:
-    """Emit matching FileInfo records via batch Rust hooks or per-file classification."""
-    matcher, inherited_match = pattern_ctx
-    hooks = ACTIVE_RUST_BATCH_HOOKS.get() if classify_file is _DEFAULT_CLASSIFY else None
-    batch_infos = hooks[1](candidates, config, base_root, prefix) if hooks is not None else None
-    if batch_infos is not None:
-        for info in batch_infos:
-            if matches_pattern_criteria(info, config, matcher=matcher, inherited_match=inherited_match):
-                yield info
-
-        return
-
-    for path, entry, accum_size in candidates:
-        info = classify_file(
-            path,
-            root_path=base_root,
-            prefix=prefix,
-            accumulated_size=accum_size,
-            entry=entry,
-            follow_symlinks=config.follow_symlinks,
-        )
-        if matches_filter(info, config, matcher=matcher, inherited_match=inherited_match):
-            yield info
-
-
-def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
+def _iter_eligible_candidates(  # noqa: PLR0913 - wide CLI/config signature
     targets: Sequence[Path | tuple[Path, os.DirEntry[str]]],
     config: TraversalConfig,
     specs: tuple[tuple[Path, PathSpecType], ...],
@@ -422,14 +253,13 @@ def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
     prefix: Path | None,
     root_dev: int | None,
     current_depth: int,
-    matcher: PatternMatcher | None = None,
-    inherited_match: bool = False,
-    accumulated_sizes: dict[Path, int] | None = None,
-    prune_memo: dict[tuple[int, int], bool] | None = None,
-    on_error: Callable[[OSError], None] | None = None,
-) -> Iterator[FileInfo]:
-    """Yield FileInfo records for candidate paths that satisfy filters and pruning."""
-    candidates: list[tuple[Path, os.DirEntry[str] | None, int | None]] = []
+    matcher: PatternMatcher | None,
+    inherited_match: bool,
+    accumulated_sizes: dict[Path, int] | None,
+    prune_memo: dict[tuple[int, int], bool] | None,
+    on_error: Callable[[OSError], None] | None,
+) -> Iterator[tuple[Path, os.DirEntry[str] | None, int | None]]:
+    """Yield eligible candidate tuples lazily before bounded-chunk classification."""
     for item in targets:
         path, entry = item if isinstance(item, tuple) else (item, None)
         if _should_skip_dir_prune(
@@ -458,13 +288,46 @@ def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
             continue
 
         accum_size = accumulated_sizes.get(path) if accumulated_sizes is not None else None
-        candidates.append((path, entry, accum_size))
+        yield path, entry, accum_size
 
-    if candidates:
-        yield from _emit_classified_candidates(
-            candidates,
-            config,
-            base_root,
-            prefix,
-            (matcher, inherited_match),
-        )
+
+def yield_matching_items(  # noqa: PLR0913 - wide CLI/config signature
+    targets: Sequence[Path | tuple[Path, os.DirEntry[str]]],
+    config: TraversalConfig,
+    specs: tuple[tuple[Path, PathSpecType], ...],
+    *,
+    base_root: Path,
+    prefix: Path | None,
+    root_dev: int | None,
+    current_depth: int,
+    matcher: PatternMatcher | None = None,
+    inherited_match: bool = False,
+    accumulated_sizes: dict[Path, int] | None = None,
+    prune_memo: dict[tuple[int, int], bool] | None = None,
+    on_error: Callable[[OSError], None] | None = None,
+) -> Iterator[FileInfo]:
+    """Yield FileInfo records for candidate paths that satisfy filters and pruning."""
+    eligible = _iter_eligible_candidates(
+        targets,
+        config,
+        specs,
+        base_root=base_root,
+        prefix=prefix,
+        root_dev=root_dev,
+        current_depth=current_depth,
+        matcher=matcher,
+        inherited_match=inherited_match,
+        accumulated_sizes=accumulated_sizes,
+        prune_memo=prune_memo,
+        on_error=on_error,
+    )
+    emit_ctx = BatchEmitContext(
+        config=config,
+        base_root=base_root,
+        prefix=prefix,
+        matcher=matcher,
+        inherited_match=inherited_match,
+        classify_fn=classify_file,
+        use_batch_hooks=classify_file is _DEFAULT_CLASSIFY,
+    )
+    yield from stream_classified_candidates(eligible, emit_ctx)

@@ -15,7 +15,7 @@ use crate::py_paths::{
     PyHandles, compute_relative_py, get_handles, pathbuf_to_py_str, py_path_to_pathbuf,
     windows_pathext_upper,
 };
-use crate::tags::{FilterCriteria, TagRegistry};
+use crate::tags::{FilterCriteria, LiveMimeDb, TagRegistry};
 
 #[allow(clippy::too_many_arguments)]
 fn build_py_file_info<'py>(
@@ -46,10 +46,10 @@ fn build_py_file_info<'py>(
     )?;
     let py_tags = PyFrozenSet::new(py, raw_res.tags.iter().map(String::as_str))?;
 
-    let symlink_target_py: Option<String> = match raw_res.symlink_target_path {
+    let symlink_target_py: Option<Bound<'py, PyAny>> = match raw_res.symlink_target_path {
         Some(ref t_pb) => {
-            let decoded: String = pathbuf_to_py_str(py, handles, t_pb)?.extract()?;
-            Some(decoded.strip_prefix(r"\\?\").unwrap_or(&decoded).to_owned())
+            let decoded = pathbuf_to_py_str(py, handles, t_pb)?;
+            Some(decoded.call_method1("removeprefix", (r"\\?\",))?)
         }
         None => None,
     };
@@ -115,7 +115,9 @@ pub fn classify_single_py<'py>(
 ) -> PyResult<Bound<'py, PyAny>> {
     let handles = get_handles(py)?;
     let registry = TagRegistry::global_from_python(py)?;
+    let mime_db = LiveMimeDb::from_python(py)?;
     let (pb, str_path, filename, is_abs) = py_path_to_pathbuf(py, handles, path)?;
+    let pre_guessed_mime = Some(mime_db.guess_mime_type(&str_path));
     let root_decoded = match root_path {
         Some(rp) => Some((rp, py_path_to_pathbuf(py, handles, rp)?.0)),
         None => None,
@@ -125,7 +127,7 @@ pub fn classify_single_py<'py>(
         None => None,
     };
     #[cfg(not(unix))]
-    let pre_stat = Some(fetch_windows_pre_stat(py, path, follow_symlinks));
+    let pre_stat = Some(fetch_windows_pre_stat(py, path, entry, follow_symlinks));
     #[cfg(unix)]
     let pre_stat = None;
 
@@ -136,6 +138,7 @@ pub fn classify_single_py<'py>(
         follow_symlinks,
         accumulated_size,
         pre_stat,
+        pre_guessed_mime,
     };
     let pathext = windows_pathext_upper();
     let raw_res = py.detach(|| classify_one_nogil(&raw_input, registry, pathext.as_deref()));
@@ -181,6 +184,7 @@ pub fn classify_batch_py<'py>(
 ) -> PyResult<Bound<'py, PyList>> {
     let handles = get_handles(py)?;
     let registry = TagRegistry::global_from_python(py)?;
+    let mime_db = LiveMimeDb::from_python(py)?;
     let root_decoded = match root_path {
         Some(rp) => Some((rp, py_path_to_pathbuf(py, handles, rp)?.0)),
         None => None,
@@ -195,11 +199,18 @@ pub fn classify_batch_py<'py>(
     for elem in candidates.try_iter()? {
         let tup = elem?;
         let path_obj = tup.get_item(0)?;
-        let has_entry: bool = tup.get_item(1)?.extract()?;
+        let entry_obj = tup.get_item(1)?;
+        let has_entry = !entry_obj.is_none();
         let accum_opt: Option<u64> = tup.get_item(2)?.extract()?;
         let (pb, str_path, filename, is_abs) = py_path_to_pathbuf(py, handles, &path_obj)?;
+        let pre_guessed_mime = Some(mime_db.guess_mime_type(&str_path));
         #[cfg(not(unix))]
-        let pre_stat = Some(fetch_windows_pre_stat(py, &path_obj, follow_symlinks));
+        let pre_stat = Some(fetch_windows_pre_stat(
+            py,
+            &path_obj,
+            has_entry.then_some(&entry_obj),
+            follow_symlinks,
+        ));
         #[cfg(unix)]
         let pre_stat = None;
 
@@ -211,6 +222,7 @@ pub fn classify_batch_py<'py>(
             follow_symlinks,
             accumulated_size: accum_opt,
             pre_stat,
+            pre_guessed_mime,
         });
     }
 
