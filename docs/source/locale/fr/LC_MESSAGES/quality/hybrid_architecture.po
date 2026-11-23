@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.3.4.dev4+g2ac484640.d20261120\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-20 13:29-0500\n"
+"POT-Creation-Date: 2026-11-23 14:13-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -20,31 +20,32 @@ msgstr ""
 "Generated-By: Babel 2.18.0\n"
 
 #: ../../source/quality/hybrid_architecture.md:1
-#: 41048d3aa981443fa1728fcc02160770
+#: f85c362a60ef41f6bb2e1ca23c51adce
 msgid "Hybrid Python-Rust Architecture & Fallback FAQ"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:3
-#: 899df2ca05cc48488ce79c04dd9c6797
+#: a7f92e1ee1394d89b7fd402d26a7c203
 msgid ""
-"This document describes the hybrid Python-Rust architecture introduced in"
-" Milestone `v1.4.0` (Epic "
+"This document describes the hybrid Python-Rust architecture introduced "
+"across Milestone `v1.4.0` (Epic "
 "[#576](https://github.com/bdperkin/findfmt/issues/576), Issues "
-"[#577](https://github.com/bdperkin/findfmt/issues/577), "
-"[#578](https://github.com/bdperkin/findfmt/issues/578), "
-"[#579](https://github.com/bdperkin/findfmt/issues/579), and "
-"[#580](https://github.com/bdperkin/findfmt/issues/580)), including the "
-"runtime dispatch gateway, pure-Python fallback guarantees, build and "
-"environment switches, and contributor workflows."
+"[#577](https://github.com/bdperkin/findfmt/issues/577)–[#580](https://github.com/bdperkin/findfmt/issues/580))"
+" and Milestone `v1.4.1` (Epic "
+"[#581](https://github.com/bdperkin/findfmt/issues/581), Issues "
+"[#582](https://github.com/bdperkin/findfmt/issues/582)–[#586](https://github.com/bdperkin/findfmt/issues/586)),"
+" including the native traversal and classification engines, runtime "
+"dispatch gateway, pure-Python fallback guarantees, build and environment "
+"switches, parity verification, and contributor workflows."
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:13
-#: 07f6fc89577e4061aac22f2f58d26884
+#: 8c014b1d181e4e9291d41c5b3d805d13
 msgid "1. Architectural Motivation & Subsystem Layout"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:15
-#: 1df8bfe2e0ba42fc9bc64ef772f61799
+#: 22b0949da312473c89f3579a02cc6f29
 msgid ""
 "Directory traversal, hierarchical `.gitignore` evaluation, shebang "
 "extraction, and magic-byte header inspection execute once per candidate "
@@ -58,7 +59,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:22
-#: 44e87ac236c44d9eb6a1746cdd22e5d0
+#: 9225cc36d12a43cda415efc0b2df5604
 msgid ""
 "To combine native I/O throughput with zero-regression portability, "
 "`findfmt` separates native acceleration, runtime dispatch, and pure-"
@@ -66,32 +67,32 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:25
-#: 5d912f6255a24eefab3c698f81d51ec2
+#: 97e6856f7d434819a283fc28893ca9c0
 msgid "Component"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:25
-#: 7ce8033d4bd54ff796c22c2661d82b67
+#: ab472a31de9e4e50b2a80bde9090a94a
 msgid "Path"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:25
-#: e99824511c944129bdd97a191ed65624
+#: 690e06afdf074ccda72aa59017fa9dc8
 msgid "Responsibility"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:25
-#: 225c5c43fed14045be5d0ce4ff3ca23e
+#: 05acfba51a1b45e38b9cd0f11b7b9680
 msgid "**PyO3 Native Crate**"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:27
-#: b72b27a27bde486aa7992604d11f407a
+#: 483c64ac4ec842bfad4fed08e708582b
 msgid "`findfmt_rs/` (`Cargo.toml`, `src/lib.rs`, `deny.toml`, `about.toml`)"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:27
-#: 876151e86a6c46e69be546bb46d50c2e
+#: 65158d8b593f4c43a61c5d37307948f3
 msgid ""
 "Rust 2024 edition (`>=1.85`) library (`cdylib` + `rlib`) compiled to "
 "`findfmt._rust_ext` with PyO3 `abi3-py311` stable ABI compatibility "
@@ -99,17 +100,17 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:27
-#: a1d7f4a8afac47dd804d38714cd394b0
+#: ef286cab8444458da23308df82bc5102
 msgid "**PEP 484 Type Stub**"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:28
-#: 0a3348799e33469ab62c3109f95da3f6
+#: 511e636b084b40b286c82d12237b4c33
 msgid "`src/findfmt/_rust_ext.pyi`"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:28
-#: 764de39a4f1046dabdd05821b6a77a06
+#: 1a45988f73754a0b82591c528f1bb611
 msgid ""
 "Declares static call signatures for symbols exported by "
 "`findfmt._rust_ext` so `ty` verifies Python-to-Rust call sites without "
@@ -117,17 +118,17 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:28
-#: 74ae0cf9683a4cda853b76cf85bed5bf
+#: bc7aa9bf1e74460690d9ddcc2c034fd7
 msgid "**Runtime Dispatch Gateway**"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:29
-#: 319327e8701749c9978523dcea68291b
+#: bbb2754563fa45d3a89f26f36d51e7b5
 msgid "`src/findfmt/core.py`"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:29
-#: bab11550ec194a7baec7ab836d2cb35c
+#: 64836e4906ed4350963a8e3f07fd2333
 msgid ""
 "Loads `findfmt._rust_ext` (unless disabled via `FINDFMT_NO_EXTENSIONS`), "
 "inspects usable entrypoints, and wraps calls in "
@@ -135,17 +136,17 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:29
-#: 00835c5f4b404b288925d6b68e528961
+#: d42030b7db7148b5a0164a78110b37b7
 msgid "**Pure-Python Fallback Engine**"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:30
-#: 1be1ef01f7274333a3d2106eb929c6a1
+#: c204e02d18084e7ca127d707fc9f9dd0
 msgid "`src/findfmt/_fallback.py`"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:30
-#: 99fec39f8aa44f1192f7c55b594b1170
+#: 3dbb8ecbc407450ba2c787404976fda0
 msgid ""
 "Re-exports pure-Python `find_files` (`src/findfmt/traversal/engine.py`) "
 "and `classify_file` (`src/findfmt/classifier.py`) with 100% behavioral "
@@ -153,12 +154,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:34
-#: f9db40034e2f408a9f4990703e4d65b3
+#: f8457ba1b965422496f980058cb592ab
 msgid "2. Build-Time vs. Runtime Controls"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:36
-#: a3c7040748e94c91836be2144e4b8cc1
+#: 8d3d8365c1ae499f9503d408a752ee48
 msgid ""
 "`findfmt` provides independent controls for package builders "
 "(`HATCH_MATURIN_DISABLE`) and end users or test suites "
@@ -166,43 +167,43 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:39
-#: 8c4c6043a192447baf9be150bcb27880
+#: 8d89816bf94c4fe5b5020a2d62c76ba6
 msgid "Variable"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:39
-#: 9979b64e9b624c1ba01fc771f04bc2df
+#: 43f86114363f4d1a8cb487d20be70dfa
 msgid "Phase"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:39
-#: 4716e3abfcfa41698a5d39f831b4bf04
+#: e75610d9f04b4edda80ddecc7b27de6c
 msgid "Accepted Enabling Values"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:39
-#: cb061caf30694803af38807d157e9595
+#: 2c89f0e5bba9440b9c3aed6c1ef0718f
 msgid "Effect"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:39
-#: eae6e1dc656f400baf29eb6202d5022d
+#: 5734df0e8d3b4c6898d5d913cb6578c2
 msgid "`HATCH_MATURIN_DISABLE`"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:41
-#: 9077cb8ad9ad4cc2a98106384103b02e
+#: 4af5bc80209046bd996a8c76d997f32a
 msgid "Package build (`uv build`, Hatchling)"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:41
 #: ../../source/quality/hybrid_architecture.md:42
-#: 3e87c207bd084168867c48e71807c77d bd0fba29fde140248c55cd0796343fde
+#: 5e04f795fe20403c90e9724631ea29b2 9f8aa9460dbd42339275a6e25f4f8026
 msgid "`1`, `true`, `yes`, `on` (case-insensitive)"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:41
-#: 1487269b9fca4d54bdf5e348b87fe15f
+#: b9cfbbbf61084f6a80c66aa21e67c0b9
 msgid ""
 "Skips `MaturinBuildHook.initialize()` and `clean()` in "
 "`tools/hatch_build.py`, producing a Cargo-free `py3-none-any` wheel "
@@ -210,17 +211,17 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:41
-#: b4f240510a6a4a7f9a9862d1b4e075b8
+#: bfcc66b238984fe58554d3519a8f6b73
 msgid "`FINDFMT_NO_EXTENSIONS`"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:42
-#: 9270155e73c44994b5c4cd3f516bc1d9
+#: b231bbf8cc7b46128ecb98c4869aab76
 msgid "Runtime execution (CLI & Python API)"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:42
-#: f3cc46f32d184792baea4a303e3d0791
+#: f8d99da02b42407fab7996cc7de69760
 msgid ""
 "Skips importing or dispatching to `findfmt._rust_ext` in "
 "`src/findfmt/core.py`, routing all operations to "
@@ -228,19 +229,19 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:44
-#: 3d9f8142e8da4dea8bd14a22cd3592e2
+#: f0284b4cbc894f64b16b285558a8b9c9
 msgid "2.1. Runtime Inspection API & CLI Diagnostics"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:46
-#: 14ddefb91cee4674bba20403c21e0c79
+#: 7113c2d31426449a83e0db747475d9a2
 msgid ""
 "Callers can inspect extension availability and execution-backend "
 "selection from both the CLI and Python:"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:48
-#: 0e0575a5b89646be9795e41dcb63f805
+#: 88841dcc6717440fb49f83948790b8dd
 msgid ""
 "**CLI Diagnostics**: `findfmt --diagnostics` (and `findfmt --version "
 "--verbose`) prints `Backend: rust` when native gateway entrypoints are "
@@ -248,7 +249,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:50
-#: f955799508c542dcad7bd87b366765e9
+#: 5ba485c5a4304b8aaf8dd5daef077fda
 msgid ""
 "**`findfmt.is_rust_extension_loaded() -> bool`**: Returns `True` when "
 "`findfmt._rust_ext` imported cleanly and `FINDFMT_NO_EXTENSIONS` is not "
@@ -256,7 +257,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:52
-#: 6f67c4a42668489b95d6e9c356e6a0a7
+#: c251d2f6bea649a9ba4c643debac8588
 msgid ""
 "**`findfmt.is_rust_backend_active() -> bool`**: Returns `True` when "
 "`findfmt._rust_ext` is enabled and exposes callable gateway entrypoints "
@@ -264,7 +265,7 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:54
-#: 176baed932e645ddbb5cdeeac10a45a2
+#: b87ae187dd314b2aa4e2e68e47ac31f2
 msgid ""
 "**`findfmt.get_active_backend() -> Literal[\"rust\", \"python\"]`**: "
 "Returns `\"rust\"` when `is_rust_backend_active()` is `True`, or "
@@ -272,19 +273,19 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:59
-#: 4ae1f9d0643546ffa2787513c9d79377
+#: c41c444a6f2c4db2a7da4a6fc5f78ca3
 msgid "3. Architecture & Fallback FAQ"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:61
-#: 4231543e86e84713970f8e0439c26f53
+#: 2dec7b9d0a3f40c1b68dfaebebafbb4f
 msgid ""
 "3.1. What happens if no prebuilt binary wheel exists for a target "
 "platform?"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:63
-#: 1b09eb9f88e94ffabe65319ae3ebdcba
+#: 316607c993fc43bb8c1ee676a64203ce
 #, python-format
 msgid ""
 "`findfmt` remains 100% functional on every Python `>=3.11` platform. Once"
@@ -300,12 +301,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:70
-#: 0600ad80473b4dd68e2b1a1d6a4c3fb2
+#: 9aef30bac15741c58f62d37ebf62eb34
 msgid "3.2. Why does `findfmt_rs` use PyO3 `abi3-py311`?"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:72
-#: f2bb03658ac04e10a7084982535101f3
+#: 7dac3eb1097d476b98cb0f91609fbb57
 msgid ""
 "Enabling `abi3-py311` targets CPython's Stable Limited API for Python "
 "`3.11` and newer. A single compiled wheel per OS/architecture "
@@ -315,12 +316,12 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:76
-#: bcf964cb3f684fcc9910a133b9893b84
+#: 293caaa6413f4ded86fafe9b0e539b6d
 msgid "3.3. What happens if native Rust code panics during execution?"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:78
-#: 5afd0ce032b245dd836b43c4659a64ef
+#: 21e0dd037ae94d179a0623037be6b0b8
 msgid ""
 "PyO3 converts Rust thread panics across FFI boundaries into "
 "`pyo3_runtime.PanicException`, which inherits directly from Python's "
@@ -335,14 +336,14 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:86
-#: 1e6fd862f336437caac0a82b899436cc
+#: 463f94e43484435d85fbefd453e4bd53
 msgid ""
 "3.4. How is MIT license compliance enforced across Rust crate "
 "dependencies?"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:88
-#: de3ef37315c94f1b88bc51892c7c8207
+#: 1760c79f67874304bb80f0ca5cbfd4b4
 msgid ""
 "Binary wheels bundle compiled code from `findfmt_rs` and its transitive "
 "Cargo dependencies. Every crate in `findfmt_rs/Cargo.lock` is audited by "
@@ -354,13 +355,64 @@ msgid ""
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:96
-#: 923c54a20ea7420f8008d272ab4ec6b7
+#: 32033d454e7b4ca1964e5c0d48317835
 msgid "4. Local Developer Setup & Debugging Runbook"
 msgstr ""
 
 #: ../../source/quality/hybrid_architecture.md:98
-#: 959b4c3ece5e4a819c072565094db8b5
+#: 49e60d4aa5b74563b5c78937318bff23
 msgid ""
 "Install `uv` alongside a stable Rust `>=1.85` toolchain via "
 "[`rustup`](https://rustup.rs/):"
+msgstr ""
+
+#: ../../source/quality/hybrid_architecture.md:124
+#: 3ccf0bf9c40248a397937986ebd9dd65
+msgid "5. Native Engine Capabilities, Parity & Fuzzing Verification"
+msgstr ""
+
+#: ../../source/quality/hybrid_architecture.md:126
+#: a4a141d559944212bce30f27ce2e41fa
+msgid ""
+"Milestone `v1.4.1` delivers the complete native execution pipeline in "
+"`findfmt_rs` (`#![forbid(unsafe_code)]`):"
+msgstr ""
+
+#: ../../source/quality/hybrid_architecture.md:128
+#: 71fe7778077c419fb8db707cbcbc8ea2
+msgid ""
+"**Streaming Directory Walker (`find_files_rs` / `find_files`)**: Executes"
+" recursive traversal in Rust while releasing the Python `GIL` "
+"(`py.detach`). Supports hierarchical `.gitignore`, `.git/info/exclude` "
+"(including submodules and linked worktree `commondir` pointers), global "
+"ignore files, `--gitignore-file`, linear-time PEP 383 `surrogateescape` "
+"glob evaluation (`-P`, `-I`, `--ignore-case`, `--match-dirs`), depth and "
+"entry boundaries (`-L`, `--filelimit`), single-filesystem confinement "
+"(`-x`), symlink cycle detection (`-l`), resumable `--prune` discovery, "
+"`--du` disk-usage accumulation, and deterministic natural version "
+"sorting."
+msgstr ""
+
+#: ../../source/quality/hybrid_architecture.md:134
+#: abdd657902e04e2c823dc61ce4e06b67
+msgid ""
+"**File Classification (`classify_file_rs` / `classify_file` / "
+"`classify_batch_rs`)**: Opens regular files in `O_NONBLOCK` mode with "
+"`fstat` regular-file verification to prevent hangs on swapped `FIFO` "
+"pipes, extracts `#!` shebang tokens (including `env -S` and multiline "
+"`nix-shell -i` headers), sniffs text vs. binary magic bytes, and resolves"
+" `identify` format and `MIME` tags without holding the `GIL`."
+msgstr ""
+
+#: ../../source/quality/hybrid_architecture.md:138
+#: 9b3e07621f4d460599152395940ac33d
+#, python-format
+msgid ""
+"**Parity, Property Testing & Continuous Fuzzing**: `tests/test_parity.py`"
+" asserts 100% field-by-field `FileInfo` identity between "
+"`findfmt._rust_ext` and `src/findfmt/_fallback.py`. Property-based "
+"`proptest` suites (`findfmt_rs/tests/`), `cargo-fuzz` targets "
+"(`findfmt_rs/fuzz/`), and `ClusterFuzzLite` harnesses (`tests/fuzz/`) "
+"continuously stress-test arbitrary path bytes, malformed globs, shebang "
+"headers, and binary buffers against panics and memory leaks."
 msgstr ""

@@ -1,12 +1,12 @@
 # Hybrid Python-Rust Architecture & Fallback FAQ
 
-This document describes the hybrid Python-Rust architecture introduced in Milestone `v1.4.0` (Epic
+This document describes the hybrid Python-Rust architecture introduced across Milestone `v1.4.0` (Epic
 [#576](https://github.com/bdperkin/findfmt/issues/576), Issues
-[#577](https://github.com/bdperkin/findfmt/issues/577),
-[#578](https://github.com/bdperkin/findfmt/issues/578),
-[#579](https://github.com/bdperkin/findfmt/issues/579), and
-[#580](https://github.com/bdperkin/findfmt/issues/580)), including the runtime dispatch gateway, pure-Python
-fallback guarantees, build and environment switches, and contributor workflows.
+[#577](https://github.com/bdperkin/findfmt/issues/577)–[#580](https://github.com/bdperkin/findfmt/issues/580))
+and Milestone `v1.4.1` (Epic [#581](https://github.com/bdperkin/findfmt/issues/581), Issues
+[#582](https://github.com/bdperkin/findfmt/issues/582)–[#586](https://github.com/bdperkin/findfmt/issues/586)),
+including the native traversal and classification engines, runtime dispatch gateway, pure-Python fallback
+guarantees, build and environment switches, parity verification, and contributor workflows.
 
 ______________________________________________________________________
 
@@ -114,4 +114,30 @@ cargo test --manifest-path findfmt_rs/Cargo.toml --no-default-features
 # Compare native and pure-Python fallback test runs with panic backtraces enabled
 RUST_BACKTRACE=1 uv run pytest
 FINDFMT_NO_EXTENSIONS=1 uv run pytest
+
+# Compare Rust vs. pure-Python throughput and memory in isolated subprocesses
+uv run python tools/benchmark.py --backend compare --tier medium --runs 3 --warmup 1
 ```
+
+______________________________________________________________________
+
+## 5. Native Engine Capabilities, Parity & Fuzzing Verification
+
+Milestone `v1.4.1` delivers the complete native execution pipeline in `findfmt_rs`
+(`#![forbid(unsafe_code)]`):
+
+- **Streaming Directory Walker (`find_files_rs` / `find_files`)**: Executes recursive traversal in Rust while
+  releasing the Python `GIL` (`py.detach`). Supports hierarchical `.gitignore`, `.git/info/exclude` (including
+  submodules and linked worktree `commondir` pointers), global ignore files, `--gitignore-file`, linear-time
+  PEP 383 `surrogateescape` glob evaluation (`-P`, `-I`, `--ignore-case`, `--match-dirs`), depth and entry
+  boundaries (`-L`, `--filelimit`), single-filesystem confinement (`-x`), symlink cycle detection (`-l`),
+  resumable `--prune` discovery, `--du` disk-usage accumulation, and deterministic natural version sorting.
+- **File Classification (`classify_file_rs` / `classify_file` / `classify_batch_rs`)**: Opens regular files in
+  `O_NONBLOCK` mode with `fstat` regular-file verification to prevent hangs on swapped `FIFO` pipes, extracts
+  `#!` shebang tokens (including `env -S` and multiline `nix-shell -i` headers), sniffs text vs. binary magic
+  bytes, and resolves `identify` format and `MIME` tags without holding the `GIL`.
+- **Parity, Property Testing & Continuous Fuzzing**: `tests/test_parity.py` asserts 100% field-by-field
+  `FileInfo` identity between `findfmt._rust_ext` and `src/findfmt/_fallback.py`. Property-based `proptest`
+  suites (`findfmt_rs/tests/`), `cargo-fuzz` targets (`findfmt_rs/fuzz/`), and `ClusterFuzzLite` harnesses
+  (`tests/fuzz/`) continuously stress-test arbitrary path bytes, malformed globs, shebang headers, and binary
+  buffers against panics and memory leaks.

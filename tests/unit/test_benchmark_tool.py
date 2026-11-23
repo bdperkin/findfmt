@@ -196,9 +196,13 @@ def test_compare_mode_end_to_end_cli_and_json(tmp_path: Path) -> None:
     payload = json.loads(out_json_stdout.getvalue())
     assert payload == json.loads(out_json_file.read_text(encoding="utf-8"))
     assert payload["measured_in"] == "subprocess"
-    assert payload["rust_backend_status"] in {"native", "fallback"}
+    expected_status = "native" if is_native_rust_find_available() else "fallback"
+    assert payload["rust_backend_status"] == expected_status
     assert len(payload["python_metrics"]) == 1
     assert len(payload["rust_metrics"]) == 1
+    if expected_status == "native":
+        assert payload["rust_metrics"][0]["backend"] == "rust"
+
     assert len(payload["comparisons"]) == 1
     comp = payload["comparisons"][0]
     assert comp["tier"] == "custom"

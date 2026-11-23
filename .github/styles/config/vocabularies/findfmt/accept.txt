@@ -236,3 +236,7 @@
 (?i)backtraces
 (?i)ttys
 (?i)truthy
+(?i)speedup
+(?i)speedups
+(?i)worktree
+(?i)worktrees

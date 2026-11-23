@@ -187,6 +187,7 @@ def test_parity_multi_root_single_file_and_missing_root_errors(
 
     bad_synth = _WalkerExt("findfmt._rust_ext")
     bad_synth.find_files_rs = lambda *_a, **_kw: iter([None, *items])
+    bad_synth.find_files = _fallback.find_files
     bad_synth.classify_file_rs = rust_ext.classify_file_rs
     bad_synth.classify_file = rust_ext.classify_file
     with pytest.raises(AssertionError, match="Unexpected find_files_rs item"):

@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 255 Closed Issues | 77 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
+> **Tracking:** 256 Closed Issues | 77 Actionable Open Tasks | 24 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -28,7 +28,7 @@
 > 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`, and released v1.3.3 and
 > closed its milestone; 2026-11-19 closed `#579` and `#577`, added and closed `#689` and `#692`; 2026-11-20
 > closed `#578`, `#580`, and epic `#576`, and released v1.4.0 and closed its milestone; 2026-11-22 closed
-> `#586` and `#583`; 2026-11-23 closed `#584`, `#585`, and `#582`)
+> `#586` and `#583`; 2026-11-23 closed `#584`, `#585`, `#582`, and epic `#581`)
 
 ______________________________________________________________________
 
@@ -767,6 +767,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#582](https://github.com/bdperkin/findfmt/issues/582)** - perf(rust): implement gitignore-aware
   directory walker in findfmt_rs mirroring src/findfmt/traversal/ (Closed: 2026-11-23 via PR
   [#707](https://github.com/bdperkin/findfmt/pull/707))
+- [x] **[#581](https://github.com/bdperkin/findfmt/issues/581)** - [Epic] Rust Core Engine (findfmt_rs):
+  Directory Traversal, Classification, Parity Verification & Fuzzing (Closed: 2026-11-23 via PR
+  [#709](https://github.com/bdperkin/findfmt/pull/709))
 
 ______________________________________________________________________
 
@@ -1245,9 +1248,6 @@ ______________________________________________________________________
 Note: Each epic's milestone equals the latest milestone among its open sub-issues. Sub-issues are linked
 natively on GitHub.
 
-- [ ] **[#581](https://github.com/bdperkin/findfmt/issues/581)** - [Epic] Rust Core Engine (findfmt_rs):
-  Directory Traversal, Classification, Parity Verification & Fuzzing *(Milestone: v1.4.1 | Open sub-issues:
-  0)*
 - [ ] **[#587](https://github.com/bdperkin/findfmt/issues/587)** - [Epic] Hybrid Quality Assurance: Unified
   Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation *(Milestone: v1.4.2 | Open
   sub-issues: 4)* - [#588](https://github.com/bdperkin/findfmt/issues/588),

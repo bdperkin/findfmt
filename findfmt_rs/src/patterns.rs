@@ -77,6 +77,7 @@ pub fn split_pattern_alternations(pattern: &str) -> Vec<String> {
 fn compile_pattern_spec(
     patterns: &[String],
     ignore_case: bool,
+    unicode_major: u8,
 ) -> Result<Option<GlobSpecU32>, String> {
     if patterns.is_empty() {
         return Ok(None);
@@ -85,7 +86,7 @@ fn compile_pattern_spec(
     for pat in patterns {
         lines.extend(split_pattern_alternations(pat));
     }
-    GlobSpecU32::try_from_lines(&lines, ignore_case)
+    GlobSpecU32::try_from_lines_with_unicode(&lines, ignore_case, unicode_major)
 }
 
 fn match_spec_u32(
@@ -123,9 +124,26 @@ impl PatternMatcher {
         ignore_case: bool,
         match_dirs: bool,
     ) -> Result<Self, String> {
+        Self::try_new_for_unicode(
+            include_patterns,
+            exclude_patterns,
+            ignore_case,
+            match_dirs,
+            16,
+        )
+    }
+
+    /// Fallible constructor gated to `unicode_major` `ignore_case` equivalences (`#581`).
+    pub fn try_new_for_unicode(
+        include_patterns: &[String],
+        exclude_patterns: &[String],
+        ignore_case: bool,
+        match_dirs: bool,
+        unicode_major: u8,
+    ) -> Result<Self, String> {
         Ok(Self {
-            include_spec: compile_pattern_spec(include_patterns, ignore_case)?,
-            exclude_spec: compile_pattern_spec(exclude_patterns, ignore_case)?,
+            include_spec: compile_pattern_spec(include_patterns, ignore_case, unicode_major)?,
+            exclude_spec: compile_pattern_spec(exclude_patterns, ignore_case, unicode_major)?,
             ignore_case,
             match_dirs,
         })

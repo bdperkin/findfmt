@@ -57,8 +57,16 @@ def test_readme_and_sphinx_hybrid_architecture_faq() -> None:
         "get_active_backend()",
         "pyo3_runtime.PanicException",
         "maturin develop",
+        "find_files_rs",
+        "classify_file_rs",
+        "tests/test_parity.py",
+        "--backend compare",
     ):
         assert required_term in faq_text, f"Missing {required_term!r} in {faq_page}"
+
+    perf_text = (ROOT / "docs" / "performance.md").read_text(encoding="utf-8")
+    assert "--backend compare" in perf_text
+    assert "findfmt._rust_ext" in perf_text
 
     quality_index = (ROOT / "docs" / "source" / "quality" / "index.md").read_text(encoding="utf-8")
     assert "hybrid_architecture" in quality_index

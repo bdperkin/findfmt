@@ -15,11 +15,9 @@ The performance model focuses on three primary metrics:
 1. **Traversal Throughput (files/sec and dirs/sec)**: Maximizing file discovery and content inspection
    throughput across large repository hierarchies while pruning excluded trees early via `.gitignore`
    specifications.
-
 2. **Latency to First Yielded Result (TTFR)**: Measuring first-byte responsiveness (in milliseconds) from
    execution start until the first matching item is yielded. Low TTFR is critical for pipe streaming and
    interactive subshells.
-
 3. **Peak Heap Memory Footprint**: Tracking peak heap memory allocation using Python's `tracemalloc` standard
    library to ensure low, bounded memory usage during multi-level directory traversal.
 
@@ -119,13 +117,10 @@ The harness supports three standardized dataset tiers alongside custom directory
 
 - **Small Tier (\<1,000 files)**: Generates approximately 800 files across nested directories with
   `.gitignore` exclusion rules. Designed for fast local feedback (\<1 second execution).
-
 - **Medium Tier (10,000–50,000 files)**: Generates approximately 12,000 files across multiple package
   subtrees, simulating standard enterprise codebases.
-
 - **Monorepo Tier (>100,000 files)**: Stress test dataset simulating large monorepo structures with deep
   hierarchies and mixed file types.
-
 - **Custom Directory Target (`-d, --target-dir`)**: Benchmarks real-world directory trees directly, such as
   the `findfmt` repository or user-specified projects.
 
@@ -268,6 +263,18 @@ uv run python tools/benchmark.py --json
 uv run python tools/benchmark.py --output benchmark_report.json
 ```
 
+### 5.9. Native Rust vs. Pure-Python Backend Comparison
+
+Select an execution backend (`auto`, `rust`, `python`) or run subprocess-isolated side-by-side comparisons:
+
+```bash
+# Compare native Rust (_rust_ext) vs. pure-Python (_fallback) throughput and peak RSS
+uv run python tools/benchmark.py --backend compare --tier medium --runs 3 --warmup 1
+
+# Emit structured JSON comparison report across topologies
+uv run python tools/benchmark.py --backend compare --topology real-world --json
+```
+
 ______________________________________________________________________
 
 ## 6. Official v1.0.0 Baseline Performance Metrics
@@ -301,6 +308,19 @@ in $O(1)$ time at the directory root level, completing in 0.37 seconds.*
 | **Tree (`tree`)**   | Buffered   | 16.3280 s    | 483.9 f/s            | 16,265.90 ms      | 36.30 MB       | $O(N)$ Linear  |
 | **Table (`table`)** | Buffered   | 57.7142 s    | 136.9 f/s            | 57,581.79 ms      | 64.80 MB       | $O(N)$ Linear  |
 | **Text + Tags**     | Classified | 3.5339 s     | 2,235.8 f/s          | 14.60 ms          | 0.72 MB        | $O(1)$ Bounded |
+
+### 6.3. Native Rust vs. Pure-Python Backend Comparison (v1.4.1)
+
+Subprocess-isolated release-profile measurements (`maturin develop --release`, CPython `3.14`, Linux `x86_64`)
+compare `findfmt._rust_ext` against `src/findfmt/_fallback.py`:
+
+| Scenario / Topology            | Matched Files | Python (files/s) | Rust (files/s) | Speedup   | Python RSS | Rust RSS |
+| :----------------------------- | :------------ | :--------------- | :------------- | :-------- | :--------- | :------- |
+| **Standard Small (800 files)** | 518           | 8,240 f/s        | 33,900 f/s     | **4.11x** | 29.5 MB    | 30.3 MB  |
+| **Standard Medium (12k)**      | 7,901         | 11,085 f/s       | 42,587 f/s     | **3.84x** | 30.3 MB    | 30.2 MB  |
+| **Flat (10k files in 1 dir)**  | 8,261         | 12,213 f/s       | 46,195 f/s     | **3.78x** | 64.5 MB    | 33.9 MB  |
+| **Deep (20 levels, 5k files)** | 4,119         | 5,696 f/s        | 34,010 f/s     | **5.97x** | 29.8 MB    | 30.6 MB  |
+| **Real-World Monorepo**        | 663           | 7,900 f/s        | 28,400 f/s     | **3.60x** | 29.7 MB    | 30.3 MB  |
 
 ______________________________________________________________________
 

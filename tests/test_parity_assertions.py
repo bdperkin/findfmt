@@ -140,8 +140,7 @@ def _verify_direct_walker_parity(
     """Verify exported _rust_ext walker functions directly without dropping unexpected items."""
     for walker_attr in ("find_files_rs", "find_files"):
         walker_fn = getattr(rust_ext, walker_attr, None)
-        if not callable(walker_fn):
-            continue
+        assert callable(walker_fn), f"Missing required callable {walker_attr!r} on findfmt._rust_ext"
 
         direct_errors: list[tuple[int | None, str | None]] = []
         direct_raw = walker_fn(

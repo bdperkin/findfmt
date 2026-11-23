@@ -255,7 +255,9 @@ def test_find_files_rs_round4_unicode_case_cmd_mode_and_git_config_parity(
     (uni_dir / "\u017f.txt").write_text("long-s\n", encoding="utf-8")
     (uni_dir / "\u00d7.txt").write_text("times\n", encoding="utf-8")
     (uni_dir / "\u00e0.txt").write_text("a-grave\n", encoding="utf-8")
-    for pat in ("[a-z].txt", "[\u00c0-\u0531].txt"):
+    (uni_dir / "\u1c8a.txt").write_text("cyrillic\n", encoding="utf-8")
+    (uni_dir / "\U00016ebb.txt").write_text("beria\n", encoding="utf-8")
+    for pat in ("[a-z].txt", "[\u00c0-\u0531].txt", "\u1c89.txt", "\U00016ea0.txt"):
         cfg_ci = TraversalConfig(root_paths=(uni_dir,), include_patterns=(pat,), ignore_case=True)
         assert list(rust_ext.find_files_rs(cfg_ci)) == list(_fallback.find_files(cfg_ci))
 
