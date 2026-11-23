@@ -79,25 +79,30 @@ pub fn resolve_device_id(path: &Path, is_symlink: bool, follow_symlinks: bool) -
             fs::metadata(path).ok().map(|m| m.dev())
         }
     }
-    #[cfg(not(unix))]
+    #[cfg(windows)]
     {
-        use std::collections::hash_map::DefaultHasher;
-        use std::hash::{Hash, Hasher};
-        use std::path::Component;
+        use std::os::windows::fs::OpenOptionsExt;
 
-        let target_for_volume = if is_symlink && !follow_symlinks {
-            let _ = fs::symlink_metadata(path).ok()?;
-            path.parent().unwrap_or(path)
-        } else {
-            path
-        };
-        let canon = fs::canonicalize(target_for_volume).ok()?;
-        let mut hasher = DefaultHasher::new();
-        match canon.components().next()? {
-            Component::Prefix(pfx) => pfx.as_os_str().to_string_lossy().to_ascii_uppercase().hash(&mut hasher),
-            other => other.hash(&mut hasher),
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+        const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+
+        let mut flags = FILE_FLAG_BACKUP_SEMANTICS;
+        if is_symlink && !follow_symlinks {
+            flags |= FILE_FLAG_OPEN_REPARSE_POINT;
         }
-        Some(hasher.finish())
+        let handle = fs::OpenOptions::new()
+            .access_mode(0)
+            .share_mode(7)
+            .custom_flags(flags)
+            .open(path)
+            .ok()?;
+        let info = winapi_util::file::information(&handle).ok()?;
+        Some(info.volume_serial_number())
+    }
+    #[cfg(all(not(unix), not(windows)))]
+    {
+        let _ = (path, is_symlink, follow_symlinks);
+        Some(0)
     }
 }
 

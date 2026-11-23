@@ -5,6 +5,11 @@ pub fn py_strip(input: &str) -> &str {
     input.trim_matches(|c: char| c.is_whitespace() || matches!(c, '\x1c'..='\x1f' | '\u{0085}'))
 }
 
+/// Trim trailing characters matching Python's `str.rstrip()` semantics.
+pub fn py_rstrip(input: &str) -> &str {
+    input.trim_end_matches(|c: char| c.is_whitespace() || matches!(c, '\x1c'..='\x1f' | '\u{0085}'))
+}
+
 /// Extract the raw `#!` shebang header line from a byte buffer (`extract_shebang_from_buffer` parity).
 pub fn extract_shebang_from_buffer(buffer: &[u8]) -> Option<String> {
     if !buffer.starts_with(b"#!") {

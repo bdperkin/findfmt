@@ -10,6 +10,7 @@ use pyo3::types::PyDict;
 
 #[cfg(not(unix))]
 use crate::metadata::RawStat;
+use crate::walker_types::WalkOsError;
 
 pub(crate) struct PyHandles {
     pub path_cls: Py<PyAny>,
@@ -252,4 +253,45 @@ pub(crate) fn compute_relative_py<'py>(
         .resolve_relative
         .bind(py)
         .call1((path_obj, root_obj, prefix_arg))
+}
+
+pub(crate) fn deliver_walk_os_error(
+    py: Python<'_>,
+    handles: &PyHandles,
+    cb: &Py<PyAny>,
+    err: &WalkOsError,
+) -> PyResult<()> {
+    let filename_py = pathbuf_to_py_str(py, handles, &err.path)?;
+    let py_err = if let Some(code) = err.raw_errno {
+        #[cfg(windows)]
+        {
+            let _ = handles;
+            pyo3::exceptions::PyOSError::new_err((
+                0_i32,
+                err.message.clone(),
+                filename_py.unbind(),
+                code,
+            ))
+        }
+        #[cfg(not(windows))]
+        {
+            let msg_py = handles
+                .os_strerror
+                .bind(py)
+                .call1((code,))
+                .unwrap_or_else(|_| {
+                    err.message
+                        .as_str()
+                        .into_pyobject(py)
+                        .map_or_else(|_| py.None().into_bound(py), Bound::into_any)
+                });
+            pyo3::exceptions::PyOSError::new_err((code, msg_py.unbind(), filename_py.unbind()))
+        }
+    } else {
+        let base = pyo3::exceptions::PyOSError::new_err(err.message.clone());
+        let _ = base.value(py).setattr("filename", filename_py);
+        base
+    };
+    cb.bind(py).call1((py_err.value(py),))?;
+    Ok(())
 }

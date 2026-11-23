@@ -1,316 +1,120 @@
-//! Lossless PEP 383 `surrogateescape` (`u32`) gitignore-glob matcher for `-P` / `-I` (#582).
+//! Lossless PEP 383 `surrogateescape` (`u32`) gitignore-glob matcher (`pathspec` parity, #582).
 
 use std::path::{Component, Path};
 
+use crate::glob_nfa::{CompiledRuleU32, Inst, RuleKind, compile_gitignore_rule, fold_cp};
 use crate::walker_types::surrogateescape_codepoints;
 
-#[inline]
-fn fold_cp(cp: u32, ignore_case: bool) -> u32 {
-    if !ignore_case {
-        return cp;
-    }
-    // Python `re.IGNORECASE` treats Greek 'Σ' (0x03A3), 'σ' (0x03C3), and 'ς' (0x03C2) identically.
-    if cp == 0x03C2 {
-        return 0x03C3;
-    }
-    let Some(ch) = char::from_u32(cp) else {
-        return cp;
-    };
-    let mut lower = ch.to_lowercase();
-    let first = lower.next().unwrap_or(ch);
-    if lower.next().is_none() {
-        let lcp = u32::from(first);
-        if lcp == 0x03C2 { 0x03C3 } else { lcp }
-    } else {
-        cp
-    }
-}
-
-#[derive(Clone, Debug)]
-enum SegToken {
-    Star,
-    AnyOne,
-    Literal(u32),
-    Class {
-        negated: bool,
-        ranges: Vec<(u32, u32)>,
-    },
-}
-
-#[derive(Clone, Debug)]
-enum SegPat {
-    DoubleStar,
-    Seq(Vec<SegToken>),
-}
-
-#[derive(Clone, Debug)]
-struct CompiledRuleU32 {
-    negated: bool,
-    dir_only: bool,
-    anchored: bool,
-    match_all: bool,
-    segments: Vec<SegPat>,
-}
-
-struct InvalidGlob;
-
-fn try_parse_bracket(
-    chars: &[char],
-    start: usize,
-    ignore_case: bool,
-) -> Result<Option<(SegToken, usize)>, InvalidGlob> {
-    let mut idx = start + 1;
-    if idx >= chars.len() {
-        return Ok(None);
-    }
-    let mut negated = false;
-    if chars[idx] == '!' || chars[idx] == '^' {
-        negated = true;
-        idx += 1;
-    }
-    let first_item_idx = idx;
-    let mut items: Vec<u32> = Vec::new();
-    let mut ranges: Vec<(u32, u32)> = Vec::new();
-
-    while idx < chars.len() {
-        if chars[idx] == ']' && idx > first_item_idx {
-            for cp in items {
-                ranges.push((cp, cp));
-            }
-            return Ok(Some((SegToken::Class { negated, ranges }, idx + 1)));
+fn add_epsilon_states(
+    prog: &[Inst],
+    start_pc: usize,
+    at_end: bool,
+    out: &mut Vec<usize>,
+    visited: &mut [bool],
+    stack: &mut Vec<usize>,
+) -> bool {
+    stack.clear();
+    stack.push(start_pc);
+    while let Some(cur) = stack.pop() {
+        if cur >= prog.len() || visited[cur] {
+            continue;
         }
-        let lo_ch = if chars[idx] == '\\' {
-            idx += 1;
-            let Some(&esc) = chars.get(idx) else {
-                return Err(InvalidGlob);
-            };
-            idx += 1;
-            esc
-        } else {
-            let c = chars[idx];
-            idx += 1;
-            c
-        };
-
-        if idx + 1 < chars.len() && chars[idx] == '-' && chars[idx + 1] != ']' {
-            idx += 1; // consume '-'
-            let hi_ch = if chars[idx] == '\\' {
-                idx += 1;
-                let Some(&esc) = chars.get(idx) else {
-                    return Err(InvalidGlob);
-                };
-                idx += 1;
-                esc
-            } else {
-                let c = chars[idx];
-                idx += 1;
-                c
-            };
-            let lo_raw = u32::from(lo_ch);
-            let hi_raw = u32::from(hi_ch);
-            if lo_raw > hi_raw {
-                return Err(InvalidGlob);
+        visited[cur] = true;
+        match prog[cur] {
+            Inst::Match => return true,
+            Inst::Split(a, b) => {
+                stack.push(b);
+                stack.push(a);
             }
-            if ignore_case && hi_raw.saturating_sub(lo_raw) <= 256 {
-                for raw_cp in lo_raw..=hi_raw {
-                    let f = fold_cp(raw_cp, true);
-                    ranges.push((f, f));
+            Inst::End => {
+                if at_end {
+                    stack.push(cur + 1);
                 }
-            } else {
-                let flo = fold_cp(lo_raw, ignore_case);
-                let fhi = fold_cp(hi_raw, ignore_case);
-                ranges.push((flo.min(fhi), flo.max(fhi)));
             }
-        } else {
-            items.push(fold_cp(u32::from(lo_ch), ignore_case));
-        }
-    }
-    // Unclosed '[' is treated as a literal '[' (`fnmatch` / `pathspec` parity).
-    Ok(None)
-}
-
-fn parse_segment_tokens(seg: &str, ignore_case: bool) -> Result<SegPat, InvalidGlob> {
-    if seg == "**" {
-        return Ok(SegPat::DoubleStar);
-    }
-    let chars: Vec<char> = seg.chars().collect();
-    let mut tokens = Vec::new();
-    let mut i = 0_usize;
-    while i < chars.len() {
-        match chars[i] {
-            '\\' => {
-                i += 1;
-                let Some(&esc) = chars.get(i) else {
-                    return Err(InvalidGlob);
-                };
-                tokens.push(SegToken::Literal(fold_cp(u32::from(esc), ignore_case)));
-                i += 1;
-            }
-            '*' => {
-                if !matches!(tokens.last(), Some(SegToken::Star)) {
-                    tokens.push(SegToken::Star);
-                }
-                i += 1;
-            }
-            '?' => {
-                tokens.push(SegToken::AnyOne);
-                i += 1;
-            }
-            '[' => match try_parse_bracket(&chars, i, ignore_case)? {
-                Some((cls_tok, next_i)) => {
-                    tokens.push(cls_tok);
-                    i = next_i;
-                }
-                None => {
-                    tokens.push(SegToken::Literal(u32::from('[')));
-                    i += 1;
-                }
-            },
-            ch => {
-                tokens.push(SegToken::Literal(fold_cp(u32::from(ch), ignore_case)));
-                i += 1;
+            Inst::AnyNonNewline | Inst::NonSlash | Inst::Char(_) | Inst::Class { .. } => {
+                out.push(cur);
             }
         }
     }
-    Ok(SegPat::Seq(tokens))
+    false
 }
 
-fn compile_rule_line(line: &str, ignore_case: bool) -> Result<Option<CompiledRuleU32>, String> {
-    if line.is_empty() || line.starts_with('#') {
-        return Ok(None);
-    }
-    let (negated, rest) = match line.strip_prefix('!') {
-        Some(r) => (true, r),
-        None => (false, line),
-    };
-    if rest.is_empty() {
-        return Err(format!("Invalid gitignore pattern: {line:?}"));
-    }
-    if rest == "/" {
-        return Ok(Some(CompiledRuleU32 {
-            negated,
-            dir_only: false,
-            anchored: false,
-            match_all: true,
-            segments: Vec::new(),
-        }));
-    }
-    if rest.chars().all(|c| c == '/') {
-        return Ok(None);
-    }
-    let dir_only = rest.ends_with('/');
-    let without_trailing = rest.trim_end_matches('/');
-    let anchored = without_trailing.contains('/');
-    let body = without_trailing
-        .strip_prefix('/')
-        .unwrap_or(without_trailing);
+fn eval_rule(kind: &RuleKind, text: &[u32], ignore_case: bool) -> bool {
+    match kind {
+        RuleKind::AnyDot => text.iter().any(|&cp| cp != u32::from('\n')),
+        RuleKind::ContainsSlash => text.contains(&u32::from('/')),
+        RuleKind::Nfa(prog) => {
+            let mut curr = Vec::with_capacity(prog.len());
+            let mut next = Vec::with_capacity(prog.len());
+            let mut visited = vec![false; prog.len()];
+            let mut stack = Vec::with_capacity(prog.len());
 
-    let mut segments = Vec::new();
-    for raw_seg in body.split('/') {
-        let seg_pat = parse_segment_tokens(raw_seg, ignore_case)
-            .map_err(|_| format!("Invalid gitignore pattern: {line:?}"))?;
-        segments.push(seg_pat);
-    }
-    Ok(Some(CompiledRuleU32 {
-        negated,
-        dir_only,
-        anchored,
-        match_all: false,
-        segments,
-    }))
-}
-
-fn match_tokens_slice(tokens: &[SegToken], text: &[u32], ignore_case: bool) -> bool {
-    let mut ti = 0_usize;
-    let mut si = 0_usize;
-    let mut star_ti: Option<usize> = None;
-    let mut star_si = 0_usize;
-
-    while si < text.len() {
-        let cp = fold_cp(text[si], ignore_case);
-        if let Some(tok) = tokens.get(ti) {
-            match tok {
-                SegToken::Star => {
-                    star_ti = Some(ti);
-                    star_si = si;
-                    ti += 1;
-                    continue;
+            if add_epsilon_states(prog, 0, text.is_empty(), &mut curr, &mut visited, &mut stack) {
+                return true;
+            }
+            for (idx, &raw_cp) in text.iter().enumerate() {
+                if curr.is_empty() {
+                    return false;
                 }
-                SegToken::AnyOne => {
-                    ti += 1;
-                    si += 1;
-                    continue;
-                }
-                SegToken::Literal(exp) if *exp == cp => {
-                    ti += 1;
-                    si += 1;
-                    continue;
-                }
-                SegToken::Class { negated, ranges } => {
-                    let hit = ranges.iter().any(|&(lo, hi)| cp >= lo && cp <= hi);
-                    if hit != *negated {
-                        ti += 1;
-                        si += 1;
-                        continue;
+                let next_at_end = idx + 1 == text.len();
+                let folded = fold_cp(raw_cp, ignore_case);
+                next.clear();
+                visited.fill(false);
+                for &pc in &curr {
+                    let ok = match prog[pc] {
+                        Inst::AnyNonNewline => raw_cp != u32::from('\n'),
+                        Inst::NonSlash => raw_cp != u32::from('/'),
+                        Inst::Char(exp) => folded == exp,
+                        Inst::Class {
+                            negated,
+                            ref ranges,
+                        } => ranges.iter().any(|&(lo, hi)| folded >= lo && folded <= hi) != negated,
+                        Inst::Split(_, _) | Inst::End | Inst::Match => false,
+                    };
+                    if ok
+                        && add_epsilon_states(
+                            prog,
+                            pc + 1,
+                            next_at_end,
+                            &mut next,
+                            &mut visited,
+                            &mut stack,
+                        )
+                    {
+                        return true;
                     }
                 }
-                SegToken::Literal(_) => {}
+                std::mem::swap(&mut curr, &mut next);
             }
-        }
-        if let Some(st) = star_ti {
-            star_si += 1;
-            si = star_si;
-            ti = st + 1;
-        } else {
-            return false;
+            false
         }
     }
-    while matches!(tokens.get(ti), Some(SegToken::Star)) {
-        ti += 1;
-    }
-    ti == tokens.len()
 }
 
-fn match_seg_pats(pats: &[SegPat], segs: &[Vec<u32>], ignore_case: bool) -> bool {
-    let mut pi = 0_usize;
-    let mut si = 0_usize;
-    let mut dstar_pi: Option<usize> = None;
-    let mut dstar_si = 0_usize;
-
-    while si < segs.len() {
-        if let Some(pat) = pats.get(pi) {
-            match pat {
-                SegPat::DoubleStar => {
-                    dstar_pi = Some(pi);
-                    dstar_si = si;
-                    pi += 1;
-                    continue;
-                }
-                SegPat::Seq(toks)
-                    if !segs[si].is_empty() && match_tokens_slice(toks, &segs[si], ignore_case) =>
-                {
-                    pi += 1;
-                    si += 1;
-                    continue;
-                }
-                SegPat::Seq(_) => {}
-            }
-        }
-        if let Some(dp) = dstar_pi {
-            dstar_si += 1;
-            si = dstar_si;
-            pi = dp + 1;
+/// Build a `/`‑joined PEP 383 `u32` buffer from `segs`, appending `/` when `is_dir` is `true`.
+pub fn build_target_u32(segs: &[Vec<u32>], is_dir: bool) -> Vec<u32> {
+    if segs.is_empty() {
+        return if is_dir {
+            vec![u32::from('/')]
         } else {
-            return false;
+            Vec::new()
+        };
+    }
+    let cap: usize = segs.iter().map(Vec::len).sum::<usize>() + segs.len();
+    let mut out = Vec::with_capacity(cap);
+    for (idx, seg) in segs.iter().enumerate() {
+        if idx > 0 {
+            out.push(u32::from('/'));
         }
+        out.extend_from_slice(seg);
     }
-    while matches!(pats.get(pi), Some(SegPat::DoubleStar)) {
-        pi += 1;
+    if is_dir {
+        out.push(u32::from('/'));
     }
-    pi == pats.len()
+    out
 }
 
-/// Compiled sequence of gitignore-style glob rules operating on PEP 383 `u32` segments.
+/// Compiled sequence of `GitIgnoreBasicPattern` rules operating on PEP 383 `u32` codepoints.
 #[derive(Clone, Debug, Default)]
 pub struct GlobSpecU32 {
     rules: Vec<CompiledRuleU32>,
@@ -325,52 +129,48 @@ impl GlobSpecU32 {
         }
         let mut rules = Vec::with_capacity(lines.len());
         for line in lines {
-            if let Some(compiled) = compile_rule_line(line, ignore_case)? {
+            if let Some(compiled) = compile_gitignore_rule(line, ignore_case)? {
                 rules.push(compiled);
             }
         }
         Ok(Some(Self { rules, ignore_case }))
     }
 
-    /// Evaluate `spec.match_file` semantics on `segs` with `is_dir` trailing-slash parity.
-    pub fn matches_segments(&self, segs: &[Vec<u32>], is_dir: bool) -> bool {
-        if segs.is_empty() {
-            return false;
-        }
-        let mut matched = false;
-        for rule in &self.rules {
-            if self.rule_hits(rule, segs, is_dir) {
-                matched = !rule.negated;
+    /// Compile lines leniently for fuzzing / `GitignoreMatcher::from_text`, counting invalid lines.
+    pub fn from_lines_lenient<'a, I>(lines: I, ignore_case: bool) -> (Self, usize)
+    where
+        I: IntoIterator<Item = &'a str>,
+    {
+        let mut rules = Vec::new();
+        let mut errors = 0_usize;
+        for line in lines {
+            match compile_gitignore_rule(line, ignore_case) {
+                Ok(Some(compiled)) => rules.push(compiled),
+                Ok(None) => {}
+                Err(_) => errors += 1,
             }
         }
-        matched
+        (Self { rules, ignore_case }, errors)
     }
 
-    fn rule_hits(&self, rule: &CompiledRuleU32, segs: &[Vec<u32>], is_dir: bool) -> bool {
-        if rule.match_all {
-            return true;
+    /// Evaluate `spec.check_file` tri-state semantics (`None`, `Some(true)`, `Some(false)`).
+    pub fn check_segments(&self, segs: &[Vec<u32>], is_dir: bool) -> Option<bool> {
+        let target = build_target_u32(segs, is_dir);
+        if target.is_empty() {
+            return None;
         }
-        for p in 1..=segs.len() {
-            let prefix_is_dir = if p < segs.len() { true } else { is_dir };
-            if rule.dir_only && !prefix_is_dir {
-                continue;
-            }
-            let prefix = &segs[..p];
-            if rule.anchored {
-                if match_seg_pats(&rule.segments, prefix, self.ignore_case) {
-                    return true;
-                }
-            } else if prefix.last().is_some_and(|last_seg| {
-                match_seg_pats(
-                    &rule.segments,
-                    std::slice::from_ref(last_seg),
-                    self.ignore_case,
-                )
-            }) {
-                return true;
+        let mut state: Option<bool> = None;
+        for rule in &self.rules {
+            if eval_rule(&rule.kind, &target, self.ignore_case) {
+                state = Some(!rule.negated);
             }
         }
-        false
+        state
+    }
+
+    /// Evaluate `spec.match_file` boolean semantics on `segs` with `is_dir` trailing-slash parity.
+    pub fn matches_segments(&self, segs: &[Vec<u32>], is_dir: bool) -> bool {
+        self.check_segments(segs, is_dir) == Some(true)
     }
 }
 

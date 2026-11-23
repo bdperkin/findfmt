@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
+from findfmt.classifier import _resolve_relative
 from findfmt.traversal._pruning import (
     _can_skip_entry_by_tags,
     _check_visited_or_memo,
@@ -19,7 +20,7 @@ from findfmt.traversal.ignore import load_child_specs
 
 if TYPE_CHECKING:
     import os
-    from collections.abc import Callable, Sequence
+    from collections.abc import Callable, MutableMapping, Sequence
     from pathlib import Path
 
     import pathspec
@@ -50,7 +51,7 @@ class DescendantSearchState:
     filter_entry_fn: FilterEntryFn
     classify_fn: Callable[..., FileInfo]
     active_visited: set[tuple[int, int]]
-    active_memo: dict[tuple[int, int], bool]
+    active_memo: MutableMapping[Any, bool]
     frames: list[_PruneFrame]
     on_error: Callable[[OSError], None] | None
 
@@ -114,6 +115,21 @@ def inspect_entries_for_match(
     return subdirs, False
 
 
+def _make_memo_key(
+    dir_key: tuple[int, int],
+    target: PruneStepTarget,
+    state: DescendantSearchState,
+) -> tuple[int, int] | tuple[int, int, Path]:
+    """Build a root-relative path-scoped memo key when symlink aliases can diverge."""
+    config = state.config
+    matcher = state.matcher
+    has_patterns = matcher is not None and (matcher.has_includes or matcher.has_excludes)
+    if config.follow_symlinks and (has_patterns or bool(target.specs) or config.gitignore_file is not None):
+        return (*dir_key, _resolve_relative(target.directory, target.base_root))
+
+    return dir_key
+
+
 def _step_prune_directory(target: PruneStepTarget, state: DescendantSearchState) -> bool:
     """Inspect a single directory for matching files or push its subdirs onto stack."""
     try:
@@ -122,14 +138,15 @@ def _step_prune_directory(target: PruneStepTarget, state: DescendantSearchState)
     except (OSError, RuntimeError):
         return False
 
-    cached, val = _check_visited_or_memo(dir_key, state.active_visited, state.active_memo)
+    memo_key = _make_memo_key(dir_key, target, state)
+    cached, val = _check_visited_or_memo(dir_key, memo_key, state.active_visited, state.active_memo)
     if cached:
         return val
 
     entries = _scan_sorted_entries(
         target.directory,
         state.active_memo,
-        dir_key,
+        memo_key,
         on_error=state.on_error,
     )
     if entries is None:
@@ -143,12 +160,12 @@ def _step_prune_directory(target: PruneStepTarget, state: DescendantSearchState)
         state=state,
     )
     if found:
-        state.active_memo[dir_key] = True
+        state.active_memo[memo_key] = True
         return True
 
     if not subdirs or not check_depth_limit(target.current_depth, state.config.max_depth):
         if not subdirs:
-            state.active_memo[dir_key] = False
+            state.active_memo[memo_key] = False
 
         return False
 
@@ -157,6 +174,7 @@ def _step_prune_directory(target: PruneStepTarget, state: DescendantSearchState)
     state.frames.append(
         _PruneFrame(
             dir_key=dir_key,
+            memo_key=memo_key,
             subdirs=subdirs,
             specs=target.specs,
             depth=target.current_depth,
@@ -204,11 +222,11 @@ def search_matching_descendants(target: PruneStepTarget, state: DescendantSearch
                 state.frames.pop()
                 state.active_visited.discard(top.dir_key)
                 if state.config.max_depth is None:
-                    state.active_memo[top.dir_key] = False
+                    state.active_memo[top.memo_key] = False
             elif _step_prune_subdir(top, state):
                 if state.config.max_depth is None:
                     for frame in state.frames:
-                        state.active_memo[frame.dir_key] = True
+                        state.active_memo[frame.memo_key] = True
 
                 return True
     finally:

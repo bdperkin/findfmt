@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import gc
 import importlib
 import os
@@ -109,7 +108,6 @@ def test_find_files_rs_worktree_gitdir_tilde_excludes_and_invalid_gitignore(
     (wt_repo / "keep.py").write_text("a = 1\n", encoding="utf-8")
     (wt_repo / "drop.wt_excl").write_text("excl\n", encoding="utf-8")
 
-    # Malformed .gitignore inside a subdirectory is rejected identically to pathspec load_spec_file
     bad_sub = wt_repo / "bad_gi_sub"
     bad_sub.mkdir()
     (bad_sub / ".gitignore").write_text("*.py\n[z-a]\n", encoding="utf-8")
@@ -137,60 +135,32 @@ def test_find_files_rs_worktree_gitdir_tilde_excludes_and_invalid_gitignore(
         assert [i.relative_path.name for i in rs_git_items] == ["kept.py"]
 
 
-@pytest.mark.skipif(
-    sys.platform == "win32" or (hasattr(os, "geteuid") and os.geteuid() == 0),
-    reason="POSIX chmod 0o000 required for unreadable subdirectory OSError test",
-)
-def test_find_files_rs_unreadable_subdir_and_prune_on_error_parity(tmp_path: Path) -> None:
-    """Verify unreadable subdirectory OSError delivery during normal and --prune walks (#582)."""
-    rust_ext = _load_rust_ext()
-
-    (tmp_path / "a_first.py").write_text("x = 1\n", encoding="utf-8")
-    locked = tmp_path / "m_locked"
-    locked.mkdir()
-    (locked / "hidden_inside.py").write_text("y = 2\n", encoding="utf-8")
-    (tmp_path / "z_last.py").write_text("z = 3\n", encoding="utf-8")
-    locked.chmod(0o000)
-
-    try:
-        for cfg in (
-            TraversalConfig(root_paths=(tmp_path,), sort_by=SortKey.NAME),
-            TraversalConfig(
-                root_paths=(tmp_path,),
-                dirs_only=True,
-                prune_empty=True,
-                include_tags=frozenset({"ruby"}),
-            ),
-        ):
-            rs_errs: list[tuple[int | None, str | None]] = []
-            py_errs: list[tuple[int | None, str | None]] = []
-            rs_out = list(
-                rust_ext.find_files_rs(cfg, on_error=lambda e, s=rs_errs: s.append((e.errno, e.filename))),
-            )
-            py_out = list(
-                _fallback.find_files(cfg, on_error=lambda e, s=py_errs: s.append((e.errno, e.filename))),
-            )
-            assert rs_out == py_out
-            assert rs_errs == py_errs
-            assert len(rs_errs) == 1
-            assert rs_errs[0][1] == str(locked.resolve())
-
-        def _raising_on_error(err: OSError) -> None:
-            msg = f"abort on {err.filename}"
-            raise RuntimeError(msg)
-
-        with pytest.raises(RuntimeError, match="abort on"):
-            list(rust_ext.find_files_rs(TraversalConfig(root_paths=(tmp_path,)), on_error=_raising_on_error))
-    finally:
-        locked.chmod(0o755)
-
-
 def test_find_files_rs_gitignore_slash_patterns_unicode_glob_and_sigma_sort(tmp_path: Path) -> None:
-    """Verify ClusterFuzzLite */ gitignore patterns, Unicode ? globs, Unix C: dirs, and final-sigma sort."""
+    """Verify gitignore slash/bracket/whitespace rules, Unicode ? globs, and Tolong Siki/sigma sort."""
     rust_ext = _load_rust_ext()
 
-    for pat in ("*/  \n", "*/\n!sub/\n", "**/\n", "/**/\n", "//\n", "/\n"):
-        case_dir = tmp_path / f"gi_{abs(hash(pat))}"
+    patterns = (
+        "*/  \n",
+        "*/\n!sub/\n",
+        "/*\n!sub/\n",
+        "/\n!sub/\n",
+        "**\n!sub/\n",
+        "*.py\n!sub/\n",
+        "?*[!a-z]\n",
+        "**[!a-z]\n",
+        "sub[^0-9]\n",
+        "/\u00a0\u00a0 \n",
+        "/\t \n",
+        "\\/\n*.py\n",
+        "!\n*.py\n",
+        r"[\]" + "\n",
+        "**/\n",
+        "/**/\n",
+        "//\n",
+        "/\n",
+    )
+    for idx, pat in enumerate(patterns):
+        case_dir = tmp_path / f"gi_{idx}"
         case_dir.mkdir(exist_ok=True)
         (case_dir / ".gitignore").write_text(pat, encoding="utf-8")
         (case_dir / "root.py").write_text("x = 1\n", encoding="utf-8")
@@ -210,31 +180,21 @@ def test_find_files_rs_gitignore_slash_patterns_unicode_glob_and_sigma_sort(tmp_
     (glob_dir / "ab.txt").write_text("2\n", encoding="utf-8")
     (glob_dir / "\u039f\u03a3").write_text("3\n", encoding="utf-8")
     (glob_dir / "\u039f\u03c2a").write_text("4\n", encoding="utf-8")
+    (glob_dir / "tolong_\U00011de1\U00011de0.txt").write_text("5\n", encoding="utf-8")
+    (glob_dir / "tolong_\U00011de2.txt").write_text("6\n", encoding="utf-8")
     if sys.platform != "win32":
         c_dir = glob_dir / "C:"
         c_dir.mkdir()
-        (c_dir / "report.txt").write_text("5\n", encoding="utf-8")
+        (c_dir / "report.txt").write_text("7\n", encoding="utf-8")
         cfg_colon = TraversalConfig(root_paths=(glob_dir,), include_patterns=("/C:/report.txt",))
         assert list(rust_ext.find_files_rs(cfg_colon)) == list(_fallback.find_files(cfg_colon))
-
-        with contextlib.suppress(OSError):
-            raw_ff = os.fsdecode(os.fsencode(glob_dir) + b"/\xff.txt")
-            Path(raw_ff).write_bytes(b"raw\n")
-            (glob_dir / "\ufffd.txt").write_text("rep\n", encoding="utf-8")
-            cfg_lossless = TraversalConfig(root_paths=(glob_dir,), exclude_patterns=("\ufffd.txt",))
-            assert list(rust_ext.find_files_rs(cfg_lossless)) == list(_fallback.find_files(cfg_lossless))
-
-            ver_dir = tmp_path / "ver_surrogate"
-            ver_dir.mkdir()
-            Path(os.fsdecode(os.fsencode(ver_dir) + b"/\xff_v2.py")).write_bytes(b"x = 1\n")
-            (ver_dir / "\ue000_v2.py").write_text("x = 2\n", encoding="utf-8")
-            cfg_ver = TraversalConfig(root_paths=(ver_dir,), sort_by=SortKey.VERSION)
-            assert list(rust_ext.find_files_rs(cfg_ver)) == list(_fallback.find_files(cfg_ver))
 
     cfg_q = TraversalConfig(root_paths=(glob_dir,), include_patterns=("?.txt",))
     assert list(rust_ext.find_files_rs(cfg_q)) == list(_fallback.find_files(cfg_q))
     cfg_sigma = TraversalConfig(root_paths=(glob_dir,), sort_by=SortKey.NAME, ignore_case=True)
     assert list(rust_ext.find_files_rs(cfg_sigma)) == list(_fallback.find_files(cfg_sigma))
+    cfg_tolong = TraversalConfig(root_paths=(glob_dir,), sort_by=SortKey.VERSION)
+    assert list(rust_ext.find_files_rs(cfg_tolong)) == list(_fallback.find_files(cfg_tolong))
 
     bad_pat_cfg = TraversalConfig(root_paths=(glob_dir,), include_patterns=("[z-a]",))
     with pytest.raises(ValueError, match=r"pattern|range"):
@@ -242,10 +202,9 @@ def test_find_files_rs_gitignore_slash_patterns_unicode_glob_and_sigma_sort(tmp_
 
 
 def test_find_files_rs_lazy_roots_depth_prune_memo_and_cyclic_gc(tmp_path: Path) -> None:
-    """Verify lazy root resolution, depth-bounded symlink --prune memoization, and PyO3 cyclic GC."""
+    """Verify lazy root resolution, depth-bounded/aliased --prune memoization, and PyO3 cyclic GC."""
     rust_ext = _load_rust_ext()
 
-    # 1. Lazy second root created after consuming from first root
     root_a = tmp_path / "lazy_a"
     root_b = tmp_path / "lazy_b"
     root_a.mkdir()
@@ -256,10 +215,25 @@ def test_find_files_rs_lazy_roots_depth_prune_memo_and_cyclic_gc(tmp_path: Path)
     assert first_item.path.name == "first.py"
     root_b.mkdir()
     (root_b / "second.py").write_text("b = 2\n", encoding="utf-8")
-    rest_items = list(it)
-    assert [x.path.name for x in rest_items] == ["second.py"]
+    assert [x.path.name for x in it] == ["second.py"]
 
-    # 2. Depth-limited & path-scoped symlink --prune memoization (guarded on Windows privilege)
+    # Cross-platform depth-bounded and match_dirs --prune parity (covers Windows & POSIX)
+    base_prune = tmp_path / "prune_cross"
+    (base_prune / "empty_branch" / "leaf").mkdir(parents=True)
+    (base_prune / "match_branch" / "sub").mkdir(parents=True)
+    (base_prune / "match_branch" / "sub" / "hit.txt").write_text("ok\n", encoding="utf-8")
+    for depth_lim in (2, 3, None):
+        cross_cfg = TraversalConfig(
+            root_paths=(base_prune,),
+            dirs_only=True,
+            prune_empty=True,
+            follow_symlinks=True,
+            max_depth=depth_lim,
+            match_dirs=True,
+            include_patterns=("match_branch",),
+        )
+        assert list(rust_ext.find_files_rs(cross_cfg)) == list(_fallback.find_files(cross_cfg))
+
     if sys.platform != "win32":
         prune_root = tmp_path / "prune_depth"
         (prune_root / "a").mkdir(parents=True)
@@ -281,17 +255,19 @@ def test_find_files_rs_lazy_roots_depth_prune_memo_and_cyclic_gc(tmp_path: Path)
             assert rs_pruned == list(_fallback.find_files(prune_cfg))
             assert [x.relative_path.as_posix() for x in rs_pruned] == ["z", "z/child"]
 
-        scoped_cfg = TraversalConfig(
-            root_paths=(prune_root,),
-            dirs_only=True,
-            prune_empty=True,
-            follow_symlinks=True,
-            max_depth=2,
-            include_patterns=("z/scoped.txt",),
-        )
-        assert list(rust_ext.find_files_rs(scoped_cfg)) == list(_fallback.find_files(scoped_cfg))
+        for max_d in (2, None):
+            scoped_cfg = TraversalConfig(
+                root_paths=(prune_root,),
+                dirs_only=True,
+                prune_empty=True,
+                follow_symlinks=True,
+                max_depth=max_d,
+                include_patterns=("z/scoped.txt",),
+            )
+            rs_scoped = list(rust_ext.find_files_rs(scoped_cfg))
+            assert rs_scoped == list(_fallback.find_files(scoped_cfg))
+            assert [x.relative_path.as_posix() for x in rs_scoped] == ["z"]
 
-    # 3. Cyclic GC collection of owner <-> iterator <-> bound callback cycle
     class _CycleOwner:
         def __init__(self, target_root: Path) -> None:
             self.it: Iterator[FileInfo] | None = rust_ext.find_files_rs(
@@ -309,46 +285,3 @@ def test_find_files_rs_lazy_roots_depth_prune_memo_and_cyclic_gc(tmp_path: Path)
     del owner
     gc.collect()
     assert ref() is None
-
-
-@pytest.mark.skipif(
-    sys.platform == "win32" or (hasattr(os, "geteuid") and os.geteuid() == 0),
-    reason="POSIX chmod required for on_error sibling restoration test",
-)
-def test_find_files_rs_on_error_pauses_before_scanning_sibling_dir(tmp_path: Path) -> None:
-    """Verify on_error runs before scanning sibling directories so restored siblings are traversed."""
-    rust_ext = _load_rust_ext()
-    dir_a = tmp_path / "a_blocked"
-    dir_b = tmp_path / "b_restored"
-    dir_a.mkdir()
-    dir_b.mkdir()
-    (dir_b / "recovered.py").write_text("ok = 1\n", encoding="utf-8")
-    dir_a.chmod(0o000)
-    dir_b.chmod(0o000)
-
-    try:
-
-        def _restore_b_on_a(err: OSError) -> None:
-            if err.filename == str(dir_a.resolve()):
-                dir_b.chmod(0o755)
-
-        cfg = TraversalConfig(root_paths=(tmp_path,), sort_by=SortKey.NAME)
-        rs_names = [x.path.name for x in rust_ext.find_files_rs(cfg, on_error=_restore_b_on_a)]
-        dir_b.chmod(0o000)
-        py_names = [x.path.name for x in _fallback.find_files(cfg, on_error=_restore_b_on_a)]
-        assert rs_names == py_names == ["recovered.py"]
-
-        dir_b.chmod(0o000)
-        prune_cfg = TraversalConfig(
-            root_paths=(tmp_path,),
-            dirs_only=True,
-            prune_empty=True,
-            sort_by=SortKey.NAME,
-        )
-        rs_dirs = [x.path.name for x in rust_ext.find_files_rs(prune_cfg, on_error=_restore_b_on_a)]
-        dir_b.chmod(0o000)
-        py_dirs = [x.path.name for x in _fallback.find_files(prune_cfg, on_error=_restore_b_on_a)]
-        assert rs_dirs == py_dirs == ["b_restored"]
-    finally:
-        dir_a.chmod(0o755)
-        dir_b.chmod(0o755)

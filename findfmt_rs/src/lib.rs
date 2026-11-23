@@ -9,6 +9,7 @@
 pub mod classifier;
 pub mod fuzz_entrypoints;
 pub mod gitignore;
+mod glob_nfa;
 pub mod glob_u32;
 pub mod header;
 pub mod ignore_stack;
@@ -23,8 +24,10 @@ pub mod shebang;
 pub mod sorting;
 pub mod tags;
 pub mod walker;
+mod walker_descent;
 pub mod walker_filter;
 pub mod walker_prune;
+mod walker_prune_inspect;
 pub mod walker_sort;
 mod walker_step;
 pub mod walker_types;

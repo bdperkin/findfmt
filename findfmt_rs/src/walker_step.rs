@@ -165,11 +165,16 @@ pub(crate) fn drain_candidate_batch(
                 }
                 let child_specs =
                     load_child_specs(&cand.0, &batch.specs, config.respect_gitignore);
+                let child_inh = config.matcher.should_inherit_match(
+                    &cand.0,
+                    Some(&state.base_root),
+                    batch.inherited_match,
+                );
                 let mut search = PruneSearch::new(
                     cand.0.clone(),
                     child_specs,
                     batch.depth + 1,
-                    batch.inherited_match,
+                    child_inh,
                 );
                 match search.poll(
                     &state.base_root,

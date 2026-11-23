@@ -200,14 +200,17 @@ pub(crate) fn resolve_single_root_py<'py>(
         None => (None, None),
     };
 
-    let global_gitignore = if let Some(ref rpb) = resolved_pb.as_ref().filter(|_| respect_gitignore)
-    {
-        let base_dir = find_git_repo_root(rpb).unwrap_or_else(|| (*rpb).clone());
-        pathbuf_to_py_path(py, handles, &base_dir)
-            .ok()
-            .and_then(|bp| handles.find_global_gitignore_path.bind(py).call1((bp,)).ok())
-            .filter(|res| !res.is_none())
-            .and_then(|res| py_path_to_pathbuf(py, handles, &res).ok().map(|t| t.0))
+    let global_gitignore = if let Some(rpb) = resolved_pb.as_ref().filter(|_| respect_gitignore) {
+        let base_dir = find_git_repo_root(rpb).unwrap_or_else(|| rpb.clone());
+        match pathbuf_to_py_path(py, handles, &base_dir).ok() {
+            None => None,
+            Some(bp) => match handles.find_global_gitignore_path.bind(py).call1((bp,)) {
+                Ok(res) if res.is_none() => None,
+                Ok(res) => py_path_to_pathbuf(py, handles, &res).ok().map(|t| t.0),
+                Err(err) if err.is_instance_of::<pyo3::exceptions::PyException>(py) => None,
+                Err(err) => return Err(err),
+            },
+        }
     } else {
         None
     };

@@ -1,12 +1,11 @@
-//! Gitignore line normalization (`#354`) and panic-free `ignore` / `globset` matching (#582, #585).
+//! Gitignore line normalization (`#354`) and panic-free `pathspec` / `globset` matching (#582, #585).
 
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 
 use globset::{GlobBuilder, GlobMatcher};
-use ignore::Match;
-use ignore::gitignore::{Gitignore, GitignoreBuilder, Glob};
 
+use crate::glob_u32::{GlobSpecU32, path_to_u32_segments};
 use crate::shebang::py_strip;
 
 /// Trim a `.gitignore` pattern line preserving significant leading and `\ `-escaped trailing spaces.
@@ -43,17 +42,6 @@ pub fn trim_gitignore_line(raw_line: &str) -> &str {
 /// Mirrors `if line.strip() and not line.startswith("#"):` in `src/findfmt/traversal/ignore.py`.
 pub fn is_active_gitignore_line(trimmed_line: &str) -> bool {
     !py_strip(trimmed_line).is_empty() && !trimmed_line.starts_with('#')
-}
-
-/// Return `true` when `trimmed_line` ends with an odd number of trailing backslashes (invalid escape).
-fn has_dangling_trailing_backslash(trimmed_line: &str) -> bool {
-    let trailing_slashes = trimmed_line
-        .as_bytes()
-        .iter()
-        .rev()
-        .take_while(|&&b| b == b'\\')
-        .count();
-    trailing_slashes % 2 == 1
 }
 
 /// Split raw text across universal newlines (`\r\n`, `\n`, and standalone `\r`).
@@ -105,29 +93,11 @@ fn normalize_relative_components(stripped: &Path) -> PathBuf {
     clean
 }
 
-/// Evaluate `gi` against `clean` and its non-empty relative parent directories (skipping `""`).
-fn matched_non_empty_ancestors<'a>(gi: &'a Gitignore, clean: &Path, is_dir: bool) -> Match<&'a Glob> {
-    let direct = gi.matched(clean, is_dir);
-    if !direct.is_none() {
-        return direct;
-    }
-    for parent in clean.ancestors().skip(1) {
-        if parent.as_os_str().is_empty() {
-            break;
-        }
-        let parent_match = gi.matched(parent, true);
-        if !parent_match.is_none() {
-            return parent_match;
-        }
-    }
-    Match::None
-}
-
-/// Compiled `.gitignore` specification bound to a directory root.
+/// Compiled `.gitignore` specification bound to a directory root (`pathspec` `"gitignore"` parity).
 #[derive(Clone, Debug)]
 pub struct GitignoreMatcher {
     root: PathBuf,
-    inner: Gitignore,
+    spec: GlobSpecU32,
 }
 
 impl GitignoreMatcher {
@@ -137,51 +107,20 @@ impl GitignoreMatcher {
     }
 
     fn compile_internal(root: &Path, content: &str) -> ((Self, usize), usize) {
-        let mut builder = GitignoreBuilder::new(Path::new(""));
-        let mut errors = 0_usize;
-        let mut active_lines = 0_usize;
+        let mut active: Vec<&str> = Vec::new();
         for raw_line in split_universal_lines(content) {
             let trimmed = trim_gitignore_line(raw_line);
-            if !is_active_gitignore_line(trimmed) {
-                continue;
-            }
-            active_lines += 1;
-            if has_dangling_trailing_backslash(trimmed) {
-                errors += 1;
-                continue;
-            }
-            // Mirror `pathspec` GitIgnoreBasicPattern slash-only semantics:
-            // `/` matches everything (`**`), `!/` whitelists everything (`!**`),
-            // while multi-slash `//`+ or `!//`+ are valid no-op rules.
-            let normalized = if trimmed == "/" {
-                Some("**")
-            } else if trimmed == "!/" {
-                Some("!**")
-            } else if trimmed.chars().all(|c| c == '/')
-                || trimmed
-                    .strip_prefix('!')
-                    .is_some_and(|rest| !rest.is_empty() && rest.chars().all(|c| c == '/'))
-            {
-                None
-            } else {
-                Some(trimmed)
-            };
-            if normalized.is_some_and(|rule| builder.add_line(None, rule).is_err()) {
-                errors += 1;
+            if is_active_gitignore_line(trimmed) {
+                active.push(trimmed);
             }
         }
-        let inner = match builder.build() {
-            Ok(gi) => gi,
-            Err(_) => {
-                errors += 1;
-                Gitignore::empty()
-            }
-        };
+        let active_lines = active.len();
+        let (spec, errors) = GlobSpecU32::from_lines_lenient(active, false);
         (
             (
                 Self {
                     root: root.to_path_buf(),
-                    inner,
+                    spec,
                 },
                 errors,
             ),
@@ -222,11 +161,8 @@ impl GitignoreMatcher {
         if clean.as_os_str().is_empty() {
             return None;
         }
-        match matched_non_empty_ancestors(&self.inner, &clean, is_dir) {
-            Match::Ignore(_) => Some(true),
-            Match::Whitelist(_) => Some(false),
-            Match::None => None,
-        }
+        let (segs, _) = path_to_u32_segments(&clean, None);
+        self.spec.check_segments(&segs, is_dir)
     }
 
     /// Evaluate whether `candidate` (or any parent directory under `root`) is ignored.
@@ -236,10 +172,8 @@ impl GitignoreMatcher {
         if clean.as_os_str().is_empty() {
             return false;
         }
-        matches!(
-            matched_non_empty_ancestors(&self.inner, &clean, is_dir),
-            Match::Ignore(_)
-        )
+        let (segs, _) = path_to_u32_segments(&clean, None);
+        self.spec.matches_segments(&segs, is_dir)
     }
 }
 
@@ -279,12 +213,31 @@ mod tests {
         let root = Path::new("/repo");
         let (star_dir, errs0) = GitignoreMatcher::from_text(root, "*/  \n");
         assert_eq!(errs0, 0);
-        assert_eq!(star_dir.check_scoped(Path::new("/repo/.gitignore"), false), None);
-        assert_eq!(star_dir.check_scoped(Path::new("/repo/symlink_dir"), false), None);
-        assert_eq!(star_dir.check_scoped(Path::new("/repo/sub"), true), Some(true));
+        assert_eq!(
+            star_dir.check_scoped(Path::new("/repo/.gitignore"), false),
+            None
+        );
+        assert_eq!(
+            star_dir.check_scoped(Path::new("/repo/symlink_dir"), false),
+            None
+        );
+        assert_eq!(
+            star_dir.check_scoped(Path::new("/repo/sub"), true),
+            Some(true)
+        );
         assert_eq!(
             star_dir.check_scoped(Path::new("/repo/sub/file.py"), false),
             Some(true)
+        );
+
+        let (neg_dir, _) = GitignoreMatcher::from_text(root, "/*\n!sub/\n");
+        assert_eq!(
+            neg_dir.check_scoped(Path::new("/repo/sub"), true),
+            Some(false)
+        );
+        assert_eq!(
+            neg_dir.check_scoped(Path::new("/repo/sub/file.py"), false),
+            Some(false)
         );
 
         let (double_slash, _) = GitignoreMatcher::from_text(root, "//\n");
@@ -292,7 +245,10 @@ mod tests {
         assert_eq!(double_slash.check_scoped(Path::new("/repo/a"), true), None);
 
         let (single_slash, _) = GitignoreMatcher::from_text(root, "/\n");
-        assert_eq!(single_slash.check_scoped(Path::new("/repo/a"), false), Some(true));
+        assert_eq!(
+            single_slash.check_scoped(Path::new("/repo/a"), false),
+            Some(true)
+        );
 
         let rules = "*.log\r\n!keep.log\r/root_only.tmp\nbuild/\n[z-a]\n\\\n";
         let (matcher, errs) = GitignoreMatcher::from_text(root, rules);

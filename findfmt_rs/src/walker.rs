@@ -3,27 +3,17 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::fs;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
 use crate::classifier::classify_one_nogil;
-use crate::gitignore::GitignoreMatcher;
-use crate::ignore_stack::{load_child_specs, resolve_root_specs};
+use crate::ignore_stack::resolve_root_specs;
 use crate::tags::TagRegistry;
+use crate::walker_descent::advance_active_root;
 use crate::walker_filter::{
-    build_raw_classify_input, is_valid_descent_dir, resolve_device_id, resolve_relative_pathbuf,
+    build_raw_classify_input, resolve_device_id, resolve_relative_pathbuf,
 };
-use crate::walker_prune::{PrunePoll, PruneSearch};
 use crate::walker_sort::calculate_accumulated_sizes_nogil;
-use crate::walker_step::{
-    ActiveRootState, PendingSubdirPrune, drain_candidate_batch, enter_directory_state,
-};
+use crate::walker_step::{ActiveRootState, enter_directory_state};
 use crate::walker_types::{DirKey, RootTarget, WalkConfig, WalkEvent, WalkYieldItem};
-
-fn has_work_remaining(state: &ActiveRootState) -> bool {
-    state.pending_batch.is_some()
-        || state.pending_subdir_prune.is_some()
-        || !state.stack.is_empty()
-}
 
 /// Streaming GIL-free directory traversal state machine.
 pub struct NativeWalker {
@@ -70,8 +60,14 @@ impl NativeWalker {
         while out.len() < cap {
             step_events.clear();
             let sub_cap = cap - out.len();
-            if self.active_root.is_some() {
-                self.step_active_root(&mut step_events, sub_cap);
+            if let Some(state) = self.active_root.take() {
+                self.active_root = advance_active_root(
+                    &self.config,
+                    self.registry,
+                    state,
+                    &mut step_events,
+                    sub_cap,
+                );
             } else if let Some(target) = self.roots.pop_front() {
                 self.start_root(target, &mut step_events);
             } else {
@@ -211,153 +207,5 @@ impl NativeWalker {
             events,
         );
         self.active_root = Some(root_state);
-    }
-
-    fn finish_subdir_descent(
-        &self,
-        state: &mut ActiveRootState,
-        subdir: PathBuf,
-        child_specs: Arc<[GitignoreMatcher]>,
-        child_depth: usize,
-        child_inh: bool,
-        events: &mut Vec<WalkEvent>,
-    ) {
-        let allow = if self.config.follow_symlinks {
-            DirKey::from_dir(&subdir).is_some_and(|dk| state.visited_dirs.insert(dk))
-        } else {
-            true
-        };
-        if allow {
-            enter_directory_state(
-                &self.config,
-                state,
-                &subdir,
-                child_specs,
-                child_depth,
-                child_inh,
-                events,
-            );
-        }
-    }
-
-    fn step_active_root(&mut self, events: &mut Vec<WalkEvent>, cap: usize) {
-        let Some(mut state) = self.active_root.take() else {
-            return;
-        };
-        if state.pending_batch.is_some() {
-            drain_candidate_batch(&self.config, self.registry, &mut state, events, cap);
-            if has_work_remaining(&state) {
-                self.active_root = Some(state);
-            }
-            return;
-        }
-        if let Some(mut pending) = state.pending_subdir_prune.take() {
-            match pending.search.poll(
-                &state.base_root,
-                state.root_dev,
-                &self.config,
-                self.registry,
-                &mut state.prune_memo,
-                events,
-            ) {
-                PrunePoll::Matched => {
-                    self.finish_subdir_descent(
-                        &mut state,
-                        pending.subdir,
-                        pending.child_specs,
-                        pending.child_depth,
-                        pending.child_inh,
-                        events,
-                    );
-                }
-                PrunePoll::Empty => {}
-                PrunePoll::YieldedError => {
-                    state.pending_subdir_prune = Some(pending);
-                }
-            }
-            if has_work_remaining(&state) {
-                self.active_root = Some(state);
-            }
-            return;
-        }
-
-        let Some(top) = state.stack.last_mut() else {
-            return;
-        };
-        if top.idx >= top.subdirs.len() {
-            if let Some(popped) = state.stack.pop() {
-                state.pending_batch = popped.deferred_batch;
-            }
-            if has_work_remaining(&state) {
-                self.active_root = Some(state);
-            }
-            return;
-        }
-
-        let subdir = top.subdirs[top.idx].clone();
-        top.idx += 1;
-        if !is_valid_descent_dir(&subdir, self.config.follow_symlinks) {
-            if has_work_remaining(&state) {
-                self.active_root = Some(state);
-            }
-            return;
-        }
-
-        let parent_specs = Arc::clone(&top.specs);
-        let child_depth = top.depth + 1;
-        let parent_inh = top.inherited_match;
-        let child_specs = load_child_specs(&subdir, &parent_specs, self.config.respect_gitignore);
-        let child_inh = self.config.matcher.should_inherit_match(
-            &subdir,
-            Some(&state.base_root),
-            parent_inh,
-        );
-
-        if self.config.dirs_only && self.config.prune_empty {
-            let mut search =
-                PruneSearch::new(subdir.clone(), Arc::clone(&child_specs), child_depth, child_inh);
-            match search.poll(
-                &state.base_root,
-                state.root_dev,
-                &self.config,
-                self.registry,
-                &mut state.prune_memo,
-                events,
-            ) {
-                PrunePoll::Matched => {
-                    self.finish_subdir_descent(
-                        &mut state,
-                        subdir,
-                        child_specs,
-                        child_depth,
-                        child_inh,
-                        events,
-                    );
-                }
-                PrunePoll::Empty => {}
-                PrunePoll::YieldedError => {
-                    state.pending_subdir_prune = Some(PendingSubdirPrune {
-                        subdir,
-                        child_specs,
-                        child_depth,
-                        child_inh,
-                        search,
-                    });
-                }
-            }
-        } else {
-            self.finish_subdir_descent(
-                &mut state,
-                subdir,
-                child_specs,
-                child_depth,
-                child_inh,
-                events,
-            );
-        }
-
-        if has_work_remaining(&state) {
-            self.active_root = Some(state);
-        }
     }
 }

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import tomllib
 from pathlib import Path
 
@@ -43,6 +44,9 @@ def test_classifier_fuzz_smoke(payload: bytes) -> None:
         b"*/  ",
         b"\x03*/  ",
         b"**/\n!v2_subdir/\n",
+        b"/*\n!v2_subdir/\n",
+        b"?*[!a-z]\n",
+        base64.b64decode("SyMh3EsjIdxLJy9L3govKkssLyoK3C8qCi8qCg=="),
         b"//\n",
         b"[z-a]\nescaped\\ \n  leading.py\n#!/usr/bin/env python3\n",
         b"\x00\x01\x02\x03\x04\x05\x06\x07\x08\t",

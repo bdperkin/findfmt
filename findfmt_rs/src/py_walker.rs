@@ -11,13 +11,13 @@ use crate::classifier::classify_one_nogil;
 use crate::py_bridge::build_py_file_info;
 #[cfg(not(unix))]
 use crate::py_paths::fetch_windows_pre_stat;
-use crate::py_paths::{PyHandles, get_handles, pathbuf_to_py_path, pathbuf_to_py_str};
+use crate::py_paths::{PyHandles, deliver_walk_os_error, get_handles, pathbuf_to_py_path};
 use crate::py_walker_config::{prepare_walk_from_py_config, resolve_single_root_py};
 use crate::tags::TagRegistry;
 use crate::walker::NativeWalker;
 #[cfg(not(unix))]
 use crate::walker_filter::resolve_relative_pathbuf;
-use crate::walker_types::{WalkConfig, WalkEvent, WalkOsError, WalkYieldItem};
+use crate::walker_types::{WalkConfig, WalkEvent, WalkYieldItem};
 
 const WALK_BATCH_SIZE: usize = 256;
 
@@ -163,34 +163,6 @@ impl RustFileIterator {
     }
 }
 
-fn deliver_walk_os_error(
-    py: Python<'_>,
-    handles: &PyHandles,
-    cb: &Py<PyAny>,
-    err: &WalkOsError,
-) -> PyResult<()> {
-    let filename_py = pathbuf_to_py_str(py, handles, &err.path)?;
-    let py_err = if let Some(code) = err.raw_errno {
-        let msg_py = handles
-            .os_strerror
-            .bind(py)
-            .call1((code,))
-            .unwrap_or_else(|_| {
-                err.message
-                    .as_str()
-                    .into_pyobject(py)
-                    .map_or_else(|_| py.None().into_bound(py), Bound::into_any)
-            });
-        pyo3::exceptions::PyOSError::new_err((code, msg_py.unbind(), filename_py.unbind()))
-    } else {
-        let base = pyo3::exceptions::PyOSError::new_err(err.message.clone());
-        let _ = base.value(py).setattr("filename", filename_py);
-        base
-    };
-    cb.bind(py).call1((py_err.value(py),))?;
-    Ok(())
-}
-
 fn materialize_yield_item<'py>(
     py: Python<'py>,
     handles: &PyHandles,
@@ -207,12 +179,16 @@ fn materialize_yield_item<'py>(
 
     #[cfg(not(unix))]
     let (raw_input, raw_classified) = {
-        let pre_stat = Some(fetch_windows_pre_stat(
-            py,
-            &path_obj,
-            None,
-            item.follow_symlinks,
-        ));
+        let mut pre = fetch_windows_pre_stat(py, &path_obj, None, item.follow_symlinks);
+        // Mirror `os.DirEntry.stat()` on Windows (`WIN32_FIND_DATA` caches `st_ino=0, st_dev=0`
+        // unless `follow_symlinks=True` resolves a symlink target via `os.stat`).
+        if item.has_entry && (!pre.0 || !item.follow_symlinks) {
+            if let Some(ref mut raw) = pre.4 {
+                raw.ino = Some(0);
+                raw.dev = Some(0);
+            }
+        }
+        let pre_stat = Some(pre);
         let pre_guessed_mime = Some(item.classified.mime_type.clone());
         let win_in = RawClassifyInput {
             path: item.path,

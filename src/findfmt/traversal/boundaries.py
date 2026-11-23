@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from findfmt.classifier import classify_file as _py_classify_file
 from findfmt.traversal._batch_dispatch import BatchEmitContext, stream_classified_candidates
@@ -34,7 +34,7 @@ from findfmt.traversal.tags import can_skip_file_by_tags
 if TYPE_CHECKING:
     import os
     import sys
-    from collections.abc import Callable, Iterator, Sequence
+    from collections.abc import Callable, Iterator, MutableMapping, Sequence
 
     import pathspec
 
@@ -191,6 +191,9 @@ def has_matching_descendants(  # noqa: PLR0913 - wide CLI/config signature
     on_error: Callable[[OSError], None] | None = None,
 ) -> bool:
     """Determine whether a directory or any subtrees contain matching files."""
+    resolved_memo: MutableMapping[Any, bool] = (
+        cast("MutableMapping[Any, bool]", memo) if memo is not None else {}
+    )
     state = DescendantSearchState(
         config=config,
         root_dev=root_dev,
@@ -198,7 +201,7 @@ def has_matching_descendants(  # noqa: PLR0913 - wide CLI/config signature
         filter_entry_fn=filter_directory_entry,
         classify_fn=classify_file,
         active_visited=visited if visited is not None else set(),
-        active_memo=memo if memo is not None else {},
+        active_memo=resolved_memo,
         frames=[],
         on_error=on_error,
     )
