@@ -172,7 +172,7 @@ def test_live_mime_refresh_and_uri_schemes(
         uri_dir = tmp_path / "uris"
         uri_dir.mkdir()
         monkeypatch.chdir(uri_dir)
-        for name in ("data:,hello", "data:hello", "http:report.py;v=1"):
+        for name in ("data:,hello", "data:hello", "http:report.py;v=1", " https:report.py?download=1"):
             p = Path(name)
             p.write_text("body\n", encoding="utf-8")
             assert rust_ext.classify_file_rs(p) == classifier.classify_file(p)

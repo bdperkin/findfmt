@@ -30,7 +30,7 @@ impl<'py> LiveMimeDb<'py> {
 
     /// Match `mimetypes.guess_type(str_path)[0]` against the live Python `mimetypes` engine.
     pub fn guess_mime_type(&self, str_path: &str) -> Option<String> {
-        if has_url_scheme(str_path) {
+        if should_delegate_colon_to_python(str_path) {
             return self
                 .guess_type_fn
                 .call1((str_path,))
@@ -78,6 +78,22 @@ pub(crate) fn py_splitext_mode(path: &str, posix_only: bool) -> (String, String)
     }
 }
 
+fn should_delegate_colon_to_python(str_path: &str) -> bool {
+    if !str_path.contains(':') {
+        return false;
+    }
+    let bytes = str_path.as_bytes();
+    if cfg!(windows)
+        && bytes.len() >= 2
+        && bytes[0].is_ascii_alphabetic()
+        && bytes[1] == b':'
+        && !str_path[2..].contains(':')
+    {
+        return false;
+    }
+    true
+}
+
 fn has_url_scheme(str_path: &str) -> bool {
     if let Some(colon_idx) = str_path.find(':') {
         if colon_idx > 1 {
@@ -118,10 +134,11 @@ enum MimeUrlOutcome<'a> {
 }
 
 fn parse_mime_url_or_path(str_path: &str) -> MimeUrlOutcome<'_> {
-    if has_url_scheme(str_path) {
-        if let Some(colon_idx) = str_path.find(':') {
-            let scheme_lower = str_path[..colon_idx].to_ascii_lowercase();
-            let rest = &str_path[colon_idx + 1..];
+    let trimmed = str_path.trim_matches(|c: char| c <= ' ');
+    if has_url_scheme(trimmed) {
+        if let Some(colon_idx) = trimmed.find(':') {
+            let scheme_lower = trimmed[..colon_idx].to_ascii_lowercase();
+            let rest = &trimmed[colon_idx + 1..];
             let end = rest.find(['?', '#']).unwrap_or(rest.len());
             let mut path_part = match rest[..end].strip_prefix("//") {
                 Some(after_slashes) => match after_slashes.find('/') {

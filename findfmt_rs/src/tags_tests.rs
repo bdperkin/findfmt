@@ -36,6 +36,10 @@ fn splitext_tag_and_data_uri_lookup_parity() {
         reg.guess_mime_type("http:report.py;v=1"),
         Some("text/x-python".into())
     );
+    assert_eq!(
+        reg.guess_mime_type(" https:report.py?download=1"),
+        Some("text/x-python".into())
+    );
 
     let mut case_reg = reg;
     case_reg
