@@ -65,6 +65,18 @@ impl DirKey {
     }
 }
 
+/// Depth-aware memoization entry for `--prune` descendant discovery.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum PruneCache {
+    Matched {
+        searched_from_depth: usize,
+    },
+    Empty {
+        searched_from_depth: usize,
+        had_cycle_skip: bool,
+    },
+}
+
 /// Pre-resolved root target passed into `NativeWalker`.
 #[derive(Clone, Debug)]
 pub struct RootTarget {
@@ -127,6 +139,7 @@ pub struct WalkYieldItem {
     pub prefix: Option<PathBuf>,
     pub has_entry: bool,
     pub follow_symlinks: bool,
+    pub inherited_match: bool,
     pub classified: RawClassifiedFile,
 }
 
@@ -153,12 +166,10 @@ pub fn surrogateescape_codepoints(name: &OsStr, ignore_case: bool) -> Vec<u32> {
         let bytes = name.as_bytes();
         let mut out = Vec::with_capacity(bytes.len());
         for chunk in bytes.utf8_chunks() {
-            for ch in chunk.valid().chars() {
-                if ignore_case {
-                    out.extend(ch.to_lowercase().map(u32::from));
-                } else {
-                    out.push(u32::from(ch));
-                }
+            if ignore_case {
+                out.extend(chunk.valid().to_lowercase().chars().map(u32::from));
+            } else {
+                out.extend(chunk.valid().chars().map(u32::from));
             }
             for &bad in chunk.invalid() {
                 out.push(0xDC00 + u32::from(bad));

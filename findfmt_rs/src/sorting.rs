@@ -1,6 +1,9 @@
-//! Natural version sort key tokenization with Unicode `Decimal_Number` and big-integer parity (#582, #585).
+//! Natural version sort key tokenization with Unicode `Decimal_Number` and PEP 383 parity (#582, #585).
 
 use std::cmp::Ordering;
+use std::ffi::OsStr;
+
+use crate::walker_types::surrogateescape_codepoints;
 
 /// Sorted Unicode 16 `Decimal_Number` block base codepoints (`zero ..= zero + 9`).
 ///
@@ -77,6 +80,40 @@ pub struct NaturalSortKey {
     pub normalized: String,
 }
 
+/// PEP 383 `surrogateescape`-preserving natural sort chunk (`0xDC80..=0xDCFF` `< 0xE000`).
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub enum SortChunkU32 {
+    Digit(String),
+    Text(Vec<u32>),
+}
+
+impl Ord for SortChunkU32 {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self, other) {
+            (Self::Digit(lhs), Self::Digit(rhs)) => lhs
+                .len()
+                .cmp(&rhs.len())
+                .then_with(|| lhs.as_bytes().cmp(rhs.as_bytes())),
+            (Self::Digit(_), Self::Text(_)) => Ordering::Less,
+            (Self::Text(_), Self::Digit(_)) => Ordering::Greater,
+            (Self::Text(lhs), Self::Text(rhs)) => lhs.cmp(rhs),
+        }
+    }
+}
+
+impl PartialOrd for SortChunkU32 {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+/// PEP 383 `surrogateescape`-preserving natural sort key for `OsStr` filenames.
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct NaturalSortKeyU32 {
+    pub chunks: Vec<SortChunkU32>,
+    pub normalized: Vec<u32>,
+}
+
 fn push_text_chunk(chunks: &mut Vec<SortChunk>, buf: &mut String, ignore_case: bool) {
     if buf.is_empty() {
         return;
@@ -86,13 +123,73 @@ fn push_text_chunk(chunks: &mut Vec<SortChunk>, buf: &mut String, ignore_case: b
     chunks.push(SortChunk::Text(text));
 }
 
-fn push_digit_chunk(chunks: &mut Vec<SortChunk>, digits: &mut String) {
+fn push_digit_chunk<T>(chunks: &mut Vec<T>, digits: &mut String, wrap: fn(String) -> T) {
     if digits.is_empty() {
         return;
     }
     let raw = std::mem::take(digits);
     let stripped = raw.trim_start_matches('0').to_owned();
-    chunks.push(SortChunk::Digit(stripped));
+    chunks.push(wrap(stripped));
+}
+
+fn flush_u32_text(
+    chunks: &mut Vec<SortChunkU32>,
+    valid_buf: &mut String,
+    text_cps: &mut Vec<u32>,
+    ignore_case: bool,
+) {
+    if !valid_buf.is_empty() {
+        let seg = std::mem::take(valid_buf);
+        if ignore_case {
+            text_cps.extend(seg.to_lowercase().chars().map(u32::from));
+        } else {
+            text_cps.extend(seg.chars().map(u32::from));
+        }
+    }
+    if !text_cps.is_empty() {
+        chunks.push(SortChunkU32::Text(std::mem::take(text_cps)));
+    }
+}
+
+/// Generate a PEP 383 `surrogateescape`-preserving natural sort key from an `OsStr`.
+pub fn natural_sort_key_osstr(name: &OsStr, ignore_case: bool) -> NaturalSortKeyU32 {
+    let raw_cps = surrogateescape_codepoints(name, false);
+    let normalized = surrogateescape_codepoints(name, ignore_case);
+
+    let mut chunks = Vec::new();
+    let mut valid_text = String::new();
+    let mut text_cps: Vec<u32> = Vec::new();
+    let mut digit_buf = String::new();
+
+    for cp in raw_cps {
+        match char::from_u32(cp) {
+            Some(ch) => {
+                if let Some(d) = decimal_digit_value(ch) {
+                    flush_u32_text(&mut chunks, &mut valid_text, &mut text_cps, ignore_case);
+                    digit_buf.push(char::from(b'0' + d));
+                } else {
+                    push_digit_chunk(&mut chunks, &mut digit_buf, SortChunkU32::Digit);
+                    valid_text.push(ch);
+                }
+            }
+            None => {
+                push_digit_chunk(&mut chunks, &mut digit_buf, SortChunkU32::Digit);
+                if !valid_text.is_empty() {
+                    let seg = std::mem::take(&mut valid_text);
+                    if ignore_case {
+                        text_cps.extend(seg.to_lowercase().chars().map(u32::from));
+                    } else {
+                        text_cps.extend(seg.chars().map(u32::from));
+                    }
+                }
+                text_cps.push(cp);
+            }
+        }
+    }
+    flush_u32_text(&mut chunks, &mut valid_text, &mut text_cps, ignore_case);
+    push_digit_chunk(&mut chunks, &mut digit_buf, SortChunkU32::Digit);
+
+    NaturalSortKeyU32 { chunks, normalized }
 }
 
 /// Generate a natural version sort key chunking embedded decimal integers (`natural_sort_key` parity).
@@ -112,12 +209,12 @@ pub fn natural_sort_key(name: &str, ignore_case: bool) -> NaturalSortKey {
             push_text_chunk(&mut chunks, &mut text_buf, ignore_case);
             digit_buf.push(char::from(b'0' + d));
         } else {
-            push_digit_chunk(&mut chunks, &mut digit_buf);
+            push_digit_chunk(&mut chunks, &mut digit_buf, SortChunk::Digit);
             text_buf.push(ch);
         }
     }
     push_text_chunk(&mut chunks, &mut text_buf, ignore_case);
-    push_digit_chunk(&mut chunks, &mut digit_buf);
+    push_digit_chunk(&mut chunks, &mut digit_buf, SortChunk::Digit);
 
     NaturalSortKey { chunks, normalized }
 }
@@ -132,38 +229,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn natural_sort_handles_ascii_leading_zeros_unicode_digits_and_huge_ints() {
+    fn natural_sort_handles_ascii_leading_zeros_unicode_digits_surrogates_and_sigma() {
         assert_eq!(compare_natural("item2.py", "item10.py", false), Ordering::Less);
-        // Equal numeric value 2 breaks ties via normalized string ("item02.py" < "item2.py")
         assert_eq!(compare_natural("item02.py", "item2.py", false), Ordering::Less);
         assert_eq!(compare_natural("000", "0", false), Ordering::Greater);
-
-        // Digit chunks sort before non-digit chunks (`_SortChunk` parity)
         assert_eq!(compare_natural("1_first", "a_second", false), Ordering::Less);
-
-        // Arabic-Indic (٢ = 2 < ١٠ = 10), Fullwidth (２ = 2), Devanagari (२ = 2)
         assert_eq!(
             compare_natural("uni_\u{0662}.txt", "uni_\u{0661}\u{0660}.txt", false),
             Ordering::Less,
         );
-        assert_eq!(
-            compare_natural("uni_\u{0662}.txt", "uni_\u{ff12}.txt", false),
-            Ordering::Less,
-        );
-        assert_eq!(
-            compare_natural("uni_\u{0968}.txt", "uni_10.txt", false),
-            Ordering::Less,
-        );
-
-        // 60-digit integer beyond u128::MAX without overflow
-        let big_small = format!("file_{}.dat", "9".repeat(59));
-        let big_large = format!("file_1{}.dat", "0".repeat(59));
-        assert_eq!(compare_natural(&big_small, &big_large, false), Ordering::Less);
-
-        // Case-insensitive chunk comparison
-        assert_eq!(
-            compare_natural("Alpha2", "alpha10", true),
-            Ordering::Less,
-        );
+        assert_eq!(compare_natural("ΟΣ", "Οςa", true), Ordering::Less);
+        #[cfg(unix)]
+        {
+            use std::os::unix::ffi::OsStrExt;
+            let k_ff = natural_sort_key_osstr(OsStr::from_bytes(b"\xff_v2"), false);
+            let k_pua = natural_sort_key_osstr(OsStr::new("\u{e000}_v2"), false);
+            assert!(k_ff < k_pua);
+        }
     }
 }

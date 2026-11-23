@@ -8,7 +8,9 @@ use std::sync::Arc;
 use crate::classifier::classify_one_nogil;
 use crate::ignore_stack::{load_child_specs, resolve_root_specs};
 use crate::tags::TagRegistry;
-use crate::walker_filter::{build_raw_classify_input, resolve_relative_pathbuf};
+use crate::walker_filter::{
+    build_raw_classify_input, is_valid_descent_dir, resolve_device_id, resolve_relative_pathbuf,
+};
 use crate::walker_prune::has_matching_descendants_nogil;
 use crate::walker_sort::calculate_accumulated_sizes_nogil;
 use crate::walker_step::{ActiveRootState, drain_candidate_batch, enter_directory_state};
@@ -20,6 +22,7 @@ pub struct NativeWalker {
     registry: &'static TagRegistry,
     roots: VecDeque<RootTarget>,
     active_root: Option<ActiveRootState>,
+    overflow: VecDeque<WalkEvent>,
 }
 
 impl NativeWalker {
@@ -34,23 +37,54 @@ impl NativeWalker {
             registry,
             roots: VecDeque::from(roots),
             active_root: None,
+            overflow: VecDeque::new(),
         }
     }
 
-    /// Advance traversal without the GIL until at least one event is ready (up to `max_events`) or EOF.
+    /// Advance traversal without the GIL up to `max_events`, pausing immediately at any error boundary.
     pub fn next_batch(&mut self, max_events: usize) -> Vec<WalkEvent> {
         let cap = max_events.max(1);
-        let mut events = Vec::new();
-        while events.len() < cap {
+        let mut out = Vec::new();
+
+        while out.len() < cap {
+            let Some(ev) = self.overflow.pop_front() else {
+                break;
+            };
+            let is_err = matches!(ev, WalkEvent::Error(_));
+            out.push(ev);
+            if is_err {
+                return out;
+            }
+        }
+
+        let mut step_events = Vec::new();
+        while out.len() < cap {
+            step_events.clear();
+            let sub_cap = cap - out.len();
             if self.active_root.is_some() {
-                self.step_active_root(&mut events, cap);
+                self.step_active_root(&mut step_events, sub_cap);
             } else if let Some(target) = self.roots.pop_front() {
-                self.start_root(target, &mut events);
+                self.start_root(target, &mut step_events);
             } else {
                 break;
             }
+
+            let mut hit_error = false;
+            for ev in step_events.drain(..) {
+                if !hit_error && out.len() < cap {
+                    if matches!(ev, WalkEvent::Error(_)) {
+                        hit_error = true;
+                    }
+                    out.push(ev);
+                } else {
+                    self.overflow.push_back(ev);
+                }
+            }
+            if hit_error {
+                break;
+            }
         }
-        events
+        out
     }
 
     fn start_root(&mut self, target: RootTarget, events: &mut Vec<WalkEvent>) {
@@ -61,8 +95,8 @@ impl NativeWalker {
             return;
         };
 
-        let is_symlink = fs::symlink_metadata(&resolved_root)
-            .is_ok_and(|m| m.file_type().is_symlink());
+        let is_symlink =
+            fs::symlink_metadata(&resolved_root).is_ok_and(|m| m.file_type().is_symlink());
         let is_file_root = (!self.config.follow_symlinks && is_symlink)
             || fs::metadata(&resolved_root).is_ok_and(|m| m.is_file());
 
@@ -105,6 +139,7 @@ impl NativeWalker {
                         prefix: target.prefix,
                         has_entry: false,
                         follow_symlinks: self.config.follow_symlinks,
+                        inherited_match: false,
                         classified,
                     }));
                 }
@@ -124,30 +159,20 @@ impl NativeWalker {
                 self.config.include_hidden,
             )
         });
-        #[cfg(unix)]
         let root_dev = if self.config.one_file_system {
-            use std::os::unix::fs::MetadataExt;
-            fs::metadata(&resolved_root).ok().map(|m| m.dev())
+            resolve_device_id(&resolved_root, false, true)
         } else {
             None
         };
-        #[cfg(not(unix))]
-        let root_dev = None;
-
-        #[cfg(not(unix))]
-        let root_canon = if self.config.one_file_system {
-            fs::canonicalize(&resolved_root).ok()
-        } else {
-            None
-        };
-        #[cfg(unix)]
-        let root_canon = None;
 
         let mut visited_dirs = HashSet::new();
-        if self.config.follow_symlinks {
-            if let Some(dk) = DirKey::from_dir(&resolved_root) {
-                visited_dirs.insert(dk);
-            }
+        if let Some(dk) = self
+            .config
+            .follow_symlinks
+            .then(|| DirKey::from_dir(&resolved_root))
+            .flatten()
+        {
+            visited_dirs.insert(dk);
         }
         let root_specs = resolve_root_specs(
             &resolved_root,
@@ -160,7 +185,6 @@ impl NativeWalker {
             base_root: resolved_root.clone(),
             prefix: target.prefix,
             root_dev,
-            root_canon,
             visited_dirs,
             accumulated_sizes,
             prune_memo: HashMap::new(),
@@ -206,6 +230,13 @@ impl NativeWalker {
 
         let subdir = top.subdirs[top.idx].clone();
         top.idx += 1;
+        if !is_valid_descent_dir(&subdir, self.config.follow_symlinks) {
+            if state.pending_batch.is_some() || !state.stack.is_empty() {
+                self.active_root = Some(state);
+            }
+            return;
+        }
+
         let parent_specs = Arc::clone(&top.specs);
         let child_depth = top.depth + 1;
         let parent_inh = top.inherited_match;
@@ -225,7 +256,6 @@ impl NativeWalker {
                 child_inh,
                 &state.base_root,
                 state.root_dev,
-                state.root_canon.as_deref(),
                 &self.config,
                 self.registry,
                 &mut state.prune_memo,

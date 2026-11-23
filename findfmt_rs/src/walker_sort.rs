@@ -2,40 +2,16 @@
 
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
-use std::ffi::OsStr;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::metadata::RawStat;
-use crate::sorting::natural_sort_key;
+use crate::sorting::natural_sort_key_osstr;
+use crate::walker_filter::{is_hidden_name, is_valid_descent_dir};
 use crate::walker_types::{
     DirKey, ScannedEntry, WalkConfig, WalkEvent, WalkOsError, WalkSortKey,
     surrogateescape_codepoints,
 };
-
-fn name_for_natural_sort(name: &OsStr) -> String {
-    if let Some(valid) = name.to_str() {
-        return valid.to_owned();
-    }
-    #[cfg(unix)]
-    {
-        use std::os::unix::ffi::OsStrExt;
-        let mut out = String::new();
-        for chunk in name.as_bytes().utf8_chunks() {
-            out.push_str(chunk.valid());
-            for &bad in chunk.invalid() {
-                if let Some(ch) = char::from_u32(0xE000 + u32::from(bad)) {
-                    out.push(ch);
-                }
-            }
-        }
-        out
-    }
-    #[cfg(not(unix))]
-    {
-        name.to_string_lossy().into_owned()
-    }
-}
 
 fn stat_sort_metrics(entry: &ScannedEntry, follow_symlinks: bool) -> (f64, f64, u64) {
     let is_sym = entry.file_type.as_ref().is_some_and(fs::FileType::is_symlink);
@@ -57,6 +33,9 @@ pub fn collect_and_sort_entries(
     config: &WalkConfig,
     events: &mut Vec<WalkEvent>,
 ) -> Option<Vec<ScannedEntry>> {
+    if !is_valid_descent_dir(dir, config.follow_symlinks) {
+        return None;
+    }
     let read_dir = match fs::read_dir(dir) {
         Ok(rd) => rd,
         Err(err) => {
@@ -66,8 +45,12 @@ pub fn collect_and_sort_entries(
     };
     let mut entries = Vec::new();
     for item_res in read_dir {
-        let Ok(ent) = item_res else {
-            continue;
+        let ent = match item_res {
+            Ok(e) => e,
+            Err(err) => {
+                events.push(WalkEvent::Error(WalkOsError::from_io(&err, dir)));
+                return None;
+            }
         };
         entries.push(ScannedEntry {
             path: ent.path(),
@@ -95,10 +78,7 @@ pub fn collect_and_sort_entries(
         WalkSortKey::Version => {
             let mut keyed: Vec<(_, ScannedEntry)> = entries
                 .into_iter()
-                .map(|e| {
-                    let s = name_for_natural_sort(&e.file_name);
-                    (natural_sort_key(&s, config.ignore_case), e)
-                })
+                .map(|e| (natural_sort_key_osstr(&e.file_name, config.ignore_case), e))
                 .collect();
             keyed.sort_by(|a, b| {
                 let ord = a.0.cmp(&b.0);
@@ -176,8 +156,7 @@ pub fn calculate_accumulated_sizes_nogil(
         let mut curr_subdirs = Vec::new();
         if let Ok(rd) = fs::read_dir(&curr_path) {
             for ent in rd.flatten() {
-                let name_lossy = ent.file_name().to_string_lossy().into_owned();
-                if !include_hidden && name_lossy.starts_with('.') {
+                if !include_hidden && is_hidden_name(&ent.file_name()) {
                     continue;
                 }
                 let p = ent.path();

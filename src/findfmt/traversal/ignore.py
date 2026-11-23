@@ -183,7 +183,17 @@ def load_git_exclude_spec(root: Path) -> PathSpecType | None:
             content = git_path.read_text(encoding="utf-8", errors="replace").strip()
             if content.startswith("gitdir:"):
                 gitdir_str = content.split(":", 1)[1].strip()
-                return load_spec_file((root / gitdir_str).resolve() / "info" / "exclude")
+                resolved_gitdir = (root / gitdir_str).resolve()
+                commondir_file = resolved_gitdir / "commondir"
+                if commondir_file.is_file():
+                    common_rel = commondir_file.read_text(encoding="utf-8", errors="replace").strip()
+                    if common_rel:
+                        common_dir = (resolved_gitdir / common_rel).resolve()
+                        common_spec = load_spec_file(common_dir / "info" / "exclude")
+                        if common_spec is not None:
+                            return common_spec
+
+                return load_spec_file(resolved_gitdir / "info" / "exclude")
 
     return None
 

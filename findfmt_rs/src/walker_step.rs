@@ -7,15 +7,15 @@ use std::sync::Arc;
 use crate::classifier::classify_one_nogil;
 use crate::gitignore::GitignoreMatcher;
 use crate::ignore_stack::load_child_specs;
-use crate::patterns::can_skip_entry_by_tags;
+use crate::patterns::{can_skip_entry_by_tags, tag_prefilter_requirements};
 use crate::tags::TagRegistry;
 use crate::walker_filter::{
-    build_raw_classify_input, executable_hint_for_skip, filter_entry_nogil,
+    build_raw_classify_input, executable_hint_for_skip, filter_entry_nogil, is_valid_descent_dir,
     resolve_relative_pathbuf, should_skip_dir,
 };
 use crate::walker_prune::has_matching_descendants_nogil;
 use crate::walker_sort::collect_and_sort_entries;
-use crate::walker_types::{DirKey, WalkConfig, WalkEvent, WalkYieldItem};
+use crate::walker_types::{DirKey, PruneCache, WalkConfig, WalkEvent, WalkYieldItem};
 
 #[derive(Clone, Debug)]
 pub(crate) struct CandidateBatch {
@@ -38,10 +38,9 @@ pub(crate) struct ActiveRootState {
     pub base_root: PathBuf,
     pub prefix: Option<PathBuf>,
     pub root_dev: Option<u64>,
-    pub root_canon: Option<PathBuf>,
     pub visited_dirs: HashSet<DirKey>,
     pub accumulated_sizes: Option<HashMap<PathBuf, u64>>,
-    pub prune_memo: HashMap<DirKey, bool>,
+    pub prune_memo: HashMap<DirKey, PruneCache>,
     pub stack: Vec<WalkFrame>,
     pub pending_batch: Option<CandidateBatch>,
 }
@@ -62,14 +61,9 @@ pub(crate) fn enter_directory_state(
     let mut files = Vec::new();
 
     for entry in entries {
-        let Some((entry_path, is_dir, is_cand_file, is_symlink)) = filter_entry_nogil(
-            &entry,
-            config,
-            &specs,
-            state.root_dev,
-            state.root_canon.as_deref(),
-            &state.base_root,
-        ) else {
+        let Some((entry_path, is_dir, is_cand_file, is_symlink)) =
+            filter_entry_nogil(&entry, config, &specs, state.root_dev, &state.base_root)
+        else {
             continue;
         };
         if is_dir {
@@ -130,25 +124,37 @@ pub(crate) fn drain_candidate_batch(
     let Some(mut batch) = state.pending_batch.take() else {
         return;
     };
+    let (tag_active, needs_mime, needs_exec) = tag_prefilter_requirements(&config.filter);
+
     while events.len() < cap {
         let Some((cand_path, is_symlink)) = batch.targets.pop_front() else {
             break;
         };
+        let events_before = events.len();
         if config.dirs_only && config.prune_empty {
+            if !is_valid_descent_dir(&cand_path, config.follow_symlinks) {
+                continue;
+            }
             let child_specs = load_child_specs(&cand_path, &batch.specs, config.respect_gitignore);
-            if !has_matching_descendants_nogil(
+            let has_match = has_matching_descendants_nogil(
                 &cand_path,
                 &child_specs,
                 batch.depth + 1,
                 batch.inherited_match,
                 &state.base_root,
                 state.root_dev,
-                state.root_canon.as_deref(),
                 config,
                 registry,
                 &mut state.prune_memo,
                 events,
-            ) {
+            );
+            let emitted_error = events[events_before..]
+                .iter()
+                .any(|ev| matches!(ev, WalkEvent::Error(_)));
+            if !has_match {
+                if emitted_error {
+                    break;
+                }
                 continue;
             }
         }
@@ -163,27 +169,37 @@ pub(crate) fn drain_candidate_batch(
             {
                 continue;
             }
-            let filename = cand_path
-                .file_name()
-                .map_or_else(String::new, |n| n.to_string_lossy().into_owned());
-            let exec_hint = executable_hint_for_skip(
-                &cand_path,
-                &filename,
-                is_symlink,
-                config.follow_symlinks,
-            );
-            let str_path = cand_path.to_string_lossy();
-            let guessed_mime = config.mime_snapshot.guess_mime_type(&str_path);
-            if can_skip_entry_by_tags(
-                &filename,
-                is_symlink,
-                config.follow_symlinks,
-                exec_hint,
-                &config.filter,
-                registry,
-                guessed_mime.as_deref(),
-            ) {
-                continue;
+            if tag_active {
+                let filename = cand_path
+                    .file_name()
+                    .map_or_else(String::new, |n| n.to_string_lossy().into_owned());
+                let exec_hint = if needs_exec {
+                    executable_hint_for_skip(
+                        &cand_path,
+                        &filename,
+                        is_symlink,
+                        config.follow_symlinks,
+                    )
+                } else {
+                    None
+                };
+                let guessed_mime = if needs_mime {
+                    let str_path = cand_path.to_string_lossy();
+                    config.mime_snapshot.guess_mime_type(&str_path)
+                } else {
+                    None
+                };
+                if can_skip_entry_by_tags(
+                    &filename,
+                    is_symlink,
+                    config.follow_symlinks,
+                    exec_hint,
+                    &config.filter,
+                    registry,
+                    guessed_mime.as_deref(),
+                ) {
+                    continue;
+                }
             }
         }
 
@@ -216,8 +232,15 @@ pub(crate) fn drain_candidate_batch(
             prefix: state.prefix.clone(),
             has_entry: !config.dirs_only,
             follow_symlinks: config.follow_symlinks,
+            inherited_match: batch.inherited_match,
             classified,
         }));
+        if events[events_before..]
+            .iter()
+            .any(|ev| matches!(ev, WalkEvent::Error(_)))
+        {
+            break;
+        }
     }
     if !batch.targets.is_empty() {
         state.pending_batch = Some(batch);

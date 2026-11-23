@@ -145,8 +145,10 @@ def _step_prune_directory(target: PruneStepTarget, state: DescendantSearchState)
         state.active_memo[dir_key] = True
         return True
 
-    if not check_depth_limit(target.current_depth, state.config.max_depth) or not subdirs:
-        state.active_memo[dir_key] = False
+    if not subdirs or not check_depth_limit(target.current_depth, state.config.max_depth):
+        if not subdirs:
+            state.active_memo[dir_key] = False
+
         return False
 
     state.active_visited.add(dir_key)
@@ -200,10 +202,12 @@ def search_matching_descendants(target: PruneStepTarget, state: DescendantSearch
             if top.idx >= len(top.subdirs):
                 state.frames.pop()
                 state.active_visited.discard(top.dir_key)
-                state.active_memo[top.dir_key] = False
+                if state.config.max_depth is None:
+                    state.active_memo[top.dir_key] = False
             elif _step_prune_subdir(top, state):
-                for frame in state.frames:
-                    state.active_memo[frame.dir_key] = True
+                if state.config.max_depth is None:
+                    for frame in state.frames:
+                        state.active_memo[frame.dir_key] = True
 
                 return True
     finally:

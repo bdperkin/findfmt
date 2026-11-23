@@ -1,12 +1,18 @@
 //! Hierarchical `.gitignore`, `.git/info/exclude`, and global ignore evaluation (#582).
 
 use std::fs;
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::Arc;
+use std::thread;
+use std::time::{Duration, Instant};
 
 use crate::gitignore::GitignoreMatcher;
 use crate::shebang::py_strip;
+
+const GIT_CONFIG_TIMEOUT: Duration = Duration::from_secs(2);
+const GIT_POLL_INTERVAL: Duration = Duration::from_millis(5);
 
 /// Locate the nearest enclosing Git repository root containing a `.git` directory or pointer file.
 pub fn find_git_repo_root(start_dir: &Path) -> Option<PathBuf> {
@@ -38,32 +44,61 @@ fn collect_ancestor_dirs(resolved: &Path, git_root: Option<&Path>) -> Vec<PathBu
 }
 
 fn expand_tilde(raw: &str, home_dir: Option<&Path>) -> PathBuf {
-    if raw == "~" {
-        if let Some(home) = home_dir {
+    if let Some(home) = home_dir {
+        if raw == "~" {
             return home.to_path_buf();
         }
-    } else if let Some(rest) = raw.strip_prefix("~/").or_else(|| raw.strip_prefix("~\\")) {
-        if let Some(home) = home_dir {
+        if let Some(rest) = raw.strip_prefix("~/").or_else(|| raw.strip_prefix("~\\")) {
             return home.join(rest);
         }
     }
     PathBuf::from(raw)
 }
 
-fn find_git_config_excludes_file(base_dir: &Path, home_dir: Option<&Path>) -> Option<PathBuf> {
-    let output = Command::new("git")
+fn run_git_config_with_timeout(git_bin: &Path, base_dir: &Path, timeout: Duration) -> Option<Vec<u8>> {
+    let mut child = Command::new(git_bin)
         .arg("-C")
         .arg(base_dir)
         .args(["config", "--get", "core.excludesFile"])
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
-        .output()
+        .spawn()
         .ok()?;
-    if !output.status.success() {
-        return None;
+
+    let deadline = Instant::now() + timeout;
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                if !status.success() {
+                    return None;
+                }
+                let mut stdout_buf = Vec::new();
+                if let Some(mut out) = child.stdout.take() {
+                    let _ = out.read_to_end(&mut stdout_buf);
+                }
+                return Some(stdout_buf);
+            }
+            Ok(None) => {
+                if Instant::now() >= deadline {
+                    let _ = child.kill();
+                    let _ = child.wait();
+                    return None;
+                }
+                thread::sleep(GIT_POLL_INTERVAL);
+            }
+            Err(_) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return None;
+            }
+        }
     }
-    let stdout = String::from_utf8_lossy(&output.stdout);
+}
+
+fn find_git_config_excludes_file(base_dir: &Path, home_dir: Option<&Path>) -> Option<PathBuf> {
+    let stdout_bytes = run_git_config_with_timeout(Path::new("git"), base_dir, GIT_CONFIG_TIMEOUT)?;
+    let stdout = String::from_utf8_lossy(&stdout_bytes);
     let trimmed = py_strip(&stdout);
     if trimmed.is_empty() {
         return None;
@@ -76,11 +111,9 @@ fn find_git_config_excludes_file(base_dir: &Path, home_dir: Option<&Path>) -> Op
 }
 
 fn find_standard_global_gitignore(home_dir: Option<&Path>) -> Option<PathBuf> {
-    if let Some(xdg_os) = std::env::var_os("XDG_CONFIG_HOME") {
-        if !xdg_os.is_empty() {
-            let xdg_path = PathBuf::from(xdg_os).join("git").join("ignore");
-            return xdg_path.is_file().then_some(xdg_path);
-        }
+    if let Some(xdg_os) = std::env::var_os("XDG_CONFIG_HOME").filter(|v| !v.is_empty()) {
+        let xdg_path = PathBuf::from(xdg_os).join("git").join("ignore");
+        return xdg_path.is_file().then_some(xdg_path);
     }
     let home = home_dir?;
     let fallback = home.join(".config").join("git").join("ignore");
@@ -93,7 +126,26 @@ pub fn find_global_gitignore_path(base_dir: &Path, home_dir: Option<&Path>) -> O
         .or_else(|| find_standard_global_gitignore(home_dir))
 }
 
-/// Load `.git/info/exclude` supporting both standard `.git/` directories and `gitdir:` pointer files.
+/// Resolve the effective Git common directory for a resolved `gitdir` (linked worktree `commondir`).
+fn resolve_common_git_dir(resolved_gitdir: &Path) -> PathBuf {
+    let try_common = (|| -> Option<PathBuf> {
+        let commondir_file = resolved_gitdir.join("commondir");
+        if !commondir_file.is_file() {
+            return None;
+        }
+        let raw = fs::read(&commondir_file).ok()?;
+        let text = String::from_utf8_lossy(&raw);
+        let rel = py_strip(&text);
+        if rel.is_empty() {
+            return None;
+        }
+        let candidate = resolved_gitdir.join(rel);
+        Some(fs::canonicalize(&candidate).unwrap_or(candidate))
+    })();
+    try_common.unwrap_or_else(|| resolved_gitdir.to_path_buf())
+}
+
+/// Load `.git/info/exclude` supporting `.git/` directories, submodules, and linked worktrees (`commondir`).
 pub fn load_git_exclude_spec(repo_root: &Path) -> Option<GitignoreMatcher> {
     let git_path = repo_root.join(".git");
     if git_path.is_dir() {
@@ -107,10 +159,17 @@ pub fn load_git_exclude_spec(repo_root: &Path) -> Option<GitignoreMatcher> {
             let gitdir_rel = py_strip(rest);
             let joined = repo_root.join(gitdir_rel);
             let resolved_gitdir = fs::canonicalize(&joined).unwrap_or(joined);
+            let common_dir = resolve_common_git_dir(&resolved_gitdir);
             return GitignoreMatcher::from_spec_file(
                 repo_root,
-                &resolved_gitdir.join("info").join("exclude"),
-            );
+                &common_dir.join("info").join("exclude"),
+            )
+            .or_else(|| {
+                GitignoreMatcher::from_spec_file(
+                    repo_root,
+                    &resolved_gitdir.join("info").join("exclude"),
+                )
+            });
         }
     }
     None
@@ -129,15 +188,13 @@ pub fn resolve_root_specs(
         let ancestors = collect_ancestor_dirs(root, git_root.as_deref());
         let base_dir = git_root.as_deref().unwrap_or(root);
 
-        if let Some(global_path) = find_global_gitignore_path(base_dir, home_dir) {
-            if let Some(global_spec) = GitignoreMatcher::from_spec_file(base_dir, &global_path) {
-                specs.push(global_spec);
-            }
+        if let Some(global_spec) = find_global_gitignore_path(base_dir, home_dir)
+            .and_then(|gp| GitignoreMatcher::from_spec_file(base_dir, &gp))
+        {
+            specs.push(global_spec);
         }
-        if let Some(ref gr) = git_root {
-            if let Some(excl) = load_git_exclude_spec(gr) {
-                specs.push(excl);
-            }
+        if let Some(excl) = git_root.as_deref().and_then(load_git_exclude_spec) {
+            specs.push(excl);
         }
         for dir in &ancestors {
             if let Some(gi) = GitignoreMatcher::from_spec_file(dir, &dir.join(".gitignore")) {
@@ -201,21 +258,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn child_negation_overrides_parent_ignore_and_worktree_gitdir_loads() {
+    fn linked_worktree_commondir_and_child_negation_and_timeout_behave_cleanly() {
         let tmp = std::env::temp_dir().join(format!("findfmt_rs_ign_stack_{}", std::process::id()));
         let _ = fs::remove_dir_all(&tmp);
-        let real_git = tmp.join("real_git").join("info");
+        let common_git = tmp.join("main_repo_git");
+        let private_wt = common_git.join("worktrees").join("wt1");
         let repo = tmp.join("worktree_repo");
         let sub = repo.join("sub");
-        fs::create_dir_all(&real_git).expect("create real_git");
+        fs::create_dir_all(common_git.join("info")).expect("create common info");
+        fs::create_dir_all(&private_wt).expect("create private worktree gitdir");
         fs::create_dir_all(&sub).expect("create sub");
 
-        fs::write(real_git.join("exclude"), "*.excl\n").expect("write exclude");
-        fs::write(
-            repo.join(".git"),
-            format!("gitdir: {}\n", tmp.join("real_git").display()),
-        )
-        .expect("write gitdir");
+        fs::write(common_git.join("info").join("exclude"), "*.excl\n").expect("write exclude");
+        fs::write(private_wt.join("commondir"), "../..\n").expect("write commondir");
+        fs::write(repo.join(".git"), format!("gitdir: {}\n", private_wt.display()))
+            .expect("write gitdir");
         fs::write(repo.join(".gitignore"), "*.log\n").expect("write root gitignore");
         fs::write(sub.join(".gitignore"), "!keep.log\n").expect("write sub gitignore");
 
@@ -227,6 +284,16 @@ mod tests {
         assert!(is_path_ignored(&canon_repo.join("secret.excl"), false, &sub_specs));
         assert!(is_path_ignored(&canon_sub.join("drop.log"), false, &sub_specs));
         assert!(!is_path_ignored(&canon_sub.join("keep.log"), false, &sub_specs));
+
+        #[cfg(unix)]
+        {
+            let timed_out = run_git_config_with_timeout(
+                Path::new("sleep"),
+                &canon_repo,
+                Duration::from_millis(15),
+            );
+            assert!(timed_out.is_none());
+        }
 
         let _ = fs::remove_dir_all(&tmp);
     }

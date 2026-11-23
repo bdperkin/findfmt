@@ -27,6 +27,21 @@ pub fn should_skip_dir(dir_name: &OsStr, include_hidden: bool) -> bool {
     dir_name == OsStr::new(".git") || (!include_hidden && is_hidden_name(dir_name))
 }
 
+/// Revalidate a queued directory path before opening or loading child ignore files (`#582`).
+///
+/// When `follow_symlinks` is `false`, rejects paths replaced with symlinks or non-directories
+/// after parent enumeration while allowing unreadable real directories (`chmod 000`) to proceed
+/// so `read_dir` reports `PermissionError` via `on_error`.
+pub fn is_valid_descent_dir(dir: &Path, follow_symlinks: bool) -> bool {
+    if follow_symlinks {
+        return true;
+    }
+    match fs::symlink_metadata(dir) {
+        Ok(meta) => !meta.file_type().is_symlink() && meta.file_type().is_dir(),
+        Err(_) => true,
+    }
+}
+
 /// Compute `relative_path` mirroring `classifier.py:_resolve_relative`.
 pub fn resolve_relative_pathbuf(
     path: &Path,
@@ -47,38 +62,68 @@ pub fn resolve_relative_pathbuf(
     }
 }
 
+/// Resolve platform filesystem device ID (`st_dev`) mirroring `src/findfmt/traversal/devices.py`.
+pub fn resolve_device_id(path: &Path, is_symlink: bool, follow_symlinks: bool) -> Option<u64> {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        let meta = if follow_symlinks || !is_symlink {
+            fs::metadata(path).ok()?
+        } else {
+            fs::symlink_metadata(path).ok()?
+        };
+        let dev = meta.dev();
+        if dev != 0 {
+            Some(dev)
+        } else {
+            fs::metadata(path).ok().map(|m| m.dev())
+        }
+    }
+    #[cfg(all(not(unix), feature = "extension-module"))]
+    {
+        use pyo3::prelude::*;
+        use pyo3::types::PyDict;
+        Python::attach(|py| -> Option<u64> {
+            let os_mod = py.import("os").ok()?;
+            let path_str = path.to_string_lossy();
+            let kwargs = PyDict::new(py);
+            kwargs
+                .set_item("follow_symlinks", follow_symlinks || !is_symlink)
+                .ok()?;
+            let st = os_mod
+                .call_method("stat", (path_str.as_ref(),), Some(&kwargs))
+                .ok()?;
+            let dev: u64 = st.getattr("st_dev").ok()?.extract().ok()?;
+            if dev != 0 {
+                return Some(dev);
+            }
+            let st_follow = os_mod.call_method1("stat", (path_str.as_ref(),)).ok()?;
+            st_follow.getattr("st_dev").ok()?.extract().ok()
+        })
+    }
+    #[cfg(all(not(unix), not(feature = "extension-module")))]
+    {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+        let _ = (is_symlink, follow_symlinks);
+        let canon = fs::canonicalize(path).ok()?;
+        let first = canon.components().next()?;
+        let mut hasher = DefaultHasher::new();
+        first.hash(&mut hasher);
+        Some(hasher.finish())
+    }
+}
+
 fn check_entry_device(
     entry_path: &Path,
     is_symlink: bool,
     follow_symlinks: bool,
     root_dev: Option<u64>,
-    root_canon: Option<&Path>,
 ) -> bool {
-    #[cfg(unix)]
-    {
-        let _ = root_canon;
-        let Some(expected_dev) = root_dev else {
-            return true;
-        };
-        use std::os::unix::fs::MetadataExt;
-        let meta_res = if follow_symlinks || !is_symlink {
-            fs::metadata(entry_path)
-        } else {
-            fs::symlink_metadata(entry_path)
-        };
-        meta_res.is_ok_and(|m| m.dev() == expected_dev)
-    }
-    #[cfg(not(unix))]
-    {
-        let _ = (is_symlink, follow_symlinks, root_dev);
-        let Some(rc) = root_canon else {
-            return true;
-        };
-        let Ok(ec) = fs::canonicalize(entry_path) else {
-            return false;
-        };
-        ec.components().next() == rc.components().next()
-    }
+    let Some(expected_dev) = root_dev else {
+        return true;
+    };
+    resolve_device_id(entry_path, is_symlink, follow_symlinks) == Some(expected_dev)
 }
 
 /// Filter a directory entry by hidden status, `-x` device boundary, gitignore, and `-I` patterns.
@@ -89,7 +134,6 @@ pub fn filter_entry_nogil(
     config: &WalkConfig,
     specs: &[GitignoreMatcher],
     root_dev: Option<u64>,
-    root_canon: Option<&Path>,
     base_root: &Path,
 ) -> Option<(PathBuf, bool, bool, bool)> {
     if !config.include_hidden && is_hidden_name(&entry.file_name) {
@@ -100,13 +144,7 @@ pub fn filter_entry_nogil(
         None => fs::symlink_metadata(&entry.path).is_ok_and(|m| m.file_type().is_symlink()),
     };
     if config.one_file_system
-        && !check_entry_device(
-            &entry.path,
-            is_symlink,
-            config.follow_symlinks,
-            root_dev,
-            root_canon,
-        )
+        && !check_entry_device(&entry.path, is_symlink, config.follow_symlinks, root_dev)
     {
         return None;
     }

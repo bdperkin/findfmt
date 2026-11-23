@@ -86,6 +86,38 @@ def test_load_git_exclude_spec_pointer_file(tmp_path: Path) -> None:
     assert spec is not None
     assert spec.match_file("file.submod")
 
+    # Linked worktree .git pointer with commondir indirection
+    common_git = tmp_path / "common_repo_git"
+    (common_git / "info").mkdir(parents=True)
+    (common_git / "info" / "exclude").write_text("*.common_excl\n", encoding="utf-8")
+    private_wt = common_git / "worktrees" / "feature_wt"
+    private_wt.mkdir(parents=True)
+    (private_wt / "commondir").write_text("../..\n", encoding="utf-8")
+    linked_wt = tmp_path / "linked_worktree"
+    linked_wt.mkdir()
+    (linked_wt / ".git").write_text(f"gitdir: {private_wt}\n", encoding="utf-8")
+
+    linked_spec = load_git_exclude_spec(linked_wt)
+    assert linked_spec is not None
+    assert linked_spec.match_file("artifact.common_excl")
+
+    # Empty commondir or missing common exclude falls back to private gitdir exclude
+    fallback_wt_git = tmp_path / "fallback_wt_git"
+    (fallback_wt_git / "info").mkdir(parents=True)
+    (fallback_wt_git / "info" / "exclude").write_text("*.priv_excl\n", encoding="utf-8")
+    (fallback_wt_git / "commondir").write_text("   \n", encoding="utf-8")
+    fallback_wt = tmp_path / "fallback_wt"
+    fallback_wt.mkdir()
+    (fallback_wt / ".git").write_text(f"gitdir: {fallback_wt_git}\n", encoding="utf-8")
+    fb_spec = load_git_exclude_spec(fallback_wt)
+    assert fb_spec is not None
+    assert fb_spec.match_file("item.priv_excl")
+
+    (fallback_wt_git / "commondir").write_text("nonexistent_common\n", encoding="utf-8")
+    fb_spec2 = load_git_exclude_spec(fallback_wt)
+    assert fb_spec2 is not None
+    assert fb_spec2.match_file("item.priv_excl")
+
     # Non-gitdir pointer file
     bad_git_file = tmp_path / "bad_git"
     bad_git_file.mkdir()

@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import warnings
+import weakref
 from collections.abc import Iterator
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -32,7 +33,7 @@ def _load_rust_ext() -> types.ModuleType:
 
 
 def test_find_files_rs_streaming_laziness_and_no_handle_leak(tmp_path: Path) -> None:
-    """Verify find_files_rs returns a lazy Iterator[FileInfo] and leaks zero directory handles (#371, #582)."""
+    """Verify find_files_rs returns a lazy Iterator[FileInfo] without handle leaks (#371, #582)."""
     rust_ext = _load_rust_ext()
     for idx in range(12):
         sub = tmp_path / f"dir_{idx:02d}"
@@ -181,3 +182,143 @@ def test_find_files_rs_unreadable_subdir_and_prune_on_error_parity(tmp_path: Pat
             list(rust_ext.find_files_rs(TraversalConfig(root_paths=(tmp_path,)), on_error=_raising_on_error))
     finally:
         locked.chmod(0o755)
+
+
+def test_find_files_rs_gitignore_slash_patterns_unicode_glob_and_sigma_sort(tmp_path: Path) -> None:
+    """Verify ClusterFuzzLite */ gitignore patterns, Unicode ? globs, Unix C: dirs, and final-sigma sort."""
+    rust_ext = _load_rust_ext()
+
+    for pat in ("*/  \n", "*/\n!sub/\n", "**/\n", "/**/\n", "//\n", "/\n"):
+        case_dir = tmp_path / f"gi_{abs(hash(pat))}"
+        case_dir.mkdir(exist_ok=True)
+        (case_dir / ".gitignore").write_text(pat, encoding="utf-8")
+        (case_dir / "root.py").write_text("x = 1\n", encoding="utf-8")
+        sub = case_dir / "sub"
+        sub.mkdir(exist_ok=True)
+        (sub / "nested.py").write_text("y = 2\n", encoding="utf-8")
+        sym = case_dir / "symlink_dir"
+        if not sym.exists() and not sym.is_symlink():
+            sym.symlink_to(sub, target_is_directory=True)
+
+        cfg = TraversalConfig(root_paths=(case_dir,), include_hidden=True, respect_gitignore=True)
+        assert list(rust_ext.find_files_rs(cfg)) == list(_fallback.find_files(cfg))
+
+    glob_dir = tmp_path / "unicode_glob"
+    glob_dir.mkdir()
+    (glob_dir / "é.txt").write_text("1\n", encoding="utf-8")
+    (glob_dir / "ab.txt").write_text("2\n", encoding="utf-8")
+    (glob_dir / "\u039f\u03a3").write_text("3\n", encoding="utf-8")
+    (glob_dir / "\u039f\u03c2a").write_text("4\n", encoding="utf-8")
+    if sys.platform != "win32":
+        c_dir = glob_dir / "C:"
+        c_dir.mkdir()
+        (c_dir / "report.txt").write_text("5\n", encoding="utf-8")
+        cfg_colon = TraversalConfig(root_paths=(glob_dir,), include_patterns=("/C:/report.txt",))
+        assert list(rust_ext.find_files_rs(cfg_colon)) == list(_fallback.find_files(cfg_colon))
+
+        raw_ff = os.fsdecode(os.fsencode(glob_dir) + b"/\xff.txt")
+        Path(raw_ff).write_bytes(b"raw\n")
+        (glob_dir / "\ufffd.txt").write_text("rep\n", encoding="utf-8")
+        cfg_lossless = TraversalConfig(root_paths=(glob_dir,), exclude_patterns=("\ufffd.txt",))
+        assert list(rust_ext.find_files_rs(cfg_lossless)) == list(_fallback.find_files(cfg_lossless))
+
+        ver_dir = tmp_path / "ver_surrogate"
+        ver_dir.mkdir()
+        Path(os.fsdecode(os.fsencode(ver_dir) + b"/\xff_v2.py")).write_bytes(b"x = 1\n")
+        (ver_dir / "\ue000_v2.py").write_text("x = 2\n", encoding="utf-8")
+        cfg_ver = TraversalConfig(root_paths=(ver_dir,), sort_by=SortKey.VERSION)
+        assert list(rust_ext.find_files_rs(cfg_ver)) == list(_fallback.find_files(cfg_ver))
+
+    cfg_q = TraversalConfig(root_paths=(glob_dir,), include_patterns=("?.txt",))
+    assert list(rust_ext.find_files_rs(cfg_q)) == list(_fallback.find_files(cfg_q))
+    cfg_sigma = TraversalConfig(root_paths=(glob_dir,), sort_by=SortKey.NAME, ignore_case=True)
+    assert list(rust_ext.find_files_rs(cfg_sigma)) == list(_fallback.find_files(cfg_sigma))
+
+
+def test_find_files_rs_lazy_roots_depth_prune_memo_and_cyclic_gc(tmp_path: Path) -> None:
+    """Verify lazy root resolution, depth-bounded symlink --prune memoization, and PyO3 cyclic GC."""
+    rust_ext = _load_rust_ext()
+
+    # 1. Lazy second root created after consuming from first root
+    root_a = tmp_path / "lazy_a"
+    root_b = tmp_path / "lazy_b"
+    root_a.mkdir()
+    (root_a / "first.py").write_text("a = 1\n", encoding="utf-8")
+    lazy_cfg = TraversalConfig(root_paths=(root_a, root_b), sort_by=SortKey.NONE)
+    it = rust_ext.find_files_rs(lazy_cfg)
+    first_item = next(it)
+    assert first_item.path.name == "first.py"
+    root_b.mkdir()
+    (root_b / "second.py").write_text("b = 2\n", encoding="utf-8")
+    rest_items = list(it)
+    assert [x.path.name for x in rest_items] == ["second.py"]
+
+    # 2. Depth-limited symlink --prune memoization (p/a/link -> p/z with p/z/child/hit.txt)
+    prune_root = tmp_path / "prune_depth"
+    (prune_root / "a").mkdir(parents=True)
+    (prune_root / "z" / "child").mkdir(parents=True)
+    (prune_root / "z" / "child" / "hit.txt").write_text("ok\n", encoding="utf-8")
+    (prune_root / "a" / "link").symlink_to(prune_root / "z", target_is_directory=True)
+    for rev in (False, True):
+        prune_cfg = TraversalConfig(
+            root_paths=(prune_root,),
+            dirs_only=True,
+            prune_empty=True,
+            follow_symlinks=True,
+            max_depth=3,
+            reverse_sort=rev,
+        )
+        rs_pruned = list(rust_ext.find_files_rs(prune_cfg))
+        py_pruned = list(_fallback.find_files(prune_cfg))
+        assert rs_pruned == py_pruned
+        assert [x.relative_path.as_posix() for x in rs_pruned] == ["z", "z/child"]
+
+    # 3. Cyclic GC collection of owner <-> iterator <-> bound callback cycle
+    class _CycleOwner:
+        def __init__(self, target_root: Path) -> None:
+            self.it: Iterator[FileInfo] | None = rust_ext.find_files_rs(
+                TraversalConfig(root_paths=(target_root,)),
+                on_error=self.handle_err,
+            )
+
+        def handle_err(self, _err: OSError) -> None:
+            pass
+
+    owner = _CycleOwner(root_a)
+    assert owner.it is not None
+    _ = next(owner.it)
+    ref = weakref.ref(owner)
+    del owner
+    gc.collect()
+    assert ref() is None
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32" or (hasattr(os, "geteuid") and os.geteuid() == 0),
+    reason="POSIX chmod required for on_error sibling restoration test",
+)
+def test_find_files_rs_on_error_pauses_before_scanning_sibling_dir(tmp_path: Path) -> None:
+    """Verify on_error runs before scanning sibling directories so restored siblings are traversed."""
+    rust_ext = _load_rust_ext()
+    dir_a = tmp_path / "a_blocked"
+    dir_b = tmp_path / "b_restored"
+    dir_a.mkdir()
+    dir_b.mkdir()
+    (dir_b / "recovered.py").write_text("ok = 1\n", encoding="utf-8")
+    dir_a.chmod(0o000)
+    dir_b.chmod(0o000)
+
+    try:
+
+        def _restore_b_on_a(err: OSError) -> None:
+            if err.filename == str(dir_a.resolve()):
+                dir_b.chmod(0o755)
+
+        cfg = TraversalConfig(root_paths=(tmp_path,), sort_by=SortKey.NAME)
+        rs_names = [x.path.name for x in rust_ext.find_files_rs(cfg, on_error=_restore_b_on_a)]
+        dir_b.chmod(0o000)
+        py_names = [x.path.name for x in _fallback.find_files(cfg, on_error=_restore_b_on_a)]
+        assert rs_names == py_names == ["recovered.py"]
+    finally:
+        dir_a.chmod(0o755)
+        dir_b.chmod(0o755)

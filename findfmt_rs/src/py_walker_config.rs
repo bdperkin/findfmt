@@ -1,6 +1,6 @@
-//! Python `TraversalConfig` extraction and root path resolution for `RustFileIterator` (#582).
+//! Python `TraversalConfig` extraction and lazy root path resolution for `RustFileIterator` (#582).
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 
 use pyo3::prelude::*;
@@ -96,10 +96,7 @@ fn ensure_oserror_filename(
     fallback_root: &Bound<'_, PyAny>,
 ) -> PyResult<()> {
     let cur_fn = err_val.getattr("filename")?;
-    let is_empty = cur_fn.is_none()
-        || cur_fn
-            .extract::<String>()
-            .is_ok_and(|s| s.is_empty());
+    let is_empty = cur_fn.is_none() || cur_fn.extract::<String>().is_ok_and(|s| s.is_empty());
     if is_empty {
         let root_str = fallback_root.str()?;
         let _ = err_val.setattr("filename", root_str);
@@ -108,7 +105,8 @@ fn ensure_oserror_filename(
     Ok(())
 }
 
-fn resolve_single_root_py<'py>(
+/// Resolve a single Python root `Path` immediately prior to walking it (`engine.py` lazy parity).
+pub(crate) fn resolve_single_root_py<'py>(
     py: Python<'py>,
     handles: &PyHandles,
     root_obj: &Bound<'py, PyAny>,
@@ -210,12 +208,12 @@ const fn libc_enoent() -> i32 {
     2
 }
 
-/// Extract `WalkConfig`, pre-resolved `RootTarget`s, and root-level `OSError`s, or return `None` when `from_file` is set.
+/// Extract `WalkConfig`, ordered pending root objects, and `relative_prefix`, or `None` when `from_file` is set.
 pub(crate) fn prepare_walk_from_py_config<'py>(
     py: Python<'py>,
     handles: &PyHandles,
     config_obj: &Bound<'py, PyAny>,
-) -> PyResult<Option<(WalkConfig, Vec<RootTarget>, Vec<(usize, Py<PyAny>)>)>> {
+) -> PyResult<Option<(WalkConfig, VecDeque<Py<PyAny>>, bool)>> {
     let max_depth = extract_optional_non_negative(py, handles, config_obj, "max_depth")?;
     let file_limit = extract_optional_non_negative(py, handles, config_obj, "file_limit")?;
 
@@ -272,16 +270,9 @@ pub(crate) fn prepare_walk_from_py_config<'py>(
         handles.sorted_fn.bind(py).call1((raw_roots_obj,))?
     };
 
-    let mut targets = Vec::new();
-    let mut root_errors = Vec::new();
-    for (idx, item_res) in ordered_roots.try_iter()?.enumerate() {
-        let root_obj = item_res?;
-        let (target, maybe_err) =
-            resolve_single_root_py(py, handles, &root_obj, follow_symlinks, relative_prefix)?;
-        if let Some(py_err) = maybe_err {
-            root_errors.push((idx, py_err));
-        }
-        targets.push(target);
+    let mut pending_roots = VecDeque::new();
+    for item_res in ordered_roots.try_iter()? {
+        pending_roots.push_back(item_res?.unbind());
     }
 
     let walk_cfg = WalkConfig {
@@ -306,5 +297,5 @@ pub(crate) fn prepare_walk_from_py_config<'py>(
         pathext_upper: windows_pathext_upper(),
         mime_snapshot: snapshot_live_mime_db(py)?,
     };
-    Ok(Some((walk_cfg, targets, root_errors)))
+    Ok(Some((walk_cfg, pending_roots, relative_prefix)))
 }

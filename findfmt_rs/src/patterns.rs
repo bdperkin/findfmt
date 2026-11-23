@@ -3,9 +3,7 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
-use ignore::Match;
-use ignore::gitignore::{Gitignore, GitignoreBuilder};
-
+use crate::glob_u32::{GlobSpecU32, path_to_u32_segments};
 use crate::shebang::py_strip;
 use crate::tags::{FilterCriteria, TagRegistry};
 
@@ -76,7 +74,7 @@ pub fn split_pattern_alternations(pattern: &str) -> Vec<String> {
     parts
 }
 
-fn compile_pattern_gitignore(patterns: &[String], ignore_case: bool) -> Option<Gitignore> {
+fn compile_pattern_spec(patterns: &[String], ignore_case: bool) -> Option<GlobSpecU32> {
     if patterns.is_empty() {
         return None;
     }
@@ -84,63 +82,32 @@ fn compile_pattern_gitignore(patterns: &[String], ignore_case: bool) -> Option<G
     for pat in patterns {
         lines.extend(split_pattern_alternations(pat));
     }
-    if lines.is_empty() {
-        return None;
-    }
-    let mut builder = GitignoreBuilder::new(Path::new(""));
-    builder.case_insensitive(ignore_case).ok()?;
-    for line in &lines {
-        let _ = builder.add_line(None, line);
-    }
-    builder.build().ok()
+    GlobSpecU32::from_lines(&lines, ignore_case)
 }
 
-fn strip_root_prefix_str(s: &str) -> &str {
-    let bytes = s.as_bytes();
-    let without_drive = if bytes.len() >= 3 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' && bytes[2] == b'/' {
-        &s[3..]
+fn match_spec_u32(
+    spec: &GlobSpecU32,
+    rel_segs: &[Vec<u32>],
+    name_opt: Option<&Vec<u32>>,
+    is_dir: bool,
+) -> bool {
+    let name_slice = name_opt.map_or(&[][..], std::slice::from_ref);
+    if is_dir {
+        spec.matches_segments(rel_segs, true)
+            || (!name_slice.is_empty() && spec.matches_segments(name_slice, true))
+            || spec.matches_segments(rel_segs, false)
+            || (!name_slice.is_empty() && spec.matches_segments(name_slice, false))
     } else {
-        s
-    };
-    without_drive.trim_matches('/')
-}
-
-fn match_gitignore_spec(spec: &Gitignore, rel_posix: &str, name: &str, is_dir: bool) -> bool {
-    let clean_rel = strip_root_prefix_str(rel_posix);
-    let clean_name = name.trim_matches('/');
-    (!clean_rel.is_empty()
-        && matches!(
-            spec.matched_path_or_any_parents(Path::new(clean_rel), is_dir),
-            Match::Ignore(_)
-        ))
-        || (!clean_name.is_empty()
-            && matches!(spec.matched(Path::new(clean_name), is_dir), Match::Ignore(_)))
-}
-
-/// Convert `path` (optionally stripped of `base_root`) into `(posix_rel, basename)` strings.
-pub fn to_posix_and_name(path: &Path, base_root: Option<&Path>) -> (String, String) {
-    let rel = match base_root {
-        Some(base) => path.strip_prefix(base).unwrap_or(path),
-        None => path,
-    };
-    let raw_rel = rel.to_string_lossy();
-    let posix_rel = if cfg!(windows) {
-        raw_rel.replace('\\', "/")
-    } else {
-        raw_rel.into_owned()
-    };
-    let name = rel
-        .file_name()
-        .or_else(|| path.file_name())
-        .map_or_else(String::new, |n| n.to_string_lossy().into_owned());
-    (posix_rel, name)
+        spec.matches_segments(rel_segs, false)
+            || (!name_slice.is_empty() && spec.matches_segments(name_slice, false))
+    }
 }
 
 /// Compiled include (`-P`) and exclude (`-I`) pattern matcher mirroring `PatternMatcher` in `patterns.py`.
 #[derive(Clone, Debug, Default)]
 pub struct PatternMatcher {
-    include_spec: Option<Gitignore>,
-    exclude_spec: Option<Gitignore>,
+    include_spec: Option<GlobSpecU32>,
+    exclude_spec: Option<GlobSpecU32>,
     pub ignore_case: bool,
     pub match_dirs: bool,
 }
@@ -154,8 +121,8 @@ impl PatternMatcher {
         match_dirs: bool,
     ) -> Self {
         Self {
-            include_spec: compile_pattern_gitignore(include_patterns, ignore_case),
-            exclude_spec: compile_pattern_gitignore(exclude_patterns, ignore_case),
+            include_spec: compile_pattern_spec(include_patterns, ignore_case),
+            exclude_spec: compile_pattern_spec(exclude_patterns, ignore_case),
             ignore_case,
             match_dirs,
         }
@@ -169,8 +136,8 @@ impl PatternMatcher {
         let Some(ref spec) = self.exclude_spec else {
             return false;
         };
-        let (rel_str, name) = to_posix_and_name(path, base_root);
-        match_gitignore_spec(spec, &rel_str, &name, is_dir)
+        let (rel_segs, name_opt) = path_to_u32_segments(path, base_root);
+        match_spec_u32(spec, &rel_segs, name_opt.as_ref(), is_dir)
     }
 
     pub fn matches_file(
@@ -188,16 +155,16 @@ impl PatternMatcher {
         if inherited_match {
             return true;
         }
-        let (rel_str, name) = to_posix_and_name(path, base_root);
-        match_gitignore_spec(spec, &rel_str, &name, false)
+        let (rel_segs, name_opt) = path_to_u32_segments(path, base_root);
+        match_spec_u32(spec, &rel_segs, name_opt.as_ref(), false)
     }
 
     pub fn matches_dir(&self, path: &Path, base_root: Option<&Path>) -> bool {
         let Some(ref spec) = self.include_spec else {
             return true;
         };
-        let (rel_str, name) = to_posix_and_name(path, base_root);
-        match_gitignore_spec(spec, &rel_str, &name, true)
+        let (rel_segs, name_opt) = path_to_u32_segments(path, base_root);
+        match_spec_u32(spec, &rel_segs, name_opt.as_ref(), true)
     }
 
     pub fn should_inherit_match(
@@ -235,6 +202,23 @@ impl PatternMatcher {
         }
         self.matches_file(target_rel_or_abs, None, inherited_match)
     }
+}
+
+/// Inspect active tag criteria to skip prefilter stat and MIME lookups when unused (`_pruning.py` parity).
+pub fn tag_prefilter_requirements(criteria: &FilterCriteria) -> (bool, bool, bool) {
+    let active = !criteria.include_tags.is_empty() || !criteria.exclude_tags.is_empty();
+    if !active {
+        return (false, false, false);
+    }
+    let has_generic = GENERIC_TAGS
+        .iter()
+        .any(|&g| criteria.include_tags.contains(g));
+    let needs_include_eval = !criteria.include_tags.is_empty() && !has_generic;
+    let needs_exec = needs_include_eval
+        && INTERPRETER_TAGS
+            .iter()
+            .any(|&it| criteria.include_tags.contains(it));
+    (true, needs_include_eval, needs_exec)
 }
 
 /// Early tag-based file rejection mirroring `src/findfmt/traversal/tags.py:can_skip_file_by_tags`.
@@ -295,23 +279,38 @@ mod tests {
     use super::*;
 
     #[test]
-    fn alternations_and_pattern_matcher_mirror_python_semantics() {
+    fn alternations_unicode_question_colon_dir_and_surrogate_lossless_matching() {
         assert_eq!(
             split_pattern_alternations("  *.py | [a|b].txt | *.rs "),
             vec!["*.py", "[a|b].txt", "*.rs"]
         );
         let matcher = PatternMatcher::new(
-            &["*.py|docs/*.rst".into(), "src/**/*.ts".into(), "[!a-z].dat".into()],
-            &["test_*.py".into(), "build/".into()],
+            &[
+                "*.py|docs/*.rst".into(),
+                "src/**/*.ts".into(),
+                "[!a-z].dat".into(),
+                "?.txt".into(),
+                "/C:/report.md".into(),
+            ],
+            &["test_*.py".into(), "build/".into(), "\u{fffd}.txt".into()],
             false,
             false,
         );
         assert!(matcher.matches_file(Path::new("main.py"), None, false));
         assert!(!matcher.matches_file(Path::new("test_main.py"), None, false));
-        assert!(matcher.matches_file(Path::new("docs/guide.rst"), None, false));
-        assert!(matcher.matches_file(Path::new("src/a/b/app.ts"), None, false));
-        assert!(matcher.matches_file(Path::new("9.dat"), None, false));
-        assert!(!matcher.matches_file(Path::new("a.dat"), None, false));
+        assert!(matcher.matches_file(Path::new("é.txt"), None, false));
+        assert!(matcher.matches_file(Path::new("🚀.txt"), None, false));
+        assert!(!matcher.matches_file(Path::new("ab.txt"), None, false));
+        #[cfg(unix)]
+        {
+            use std::ffi::OsStr;
+            use std::os::unix::ffi::OsStrExt;
+            assert!(matcher.matches_file(Path::new("C:/report.md"), None, false));
+            let raw_ff = Path::new(OsStr::from_bytes(b"\xff.txt"));
+            assert!(matcher.matches_file(raw_ff, None, false));
+            assert!(!matcher.should_exclude(raw_ff, false, None));
+            assert!(matcher.should_exclude(Path::new("\u{fffd}.txt"), false, None));
+        }
         assert!(matcher.should_exclude(Path::new("build"), true, None));
         assert!(!matcher.should_exclude(Path::new("build"), false, None));
     }

@@ -2,6 +2,7 @@
 
 use std::collections::{HashMap, VecDeque};
 
+use pyo3::gc::{PyTraverseError, PyVisit};
 use pyo3::prelude::*;
 
 use crate::classifier::RawClassifyInput;
@@ -11,17 +12,20 @@ use crate::py_bridge::build_py_file_info;
 #[cfg(not(unix))]
 use crate::py_paths::fetch_windows_pre_stat;
 use crate::py_paths::{PyHandles, get_handles, pathbuf_to_py_path, pathbuf_to_py_str};
-use crate::py_walker_config::prepare_walk_from_py_config;
+use crate::py_walker_config::{prepare_walk_from_py_config, resolve_single_root_py};
 use crate::tags::TagRegistry;
 use crate::walker::NativeWalker;
-use crate::walker_types::{RootTarget, WalkConfig, WalkEvent, WalkOsError, WalkYieldItem};
+#[cfg(not(unix))]
+use crate::walker_filter::resolve_relative_pathbuf;
+use crate::walker_types::{WalkConfig, WalkEvent, WalkOsError, WalkYieldItem};
 
 const WALK_BATCH_SIZE: usize = 256;
 
 struct NativeIterDriver {
     walk_cfg: WalkConfig,
+    relative_prefix: bool,
     registry: &'static TagRegistry,
-    remaining_roots: VecDeque<(RootTarget, Option<Py<PyAny>>)>,
+    pending_roots: VecDeque<Py<PyAny>>,
     current_walker: Option<NativeWalker>,
     buffered_events: VecDeque<WalkEvent>,
     on_error: Option<Py<PyAny>>,
@@ -51,6 +55,40 @@ pub struct RustFileIterator {
 impl RustFileIterator {
     fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
+    }
+
+    fn __traverse__(&self, visit: PyVisit<'_>) -> Result<(), PyTraverseError> {
+        match &self.state {
+            IterState::Uninitialized { config, on_error } => {
+                visit.call(config)?;
+                if let Some(cb) = on_error {
+                    visit.call(cb)?;
+                }
+            }
+            IterState::Delegated { py_iter } => {
+                visit.call(py_iter)?;
+            }
+            IterState::Native(driver) => {
+                if let Some(cb) = &driver.on_error {
+                    visit.call(cb)?;
+                }
+                for root_py in &driver.pending_roots {
+                    visit.call(root_py)?;
+                }
+                for u in driver.uid_cache.values() {
+                    visit.call(u)?;
+                }
+                for g in driver.gid_cache.values() {
+                    visit.call(g)?;
+                }
+            }
+            IterState::Exhausted => {}
+        }
+        Ok(())
+    }
+
+    fn __clear__(&mut self) {
+        self.state = IterState::Exhausted;
     }
 
     fn __next__<'py>(&mut self, py: Python<'py>) -> PyResult<Option<Bound<'py, PyAny>>> {
@@ -100,7 +138,7 @@ impl RustFileIterator {
         on_error: Option<Py<PyAny>>,
     ) -> PyResult<()> {
         let handles = get_handles(py)?;
-        let Some((walk_cfg, targets, root_errors)) =
+        let Some((walk_cfg, pending_roots, relative_prefix)) =
             prepare_walk_from_py_config(py, handles, config_obj)?
         else {
             let delegated_gen = handles.ingest_from_file.bind(py).call1((config_obj,))?;
@@ -109,18 +147,12 @@ impl RustFileIterator {
             return Ok(());
         };
 
-        let mut err_by_idx: HashMap<usize, Py<PyAny>> = root_errors.into_iter().collect();
-        let paired_roots: VecDeque<(RootTarget, Option<Py<PyAny>>)> = targets
-            .into_iter()
-            .enumerate()
-            .map(|(idx, tgt)| (tgt, err_by_idx.remove(&idx)))
-            .collect();
-
         let registry = TagRegistry::global_from_python(py)?;
         self.state = IterState::Native(Box::new(NativeIterDriver {
             walk_cfg,
+            relative_prefix,
             registry,
-            remaining_roots: paired_roots,
+            pending_roots,
             current_walker: None,
             buffered_events: VecDeque::new(),
             on_error,
@@ -164,7 +196,7 @@ fn materialize_yield_item<'py>(
     handles: &PyHandles,
     driver: &mut NativeIterDriver,
     item: WalkYieldItem,
-) -> PyResult<Bound<'py, PyAny>> {
+) -> PyResult<Option<Bound<'py, PyAny>>> {
     let path_obj = pathbuf_to_py_path(py, handles, &item.path)?;
     let root_obj = pathbuf_to_py_path(py, handles, &item.root_path)?;
     let prefix_obj = match item.prefix {
@@ -191,11 +223,23 @@ fn materialize_yield_item<'py>(
             pre_stat,
             pre_guessed_mime,
         };
-        let refreshed = classify_one_nogil(
-            &win_in,
-            driver.registry,
-            driver.walk_cfg.pathext_upper.as_deref(),
-        );
+        let registry = driver.registry;
+        let pathext_ref = driver.walk_cfg.pathext_upper.as_deref();
+        let refreshed = py.detach(|| classify_one_nogil(&win_in, registry, pathext_ref));
+        let is_dir_item = refreshed.is_dir || refreshed.tags.contains("directory");
+        let rel_pb =
+            resolve_relative_pathbuf(&win_in.path, &item.root_path, item.prefix.as_deref());
+        if !driver.walk_cfg.filter.matches(
+            &refreshed.tags,
+            refreshed.shebang.as_deref(),
+            is_dir_item,
+        ) || !driver.walk_cfg.matcher.matches_classified_item(
+            &rel_pb,
+            is_dir_item,
+            item.inherited_match,
+        ) {
+            return Ok(None);
+        }
         (win_in, refreshed)
     };
 
@@ -247,7 +291,7 @@ fn materialize_yield_item<'py>(
     for (k, v) in bound_gid_cache {
         driver.gid_cache.entry(k).or_insert_with(|| v.unbind());
     }
-    Ok(info)
+    Ok(Some(info))
 }
 
 fn step_native_driver<'py>(
@@ -264,7 +308,9 @@ fn step_native_driver<'py>(
                     }
                 }
                 WalkEvent::Item(item) => {
-                    return materialize_yield_item(py, handles, driver, item).map(Some);
+                    if let Some(info) = materialize_yield_item(py, handles, driver, item)? {
+                        return Ok(Some(info));
+                    }
                 }
             }
             continue;
@@ -280,9 +326,16 @@ fn step_native_driver<'py>(
             continue;
         }
 
-        let Some((root_target, maybe_root_err)) = driver.remaining_roots.pop_front() else {
+        let Some(raw_root_py) = driver.pending_roots.pop_front() else {
             return Ok(None);
         };
+        let (root_target, maybe_root_err) = resolve_single_root_py(
+            py,
+            handles,
+            raw_root_py.bind(py),
+            driver.walk_cfg.follow_symlinks,
+            driver.relative_prefix,
+        )?;
         if let (Some(py_err), Some(cb)) = (maybe_root_err, driver.on_error.as_ref()) {
             cb.bind(py).call1((py_err.bind(py),))?;
         }
