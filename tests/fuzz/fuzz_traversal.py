@@ -13,11 +13,6 @@ try:
 except ImportError:
     atheris = None
 
-try:
-    from findfmt import _rust_ext
-except ImportError:
-    _rust_ext = None
-
 if atheris is not None:
     with atheris.instrument_imports():
         from findfmt import _fallback, core
@@ -27,6 +22,11 @@ if atheris is not None:
             load_gitignore_spec,
             matches_filter,
         )
+
+        try:
+            from findfmt import _rust_ext
+        except ImportError:
+            _rust_ext = None
 else:
     from findfmt import _fallback, core
     from findfmt.models import FileInfo, SortKey, TraversalConfig
@@ -35,6 +35,11 @@ else:
         load_gitignore_spec,
         matches_filter,
     )
+
+    try:
+        from findfmt import _rust_ext
+    except ImportError:
+        _rust_ext = None
 
 _SORT_KEYS: tuple[SortKey, ...] = (
     SortKey.NAME,
@@ -150,6 +155,25 @@ def TestOneInput(data: bytes) -> None:  # noqa: N802 - Atheris TestOneInput cont
             py_items = list(_fallback.find_files(config))
             rs_items = list(core.find_files(config))
             assert rs_items == py_items
+
+            if _rust_ext is not None:
+                direct_walker = getattr(_rust_ext, "find_files", None)
+                if callable(direct_walker):
+                    assert list(direct_walker(config)) == py_items
+
+                file_candidates = [item.path for item in py_items if "directory" not in item.tags]
+                if file_candidates:
+                    direct_batch = _rust_ext.classify_batch_rs(
+                        [(p, None, None) for p in file_candidates],
+                        root_path=root,
+                        follow_symlinks=config.follow_symlinks,
+                    )
+                    expected_batch = [
+                        _fallback.classify_file(p, root_path=root, follow_symlinks=config.follow_symlinks)
+                        for p in file_candidates
+                    ]
+                    assert direct_batch == expected_batch
+
             for item in rs_items:
                 assert item.path.exists() or item.is_symlink
 

@@ -243,9 +243,16 @@ def test_cargo_lock_and_third_party_licenses_completeness() -> None:
         for m in re.finditer(r"- \[`([^`]+)` `([^`]+)`\]\(", third_party_text)
         if m.group(1) != "findfmt_rs"
     }
-    assert attributed_pairs, "Expected third-party crate attributions in THIRD_PARTY_LICENSES.md"
-    assert attributed_pairs <= non_dev_pairs, (
-        f"Unexpected or dev-only crate(s) in THIRD_PARTY_LICENSES.md: {attributed_pairs - non_dev_pairs}"
+    # Cargo v4 lockfiles record optional feature edges on crates like `bstr` (`serde_core` / `serde_derive`)
+    # even when the `serde` feature is disabled in the resolved compilation graph.
+    disabled_optional_crates = {"serde_core", "serde_derive"}
+    expected_attributed_pairs = {
+        (name, ver) for name, ver in non_dev_pairs if name not in disabled_optional_crates
+    }
+    assert attributed_pairs == expected_attributed_pairs, (
+        "THIRD_PARTY_LICENSES.md must match the exact transitive non-dev dependency set: "
+        f"missing={expected_attributed_pairs - attributed_pairs}, "
+        f"unexpected={attributed_pairs - expected_attributed_pairs}"
     )
 
     for direct_dep in manifest.get("dependencies", {}):

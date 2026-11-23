@@ -54,7 +54,9 @@ pub struct GitignoreMatcher {
 impl GitignoreMatcher {
     /// Parse and compile `.gitignore` text, returning `(matcher, invalid_line_count)` without panicking.
     pub fn from_text(root: &Path, content: &str) -> (Self, usize) {
-        let mut builder = GitignoreBuilder::new(root);
+        // Bind inner GitignoreBuilder to an empty relative base so `self.root` is stripped
+        // once in `is_ignored` (preventing double-stripping when `root` itself is relative).
+        let mut builder = GitignoreBuilder::new(Path::new(""));
         let mut errors = 0_usize;
         for raw_line in content.split('\n') {
             let trimmed = trim_gitignore_line(raw_line);
@@ -168,6 +170,12 @@ mod tests {
         assert!(matcher.is_ignored(Path::new("/repo/build/artifact.o"), false));
         assert!(!matcher.is_ignored(Path::new(""), false));
         assert!(!matcher.is_ignored(Path::new("/repo/.."), true));
+
+        let rel_root = Path::new("repo");
+        let (rel_matcher, rel_errs) = GitignoreMatcher::from_text(rel_root, "/only.tmp\n");
+        assert_eq!(rel_errs, 0);
+        assert!(rel_matcher.is_ignored(Path::new("repo/only.tmp"), false));
+        assert!(!rel_matcher.is_ignored(Path::new("repo/repo/only.tmp"), false));
 
         assert!(compile_glob_matcher("*.rs", true).is_ok());
         assert!(compile_glob_matcher("[unclosed", false).is_err());

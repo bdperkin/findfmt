@@ -10,6 +10,19 @@ use _rust_ext::gitignore::{
 use _rust_ext::sorting::{compare_natural, decimal_digit_value, natural_sort_key};
 use proptest::prelude::*;
 
+fn encode_in_unicode_decimal_base(mut value: u64, zero_base: u32) -> String {
+    if value == 0 {
+        return char::from_u32(zero_base).expect("valid zero scalar").to_string();
+    }
+    let mut digits = Vec::new();
+    while value > 0 {
+        let rem = u32::try_from(value % 10).expect("digit 0..9");
+        digits.push(char::from_u32(zero_base + rem).expect("valid decimal scalar"));
+        value /= 10;
+    }
+    digits.into_iter().rev().collect()
+}
+
 proptest! {
     #![proptest_config(ProptestConfig {
         cases: 256,
@@ -49,12 +62,17 @@ proptest! {
         suffix in "\\.[a-z]{1,4}",
         n1 in 0_u64..1_000_000_u64,
         n2 in 0_u64..1_000_000_u64,
+        script_base in prop_oneof![Just(0x0660_u32), Just(0x0966_u32), Just(0xFF10_u32), Just(0x1D7CE_u32)],
         big_len_a in 40_usize..80_usize,
         big_len_b in 81_usize..120_usize,
     ) {
         let s1 = format!("{prefix}{n1}{suffix}");
         let s2 = format!("{prefix}{n2}{suffix}");
         prop_assert_eq!(compare_natural(&s1, &s2, false), n1.cmp(&n2));
+
+        let u1 = format!("{prefix}{}{suffix}", encode_in_unicode_decimal_base(n1, script_base));
+        let u2 = format!("{prefix}{}{suffix}", encode_in_unicode_decimal_base(n2, script_base));
+        prop_assert_eq!(compare_natural(&u1, &u2, false), n1.cmp(&n2));
 
         // Arbitrary-precision digit runs beyond u128::MAX never overflow
         let huge_smaller = format!("{prefix}{}{suffix}", "9".repeat(big_len_a));

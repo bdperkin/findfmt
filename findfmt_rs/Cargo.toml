@@ -10,7 +10,7 @@ authors = ["Brandon Perkins <bdperkin@gmail.com>"]
 # standard SPDX `license = "MIT"` satisfies Cargo, cargo-deny, and cargo-about.
 license = "MIT"
 readme = "../README.md"
-homepage = "https://github.com/bdperkin/findfmt"
+homepage = "https://bdperkin.github.io/findfmt"
 repository = "https://github.com/bdperkin/findfmt"
 publish = false
 

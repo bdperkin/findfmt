@@ -1,9 +1,12 @@
 //! Pure-Rust fuzzing entrypoints shared across `cargo-fuzz`, `proptest`, and smoke tests (#585).
 
 use std::collections::BTreeSet;
-use std::fs;
+use std::fs::{self, OpenOptions};
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::classifier::{RawClassifyInput, classify_batch_nogil, classify_one_nogil};
 use crate::gitignore::{GitignoreMatcher, compile_glob_matcher, trim_gitignore_line};
@@ -15,6 +18,7 @@ use crate::sorting::{NaturalSortKey, compare_natural, natural_sort_key};
 use crate::tags::{FilterCriteria, TagRegistry};
 
 static FUZZ_REGISTRY: OnceLock<TagRegistry> = OnceLock::new();
+static SCRATCH_SEQ: AtomicU64 = AtomicU64::new(0);
 
 fn shared_registry() -> &'static TagRegistry {
     FUZZ_REGISTRY.get_or_init(TagRegistry::sample_registry)
@@ -48,8 +52,60 @@ fn sanitize_temp_filename(raw: &str) -> String {
     }
 }
 
-fn fuzz_scratch_dir() -> PathBuf {
-    std::env::temp_dir().join(format!("findfmt_rs_fuzz_{}", std::process::id()))
+fn create_private_scratch_dir() -> Option<PathBuf> {
+    let base = std::env::temp_dir();
+    let pid = std::process::id();
+    for attempt in 0_u32..16_u32 {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_or(0_u128, |d| d.as_nanos());
+        let seq = SCRATCH_SEQ.fetch_add(1, Ordering::Relaxed);
+        let candidate = base.join(format!("findfmt_rs_fuzz_{pid}_{nanos:x}_{seq:x}_{attempt}"));
+        #[cfg(unix)]
+        let created = {
+            use std::os::unix::fs::DirBuilderExt;
+            fs::DirBuilder::new().mode(0o700).create(&candidate)
+        };
+        #[cfg(not(unix))]
+        let created = fs::create_dir(&candidate);
+        if created.is_ok() {
+            return Some(candidate);
+        }
+    }
+    None
+}
+
+fn write_exclusive_sample(dir: &Path, safe_name: &str, payload: &[u8]) -> Option<PathBuf> {
+    let file_path = dir.join(safe_name);
+    let mut file = OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&file_path)
+        .ok()?;
+    file.write_all(payload).ok()?;
+    Some(file_path)
+}
+
+#[allow(clippy::type_complexity)]
+fn build_pre_stat(file_path: Option<&Path>) -> Option<(bool, bool, bool, u64, Option<RawStat>)> {
+    let Some(path) = file_path else {
+        return Some((false, false, false, 0, None));
+    };
+    #[cfg(unix)]
+    {
+        let _ = path;
+        None
+    }
+    #[cfg(not(unix))]
+    {
+        match fs::metadata(path) {
+            Ok(meta) => {
+                let raw = RawStat::from_std_metadata(&meta);
+                Some((false, true, raw.is_reg(), raw.size, Some(raw)))
+            }
+            Err(_) => Some((false, false, false, 0, None)),
+        }
+    }
 }
 
 /// Fuzz filename/MIME splitting, tag tables, mode formatting, and GIL-free file classification.
@@ -87,19 +143,23 @@ pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<Str
         Some(&synth_stat),
     );
 
-    let scratch = fuzz_scratch_dir();
-    let _ = fs::create_dir_all(&scratch);
     let safe_name = sanitize_temp_filename(&raw_name);
-    let file_path = scratch.join(&safe_name);
-    let wrote = fs::write(&file_path, payload).is_ok();
+    let scratch_dir = create_private_scratch_dir();
+    let written_path = scratch_dir
+        .as_deref()
+        .and_then(|dir| write_exclusive_sample(dir, &safe_name, payload));
+    let pre_stat = build_pre_stat(written_path.as_deref());
+    let effective_path = written_path
+        .clone()
+        .unwrap_or_else(|| PathBuf::from(&safe_name));
 
     let input = RawClassifyInput {
-        path: file_path.clone(),
+        path: effective_path,
         str_path: raw_name.into_owned(),
         filename: safe_name,
         follow_symlinks: data.first().is_some_and(|b| (b & 1) == 0),
         accumulated_size: None,
-        pre_stat: (!wrote).then_some((false, false, false, 0, None)),
+        pre_stat,
         pre_guessed_mime: None,
     };
     let pathext = data
@@ -115,7 +175,9 @@ pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<Str
         shebang_filter: None,
     };
     let _ = classify_batch_nogil(std::slice::from_ref(&input), Some(&filter), registry, None);
-    let _ = fs::remove_file(&file_path);
+    if let Some(dir) = scratch_dir {
+        let _ = fs::remove_dir_all(&dir);
+    }
 
     (reconstructed, mode_str.chars().count(), classified.tags)
 }

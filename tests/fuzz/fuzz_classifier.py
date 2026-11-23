@@ -13,18 +13,23 @@ try:
 except ImportError:
     atheris = None
 
-try:
-    from findfmt import _rust_ext
-except ImportError:
-    _rust_ext = None
-
 if atheris is not None:
     with atheris.instrument_imports():
         from findfmt import _fallback, core
         from findfmt.classifier import extract_shebang, get_known_tags
+
+        try:
+            from findfmt import _rust_ext
+        except ImportError:
+            _rust_ext = None
 else:
     from findfmt import _fallback, core
     from findfmt.classifier import extract_shebang, get_known_tags
+
+    try:
+        from findfmt import _rust_ext
+    except ImportError:
+        _rust_ext = None
 
 
 def _build_candidate_path(tmpdir: str, ext: str, selector: int) -> Path:
@@ -78,7 +83,7 @@ def TestOneInput(data: bytes) -> None:  # noqa: N802 - Atheris TestOneInput cont
             py_info = _fallback.classify_file(target_path)
             core_info = core.classify_file(target_path)
             assert core_info == py_info
-            assert py_info.path == target_path.resolve()
+            assert py_info.path == target_path
             assert isinstance(py_info.tags, frozenset)
             assert isinstance(py_info.is_executable, bool)
             assert isinstance(py_info.is_symlink, bool)

@@ -83,15 +83,11 @@ fn should_delegate_colon_to_python(str_path: &str) -> bool {
         return false;
     }
     let bytes = str_path.as_bytes();
-    if cfg!(windows)
+    !(cfg!(windows)
         && bytes.len() >= 2
         && bytes[0].is_ascii_alphabetic()
         && bytes[1] == b':'
-        && !str_path[2..].contains(':')
-    {
-        return false;
-    }
-    true
+        && !str_path[2..].contains(':'))
 }
 
 fn has_url_scheme(str_path: &str) -> bool {
