@@ -238,3 +238,5 @@
 (?i)truthy
 (?i)speedup
 (?i)speedups
+(?i)worktree
+(?i)worktrees
