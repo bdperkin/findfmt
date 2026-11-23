@@ -5,6 +5,7 @@ from __future__ import annotations
 import errno
 import importlib
 import os
+import string
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -16,6 +17,9 @@ from findfmt.models import SortKey, TraversalConfig
 
 if TYPE_CHECKING:
     import types
+    from collections.abc import Callable, Iterator
+
+    from findfmt.models import FileInfo
 
 
 def _load_rust_ext() -> types.ModuleType:
@@ -192,3 +196,141 @@ def test_find_files_rs_on_error_pauses_before_scanning_sibling_dir(tmp_path: Pat
     finally:
         dir_a.chmod(0o755)
         dir_b.chmod(0o755)
+
+
+@pytest.mark.skipif(
+    sys.platform == "win32" or (hasattr(os, "geteuid") and os.geteuid() == 0),
+    reason="POSIX chmod required for mutating on_error bounded prune test",
+)
+def test_find_files_rs_mutating_on_error_invalidates_bounded_prune_memo(tmp_path: Path) -> None:
+    """Verify bounded --prune --dirs-first does not reuse stale ancestor hits across on_error."""
+    rust_ext = _load_rust_ext()
+
+    def _run_once(backend_fn: Callable[..., Iterator[FileInfo]]) -> list[str]:
+        root = tmp_path / ("rs_tree" if backend_fn is rust_ext.find_files_rs else "py_tree")
+        drop_leaf = root / "a_drop" / "child"
+        locked = root / "b_locked"
+        keep_leaf = root / "c_keep" / "child"
+        drop_leaf.mkdir(parents=True)
+        locked.mkdir(parents=True)
+        keep_leaf.mkdir(parents=True)
+        hit = drop_leaf / "hit.txt"
+        hit.write_text("drop\n", encoding="utf-8")
+        (keep_leaf / "hit.txt").write_text("keep\n", encoding="utf-8")
+        locked.chmod(0o000)
+
+        def _mutate_on_err(err: OSError) -> None:
+            if err.filename == str(locked.resolve()) and hit.exists():
+                hit.unlink()
+                drop_leaf.rmdir()
+
+        cfg = TraversalConfig(
+            root_paths=(root,),
+            dirs_only=True,
+            dirs_first=True,
+            prune_empty=True,
+            max_depth=3,
+            sort_by=SortKey.NAME,
+        )
+        try:
+            items = list(backend_fn(cfg, on_error=_mutate_on_err))
+            return [str(x.relative_path.as_posix()) for x in items]
+        finally:
+            locked.chmod(0o755)
+
+    rs_rels = _run_once(rust_ext.find_files_rs)
+    py_rels = _run_once(_fallback.find_files)
+    assert rs_rels == py_rels == ["a_drop/child", "c_keep/child", "c_keep"]
+
+
+def test_find_files_rs_round4_unicode_case_cmd_mode_and_git_config_parity(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify Python re.I equivalences, wide ranges, .cmd DirEntry mode, and GIT_CONFIG parity."""
+    rust_ext = _load_rust_ext()
+
+    uni_dir = tmp_path / "uni_case"
+    uni_dir.mkdir()
+    (uni_dir / "\u017f.txt").write_text("long-s\n", encoding="utf-8")
+    (uni_dir / "\u00d7.txt").write_text("times\n", encoding="utf-8")
+    (uni_dir / "\u00e0.txt").write_text("a-grave\n", encoding="utf-8")
+    for pat in ("[a-z].txt", "[\u00c0-\u0531].txt"):
+        cfg_ci = TraversalConfig(root_paths=(uni_dir,), include_patterns=(pat,), ignore_case=True)
+        assert list(rust_ext.find_files_rs(cfg_ci)) == list(_fallback.find_files(cfg_ci))
+
+    cmd_dir = tmp_path / "cmd_mode"
+    cmd_dir.mkdir()
+    cmd_file = cmd_dir / "run.cmd"
+    cmd_file.write_text("@echo off\r\n", encoding="utf-8")
+    for roots in ((cmd_dir,), (cmd_file,)):
+        cfg_cmd = TraversalConfig(root_paths=roots)
+        assert list(rust_ext.find_files_rs(cfg_cmd)) == list(_fallback.find_files(cfg_cmd))
+
+    repo = tmp_path / "git_cfg_repo"
+    (repo / ".git").mkdir(parents=True)
+    excl_file = tmp_path / "repo_excludes.ign"
+    excl_file.write_text("report.txt\n", encoding="utf-8")
+    (repo / ".git" / "config").write_text(
+        f'[core]\n\texcludesFile = "{excl_file.as_posix()}"\n',
+        encoding="utf-8",
+    )
+    (repo / "report.txt").write_text("visible\n", encoding="utf-8")
+    empty_git_cfg = tmp_path / "empty_gitconfig"
+    empty_git_cfg.write_text("", encoding="utf-8")
+    monkeypatch.setenv("GIT_CONFIG", str(empty_git_cfg))
+    cfg_git = TraversalConfig(root_paths=(repo,), respect_gitignore=True)
+    assert list(rust_ext.find_files_rs(cfg_git)) == list(_fallback.find_files(cfg_git))
+
+    if sys.platform != "win32":
+        nl_dir = tmp_path / "nl_anchor"
+        nl_dir.mkdir()
+        try:
+            (nl_dir / "note\n").write_text("1\n", encoding="utf-8")
+            (nl_dir / "note\nmore").write_text("2\n", encoding="utf-8")
+        except OSError:
+            return
+
+        cfg_nl = TraversalConfig(root_paths=(nl_dir,), include_patterns=("note",))
+        rs_nl = list(rust_ext.find_files_rs(cfg_nl))
+        py_nl = list(_fallback.find_files(cfg_nl))
+        assert rs_nl == py_nl
+        assert len(rs_nl) == 1
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows multi-volume symlink boundary test")
+def test_find_files_rs_windows_cross_volume_unfollowed_symlink_parity(tmp_path: Path) -> None:
+    """Verify -x with unfollowed symlink on root volume pointing to another volume matches fallback."""
+    rust_ext = _load_rust_ext()
+    root_dev = tmp_path.stat().st_dev
+    other_target: Path | None = None
+    for letter in string.ascii_uppercase:
+        drive = Path(f"{letter}:\\")
+        try:
+            if drive.exists() and drive.stat().st_dev != root_dev:
+                other_target = drive
+                break
+        except OSError:
+            continue
+
+    if other_target is None:
+        pytest.skip("No secondary volume available on this Windows host")
+
+    link_path = tmp_path / "cross_vol_link"
+    try:
+        link_path.symlink_to(other_target, target_is_directory=True)
+    except OSError:
+        pytest.skip("Windows symlink privilege not enabled")
+
+    for follow in (False, True):
+        cfg = TraversalConfig(
+            root_paths=(tmp_path,),
+            one_file_system=True,
+            follow_symlinks=follow,
+            max_depth=1,
+        )
+        rs_res = list(rust_ext.find_files_rs(cfg))
+        py_res = list(_fallback.find_files(cfg))
+        assert rs_res == py_res
+        if not follow:
+            assert [x.path.name for x in rs_res] == ["cross_vol_link"]

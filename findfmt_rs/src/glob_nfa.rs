@@ -1,28 +1,6 @@
-//! Linear-time Thompson NFA compiler and evaluator for `pathspec` `GitIgnoreBasicPattern` (#582).
+//! Linear-time Thompson NFA compiler for `pathspec` `GitIgnoreBasicPattern` (#582).
 
 use crate::shebang::py_rstrip;
-
-#[inline]
-pub(crate) fn fold_cp(cp: u32, ignore_case: bool) -> u32 {
-    if !ignore_case {
-        return cp;
-    }
-    // Python `re.IGNORECASE` treats Greek 'Σ' (0x03A3), 'σ' (0x03C3), and 'ς' (0x03C2) identically.
-    if cp == 0x03C2 {
-        return 0x03C3;
-    }
-    let Some(ch) = char::from_u32(cp) else {
-        return cp;
-    };
-    let mut lower = ch.to_lowercase();
-    let first = lower.next().unwrap_or(ch);
-    if lower.next().is_none() {
-        let lcp = u32::from(first);
-        if lcp == 0x03C2 { 0x03C3 } else { lcp }
-    } else {
-        cp
-    }
-}
 
 #[derive(Clone, Debug)]
 pub(crate) enum Inst {
@@ -56,7 +34,7 @@ struct InvalidGlob;
 fn try_parse_bracket(
     chars: &[char],
     start: usize,
-    ignore_case: bool,
+    next_rbracket: &[Option<usize>],
 ) -> Result<Option<(Inst, usize)>, InvalidGlob> {
     let mut j = start + 1;
     if j < chars.len() && (chars[j] == '!' || chars[j] == '^') {
@@ -65,20 +43,17 @@ fn try_parse_bracket(
     if j < chars.len() && chars[j] == ']' {
         j += 1;
     }
-    while j < chars.len() && chars[j] != ']' {
-        j += 1;
-    }
-    if j >= chars.len() {
+    let Some(close_idx) = next_rbracket.get(j).copied().flatten() else {
         return Ok(None);
-    }
+    };
 
     let mut body_start = start + 1;
     let mut negated = false;
-    if body_start < j && (chars[body_start] == '!' || chars[body_start] == '^') {
+    if body_start < close_idx && (chars[body_start] == '!' || chars[body_start] == '^') {
         negated = true;
         body_start += 1;
     }
-    let body = &chars[body_start..j];
+    let body = &chars[body_start..close_idx];
     let mut k = 0_usize;
     let mut ranges: Vec<(u32, u32)> = Vec::new();
     while k < body.len() {
@@ -93,26 +68,26 @@ fn try_parse_bracket(
             if lo_raw > hi_raw {
                 return Err(InvalidGlob);
             }
-            if ignore_case && hi_raw.saturating_sub(lo_raw) <= 1024 {
-                for raw_cp in lo_raw..=hi_raw {
-                    let f = fold_cp(raw_cp, true);
-                    ranges.push((f, f));
-                }
-            } else {
-                let flo = fold_cp(lo_raw, ignore_case);
-                let fhi = fold_cp(hi_raw, ignore_case);
-                ranges.push((flo.min(fhi), flo.max(fhi)));
-            }
+            ranges.push((lo_raw, hi_raw));
         } else {
-            let f = fold_cp(u32::from(lo_ch), ignore_case);
-            ranges.push((f, f));
+            let raw = u32::from(lo_ch);
+            ranges.push((raw, raw));
         }
     }
-    Ok(Some((Inst::Class { negated, ranges }, j + 1)))
+    Ok(Some((Inst::Class { negated, ranges }, close_idx + 1)))
 }
 
-fn emit_segment_glob(prog: &mut Vec<Inst>, seg: &str, ignore_case: bool) -> Result<(), InvalidGlob> {
+fn emit_segment_glob(prog: &mut Vec<Inst>, seg: &str) -> Result<(), InvalidGlob> {
     let chars: Vec<char> = seg.chars().collect();
+    let mut next_rbracket = vec![None; chars.len() + 1];
+    let mut last_rb = None;
+    for idx in (0..chars.len()).rev() {
+        if chars[idx] == ']' {
+            last_rb = Some(idx);
+        }
+        next_rbracket[idx] = last_rb;
+    }
+
     let mut k = 0_usize;
     while k < chars.len() {
         match chars[k] {
@@ -121,7 +96,7 @@ fn emit_segment_glob(prog: &mut Vec<Inst>, seg: &str, ignore_case: bool) -> Resu
                 let Some(&esc) = chars.get(k) else {
                     return Err(InvalidGlob);
                 };
-                prog.push(Inst::Char(fold_cp(u32::from(esc), ignore_case)));
+                prog.push(Inst::Char(u32::from(esc)));
                 k += 1;
             }
             '*' => {
@@ -141,7 +116,7 @@ fn emit_segment_glob(prog: &mut Vec<Inst>, seg: &str, ignore_case: bool) -> Resu
                 prog.push(Inst::NonSlash);
                 k += 1;
             }
-            '[' => match try_parse_bracket(&chars, k, ignore_case)? {
+            '[' => match try_parse_bracket(&chars, k, &next_rbracket)? {
                 Some((cls_inst, next_k)) => {
                     prog.push(cls_inst);
                     k = next_k;
@@ -152,7 +127,7 @@ fn emit_segment_glob(prog: &mut Vec<Inst>, seg: &str, ignore_case: bool) -> Resu
                 }
             },
             ch => {
-                prog.push(Inst::Char(fold_cp(u32::from(ch), ignore_case)));
+                prog.push(Inst::Char(u32::from(ch)));
                 k += 1;
             }
         }
@@ -161,10 +136,7 @@ fn emit_segment_glob(prog: &mut Vec<Inst>, seg: &str, ignore_case: bool) -> Resu
 }
 
 /// Compile a single rule line mirroring `pathspec`'s `GitIgnoreBasicPattern.pattern_to_regex`.
-pub(crate) fn compile_gitignore_rule(
-    raw_line: &str,
-    ignore_case: bool,
-) -> Result<Option<CompiledRuleU32>, String> {
+pub(crate) fn compile_gitignore_rule(raw_line: &str) -> Result<Option<CompiledRuleU32>, String> {
     let trimmed = if raw_line.ends_with(r"\ ") {
         raw_line
     } else {
@@ -211,12 +183,6 @@ pub(crate) fn compile_gitignore_rule(
             RuleKind::AnyDot
         };
         return Ok(Some(CompiledRuleU32 { negated, kind }));
-    }
-    if segs.len() == 2 && segs[0] == "**" && segs[1] == "*" {
-        return Ok(Some(CompiledRuleU32 {
-            negated,
-            kind: RuleKind::AnyDot,
-        }));
     }
     if segs.len() == 3 && segs[0] == "**" && segs[1] == "*" && segs[2] == "**" {
         return Ok(Some(CompiledRuleU32 {
@@ -265,7 +231,7 @@ pub(crate) fn compile_gitignore_rule(
                 let pc_loop = prog.len();
                 prog.push(Inst::Split(pc_ns, pc_loop + 1));
             } else {
-                emit_segment_glob(&mut prog, seg, ignore_case)
+                emit_segment_glob(&mut prog, seg)
                     .map_err(|_| format!("Invalid git pattern: {raw_line:?}"))?;
             }
             if i == end {

@@ -173,7 +173,15 @@ impl GitignoreMatcher {
             return false;
         }
         let (segs, _) = path_to_u32_segments(&clean, None);
-        self.spec.matches_segments(&segs, is_dir)
+        if let Some(decision) = self.spec.check_segments(&segs, is_dir) {
+            return decision;
+        }
+        for prefix_len in (1..segs.len()).rev() {
+            if let Some(decision) = self.spec.check_segments(&segs[..prefix_len], true) {
+                return decision;
+            }
+        }
+        false
     }
 }
 
@@ -249,6 +257,9 @@ mod tests {
             single_slash.check_scoped(Path::new("/repo/a"), false),
             Some(true)
         );
+
+        let (build_star, _) = GitignoreMatcher::from_text(root, "/build/*\n");
+        assert!(build_star.is_ignored(Path::new("/repo/build/cache/item.txt"), false));
 
         let rules = "*.log\r\n!keep.log\r/root_only.tmp\nbuild/\n[z-a]\n\\\n";
         let (matcher, errs) = GitignoreMatcher::from_text(root, rules);

@@ -266,12 +266,18 @@ pub(crate) fn deliver_walk_os_error(
         #[cfg(windows)]
         {
             let _ = handles;
-            pyo3::exceptions::PyOSError::new_err((
-                0_i32,
-                err.message.clone(),
-                filename_py.unbind(),
-                code,
-            ))
+            let sys_msg = py
+                .import("_winapi")
+                .and_then(|m| m.call_method1("FormatMessage", (code,)))
+                .and_then(|v| v.extract::<String>())
+                .map(|s| s.trim_end_matches(['\r', '\n', ' ', '.']).to_owned())
+                .unwrap_or_else(|_| {
+                    err.message
+                        .strip_suffix(&format!(" (os error {code})"))
+                        .unwrap_or(&err.message)
+                        .to_owned()
+                });
+            pyo3::exceptions::PyOSError::new_err((0_i32, sys_msg, filename_py.unbind(), code))
         }
         #[cfg(not(windows))]
         {

@@ -9,6 +9,7 @@
 pub mod classifier;
 pub mod fuzz_entrypoints;
 pub mod gitignore;
+mod glob_case;
 mod glob_nfa;
 pub mod glob_u32;
 pub mod header;

@@ -80,13 +80,25 @@ pub enum PruneCache {
     },
 }
 
+/// Tri-state outcome for pre-resolved global gitignore discovery (`#582`).
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub enum GlobalIgnoreResolution {
+    /// No Python lookup was performed; fall back to native INI/XDG discovery.
+    #[default]
+    Unresolved,
+    /// Python lookup completed (or suppressed a `PyException`) and found no active file.
+    ResolvedNone,
+    /// Python lookup resolved a concrete global gitignore path.
+    ResolvedPath(PathBuf),
+}
+
 /// Pre-resolved root target passed into `NativeWalker`.
 #[derive(Clone, Debug)]
 pub struct RootTarget {
     pub raw_root: PathBuf,
     pub resolved_root: Option<PathBuf>,
     pub prefix: Option<PathBuf>,
-    pub global_gitignore: Option<PathBuf>,
+    pub global_gitignore: GlobalIgnoreResolution,
     pub initial_error: Option<WalkOsError>,
 }
 

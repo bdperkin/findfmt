@@ -13,7 +13,9 @@ use crate::py_paths::{
     PyHandles, pathbuf_to_py_path, py_path_to_pathbuf, windows_pathext_upper,
 };
 use crate::tags::FilterCriteria;
-use crate::walker_types::{MimeSnapshot, RootTarget, WalkConfig, WalkSortKey};
+use crate::walker_types::{
+    GlobalIgnoreResolution, MimeSnapshot, RootTarget, WalkConfig, WalkSortKey,
+};
 
 type ResolvedRootStep<'py> = (Option<Bound<'py, PyAny>>, Option<Py<PyAny>>);
 pub(crate) type PreparedWalk = (WalkConfig, VecDeque<Py<PyAny>>, bool);
@@ -202,17 +204,22 @@ pub(crate) fn resolve_single_root_py<'py>(
 
     let global_gitignore = if let Some(rpb) = resolved_pb.as_ref().filter(|_| respect_gitignore) {
         let base_dir = find_git_repo_root(rpb).unwrap_or_else(|| rpb.clone());
-        match pathbuf_to_py_path(py, handles, &base_dir).ok() {
-            None => None,
-            Some(bp) => match handles.find_global_gitignore_path.bind(py).call1((bp,)) {
-                Ok(res) if res.is_none() => None,
-                Ok(res) => py_path_to_pathbuf(py, handles, &res).ok().map(|t| t.0),
-                Err(err) if err.is_instance_of::<pyo3::exceptions::PyException>(py) => None,
+        match pathbuf_to_py_path(py, handles, &base_dir) {
+            Ok(bp) => match handles.find_global_gitignore_path.bind(py).call1((bp,)) {
+                Ok(res) if res.is_none() => GlobalIgnoreResolution::ResolvedNone,
+                Ok(res) => match py_path_to_pathbuf(py, handles, &res) {
+                    Ok((pb, _, _, _)) => GlobalIgnoreResolution::ResolvedPath(pb),
+                    Err(_) => GlobalIgnoreResolution::ResolvedNone,
+                },
+                Err(err) if err.is_instance_of::<pyo3::exceptions::PyException>(py) => {
+                    GlobalIgnoreResolution::ResolvedNone
+                }
                 Err(err) => return Err(err),
             },
+            Err(_) => GlobalIgnoreResolution::Unresolved,
         }
     } else {
-        None
+        GlobalIgnoreResolution::Unresolved
     };
 
     Ok((

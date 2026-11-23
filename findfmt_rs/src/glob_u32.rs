@@ -2,8 +2,14 @@
 
 use std::path::{Component, Path};
 
-use crate::glob_nfa::{CompiledRuleU32, Inst, RuleKind, compile_gitignore_rule, fold_cp};
+use crate::glob_case::re_ignorecase_equivalents;
+use crate::glob_nfa::{CompiledRuleU32, Inst, RuleKind, compile_gitignore_rule};
 use crate::walker_types::surrogateescape_codepoints;
+
+#[inline]
+fn at_end_pos(text: &[u32], pos: usize) -> bool {
+    pos == text.len() || (pos + 1 == text.len() && text[pos] == u32::from('\n'))
+}
 
 fn add_epsilon_states(
     prog: &[Inst],
@@ -49,26 +55,43 @@ fn eval_rule(kind: &RuleKind, text: &[u32], ignore_case: bool) -> bool {
             let mut visited = vec![false; prog.len()];
             let mut stack = Vec::with_capacity(prog.len());
 
-            if add_epsilon_states(prog, 0, text.is_empty(), &mut curr, &mut visited, &mut stack) {
+            if add_epsilon_states(
+                prog,
+                0,
+                at_end_pos(text, 0),
+                &mut curr,
+                &mut visited,
+                &mut stack,
+            ) {
                 return true;
             }
             for (idx, &raw_cp) in text.iter().enumerate() {
                 if curr.is_empty() {
                     return false;
                 }
-                let next_at_end = idx + 1 == text.len();
-                let folded = fold_cp(raw_cp, ignore_case);
+                let next_at_end = at_end_pos(text, idx + 1);
+                let (equivs, eq_len) = if ignore_case {
+                    re_ignorecase_equivalents(raw_cp)
+                } else {
+                    ([raw_cp, 0, 0, 0], 1)
+                };
+                let eq_slice = &equivs[..eq_len];
                 next.clear();
                 visited.fill(false);
                 for &pc in &curr {
                     let ok = match prog[pc] {
                         Inst::AnyNonNewline => raw_cp != u32::from('\n'),
                         Inst::NonSlash => raw_cp != u32::from('/'),
-                        Inst::Char(exp) => folded == exp,
+                        Inst::Char(exp) => eq_slice.contains(&exp),
                         Inst::Class {
                             negated,
                             ref ranges,
-                        } => ranges.iter().any(|&(lo, hi)| folded >= lo && folded <= hi) != negated,
+                        } => {
+                            ranges
+                                .iter()
+                                .any(|&(lo, hi)| eq_slice.iter().any(|&c| c >= lo && c <= hi))
+                                != negated
+                        }
                         Inst::Split(_, _) | Inst::End | Inst::Match => false,
                     };
                     if ok
@@ -129,7 +152,7 @@ impl GlobSpecU32 {
         }
         let mut rules = Vec::with_capacity(lines.len());
         for line in lines {
-            if let Some(compiled) = compile_gitignore_rule(line, ignore_case)? {
+            if let Some(compiled) = compile_gitignore_rule(line)? {
                 rules.push(compiled);
             }
         }
@@ -144,7 +167,7 @@ impl GlobSpecU32 {
         let mut rules = Vec::new();
         let mut errors = 0_usize;
         for line in lines {
-            match compile_gitignore_rule(line, ignore_case) {
+            match compile_gitignore_rule(line) {
                 Ok(Some(compiled)) => rules.push(compiled),
                 Ok(None) => {}
                 Err(_) => errors += 1,
@@ -200,4 +223,36 @@ pub fn path_to_u32_segments(
         .map(|n| surrogateescape_codepoints(n, false))
         .filter(|v| !v.is_empty());
     (segs, name_cps)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn segs(s: &str) -> Vec<Vec<u32>> {
+        vec![s.chars().map(u32::from).collect()]
+    }
+
+    #[test]
+    fn ignore_case_equivalences_wide_ranges_unclosed_brackets_and_final_newline() {
+        let (ci_az, _) = GlobSpecU32::from_lines_lenient(["[a-z].txt"], true);
+        let (cs_az, _) = GlobSpecU32::from_lines_lenient(["[a-z].txt"], false);
+        assert!(ci_az.matches_segments(&segs("ſ.txt"), false));
+        assert!(ci_az.matches_segments(&segs("K.txt"), false));
+        assert!(!cs_az.matches_segments(&segs("ſ.txt"), false));
+
+        let (wide, _) = GlobSpecU32::from_lines_lenient(["[À-Ա].txt"], true);
+        assert!(wide.matches_segments(&segs("×.txt"), false));
+        assert!(wide.matches_segments(&segs("à.txt"), false));
+        assert!(wide.matches_segments(&segs("ա.txt"), false));
+
+        let many_open = format!("{}tail", "[".repeat(512));
+        let (unclosed, errs) = GlobSpecU32::from_lines_lenient([many_open.as_str()], false);
+        assert_eq!(errs, 0);
+        assert!(unclosed.matches_segments(&segs(&many_open), false));
+
+        let (note, _) = GlobSpecU32::from_lines_lenient(["note"], false);
+        assert!(note.matches_segments(&segs("note\n"), false));
+        assert!(!note.matches_segments(&segs("note\nmore"), false));
+    }
 }

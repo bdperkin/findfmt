@@ -181,11 +181,14 @@ fn materialize_yield_item<'py>(
     let (raw_input, raw_classified) = {
         let mut pre = fetch_windows_pre_stat(py, &path_obj, None, item.follow_symlinks);
         // Mirror `os.DirEntry.stat()` on Windows (`WIN32_FIND_DATA` caches `st_ino=0, st_dev=0`
-        // unless `follow_symlinks=True` resolves a symlink target via `os.stat`).
+        // and regular-file mode `0o666`/`0o444` unless `follow_symlinks=True` resolves a symlink).
         if item.has_entry && (!pre.0 || !item.follow_symlinks) {
             if let Some(ref mut raw) = pre.4 {
                 raw.ino = Some(0);
                 raw.dev = Some(0);
+                if raw.is_reg() {
+                    raw.mode = 0o100_000 | if (raw.mode & 0o200) == 0 { 0o444 } else { 0o666 };
+                }
             }
         }
         let pre_stat = Some(pre);
@@ -203,6 +206,9 @@ fn materialize_yield_item<'py>(
         let pathext_ref = driver.walk_cfg.pathext_upper.as_deref();
         let refreshed = py.detach(|| classify_one_nogil(&win_in, registry, pathext_ref));
         let is_dir_item = refreshed.is_dir || refreshed.tags.contains("directory");
+        if driver.walk_cfg.dirs_only && !is_dir_item {
+            return Ok(None);
+        }
         let rel_pb =
             resolve_relative_pathbuf(&win_in.path, &item.root_path, item.prefix.as_deref());
         if !driver.walk_cfg.filter.matches(

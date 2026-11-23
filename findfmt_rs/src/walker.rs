@@ -183,7 +183,7 @@ impl NativeWalker {
             self.config.respect_gitignore,
             self.config.custom_gitignore_file.as_deref(),
             self.config.home_dir.as_deref(),
-            target.global_gitignore.as_deref(),
+            &target.global_gitignore,
         );
 
         let mut root_state = ActiveRootState {

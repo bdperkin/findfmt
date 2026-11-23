@@ -102,7 +102,7 @@ impl PruneSearch {
                     {
                         parent.had_incomplete_child = true;
                     }
-                    if !popped.had_incomplete_child {
+                    if !popped.had_incomplete_child && config.max_depth.is_none() {
                         memo.insert(
                             popped.memo_key,
                             PruneCache::Empty {
@@ -141,13 +141,15 @@ impl PruneSearch {
                 memo,
                 events,
             ) {
-                for frame in &self.frames {
-                    memo.insert(
-                        frame.memo_key.clone(),
-                        PruneCache::Matched {
-                            searched_from_depth: frame.depth,
-                        },
-                    );
+                if config.max_depth.is_none() {
+                    for frame in &self.frames {
+                        memo.insert(
+                            frame.memo_key.clone(),
+                            PruneCache::Matched {
+                                searched_from_depth: frame.depth,
+                            },
+                        );
+                    }
                 }
                 self.frames.clear();
                 self.visited.clear();

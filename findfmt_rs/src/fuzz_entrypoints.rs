@@ -18,7 +18,9 @@ use crate::shebang::{extract_shebang_from_buffer, parse_shebang_tokens, py_strip
 use crate::sorting::{NaturalSortKey, compare_natural, natural_sort_key};
 use crate::tags::{FilterCriteria, TagRegistry};
 use crate::walker::NativeWalker;
-use crate::walker_types::{MimeSnapshot, RootTarget, WalkConfig, WalkSortKey};
+use crate::walker_types::{
+    GlobalIgnoreResolution, MimeSnapshot, RootTarget, WalkConfig, WalkSortKey,
+};
 
 static FUZZ_REGISTRY: OnceLock<TagRegistry> = OnceLock::new();
 static SCRATCH_SEQ: AtomicU64 = AtomicU64::new(0);
@@ -241,7 +243,7 @@ pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
             raw_root: dir.clone(),
             resolved_root: Some(dir.clone()),
             prefix: None,
-            global_gitignore: None,
+            global_gitignore: GlobalIgnoreResolution::Unresolved,
             initial_error: None,
         };
         let mut walker = NativeWalker::new(walk_cfg, shared_registry(), vec![target]);
