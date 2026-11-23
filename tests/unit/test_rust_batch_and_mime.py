@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import importlib
 import mimetypes
 import os
@@ -16,6 +18,7 @@ import pytest
 from findfmt import _fallback, classifier, core
 from findfmt.models import FileInfo, TraversalConfig
 from findfmt.traversal._batch_dispatch import RUST_BATCH_CHUNK_SIZE
+from findfmt.traversal._pruning import ACTIVE_RUST_BATCH_HOOKS
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -63,8 +66,11 @@ def test_combined_traversal_batch_filtering_and_gateway_fallbacks(
             include_patterns=("*.txt",),
         ),
     ]
+    monkeypatch.delenv("FINDFMT_NO_EXTENSIONS", raising=False)
+    with contextlib.suppress(ModuleNotFoundError):
+        monkeypatch.setattr(core, "_RUST_EXT", importlib.import_module("findfmt._rust_ext"))
+
     for cfg in configs:
-        monkeypatch.delenv("FINDFMT_NO_EXTENSIONS", raising=False)
         rust_results = list(core.find_files(cfg))
         py_results = list(_fallback.find_files(cfg))
         assert rust_results == py_results
@@ -115,13 +121,14 @@ def test_combined_traversal_batch_filtering_and_gateway_fallbacks(
         list(core.find_files(cfg_all))
 
 
-def test_live_mime_refresh_data_uri_and_bounded_chunks(
+def test_live_mime_refresh_and_uri_schemes(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """Verify runtime mimetypes.add_type, directory-MIME filter parity, data: URIs, and chunking."""
+    """Verify runtime mimetypes.add_type, directory-MIME filter parity, and scheme-prefixed names."""
     rust_ext = _load_rust_ext()
     monkeypatch.delenv("FINDFMT_NO_EXTENSIONS", raising=False)
+    monkeypatch.setattr(core, "_RUST_EXT", rust_ext)
 
     warmup = tmp_path / "warmup.py"
     warmup.write_text("x = 1\n", encoding="utf-8")
@@ -131,29 +138,54 @@ def test_live_mime_refresh_data_uri_and_bounded_chunks(
     custom_file.write_text("payload\n", encoding="utf-8")
     dir_mime_file = tmp_path / "card.dirfmt583"
     dir_mime_file.write_text("BEGIN:VCARD\n", encoding="utf-8")
+    extless_file = tmp_path / "EXTLESS583"
+    extless_file.write_text("plain\n", encoding="utf-8")
+    upper_py = tmp_path / "upper.PY"
+    upper_py.write_text("x = 2\n", encoding="utf-8")
     db = getattr(mimetypes, "_db", None)
     strict_map = db.types_map[True] if db is not None else {}
+    had_empty = "" in strict_map
+    prev_empty = strict_map.get("")
     try:
         mimetypes.add_type("application/x-example583", ".examplefmt583")
         mimetypes.add_type("directory/x-dirfmt583", ".dirfmt583")
-        assert rust_ext.classify_file_rs(custom_file, root_path=tmp_path) == classifier.classify_file(
-            custom_file,
-            root_path=tmp_path,
-        )
+        mimetypes.add_type("application/x-extless583", "")
+        strict_map[".PY"] = "text/x-custom-upper-py"
+        for target in (custom_file, extless_file, upper_py):
+            assert rust_ext.classify_file_rs(target, root_path=tmp_path) == classifier.classify_file(
+                target,
+                root_path=tmp_path,
+            )
+
         sb_cfg = TraversalConfig(root_paths=(tmp_path,), shebang_filter="nonexistent_interp")
         assert list(core.find_files(sb_cfg)) == list(_fallback.find_files(sb_cfg))
     finally:
         strict_map.pop(".examplefmt583", None)
         strict_map.pop(".dirfmt583", None)
+        strict_map.pop(".PY", None)
+        if had_empty and prev_empty is not None:
+            strict_map[""] = prev_empty
+        else:
+            strict_map.pop("", None)
 
     if os.name == "posix":
         uri_dir = tmp_path / "uris"
         uri_dir.mkdir()
         monkeypatch.chdir(uri_dir)
-        for name in ("data:,hello", "data:hello"):
+        for name in ("data:,hello", "data:hello", "http:report.py;v=1"):
             p = Path(name)
             p.write_text("body\n", encoding="utf-8")
             assert rust_ext.classify_file_rs(p) == classifier.classify_file(p)
+
+
+def test_bounded_chunk_batch_emission_and_context_isolation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Verify bounded-chunk streaming and ContextVar hook reset across paused core.find_files yields."""
+    rust_ext = _load_rust_ext()
+    monkeypatch.delenv("FINDFMT_NO_EXTENSIONS", raising=False)
+    monkeypatch.setattr(core, "_RUST_EXT", rust_ext)
 
     chunk_dir = tmp_path / "chunked"
     chunk_dir.mkdir()
@@ -174,8 +206,15 @@ def test_live_mime_refresh_data_uri_and_bounded_chunks(
     chunk_cfg = TraversalConfig(root_paths=(chunk_dir,), include_tags=frozenset({"python"}))
     it = core.find_files(chunk_cfg)
     first_item = next(it)
+    assert ACTIVE_RUST_BATCH_HOOKS.get() is None
     assert first_item.relative_path == Path("f_0000.py")
     assert chunk_sizes == [RUST_BATCH_CHUNK_SIZE]
     rest = list(it)
     assert len(rest) == total - 1
     assert chunk_sizes == [RUST_BATCH_CHUNK_SIZE, 10]
+
+    # Closing a paused core.find_files iterator from a separate ContextVar Context never raises ValueError
+    paused_it = core.find_files(chunk_cfg)
+    assert isinstance(paused_it, types.GeneratorType)
+    _ = next(paused_it)
+    contextvars.copy_context().run(paused_it.close)

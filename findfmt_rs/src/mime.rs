@@ -5,6 +5,7 @@ use pyo3::types::{PyDict, PyTuple};
 
 /// Live view of Python's `mimetypes._db` dictionaries refreshed per classification operation.
 pub struct LiveMimeDb<'py> {
+    guess_type_fn: Bound<'py, PyAny>,
     strict_dict: Bound<'py, PyDict>,
     suffix_map: Bound<'py, PyDict>,
     encodings_map: Bound<'py, PyDict>,
@@ -20,19 +21,30 @@ impl<'py> LiveMimeDb<'py> {
         let db = mime_mod.getattr("_db")?;
         let types_map_tuple = db.getattr("types_map")?.cast_into::<PyTuple>()?;
         Ok(Self {
+            guess_type_fn: mime_mod.getattr("guess_type")?,
             strict_dict: types_map_tuple.get_item(1)?.cast_into::<PyDict>()?,
             suffix_map: db.getattr("suffix_map")?.cast_into::<PyDict>()?,
             encodings_map: db.getattr("encodings_map")?.cast_into::<PyDict>()?,
         })
     }
 
-    /// Match `mimetypes.guess_type(str_path)[0]` against the live Python `mimetypes._db`.
+    /// Match `mimetypes.guess_type(str_path)[0]` against the live Python `mimetypes` engine.
     pub fn guess_mime_type(&self, str_path: &str) -> Option<String> {
+        if has_url_scheme(str_path) {
+            return self
+                .guess_type_fn
+                .call1((str_path,))
+                .ok()
+                .and_then(|res| res.get_item(0).ok())
+                .and_then(|item| item.extract::<Option<String>>().ok())
+                .flatten();
+        }
         let dict_str = |d: &Bound<'py, PyDict>, key: &str| -> Option<String> {
             d.get_item(key).ok().flatten().and_then(|v| v.extract().ok())
         };
-        guess_mime_with_lookup(
+        guess_file_mime_with_lookup(
             str_path,
+            false,
             |k| dict_str(&self.suffix_map, k),
             |k| self.encodings_map.contains(k).unwrap_or(false),
             |k| dict_str(&self.strict_dict, k),
@@ -66,50 +78,84 @@ pub(crate) fn py_splitext_mode(path: &str, posix_only: bool) -> (String, String)
     }
 }
 
+fn has_url_scheme(str_path: &str) -> bool {
+    if let Some(colon_idx) = str_path.find(':') {
+        if colon_idx > 1 {
+            let scheme = &str_path[..colon_idx];
+            return scheme.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
+                && scheme
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'-' | b'.'));
+        }
+    }
+    false
+}
+
+fn scheme_uses_params(scheme_lower: &str) -> bool {
+    scheme_lower.strip_prefix('s') == Some("http")
+        || matches!(
+            scheme_lower,
+            "" | "ftp"
+                | "hdl"
+                | "prospero"
+                | "http"
+                | "imap"
+                | "https"
+                | "rtsp"
+                | "rtsps"
+                | "rtspu"
+                | "sip"
+                | "sips"
+                | "mms"
+                | "sftp"
+                | "tel"
+        )
+}
+
 enum MimeUrlOutcome<'a> {
     DirectMime(Option<String>),
     FilePath { path: &'a str, posix_only: bool },
 }
 
 fn parse_mime_url_or_path(str_path: &str) -> MimeUrlOutcome<'_> {
-    if let Some(colon_idx) = str_path.find(':') {
-        if colon_idx > 1 {
-            let scheme = &str_path[..colon_idx];
-            let valid_scheme = scheme.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
-                && scheme
-                    .bytes()
-                    .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'-' | b'.'));
-            if valid_scheme {
-                let rest = &str_path[colon_idx + 1..];
-                let end = rest.find(['?', '#']).unwrap_or(rest.len());
-                let path_part = match rest[..end].strip_prefix("//") {
-                    Some(after_slashes) => match after_slashes.find('/') {
-                        Some(slash_idx) => &after_slashes[slash_idx..],
-                        None => "",
-                    },
-                    None => &rest[..end],
+    if has_url_scheme(str_path) {
+        if let Some(colon_idx) = str_path.find(':') {
+            let scheme_lower = str_path[..colon_idx].to_ascii_lowercase();
+            let rest = &str_path[colon_idx + 1..];
+            let end = rest.find(['?', '#']).unwrap_or(rest.len());
+            let mut path_part = match rest[..end].strip_prefix("//") {
+                Some(after_slashes) => match after_slashes.find('/') {
+                    Some(slash_idx) => &after_slashes[slash_idx..],
+                    None => "",
+                },
+                None => &rest[..end],
+            };
+            if scheme_lower == "data" {
+                let Some(comma_idx) = path_part.find(',') else {
+                    return MimeUrlOutcome::DirectMime(None);
                 };
-                if scheme.eq_ignore_ascii_case("data") {
-                    let Some(comma_idx) = path_part.find(',') else {
-                        return MimeUrlOutcome::DirectMime(None);
-                    };
-                    let before_comma = &path_part[..comma_idx];
-                    let raw_type = match before_comma.find(';') {
-                        Some(semi_idx) => &before_comma[..semi_idx],
-                        None => before_comma,
-                    };
-                    let mime = if raw_type.contains('=') || !raw_type.contains('/') {
-                        "text/plain".to_owned()
-                    } else {
-                        raw_type.to_owned()
-                    };
-                    return MimeUrlOutcome::DirectMime(Some(mime));
-                }
-                return MimeUrlOutcome::FilePath {
-                    path: path_part,
-                    posix_only: true,
+                let before_comma = &path_part[..comma_idx];
+                let raw_type = match before_comma.find(';') {
+                    Some(semi_idx) => &before_comma[..semi_idx],
+                    None => before_comma,
                 };
+                let mime = if raw_type.contains('=') || !raw_type.contains('/') {
+                    "text/plain".to_owned()
+                } else {
+                    raw_type.to_owned()
+                };
+                return MimeUrlOutcome::DirectMime(Some(mime));
             }
+            if scheme_uses_params(&scheme_lower) {
+                let last_seg_start = path_part.rfind('/').map_or(0, |idx| idx + 1);
+                if let Some(semi_rel) = path_part[last_seg_start..].find(';') {
+                    path_part = &path_part[..last_seg_start + semi_rel];
+                }
+            }
+            return MimeUrlOutcome::FilePath {
+                path: path_part,
+                posix_only: true,
+            };
         }
     }
     MimeUrlOutcome::FilePath {
@@ -129,10 +175,26 @@ where
     FEnc: Fn(&str) -> bool,
     FType: Fn(&str) -> Option<String>,
 {
-    let (target, posix_only) = match parse_mime_url_or_path(str_path) {
-        MimeUrlOutcome::DirectMime(mime) => return mime,
-        MimeUrlOutcome::FilePath { path, posix_only } => (path, posix_only),
-    };
+    match parse_mime_url_or_path(str_path) {
+        MimeUrlOutcome::DirectMime(mime) => mime,
+        MimeUrlOutcome::FilePath { path, posix_only } => {
+            guess_file_mime_with_lookup(path, posix_only, lookup_suffix, has_encoding, lookup_type)
+        }
+    }
+}
+
+fn guess_file_mime_with_lookup<FSuf, FEnc, FType>(
+    target: &str,
+    posix_only: bool,
+    lookup_suffix: FSuf,
+    has_encoding: FEnc,
+    lookup_type: FType,
+) -> Option<String>
+where
+    FSuf: Fn(&str) -> Option<String>,
+    FEnc: Fn(&str) -> bool,
+    FType: Fn(&str) -> Option<String>,
+{
     let (mut base, mut ext) = py_splitext_mode(target, posix_only);
     for _ in 0..8 {
         let lower = ext.to_lowercase();
@@ -148,8 +210,5 @@ where
         let (_, ne) = py_splitext_mode(&base, posix_only);
         ext = ne;
     }
-    if ext.is_empty() {
-        return None;
-    }
-    lookup_type(&ext).or_else(|| lookup_type(&ext.to_lowercase()))
+    lookup_type(&ext.to_lowercase())
 }

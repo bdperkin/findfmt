@@ -32,6 +32,26 @@ fn splitext_tag_and_data_uri_lookup_parity() {
         reg.guess_mime_type("https://example.com/pkg/app.py?v=1#top"),
         Some("text/x-python".into())
     );
+    assert_eq!(
+        reg.guess_mime_type("http:report.py;v=1"),
+        Some("text/x-python".into())
+    );
+
+    let mut case_reg = reg;
+    case_reg
+        .mime_types_strict
+        .insert(".PY".into(), "text/x-upper-py".into());
+    case_reg
+        .mime_types_strict
+        .insert(String::new(), "application/x-extensionless".into());
+    assert_eq!(
+        case_reg.guess_mime_type("report.PY"),
+        Some("text/x-python".into())
+    );
+    assert_eq!(
+        case_reg.guess_mime_type("README"),
+        Some("application/x-extensionless".into())
+    );
 }
 
 #[test]

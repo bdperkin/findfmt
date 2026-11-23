@@ -159,6 +159,25 @@ def _classify_traversal_batch(
         return None
 
 
+def _iter_fallback_with_hooks(
+    config: TraversalConfig,
+    on_error: Callable[[OSError], None] | None,
+    hooks: tuple[Callable[..., FileInfo], Callable[..., list[FileInfo] | None]] | None,
+) -> Iterator[FileInfo]:
+    """Advance _fallback.find_files step-by-step while scoping ACTIVE_RUST_BATCH_HOOKS per step."""
+    fallback_iter = _fallback.find_files(config, on_error=on_error)
+    while True:
+        token = ACTIVE_RUST_BATCH_HOOKS.set(hooks)
+        try:
+            item = next(fallback_iter)
+        except StopIteration:
+            return
+        finally:
+            ACTIVE_RUST_BATCH_HOOKS.reset(token)
+
+        yield item
+
+
 def find_files(
     config: TraversalConfig,
     *,
@@ -191,8 +210,4 @@ def find_files(
             return
 
     hooks = (classify_file, _classify_traversal_batch) if rust_ext is not None else None
-    token = ACTIVE_RUST_BATCH_HOOKS.set(hooks)
-    try:
-        yield from _fallback.find_files(config, on_error=on_error)
-    finally:
-        ACTIVE_RUST_BATCH_HOOKS.reset(token)
+    yield from _iter_fallback_with_hooks(config, on_error, hooks)
