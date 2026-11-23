@@ -47,7 +47,9 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
         resolve_relative: classifier.getattr("_resolve_relative")?.unbind(),
     };
     let _ = PY_HANDLES.set(built);
-    Ok(PY_HANDLES.get().expect("initialized PyHandles"))
+    PY_HANDLES.get().ok_or_else(|| {
+        pyo3::exceptions::PyRuntimeError::new_err("failed to initialize PyHandles")
+    })
 }
 
 pub(crate) fn py_path_to_pathbuf(

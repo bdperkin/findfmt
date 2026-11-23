@@ -155,6 +155,7 @@ def test_cargo_deny_and_cargo_about_permissive_policy_parity() -> None:
     assert licenses["private"]["ignore"] is False
     assert about["accepted"] == EXPECTED_ALLOWED_LICENSES
     assert about["ignore-build-dependencies"] is False
+    assert about["ignore-dev-dependencies"] is True
     assert about["ignore-transitive-dependencies"] is False
     assert about["findfmt_rs"]["clarify"]["license"] == "MIT"
     assert about["findfmt_rs"]["clarify"]["files"][0]["path"] == "../LICENSE"
@@ -170,31 +171,91 @@ def test_cargo_deny_and_cargo_about_permissive_policy_parity() -> None:
     assert sources["allow-git"] == []
 
 
+def _collect_non_dev_lock_packages(
+    manifest: dict[str, Any],
+    packages: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Collect Cargo.lock packages reachable from runtime, build, and target-specific dependencies."""
+    direct_roots: set[str] = set()
+    for section in ("dependencies", "build-dependencies"):
+        direct_roots.update(str(k) for k in manifest.get(section, {}))
+
+    for target_cfg in manifest.get("target", {}).values():
+        if isinstance(target_cfg, dict):
+            for section in ("dependencies", "build-dependencies"):
+                direct_roots.update(str(k) for k in target_cfg.get(section, {}))
+
+    by_name: dict[str, list[dict[str, Any]]] = {}
+    by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for pkg in packages:
+        name, ver = str(pkg["name"]), str(pkg["version"])
+        by_name.setdefault(name, []).append(pkg)
+        by_key[(name, ver)] = pkg
+
+    visited: dict[tuple[str, str], dict[str, Any]] = {}
+    queue: list[dict[str, Any]] = [pkg for name in sorted(direct_roots) for pkg in by_name.get(name, [])]
+    while queue:
+        cur = queue.pop()
+        key = (str(cur["name"]), str(cur["version"]))
+        if key in visited:
+            continue
+
+        visited[key] = cur
+        for raw_dep in cur.get("dependencies", []):
+            parts = str(raw_dep).split()
+            if len(parts) >= 2 and (parts[0], parts[1]) in by_key:
+                queue.append(by_key[(parts[0], parts[1])])
+            else:
+                queue.extend(by_name.get(parts[0], []))
+
+    return [visited[k] for k in sorted(visited)]
+
+
 def test_cargo_lock_and_third_party_licenses_completeness() -> None:
-    """Verify every external crate in findfmt_rs/Cargo.lock comes from crates.io and is attributed."""
+    """Verify Cargo.lock registry integrity, non-dev uniqueness, and THIRD_PARTY_LICENSES.md parity."""
+    manifest = _load_toml("findfmt_rs/Cargo.toml")
     lock = _load_toml("findfmt_rs/Cargo.lock")
     packages = lock.get("package", [])
     assert isinstance(packages, list)
     assert packages
 
-    names = [str(pkg["name"]) for pkg in packages]
-    assert len(names) == len(set(names)), "Duplicate crate versions detected in findfmt_rs/Cargo.lock"
+    external_crates = [pkg for pkg in packages if pkg["name"] != "findfmt_rs"]
+    assert external_crates, "Expected transitive crates in findfmt_rs/Cargo.lock"
+    for pkg in external_crates:
+        name = str(pkg["name"])
+        assert pkg.get("source") == CRATES_IO_SOURCE, f"{name} uses non-crates.io source"
+        assert SHA256_RE.fullmatch(str(pkg.get("checksum", ""))), f"{name} missing valid SHA-256 checksum"
+
+    non_dev_crates = _collect_non_dev_lock_packages(manifest, packages)
+    non_dev_names = [str(pkg["name"]) for pkg in non_dev_crates]
+    assert len(non_dev_names) == len(set(non_dev_names)), (
+        "Duplicate runtime/build crate versions detected in findfmt_rs/Cargo.lock"
+    )
+    non_dev_pairs = {(str(pkg["name"]), str(pkg["version"])) for pkg in non_dev_crates}
 
     third_party_text = (ROOT / "THIRD_PARTY_LICENSES.md").read_text(encoding="utf-8")
     assert "<year>" not in third_party_text
     assert "<copyright holders>" not in third_party_text
     assert "Copyright (c) 2026 Brandon Perkins" in third_party_text
-    external_crates = [pkg for pkg in packages if pkg["name"] != "findfmt_rs"]
-    assert external_crates, "Expected transitive PyO3 crates in findfmt_rs/Cargo.lock"
 
-    for pkg in external_crates:
-        name = str(pkg["name"])
-        version = str(pkg["version"])
-        assert pkg.get("source") == CRATES_IO_SOURCE, f"{name} uses non-crates.io source"
-        assert SHA256_RE.fullmatch(str(pkg.get("checksum", ""))), f"{name} missing valid SHA-256 checksum"
-        assert f"[`{name}` `{version}`]" in third_party_text, (
-            f"THIRD_PARTY_LICENSES.md is missing attribution for {name} {version}; "
-            "re-run cargo-about generate"
+    attributed_pairs = {
+        (m.group(1), m.group(2))
+        for m in re.finditer(r"- \[`([^`]+)` `([^`]+)`\]\(", third_party_text)
+        if m.group(1) != "findfmt_rs"
+    }
+    assert attributed_pairs, "Expected third-party crate attributions in THIRD_PARTY_LICENSES.md"
+    assert attributed_pairs <= non_dev_pairs, (
+        f"Unexpected or dev-only crate(s) in THIRD_PARTY_LICENSES.md: {attributed_pairs - non_dev_pairs}"
+    )
+
+    for direct_dep in manifest.get("dependencies", {}):
+        assert any(name == str(direct_dep) for name, _ in attributed_pairs), (
+            f"THIRD_PARTY_LICENSES.md is missing direct dependency {direct_dep}; re-run cargo-about generate"
+        )
+
+    for dev_dep in manifest.get("dev-dependencies", {}):
+        assert all(name != str(dev_dep) for name, _ in attributed_pairs), (
+            f"Dev-only dependency {dev_dep} must not appear in THIRD_PARTY_LICENSES.md"
         )
 
 

@@ -1,0 +1,11 @@
+*.log
+!keep.log
+/anchored.tmp
+escaped\
+[unclosed
+---
+item2.py
+item10.py
+item02.py
+build/out.log
+keep.log

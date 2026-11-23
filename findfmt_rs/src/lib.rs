@@ -1,14 +1,21 @@
 //! Native PyO3 extension module for `findfmt._rust_ext`.
 
 #![forbid(unsafe_code)]
+#![cfg_attr(
+    not(test),
+    deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)
+)]
 
 pub mod classifier;
+pub mod fuzz_entrypoints;
+pub mod gitignore;
 pub mod header;
 pub mod metadata;
 pub mod mime;
 pub mod py_bridge;
 mod py_paths;
 pub mod shebang;
+pub mod sorting;
 pub mod tags;
 
 use pyo3::prelude::*;

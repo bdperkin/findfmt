@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 253 Closed Issues | 79 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
+> **Tracking:** 254 Closed Issues | 78 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -28,7 +28,7 @@
 > 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`, and released v1.3.3 and
 > closed its milestone; 2026-11-19 closed `#579` and `#577`, added and closed `#689` and `#692`; 2026-11-20
 > closed `#578`, `#580`, and epic `#576`, and released v1.4.0 and closed its milestone; 2026-11-22 closed
-> `#586` and `#583`; 2026-11-23 closed `#584`)
+> `#586` and `#583`; 2026-11-23 closed `#584` and `#585`)
 
 ______________________________________________________________________
 
@@ -761,6 +761,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#584](https://github.com/bdperkin/findfmt/issues/584)** - test(parity): create parameterized pytest
   parity suite (tests/test_parity.py) comparing findfmt.\_rust_ext and \_fallback (Closed: 2026-11-23 via PR
   [#705](https://github.com/bdperkin/findfmt/pull/705))
+- [x] **[#585](https://github.com/bdperkin/findfmt/issues/585)** - test(fuzz): extend ClusterFuzzLite and add
+  cargo-fuzz / proptest targets for findfmt_rs traversal and classification (Closed: 2026-11-23 via PR
+  [#706](https://github.com/bdperkin/findfmt/pull/706))
 
 ______________________________________________________________________
 
@@ -818,12 +821,6 @@ when picking up work.
   Rust extension nor the pure-Python fallback regresses on any OS or Python version.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#585](https://github.com/bdperkin/findfmt/issues/585)** - test(fuzz): extend ClusterFuzzLite and add
-  cargo-fuzz / proptest targets for findfmt_rs traversal and classification *(Rank: 34 | Epic:
-  [[Epic] Rust Core Engine (findfmt_rs): Directory Traversal, Classification, Parity Verification & Fuzzing](https://github.com/bdperkin/findfmt/issues/581)
-  | Milestone: v1.4.1)* - **Value:** Medium | **Effort:** M - **Rationale:** Prevents panics, UTF-8 decoding
-  bugs, and memory safety regressions in native Rust code.
 
 - [ ] **[#593](https://github.com/bdperkin/findfmt/issues/593)** - build(docker): update multi-stage
   Dockerfile and container smoke tests for hybrid uv + rustup wheel builds *(Rank: 35 | Epic:
@@ -1253,8 +1250,7 @@ natively on GitHub.
 
 - [ ] **[#581](https://github.com/bdperkin/findfmt/issues/581)** - [Epic] Rust Core Engine (findfmt_rs):
   Directory Traversal, Classification, Parity Verification & Fuzzing *(Milestone: v1.4.1 | Open sub-issues:
-  2)* - [#582](https://github.com/bdperkin/findfmt/issues/582),
-  [#585](https://github.com/bdperkin/findfmt/issues/585)
+  1)* - [#582](https://github.com/bdperkin/findfmt/issues/582)
 - [ ] **[#587](https://github.com/bdperkin/findfmt/issues/587)** - [Epic] Hybrid Quality Assurance: Unified
   Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation *(Milestone: v1.4.2 | Open
   sub-issues: 4)* - [#588](https://github.com/bdperkin/findfmt/issues/588),
@@ -1408,7 +1404,7 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 3           |
+| v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 2           |
 | v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 3           |
 | v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 4           |
