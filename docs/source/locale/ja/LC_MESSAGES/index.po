@@ -316,9 +316,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/index.md:60 f7a403743f2a470a90527f58c126c33b
-#, fuzzy
 msgid "Documentation"
-msgstr "API ドキュメント"
+msgstr "ドキュメント"
 
 #: ../../source/index.md:60 9ed99b3e21774ac399474f9a85a0af12
 msgid "i18n Languages"
@@ -396,7 +395,6 @@ msgstr ""
 "でそのまま利用できる、整理されたアルファベット順の相対ファイルパスを常に出力します。"
 
 #: ../../source/index.md:83 61deb62298394b5dbcf45f0efb3b1d32
-#, fuzzy
 msgid ""
 "**Hybrid Python-Rust Architecture**: Built with a strict `uv`-first "
 "methodology, PyO3 `abi3-py311` native extension support "
@@ -404,7 +402,9 @@ msgid ""
 "(`FINDFMT_NO_EXTENSIONS=1`), 100% test coverage, and strict static type "
 "checking."
 msgstr ""
-"**モダンな Python アーキテクチャ**: 厳格な `uv` ファーストの開発手法、100% "
+"**Python-Rust ハイブリッドアーキテクチャ**: 厳格な `uv` ファーストの開発手法、PyO3 `abi3-py311` "
+"ネイティブ拡張サポート（`findfmt._rust_ext`）、保証された純粋 Python "
+"フォールバック（`FINDFMT_NO_EXTENSIONS=1`）、100% "
 "のテストカバレッジ、および厳密な静的型チェックによって構築されています。"
 
 #: ../../source/index.md:87 867aed5fceb243e5a692b1d9745cc9a4

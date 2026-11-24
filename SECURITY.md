@@ -185,7 +185,7 @@ implemented across `findfmt`'s hybrid Python (`src/findfmt/`) and Rust (`findfmt
   checks that the image reports the release version before pushing it, then publishes an SBOM, build
   provenance, and a signed attestation, which `gh attestation verify` checks:
   ```bash
-  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.4.0 --owner bdperkin
+  gh attestation verify oci://ghcr.io/bdperkin/findfmt:1.4.1 --owner bdperkin
   ```
 
 #### 3.5.4. Multi-Tier Secret Scanning & Static Analysis

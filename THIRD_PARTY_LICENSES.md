@@ -607,7 +607,7 @@ DEALINGS IN THE SOFTWARE.
 
 Used by:
 
-- [`findfmt_rs` `0.1.0`](https://github.com/bdperkin/findfmt)
+- [`findfmt_rs` `1.4.1`](https://github.com/bdperkin/findfmt)
 
 ```text
 MIT License
