@@ -4,12 +4,28 @@ from __future__ import annotations
 
 import configparser
 import os
+import shlex
 import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
 
+import pytest
 import yaml
+
+
+@pytest.fixture(scope="session")
+def pre_commit_cache_dir() -> Path:
+    """Resolve the host pre-commit cache directory before function-level HOME isolation."""
+    env_home = os.environ.get("PRE_COMMIT_HOME")
+    if env_home is not None and env_home != "":
+        return Path(env_home)
+
+    xdg_cache = os.environ.get("XDG_CACHE_HOME")
+    if xdg_cache is not None and xdg_cache != "":
+        return Path(xdg_cache) / "pre-commit"
+
+    return Path.home() / ".cache" / "pre-commit"
 
 
 def _repo_root() -> Path:
@@ -27,13 +43,12 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return data
 
 
-def _find_vale_binary() -> str | None:
-    """Locate an installed Vale executable on PATH or inside pre-commit's cache."""
+def _find_vale_binary(cache_root: Path) -> str | None:
+    """Locate an installed Vale executable on PATH or inside the pre-commit cache."""
     direct = shutil.which("vale")
     if direct is not None:
         return direct
 
-    cache_root = Path(os.environ.get("PRE_COMMIT_HOME", Path.home() / ".cache" / "pre-commit"))
     if not cache_root.is_dir():
         return None
 
@@ -84,6 +99,8 @@ def test_vale_pre_commit_hooks_and_ci_parity() -> None:
     assert msg_hook is not None
     assert msg_hook.get("stages") == ["commit-msg"]
     msg_entry = str(msg_hook.get("entry", ""))
+    assert "commit.cleanup" in msg_entry
+    assert "git stripspace --strip-comments" in msg_entry
     assert "sed" in msg_entry
     assert "--minAlertLevel=error" in msg_entry
     assert "--path=COMMIT_EDITMSG" in msg_entry
@@ -141,46 +158,96 @@ def test_vale_ini_sections_and_gitignore_entries() -> None:
     assert ".github/styles/config/grammars/" in gitignore_lines
 
 
-def test_vale_behavioral_comments_and_commit_metadata(tmp_path: Path) -> None:
-    """Verify commit metadata filtering and live Vale markup/prose behavior when synced (#727)."""
+def _vale_commit_msg_argv(root: Path) -> list[str]:
+    """Return tokenized argv for the vale-commit-msg hook entry."""
+    pc_data = _load_yaml(root / ".pre-commit-config.yaml")
+    vale_repo = next(
+        r for r in pc_data.get("repos", []) if r.get("repo") == "https://github.com/vale-cli/vale"
+    )
+    msg_hook = next(h for h in vale_repo["hooks"] if h.get("id") == "vale-commit-msg")
+    return shlex.split(str(msg_hook["entry"]))
+
+
+def test_vale_commit_msg_filter_respects_comment_char_and_cleanup(tmp_path: Path) -> None:
+    """Verify vale-commit-msg strips active core.commentChar comments, scissors, and trailers (#727)."""
+    if os.name == "nt":
+        pytest.skip("POSIX sh commit-msg filter test requires POSIX shell environment")
+
+    if shutil.which("sh") is None or shutil.which("git") is None or shutil.which("sed") is None:
+        pytest.skip("sh, git, or sed binary not available")
+
     root = _repo_root()
-    commit_file = tmp_path / "COMMIT_EDITMSG"
-    commit_file.write_text(
+    shim_dir = tmp_path / "shim_bin"
+    shim_dir.mkdir()
+    vale_shim = shim_dir / "vale"
+    vale_shim.write_text("#!/bin/sh\ncat\n", encoding="utf-8")
+    vale_shim.chmod(0o755)
+
+    hook_argv = _vale_commit_msg_argv(root)
+    base_env = os.environ.copy()
+    base_env["PATH"] = f"{shim_dir}{os.pathsep}{base_env.get('PATH', '')}"
+
+    default_msg = tmp_path / "COMMIT_EDITMSG_DEFAULT"
+    default_msg.write_text(
         "ci(pre-commit): integrate `my_nonexistent_ident_xyz` hook (#727)\n\n"
         "# git interactive comment with zxqwvut token\n"
         "Signed-off-by: Jane Kaczmarek <jk@example.com>\n",
         encoding="utf-8",
     )
-
-    sed_bin = shutil.which("sed")
-    if sed_bin is not None:
-        filtered = subprocess.run(
-            [sed_bin, "-e", "/^#/d", "-e", "/^[A-Za-z-]*-by: /d", str(commit_file)],
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout
-        assert "Kaczmarek" not in filtered
-        assert "zxqwvut" not in filtered
-        assert "ci(pre-commit): integrate `my_nonexistent_ident_xyz` hook (#727)" in filtered
-
-    vale_bin = _find_vale_binary()
-    styles_synced = (root / ".github" / "styles" / "Google").is_dir() and (
-        root / ".github" / "styles" / "proselint"
-    ).is_dir()
-    if vale_bin is None or not styles_synced or sed_bin is None:
-        return
-
-    cfg_flag = f"--config={root / '.vale.ini'}"
-    filtered_msg = subprocess.run(
-        [sed_bin, "-e", "/^#/d", "-e", "/^[A-Za-z-]*-by: /d", str(commit_file)],
+    default_res = subprocess.run(
+        [*hook_argv, str(default_msg)],
+        env=base_env,
         capture_output=True,
         text=True,
         check=True,
-    ).stdout
+    )
+    assert "ci(pre-commit): integrate `my_nonexistent_ident_xyz` hook (#727)" in default_res.stdout
+    assert "zxqwvut" not in default_res.stdout
+    assert "Kaczmarek" not in default_res.stdout
+
+    semicolon_msg = tmp_path / "COMMIT_EDITMSG_SEMICOLON"
+    semicolon_msg.write_text(
+        "ci(pre-commit): honor custom comment char (#727)\n\n"
+        "; zxqwvut template comment with custom commentChar\n"
+        "Co-authored-by: Jane Kaczmarek <jk@example.com>\n"
+        "; ------------------------ >8 ------------------------\n"
+        "diff --git a/foo.py b/foo.py\n"
+        "+zxqwvut_diff_token\n",
+        encoding="utf-8",
+    )
+    semicolon_env = base_env.copy()
+    semicolon_env["GIT_CONFIG_COUNT"] = "1"
+    semicolon_env["GIT_CONFIG_KEY_0"] = "core.commentChar"
+    semicolon_env["GIT_CONFIG_VALUE_0"] = ";"
+    semicolon_res = subprocess.run(
+        [*hook_argv, str(semicolon_msg)],
+        env=semicolon_env,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "ci(pre-commit): honor custom comment char (#727)" in semicolon_res.stdout
+    assert "zxqwvut" not in semicolon_res.stdout
+    assert "Kaczmarek" not in semicolon_res.stdout
+
+
+def test_vale_live_prose_and_code_comment_linting(
+    tmp_path: Path,
+    pre_commit_cache_dir: Path,
+) -> None:
+    """Verify live Vale commit-msg and Python comment prose checks when synced (#727)."""
+    root = _repo_root()
+    vale_bin = _find_vale_binary(pre_commit_cache_dir)
+    styles_synced = (root / ".github" / "styles" / "Google").is_dir() and (
+        root / ".github" / "styles" / "proselint"
+    ).is_dir()
+    if vale_bin is None or not styles_synced:
+        pytest.skip("Vale binary or synced styles (.github/styles/{Google,proselint}) not available")
+
+    cfg_flag = f"--config={root / '.vale.ini'}"
     ok_msg_res = subprocess.run(
         [vale_bin, cfg_flag, "--output=line", "--minAlertLevel=error", "--path=COMMIT_EDITMSG"],
-        input=filtered_msg,
+        input="ci(pre-commit): integrate `my_nonexistent_ident_xyz` hook (#727)\n",
         capture_output=True,
         text=True,
         check=False,
@@ -194,7 +261,8 @@ def test_vale_behavioral_comments_and_commit_metadata(tmp_path: Path) -> None:
         text=True,
         check=False,
     )
-    assert bad_msg_res.returncode != 0
+    assert bad_msg_res.returncode == 1, bad_msg_res.stdout + bad_msg_res.stderr
+    assert "Vale.Spelling" in bad_msg_res.stdout
 
     py_escaped = tmp_path / "escaped_literal.py"
     py_escaped.write_text("# Match `the the` in code.\nx = 1\n", encoding="utf-8")
@@ -214,4 +282,5 @@ def test_vale_behavioral_comments_and_commit_metadata(tmp_path: Path) -> None:
         text=True,
         check=False,
     )
-    assert error_res.returncode != 0
+    assert error_res.returncode == 1, error_res.stdout + error_res.stderr
+    assert "Vale.Repetition" in error_res.stdout

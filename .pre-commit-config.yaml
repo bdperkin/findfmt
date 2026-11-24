@@ -326,7 +326,16 @@ repos:
           - --minAlertLevel=error
       - id: vale-commit-msg
         entry: >-
-          sh -c 'sed -e "/^#/d" -e "/^[A-Za-z-]*-by: /d" "$1" |
+          sh -c 'mode=$(git config --get commit.cleanup || printf default);
+          case "$mode" in
+          verbatim) filtered=$(cat "$1") ;;
+          whitespace) filtered=$(git stripspace < "$1") ;;
+          scissors) raw=$(sed -n -e "/------------------------ >8 ------------------------/q" -e "p" "$1") &&
+          filtered=$(printf "%s\n" "$raw" | git stripspace) ;;
+          *) raw=$(sed -n -e "/------------------------ >8 ------------------------/q" -e "p" "$1") &&
+          filtered=$(printf "%s\n" "$raw" | git stripspace --strip-comments) ;;
+          esac &&
+          printf "%s\n" "$filtered" | sed -e "/^[A-Za-z-]*-by: /d" |
           vale --output=line --minAlertLevel=error --path=COMMIT_EDITMSG' --
         stages:
           - commit-msg
