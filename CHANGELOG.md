@@ -7,6 +7,41 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-11-24
+
+### Performance
+
+- *(traversal)* Implement GIL-released `.gitignore`-aware directory walker in `findfmt_rs` (`find_files_rs`,
+  `find_files`) supporting hierarchical `.gitignore`/`.git/info/exclude`/global excludes, linked worktrees,
+  `-P`/`-I` globs, `--prune`, `-L`/`--filelimit`/`-x` boundaries, `-l` symlink cycle detection, natural
+  version sorting, and lossless surrogate-escaped paths, delivering `3.6x`–`6.0x` end-to-end CLI speedups
+  (#581, #582, #707, #709).
+- *(classifier)* Port FIFO-safe header inspection, shebang parsing, `identify` tag lookup, and MIME type
+  resolution (`classify_file_rs`, `classify_batch_rs`) to `findfmt_rs` (#583, #704).
+- *(benchmark)* Extend `tools/benchmark.py` (`--backend python|rust|compare`) to compare native `findfmt_rs`
+  vs. pure-Python fallback throughput, first-file latency, and memory usage (#586, #702).
+
+### Security
+
+- *(fuzz,policy)* Pin ClusterFuzzLite Rust toolchain and `maturin` build dependencies by SHA-256 digest in
+  `.clusterfuzzlite/Dockerfile`, route standalone `extract_shebang()` through non-blocking `O_NONBLOCK` +
+  `fstat` regular-file verification, and update `SECURITY.md` with coordinated disclosure timelines and hybrid
+  Python-Rust threat-model controls (#710).
+
+### Testing
+
+- *(parity)* Add parameterized `tests/test_parity.py` suite proving 100% behavioral identity between
+  `findfmt._rust_ext` and `src/findfmt/_fallback.py` across `.gitignore` rules, boundaries, symlink loops,
+  sorting, Unicode case-folding, and error callbacks (#584, #581, #705, #709).
+- *(fuzz)* Add `proptest` property suites (`findfmt_rs/tests/`), `cargo-fuzz` `libFuzzer` targets
+  (`findfmt_rs/fuzz/`), and native PyO3 ClusterFuzzLite Atheris builds (#585, #706).
+
+### Changed
+
+- *(deps)* Update Rust crates (`globset` to `v0.4.21`, `ignore` to `v0.4.34`, `proptest` to `v1.12.0`), align
+  `rust-version = "1.88"` MSRV and `let_chains` idioms, add Renovate `rust-dependencies` Cargo grouping, and
+  refresh Python lock file and pre-commit hook pins (#671, #703, #708, #712).
+
 ## [1.4.0] - 2026-11-20
 
 ### Features
@@ -884,4 +919,5 @@ future 1.x releases.
 [1.3.2]: https://github.com/bdperkin/findfmt/compare/v1.3.1...v1.3.2
 [1.3.3]: https://github.com/bdperkin/findfmt/compare/v1.3.2...v1.3.3
 [1.4.0]: https://github.com/bdperkin/findfmt/compare/v1.3.3...v1.4.0
-[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.4.0...HEAD
+[1.4.1]: https://github.com/bdperkin/findfmt/compare/v1.4.0...v1.4.1
+[unreleased]: https://github.com/bdperkin/findfmt/compare/v1.4.1...HEAD

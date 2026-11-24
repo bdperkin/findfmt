@@ -316,9 +316,8 @@ msgid ""
 msgstr ""
 
 #: ../../source/index.md:60 f7a403743f2a470a90527f58c126c33b
-#, fuzzy
 msgid "Documentation"
-msgstr "Documentation de l'API"
+msgstr "Documentation"
 
 #: ../../source/index.md:60 9ed99b3e21774ac399474f9a85a0af12
 msgid "i18n Languages"
@@ -401,7 +400,6 @@ msgstr ""
 "pipelines Unix et `xargs`."
 
 #: ../../source/index.md:83 61deb62298394b5dbcf45f0efb3b1d32
-#, fuzzy
 msgid ""
 "**Hybrid Python-Rust Architecture**: Built with a strict `uv`-first "
 "methodology, PyO3 `abi3-py311` native extension support "
@@ -409,9 +407,11 @@ msgid ""
 "(`FINDFMT_NO_EXTENSIONS=1`), 100% test coverage, and strict static type "
 "checking."
 msgstr ""
-"**Architecture Python moderne** : conçue selon une méthodologie stricte "
-"axée sur `uv`, avec une couverture de tests à 100 % et un typage statique"
-" strict."
+"**Architecture hybride Python-Rust** : conçue selon une méthodologie "
+"stricte axée sur `uv`, avec prise en charge de l'extension native PyO3 "
+"`abi3-py311` (`findfmt._rust_ext`), repli garanti en Python pur "
+"(`FINDFMT_NO_EXTENSIONS=1`), couverture de tests à 100 % et typage "
+"statique strict."
 
 #: ../../source/index.md:87 867aed5fceb243e5a692b1d9745cc9a4
 msgid "2. Quickstart"

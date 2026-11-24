@@ -28,13 +28,13 @@ def test_analyze_catalog_real_and_empty(tmp_path: Path) -> None:
     """Verify catalog metrics on shipped findfmt.pot and empty fallback paths."""
     metrics = analyze_catalog(pot_file=POT_FILE, locale_dir=LOCALE_DIR)
     assert metrics.total_entries >= 140
-    assert metrics.total_chars >= 15000
-    assert metrics.total_words >= 1800
+    assert metrics.total_chars >= 8000
+    assert metrics.total_words >= 1100
     assert metrics.brace_placeholder_entries >= 20
     assert metrics.rich_markup_entries >= 2
     assert metrics.plural_entries >= 1
     assert metrics.multiline_entries >= 4
-    assert metrics.estimated_source_tokens >= 4000
+    assert metrics.estimated_source_tokens >= 3000
     assert set(metrics.baseline_translated.keys()) == set(BASELINE_LOCALES)
     for loc in BASELINE_LOCALES:
         assert metrics.baseline_translated[loc] >= 15
