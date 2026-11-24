@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 256 Closed Issues | 87 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
+> **Tracking:** 257 Closed Issues | 87 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -30,8 +30,8 @@
 > closed `#578`, `#580`, and epic `#576`, and released v1.4.0 and closed its milestone; 2026-11-22 closed
 > `#586` and `#583`; 2026-11-23 closed `#584`, `#585`, `#582`, and epic `#581`, and processed Renovate
 > Dependency Dashboard `#671` Rust crate updates and Cargo grouping; 2026-11-24 released v1.4.1 and closed its
-> milestone, and added pre-commit pipeline evaluation epic `#715` and child issues `#716`-`#725` under `#587`
-> in v1.4.2)
+> milestone, added pre-commit pipeline evaluation epic `#715` and child issues `#716`-`#725` and `#727` under
+> `#587` in v1.4.2, and closed `#727`)
 
 ______________________________________________________________________
 
@@ -773,6 +773,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#581](https://github.com/bdperkin/findfmt/issues/581)** - [Epic] Rust Core Engine (findfmt_rs):
   Directory Traversal, Classification, Parity Verification & Fuzzing (Closed: 2026-11-23 via PR
   [#709](https://github.com/bdperkin/findfmt/pull/709))
+- [x] **[#727](https://github.com/bdperkin/findfmt/issues/727)** - Evaluate & Integrate Pre-commit Stage 9
+  Candidate: Official Vale Prose Linter Hook (vale-cli/vale) (Closed: 2026-11-24 via PR
+  [#728](https://github.com/bdperkin/findfmt/pull/728))
 
 ______________________________________________________________________
 

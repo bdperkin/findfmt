@@ -132,7 +132,7 @@ def test_ignored_dirs_not_scanned(tmp_path: Path, mocker: MockerFixture):
     # Deterministic counter assertion: no os.scandir call targets any ignored directory
     assert scanned_paths.isdisjoint(ignored_dirs)
     assert scanned_paths == {tmp_path.resolve(), src_dir.resolve()}
-    # Peak heap memory should remain very small (< 1.5 MB)
+    # Peak heap memory should remain small (< 1.5 MB)
     assert peak_mb < 1.5
 
 

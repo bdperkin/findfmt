@@ -15,6 +15,8 @@ ci:
     - xenon
     - sync-pre-commit-deps
     - pyroma
+    - vale
+    - vale-commit-msg
   submodules: false
 
 default_install_hook_types:
@@ -58,6 +60,10 @@ repos:
       - id: debug-statements
       - id: detect-private-key
       - id: end-of-file-fixer
+      - id: file-contents-sorter
+        files: ^\.github/styles/config/vocabularies/findfmt/(accept|reject)\.txt$
+        args:
+          - --unique
       - id: trailing-whitespace
       - id: name-tests-test
         args:
@@ -300,6 +306,28 @@ repos:
     rev: v0.0.5
     hooks:
       - id: sync-pre-commit-deps
+
+  # Vale prose, code-comment, and commit-message linter
+  - repo: https://github.com/vale-cli/vale
+    rev: v3.28.1
+    hooks:
+      - id: vale
+        alias: vale-sync
+        name: vale sync
+        entry: sh -c 'VALE_GRAMMARS_URL=https://github.com/vale-cli/vale/releases/download/v3.28.1 vale "$@"' --
+        pass_filenames: false
+        args:
+          - sync
+        stages:
+          - manual
+      - id: vale
+        args:
+          - --output=line
+          - --minAlertLevel=error
+      - id: vale-commit-msg
+        entry: sh -c 'vale --output=line --minAlertLevel=error --path=COMMIT_EDITMSG < "$1"' --
+        stages:
+          - commit-msg
 
   # File Line Length Enforcement
   - repo: local

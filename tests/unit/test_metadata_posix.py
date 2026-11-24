@@ -27,7 +27,7 @@ def test_format_permissions_regular_file() -> None:
 
 
 def test_resolve_user_name_real() -> None:
-    """Verify resolve_user_name resolves current user UID and utilizes caching."""
+    """Verify resolve_user_name resolves current user UID and uses caching."""
     clear_metadata_cache()
     if hasattr(os, "getuid"):
         current_uid = os.getuid()
@@ -73,7 +73,7 @@ def test_resolve_user_name_fallbacks() -> None:
 
 
 def test_resolve_group_name_real() -> None:
-    """Verify resolve_group_name resolves current group GID and utilizes caching."""
+    """Verify resolve_group_name resolves current group GID and uses caching."""
     clear_metadata_cache()
     if hasattr(os, "getgid"):
         current_gid = os.getgid()
