@@ -165,6 +165,7 @@ def test_test_matrix_never_falls_back_to_system_python() -> None:
 
     succeeded = "${{ steps.setup-python.outcome == 'success' }}"
     for name in (
+        "Cache Rust dependencies",
         "Install Dependencies",
         "Populate Global Gitignore to Verify Hermeticity",
         "Run Pytest with 100% Coverage Enforcement",
@@ -260,12 +261,21 @@ def test_classifiers_are_exactly_the_supported_range() -> None:
     assert sorted(_classifier_versions(), key=_minor_version) == expected
 
 
-def test_every_supported_version_runs_on_all_platforms() -> None:
-    """Validate the gating matrix pairs every supported version with Linux, macOS, and Windows."""
+def test_supported_versions_run_on_ubuntu_and_extremes_on_all_platforms() -> None:
+    """Validate Ubuntu runs every supported Python while macOS/Windows gate min + max (#729)."""
+    minimum, maximum = _supported_range()
     matrix = _test_matrix_job()["strategy"]["matrix"]
     assert set(matrix["os"]) == ALL_PLATFORMS
-    assert not matrix.get("exclude"), "test-matrix must not exclude supported combinations"
-    assert set(_classifier_versions()) <= {str(v) for v in matrix["python-version"]}
+    advertised = set(_classifier_versions())
+    assert advertised == {str(v) for v in matrix["python-version"]}
+
+    excluded = {(str(e["os"]), str(e["python-version"])) for e in matrix.get("exclude", [])}
+    active_by_os = {
+        os_name: {v for v in advertised if (os_name, v) not in excluded} for os_name in ALL_PLATFORMS
+    }
+    assert active_by_os["ubuntu-latest"] == advertised
+    assert active_by_os["macos-latest"] == {minimum, maximum}
+    assert active_by_os["windows-latest"] == {minimum, maximum}
 
 
 def test_test_matrix_runs_on_every_pull_request() -> None:

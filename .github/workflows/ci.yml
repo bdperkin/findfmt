@@ -35,6 +35,10 @@ jobs:
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.15'
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
+        with:
+          workspaces: findfmt_rs
       - name: Install dependencies
         run: uv sync --locked --all-groups
       - name: Verify Local Runner Configuration
@@ -60,6 +64,10 @@ jobs:
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.15'
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
+        with:
+          workspaces: findfmt_rs
       - name: Install dependencies
         run: uv sync --locked --only-group lint
       - name: Build sdist and wheel
@@ -110,6 +118,10 @@ jobs:
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
+        with:
+          workspaces: findfmt_rs
       - name: Build Distribution Packages
         run: uv build
       - name: Install and Smoke-Test the Installed Wheel
@@ -154,6 +166,10 @@ jobs:
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.15'
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
+        with:
+          workspaces: findfmt_rs
       - name: Install dependencies
         run: uv sync --locked --all-groups
       - name: Build the Image from a Wheel and Test It
@@ -187,6 +203,10 @@ jobs:
         with:
           # Verify dependency floors on the minimum supported Python (#325).
           python-version: '3.11'
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
+        with:
+          workspaces: findfmt_rs
       - name: Create Clean Virtual Environment
         run: uv venv --python 3.11 smoke_env
       - name: Install Dependencies (${{ matrix.resolution }} / ${{ matrix.prerelease }})
@@ -226,6 +246,20 @@ jobs:
           - '3.13'
           - '3.14'
           - '3.15'
+        # Trim macOS/Windows to min + max supported Python (#729); Ubuntu tests all versions.
+        exclude:
+          - os: macos-latest
+            python-version: '3.12'
+          - os: macos-latest
+            python-version: '3.13'
+          - os: macos-latest
+            python-version: '3.14'
+          - os: windows-latest
+            python-version: '3.12'
+          - os: windows-latest
+            python-version: '3.13'
+          - os: windows-latest
+            python-version: '3.14'
         include:
           # Early warning for the next feature release: never gating, not advertised.
           - os: ubuntu-latest
@@ -260,6 +294,12 @@ jobs:
           echo "::warning title=Python ${PYTHON_VERSION} unavailable::${msg} ${skip_msg}"
           echo "Python ${PYTHON_VERSION} was not tested: no runner build is available yet." \
             >> "$GITHUB_STEP_SUMMARY"
+      - name: Cache Rust dependencies
+        if: ${{ steps.setup-python.outcome == 'success' }}
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
+        with:
+          workspaces: findfmt_rs
+        continue-on-error: ${{ matrix.experimental || false }}
       - name: Install Dependencies
         if: ${{ steps.setup-python.outcome == 'success' }}
         env:
@@ -314,6 +354,10 @@ jobs:
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0  # v7.1.0
         with:
           python-version: '3.15'
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
+        with:
+          workspaces: findfmt_rs
       - name: Install dependencies
         run: uv sync --locked --all-groups
       - name: Run Performance Benchmarks
@@ -328,6 +372,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
         with:
           persist-credentials: false
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
+        with:
+          workspaces: |
+            findfmt_rs
+            findfmt_rs/fuzz
       - name: Run Clippy Static Analysis on findfmt_rs
         run: cargo clippy --manifest-path findfmt_rs/Cargo.toml --locked --no-default-features --all-targets --
           -D warnings
