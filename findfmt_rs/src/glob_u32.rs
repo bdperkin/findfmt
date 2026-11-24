@@ -156,11 +156,6 @@ impl Default for GlobSpecU32 {
 }
 
 impl GlobSpecU32 {
-    /// Compile trimmed pattern lines under Unicode 16 case equivalences (`patterns.py` parity).
-    pub fn try_from_lines(lines: &[String], ignore_case: bool) -> Result<Option<Self>, String> {
-        Self::try_from_lines_with_unicode(lines, ignore_case, 16)
-    }
-
     /// Compile trimmed pattern lines gated to `unicode_major` case equivalences (`#581`).
     pub fn try_from_lines_with_unicode(
         lines: &[String],
@@ -266,11 +261,11 @@ mod tests {
 
     #[test]
     fn ignore_case_equivalences_wide_ranges_unclosed_brackets_and_final_newline() {
-        let (ci_az, _) = GlobSpecU32::from_lines_lenient(["[a-z].txt"], true);
-        let (cs_az, _) = GlobSpecU32::from_lines_lenient(["[a-z].txt"], false);
-        assert!(ci_az.matches_segments(&segs("ſ.txt"), false));
-        assert!(ci_az.matches_segments(&segs("K.txt"), false));
-        assert!(!cs_az.matches_segments(&segs("ſ.txt"), false));
+        let (case_fold_az, _) = GlobSpecU32::from_lines_lenient(["[a-z].txt"], true);
+        let (exact_case_az, _) = GlobSpecU32::from_lines_lenient(["[a-z].txt"], false);
+        assert!(case_fold_az.matches_segments(&segs("ſ.txt"), false));
+        assert!(case_fold_az.matches_segments(&segs("\u{212A}.txt"), false));
+        assert!(!exact_case_az.matches_segments(&segs("ſ.txt"), false));
 
         let (wide, _) = GlobSpecU32::from_lines_lenient(["[À-Ա].txt"], true);
         assert!(wide.matches_segments(&segs("×.txt"), false));

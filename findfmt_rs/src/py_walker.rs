@@ -187,7 +187,12 @@ fn materialize_yield_item<'py>(
                 raw.ino = Some(0);
                 raw.dev = Some(0);
                 if raw.is_reg() {
-                    raw.mode = 0o100_000 | if (raw.mode & 0o200) == 0 { 0o444 } else { 0o666 };
+                    raw.mode = 0o100_000
+                        | if (raw.mode & 0o200) == 0 {
+                            0o444
+                        } else {
+                            0o666
+                        };
                 }
             }
         }
@@ -206,7 +211,7 @@ fn materialize_yield_item<'py>(
         let pathext_ref = driver.walk_cfg.pathext_upper.as_deref();
         let refreshed = py.detach(|| classify_one_nogil(&win_in, registry, pathext_ref));
         let is_dir_item = refreshed.is_dir || refreshed.tags.contains("directory");
-        if driver.walk_cfg.dirs_only && !is_dir_item {
+        if driver.walk_cfg.scope.dirs_only && !is_dir_item {
             return Ok(None);
         }
         let rel_pb =
@@ -239,12 +244,12 @@ fn materialize_yield_item<'py>(
         item.classified,
     );
 
-    let mut bound_uid_cache: HashMap<u32, Bound<'py, PyAny>> = driver
+    let mut user_map: HashMap<u32, Bound<'py, PyAny>> = driver
         .uid_cache
         .iter()
         .map(|(&k, v)| (k, v.bind(py).clone()))
         .collect();
-    let mut bound_gid_cache: HashMap<u32, Bound<'py, PyAny>> = driver
+    let mut group_map: HashMap<u32, Bound<'py, PyAny>> = driver
         .gid_cache
         .iter()
         .map(|(&k, v)| (k, v.bind(py).clone()))
@@ -260,14 +265,14 @@ fn materialize_yield_item<'py>(
         Some((&root_obj, &item.root_path)),
         prefix_obj.as_ref().zip(item.prefix.as_deref()),
         raw_classified,
-        &mut bound_uid_cache,
-        &mut bound_gid_cache,
+        &mut user_map,
+        &mut group_map,
     )?;
 
-    for (k, v) in bound_uid_cache {
+    for (k, v) in user_map {
         driver.uid_cache.entry(k).or_insert_with(|| v.unbind());
     }
-    for (k, v) in bound_gid_cache {
+    for (k, v) in group_map {
         driver.gid_cache.entry(k).or_insert_with(|| v.unbind());
     }
     Ok(Some(info))
@@ -312,7 +317,7 @@ fn step_native_driver<'py>(
             py,
             handles,
             raw_root_py.bind(py),
-            driver.walk_cfg.follow_symlinks,
+            driver.walk_cfg.scope.follow_symlinks,
             driver.relative_prefix,
             driver.walk_cfg.respect_gitignore,
         )?;

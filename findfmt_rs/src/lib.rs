@@ -1,38 +1,35 @@
-//! Native PyO3 extension module for `findfmt._rust_ext`.
+//! Native `PyO3` extension module for `findfmt._rust_ext`.
 
 #![forbid(unsafe_code)]
-#![cfg_attr(
-    not(test),
-    deny(clippy::unwrap_used, clippy::expect_used, clippy::panic)
-)]
 
 pub mod classifier;
 pub mod fuzz_entrypoints;
 pub mod gitignore;
 mod glob_case;
 mod glob_nfa;
-pub mod glob_u32;
+mod glob_u32;
 pub mod header;
-pub mod ignore_stack;
+mod ignore_stack;
 pub mod metadata;
 pub mod mime;
-pub mod patterns;
-pub mod py_bridge;
+mod patterns;
+mod py_bridge;
 mod py_paths;
-pub mod py_walker;
+mod py_walker;
 mod py_walker_config;
 pub mod shebang;
 pub mod sorting;
 pub mod tags;
-pub mod walker;
+mod walker;
 mod walker_descent;
-pub mod walker_filter;
-pub mod walker_prune;
+mod walker_filter;
+mod walker_prune;
 mod walker_prune_inspect;
-pub mod walker_sort;
+mod walker_sort;
 mod walker_step;
-pub mod walker_types;
+mod walker_types;
 
+use ignore as _;
 use pyo3::prelude::*;
 use pyo3::types::PyList;
 
@@ -63,10 +60,7 @@ fn find_files_rs(
 /// Gateway alias for `find_files_rs` dispatched by `src/findfmt/core.py` (#578, #582).
 #[pyfunction]
 #[pyo3(signature = (config, *, on_error=None))]
-fn find_files(
-    config: &Bound<'_, PyAny>,
-    on_error: Option<&Bound<'_, PyAny>>,
-) -> RustFileIterator {
+fn find_files(config: &Bound<'_, PyAny>, on_error: Option<&Bound<'_, PyAny>>) -> RustFileIterator {
     py_walker::find_files_py(config, on_error)
 }
 
@@ -145,8 +139,8 @@ fn classify_batch_rs<'py>(
 }
 
 /// Native acceleration module for `findfmt`.
-#[pymodule]
-fn _rust_ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
+#[pymodule(name = "_rust_ext")]
+fn rust_ext(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("__doc__", "Native PyO3 acceleration module for findfmt.")?;
     m.add_class::<RustFileIterator>()?;
     m.add_function(wrap_pyfunction!(backend_name, m)?)?;

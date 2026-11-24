@@ -143,14 +143,14 @@ mod tests {
         let (mult, n_m) = re_ignorecase_equivalents(u32::from('×'), 16);
         assert_eq!(&mult[..n_m], &[u32::from('×')]);
 
-        let (tje_14, n_t14) = re_ignorecase_equivalents(0x1C89, 14);
-        assert_eq!(&tje_14[..n_t14], &[0x1C89]);
-        let (tje_16, n_t16) = re_ignorecase_equivalents(0x1C89, 16);
-        assert_eq!(&tje_16[..n_t16], &[0x1C89, 0x1C8A]);
+        let (cyrillic_u14, len_u14) = re_ignorecase_equivalents(0x1C89, 14);
+        assert_eq!(&cyrillic_u14[..len_u14], &[0x1C89]);
+        let (cyrillic_u16, len_u16) = re_ignorecase_equivalents(0x1C89, 16);
+        assert_eq!(&cyrillic_u16[..len_u16], &[0x1C89, 0x1C8A]);
 
-        let (beria_16, n_b16) = re_ignorecase_equivalents(0x16EA0, 16);
-        assert_eq!(&beria_16[..n_b16], &[0x16EA0]);
-        let (beria_17, n_b17) = re_ignorecase_equivalents(0x16EA0, 17);
-        assert_eq!(&beria_17[..n_b17], &[0x16EA0, 0x16EBB]);
+        let (beria_old, len_old) = re_ignorecase_equivalents(0x16EA0, 16);
+        assert_eq!(&beria_old[..len_old], &[0x16EA0]);
+        let (beria_new, len_new) = re_ignorecase_equivalents(0x16EA0, 17);
+        assert_eq!(&beria_new[..len_new], &[0x16EA0, 0x16EBB]);
     }
 }

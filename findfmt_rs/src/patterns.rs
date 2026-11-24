@@ -112,27 +112,10 @@ fn match_spec_u32(
 pub struct PatternMatcher {
     include_spec: Option<GlobSpecU32>,
     exclude_spec: Option<GlobSpecU32>,
-    pub ignore_case: bool,
     pub match_dirs: bool,
 }
 
 impl PatternMatcher {
-    /// Fallible constructor propagating malformed glob syntax as `Err(String)`.
-    pub fn try_new(
-        include_patterns: &[String],
-        exclude_patterns: &[String],
-        ignore_case: bool,
-        match_dirs: bool,
-    ) -> Result<Self, String> {
-        Self::try_new_for_unicode(
-            include_patterns,
-            exclude_patterns,
-            ignore_case,
-            match_dirs,
-            16,
-        )
-    }
-
     /// Fallible constructor gated to `unicode_major` `ignore_case` equivalences (`#581`).
     pub fn try_new_for_unicode(
         include_patterns: &[String],
@@ -144,20 +127,26 @@ impl PatternMatcher {
         Ok(Self {
             include_spec: compile_pattern_spec(include_patterns, ignore_case, unicode_major)?,
             exclude_spec: compile_pattern_spec(exclude_patterns, ignore_case, unicode_major)?,
-            ignore_case,
             match_dirs,
         })
     }
 
-    /// Construct a `PatternMatcher` from raw include and exclude pattern lists.
+    /// Construct a `PatternMatcher` from raw include and exclude pattern lists in unit tests.
+    #[cfg(test)]
     pub fn new(
         include_patterns: &[String],
         exclude_patterns: &[String],
         ignore_case: bool,
         match_dirs: bool,
     ) -> Self {
-        Self::try_new(include_patterns, exclude_patterns, ignore_case, match_dirs)
-            .unwrap_or_default()
+        Self::try_new_for_unicode(
+            include_patterns,
+            exclude_patterns,
+            ignore_case,
+            match_dirs,
+            16,
+        )
+        .unwrap_or_default()
     }
 
     pub fn is_active(&self) -> bool {

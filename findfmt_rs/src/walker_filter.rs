@@ -43,11 +43,7 @@ pub fn is_valid_descent_dir(dir: &Path, follow_symlinks: bool) -> bool {
 }
 
 /// Compute `relative_path` mirroring `classifier.py:_resolve_relative`.
-pub fn resolve_relative_pathbuf(
-    path: &Path,
-    base_root: &Path,
-    prefix: Option<&Path>,
-) -> PathBuf {
+pub fn resolve_relative_pathbuf(path: &Path, base_root: &Path, prefix: Option<&Path>) -> PathBuf {
     let Ok(rel) = path.strip_prefix(base_root) else {
         return path.to_path_buf();
     };
@@ -128,28 +124,32 @@ pub fn filter_entry_nogil(
     root_dev: Option<u64>,
     base_root: &Path,
 ) -> Option<(PathBuf, bool, bool, bool)> {
-    if !config.include_hidden && is_hidden_name(&entry.file_name) {
+    if !config.scope.include_hidden && is_hidden_name(&entry.file_name) {
         return None;
     }
     let is_symlink = match entry.file_type {
         Some(ft) => ft.is_symlink(),
         None => fs::symlink_metadata(&entry.path).is_ok_and(|m| m.file_type().is_symlink()),
     };
-    if config.one_file_system
-        && !check_entry_device(&entry.path, is_symlink, config.follow_symlinks, root_dev)
+    if config.bounds.one_file_system
+        && !check_entry_device(
+            &entry.path,
+            is_symlink,
+            config.scope.follow_symlinks,
+            root_dev,
+        )
     {
         return None;
     }
 
     let (is_dir, is_candidate_file) = if !is_symlink {
-        match entry.file_type {
-            Some(ft) => (ft.is_dir(), ft.is_file()),
-            None => {
-                let meta = fs::symlink_metadata(&entry.path).ok()?;
-                (meta.is_dir(), meta.is_file())
-            }
+        if let Some(ft) = entry.file_type {
+            (ft.is_dir(), ft.is_file())
+        } else {
+            let meta = fs::symlink_metadata(&entry.path).ok()?;
+            (meta.is_dir(), meta.is_file())
         }
-    } else if config.follow_symlinks {
+    } else if config.scope.follow_symlinks {
         let target_meta = fs::metadata(&entry.path).ok()?;
         (target_meta.is_dir(), target_meta.is_file())
     } else {
@@ -179,8 +179,8 @@ pub fn executable_hint_for_skip(
 ) -> Option<bool> {
     #[cfg(unix)]
     {
-        let _ = filename;
         use std::os::unix::fs::MetadataExt;
+        let _ = filename;
         let meta = if follow_symlinks || !is_symlink {
             fs::metadata(entry_path).ok()?
         } else {

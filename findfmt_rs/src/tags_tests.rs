@@ -12,9 +12,15 @@ fn splitext_tag_and_data_uri_lookup_parity() {
     );
 
     let reg = TagRegistry::builtin_for_tests();
-    assert!(reg.tags_from_filename("Dockerfile.prod").contains("dockerfile"));
+    assert!(
+        reg.tags_from_filename("Dockerfile.prod")
+            .contains("dockerfile")
+    );
     assert!(reg.tags_from_filename("app.PY").contains("python"));
-    assert!(reg.tags_from_interpreter("/usr/bin/python3.12.1").contains("python3"));
+    assert!(
+        reg.tags_from_interpreter("/usr/bin/python3.12.1")
+            .contains("python3")
+    );
     assert_eq!(
         reg.guess_mime_type("bundle.tgz"),
         Some("application/x-tar".into())

@@ -12,12 +12,12 @@ use proptest::prelude::*;
 
 fn encode_in_unicode_decimal_base(mut value: u64, zero_base: u32) -> String {
     if value == 0 {
-        return char::from_u32(zero_base).expect("valid zero scalar").to_string();
+        return char::from_u32(zero_base).unwrap_or('0').to_string();
     }
     let mut digits = Vec::new();
     while value > 0 {
-        let rem = u32::try_from(value % 10).expect("digit 0..9");
-        digits.push(char::from_u32(zero_base + rem).expect("valid decimal scalar"));
+        let rem = u32::try_from(value % 10).unwrap_or(0);
+        digits.push(char::from_u32(zero_base + rem).unwrap_or('0'));
         value /= 10;
     }
     digits.into_iter().rev().collect()
@@ -87,8 +87,11 @@ proptest! {
         // Sample ASCII, Arabic-Indic, Extended Arabic-Indic, Devanagari, Fullwidth, Math Bold
         let bases: [u32; 6] = [0x0030, 0x0660, 0x06F0, 0x0966, 0xFF10, 0x1D7CE];
         for base in bases {
-            let ch = char::from_u32(base + u32::from(digit)).expect("valid Unicode decimal scalar");
-            prop_assert_eq!(decimal_digit_value(ch), Some(digit));
+            let maybe_ch = char::from_u32(base + u32::from(digit));
+            prop_assert!(maybe_ch.is_some());
+            if let Some(ch) = maybe_ch {
+                prop_assert_eq!(decimal_digit_value(ch), Some(digit));
+            }
         }
     }
 

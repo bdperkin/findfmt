@@ -75,9 +75,9 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
         unicode_major,
     };
     let _ = PY_HANDLES.set(built);
-    PY_HANDLES.get().ok_or_else(|| {
-        pyo3::exceptions::PyRuntimeError::new_err("failed to initialize PyHandles")
-    })
+    PY_HANDLES
+        .get()
+        .ok_or_else(|| pyo3::exceptions::PyRuntimeError::new_err("failed to initialize PyHandles"))
 }
 
 pub(crate) fn py_path_to_pathbuf(
@@ -168,7 +168,10 @@ pub(crate) fn fetch_windows_pre_stat(
         let Ok(lst) = os_mod.call_method("stat", (path_obj,), Some(&kwargs_no_follow)) else {
             return (false, false, false, 0, None);
         };
-        let lmode: u32 = lst.getattr("st_mode").and_then(|v| v.extract()).unwrap_or(0);
+        let lmode: u32 = lst
+            .getattr("st_mode")
+            .and_then(|v| v.extract())
+            .unwrap_or(0);
         let sym = (lmode & 0o170_000) == 0o120_000;
         if sym && follow_symlinks {
             let Ok(followed) = os_mod.call_method1("stat", (path_obj,)) else {

@@ -116,16 +116,15 @@ fn emit_segment_glob(prog: &mut Vec<Inst>, seg: &str) -> Result<(), InvalidGlob>
                 prog.push(Inst::NonSlash);
                 k += 1;
             }
-            '[' => match try_parse_bracket(&chars, k, &next_rbracket)? {
-                Some((cls_inst, next_k)) => {
+            '[' => {
+                if let Some((cls_inst, next_k)) = try_parse_bracket(&chars, k, &next_rbracket)? {
                     prog.push(cls_inst);
                     k = next_k;
-                }
-                None => {
+                } else {
                     prog.push(Inst::Char(u32::from('[')));
                     k += 1;
                 }
-            },
+            }
             ch => {
                 prog.push(Inst::Char(u32::from(ch)));
                 k += 1;
@@ -135,21 +134,10 @@ fn emit_segment_glob(prog: &mut Vec<Inst>, seg: &str) -> Result<(), InvalidGlob>
     Ok(())
 }
 
-/// Compile a single rule line mirroring `pathspec`'s `GitIgnoreBasicPattern.pattern_to_regex`.
-pub(crate) fn compile_gitignore_rule(raw_line: &str) -> Result<Option<CompiledRuleU32>, String> {
-    let trimmed = if raw_line.ends_with(r"\ ") {
-        raw_line
-    } else {
-        py_rstrip(raw_line)
-    };
-    if trimmed.is_empty() || trimmed.starts_with('#') {
-        return Ok(None);
-    }
-    let (negated, pattern_str) = match trimmed.strip_prefix('!') {
-        Some(r) => (true, r),
-        None => (false, trimmed),
-    };
-
+fn normalize_gitignore_segments<'a>(
+    pattern_str: &'a str,
+    raw_line: &str,
+) -> Result<(Vec<&'a str>, bool), String> {
     let mut segs: Vec<&str> = pattern_str.split('/').collect();
     let mut is_dir_pattern = segs.last().is_some_and(|s| s.is_empty());
     if pattern_str == "/" {
@@ -175,7 +163,77 @@ pub(crate) fn compile_gitignore_rule(raw_line: &str) -> Result<Option<CompiledRu
             segs.remove(idx);
         }
     }
+    Ok((segs, is_dir_pattern))
+}
 
+fn emit_double_star(prog: &mut Vec<Inst>, idx: usize, end: usize, need_slash: &mut bool) {
+    if idx == 0 {
+        let pc_split = prog.len();
+        prog.push(Inst::Split(0, 0));
+        let pc_dot = prog.len();
+        prog.push(Inst::AnyNonNewline);
+        let pc_loop = prog.len();
+        prog.push(Inst::Split(pc_dot, pc_loop + 1));
+        prog.push(Inst::Char(u32::from('/')));
+        let pc_skip = prog.len();
+        prog[pc_split] = Inst::Split(pc_dot, pc_skip);
+    } else if idx < end {
+        let pc_split = prog.len();
+        prog.push(Inst::Split(0, 0));
+        let pc_slash = prog.len();
+        prog.push(Inst::Char(u32::from('/')));
+        let pc_dot = prog.len();
+        prog.push(Inst::AnyNonNewline);
+        let pc_loop = prog.len();
+        prog.push(Inst::Split(pc_dot, pc_loop + 1));
+        let pc_skip = prog.len();
+        prog[pc_split] = Inst::Split(pc_slash, pc_skip);
+        *need_slash = true;
+    } else {
+        prog.push(Inst::Char(u32::from('/')));
+    }
+}
+
+fn emit_terminal_suffix(prog: &mut Vec<Inst>, seg: &str) {
+    if seg == "*" {
+        let pc_split = prog.len();
+        prog.push(Inst::Split(0, 0));
+        let pc_slash = prog.len();
+        prog.push(Inst::Char(u32::from('/')));
+        let pc_end = prog.len();
+        prog.push(Inst::End);
+        prog[pc_split] = Inst::Split(pc_slash, pc_end);
+    } else {
+        let pc_split = prog.len();
+        prog.push(Inst::Split(0, 0));
+        let pc_slash = prog.len();
+        prog.push(Inst::Char(u32::from('/')));
+        let pc_jump = prog.len();
+        prog.push(Inst::Split(0, 0));
+        let pc_end = prog.len();
+        prog.push(Inst::End);
+        let pc_match = prog.len();
+        prog[pc_split] = Inst::Split(pc_slash, pc_end);
+        prog[pc_jump] = Inst::Split(pc_match, pc_match);
+    }
+}
+
+/// Compile a single rule line mirroring `pathspec`'s `GitIgnoreBasicPattern.pattern_to_regex`.
+pub(crate) fn compile_gitignore_rule(raw_line: &str) -> Result<Option<CompiledRuleU32>, String> {
+    let trimmed = if raw_line.ends_with(r"\ ") {
+        raw_line
+    } else {
+        py_rstrip(raw_line)
+    };
+    if trimmed.is_empty() || trimmed.starts_with('#') {
+        return Ok(None);
+    }
+    let (negated, pattern_str) = match trimmed.strip_prefix('!') {
+        Some(r) => (true, r),
+        None => (false, trimmed),
+    };
+
+    let (segs, is_dir_pattern) = normalize_gitignore_segments(pattern_str, raw_line)?;
     if segs.len() == 1 && segs[0] == "**" {
         let kind = if is_dir_pattern {
             RuleKind::ContainsSlash
@@ -196,31 +254,7 @@ pub(crate) fn compile_gitignore_rule(raw_line: &str) -> Result<Option<CompiledRu
     let end = segs.len() - 1;
     for (i, &seg) in segs.iter().enumerate() {
         if seg == "**" {
-            if i == 0 {
-                let pc_split = prog.len();
-                prog.push(Inst::Split(0, 0));
-                let pc_dot = prog.len();
-                prog.push(Inst::AnyNonNewline);
-                let pc_loop = prog.len();
-                prog.push(Inst::Split(pc_dot, pc_loop + 1));
-                prog.push(Inst::Char(u32::from('/')));
-                let pc_skip = prog.len();
-                prog[pc_split] = Inst::Split(pc_dot, pc_skip);
-            } else if i < end {
-                let pc_split = prog.len();
-                prog.push(Inst::Split(0, 0));
-                let pc_slash = prog.len();
-                prog.push(Inst::Char(u32::from('/')));
-                let pc_dot = prog.len();
-                prog.push(Inst::AnyNonNewline);
-                let pc_loop = prog.len();
-                prog.push(Inst::Split(pc_dot, pc_loop + 1));
-                let pc_skip = prog.len();
-                prog[pc_split] = Inst::Split(pc_slash, pc_skip);
-                need_slash = true;
-            } else {
-                prog.push(Inst::Char(u32::from('/')));
-            }
+            emit_double_star(&mut prog, i, end, &mut need_slash);
         } else {
             if need_slash {
                 prog.push(Inst::Char(u32::from('/')));
@@ -235,27 +269,7 @@ pub(crate) fn compile_gitignore_rule(raw_line: &str) -> Result<Option<CompiledRu
                     .map_err(|_| format!("Invalid git pattern: {raw_line:?}"))?;
             }
             if i == end {
-                if seg == "*" {
-                    let pc_split = prog.len();
-                    prog.push(Inst::Split(0, 0));
-                    let pc_slash = prog.len();
-                    prog.push(Inst::Char(u32::from('/')));
-                    let pc_end = prog.len();
-                    prog.push(Inst::End);
-                    prog[pc_split] = Inst::Split(pc_slash, pc_end);
-                } else {
-                    let pc_split = prog.len();
-                    prog.push(Inst::Split(0, 0));
-                    let pc_slash = prog.len();
-                    prog.push(Inst::Char(u32::from('/')));
-                    let pc_jump = prog.len();
-                    prog.push(Inst::Split(0, 0));
-                    let pc_end = prog.len();
-                    prog.push(Inst::End);
-                    let pc_match = prog.len();
-                    prog[pc_split] = Inst::Split(pc_slash, pc_end);
-                    prog[pc_jump] = Inst::Split(pc_match, pc_match);
-                }
+                emit_terminal_suffix(&mut prog, seg);
             }
             need_slash = true;
         }

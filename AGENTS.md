@@ -58,10 +58,10 @@ extension metadata, dispatched through `src/findfmt/core.py` with automatic fall
 - `src/findfmt/models.py`, `metadata.py`, `sizes.py`, `exceptions.py`, `i18n.py`, `utils/`: Core data models,
   POSIX metadata formatting, IEC/SI size formatting, domain exceptions, and GNU `gettext` internationalization
   (`src/findfmt/locale/`).
-- `tools/`: Maintainer and CI automation scripts (`verify_quality.py`, `dep_matrix.py`, `line_linter.py`,
-  `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_sync.py`, `i18n_translate.py`,
-  `i18n_validation.py`, `i18n_prompts.py`, `i18n_benchmark.py`, `hatch_build.py`, `smoke_wheel.py`,
-  `release_notes.py`, `verify_release_version.py`, `sync_cli_docs.py`, `sync_labels.py`,
+- `tools/`: Maintainer and CI automation scripts (`verify_quality.py`, `quality_steps.py`, `dep_matrix.py`,
+  `line_linter.py`, `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_sync.py`,
+  `i18n_translate.py`, `i18n_validation.py`, `i18n_prompts.py`, `i18n_benchmark.py`, `hatch_build.py`,
+  `smoke_wheel.py`, `release_notes.py`, `verify_release_version.py`, `sync_cli_docs.py`, `sync_labels.py`,
   `sync_pre_commit_deps.py`, `generate_assets.py`, `benchmark.py`, `benchmark_backends.py`,
   `benchmark_models.py`, `benchmark_render.py`, `benchmark_runner.py`, `benchmark_topologies.py`).
 - `tests/`: Comprehensive `pytest` suites mirroring the source layout (`tests/unit/`, `tests/integration/`,
@@ -137,7 +137,9 @@ uv run ruff check
 uv run ruff format --check
 uv run ty check
 cargo fmt --manifest-path findfmt_rs/Cargo.toml --check
-cargo clippy --manifest-path findfmt_rs/Cargo.toml --all-targets -- -D warnings
+cargo check --manifest-path findfmt_rs/Cargo.toml --locked
+cargo clippy --manifest-path findfmt_rs/Cargo.toml --locked --lib -- -D warnings
+cargo clippy --manifest-path findfmt_rs/Cargo.toml --locked --no-default-features --all-targets -- -D warnings
 cargo deny --manifest-path findfmt_rs/Cargo.toml check licenses bans sources
 ```
 

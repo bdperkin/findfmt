@@ -5,16 +5,19 @@ fn is_py_whitespace(c: char) -> bool {
 }
 
 /// Trim characters matching Python's `str.strip()` semantics (Unicode whitespace + ASCII FS/GS/RS/US/NEL).
+#[must_use]
 pub fn py_strip(input: &str) -> &str {
     input.trim_matches(is_py_whitespace)
 }
 
 /// Trim trailing characters matching Python's `str.rstrip()` semantics.
+#[must_use]
 pub fn py_rstrip(input: &str) -> &str {
     input.trim_end_matches(is_py_whitespace)
 }
 
 /// Extract the raw `#!` shebang header line from a byte buffer (`extract_shebang_from_buffer` parity).
+#[must_use]
 pub fn extract_shebang_from_buffer(buffer: &[u8]) -> Option<String> {
     if !buffer.starts_with(b"#!") {
         return None;
@@ -33,6 +36,7 @@ fn is_shlex_whitespace(ch: char) -> bool {
 }
 
 /// Parse a shebang command line using POSIX `shlex.split` rules, falling back to whitespace split.
+#[must_use]
 pub fn shebang_split(line: &str) -> Vec<String> {
     posix_shlex_split(line).unwrap_or_else(|()| {
         line.split_whitespace()
@@ -135,6 +139,7 @@ fn read_line_slice(input: &[u8]) -> (&[u8], &[u8]) {
 /// Parse interpreter command tokens from a `#!` buffer (`identify.identify.parse_shebang` parity).
 ///
 /// Supports `#!/usr/bin/env -S ...`, `#!/usr/bin/env ...`, quoted paths, and multi-line `nix-shell -i`.
+#[must_use]
 pub fn parse_shebang_tokens(buffer: &[u8]) -> Vec<String> {
     let Some(after_magic) = buffer.strip_prefix(b"#!") else {
         return Vec::new();
@@ -197,10 +202,7 @@ mod tests {
             parse_shebang_tokens(b"#!/usr/bin/env -S python3 -u\n"),
             vec!["python3", "-u"],
         );
-        assert_eq!(
-            parse_shebang_tokens(b"#!/usr/bin/env node\n"),
-            vec!["node"],
-        );
+        assert_eq!(parse_shebang_tokens(b"#!/usr/bin/env node\n"), vec!["node"],);
         assert_eq!(
             parse_shebang_tokens(b"#!\"/opt/my python/bin/python3.12\" -O\n"),
             vec!["/opt/my python/bin/python3.12", "-O"],
@@ -211,8 +213,14 @@ mod tests {
             vec!["/bin/sh", "'unclosed"],
         );
         // Non-printable / invalid UTF-8 rejected by parse_shebang_tokens
-        assert!(parse_shebang_tokens(b"#!/usr/bin/python3 \xff\n").is_empty());
-        assert!(parse_shebang_tokens(b"#!/usr/bin/python3 \x01\n").is_empty());
+        assert_eq!(
+            parse_shebang_tokens(b"#!/usr/bin/python3 \xff\n"),
+            Vec::<String>::new(),
+        );
+        assert_eq!(
+            parse_shebang_tokens(b"#!/usr/bin/python3 \x01\n"),
+            Vec::<String>::new(),
+        );
 
         // nix-shell multi-line shebang
         let nix = b"#! /usr/bin/env nix-shell\n#! nix-shell -i bash -p bash\necho ok\n";

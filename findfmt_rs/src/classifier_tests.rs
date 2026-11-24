@@ -9,24 +9,24 @@ use super::*;
 
 #[cfg(unix)]
 #[test]
-fn classify_regular_shebang_symlink_and_batch_filter() {
+fn classify_regular_shebang_symlink_and_batch_filter() -> Result<(), Box<dyn std::error::Error>> {
     use std::os::unix::fs::{PermissionsExt, symlink};
 
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_or(0, |d| d.as_nanos());
     let dir = env::temp_dir().join(format!("findfmt_rs_cls_{}_{nanos}", std::process::id()));
-    fs::create_dir_all(&dir).expect("temp dir");
+    fs::create_dir_all(&dir)?;
 
     let script = dir.join("runner");
-    fs::write(&script, b"#!/usr/bin/env -S python3 -u\nprint('ok')\n").expect("write script");
-    fs::set_permissions(&script, fs::Permissions::from_mode(0o755)).expect("chmod");
+    fs::write(&script, b"#!/usr/bin/env -S python3 -u\nprint('ok')\n")?;
+    fs::set_permissions(&script, fs::Permissions::from_mode(0o755))?;
 
     let plain = dir.join("notes.rs");
-    fs::write(&plain, b"fn main() {}\n").expect("write rs");
+    fs::write(&plain, b"fn main() {}\n")?;
 
     let link = dir.join("link_rs");
-    symlink(&plain, &link).expect("symlink");
+    symlink(&plain, &link)?;
 
     let reg = TagRegistry::builtin_for_tests();
     let inputs = vec![
@@ -67,7 +67,7 @@ fn classify_regular_shebang_symlink_and_batch_filter() {
         Some("#!/usr/bin/env -S python3 -u")
     );
     assert_eq!(all[0].1.indicator, Some("*"));
-    assert!(all[2].1.is_symlink);
+    assert!(all[2].1.is_symlink());
     assert!(all[2].1.tags.contains("rust"));
 
     let py_only = FilterCriteria {
@@ -109,4 +109,5 @@ fn classify_regular_shebang_symlink_and_batch_filter() {
     assert_ne!(swapped.inode, Some(42));
 
     let _ = fs::remove_dir_all(&dir);
+    Ok(())
 }

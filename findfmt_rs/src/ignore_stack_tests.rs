@@ -3,7 +3,8 @@ use std::fs;
 use super::*;
 
 #[test]
-fn linked_worktree_commondir_ini_config_and_child_negation_behave_cleanly() {
+fn linked_worktree_commondir_ini_config_and_child_negation_behave_cleanly()
+-> Result<(), Box<dyn std::error::Error>> {
     let tmp = std::env::temp_dir().join(format!("findfmt_rs_ign_stack_{}", std::process::id()));
     let _ = fs::remove_dir_all(&tmp);
     let common_git = tmp.join("  main_repo_git");
@@ -11,33 +12,30 @@ fn linked_worktree_commondir_ini_config_and_child_negation_behave_cleanly() {
     let repo = tmp.join("worktree_repo");
     let sub = repo.join("sub");
     let fake_home = tmp.join("home");
-    fs::create_dir_all(common_git.join("info")).expect("create common info");
-    fs::create_dir_all(private_wt.join("info")).expect("create private info");
-    fs::create_dir_all(&sub).expect("create sub");
-    fs::create_dir_all(&fake_home).expect("create home");
+    fs::create_dir_all(common_git.join("info"))?;
+    fs::create_dir_all(private_wt.join("info"))?;
+    fs::create_dir_all(&sub)?;
+    fs::create_dir_all(&fake_home)?;
 
-    fs::write(fake_home.join("glob.ign"), "*.cfg_ign\n").expect("write glob.ign");
+    fs::write(fake_home.join("glob.ign"), "*.cfg_ign\n")?;
     fs::write(
         common_git.join("config"),
         "[core]\n\texcludesFile = ~/glob.ign\n",
-    )
-    .expect("write git config");
-    fs::write(common_git.join("info").join("exclude"), "*.excl\n").expect("write exclude");
-    fs::write(private_wt.join("info").join("exclude"), "*.stale\n")
-        .expect("write stale private exclude");
+    )?;
+    fs::write(common_git.join("info").join("exclude"), "*.excl\n")?;
+    fs::write(private_wt.join("info").join("exclude"), "*.stale\n")?;
     fs::write(
         private_wt.join("commondir"),
         format!("{}\n", common_git.display()),
-    )
-    .expect("write commondir");
-    fs::write(repo.join(".git"), format!("gitdir: {}\n", private_wt.display()))
-        .expect("write gitdir");
-    fs::write(repo.join(".gitignore"), "*.log\n").expect("write root gitignore");
-    fs::write(sub.join(".gitignore"), "!keep.log\n").expect("write sub gitignore");
+    )?;
+    fs::write(
+        repo.join(".git"),
+        format!("gitdir: {}\n", private_wt.display()),
+    )?;
+    fs::write(repo.join(".gitignore"), "*.log\n")?;
+    fs::write(sub.join(".gitignore"), "!keep.log\n")?;
 
-    let canon_repo = fs::canonicalize(&repo)
-        .map(|p| align_path_form(p, &repo))
-        .unwrap_or(repo);
+    let canon_repo = fs::canonicalize(&repo).map_or(repo, |p| align_path_form(p, &tmp));
     let canon_sub = canon_repo.join("sub");
     let root_specs = resolve_root_specs(
         &canon_repo,
@@ -55,12 +53,37 @@ fn linked_worktree_commondir_ini_config_and_child_negation_behave_cleanly() {
     );
     let sub_specs = load_child_specs(&canon_sub, &root_specs, true);
 
-    assert!(is_path_ignored(&canon_repo.join("secret.excl"), false, &sub_specs));
-    assert!(!is_path_ignored(&canon_repo.join("secret.stale"), false, &sub_specs));
-    assert!(is_path_ignored(&canon_repo.join("item.cfg_ign"), false, &sub_specs));
-    assert!(!is_path_ignored(&canon_repo.join("item.cfg_ign"), false, &no_glob));
-    assert!(is_path_ignored(&canon_sub.join("drop.log"), false, &sub_specs));
-    assert!(!is_path_ignored(&canon_sub.join("keep.log"), false, &sub_specs));
+    assert!(is_path_ignored(
+        &canon_repo.join("secret.excl"),
+        false,
+        &sub_specs
+    ));
+    assert!(!is_path_ignored(
+        &canon_repo.join("secret.stale"),
+        false,
+        &sub_specs
+    ));
+    assert!(is_path_ignored(
+        &canon_repo.join("item.cfg_ign"),
+        false,
+        &sub_specs
+    ));
+    assert!(!is_path_ignored(
+        &canon_repo.join("item.cfg_ign"),
+        false,
+        &no_glob
+    ));
+    assert!(is_path_ignored(
+        &canon_sub.join("drop.log"),
+        false,
+        &sub_specs
+    ));
+    assert!(!is_path_ignored(
+        &canon_sub.join("keep.log"),
+        false,
+        &sub_specs
+    ));
 
     let _ = fs::remove_dir_all(&tmp);
+    Ok(())
 }

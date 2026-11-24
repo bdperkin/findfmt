@@ -53,6 +53,79 @@ fn scan_sorted_for_prune(
     Some(entries)
 }
 
+fn check_prune_memo(
+    memo: &HashMap<PruneMemoKey, PruneCache>,
+    memo_key: &PruneMemoKey,
+    current_depth: usize,
+    max_depth: Option<usize>,
+) -> Option<bool> {
+    let &cached = memo.get(memo_key)?;
+    match cached {
+        PruneCache::Matched {
+            searched_from_depth,
+        } if max_depth.is_none() || current_depth <= searched_from_depth => Some(true),
+        PruneCache::Empty {
+            searched_from_depth,
+            had_cycle_skip,
+        } if !had_cycle_skip && (max_depth.is_none() || current_depth >= searched_from_depth) => {
+            Some(false)
+        }
+        _ => None,
+    }
+}
+
+fn prune_candidate_matches(
+    entry: &ScannedEntry,
+    entry_path: PathBuf,
+    is_symlink: bool,
+    inherited_match: bool,
+    base_root: &Path,
+    config: &WalkConfig,
+    registry: &TagRegistry,
+) -> bool {
+    let (tag_active, needs_mime, needs_exec) = tag_prefilter_requirements(&config.filter);
+    if tag_active {
+        let filename = entry.file_name.to_string_lossy();
+        let exec_hint = needs_exec
+            .then(|| {
+                executable_hint_for_skip(
+                    &entry_path,
+                    &filename,
+                    is_symlink,
+                    config.scope.follow_symlinks,
+                )
+            })
+            .flatten();
+        let guessed_mime = needs_mime
+            .then(|| {
+                let str_path = entry_path.to_string_lossy();
+                config.mime_snapshot.guess_mime_type(&str_path)
+            })
+            .flatten();
+        if can_skip_entry_by_tags(
+            &filename,
+            is_symlink,
+            config.scope.follow_symlinks,
+            exec_hint,
+            &config.filter,
+            registry,
+            guessed_mime.as_deref(),
+        ) {
+            return false;
+        }
+    }
+    let rel_pb = resolve_relative_pathbuf(&entry_path, base_root, None);
+    let raw_in = build_raw_classify_input(entry_path, config.scope.follow_symlinks, None, config);
+    let classified = classify_one_nogil(&raw_in, registry, config.pathext_upper.as_deref());
+    let is_dir_item = classified.is_dir || classified.tags.contains("directory");
+    config
+        .filter
+        .matches(&classified.tags, classified.shebang.as_deref(), is_dir_item)
+        && config
+            .matcher
+            .matches_classified_item(&rel_pb, is_dir_item, inherited_match)
+}
+
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn inspect_prune_dir(
     search: &mut PruneSearch,
@@ -67,7 +140,7 @@ pub(crate) fn inspect_prune_dir(
     memo: &mut HashMap<PruneMemoKey, PruneCache>,
     events: &mut Vec<WalkEvent>,
 ) -> bool {
-    if !is_valid_descent_dir(directory, config.follow_symlinks) {
+    if !is_valid_descent_dir(directory, config.scope.follow_symlinks) {
         return false;
     }
     let Some(dir_key) = DirKey::from_dir(directory) else {
@@ -80,27 +153,13 @@ pub(crate) fn inspect_prune_dir(
         return false;
     }
     let memo_key = make_memo_key(&dir_key, directory, base_root, specs, config);
-    if let Some(&cached) = memo.get(&memo_key) {
-        match cached {
-            PruneCache::Matched {
-                searched_from_depth,
-            } if config.max_depth.is_none() || current_depth <= searched_from_depth => {
-                return true;
-            }
-            PruneCache::Empty {
-                searched_from_depth,
-                had_cycle_skip,
-            } if !had_cycle_skip
-                && (config.max_depth.is_none() || current_depth >= searched_from_depth) =>
-            {
-                return false;
-            }
-            _ => {}
-        }
+    if let Some(hit) = check_prune_memo(memo, &memo_key, current_depth, config.bounds.max_depth) {
+        return hit;
     }
 
     let err_before = events.len();
-    let Some(entries) = scan_sorted_for_prune(directory, config.follow_symlinks, events) else {
+    let Some(entries) = scan_sorted_for_prune(directory, config.scope.follow_symlinks, events)
+    else {
         if events.len() > err_before {
             memo.insert(
                 memo_key,
@@ -113,7 +172,6 @@ pub(crate) fn inspect_prune_dir(
         return false;
     };
 
-    let (tag_active, needs_mime, needs_exec) = tag_prefilter_requirements(&config.filter);
     let mut subdirs: Vec<PathBuf> = Vec::new();
     for entry in &entries {
         let Some((entry_path, is_dir, is_cand_file, is_symlink)) =
@@ -122,62 +180,27 @@ pub(crate) fn inspect_prune_dir(
             continue;
         };
         if is_dir {
-            if !should_skip_dir(&entry.file_name, config.include_hidden) {
+            if !should_skip_dir(&entry.file_name, config.scope.include_hidden) {
                 subdirs.push(entry_path);
             }
-        } else if is_cand_file {
-            if tag_active {
-                let filename = entry.file_name.to_string_lossy();
-                let exec_hint = needs_exec
-                    .then(|| {
-                        executable_hint_for_skip(
-                            &entry_path,
-                            &filename,
-                            is_symlink,
-                            config.follow_symlinks,
-                        )
-                    })
-                    .flatten();
-                let guessed_mime = needs_mime
-                    .then(|| {
-                        let str_path = entry_path.to_string_lossy();
-                        config.mime_snapshot.guess_mime_type(&str_path)
-                    })
-                    .flatten();
-                if can_skip_entry_by_tags(
-                    &filename,
-                    is_symlink,
-                    config.follow_symlinks,
-                    exec_hint,
-                    &config.filter,
-                    registry,
-                    guessed_mime.as_deref(),
-                ) {
-                    continue;
-                }
-            }
-            let raw_in =
-                build_raw_classify_input(entry_path.clone(), config.follow_symlinks, None, config);
-            let classified = classify_one_nogil(&raw_in, registry, config.pathext_upper.as_deref());
-            let is_dir_item = classified.is_dir || classified.tags.contains("directory");
-            let rel_pb = resolve_relative_pathbuf(&entry_path, base_root, None);
-            if config.filter.matches(
-                &classified.tags,
-                classified.shebang.as_deref(),
-                is_dir_item,
-            ) && config.matcher.matches_classified_item(
-                &rel_pb,
-                is_dir_item,
+        } else if is_cand_file
+            && prune_candidate_matches(
+                entry,
+                entry_path,
+                is_symlink,
                 inherited_match,
-            ) {
-                memo.insert(
-                    memo_key,
-                    PruneCache::Matched {
-                        searched_from_depth: usize::MAX,
-                    },
-                );
-                return true;
-            }
+                base_root,
+                config,
+                registry,
+            )
+        {
+            memo.insert(
+                memo_key,
+                PruneCache::Matched {
+                    searched_from_depth: usize::MAX,
+                },
+            );
+            return true;
         }
     }
 
@@ -191,7 +214,11 @@ pub(crate) fn inspect_prune_dir(
         );
         return false;
     }
-    if config.max_depth.is_some_and(|max_d| current_depth >= max_d) {
+    if config
+        .bounds
+        .max_depth
+        .is_some_and(|max_d| current_depth >= max_d)
+    {
         if let Some(parent) = search.frames.last_mut() {
             parent.had_incomplete_child = true;
         }

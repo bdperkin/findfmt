@@ -1,6 +1,6 @@
 //! Subdirectory descent and resumable `--prune` poll progression for `NativeWalker` (#582).
 
-use std::path::PathBuf;
+use std::path::Path;
 use std::sync::Arc;
 
 use crate::gitignore::GitignoreMatcher;
@@ -14,22 +14,20 @@ use crate::walker_step::{
 use crate::walker_types::{DirKey, WalkConfig, WalkEvent};
 
 pub(crate) fn has_work_remaining(state: &ActiveRootState) -> bool {
-    state.pending_batch.is_some()
-        || state.pending_subdir_prune.is_some()
-        || !state.stack.is_empty()
+    state.pending_batch.is_some() || state.pending_subdir_prune.is_some() || !state.stack.is_empty()
 }
 
 pub(crate) fn finish_subdir_descent(
     config: &WalkConfig,
     state: &mut ActiveRootState,
-    subdir: PathBuf,
+    subdir: &Path,
     child_specs: Arc<[GitignoreMatcher]>,
     child_depth: usize,
     child_inh: bool,
     events: &mut Vec<WalkEvent>,
 ) {
-    let allow = if config.follow_symlinks {
-        DirKey::from_dir(&subdir).is_some_and(|dk| state.visited_dirs.insert(dk))
+    let allow = if config.scope.follow_symlinks {
+        DirKey::from_dir(subdir).is_some_and(|dk| state.visited_dirs.insert(dk))
     } else {
         true
     };
@@ -37,7 +35,7 @@ pub(crate) fn finish_subdir_descent(
         enter_directory_state(
             config,
             state,
-            &subdir,
+            subdir,
             child_specs,
             child_depth,
             child_inh,
@@ -70,7 +68,7 @@ pub(crate) fn advance_active_root(
                 finish_subdir_descent(
                     config,
                     &mut state,
-                    pending.subdir,
+                    &pending.subdir,
                     pending.child_specs,
                     pending.child_depth,
                     pending.child_inh,
@@ -95,7 +93,7 @@ pub(crate) fn advance_active_root(
 
     let subdir = top.subdirs[top.idx].clone();
     top.idx += 1;
-    if !is_valid_descent_dir(&subdir, config.follow_symlinks) {
+    if !is_valid_descent_dir(&subdir, config.scope.follow_symlinks) {
         return has_work_remaining(&state).then_some(state);
     }
 
@@ -108,9 +106,13 @@ pub(crate) fn advance_active_root(
             .matcher
             .should_inherit_match(&subdir, Some(&state.base_root), parent_inh);
 
-    if config.dirs_only && config.prune_empty {
-        let mut search =
-            PruneSearch::new(subdir.clone(), Arc::clone(&child_specs), child_depth, child_inh);
+    if config.scope.dirs_only && config.bounds.prune_empty {
+        let mut search = PruneSearch::new(
+            subdir.clone(),
+            Arc::clone(&child_specs),
+            child_depth,
+            child_inh,
+        );
         match search.poll(
             &state.base_root,
             state.root_dev,
@@ -123,7 +125,7 @@ pub(crate) fn advance_active_root(
                 finish_subdir_descent(
                     config,
                     &mut state,
-                    subdir,
+                    &subdir,
                     child_specs,
                     child_depth,
                     child_inh,
@@ -145,7 +147,7 @@ pub(crate) fn advance_active_root(
         finish_subdir_descent(
             config,
             &mut state,
-            subdir,
+            &subdir,
             child_specs,
             child_depth,
             child_inh,

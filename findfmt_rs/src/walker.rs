@@ -8,9 +8,7 @@ use crate::classifier::classify_one_nogil;
 use crate::ignore_stack::resolve_root_specs;
 use crate::tags::TagRegistry;
 use crate::walker_descent::advance_active_root;
-use crate::walker_filter::{
-    build_raw_classify_input, resolve_device_id, resolve_relative_pathbuf,
-};
+use crate::walker_filter::{build_raw_classify_input, resolve_device_id, resolve_relative_pathbuf};
 use crate::walker_sort::calculate_accumulated_sizes_nogil;
 use crate::walker_step::{ActiveRootState, enter_directory_state};
 use crate::walker_types::{DirKey, RootTarget, WalkConfig, WalkEvent, WalkYieldItem};
@@ -26,11 +24,7 @@ pub struct NativeWalker {
 
 impl NativeWalker {
     /// Construct a new `NativeWalker` over pre-resolved `RootTarget`s.
-    pub fn new(
-        config: WalkConfig,
-        registry: &'static TagRegistry,
-        roots: Vec<RootTarget>,
-    ) -> Self {
+    pub fn new(config: WalkConfig, registry: &'static TagRegistry, roots: Vec<RootTarget>) -> Self {
         Self {
             config,
             registry,
@@ -92,6 +86,52 @@ impl NativeWalker {
         out
     }
 
+    fn emit_single_file_root(
+        &self,
+        resolved_root: PathBuf,
+        prefix: Option<PathBuf>,
+        events: &mut Vec<WalkEvent>,
+    ) {
+        if self.config.scope.dirs_only {
+            return;
+        }
+        let parent_root = resolved_root
+            .parent()
+            .map_or_else(|| PathBuf::from("."), Path::to_path_buf);
+        let raw_in = build_raw_classify_input(
+            resolved_root.clone(),
+            self.config.scope.follow_symlinks,
+            None,
+            &self.config,
+        );
+        let classified =
+            classify_one_nogil(&raw_in, self.registry, self.config.pathext_upper.as_deref());
+        let is_dir_item = classified.is_dir || classified.tags.contains("directory");
+        let rel_pb = resolve_relative_pathbuf(&resolved_root, &parent_root, prefix.as_deref());
+        if self
+            .config
+            .filter
+            .matches(&classified.tags, classified.shebang.as_deref(), is_dir_item)
+            && self
+                .config
+                .matcher
+                .matches_classified_item(&rel_pb, is_dir_item, false)
+        {
+            events.push(WalkEvent::Item(Box::new(WalkYieldItem {
+                path: resolved_root,
+                str_path: raw_in.str_path,
+                filename: raw_in.filename,
+                root_path: parent_root,
+                prefix,
+                has_entry: false,
+                follow_symlinks: self.config.scope.follow_symlinks,
+                #[cfg(not(unix))]
+                inherited_match: false,
+                classified,
+            })));
+        }
+    }
+
     fn start_root(&mut self, target: RootTarget, events: &mut Vec<WalkEvent>) {
         if let Some(err) = target.initial_error {
             events.push(WalkEvent::Error(err));
@@ -102,53 +142,11 @@ impl NativeWalker {
 
         let is_symlink =
             fs::symlink_metadata(&resolved_root).is_ok_and(|m| m.file_type().is_symlink());
-        let is_file_root = (!self.config.follow_symlinks && is_symlink)
+        let is_file_root = (!self.config.scope.follow_symlinks && is_symlink)
             || fs::metadata(&resolved_root).is_ok_and(|m| m.is_file());
 
         if is_file_root {
-            if !self.config.dirs_only {
-                let parent_root = resolved_root
-                    .parent()
-                    .map_or_else(|| PathBuf::from("."), Path::to_path_buf);
-                let raw_in = build_raw_classify_input(
-                    resolved_root.clone(),
-                    self.config.follow_symlinks,
-                    None,
-                    &self.config,
-                );
-                let classified = classify_one_nogil(
-                    &raw_in,
-                    self.registry,
-                    self.config.pathext_upper.as_deref(),
-                );
-                let is_dir_item = classified.is_dir || classified.tags.contains("directory");
-                let rel_pb = resolve_relative_pathbuf(
-                    &resolved_root,
-                    &parent_root,
-                    target.prefix.as_deref(),
-                );
-                if self.config.filter.matches(
-                    &classified.tags,
-                    classified.shebang.as_deref(),
-                    is_dir_item,
-                ) && self
-                    .config
-                    .matcher
-                    .matches_classified_item(&rel_pb, is_dir_item, false)
-                {
-                    events.push(WalkEvent::Item(Box::new(WalkYieldItem {
-                        path: resolved_root,
-                        str_path: raw_in.str_path,
-                        filename: raw_in.filename,
-                        root_path: parent_root,
-                        prefix: target.prefix,
-                        has_entry: false,
-                        follow_symlinks: self.config.follow_symlinks,
-                        inherited_match: false,
-                        classified,
-                    })));
-                }
-            }
+            self.emit_single_file_root(resolved_root, target.prefix, events);
             return;
         }
 
@@ -156,15 +154,16 @@ impl NativeWalker {
             return;
         }
 
-        let accumulated_sizes = self.config.accumulate_size.then(|| {
+        let accumulated_sizes = self.config.bounds.accumulate_size.then(|| {
             calculate_accumulated_sizes_nogil(
                 &resolved_root,
-                self.config.follow_symlinks,
-                self.config.include_hidden,
+                self.config.scope.follow_symlinks,
+                self.config.scope.include_hidden,
             )
         });
         let root_dev = self
             .config
+            .bounds
             .one_file_system
             .then(|| resolve_device_id(&resolved_root, false, true))
             .flatten();
@@ -172,6 +171,7 @@ impl NativeWalker {
         let mut visited_dirs = HashSet::new();
         if let Some(dk) = self
             .config
+            .scope
             .follow_symlinks
             .then(|| DirKey::from_dir(&resolved_root))
             .flatten()

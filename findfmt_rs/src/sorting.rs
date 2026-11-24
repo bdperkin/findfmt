@@ -36,6 +36,7 @@ const fn block_min_unicode_major(base: u32) -> u8 {
 
 /// Return the decimal value (`0..=9`) when `ch` belongs to Unicode `Decimal_Number` at `unicode_major`.
 #[inline]
+#[must_use]
 pub fn decimal_digit_value_for_unicode(ch: char, unicode_major: u8) -> Option<u8> {
     if ch.is_ascii_digit() {
         return Some((ch as u8) - b'0');
@@ -62,6 +63,7 @@ pub fn decimal_digit_value_for_unicode(ch: char, unicode_major: u8) -> Option<u8
 
 /// Return the decimal value (`0..=9`) when `ch` belongs to Unicode 16 `Decimal_Number`.
 #[inline]
+#[must_use]
 pub fn decimal_digit_value(ch: char) -> Option<u8> {
     decimal_digit_value_for_unicode(ch, 16)
 }
@@ -106,8 +108,10 @@ pub struct NaturalSortKey {
 
 /// PEP 383 `surrogateescape`-preserving natural sort chunk (`0xDC80..=0xDCFF` `< 0xE000`).
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
-pub enum SortChunkU32 {
+pub(crate) enum SortChunkU32 {
+    /// Contiguous decimal digit run stored as leading-zero-stripped ASCII digits.
     Digit(String),
+    /// Contiguous non-decimal codepoint run preserving PEP 383 surrogates.
     Text(Vec<u32>),
 }
 
@@ -133,7 +137,7 @@ impl PartialOrd for SortChunkU32 {
 
 /// PEP 383 `surrogateescape`-preserving natural sort key for `OsStr` filenames.
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct NaturalSortKeyU32 {
+pub(crate) struct NaturalSortKeyU32 {
     pub chunks: Vec<SortChunkU32>,
     pub normalized: Vec<u32>,
 }
@@ -176,7 +180,8 @@ fn flush_u32_text(
 }
 
 /// Generate a PEP 383 `surrogateescape`-preserving natural sort key from an `OsStr`.
-pub fn natural_sort_key_osstr(
+#[must_use]
+pub(crate) fn natural_sort_key_osstr(
     name: &OsStr,
     ignore_case: bool,
     unicode_major: u8,
@@ -190,28 +195,25 @@ pub fn natural_sort_key_osstr(
     let mut digit_buf = String::new();
 
     for cp in raw_cps {
-        match char::from_u32(cp) {
-            Some(ch) => {
-                if let Some(d) = decimal_digit_value_for_unicode(ch, unicode_major) {
-                    flush_u32_text(&mut chunks, &mut valid_text, &mut text_cps, ignore_case);
-                    digit_buf.push(char::from(b'0' + d));
-                } else {
-                    push_digit_chunk(&mut chunks, &mut digit_buf, SortChunkU32::Digit);
-                    valid_text.push(ch);
-                }
-            }
-            None => {
+        if let Some(ch) = char::from_u32(cp) {
+            if let Some(d) = decimal_digit_value_for_unicode(ch, unicode_major) {
+                flush_u32_text(&mut chunks, &mut valid_text, &mut text_cps, ignore_case);
+                digit_buf.push(char::from(b'0' + d));
+            } else {
                 push_digit_chunk(&mut chunks, &mut digit_buf, SortChunkU32::Digit);
-                if !valid_text.is_empty() {
-                    let seg = std::mem::take(&mut valid_text);
-                    if ignore_case {
-                        text_cps.extend(seg.to_lowercase().chars().map(u32::from));
-                    } else {
-                        text_cps.extend(seg.chars().map(u32::from));
-                    }
-                }
-                text_cps.push(cp);
+                valid_text.push(ch);
             }
+        } else {
+            push_digit_chunk(&mut chunks, &mut digit_buf, SortChunkU32::Digit);
+            if !valid_text.is_empty() {
+                let seg = std::mem::take(&mut valid_text);
+                if ignore_case {
+                    text_cps.extend(seg.to_lowercase().chars().map(u32::from));
+                } else {
+                    text_cps.extend(seg.chars().map(u32::from));
+                }
+            }
+            text_cps.push(cp);
         }
     }
     flush_u32_text(&mut chunks, &mut valid_text, &mut text_cps, ignore_case);
@@ -221,6 +223,7 @@ pub fn natural_sort_key_osstr(
 }
 
 /// Generate a natural version sort key chunking embedded decimal integers (`natural_sort_key` parity).
+#[must_use]
 pub fn natural_sort_key(name: &str, ignore_case: bool) -> NaturalSortKey {
     let normalized = if ignore_case {
         name.to_lowercase()
@@ -248,6 +251,7 @@ pub fn natural_sort_key(name: &str, ignore_case: bool) -> NaturalSortKey {
 }
 
 /// Compare two filenames using natural version ordering.
+#[must_use]
 pub fn compare_natural(lhs: &str, rhs: &str, ignore_case: bool) -> Ordering {
     natural_sort_key(lhs, ignore_case).cmp(&natural_sort_key(rhs, ignore_case))
 }
@@ -258,10 +262,19 @@ mod tests {
 
     #[test]
     fn natural_sort_handles_ascii_leading_zeros_unicode_digits_surrogates_and_sigma() {
-        assert_eq!(compare_natural("item2.py", "item10.py", false), Ordering::Less);
-        assert_eq!(compare_natural("item02.py", "item2.py", false), Ordering::Less);
+        assert_eq!(
+            compare_natural("item2.py", "item10.py", false),
+            Ordering::Less
+        );
+        assert_eq!(
+            compare_natural("item02.py", "item2.py", false),
+            Ordering::Less
+        );
         assert_eq!(compare_natural("000", "0", false), Ordering::Greater);
-        assert_eq!(compare_natural("1_first", "a_second", false), Ordering::Less);
+        assert_eq!(
+            compare_natural("1_first", "a_second", false),
+            Ordering::Less
+        );
         assert_eq!(
             compare_natural("uni_\u{0662}.txt", "uni_\u{0661}\u{0660}.txt", false),
             Ordering::Less,
