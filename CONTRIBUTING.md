@@ -324,6 +324,12 @@ git commit -s -m "feat: add support for MIME categories"
      and branch coverage, strict `ty` type checking, pre-commit suite, CodeQL, zizmor, ClusterFuzzLite, Vale
      prose linting, and dependency review) and automated AI review via CodeRabbit (`.coderabbit.yaml`). All
      status checks must pass before merging.
+   - **Draft PR Fast-Iteration Path**: Opening a Draft PR (`gh pr create --draft`) runs the fast
+     `ubuntu-latest` CI suite alongside automated CodeRabbit AI review (`reviews.auto_review.drafts: true` in
+     `.coderabbit.yaml`) while skipping `macos-latest` and `windows-latest` matrix builds during rapid push
+     and review cycles. Once ready for final validation, run `gh pr ready` (`ready_for_review` event) to
+     trigger the full `ubuntu-latest`, `macos-latest`, and `windows-latest` gating matrix required before
+     merging to `main`.
    - Pull requests touching `docs/source/` (or included documentation sources) receive live Sphinx preview
      builds via Read the Docs (`.readthedocs.yaml`) and automated page-level preview links via
      `.github/workflows/docs-preview.yml`.

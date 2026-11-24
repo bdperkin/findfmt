@@ -1,5 +1,6 @@
 """Python version support policy: supported range, CI coverage, and container image."""
 
+import json
 import re
 import tomllib
 from pathlib import Path
@@ -262,11 +263,21 @@ def test_classifiers_are_exactly_the_supported_range() -> None:
     assert sorted(_classifier_versions(), key=_minor_version) == expected
 
 
+def _full_matrix_platforms(os_spec: object) -> set[str]:
+    """Extract the full gating OS set from a list or fromJSON(...) matrix expression (#730)."""
+    if isinstance(os_spec, list):
+        return {str(item) for item in os_spec}
+
+    matches = re.findall(r"'(\[[^']+\])'", str(os_spec))
+    assert matches, f"Expected JSON OS list literal in {os_spec!r}"
+    return {str(item) for item in json.loads(matches[-1])}
+
+
 def test_supported_versions_run_on_ubuntu_and_extremes_on_all_platforms() -> None:
     """Validate Ubuntu runs every supported Python while macOS/Windows gate min + max (#729)."""
     minimum, maximum = _supported_range()
     matrix = _test_matrix_job()["strategy"]["matrix"]
-    assert set(matrix["os"]) == ALL_PLATFORMS
+    assert _full_matrix_platforms(matrix["os"]) == ALL_PLATFORMS
     advertised = set(_classifier_versions())
     assert advertised == {str(v) for v in matrix["python-version"]}
 
@@ -315,7 +326,7 @@ def test_wheel_smoke_test_covers_minimum_and_maximum_python() -> None:
     minimum, maximum = _supported_range()
     job = _load_ci_workflow()["jobs"]["packaging-smoke-test"]
     matrix = job["strategy"]["matrix"]
-    assert set(matrix["os"]) == ALL_PLATFORMS
+    assert _full_matrix_platforms(matrix["os"]) == ALL_PLATFORMS
     assert [str(v) for v in matrix["python-version"]] == [minimum, maximum]
     runs = "\n".join(str(step.get("run", "")) for step in job["steps"])
     assert "tools/smoke_wheel.py --wheel dist/*.whl" in runs

@@ -44,8 +44,10 @@ def test_coderabbit_top_level_and_review_profile() -> None:
     auto_review = reviews.get("auto_review")
     assert isinstance(auto_review, dict)
     assert auto_review.get("enabled") is True
-    assert auto_review.get("drafts") is False
+    assert auto_review.get("drafts") is True
     assert auto_review.get("base_branches") == ["main"]
+    assert auto_review.get("ignore_title_keywords") == ["merge queue: checking"]
+    assert auto_review.get("ignore_usernames") == ["mergify[bot]"]
 
     chat = cfg.get("chat")
     assert isinstance(chat, dict)
@@ -193,7 +195,7 @@ def test_mergify_queue_and_pull_request_rules() -> None:
         assert "check-success = codecov/project" in conds
         assert "check-success = Code Quality & Gatekeeping" in conds
 
-    # CodeRabbit skips Draft PRs (.coderabbit.yaml drafts: false), so it must gate queue entry only (#692).
+    # CodeRabbit skips Mergify queue draft PRs (.coderabbit.yaml ignore filters), gating queue entry (#730).
     assert "check-success = CodeRabbit" in default_queue["queue_conditions"]
     assert "check-success = CodeRabbit" not in default_queue["merge_conditions"]
 

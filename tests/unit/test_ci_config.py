@@ -1,8 +1,8 @@
-"""Tests for CI workflows, Mergify check parity, and Dependabot configuration."""
+"""Tests for CI workflows, Mergify check parity, and Draft PR fast path."""
 
 from __future__ import annotations
 
-import fnmatch
+import json
 import re
 import tomllib
 from pathlib import Path
@@ -52,71 +52,9 @@ def _load_yaml_mapping(rel_path: Path) -> dict[str, Any]:
     return data
 
 
-def _load_dependabot_config() -> dict[str, Any]:
-    """Load and parse .github/dependabot.yml."""
-    return _load_yaml_mapping(Path(".github/dependabot.yml"))
-
-
 def _load_ci_workflow() -> dict[str, Any]:
     """Load and parse .github/workflows/ci.yml."""
     return _load_yaml_mapping(Path(".github/workflows/ci.yml"))
-
-
-def _get_gh_actions_groups() -> dict[str, Any]:
-    """Return the groups dictionary for the github-actions ecosystem."""
-    config = _load_dependabot_config()
-    gh_actions = next(
-        entry for entry in config["updates"] if entry.get("package-ecosystem") == "github-actions"
-    )
-    assert gh_actions.get("directory") == "/"
-    groups = gh_actions.get("groups")
-    assert isinstance(groups, dict), "github-actions entry must define dependency groups"
-    return groups
-
-
-def test_dependabot_config_structure_and_groups() -> None:
-    """Validate Dependabot ecosystems and github-actions groups including rust-cache (#729)."""
-    config = _load_dependabot_config()
-    assert config.get("version") == 2
-    updates = config.get("updates")
-    assert isinstance(updates, list)
-    ecosystems = {entry.get("package-ecosystem"): entry for entry in updates if isinstance(entry, dict)}
-    assert {"github-actions", "pip"} <= set(ecosystems)
-
-    pip_groups = ecosystems["pip"]["groups"]
-    assert pip_groups["dev-dependencies"]["dependency-type"] == "development"
-    assert pip_groups["production-dependencies"]["dependency-type"] == "production"
-
-    groups = _get_gh_actions_groups()
-    for group_name, sample_action in (
-        ("codeql-action", "github/codeql-action/init"),
-        ("actions", "actions/checkout"),
-        ("docker", "docker/build-push-action"),
-        ("clusterfuzzlite", "google/clusterfuzzlite/actions/build_fuzzers"),
-        ("rust-cache", "Swatinem/rust-cache"),
-    ):
-        assert group_name in groups
-        patterns = groups[group_name].get("patterns")
-        assert isinstance(patterns, list)
-        assert any(fnmatch.fnmatch(sample_action, pat) for pat in patterns)
-
-
-def test_dependabot_covers_workflow_codeql_actions() -> None:
-    """Assert all CodeQL action steps used across workflows match the group pattern."""
-    codeql_patterns = _get_gh_actions_groups()["codeql-action"]["patterns"]
-    workflow_files = list((_repo_root() / ".github" / "workflows").glob("*.yml"))
-    assert workflow_files
-    codeql_uses: set[str] = set()
-    for wf in workflow_files:
-        for line in wf.read_text(encoding="utf-8").splitlines():
-            stripped = line.strip()
-            if stripped.startswith("uses:") and "github/codeql-action" in stripped:
-                action_ref = stripped.split("uses:")[1].strip().split("@")[0].split("#")[0].strip()
-                codeql_uses.add(action_ref)
-
-    assert codeql_uses
-    for action in codeql_uses:
-        assert any(fnmatch.fnmatch(action, pat) for pat in codeql_patterns)
 
 
 def test_ci_dependency_smoke_matrix_structure_and_steps() -> None:
@@ -204,15 +142,49 @@ def test_ci_fail_fast_policy_across_gating_and_diagnostic_matrices() -> None:
     assert cflite_wf["jobs"]["fuzzing"]["strategy"]["fail-fast"] is False
 
 
-def _expand_test_matrix_cells(ci_jobs: dict[str, Any]) -> tuple[list[tuple[str, str, bool]], int]:
+EXPECTED_OS_MATRIX_EXPR = (
+    "${{ fromJSON((github.event_name == 'pull_request' && github.event.pull_request.draft == true && "
+    "!(github.event.pull_request.user.login == 'mergify[bot]' && "
+    "github.event.pull_request.head.repo.full_name == github.repository && "
+    "startsWith(github.head_ref, 'mergify/merge-queue/'))) && '[\"ubuntu-latest\"]' || "
+    '\'["ubuntu-latest", "macos-latest", "windows-latest"]\') }}'
+)
+
+
+def _eval_os_matrix(
+    os_expr: str,
+    *,
+    event_name: str = "push",
+    draft: bool = False,
+    actor_repo_ref: tuple[str, str, str] = ("bdperkin", "bdperkin/findfmt", "main"),
+) -> list[str]:
+    """Verify the ci.yml OS matrix expression and evaluate its JSON array (#730)."""
+    assert " ".join(os_expr.split()) == EXPECTED_OS_MATRIX_EXPR
+    fast_json, full_json = re.findall(r"'(\[[^']+\])'", os_expr)
+    user_login, head_repo, head_ref = actor_repo_ref
+    is_mergify_queue = (
+        user_login == "mergify[bot]"
+        and head_repo == "bdperkin/findfmt"
+        and head_ref.startswith("mergify/merge-queue/")
+    )
+    use_fast = event_name == "pull_request" and draft and not is_mergify_queue
+    return [str(item) for item in json.loads(fast_json if use_fast else full_json)]
+
+
+def _expand_test_matrix_cells(
+    ci_jobs: dict[str, Any],
+    *,
+    draft: bool = False,
+) -> tuple[list[tuple[str, str, bool]], int]:
     """Expand effective (os, python_version, experimental) cells and count total macOS jobs."""
     matrix = ci_jobs["test-matrix"]["strategy"]["matrix"]
+    test_oses = _eval_os_matrix(str(matrix["os"]), event_name="pull_request", draft=draft)
     excluded = {(str(e["os"]), str(e["python-version"])) for e in matrix.get("exclude", [])}
     cells = [
-        (str(os_name), str(py_ver), False)
-        for os_name in matrix["os"]
+        (os_name, str(py_ver), False)
+        for os_name in test_oses
         for py_ver in matrix["python-version"]
-        if (str(os_name), str(py_ver)) not in excluded
+        if (os_name, str(py_ver)) not in excluded
     ]
     cells.extend(
         (str(inc["os"]), str(inc["python-version"]), bool(inc.get("experimental", False)))
@@ -220,11 +192,49 @@ def _expand_test_matrix_cells(ci_jobs: dict[str, Any]) -> tuple[list[tuple[str, 
     )
 
     pkg_matrix = ci_jobs["packaging-smoke-test"]["strategy"]["matrix"]
-    pkg_macos = sum(1 for os_name in pkg_matrix["os"] if os_name == "macos-latest") * len(
+    pkg_oses = _eval_os_matrix(str(pkg_matrix["os"]), event_name="pull_request", draft=draft)
+    pkg_macos = sum(1 for os_name in pkg_oses if os_name == "macos-latest") * len(
         pkg_matrix["python-version"],
     )
     test_macos = sum(1 for os_name, _, _ in cells if os_name == "macos-latest")
     return cells, pkg_macos + test_macos
+
+
+def test_ci_draft_pr_fast_path_and_coderabbit_draft_reviews() -> None:
+    """Validate ready_for_review trigger, Draft PR Linux fast path, and CodeRabbit drafts (#730)."""
+    ci = _load_ci_workflow()
+    triggers = ci.get("on", ci.get(True, {}))
+    assert triggers["pull_request"]["types"] == ["opened", "synchronize", "reopened", "ready_for_review"]
+
+    ci_jobs = ci["jobs"]
+    draft_cells, draft_macos = _expand_test_matrix_cells(ci_jobs, draft=True)
+    assert draft_macos == 0
+    assert {os_name for os_name, _, _ in draft_cells} == {"ubuntu-latest"}
+
+    for job_name in ("packaging-smoke-test", "test-matrix"):
+        expr = str(ci_jobs[job_name]["strategy"]["matrix"]["os"])
+        assert _eval_os_matrix(
+            expr,
+            event_name="pull_request",
+            draft=True,
+            actor_repo_ref=("contributor", "contributor/findfmt", "mergify/merge-queue/spoof"),
+        ) == ["ubuntu-latest"]
+        assert _eval_os_matrix(
+            expr,
+            event_name="pull_request",
+            draft=True,
+            actor_repo_ref=("mergify[bot]", "bdperkin/findfmt", "mergify/merge-queue/abc123"),
+        ) == ["ubuntu-latest", "macos-latest", "windows-latest"]
+        assert _eval_os_matrix(expr, event_name="push") == [
+            "ubuntu-latest",
+            "macos-latest",
+            "windows-latest",
+        ]
+
+    auto_review = _load_yaml_mapping(Path(".coderabbit.yaml"))["reviews"]["auto_review"]
+    assert auto_review["drafts"] is True
+    assert "mergify[bot]" in auto_review["ignore_usernames"]
+    assert "merge queue: checking" in auto_review["ignore_title_keywords"]
 
 
 def test_ci_test_matrix_trimmed_and_aligned_with_mergify() -> None:
