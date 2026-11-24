@@ -29,7 +29,8 @@
 > closed its milestone; 2026-11-19 closed `#579` and `#577`, added and closed `#689` and `#692`; 2026-11-20
 > closed `#578`, `#580`, and epic `#576`, and released v1.4.0 and closed its milestone; 2026-11-22 closed
 > `#586` and `#583`; 2026-11-23 closed `#584`, `#585`, `#582`, and epic `#581`, and processed Renovate
-> Dependency Dashboard `#671` Rust crate updates and Cargo grouping)
+> Dependency Dashboard `#671` Rust crate updates and Cargo grouping; 2026-11-24 released v1.4.1 and closed its
+> milestone)
 
 ______________________________________________________________________
 
@@ -1391,8 +1392,8 @@ issue #321 → v1.2.1, #355 → v1.2.2, and #215 → v1.1.5.
 
 v1.1.0 was released on 2026-10-24, v1.1.1 on 2026-11-05, v1.1.2 on 2026-11-06, v1.1.3 and v1.1.4 on
 2026-11-08, v1.1.5 on 2026-11-09, v1.2.0 on 2026-11-10, v1.2.1 on 2026-11-11, v1.2.2 on 2026-11-13, v1.3.0 and
-v1.3.1 on 2026-11-15, v1.3.2 on 2026-11-17, v1.3.3 on 2026-11-18, and v1.4.0 on 2026-11-20 (PyPI, GHCR, and
-GitHub Releases), and their milestones are closed.
+v1.3.1 on 2026-11-15, v1.3.2 on 2026-11-17, v1.3.3 on 2026-11-18, v1.4.0 on 2026-11-20, and v1.4.1 on
+2026-11-24 (PyPI, GHCR, and GitHub Releases), and their milestones are closed.
 
 Realigned on 2026-11-09 ahead of v1.2.0: pulled #366 into v1.2.0, closed #311 and #474 as not planned,
 promoted the Hybrid Python-Rust engine track (#576-#598) from v1.8.0-v1.8.4 to v1.4.0-v1.4.4 so native Rust
@@ -1402,7 +1403,6 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.1          | Rust Core Engine (findfmt_rs): ignore-Based Traversal, Content Classifier, Parity Suite & Fuzzing                  | 2           |
 | v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 3           |
 | v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 4           |
