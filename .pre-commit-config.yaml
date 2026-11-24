@@ -327,6 +327,9 @@ repos:
       - id: vale-commit-msg
         entry: >-
           sh -c 'mode=$(git config --get commit.cleanup || printf default);
+          if [ "$mode" = default ]; then
+          if [ "${GIT_EDITOR:-}" = ":" ]; then mode=whitespace; else mode=strip; fi;
+          fi;
           case "$mode" in
           verbatim) filtered=$(cat "$1") ;;
           whitespace) filtered=$(git stripspace < "$1") ;;

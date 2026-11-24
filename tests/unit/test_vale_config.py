@@ -169,14 +169,19 @@ def _vale_commit_msg_argv(root: Path) -> list[str]:
 
 
 def test_vale_commit_msg_filter_respects_comment_char_and_cleanup(tmp_path: Path) -> None:
-    """Verify vale-commit-msg strips active core.commentChar comments, scissors, and trailers (#727)."""
+    """Verify vale-commit-msg honors cleanup modes, commentChar, scissors, and trailers (#727)."""
     if os.name == "nt":
         pytest.skip("POSIX sh commit-msg filter test requires POSIX shell environment")
 
-    if shutil.which("sh") is None or shutil.which("git") is None or shutil.which("sed") is None:
+    git_bin = shutil.which("git")
+    if shutil.which("sh") is None or git_bin is None or shutil.which("sed") is None:
         pytest.skip("sh, git, or sed binary not available")
 
     root = _repo_root()
+    repo_dir = tmp_path / "isolated_repo"
+    repo_dir.mkdir()
+    subprocess.run([git_bin, "init", str(repo_dir)], capture_output=True, text=True, check=True)
+
     shim_dir = tmp_path / "shim_bin"
     shim_dir.mkdir()
     vale_shim = shim_dir / "vale"
@@ -185,6 +190,7 @@ def test_vale_commit_msg_filter_respects_comment_char_and_cleanup(tmp_path: Path
 
     hook_argv = _vale_commit_msg_argv(root)
     base_env = os.environ.copy()
+    base_env.pop("GIT_EDITOR", None)
     base_env["PATH"] = f"{shim_dir}{os.pathsep}{base_env.get('PATH', '')}"
 
     default_msg = tmp_path / "COMMIT_EDITMSG_DEFAULT"
@@ -196,6 +202,7 @@ def test_vale_commit_msg_filter_respects_comment_char_and_cleanup(tmp_path: Path
     )
     default_res = subprocess.run(
         [*hook_argv, str(default_msg)],
+        cwd=repo_dir,
         env=base_env,
         capture_output=True,
         text=True,
@@ -204,6 +211,19 @@ def test_vale_commit_msg_filter_respects_comment_char_and_cleanup(tmp_path: Path
     assert "ci(pre-commit): integrate `my_nonexistent_ident_xyz` hook (#727)" in default_res.stdout
     assert "zxqwvut" not in default_res.stdout
     assert "Kaczmarek" not in default_res.stdout
+
+    non_editor_env = base_env.copy()
+    non_editor_env["GIT_EDITOR"] = ":"
+    non_editor_res = subprocess.run(
+        [*hook_argv, str(default_msg)],
+        cwd=repo_dir,
+        env=non_editor_env,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert "# git interactive comment with zxqwvut token" in non_editor_res.stdout
+    assert "Kaczmarek" not in non_editor_res.stdout
 
     semicolon_msg = tmp_path / "COMMIT_EDITMSG_SEMICOLON"
     semicolon_msg.write_text(
@@ -221,6 +241,7 @@ def test_vale_commit_msg_filter_respects_comment_char_and_cleanup(tmp_path: Path
     semicolon_env["GIT_CONFIG_VALUE_0"] = ";"
     semicolon_res = subprocess.run(
         [*hook_argv, str(semicolon_msg)],
+        cwd=repo_dir,
         env=semicolon_env,
         capture_output=True,
         text=True,
