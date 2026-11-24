@@ -38,18 +38,19 @@ pub(crate) fn materialize_yield_item<'py>(
         let mut pre = fetch_windows_pre_stat(py, &path_obj, None, item.follow_symlinks);
         // Mirror `os.DirEntry.stat()` on Windows (`WIN32_FIND_DATA` caches `st_ino=0, st_dev=0`
         // and regular-file mode `0o666`/`0o444` unless `follow_symlinks=True` resolves a symlink).
-        if item.has_entry && (!pre.0 || !item.follow_symlinks) {
-            if let Some(ref mut raw) = pre.4 {
-                raw.ino = Some(0);
-                raw.dev = Some(0);
-                if raw.is_reg() {
-                    raw.mode = 0o100_000
-                        | if (raw.mode & 0o200) == 0 {
-                            0o444
-                        } else {
-                            0o666
-                        };
-                }
+        if item.has_entry
+            && (!pre.0 || !item.follow_symlinks)
+            && let Some(ref mut raw) = pre.4
+        {
+            raw.ino = Some(0);
+            raw.dev = Some(0);
+            if raw.is_reg() {
+                raw.mode = 0o100_000
+                    | if (raw.mode & 0o200) == 0 {
+                        0o444
+                    } else {
+                        0o666
+                    };
             }
         }
         let pre_stat = Some(pre);

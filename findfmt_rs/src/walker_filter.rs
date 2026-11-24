@@ -198,13 +198,13 @@ pub fn executable_hint_for_skip(
         if meta.is_dir() {
             return Some(true);
         }
-        let lower = filename.to_ascii_lowercase();
-        Some(
-            lower.ends_with(".exe")
-                || lower.ends_with(".bat")
-                || lower.ends_with(".cmd")
-                || lower.ends_with(".com"),
-        )
+        let is_win_exec = Path::new(filename).extension().is_some_and(|ext| {
+            ext.eq_ignore_ascii_case("exe")
+                || ext.eq_ignore_ascii_case("bat")
+                || ext.eq_ignore_ascii_case("cmd")
+                || ext.eq_ignore_ascii_case("com")
+        });
+        Some(is_win_exec)
     }
     #[cfg(not(any(unix, windows)))]
     {

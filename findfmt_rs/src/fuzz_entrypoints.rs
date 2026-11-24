@@ -93,25 +93,17 @@ fn write_exclusive_sample(dir: &Path, safe_name: &str, payload: &[u8]) -> Option
     Some(file_path)
 }
 
-#[allow(clippy::type_complexity)]
-fn build_pre_stat(file_path: Option<&Path>) -> Option<(bool, bool, bool, u64, Option<RawStat>)> {
+#[cfg(not(unix))]
+fn build_non_unix_pre_stat(file_path: Option<&Path>) -> (bool, bool, bool, u64, Option<RawStat>) {
     let Some(path) = file_path else {
-        return Some((false, false, false, 0, None));
+        return (false, false, false, 0, None);
     };
-    #[cfg(unix)]
-    {
-        let _ = path;
-        None
-    }
-    #[cfg(not(unix))]
-    {
-        match fs::metadata(path) {
-            Ok(meta) => {
-                let raw = RawStat::from_std_metadata(&meta);
-                Some((false, true, raw.is_reg(), raw.size, Some(raw)))
-            }
-            Err(_) => Some((false, false, false, 0, None)),
+    match fs::metadata(path) {
+        Ok(meta) => {
+            let raw = RawStat::from_std_metadata(&meta);
+            (false, true, raw.is_reg(), raw.size, Some(raw))
         }
+        Err(_) => (false, false, false, 0, None),
     }
 }
 
@@ -159,7 +151,12 @@ pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<Str
     let written_path = scratch_dir
         .as_deref()
         .and_then(|dir| write_exclusive_sample(dir, &safe_name, payload));
-    let pre_stat = build_pre_stat(written_path.as_deref());
+    #[cfg(unix)]
+    let pre_stat = written_path
+        .is_none()
+        .then_some((false, false, false, 0, None));
+    #[cfg(not(unix))]
+    let pre_stat = Some(build_non_unix_pre_stat(written_path.as_deref()));
     let effective_path = written_path
         .clone()
         .unwrap_or_else(|| PathBuf::from(&safe_name));
