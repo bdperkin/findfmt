@@ -16,7 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `-P`/`-I` globs, `--prune`, `-L`/`--filelimit`/`-x` boundaries, `-l` symlink cycle detection, natural
   version sorting, and lossless surrogate-escaped paths, delivering `3.6x`–`6.0x` end-to-end CLI speedups
   (#581, #582, #707, #709).
-- *(classifier)* Port FIFO-safe header inspection, shebang tokenization, `identify` tag lookup, and MIME type
+- *(classifier)* Port FIFO-safe header inspection, shebang parsing, `identify` tag lookup, and MIME type
   resolution (`classify_file_rs`, `classify_batch_rs`) to `findfmt_rs` (#583, #704).
 - *(benchmark)* Extend `tools/benchmark.py` (`--backend python|rust|compare`) to compare native `findfmt_rs`
   vs. pure-Python fallback throughput, first-file latency, and memory usage (#586, #702).
@@ -25,7 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - *(fuzz,policy)* Pin ClusterFuzzLite Rust toolchain and `maturin` build dependencies by SHA-256 digest in
   `.clusterfuzzlite/Dockerfile`, route standalone `extract_shebang()` through non-blocking `O_NONBLOCK` +
-  `fstat` regular-file verification, and update `SECURITY.md` with coordinated disclosure SLAs and hybrid
+  `fstat` regular-file verification, and update `SECURITY.md` with coordinated disclosure timelines and hybrid
   Python-Rust threat-model controls (#710).
 
 ### Testing
@@ -40,7 +40,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - *(deps)* Update Rust crates (`globset` to `v0.4.21`, `ignore` to `v0.4.34`, `proptest` to `v1.12.0`), align
   `rust-version = "1.88"` MSRV and `let_chains` idioms, add Renovate `rust-dependencies` Cargo grouping, and
-  refresh Python lockfile and pre-commit hook pins (#671, #703, #708, #712).
+  refresh Python lock file and pre-commit hook pins (#671, #703, #708, #712).
 
 ## [1.4.0] - 2026-11-20
 
