@@ -100,8 +100,8 @@ specifiers (such as `>=1.0a1` or `>=2.0.0rc1`):
    `--prerelease if-necessary` across all resolutions and fork strategies.
 2. **Eliminate `if-necessary` under `highest` and `lowest-direct` (-4 combinations)**: Every direct and
    transitive dependency of `findfmt` has published stable wheels satisfying `>=3.11`. Under `highest` and
-   `lowest-direct`, the solver never lacks a stable candidate, so `if-necessary` produces the exact same
-   resolution graph as `disallow`.
+   `lowest-direct`, the solver never lacks a stable candidate, so `if-necessary` produces the same resolution
+   graph as `disallow`.
 3. **Retain `(lowest, if-necessary, fewest)` and eliminate `(lowest, disallow, *)` / `(lowest, allow, *)` (-5
    combinations)**: Full transitive `--resolution lowest` attempts to pick the oldest historical release of
    every transitive package (`click`, `pygments`, `markdown-it-py`, `mdurl`, `packaging`). Using

@@ -28,11 +28,13 @@ jobs:
           path: |
             .github/styles/Google
             .github/styles/proselint
-          key: vale-styles-${{ hashFiles('.vale.ini') }}
+            .github/styles/config/grammars
+            .github/styles/models
+          key: vale-styles-v3.28.1-${{ hashFiles('.vale.ini') }}
       - name: Run Vale Prose Linter
         uses: vale-cli/vale-action@518a9136acc6e6668ce7c00d367051e0941e87ff  # v3.0.0
         with:
-          version: 3.20.0
+          version: 3.28.1
           files: all
           sync: ${{ steps.cache-vale-styles.outputs.cache-hit != 'true' }}
           fail_on_error: true

@@ -76,9 +76,11 @@ docs/source/api/generated/
 .DS_Store
 Thumbs.db
 
-# Vale synced packages
+# Vale synced packages and grammars
 .github/styles/Google/
 .github/styles/proselint/
+.github/styles/config/grammars/
+.github/styles/models/
 
 # Rust / Cargo build artifacts
 target/

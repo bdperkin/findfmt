@@ -100,10 +100,11 @@ and `maturin` (`hatch-maturin-build`) to compile the `findfmt_rs/` PyO3 native e
    HATCH_MATURIN_DISABLE=1 uv build --wheel
    ```
 
-4. **Install Pre-Commit Hooks**:
+4. **Install Pre-Commit Hooks & Sync Vale Styles**:
 
    ```bash
    uv run pre-commit install
+   uv run pre-commit run vale-sync --hook-stage manual --all-files
    ```
 
 ### 3.1. Debugging Hybrid Python-Rust Code

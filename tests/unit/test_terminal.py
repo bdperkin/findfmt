@@ -246,7 +246,7 @@ def test_pager_controller_force_color_overrides() -> None:
 
 
 def test_get_console_broken_pipe_raises_broken_pipe_error() -> None:
-    """Verify get_console Console subclass raises BrokenPipeError instead of SystemExit(1)."""
+    """Verify the Console subclass from get_console raises BrokenPipeError instead of SystemExit(1)."""
     console = get_console(io.StringIO())
     with pytest.raises(BrokenPipeError):
         console.on_broken_pipe()

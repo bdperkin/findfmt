@@ -148,7 +148,7 @@ def test_markdown_formatter_cjk_line_widths(cjk_file_sample: list[FileInfo]) -> 
 
 
 def test_markdown_formatter_cjk_pipe_alignment(cjk_file_sample: list[FileInfo]) -> None:
-    """Verify that vertical column separator pipes '|' align at the exact same cell positions."""
+    """Verify that vertical column separator pipes '|' align at the same cell positions."""
     formatter = MarkdownFormatter(absolute=False)
     output = formatter.format(cjk_file_sample)
     lines = [line for line in output.splitlines() if line.strip()]
