@@ -14,15 +14,25 @@ from tools import verify_quality
 from tools.dep_matrix import load_supported_pythons
 
 SHA40_RE = re.compile(r"^Swatinem/rust-cache@[0-9a-f]{40}$")
-ALL_RUST_CI_JOBS = (
-    "quality-gate",
-    "package-check",
-    "packaging-smoke-test",
-    "container-smoke-test",
-    "dependency-smoke-matrix",
-    "test-matrix",
-    "perf-tests",
-    "rust-proptest-fuzz",
+RUST_CI_WORKFLOW_JOBS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    (
+        ".github/workflows/ci.yml",
+        (
+            "quality-gate",
+            "package-check",
+            "packaging-smoke-test",
+            "container-smoke-test",
+            "dependency-smoke-matrix",
+            "test-matrix",
+        ),
+    ),
+    (
+        ".github/workflows/perf-and-fuzz.yml",
+        (
+            "perf-tests",
+            "rust-proptest-fuzz",
+        ),
+    ),
 )
 
 
@@ -150,7 +160,8 @@ def test_perf_marker_and_ci_job() -> None:
     pytest_opts = data["tool"]["pytest"]["ini_options"]
     assert any(m.startswith("perf:") for m in pytest_opts.get("markers", []))
     assert "not perf" in pytest_opts.get("addopts", "")
-    perf_steps = _load_ci_workflow()["jobs"]["perf-tests"]["steps"]
+    perf_wf = _load_yaml_mapping(Path(".github/workflows/perf-and-fuzz.yml"))
+    perf_steps = perf_wf["jobs"]["perf-tests"]["steps"]
     assert any("pytest -m perf" in str(s.get("run", "")) for s in perf_steps)
 
 
@@ -251,26 +262,33 @@ def test_ci_test_matrix_trimmed_and_aligned_with_mergify() -> None:
 
 def test_ci_rust_cache_pinned_by_sha_across_rust_jobs() -> None:
     """Verify every Rust-compiling CI job uses SHA-pinned Swatinem/rust-cache (#729)."""
-    ci_jobs = _load_ci_workflow()["jobs"]
-    for job_name in ALL_RUST_CI_JOBS:
-        steps = ci_jobs[job_name]["steps"]
-        checkout_idx = next(i for i, s in enumerate(steps) if "actions/checkout@" in str(s.get("uses", "")))
-        cache_indices = [i for i, s in enumerate(steps) if "Swatinem/rust-cache@" in str(s.get("uses", ""))]
-        assert len(cache_indices) == 1, f"Expected Swatinem/rust-cache step in {job_name}"
-        cache_idx = cache_indices[0]
-        assert checkout_idx < cache_idx
-        first_run_idx = next(
-            i
-            for i, s in enumerate(steps)
-            if i > checkout_idx and ("uv " in str(s.get("run", "")) or "cargo " in str(s.get("run", "")))
-        )
-        assert cache_idx < first_run_idx
-        step = steps[cache_idx]
-        assert SHA40_RE.match(str(step["uses"]))
-        workspaces = str(step.get("with", {}).get("workspaces", "")).splitlines()
-        assert "findfmt_rs" in workspaces
-        if job_name == "rust-proptest-fuzz":
-            assert "findfmt_rs/fuzz" in workspaces
-        elif job_name == "test-matrix":
-            assert step.get("if") == "${{ steps.setup-python.outcome == 'success' }}"
-            assert step.get("continue-on-error") == "${{ matrix.experimental || false }}"
+    ci_lines = (_repo_root() / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8").splitlines()
+    assert len(ci_lines) <= 350
+    for wf_rel_path, job_names in RUST_CI_WORKFLOW_JOBS:
+        wf_jobs = _load_yaml_mapping(Path(wf_rel_path))["jobs"]
+        for job_name in job_names:
+            steps = wf_jobs[job_name]["steps"]
+            checkout_idx = next(
+                i for i, s in enumerate(steps) if "actions/checkout@" in str(s.get("uses", ""))
+            )
+            cache_indices = [
+                i for i, s in enumerate(steps) if "Swatinem/rust-cache@" in str(s.get("uses", ""))
+            ]
+            assert len(cache_indices) == 1, f"Expected Swatinem/rust-cache step in {wf_rel_path}:{job_name}"
+            cache_idx = cache_indices[0]
+            assert checkout_idx < cache_idx
+            first_run_idx = next(
+                i
+                for i, s in enumerate(steps)
+                if i > checkout_idx and ("uv " in str(s.get("run", "")) or "cargo " in str(s.get("run", "")))
+            )
+            assert cache_idx < first_run_idx
+            step = steps[cache_idx]
+            assert SHA40_RE.match(str(step["uses"]))
+            workspaces = str(step.get("with", {}).get("workspaces", "")).splitlines()
+            assert "findfmt_rs" in workspaces
+            if job_name == "rust-proptest-fuzz":
+                assert "findfmt_rs/fuzz" in workspaces
+            elif job_name == "test-matrix":
+                assert step.get("if") == "${{ steps.setup-python.outcome == 'success' }}"
+                assert step.get("continue-on-error") == "${{ matrix.experimental || false }}"

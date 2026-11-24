@@ -183,6 +183,7 @@ MAXIMUM_PYTHON = "3.15"
 SINGLE_VERSION_JOBS = {
     "ci.yml": ("quality-gate", "container-smoke-test"),
     "docs.yml": ("build",),
+    "perf-and-fuzz.yml": ("perf-tests",),
     "release.yml": ("verify-release", "build-distributions"),
 }
 

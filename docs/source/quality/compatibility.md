@@ -177,12 +177,15 @@ by `tests/unit/test_python_support_policy.py`, so a partial update fails CI.
 1. Raise `requires-python` in `pyproject.toml`, remove the old Trove classifier, and raise ruff's
    `target-version`. Re-lock with `uv lock` and regenerate `.clusterfuzzlite/requirements.txt`.
 2. Remove the version from `test-matrix` in `.github/workflows/ci.yml` (updating `exclude` so `macos-latest`
-   and `windows-latest` test the new minimum and maximum versions), and remove compatibility code that only
-   the old version needed (`sys.version_info` guards and fallback imports). In the `packaging-smoke-test` job,
-   raise the minimum `python-version` and the Python that `pip` must refuse.
-3. **Just before merging**, update the `Test (<os> - Python <ver>)` required status checks in branch
-   protection on `main` and `.mergify.yml` so retired `<old>` checks are removed and the new minimum is
-   required on all three operating systems. Otherwise the pull request waits for checks that no longer run.
+   and `windows-latest` test the new minimum and maximum versions) and update the matching
+   `Test (<os> - Python <ver>)` checks in `.mergify.yml` in the same commit so the matrix parity test passes,
+   and remove compatibility code that only the old version needed (`sys.version_info` guards and fallback
+   imports). In the `packaging-smoke-test` job, raise the minimum `python-version` and the Python that `pip`
+   must refuse (updating its matching `.mergify.yml` checks together).
+3. **After the new pull request checks report green and just before merging**, update the
+   `Test (<os> - Python <ver>)` required status checks in branch protection on `main` so retired `<old>`
+   checks are removed and the new minimum is required on all three operating systems. Otherwise the pull
+   request waits for checks that no longer run.
 4. Update the supported range in this guide, `docs/source/quality/index.md`, `CONTRIBUTING.md`, `SECURITY.md`,
    and `assets/social-preview.svg` (then regenerate the PNG), regenerate the documentation catalogs
    (`make -C docs intl-update`), and record the change as breaking in the changelog. Python 3.10 was dropped
@@ -191,13 +194,15 @@ by `tests/unit/test_python_support_policy.py`, so a partial update fails CI.
 ### 5.2. When a New Version Is Released
 
 1. Move the version from the experimental `<version>-dev` matrix entry into the gating `python-version` list
-   (adding the previous maximum to `exclude` on `macos-latest` and `windows-latest`), and point the
-   experimental entry at the next feature release.
+   (adding the previous maximum to `exclude` on `macos-latest` and `windows-latest`), update the matching
+   `Test (<os> - Python <ver>)` checks in `.mergify.yml` in the same commit so the matrix parity test passes,
+   and point the experimental entry at the next feature release.
 2. Add the new Trove classifier and raise `pyproject-fmt --max-supported-python` in `.pre-commit-config.yaml`.
-3. Move the single-interpreter jobs (quality gate, documentation, and release) and the maximum
-   `python-version` of the packaging smoke test to the new version once the toolchain passes on it. Update the
-   container image when matching `uv` builder and Python runtime images exist for the same Debian release.
-4. **After the new jobs report green**, update branch protection on `main` and `.mergify.yml` to require the
-   three `Test (<os> - Python <new>)` checks and retire the previous maximum on `macos-latest` and
-   `windows-latest`. Never require the experimental job.
+3. Move the single-interpreter jobs (quality gate, documentation, performance benchmarks, and release) and the
+   maximum `python-version` of the packaging smoke test to the new version once the toolchain passes on it
+   (updating its matching `.mergify.yml` checks together). Update the container image when matching `uv`
+   builder and Python runtime images exist for the same Debian release.
+4. **After the new pull request checks report green and just before merging**, update branch protection on
+   `main` to require the three `Test (<os> - Python <new>)` checks and retire the previous maximum on
+   `macos-latest` and `windows-latest`. Never require the experimental job.
 5. Update the docs as in step 4 of §5.1. Python 3.15 was added this way in #335 and #440.
