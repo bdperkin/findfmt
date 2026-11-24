@@ -19,7 +19,8 @@ use crate::sorting::{NaturalSortKey, compare_natural, natural_sort_key};
 use crate::tags::{FilterCriteria, TagRegistry};
 use crate::walker::NativeWalker;
 use crate::walker_types::{
-    GlobalIgnoreResolution, MimeSnapshot, RootTarget, WalkConfig, WalkSortKey,
+    GlobalIgnoreResolution, MimeSnapshot, RootTarget, WalkBounds, WalkConfig, WalkScope, WalkSort,
+    WalkSortKey,
 };
 
 static FUZZ_REGISTRY: OnceLock<TagRegistry> = OnceLock::new();
@@ -32,6 +33,7 @@ fn shared_registry() -> &'static TagRegistry {
 /// Fuzz shebang extraction, POSIX shlex tokenization, and binary-vs-text byte detection.
 ///
 /// Returns `(is_text, extracted_shebang, parsed_tokens)` so callers can assert invariants.
+#[must_use]
 pub fn fuzz_shebang_and_header_bytes(data: &[u8]) -> (bool, Option<String>, Vec<String>) {
     let text_ok = is_text_buffer(data);
     let raw_shebang = extract_shebang_from_buffer(data);
@@ -91,31 +93,24 @@ fn write_exclusive_sample(dir: &Path, safe_name: &str, payload: &[u8]) -> Option
     Some(file_path)
 }
 
-#[allow(clippy::type_complexity)]
-fn build_pre_stat(file_path: Option<&Path>) -> Option<(bool, bool, bool, u64, Option<RawStat>)> {
+#[cfg(not(unix))]
+fn build_non_unix_pre_stat(file_path: Option<&Path>) -> (bool, bool, bool, u64, Option<RawStat>) {
     let Some(path) = file_path else {
-        return Some((false, false, false, 0, None));
+        return (false, false, false, 0, None);
     };
-    #[cfg(unix)]
-    {
-        let _ = path;
-        None
-    }
-    #[cfg(not(unix))]
-    {
-        match fs::metadata(path) {
-            Ok(meta) => {
-                let raw = RawStat::from_std_metadata(&meta);
-                Some((false, true, raw.is_reg(), raw.size, Some(raw)))
-            }
-            Err(_) => Some((false, false, false, 0, None)),
+    match fs::metadata(path) {
+        Ok(meta) => {
+            let raw = RawStat::from_std_metadata(&meta);
+            (false, true, raw.is_reg(), raw.size, Some(raw))
         }
+        Err(_) => (false, false, false, 0, None),
     }
 }
 
 /// Fuzz filename/MIME splitting, tag tables, mode formatting, and GIL-free file classification.
 ///
 /// Returns `(split_reconstructed, mode_len, tags)` for caller invariant checks.
+#[must_use]
 pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<String>) {
     let registry = shared_registry();
     let mid = (data.len() / 3).min(64);
@@ -129,7 +124,10 @@ pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<Str
     let _ = registry.tags_from_interpreter(&raw_name);
     let _ = registry.guess_mime_type(&raw_name);
 
-    let mode_bits = data.iter().take(4).fold(0_u32, |acc, &b| (acc << 8) | u32::from(b));
+    let mode_bits = data
+        .iter()
+        .take(4)
+        .fold(0_u32, |acc, &b| (acc << 8) | u32::from(b));
     let mode_str = format_filemode(mode_bits);
     let synth_stat = RawStat {
         mode: mode_bits,
@@ -153,7 +151,12 @@ pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<Str
     let written_path = scratch_dir
         .as_deref()
         .and_then(|dir| write_exclusive_sample(dir, &safe_name, payload));
-    let pre_stat = build_pre_stat(written_path.as_deref());
+    #[cfg(unix)]
+    let pre_stat = written_path
+        .is_none()
+        .then_some((false, false, false, 0, None));
+    #[cfg(not(unix))]
+    let pre_stat = Some(build_non_unix_pre_stat(written_path.as_deref()));
     let effective_path = written_path
         .clone()
         .unwrap_or_else(|| PathBuf::from(&safe_name));
@@ -190,6 +193,7 @@ pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<Str
 /// Fuzz `.gitignore` line trimming, malformed glob compilation, path matching, and natural sorting.
 ///
 /// Returns sorted `NaturalSortKey` sequence for caller monotonicity verification.
+#[must_use]
 pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
     let split_at = data.len() / 2;
     let (gi_bytes, paths_bytes) = data.split_at(split_at);
@@ -216,22 +220,28 @@ pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
     if let Some(dir) = create_private_scratch_dir() {
         let _ = write_exclusive_sample(&dir, ".gitignore", gi_bytes);
         let _ = write_exclusive_sample(&dir, "fuzz_a.py", paths_bytes);
+        let first_byte = data.first().copied().unwrap_or(0);
         let walk_cfg = WalkConfig {
             respect_gitignore: true,
             custom_gitignore_file: None,
-            include_hidden: (data.first().copied().unwrap_or(0) & 2) != 0,
-            follow_symlinks: false,
-            dirs_only: (data.first().copied().unwrap_or(0) & 4) != 0,
-            one_file_system: false,
-            max_depth: Some(3),
-            file_limit: None,
-            prune_empty: (data.first().copied().unwrap_or(0) & 8) != 0,
-            ignore_case,
-            match_dirs: false,
-            accumulate_size: false,
-            sort_by: WalkSortKey::Version,
-            reverse_sort: false,
-            dirs_first: (data.first().copied().unwrap_or(0) & 16) != 0,
+            scope: WalkScope {
+                include_hidden: (first_byte & 2) != 0,
+                follow_symlinks: false,
+                dirs_only: (first_byte & 4) != 0,
+            },
+            bounds: WalkBounds {
+                one_file_system: false,
+                prune_empty: (first_byte & 8) != 0,
+                accumulate_size: false,
+                max_depth: Some(3),
+                file_limit: None,
+            },
+            sort: WalkSort {
+                sort_by: WalkSortKey::Version,
+                reverse_sort: false,
+                dirs_first: (first_byte & 16) != 0,
+                ignore_case,
+            },
             filter: FilterCriteria::default(),
             matcher: PatternMatcher::default(),
             home_dir: None,
@@ -240,7 +250,6 @@ pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
             mime_snapshot: MimeSnapshot::default(),
         };
         let target = RootTarget {
-            raw_root: dir.clone(),
             resolved_root: Some(dir.clone()),
             prefix: None,
             global_gitignore: GlobalIgnoreResolution::Unresolved,

@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 
 use pyo3::prelude::*;
+#[cfg(unix)]
 use pyo3::types::PyBytes;
 #[cfg(not(unix))]
 use pyo3::types::PyDict;
@@ -75,9 +76,9 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
         unicode_major,
     };
     let _ = PY_HANDLES.set(built);
-    PY_HANDLES.get().ok_or_else(|| {
-        pyo3::exceptions::PyRuntimeError::new_err("failed to initialize PyHandles")
-    })
+    PY_HANDLES
+        .get()
+        .ok_or_else(|| pyo3::exceptions::PyRuntimeError::new_err("failed to initialize PyHandles"))
 }
 
 pub(crate) fn py_path_to_pathbuf(
@@ -168,7 +169,10 @@ pub(crate) fn fetch_windows_pre_stat(
         let Ok(lst) = os_mod.call_method("stat", (path_obj,), Some(&kwargs_no_follow)) else {
             return (false, false, false, 0, None);
         };
-        let lmode: u32 = lst.getattr("st_mode").and_then(|v| v.extract()).unwrap_or(0);
+        let lmode: u32 = lst
+            .getattr("st_mode")
+            .and_then(|v| v.extract())
+            .unwrap_or(0);
         let sym = (lmode & 0o170_000) == 0o120_000;
         if sym && follow_symlinks {
             let Ok(followed) = os_mod.call_method1("stat", (path_obj,)) else {
@@ -270,13 +274,15 @@ pub(crate) fn deliver_walk_os_error(
                 .import("_winapi")
                 .and_then(|m| m.call_method1("FormatMessage", (code,)))
                 .and_then(|v| v.extract::<String>())
-                .map(|s| s.trim_end_matches(['\r', '\n', ' ', '.']).to_owned())
-                .unwrap_or_else(|_| {
-                    err.message
-                        .strip_suffix(&format!(" (os error {code})"))
-                        .unwrap_or(&err.message)
-                        .to_owned()
-                });
+                .map_or_else(
+                    |_| {
+                        err.message
+                            .strip_suffix(&format!(" (os error {code})"))
+                            .unwrap_or(&err.message)
+                            .to_owned()
+                    },
+                    |s| s.trim_end_matches(['\r', '\n', ' ', '.']).to_owned(),
+                );
             pyo3::exceptions::PyOSError::new_err((0_i32, sys_msg, filename_py.unbind(), code))
         }
         #[cfg(not(windows))]

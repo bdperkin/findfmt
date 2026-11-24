@@ -26,6 +26,7 @@ pub struct HeaderInspection {
 /// Opens with `O_NONBLOCK` on Unix and verifies `meta.file_type().is_file()` via
 /// `fstat` on the open descriptor before reading any bytes, preventing TOCTOU
 /// FIFO/named-pipe swap hangs (#363, #583).
+#[must_use]
 pub fn read_header_nonblocking(path: &Path, max_bytes: usize) -> Option<HeaderInspection> {
     read_header_with_hook(path, max_bytes, || {})
 }
@@ -87,7 +88,7 @@ fn inspect_open_file(mut file: File, max_bytes: usize) -> Option<HeaderInspectio
         match file.read(&mut buffer[total..]) {
             Ok(0) => break,
             Ok(n) => total += n,
-            Err(err) if err.kind() == io::ErrorKind::Interrupted => continue,
+            Err(err) if err.kind() == io::ErrorKind::Interrupted => {}
             Err(err) if err.kind() == io::ErrorKind::WouldBlock => break,
             Err(_) => return None,
         }
@@ -102,6 +103,7 @@ fn inspect_open_file(mut file: File, max_bytes: usize) -> Option<HeaderInspectio
 /// Return `true` when the first `1024` bytes of `buffer` contain only `identify` text bytes.
 ///
 /// Matches `identify.identify.is_text`: allowed bytes are `{7..=13, 27, 0x20..=0x7E, 0x80..=0xFF}`.
+#[must_use]
 pub fn is_text_buffer(buffer: &[u8]) -> bool {
     let limit = buffer.len().min(TEXT_CHECK_BYTES);
     buffer[..limit]
@@ -116,7 +118,7 @@ mod tests {
     use std::fs;
     use std::time::{SystemTime, UNIX_EPOCH};
 
-    fn unique_temp_dir(label: &str) -> std::path::PathBuf {
+    fn unique_temp_dir(label: &str) -> io::Result<std::path::PathBuf> {
         let nanos = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map_or(0, |d| d.as_nanos());
@@ -124,8 +126,8 @@ mod tests {
             "findfmt_rs_hdr_{label}_{}_{nanos}",
             std::process::id()
         ));
-        fs::create_dir_all(&dir).expect("create temp dir");
-        dir
+        fs::create_dir_all(&dir)?;
+        Ok(dir)
     }
 
     #[test]
@@ -143,50 +145,46 @@ mod tests {
     }
 
     #[test]
-    fn regular_and_missing_header_reads() {
-        let dir = unique_temp_dir("reg");
+    fn regular_and_missing_header_reads() -> Result<(), Box<dyn std::error::Error>> {
+        let dir = unique_temp_dir("reg")?;
         let file_path = dir.join("sample.py");
-        fs::write(&file_path, b"#!/usr/bin/env python3\nprint(1)\n").expect("write sample");
+        fs::write(&file_path, b"#!/usr/bin/env python3\nprint(1)\n")?;
 
-        let res = read_header_nonblocking(&file_path, MAX_HEADER_BYTES).expect("header read");
-        assert!(res.opened_meta.as_ref().is_some_and(|m| m.is_file()));
+        let res = read_header_nonblocking(&file_path, MAX_HEADER_BYTES).ok_or("header read")?;
+        assert!(res.opened_meta.as_ref().is_some_and(Metadata::is_file));
         assert!(res.buffer.starts_with(b"#!/usr/bin/env python3"));
 
         assert!(read_header_nonblocking(&dir.join("missing.py"), MAX_HEADER_BYTES).is_none());
         let _ = fs::remove_dir_all(&dir);
+        Ok(())
     }
 
     #[cfg(unix)]
     #[test]
-    fn fifo_swap_never_blocks_and_reports_non_regular() {
-        use std::ffi::CString;
-        use std::os::unix::ffi::OsStrExt;
+    fn fifo_swap_never_blocks_and_reports_non_regular() -> Result<(), Box<dyn std::error::Error>> {
         use std::os::unix::fs::FileTypeExt;
 
-        let dir = unique_temp_dir("fifo");
+        let dir = unique_temp_dir("fifo")?;
         let pipe_path = dir.join("swapped.pipe");
-        fs::write(&pipe_path, b"regular initial content\n").expect("write regular");
+        fs::write(&pipe_path, b"regular initial content\n")?;
 
         let swap_target = pipe_path.clone();
         let res = read_header_with_hook(&pipe_path, MAX_HEADER_BYTES, move || {
-            fs::remove_file(&swap_target).expect("unlink regular");
-            let c_path = CString::new(swap_target.as_os_str().as_bytes()).expect("cstring");
-            let rc = {
-                // Create POSIX FIFO via mkfifo CLI fallback if needed; test uses std process `mkfifo`
-                let _ = c_path;
-                std::process::Command::new("mkfifo")
-                    .arg(&swap_target)
-                    .status()
-                    .map_or(-1, |s| if s.success() { 0 } else { -1 })
-            };
+            let removed = fs::remove_file(&swap_target);
+            assert!(removed.is_ok(), "unlink regular must succeed");
+            let rc = std::process::Command::new("mkfifo")
+                .arg(&swap_target)
+                .status()
+                .map_or(-1, |s| if s.success() { 0 } else { -1 });
             assert_eq!(rc, 0, "mkfifo must succeed");
         })
-        .expect("non-blocking open of FIFO");
+        .ok_or("non-blocking open of FIFO")?;
 
-        assert!(res.buffer.is_empty());
-        let meta = res.opened_meta.expect("fstat metadata present");
+        assert_eq!(res.buffer, b"");
+        let meta = res.opened_meta.ok_or("fstat metadata present")?;
         assert!(!meta.file_type().is_file());
         assert!(meta.file_type().is_fifo());
         let _ = fs::remove_dir_all(&dir);
+        Ok(())
     }
 }

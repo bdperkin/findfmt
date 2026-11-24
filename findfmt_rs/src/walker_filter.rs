@@ -43,11 +43,7 @@ pub fn is_valid_descent_dir(dir: &Path, follow_symlinks: bool) -> bool {
 }
 
 /// Compute `relative_path` mirroring `classifier.py:_resolve_relative`.
-pub fn resolve_relative_pathbuf(
-    path: &Path,
-    base_root: &Path,
-    prefix: Option<&Path>,
-) -> PathBuf {
+pub fn resolve_relative_pathbuf(path: &Path, base_root: &Path, prefix: Option<&Path>) -> PathBuf {
     let Ok(rel) = path.strip_prefix(base_root) else {
         return path.to_path_buf();
     };
@@ -128,28 +124,32 @@ pub fn filter_entry_nogil(
     root_dev: Option<u64>,
     base_root: &Path,
 ) -> Option<(PathBuf, bool, bool, bool)> {
-    if !config.include_hidden && is_hidden_name(&entry.file_name) {
+    if !config.scope.include_hidden && is_hidden_name(&entry.file_name) {
         return None;
     }
     let is_symlink = match entry.file_type {
         Some(ft) => ft.is_symlink(),
         None => fs::symlink_metadata(&entry.path).is_ok_and(|m| m.file_type().is_symlink()),
     };
-    if config.one_file_system
-        && !check_entry_device(&entry.path, is_symlink, config.follow_symlinks, root_dev)
+    if config.bounds.one_file_system
+        && !check_entry_device(
+            &entry.path,
+            is_symlink,
+            config.scope.follow_symlinks,
+            root_dev,
+        )
     {
         return None;
     }
 
     let (is_dir, is_candidate_file) = if !is_symlink {
-        match entry.file_type {
-            Some(ft) => (ft.is_dir(), ft.is_file()),
-            None => {
-                let meta = fs::symlink_metadata(&entry.path).ok()?;
-                (meta.is_dir(), meta.is_file())
-            }
+        if let Some(ft) = entry.file_type {
+            (ft.is_dir(), ft.is_file())
+        } else {
+            let meta = fs::symlink_metadata(&entry.path).ok()?;
+            (meta.is_dir(), meta.is_file())
         }
-    } else if config.follow_symlinks {
+    } else if config.scope.follow_symlinks {
         let target_meta = fs::metadata(&entry.path).ok()?;
         (target_meta.is_dir(), target_meta.is_file())
     } else {
@@ -170,6 +170,16 @@ pub fn filter_entry_nogil(
     Some((entry.path.clone(), is_dir, is_candidate_file, is_symlink))
 }
 
+#[cfg(any(windows, test))]
+fn has_windows_exec_suffix(filename: &str) -> bool {
+    const WIN_EXEC_SUFFIXES: [&[u8]; 4] = [b".exe", b".bat", b".cmd", b".com"];
+    let bytes = filename.as_bytes();
+    bytes.len() >= 4
+        && WIN_EXEC_SUFFIXES
+            .iter()
+            .any(|sfx| bytes[bytes.len() - 4..].eq_ignore_ascii_case(sfx))
+}
+
 /// Compute `(st_mode & 0o111) != 0` hint for early interpreter-tag skipping (`_pruning.py` parity).
 pub fn executable_hint_for_skip(
     entry_path: &Path,
@@ -179,8 +189,8 @@ pub fn executable_hint_for_skip(
 ) -> Option<bool> {
     #[cfg(unix)]
     {
-        let _ = filename;
         use std::os::unix::fs::MetadataExt;
+        let _ = filename;
         let meta = if follow_symlinks || !is_symlink {
             fs::metadata(entry_path).ok()?
         } else {
@@ -198,13 +208,7 @@ pub fn executable_hint_for_skip(
         if meta.is_dir() {
             return Some(true);
         }
-        let lower = filename.to_ascii_lowercase();
-        Some(
-            lower.ends_with(".exe")
-                || lower.ends_with(".bat")
-                || lower.ends_with(".cmd")
-                || lower.ends_with(".com"),
-        )
+        Some(has_windows_exec_suffix(filename))
     }
     #[cfg(not(any(unix, windows)))]
     {
@@ -260,5 +264,21 @@ pub fn build_raw_classify_input(
         accumulated_size,
         pre_stat,
         pre_guessed_mime,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::has_windows_exec_suffix;
+
+    #[test]
+    fn windows_exec_suffix_preserves_leading_dot_and_case_insensitivity() {
+        assert!(has_windows_exec_suffix(".exe"));
+        assert!(has_windows_exec_suffix(".CMD"));
+        assert!(has_windows_exec_suffix("tool.EXE"));
+        assert!(has_windows_exec_suffix("é.bat"));
+        assert!(has_windows_exec_suffix("legacy.CoM"));
+        assert!(!has_windows_exec_suffix("exe"));
+        assert!(!has_windows_exec_suffix("script.py"));
     }
 }

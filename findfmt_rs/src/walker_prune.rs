@@ -46,7 +46,7 @@ pub(crate) fn make_memo_key(
     specs: &[GitignoreMatcher],
     config: &WalkConfig,
 ) -> PruneMemoKey {
-    let scoped_path = (config.follow_symlinks
+    let scoped_path = (config.scope.follow_symlinks
         && (config.matcher.is_active()
             || !specs.is_empty()
             || config.respect_gitignore
@@ -97,12 +97,14 @@ impl PruneSearch {
             if top.idx >= top.subdirs.len() {
                 if let Some(popped) = self.frames.pop() {
                     self.visited.remove(&popped.dir_key);
-                    if let Some(parent) =
-                        self.frames.last_mut().filter(|_| popped.had_incomplete_child)
+                    if let Some(parent) = self
+                        .frames
+                        .last_mut()
+                        .filter(|_| popped.had_incomplete_child)
                     {
                         parent.had_incomplete_child = true;
                     }
-                    if !popped.had_incomplete_child && config.max_depth.is_none() {
+                    if !popped.had_incomplete_child && config.bounds.max_depth.is_none() {
                         memo.insert(
                             popped.memo_key,
                             PruneCache::Empty {
@@ -116,16 +118,17 @@ impl PruneSearch {
             }
             let subdir = top.subdirs[top.idx].clone();
             top.idx += 1;
-            if !is_valid_descent_dir(&subdir, config.follow_symlinks) {
+            if !is_valid_descent_dir(&subdir, config.scope.follow_symlinks) {
                 continue;
             }
             let parent_specs = Arc::clone(&top.specs);
             let child_depth = top.depth + 1;
             let parent_inh = top.inherited_match;
             let child_specs = load_child_specs(&subdir, &parent_specs, config.respect_gitignore);
-            let child_inh = config
-                .matcher
-                .should_inherit_match(&subdir, Some(base_root), parent_inh);
+            let child_inh =
+                config
+                    .matcher
+                    .should_inherit_match(&subdir, Some(base_root), parent_inh);
 
             let err_before = events.len();
             if inspect_prune_dir(
@@ -141,7 +144,7 @@ impl PruneSearch {
                 memo,
                 events,
             ) {
-                if config.max_depth.is_none() {
+                if config.bounds.max_depth.is_none() {
                     for frame in &self.frames {
                         memo.insert(
                             frame.memo_key.clone(),

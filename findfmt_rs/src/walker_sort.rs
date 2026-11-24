@@ -16,7 +16,10 @@ use crate::walker_types::{
 type MetricSortEntry = (Vec<u32>, (f64, f64, u64), ScannedEntry);
 
 fn stat_sort_metrics(entry: &ScannedEntry, follow_symlinks: bool) -> (f64, f64, u64) {
-    let is_sym = entry.file_type.as_ref().is_some_and(fs::FileType::is_symlink);
+    let is_sym = entry
+        .file_type
+        .as_ref()
+        .is_some_and(fs::FileType::is_symlink);
     let meta_res = if is_sym && follow_symlinks {
         fs::metadata(&entry.path)
     } else {
@@ -35,7 +38,7 @@ pub fn collect_and_sort_entries(
     config: &WalkConfig,
     events: &mut Vec<WalkEvent>,
 ) -> Option<Vec<ScannedEntry>> {
-    if !is_valid_descent_dir(dir, config.follow_symlinks) {
+    if !is_valid_descent_dir(dir, config.scope.follow_symlinks) {
         return None;
     }
     let read_dir = match fs::read_dir(dir) {
@@ -59,21 +62,34 @@ pub fn collect_and_sort_entries(
             file_name: ent.file_name(),
             file_type: ent.file_type().ok(),
         });
-        if config.file_limit.is_some_and(|lim| entries.len() > lim) {
+        if config
+            .bounds
+            .file_limit
+            .is_some_and(|lim| entries.len() > lim)
+        {
             return None;
         }
     }
 
-    match config.sort_by {
+    match config.sort.sort_by {
         WalkSortKey::None => {}
         WalkSortKey::Name => {
             let mut keyed: Vec<(Vec<u32>, ScannedEntry)> = entries
                 .into_iter()
-                .map(|e| (surrogateescape_codepoints(&e.file_name, config.ignore_case), e))
+                .map(|e| {
+                    (
+                        surrogateescape_codepoints(&e.file_name, config.sort.ignore_case),
+                        e,
+                    )
+                })
                 .collect();
             keyed.sort_by(|a, b| {
                 let ord = a.0.cmp(&b.0);
-                if config.reverse_sort { ord.reverse() } else { ord }
+                if config.sort.reverse_sort {
+                    ord.reverse()
+                } else {
+                    ord
+                }
             });
             entries = keyed.into_iter().map(|(_, e)| e).collect();
         }
@@ -83,7 +99,7 @@ pub fn collect_and_sort_entries(
                 .map(|e| {
                     let k = natural_sort_key_osstr(
                         &e.file_name,
-                        config.ignore_case,
+                        config.sort.ignore_case,
                         config.unicode_major,
                     );
                     (k, e)
@@ -91,23 +107,27 @@ pub fn collect_and_sort_entries(
                 .collect();
             keyed.sort_by(|a, b| {
                 let ord = a.0.cmp(&b.0);
-                if config.reverse_sort { ord.reverse() } else { ord }
+                if config.sort.reverse_sort {
+                    ord.reverse()
+                } else {
+                    ord
+                }
             });
             entries = keyed.into_iter().map(|(_, e)| e).collect();
         }
         WalkSortKey::Time | WalkSortKey::Ctime | WalkSortKey::Size => {
-            let descending = !config.reverse_sort;
+            let descending = !config.sort.reverse_sort;
             let mut keyed: Vec<MetricSortEntry> = entries
                 .into_iter()
                 .map(|e| {
-                    let nk = surrogateescape_codepoints(&e.file_name, config.ignore_case);
-                    let metrics = stat_sort_metrics(&e, config.follow_symlinks);
+                    let nk = surrogateescape_codepoints(&e.file_name, config.sort.ignore_case);
+                    let metrics = stat_sort_metrics(&e, config.scope.follow_symlinks);
                     (nk, metrics, e)
                 })
                 .collect();
             keyed.sort_by(|a, b| a.0.cmp(&b.0));
             keyed.sort_by(|a, b| {
-                let ord = match config.sort_by {
+                let ord = match config.sort.sort_by {
                     WalkSortKey::Size => a.1.2.cmp(&b.1.2),
                     WalkSortKey::Ctime => a.1.1.partial_cmp(&b.1.1).unwrap_or(Ordering::Equal),
                     _ => a.1.0.partial_cmp(&b.1.0).unwrap_or(Ordering::Equal),

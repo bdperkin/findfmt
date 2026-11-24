@@ -13,6 +13,10 @@ pub struct LiveMimeDb<'py> {
 
 impl<'py> LiveMimeDb<'py> {
     /// Read the active `mimetypes._db` dictionaries so runtime `mimetypes.add_type` calls take effect.
+    ///
+    /// # Errors
+    ///
+    /// Returns a [`PyErr`] if importing or inspecting Python's `mimetypes` module fails.
     pub fn from_python(py: Python<'py>) -> PyResult<Self> {
         let mime_mod = py.import("mimetypes")?;
         if mime_mod.getattr("_db")?.is_none() {
@@ -29,6 +33,7 @@ impl<'py> LiveMimeDb<'py> {
     }
 
     /// Match `mimetypes.guess_type(str_path)[0]` against the live Python `mimetypes` engine.
+    #[must_use]
     pub fn guess_mime_type(&self, str_path: &str) -> Option<String> {
         if should_delegate_colon_to_python(str_path) {
             return self
@@ -40,7 +45,10 @@ impl<'py> LiveMimeDb<'py> {
                 .flatten();
         }
         let dict_str = |d: &Bound<'py, PyDict>, key: &str| -> Option<String> {
-            d.get_item(key).ok().flatten().and_then(|v| v.extract().ok())
+            d.get_item(key)
+                .ok()
+                .flatten()
+                .and_then(|v| v.extract().ok())
         };
         guess_file_mime_with_lookup(
             str_path,
@@ -53,6 +61,7 @@ impl<'py> LiveMimeDb<'py> {
 }
 
 /// Split `(root, ext)` matching Python's `os.path.splitext` leading-dot semantics.
+#[must_use]
 pub fn py_splitext(path: &str) -> (String, String) {
     py_splitext_mode(path, false)
 }
@@ -95,7 +104,10 @@ fn has_url_scheme(str_path: &str) -> bool {
         && colon_idx > 1
     {
         let scheme = &str_path[..colon_idx];
-        return scheme.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
+        return scheme
+            .as_bytes()
+            .first()
+            .is_some_and(u8::is_ascii_alphabetic)
             && scheme
                 .bytes()
                 .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'-' | b'.'));

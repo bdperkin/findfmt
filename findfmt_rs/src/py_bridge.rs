@@ -1,4 +1,4 @@
-//! PyO3 FFI bridge converting GIL-free Rust classification outputs into `FileInfo` (#583).
+//! `PyO3` FFI bridge converting GIL-free Rust classification outputs into `FileInfo` (#583).
 
 use std::collections::{BTreeSet, HashMap};
 use std::path::Path;
@@ -31,7 +31,8 @@ pub(crate) fn build_py_file_info<'py>(
     uid_cache: &mut HashMap<u32, Bound<'py, PyAny>>,
     gid_cache: &mut HashMap<u32, Bound<'py, PyAny>>,
 ) -> PyResult<Bound<'py, PyAny>> {
-    let resolved_path = if !has_entry && !raw_res.is_symlink && raw_res.exists && !is_abs {
+    let is_symlink = raw_res.is_symlink();
+    let resolved_path = if !has_entry && !is_symlink && raw_res.exists && !is_abs {
         path_obj.call_method0("resolve")?
     } else {
         path_obj.clone()
@@ -46,8 +47,8 @@ pub(crate) fn build_py_file_info<'py>(
     )?;
     let py_tags = PyFrozenSet::new(py, raw_res.tags.iter().map(String::as_str))?;
 
-    let symlink_target_py: Option<Bound<'py, PyAny>> = match raw_res.symlink_target_path {
-        Some(ref t_pb) => {
+    let symlink_target_py: Option<Bound<'py, PyAny>> = match raw_res.symlink_target() {
+        Some(t_pb) => {
             let decoded = pathbuf_to_py_str(py, handles, t_pb)?;
             Some(decoded.call_method1("removeprefix", (r"\\?\",))?)
         }
@@ -86,7 +87,7 @@ pub(crate) fn build_py_file_info<'py>(
     kwargs.set_item("shebang", raw_res.shebang)?;
     kwargs.set_item("mime_type", raw_res.mime_type)?;
     kwargs.set_item("is_executable", raw_res.is_executable)?;
-    kwargs.set_item("is_symlink", raw_res.is_symlink)?;
+    kwargs.set_item("is_symlink", is_symlink)?;
     kwargs.set_item("symlink_target", symlink_target_py)?;
     kwargs.set_item("size_bytes", raw_res.size_bytes)?;
     kwargs.set_item("permissions_str", raw_res.permissions_str)?;
@@ -235,9 +236,8 @@ pub fn classify_batch_py<'py>(
     let filter_ref = criteria.is_active().then_some(&criteria);
     let pathext = windows_pathext_upper();
 
-    let matched = py.detach(|| {
-        classify_batch_nogil(&raw_inputs, filter_ref, registry, pathext.as_deref())
-    });
+    let matched =
+        py.detach(|| classify_batch_nogil(&raw_inputs, filter_ref, registry, pathext.as_deref()));
 
     let out = PyList::empty(py);
     let mut uid_cache = HashMap::new();

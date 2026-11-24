@@ -48,9 +48,11 @@ proptest! {
     ) {
         let (_is_txt, extracted, tokens) = fuzz_shebang_and_header_bytes(&raw);
         if raw.starts_with(b"#!") {
-            let line = extracted.expect("buffer starting with #! must extract shebang");
-            prop_assert!(!line.contains('\n'));
-            prop_assert_eq!(py_strip(&line), line.as_str());
+            prop_assert!(extracted.is_some());
+            if let Some(line) = extracted {
+                prop_assert!(!line.contains('\n'));
+                prop_assert_eq!(py_strip(&line), line.as_str());
+            }
         } else {
             prop_assert!(extracted.is_none());
             prop_assert!(tokens.is_empty());

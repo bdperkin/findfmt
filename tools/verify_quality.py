@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
 import subprocess
 import sys
 import tempfile
@@ -15,33 +14,30 @@ if TYPE_CHECKING:
 try:
     from tools.dep_matrix import (
         FULL_MATRIX,
-        VALID_FORK_STRATEGIES,
-        VALID_PRERELEASES,
-        VALID_RESOLUTIONS,
         MatrixCell,
         capture_diagnostics,
         load_supported_pythons,
         select_cells,
     )
+    from tools.quality_steps import QUALITY_STEPS, build_parser, prepare_step_execution
 except ModuleNotFoundError:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     from tools.dep_matrix import (
         FULL_MATRIX,
-        VALID_FORK_STRATEGIES,
-        VALID_PRERELEASES,
-        VALID_RESOLUTIONS,
         MatrixCell,
         capture_diagnostics,
         load_supported_pythons,
         select_cells,
     )
+    from tools.quality_steps import QUALITY_STEPS, build_parser, prepare_step_execution
 
 
-def run_step(name: str, cmd: list[str]) -> bool:
+def run_step(name: str, cmd: Sequence[str]) -> bool:
     """Run a quality check step and print output."""
     sys.stdout.write(f"\n[+] Running {name}: {' '.join(cmd)}\n")
     sys.stdout.flush()
-    proc = subprocess.run(cmd, check=False)
+    resolved_cmd, step_env = prepare_step_execution(cmd)
+    proc = subprocess.run(resolved_cmd, env=step_env, check=False)
     if proc.returncode != 0:
         sys.stderr.write(f"[-] Step '{name}' failed with exit code {proc.returncode}\n")
         return False
@@ -50,33 +46,8 @@ def run_step(name: str, cmd: list[str]) -> bool:
 
 
 def run_quality_suite() -> int:
-    """Execute the standard 12-step verification suite."""
-    steps = [
-        ("Ruff Linter", ["uv", "run", "ruff", "check"]),
-        ("Ruff Formatter", ["uv", "run", "ruff", "format", "--check"]),
-        ("Ty Type Checker", ["uv", "run", "ty", "check"]),
-        ("Pytest & Coverage", ["uv", "run", "pytest"]),
-        ("Interrogate Docstrings", ["uv", "run", "interrogate", "src"]),
-        ("Radon Cyclomatic Complexity", ["uv", "run", "radon", "cc", "src", "-s", "-a"]),
-        (
-            "Xenon Complexity Assertions",
-            ["uv", "run", "xenon", "-b", "B", "-m", "B", "-a", "A", "src"],
-        ),
-        ("Deptry Dependencies", ["uv", "run", "deptry", "."]),
-        ("Vulture Dead Code", ["uv", "run", "vulture", "src"]),
-        ("Codespell Spelling", ["uv", "run", "codespell"]),
-        (
-            "Pre-Commit Dependency Sync",
-            ["uv", "run", "python", "tools/sync_pre_commit_deps.py"],
-        ),
-        (
-            "CLI & Markdown Docs SoT Sync",
-            ["uv", "run", "python", "tools/sync_cli_docs.py"],
-        ),
-        ("UV Dependency Audit", ["uv", "audit", "--preview-features", "audit-command"]),
-    ]
-
-    for name, cmd in steps:
+    """Execute the standard 17-step Python and Rust verification suite."""
+    for name, cmd in QUALITY_STEPS:
         if not run_step(name, cmd):
             return 1
 
@@ -252,52 +223,6 @@ def run_multi_python(
         f"{len(skipped)} skipped: {', '.join(skipped) or 'none'})!\n",
     )
     return 0
-
-
-def build_parser() -> argparse.ArgumentParser:
-    """Build argument parser for verify_quality.py and dependency matrix modes."""
-    parser = argparse.ArgumentParser(
-        description="Run findfmt quality suite, multi-Python runner, or dependency matrix.",
-    )
-    parser.add_argument(
-        "--list",
-        dest="list_sessions",
-        action="store_true",
-        help="List supported Python interpreter sessions and dependency matrix cells.",
-    )
-    mode_group = parser.add_mutually_exclusive_group()
-    mode_group.add_argument(
-        "--all-pythons",
-        action="store_true",
-        help="Run pytest across every supported Python interpreter (3.11-3.15).",
-    )
-    mode_group.add_argument(
-        "--pythons",
-        help="Comma-separated list of Python versions to test (e.g. '3.11,3.15').",
-    )
-    mode_group.add_argument(
-        "--smoke",
-        action="store_true",
-        help="Run curated 2-cell PR dependency smoke matrix (M1, M2).",
-    )
-    mode_group.add_argument(
-        "--full",
-        action="store_true",
-        help="Run all 6 pruned dependency matrix permutations (M1-M6).",
-    )
-    parser.add_argument("--resolution", choices=VALID_RESOLUTIONS, help="uv --resolution mode.")
-    parser.add_argument("--prerelease", choices=VALID_PRERELEASES, help="uv --prerelease mode.")
-    parser.add_argument(
-        "--fork-strategy",
-        choices=VALID_FORK_STRATEGIES,
-        help="uv --fork-strategy mode.",
-    )
-    parser.add_argument(
-        "--python",
-        default=sys.executable,
-        help="Python interpreter version or path for ephemeral virtualenvs.",
-    )
-    return parser
 
 
 def main(argv: Sequence[str] | None = None, repo_root: Path | None = None) -> int:

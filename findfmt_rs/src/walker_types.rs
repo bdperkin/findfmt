@@ -25,9 +25,9 @@ pub enum WalkSortKey {
 /// Owned, GIL-free snapshot of Python's live `mimetypes._db` maps.
 #[derive(Clone, Debug, Default)]
 pub struct MimeSnapshot {
-    pub strict_map: HashMap<String, String>,
-    pub suffix_map: HashMap<String, String>,
-    pub encodings_map: HashSet<String>,
+    pub strict: HashMap<String, String>,
+    pub suffixes: HashMap<String, String>,
+    pub encodings: HashSet<String>,
 }
 
 impl MimeSnapshot {
@@ -35,9 +35,9 @@ impl MimeSnapshot {
     pub fn guess_mime_type(&self, str_path: &str) -> Option<String> {
         guess_mime_with_lookup(
             str_path,
-            |k| self.suffix_map.get(k).cloned(),
-            |k| self.encodings_map.contains(k),
-            |k| self.strict_map.get(k).cloned(),
+            |k| self.suffixes.get(k).cloned(),
+            |k| self.encodings.contains(k),
+            |k| self.strict.get(k).cloned(),
         )
     }
 }
@@ -45,7 +45,9 @@ impl MimeSnapshot {
 /// Portable directory identity key for cycle detection and `--prune` memoization (`#318`, `#345`).
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum DirKey {
+    #[cfg(unix)]
     Inode(u64, u64),
+    #[cfg(not(unix))]
     Canonical(PathBuf),
 }
 
@@ -95,11 +97,37 @@ pub enum GlobalIgnoreResolution {
 /// Pre-resolved root target passed into `NativeWalker`.
 #[derive(Clone, Debug)]
 pub struct RootTarget {
-    pub raw_root: PathBuf,
     pub resolved_root: Option<PathBuf>,
     pub prefix: Option<PathBuf>,
     pub global_gitignore: GlobalIgnoreResolution,
     pub initial_error: Option<WalkOsError>,
+}
+
+/// Entry visibility, symlink dereferencing, and directory-only emission flags.
+#[derive(Clone, Copy, Debug)]
+pub struct WalkScope {
+    pub include_hidden: bool,
+    pub follow_symlinks: bool,
+    pub dirs_only: bool,
+}
+
+/// Traversal depth, filesystem boundary, pruning, and disk-usage flags.
+#[derive(Clone, Copy, Debug)]
+pub struct WalkBounds {
+    pub one_file_system: bool,
+    pub prune_empty: bool,
+    pub accumulate_size: bool,
+    pub max_depth: Option<usize>,
+    pub file_limit: Option<usize>,
+}
+
+/// Entry ordering options for directory enumeration.
+#[derive(Clone, Copy, Debug)]
+pub struct WalkSort {
+    pub sort_by: WalkSortKey,
+    pub reverse_sort: bool,
+    pub dirs_first: bool,
+    pub ignore_case: bool,
 }
 
 /// Pure-Rust traversal configuration mirroring `TraversalConfig`.
@@ -107,19 +135,9 @@ pub struct RootTarget {
 pub struct WalkConfig {
     pub respect_gitignore: bool,
     pub custom_gitignore_file: Option<PathBuf>,
-    pub include_hidden: bool,
-    pub follow_symlinks: bool,
-    pub dirs_only: bool,
-    pub one_file_system: bool,
-    pub max_depth: Option<usize>,
-    pub file_limit: Option<usize>,
-    pub prune_empty: bool,
-    pub ignore_case: bool,
-    pub match_dirs: bool,
-    pub accumulate_size: bool,
-    pub sort_by: WalkSortKey,
-    pub reverse_sort: bool,
-    pub dirs_first: bool,
+    pub scope: WalkScope,
+    pub bounds: WalkBounds,
+    pub sort: WalkSort,
     pub filter: FilterCriteria,
     pub matcher: PatternMatcher,
     pub home_dir: Option<PathBuf>,
@@ -156,6 +174,7 @@ pub struct WalkYieldItem {
     pub prefix: Option<PathBuf>,
     pub has_entry: bool,
     pub follow_symlinks: bool,
+    #[cfg(not(unix))]
     pub inherited_match: bool,
     pub classified: RawClassifiedFile,
 }

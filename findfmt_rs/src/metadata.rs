@@ -19,27 +19,47 @@ const S_ISUID: u32 = 0o004_000;
 const S_ISGID: u32 = 0o002_000;
 const S_ISVTX: u32 = 0o001_000;
 
+#[cfg(unix)]
+fn unix_timespec_to_f64(secs: i64, nsecs: i64) -> f64 {
+    let sec_hi = i32::try_from(secs >> 32).unwrap_or(0);
+    let sec_lo = u32::try_from(secs & 0xFFFF_FFFF).unwrap_or(0);
+    let nsec_hi = i32::try_from(nsecs >> 32).unwrap_or(0);
+    let nsec_lo = u32::try_from(nsecs & 0xFFFF_FFFF).unwrap_or(0);
+    let sec_f = f64::from(sec_hi) * 4_294_967_296.0 + f64::from(sec_lo);
+    let nsec_f = f64::from(nsec_hi) * 4_294_967_296.0 + f64::from(nsec_lo);
+    sec_f + 1e-9 * nsec_f
+}
+
 /// Portable snapshot of `stat_result` fields required to populate `FileInfo`.
 #[derive(Clone, Debug)]
 pub struct RawStat {
+    /// Raw POSIX file mode (`st_mode`).
     pub mode: u32,
+    /// File size in bytes (`st_size`).
     pub size: u64,
+    /// Numeric owner user ID (`st_uid`).
     pub uid: Option<u32>,
+    /// Numeric owner group ID (`st_gid`).
     pub gid: Option<u32>,
+    /// Filesystem inode identifier (`st_ino`).
     pub ino: Option<u128>,
+    /// Filesystem device identifier (`st_dev`).
     pub dev: Option<u128>,
+    /// Last modification timestamp in seconds since the Unix epoch.
     pub mtime: Option<f64>,
+    /// Metadata change / creation timestamp in seconds since the Unix epoch.
     pub ctime: Option<f64>,
 }
 
 impl RawStat {
     /// Extract a `RawStat` from `std::fs::Metadata` on Unix platforms.
     #[cfg(unix)]
+    #[must_use]
     pub fn from_std_metadata(meta: &Metadata) -> Self {
         use std::os::unix::fs::MetadataExt;
 
-        let mtime = (meta.mtime() as f64) + 1e-9 * (meta.mtime_nsec() as f64);
-        let ctime = (meta.ctime() as f64) + 1e-9 * (meta.ctime_nsec() as f64);
+        let mtime = unix_timespec_to_f64(meta.mtime(), meta.mtime_nsec());
+        let ctime = unix_timespec_to_f64(meta.ctime(), meta.ctime_nsec());
         Self {
             mode: meta.mode(),
             size: meta.len(),
@@ -54,12 +74,14 @@ impl RawStat {
 
     /// Extract a `RawStat` from `std::fs::Metadata` on non-Unix platforms (e.g., Windows).
     #[cfg(not(unix))]
+    #[must_use]
     pub fn from_std_metadata(meta: &Metadata) -> Self {
         Self::from_portable_metadata(meta)
     }
 
     /// Build a consistent `RawStat` snapshot from portable `std::fs::Metadata` fields.
     #[cfg(any(not(unix), test))]
+    #[must_use]
     pub fn from_portable_metadata(meta: &Metadata) -> Self {
         let readonly = meta.permissions().readonly();
         let mode = if meta.is_dir() {
@@ -90,32 +112,45 @@ impl RawStat {
         }
     }
 
-    pub fn is_reg(&self) -> bool {
+    /// Return `true` when `mode` denotes a regular file (`S_IFREG`).
+    #[must_use]
+    pub const fn is_reg(&self) -> bool {
         (self.mode & S_IFMT) == S_IFREG
     }
 
-    pub fn is_dir(&self) -> bool {
+    /// Return `true` when `mode` denotes a directory (`S_IFDIR`).
+    #[must_use]
+    pub const fn is_dir(&self) -> bool {
         (self.mode & S_IFMT) == S_IFDIR
     }
 
-    pub fn is_lnk(&self) -> bool {
+    /// Return `true` when `mode` denotes a symbolic link (`S_IFLNK`).
+    #[must_use]
+    pub const fn is_lnk(&self) -> bool {
         (self.mode & S_IFMT) == S_IFLNK
     }
 
-    pub fn is_sock(&self) -> bool {
+    /// Return `true` when `mode` denotes a Unix domain socket (`S_IFSOCK`).
+    #[must_use]
+    pub const fn is_sock(&self) -> bool {
         (self.mode & S_IFMT) == S_IFSOCK
     }
 
-    pub fn is_fifo(&self) -> bool {
+    /// Return `true` when `mode` denotes a named pipe / FIFO (`S_IFIFO`).
+    #[must_use]
+    pub const fn is_fifo(&self) -> bool {
         (self.mode & S_IFMT) == S_IFIFO
     }
 
-    pub fn is_door(&self) -> bool {
+    /// Return `true` when `mode` denotes a Solaris door (`S_IFDOOR`).
+    #[must_use]
+    pub const fn is_door(&self) -> bool {
         (self.mode & S_IFMT) == S_IFDOOR
     }
 }
 
 /// Format POSIX mode bits into a 10-character `ls -l` permissions string (`stat.filemode` parity).
+#[must_use]
 pub fn format_filemode(mode: u32) -> String {
     let file_type = match mode & S_IFMT {
         S_IFDIR => 'd',
@@ -165,6 +200,7 @@ pub fn format_filemode(mode: u32) -> String {
 }
 
 /// Compute the POSIX classification indicator (`get_classification_indicator` parity).
+#[must_use]
 pub fn classification_indicator(
     is_dir: bool,
     is_symlink: bool,
@@ -215,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn indicator_matches_posix_symbols() {
+    fn indicator_matches_posix_symbols() -> Result<(), Box<dyn std::error::Error>> {
         let fifo_stat = RawStat {
             mode: S_IFIFO | 0o644,
             size: 0,
@@ -238,9 +274,10 @@ mod tests {
         );
         assert_eq!(classification_indicator(false, false, false, None), None);
 
-        let cur_dir_meta = std::fs::metadata(".").expect("current dir metadata");
+        let cur_dir_meta = std::fs::metadata(".")?;
         let portable_dir = RawStat::from_portable_metadata(&cur_dir_meta);
         assert!(portable_dir.is_dir());
         assert!(!portable_dir.is_reg());
+        Ok(())
     }
 }

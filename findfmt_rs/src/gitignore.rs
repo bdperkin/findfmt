@@ -15,6 +15,7 @@ use crate::shebang::py_strip;
 /// - Strips unescaped trailing ASCII spaces (`' '`), stopping when an odd number of backslashes
 ///   immediately precedes the trailing space.
 /// - Preserves leading spaces verbatim.
+#[must_use]
 pub fn trim_gitignore_line(raw_line: &str) -> &str {
     let mut line = raw_line.trim_end_matches(['\r', '\n']);
     while line.ends_with(' ') {
@@ -40,6 +41,7 @@ pub fn trim_gitignore_line(raw_line: &str) -> &str {
 /// Return `true` when `trimmed_line` represents an active gitignore rule (non-blank and non-comment).
 ///
 /// Mirrors `if line.strip() and not line.startswith("#"):` in `src/findfmt/traversal/ignore.py`.
+#[must_use]
 pub fn is_active_gitignore_line(trimmed_line: &str) -> bool {
     !py_strip(trimmed_line).is_empty() && !trimmed_line.starts_with('#')
 }
@@ -102,6 +104,7 @@ pub struct GitignoreMatcher {
 
 impl GitignoreMatcher {
     /// Parse and compile `.gitignore` text, returning `(matcher, invalid_line_count)` without panicking.
+    #[must_use]
     pub fn from_text(root: &Path, content: &str) -> (Self, usize) {
         Self::compile_internal(root, content).0
     }
@@ -129,12 +132,14 @@ impl GitignoreMatcher {
     }
 
     /// Parse raw `.gitignore` bytes using UTF-8 replacement (`errors="replace"` parity).
+    #[must_use]
     pub fn from_bytes_lossy(root: &Path, raw_bytes: &[u8]) -> (Self, usize) {
         let decoded = String::from_utf8_lossy(raw_bytes);
         Self::from_text(root, &decoded)
     }
 
     /// Load a specification file strictly mirroring `src/findfmt/traversal/ignore.py:load_spec_file`.
+    #[must_use]
     pub fn from_spec_file(base_dir: &Path, spec_file: &Path) -> Option<Self> {
         if !spec_file.is_file() {
             return None;
@@ -150,11 +155,13 @@ impl GitignoreMatcher {
     }
 
     /// Return the directory root this matcher is bound to.
+    #[must_use]
     pub fn root(&self) -> &Path {
         &self.root
     }
 
     /// Evaluate tri-state ignore decision when `candidate` resides strictly beneath `self.root`.
+    #[must_use]
     pub fn check_scoped(&self, candidate: &Path, is_dir: bool) -> Option<bool> {
         let stripped = candidate.strip_prefix(&self.root).ok()?;
         let clean = normalize_relative_components(stripped);
@@ -166,6 +173,7 @@ impl GitignoreMatcher {
     }
 
     /// Evaluate whether `candidate` (or any parent directory under `root`) is ignored.
+    #[must_use]
     pub fn is_ignored(&self, candidate: &Path, is_dir: bool) -> bool {
         let stripped = candidate.strip_prefix(&self.root).unwrap_or(candidate);
         let clean = normalize_relative_components(stripped);
@@ -186,6 +194,10 @@ impl GitignoreMatcher {
 }
 
 /// Compile a standalone glob pattern via `globset` (`-P` / `-I` foundation for `#582`).
+///
+/// # Errors
+///
+/// Returns [`globset::Error`] if `pattern` contains malformed glob syntax.
 pub fn compile_glob_matcher(
     pattern: &str,
     case_insensitive: bool,

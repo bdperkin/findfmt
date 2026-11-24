@@ -78,7 +78,7 @@ pub(crate) fn enter_directory_state(
             continue;
         };
         if is_dir {
-            if !should_skip_dir(&entry.file_name, config.include_hidden) {
+            if !should_skip_dir(&entry.file_name, config.scope.include_hidden) {
                 subdirs.push(entry_path);
             }
         } else if is_cand_file {
@@ -86,7 +86,7 @@ pub(crate) fn enter_directory_state(
         }
     }
 
-    let raw_targets: VecDeque<(PathBuf, bool)> = if config.dirs_only {
+    let raw_targets: VecDeque<(PathBuf, bool)> = if config.scope.dirs_only {
         subdirs.iter().cloned().map(|p| (p, false)).collect()
     } else {
         VecDeque::from(files)
@@ -99,9 +99,13 @@ pub(crate) fn enter_directory_state(
         inherited_match,
     });
 
-    let can_descend = config.max_depth.is_none_or(|max_d| current_depth < max_d) && !subdirs.is_empty();
+    let can_descend = config
+        .bounds
+        .max_depth
+        .is_none_or(|max_d| current_depth < max_d)
+        && !subdirs.is_empty();
 
-    if config.dirs_first && can_descend {
+    if config.sort.dirs_first && can_descend {
         state.stack.push(WalkFrame {
             subdirs,
             idx: 0,
@@ -126,6 +130,115 @@ pub(crate) fn enter_directory_state(
     }
 }
 
+enum BatchStep {
+    Ready(PathBuf, bool),
+    Skip,
+    PauseOrDone,
+}
+
+fn next_batch_candidate(
+    batch: &mut CandidateBatch,
+    config: &WalkConfig,
+    registry: &TagRegistry,
+    state: &mut ActiveRootState,
+    events: &mut Vec<WalkEvent>,
+) -> BatchStep {
+    if let Some((cand, mut search)) = batch.active_prune.take() {
+        return match search.poll(
+            &state.base_root,
+            state.root_dev,
+            config,
+            registry,
+            &mut state.prune_memo,
+            events,
+        ) {
+            PrunePoll::Matched => BatchStep::Ready(cand.0, cand.1),
+            PrunePoll::Empty => BatchStep::Skip,
+            PrunePoll::YieldedError => {
+                batch.active_prune = Some((cand, search));
+                BatchStep::PauseOrDone
+            }
+        };
+    }
+
+    let Some(cand) = batch.targets.pop_front() else {
+        return BatchStep::PauseOrDone;
+    };
+    if !config.scope.dirs_only || !config.bounds.prune_empty {
+        return BatchStep::Ready(cand.0, cand.1);
+    }
+    if !is_valid_descent_dir(&cand.0, config.scope.follow_symlinks) {
+        return BatchStep::Skip;
+    }
+    let child_specs = load_child_specs(&cand.0, &batch.specs, config.respect_gitignore);
+    let child_inh =
+        config
+            .matcher
+            .should_inherit_match(&cand.0, Some(&state.base_root), batch.inherited_match);
+    let mut search = PruneSearch::new(cand.0.clone(), child_specs, batch.depth + 1, child_inh);
+    match search.poll(
+        &state.base_root,
+        state.root_dev,
+        config,
+        registry,
+        &mut state.prune_memo,
+        events,
+    ) {
+        PrunePoll::Matched => BatchStep::Ready(cand.0, cand.1),
+        PrunePoll::Empty => BatchStep::Skip,
+        PrunePoll::YieldedError => {
+            batch.active_prune = Some((cand, search));
+            BatchStep::PauseOrDone
+        }
+    }
+}
+
+fn passes_file_prefilter(
+    cand_path: &Path,
+    rel_pb: &Path,
+    is_symlink: bool,
+    inherited_match: bool,
+    prefilter: (bool, bool, bool),
+    config: &WalkConfig,
+    registry: &TagRegistry,
+) -> bool {
+    if config.matcher.is_active() && !config.matcher.matches_file(rel_pb, None, inherited_match) {
+        return false;
+    }
+    let (tag_active, needs_mime, needs_exec) = prefilter;
+    if !tag_active {
+        return true;
+    }
+    let filename = cand_path
+        .file_name()
+        .map_or_else(String::new, |n| n.to_string_lossy().into_owned());
+    let exec_hint = needs_exec
+        .then(|| {
+            executable_hint_for_skip(
+                cand_path,
+                &filename,
+                is_symlink,
+                config.scope.follow_symlinks,
+            )
+        })
+        .flatten();
+    let guessed_mime = needs_mime
+        .then(|| {
+            let str_path = cand_path.to_string_lossy();
+            config.mime_snapshot.guess_mime_type(&str_path)
+        })
+        .flatten();
+    !can_skip_entry_by_tags(
+        &filename,
+        is_symlink,
+        config.scope.follow_symlinks,
+        exec_hint,
+        &config.filter,
+        registry,
+        guessed_mime.as_deref(),
+    )
+}
+
 pub(crate) fn drain_candidate_batch(
     config: &WalkConfig,
     registry: &TagRegistry,
@@ -136,128 +249,51 @@ pub(crate) fn drain_candidate_batch(
     let Some(mut batch) = state.pending_batch.take() else {
         return;
     };
-    let (tag_active, needs_mime, needs_exec) = tag_prefilter_requirements(&config.filter);
+    let prefilter = tag_prefilter_requirements(&config.filter);
 
     while events.len() < cap {
-        let (cand_path, is_symlink) = if let Some((cand, mut search)) = batch.active_prune.take() {
-            match search.poll(
-                &state.base_root,
-                state.root_dev,
-                config,
-                registry,
-                &mut state.prune_memo,
-                events,
-            ) {
-                PrunePoll::Matched => cand,
-                PrunePoll::Empty => continue,
-                PrunePoll::YieldedError => {
-                    batch.active_prune = Some((cand, search));
-                    break;
-                }
-            }
-        } else {
-            let Some(cand) = batch.targets.pop_front() else {
-                break;
+        let (cand_path, is_symlink) =
+            match next_batch_candidate(&mut batch, config, registry, state, events) {
+                BatchStep::Ready(p, sym) => (p, sym),
+                BatchStep::Skip => continue,
+                BatchStep::PauseOrDone => break,
             };
-            if config.dirs_only && config.prune_empty {
-                if !is_valid_descent_dir(&cand.0, config.follow_symlinks) {
-                    continue;
-                }
-                let child_specs =
-                    load_child_specs(&cand.0, &batch.specs, config.respect_gitignore);
-                let child_inh = config.matcher.should_inherit_match(
-                    &cand.0,
-                    Some(&state.base_root),
-                    batch.inherited_match,
-                );
-                let mut search = PruneSearch::new(
-                    cand.0.clone(),
-                    child_specs,
-                    batch.depth + 1,
-                    child_inh,
-                );
-                match search.poll(
-                    &state.base_root,
-                    state.root_dev,
-                    config,
-                    registry,
-                    &mut state.prune_memo,
-                    events,
-                ) {
-                    PrunePoll::Matched => cand,
-                    PrunePoll::Empty => continue,
-                    PrunePoll::YieldedError => {
-                        batch.active_prune = Some((cand, search));
-                        break;
-                    }
-                }
-            } else {
-                cand
-            }
-        };
 
         let rel_pb =
             resolve_relative_pathbuf(&cand_path, &state.base_root, state.prefix.as_deref());
-        if !config.dirs_only {
-            if config.matcher.is_active()
-                && !config
-                    .matcher
-                    .matches_file(&rel_pb, None, batch.inherited_match)
-            {
-                continue;
-            }
-            if tag_active {
-                let filename = cand_path
-                    .file_name()
-                    .map_or_else(String::new, |n| n.to_string_lossy().into_owned());
-                let exec_hint = needs_exec
-                    .then(|| {
-                        executable_hint_for_skip(
-                            &cand_path,
-                            &filename,
-                            is_symlink,
-                            config.follow_symlinks,
-                        )
-                    })
-                    .flatten();
-                let guessed_mime = needs_mime
-                    .then(|| {
-                        let str_path = cand_path.to_string_lossy();
-                        config.mime_snapshot.guess_mime_type(&str_path)
-                    })
-                    .flatten();
-                if can_skip_entry_by_tags(
-                    &filename,
-                    is_symlink,
-                    config.follow_symlinks,
-                    exec_hint,
-                    &config.filter,
-                    registry,
-                    guessed_mime.as_deref(),
-                ) {
-                    continue;
-                }
-            }
+        if !config.scope.dirs_only
+            && !passes_file_prefilter(
+                &cand_path,
+                &rel_pb,
+                is_symlink,
+                batch.inherited_match,
+                prefilter,
+                config,
+                registry,
+            )
+        {
+            continue;
         }
 
         let accum = state
             .accumulated_sizes
             .as_ref()
             .and_then(|m| m.get(&cand_path).copied());
-        let raw_in =
-            build_raw_classify_input(cand_path.clone(), config.follow_symlinks, accum, config);
-        let classified =
-            classify_one_nogil(&raw_in, registry, config.pathext_upper.as_deref());
+        let raw_in = build_raw_classify_input(
+            cand_path.clone(),
+            config.scope.follow_symlinks,
+            accum,
+            config,
+        );
+        let classified = classify_one_nogil(&raw_in, registry, config.pathext_upper.as_deref());
         let is_dir_item = classified.is_dir || classified.tags.contains("directory");
-        if !config.filter.matches(
-            &classified.tags,
-            classified.shebang.as_deref(),
-            is_dir_item,
-        ) || !config.matcher.matches_classified_item(
-            &rel_pb,
-            is_dir_item,
-            batch.inherited_match,
-        ) {
+        if !config
+            .filter
+            .matches(&classified.tags, classified.shebang.as_deref(), is_dir_item)
+            || !config
+                .matcher
+                .matches_classified_item(&rel_pb, is_dir_item, batch.inherited_match)
+        {
             continue;
         }
 
@@ -267,8 +303,9 @@ pub(crate) fn drain_candidate_batch(
             filename: raw_in.filename,
             root_path: state.base_root.clone(),
             prefix: state.prefix.clone(),
-            has_entry: !config.dirs_only,
-            follow_symlinks: config.follow_symlinks,
+            has_entry: !config.scope.dirs_only,
+            follow_symlinks: config.scope.follow_symlinks,
+            #[cfg(not(unix))]
             inherited_match: batch.inherited_match,
             classified,
         })));

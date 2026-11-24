@@ -33,9 +33,10 @@ fn align_path_form(candidate: PathBuf, reference: &Path) -> PathBuf {
 
 /// Locate the nearest enclosing Git repository root containing a `.git` directory or pointer file.
 pub fn find_git_repo_root(start_dir: &Path) -> Option<PathBuf> {
-    let resolved = fs::canonicalize(start_dir)
-        .map(|p| align_path_form(p, start_dir))
-        .unwrap_or_else(|_| start_dir.to_path_buf());
+    let resolved = fs::canonicalize(start_dir).map_or_else(
+        |_| start_dir.to_path_buf(),
+        |p| align_path_form(p, start_dir),
+    );
     for directory in resolved.ancestors() {
         if directory.join(".git").exists() {
             return Some(directory.to_path_buf());
@@ -107,9 +108,8 @@ fn resolve_common_git_dir(resolved_gitdir: &Path) -> PathBuf {
         let rel_path = PathBuf::from(String::from_utf8_lossy(trimmed).into_owned());
 
         let joined = resolved_gitdir.join(rel_path);
-        let candidate = fs::canonicalize(&joined)
-            .map(|p| align_path_form(p, resolved_gitdir))
-            .unwrap_or(joined);
+        let candidate =
+            fs::canonicalize(&joined).map_or(joined, |p| align_path_form(p, resolved_gitdir));
         candidate.is_dir().then_some(candidate)
     })();
     try_common.unwrap_or_else(|| resolved_gitdir.to_path_buf())
@@ -125,11 +125,7 @@ fn resolve_repo_git_dir(repo_root: &Path) -> Option<PathBuf> {
         let text = String::from_utf8_lossy(&raw);
         let rest = py_strip(&text).strip_prefix("gitdir:")?;
         let joined = repo_root.join(py_strip(rest));
-        return Some(
-            fs::canonicalize(&joined)
-                .map(|p| align_path_form(p, repo_root))
-                .unwrap_or(joined),
-        );
+        return Some(fs::canonicalize(&joined).map_or(joined, |p| align_path_form(p, repo_root)));
     }
     None
 }
