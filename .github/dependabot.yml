@@ -25,6 +25,9 @@ updates:
       clusterfuzzlite:
         patterns:
           - google/clusterfuzzlite*
+      rust-cache:
+        patterns:
+          - Swatinem/rust-cache*
 
   # Dependabot for Python Dependencies (pip / uv)
   - package-ecosystem: pip
