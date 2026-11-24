@@ -62,6 +62,14 @@
       "groupSlug": "github-actions"
     },
     {
+      "description": "Group Rust Cargo dependency updates",
+      "matchManagers": [
+        "cargo"
+      ],
+      "groupName": "rust-dependencies",
+      "groupSlug": "rust-deps"
+    },
+    {
       "description": "Preserve explicit Python version matrix floors and pins in GitHub Actions workflows",
       "matchManagers": [
         "github-actions"

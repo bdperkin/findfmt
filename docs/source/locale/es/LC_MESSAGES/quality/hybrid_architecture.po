@@ -94,7 +94,7 @@ msgstr ""
 #: ../../source/quality/hybrid_architecture.md:27
 #: 65158d8b593f4c43a61c5d37307948f3
 msgid ""
-"Rust 2024 edition (`>=1.85`) library (`cdylib` + `rlib`) compiled to "
+"Rust 2024 edition (`>=1.88`) library (`cdylib` + `rlib`) compiled to "
 "`findfmt._rust_ext` with PyO3 `abi3-py311` stable ABI compatibility "
 "across Python `3.11+`."
 msgstr ""
@@ -362,7 +362,7 @@ msgstr ""
 #: ../../source/quality/hybrid_architecture.md:98
 #: 49e60d4aa5b74563b5c78937318bff23
 msgid ""
-"Install `uv` alongside a stable Rust `>=1.85` toolchain via "
+"Install `uv` alongside a stable Rust `>=1.88` toolchain via "
 "[`rustup`](https://rustup.rs/):"
 msgstr ""
 

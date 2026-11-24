@@ -24,7 +24,7 @@ runtime dispatch, and pure-Python fallback across four explicit layers:
 
 | Component                       | Path                                                                  | Responsibility                                                                                                                                                   |
 | :------------------------------ | :-------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **PyO3 Native Crate**           | `findfmt_rs/` (`Cargo.toml`, `src/lib.rs`, `deny.toml`, `about.toml`) | Rust 2024 edition (`>=1.85`) library (`cdylib` + `rlib`) compiled to `findfmt._rust_ext` with PyO3 `abi3-py311` stable ABI compatibility across Python `3.11+`.  |
+| **PyO3 Native Crate**           | `findfmt_rs/` (`Cargo.toml`, `src/lib.rs`, `deny.toml`, `about.toml`) | Rust 2024 edition (`>=1.88`) library (`cdylib` + `rlib`) compiled to `findfmt._rust_ext` with PyO3 `abi3-py311` stable ABI compatibility across Python `3.11+`.  |
 | **PEP 484 Type Stub**           | `src/findfmt/_rust_ext.pyi`                                           | Declares static call signatures for symbols exported by `findfmt._rust_ext` so `ty` verifies Python-to-Rust call sites without runtime introspection.            |
 | **Runtime Dispatch Gateway**    | `src/findfmt/core.py`                                                 | Loads `findfmt._rust_ext` (unless disabled via `FINDFMT_NO_EXTENSIONS`), inspects usable entrypoints, and wraps calls in `pyo3_runtime.PanicException` recovery. |
 | **Pure-Python Fallback Engine** | `src/findfmt/_fallback.py`                                            | Re-exports pure-Python `find_files` (`src/findfmt/traversal/engine.py`) and `classify_file` (`src/findfmt/classifier.py`) with 100% behavioral parity.           |
@@ -95,7 +95,7 @@ ______________________________________________________________________
 
 ## 4. Local Developer Setup & Debugging Runbook
 
-Install `uv` alongside a stable Rust `>=1.85` toolchain via [`rustup`](https://rustup.rs/):
+Install `uv` alongside a stable Rust `>=1.88` toolchain via [`rustup`](https://rustup.rs/):
 
 ```bash
 # Install Rust stable toolchain and static analysis components

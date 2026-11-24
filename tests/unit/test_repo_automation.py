@@ -129,6 +129,11 @@ def test_renovate_top_level_and_package_groups() -> None:
     gha_rule = groups["github-actions"]
     assert gha_rule.get("matchManagers") == ["github-actions"]
 
+    assert "rust-dependencies" in groups
+    rust_rule = groups["rust-dependencies"]
+    assert rust_rule.get("matchManagers") == ["cargo"]
+    assert rust_rule.get("groupSlug") == "rust-deps"
+
     disabled_rules = [r for r in rules if isinstance(r, dict) and r.get("enabled") is False]
     assert any(
         r.get("matchManagers") == ["github-actions"] and "python" in r.get("matchPackageNames", [])
