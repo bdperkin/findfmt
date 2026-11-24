@@ -325,7 +325,9 @@ repos:
           - --output=line
           - --minAlertLevel=error
       - id: vale-commit-msg
-        entry: sh -c 'vale --output=line --minAlertLevel=error --path=COMMIT_EDITMSG < "$1"' --
+        entry: >-
+          sh -c 'sed -e "/^#/d" -e "/^[A-Za-z-]*-by: /d" "$1" |
+          vale --output=line --minAlertLevel=error --path=COMMIT_EDITMSG' --
         stages:
           - commit-msg
 
