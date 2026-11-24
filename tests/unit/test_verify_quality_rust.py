@@ -114,7 +114,7 @@ def test_prepare_step_execution_resolves_rustup_cargo_path(tmp_path: Path) -> No
     assert empty_env is None
 
     # No ~/.cargo/bin directory and no cargo on PATH -> falls back cleanly to "cargo"
-    with patch("tools.quality_steps.shutil.which", return_value=None):
+    with patch("tools.quality_steps.shutil.which", return_value=None) as mock_which_missing:
         no_bin_argv, no_bin_env = prepare_step_execution(
             ("cargo", "fmt", "--check"),
             home_dir=tmp_path,
@@ -123,6 +123,7 @@ def test_prepare_step_execution_resolves_rustup_cargo_path(tmp_path: Path) -> No
 
     assert no_bin_argv == ["cargo", "fmt", "--check"]
     assert no_bin_env == {"PATH": "/usr/bin"}
+    mock_which_missing.assert_called_once_with("cargo", path="/usr/bin")
 
     # ~/.cargo/bin present -> prepended ahead of /usr/bin and deduplicated
     cargo_bin = tmp_path / ".cargo" / "bin"
@@ -142,7 +143,7 @@ def test_prepare_step_execution_resolves_rustup_cargo_path(tmp_path: Path) -> No
     mock_which.assert_called_once_with("cargo", path=expected_path)
 
     # Already first in PATH -> preserved unchanged
-    with patch("tools.quality_steps.shutil.which", return_value=fake_cargo):
+    with patch("tools.quality_steps.shutil.which", return_value=fake_cargo) as mock_which_unchanged:
         _, unchanged_env = prepare_step_execution(
             ("cargo", "check"),
             home_dir=tmp_path,
@@ -150,10 +151,16 @@ def test_prepare_step_execution_resolves_rustup_cargo_path(tmp_path: Path) -> No
         )
 
     assert unchanged_env == {"PATH": expected_path}
+    mock_which_unchanged.assert_called_once_with("cargo", path=expected_path)
 
 
 def test_run_quality_suite_executes_all_python_and_rust_steps() -> None:
     """Verify run_quality_suite dispatches every configured Python and Rust check in order."""
+    with patch("tools.verify_quality.run_step", return_value=True) as mock_step:
+        assert verify_quality.run_quality_suite() == 0
+
+    assert [call.args for call in mock_step.call_args_list] == list(QUALITY_STEPS)
+
     ok_proc = subprocess.CompletedProcess(args=["cmd"], returncode=0)
     with patch("tools.verify_quality.subprocess.run", return_value=ok_proc) as mock_run:
         assert verify_quality.run_quality_suite() == 0

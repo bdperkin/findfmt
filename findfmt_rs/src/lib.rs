@@ -3,6 +3,7 @@
 #![forbid(unsafe_code)]
 
 pub mod classifier;
+mod classifier_helpers;
 pub mod fuzz_entrypoints;
 pub mod gitignore;
 mod glob_case;
@@ -17,6 +18,8 @@ mod py_bridge;
 mod py_paths;
 mod py_walker;
 mod py_walker_config;
+mod py_walker_item;
+mod py_walker_root;
 pub mod shebang;
 pub mod sorting;
 pub mod tags;

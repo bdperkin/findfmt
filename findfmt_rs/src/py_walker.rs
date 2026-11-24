@@ -5,19 +5,13 @@ use std::collections::{HashMap, VecDeque};
 use pyo3::gc::{PyTraverseError, PyVisit};
 use pyo3::prelude::*;
 
-use crate::classifier::RawClassifyInput;
-#[cfg(not(unix))]
-use crate::classifier::classify_one_nogil;
-use crate::py_bridge::build_py_file_info;
-#[cfg(not(unix))]
-use crate::py_paths::fetch_windows_pre_stat;
-use crate::py_paths::{PyHandles, deliver_walk_os_error, get_handles, pathbuf_to_py_path};
-use crate::py_walker_config::{prepare_walk_from_py_config, resolve_single_root_py};
+use crate::py_paths::{deliver_walk_os_error, get_handles};
+use crate::py_walker_config::prepare_walk_from_py_config;
+use crate::py_walker_item::materialize_yield_item;
+use crate::py_walker_root::resolve_single_root_py;
 use crate::tags::TagRegistry;
 use crate::walker::NativeWalker;
-#[cfg(not(unix))]
-use crate::walker_filter::resolve_relative_pathbuf;
-use crate::walker_types::{WalkConfig, WalkEvent, WalkYieldItem};
+use crate::walker_types::{WalkConfig, WalkEvent};
 
 const WALK_BATCH_SIZE: usize = 256;
 
@@ -163,121 +157,6 @@ impl RustFileIterator {
     }
 }
 
-fn materialize_yield_item<'py>(
-    py: Python<'py>,
-    handles: &PyHandles,
-    driver: &mut NativeIterDriver,
-    item: WalkYieldItem,
-) -> PyResult<Option<Bound<'py, PyAny>>> {
-    let path_obj = pathbuf_to_py_path(py, handles, &item.path)?;
-    let root_obj = pathbuf_to_py_path(py, handles, &item.root_path)?;
-    let prefix_obj = match item.prefix {
-        Some(ref pfx) => Some(pathbuf_to_py_path(py, handles, pfx)?),
-        None => None,
-    };
-    let is_abs = item.path.is_absolute();
-
-    #[cfg(not(unix))]
-    let (raw_input, raw_classified) = {
-        let mut pre = fetch_windows_pre_stat(py, &path_obj, None, item.follow_symlinks);
-        // Mirror `os.DirEntry.stat()` on Windows (`WIN32_FIND_DATA` caches `st_ino=0, st_dev=0`
-        // and regular-file mode `0o666`/`0o444` unless `follow_symlinks=True` resolves a symlink).
-        if item.has_entry && (!pre.0 || !item.follow_symlinks) {
-            if let Some(ref mut raw) = pre.4 {
-                raw.ino = Some(0);
-                raw.dev = Some(0);
-                if raw.is_reg() {
-                    raw.mode = 0o100_000
-                        | if (raw.mode & 0o200) == 0 {
-                            0o444
-                        } else {
-                            0o666
-                        };
-                }
-            }
-        }
-        let pre_stat = Some(pre);
-        let pre_guessed_mime = Some(item.classified.mime_type.clone());
-        let win_in = RawClassifyInput {
-            path: item.path,
-            str_path: item.str_path,
-            filename: item.filename,
-            follow_symlinks: item.follow_symlinks,
-            accumulated_size: item.classified.accumulated_size,
-            pre_stat,
-            pre_guessed_mime,
-        };
-        let registry = driver.registry;
-        let pathext_ref = driver.walk_cfg.pathext_upper.as_deref();
-        let refreshed = py.detach(|| classify_one_nogil(&win_in, registry, pathext_ref));
-        let is_dir_item = refreshed.is_dir || refreshed.tags.contains("directory");
-        if driver.walk_cfg.scope.dirs_only && !is_dir_item {
-            return Ok(None);
-        }
-        let rel_pb =
-            resolve_relative_pathbuf(&win_in.path, &item.root_path, item.prefix.as_deref());
-        if !driver.walk_cfg.filter.matches(
-            &refreshed.tags,
-            refreshed.shebang.as_deref(),
-            is_dir_item,
-        ) || !driver.walk_cfg.matcher.matches_classified_item(
-            &rel_pb,
-            is_dir_item,
-            item.inherited_match,
-        ) {
-            return Ok(None);
-        }
-        (win_in, refreshed)
-    };
-
-    #[cfg(unix)]
-    let (raw_input, raw_classified) = (
-        RawClassifyInput {
-            path: item.path,
-            str_path: item.str_path,
-            filename: item.filename,
-            follow_symlinks: item.follow_symlinks,
-            accumulated_size: item.classified.accumulated_size,
-            pre_stat: None,
-            pre_guessed_mime: None,
-        },
-        item.classified,
-    );
-
-    let mut user_map: HashMap<u32, Bound<'py, PyAny>> = driver
-        .uid_cache
-        .iter()
-        .map(|(&k, v)| (k, v.bind(py).clone()))
-        .collect();
-    let mut group_map: HashMap<u32, Bound<'py, PyAny>> = driver
-        .gid_cache
-        .iter()
-        .map(|(&k, v)| (k, v.bind(py).clone()))
-        .collect();
-
-    let info = build_py_file_info(
-        py,
-        handles,
-        &path_obj,
-        &raw_input,
-        is_abs,
-        item.has_entry,
-        Some((&root_obj, &item.root_path)),
-        prefix_obj.as_ref().zip(item.prefix.as_deref()),
-        raw_classified,
-        &mut user_map,
-        &mut group_map,
-    )?;
-
-    for (k, v) in user_map {
-        driver.uid_cache.entry(k).or_insert_with(|| v.unbind());
-    }
-    for (k, v) in group_map {
-        driver.gid_cache.entry(k).or_insert_with(|| v.unbind());
-    }
-    Ok(Some(info))
-}
-
 fn step_native_driver<'py>(
     py: Python<'py>,
     driver: &mut NativeIterDriver,
@@ -292,7 +171,15 @@ fn step_native_driver<'py>(
                     }
                 }
                 WalkEvent::Item(item) => {
-                    if let Some(info) = materialize_yield_item(py, handles, driver, *item)? {
+                    if let Some(info) = materialize_yield_item(
+                        py,
+                        handles,
+                        &driver.walk_cfg,
+                        driver.registry,
+                        &mut driver.uid_cache,
+                        &mut driver.gid_cache,
+                        *item,
+                    )? {
                         return Ok(Some(info));
                     }
                 }
