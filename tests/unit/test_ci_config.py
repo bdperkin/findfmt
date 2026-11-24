@@ -1,7 +1,8 @@
-"""Tests for CI workflows, Mergify check parity, and Draft PR fast path."""
+"""Tests for CI workflows, Mergify check parity, and Dependabot configuration."""
 
 from __future__ import annotations
 
+import fnmatch
 import json
 import re
 import tomllib
@@ -26,13 +27,7 @@ RUST_CI_WORKFLOW_JOBS: tuple[tuple[str, tuple[str, ...]], ...] = (
             "test-matrix",
         ),
     ),
-    (
-        ".github/workflows/perf-and-fuzz.yml",
-        (
-            "perf-tests",
-            "rust-proptest-fuzz",
-        ),
-    ),
+    (".github/workflows/perf-and-fuzz.yml", ("perf-tests", "rust-proptest-fuzz")),
 )
 
 
@@ -52,9 +47,71 @@ def _load_yaml_mapping(rel_path: Path) -> dict[str, Any]:
     return data
 
 
+def _load_dependabot_config() -> dict[str, Any]:
+    """Load and parse .github/dependabot.yml."""
+    return _load_yaml_mapping(Path(".github/dependabot.yml"))
+
+
 def _load_ci_workflow() -> dict[str, Any]:
     """Load and parse .github/workflows/ci.yml."""
     return _load_yaml_mapping(Path(".github/workflows/ci.yml"))
+
+
+def _get_gh_actions_groups() -> dict[str, Any]:
+    """Return the groups dictionary for the github-actions ecosystem."""
+    config = _load_dependabot_config()
+    gh_actions = next(
+        entry for entry in config["updates"] if entry.get("package-ecosystem") == "github-actions"
+    )
+    assert gh_actions.get("directory") == "/"
+    groups = gh_actions.get("groups")
+    assert isinstance(groups, dict), "github-actions entry must define dependency groups"
+    return groups
+
+
+def test_dependabot_config_structure_and_groups() -> None:
+    """Validate Dependabot ecosystems and github-actions groups including rust-cache (#729)."""
+    config = _load_dependabot_config()
+    assert config.get("version") == 2
+    updates = config.get("updates")
+    assert isinstance(updates, list)
+    ecosystems = {entry.get("package-ecosystem"): entry for entry in updates if isinstance(entry, dict)}
+    assert {"github-actions", "pip"} <= set(ecosystems)
+
+    pip_groups = ecosystems["pip"]["groups"]
+    assert pip_groups["dev-dependencies"]["dependency-type"] == "development"
+    assert pip_groups["production-dependencies"]["dependency-type"] == "production"
+
+    groups = _get_gh_actions_groups()
+    for group_name, sample_action in (
+        ("codeql-action", "github/codeql-action/init"),
+        ("actions", "actions/checkout"),
+        ("docker", "docker/build-push-action"),
+        ("clusterfuzzlite", "google/clusterfuzzlite/actions/build_fuzzers"),
+        ("rust-cache", "Swatinem/rust-cache"),
+    ):
+        assert group_name in groups
+        patterns = groups[group_name].get("patterns")
+        assert isinstance(patterns, list)
+        assert any(fnmatch.fnmatch(sample_action, pat) for pat in patterns)
+
+
+def test_dependabot_covers_workflow_codeql_actions() -> None:
+    """Assert all CodeQL action steps used across workflows match the group pattern."""
+    codeql_patterns = _get_gh_actions_groups()["codeql-action"]["patterns"]
+    workflow_files = list((_repo_root() / ".github" / "workflows").glob("*.yml"))
+    assert workflow_files
+    codeql_uses: set[str] = set()
+    for wf in workflow_files:
+        for line in wf.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("uses:") and "github/codeql-action" in stripped:
+                action_ref = stripped.split("uses:")[1].strip().split("@")[0].split("#")[0].strip()
+                codeql_uses.add(action_ref)
+
+    assert codeql_uses
+    for action in codeql_uses:
+        assert any(fnmatch.fnmatch(action, pat) for pat in codeql_patterns)
 
 
 def test_ci_dependency_smoke_matrix_structure_and_steps() -> None:
@@ -211,25 +268,19 @@ def test_ci_draft_pr_fast_path_and_coderabbit_draft_reviews() -> None:
     assert draft_macos == 0
     assert {os_name for os_name, _, _ in draft_cells} == {"ubuntu-latest"}
 
+    full_oses = ["ubuntu-latest", "macos-latest", "windows-latest"]
+    spoof_ref = ("contributor", "contributor/findfmt", "mergify/merge-queue/spoof")
+    queue_ref = ("mergify[bot]", "bdperkin/findfmt", "mergify/merge-queue/abc123")
     for job_name in ("packaging-smoke-test", "test-matrix"):
         expr = str(ci_jobs[job_name]["strategy"]["matrix"]["os"])
-        assert _eval_os_matrix(
-            expr,
-            event_name="pull_request",
-            draft=True,
-            actor_repo_ref=("contributor", "contributor/findfmt", "mergify/merge-queue/spoof"),
-        ) == ["ubuntu-latest"]
-        assert _eval_os_matrix(
-            expr,
-            event_name="pull_request",
-            draft=True,
-            actor_repo_ref=("mergify[bot]", "bdperkin/findfmt", "mergify/merge-queue/abc123"),
-        ) == ["ubuntu-latest", "macos-latest", "windows-latest"]
-        assert _eval_os_matrix(expr, event_name="push") == [
+        assert _eval_os_matrix(expr, event_name="pull_request", draft=True, actor_repo_ref=spoof_ref) == [
             "ubuntu-latest",
-            "macos-latest",
-            "windows-latest",
         ]
+        assert (
+            _eval_os_matrix(expr, event_name="pull_request", draft=True, actor_repo_ref=queue_ref)
+            == full_oses
+        )
+        assert _eval_os_matrix(expr, event_name="push") == full_oses
 
     auto_review = _load_yaml_mapping(Path(".coderabbit.yaml"))["reviews"]["auto_review"]
     assert auto_review["drafts"] is True
@@ -245,15 +296,9 @@ def test_ci_test_matrix_trimmed_and_aligned_with_mergify() -> None:
 
     gating_cells = {(os_name, py_ver) for os_name, py_ver, exp in cells if not exp}
     expected_gating = {
-        ("ubuntu-latest", "3.11"),
-        ("ubuntu-latest", "3.12"),
-        ("ubuntu-latest", "3.13"),
-        ("ubuntu-latest", "3.14"),
-        ("ubuntu-latest", "3.15"),
-        ("macos-latest", "3.11"),
-        ("macos-latest", "3.15"),
-        ("windows-latest", "3.11"),
-        ("windows-latest", "3.15"),
+        *(("ubuntu-latest", ver) for ver in ("3.11", "3.12", "3.13", "3.14", "3.15")),
+        *(("macos-latest", ver) for ver in ("3.11", "3.15")),
+        *(("windows-latest", ver) for ver in ("3.11", "3.15")),
     }
     assert gating_cells == expected_gating
     assert ("ubuntu-latest", "3.16-dev", True) in cells
