@@ -18,7 +18,7 @@ extension metadata, dispatched through `src/findfmt/core.py` with automatic fall
 - `src/findfmt/__init__.py` & `src/findfmt/__main__.py`: Package root exporting the public Python API
   (`FileInfo`, `TraversalConfig`, `find_files`, `classify_file`, `get_formatter`, `is_rust_extension_loaded`,
   `is_rust_backend_active`, `get_active_backend`) and `python -m findfmt` execution entry point.
-- `findfmt_rs/` & `src/findfmt/_rust_ext.pyi`: Rust 2024 edition (`>=1.85`) PyO3 crate (`abi3-py311`, `cdylib`
+- `findfmt_rs/` & `src/findfmt/_rust_ext.pyi`: Rust 2024 edition (`>=1.88`) PyO3 crate (`abi3-py311`, `cdylib`
   \+ `rlib`) compiled to `findfmt._rust_ext` via `hatch-maturin-build`, paired with strict PEP 484 type stubs,
   `proptest` suites (`findfmt_rs/tests/`), `cargo-fuzz` targets (`findfmt_rs/fuzz/`), and Cargo license and
   supply chain configuration files (`deny.toml`, `about.toml`).
@@ -88,7 +88,7 @@ toolchain, strict static analysis, and `pre-commit` hooks.
 
 ### 2.1. Environment Setup, Rust Prerequisites, & Hybrid Builds
 
-Install Python `>=3.11`, `uv`, and a stable Rust `>=1.85` toolchain (`rustup`, `rustfmt`, `clippy`):
+Install Python `>=3.11`, `uv`, and a stable Rust `>=1.88` toolchain (`rustup`, `rustfmt`, `clippy`):
 
 ```bash
 # Install stable Rust toolchain and lint components

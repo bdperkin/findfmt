@@ -134,7 +134,7 @@ def test_mit_license_parity_across_python_and_rust_manifests() -> None:
     cargo_pkg = _load_toml("findfmt_rs/Cargo.toml")["package"]
     assert cargo_pkg["name"] == "findfmt_rs"
     assert cargo_pkg["license"] == "MIT"
-    assert tuple(int(p) for p in str(cargo_pkg["rust-version"]).split(".")) >= (1, 85)
+    assert tuple(int(p) for p in str(cargo_pkg["rust-version"]).split(".")) >= (1, 88)
     assert "license-file" not in cargo_pkg, "Avoid setting both license and license-file in Cargo.toml"
     assert cargo_pkg["publish"] is False
     assert (ROOT / "findfmt_rs" / cargo_pkg["readme"]).resolve() == (ROOT / "README.md").resolve()

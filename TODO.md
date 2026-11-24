@@ -28,7 +28,8 @@
 > 2026-11-18 closed `#632`, `#633`, `#634`, `#635`, epic `#627`, and epic `#625`, and released v1.3.3 and
 > closed its milestone; 2026-11-19 closed `#579` and `#577`, added and closed `#689` and `#692`; 2026-11-20
 > closed `#578`, `#580`, and epic `#576`, and released v1.4.0 and closed its milestone; 2026-11-22 closed
-> `#586` and `#583`; 2026-11-23 closed `#584`, `#585`, `#582`, and epic `#581`)
+> `#586` and `#583`; 2026-11-23 closed `#584`, `#585`, `#582`, and epic `#581`, and processed Renovate
+> Dependency Dashboard `#671` Rust crate updates and Cargo grouping)
 
 ______________________________________________________________________
 

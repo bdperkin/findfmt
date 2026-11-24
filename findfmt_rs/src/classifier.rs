@@ -106,10 +106,11 @@ fn identify_tags_from_buffer(
     let name_tags = registry.tags_from_filename(filename);
     if !name_tags.is_empty() {
         tags.extend(name_tags);
-    } else if is_executable && buffer.starts_with(b"#!") {
-        if let Some(first_interp) = parsed_shebang.first() {
-            tags.extend(registry.tags_from_interpreter(first_interp));
-        }
+    } else if is_executable
+        && buffer.starts_with(b"#!")
+        && let Some(first_interp) = parsed_shebang.first()
+    {
+        tags.extend(registry.tags_from_interpreter(first_interp));
     }
 
     if !tags.contains("text") && !tags.contains("binary") {
@@ -182,12 +183,12 @@ pub fn classify_one_nogil(
     if exists && is_file && follow_target {
         match read_header_nonblocking(&input.path, MAX_HEADER_BYTES) {
             Some(hdr) => {
-                if let Some(ref opened) = hdr.opened_meta {
-                    if !opened.file_type().is_file() {
-                        is_file = false;
-                        size_bytes = opened.len();
-                        raw_stat = Some(RawStat::from_std_metadata(opened));
-                    }
+                if let Some(ref opened) = hdr.opened_meta
+                    && !opened.file_type().is_file()
+                {
+                    is_file = false;
+                    size_bytes = opened.len();
+                    raw_stat = Some(RawStat::from_std_metadata(opened));
                 }
                 buffer = Some(hdr.buffer);
             }
@@ -245,10 +246,10 @@ pub fn classify_one_nogil(
     if is_symlink {
         tags.insert("symlink".to_owned());
         tags.extend(registry.tags_from_filename(&input.filename));
-        if input.follow_symlinks {
-            if let Some(target_name) = symlink_target_path.as_deref().and_then(Path::file_name) {
-                tags.extend(registry.tags_from_filename(&target_name.to_string_lossy()));
-            }
+        if input.follow_symlinks
+            && let Some(target_name) = symlink_target_path.as_deref().and_then(Path::file_name)
+        {
+            tags.extend(registry.tags_from_filename(&target_name.to_string_lossy()));
         }
     }
 

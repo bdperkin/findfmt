@@ -2,7 +2,7 @@
 name = "findfmt_rs"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 description = "Native PyO3 acceleration bindings for findfmt file discovery and classification."
 authors = ["Brandon Perkins <bdperkin@gmail.com>"]
 # Canonical MIT license text resides at ../LICENSE (mirrored in pyproject.toml).

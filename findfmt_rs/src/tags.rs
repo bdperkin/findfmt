@@ -58,10 +58,10 @@ impl FilterCriteria {
                 return false;
             }
         }
-        if let Some(ref needle) = self.shebang_filter {
-            if !needle.is_empty() {
-                return shebang.is_some_and(|sb| sb.contains(needle.as_str()));
-            }
+        if let Some(ref needle) = self.shebang_filter
+            && !needle.is_empty()
+        {
+            return shebang.is_some_and(|sb| sb.contains(needle.as_str()));
         }
         true
     }

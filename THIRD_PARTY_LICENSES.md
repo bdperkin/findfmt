@@ -677,8 +677,8 @@ DEALINGS IN THE SOFTWARE.
 Used by:
 
 - [`aho-corasick` `1.1.5`](https://github.com/BurntSushi/aho-corasick)
-- [`globset` `0.4.19`](https://github.com/BurntSushi/ripgrep/tree/master/crates/globset)
-- [`ignore` `0.4.30`](https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore)
+- [`globset` `0.4.21`](https://github.com/BurntSushi/ripgrep/tree/master/crates/globset)
+- [`ignore` `0.4.34`](https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore)
 - [`memchr` `2.8.3`](https://github.com/BurntSushi/memchr)
 - [`walkdir` `2.5.1`](https://github.com/BurntSushi/walkdir)
 

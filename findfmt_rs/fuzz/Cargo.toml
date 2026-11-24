@@ -2,7 +2,7 @@
 name = "findfmt_rs-fuzz"
 version = "0.0.0"
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.88"
 description = "cargo-fuzz libFuzzer harnesses for findfmt_rs classification, sorting, and gitignore parsing."
 license = "MIT"
 publish = false

@@ -58,7 +58,7 @@ We organize issues and pull requests using a structured, prefixed label taxonomy
 
 ## 3. Development Setup
 
-`findfmt` uses `uv` for Python package management alongside a stable Rust toolchain (`>=1.85`, edition 2024)
+`findfmt` uses `uv` for Python package management alongside a stable Rust toolchain (`>=1.88`, edition 2024)
 and `maturin` (`hatch-maturin-build`) to compile the `findfmt_rs/` PyO3 native extension into
 `findfmt._rust_ext`.
 

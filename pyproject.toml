@@ -191,7 +191,10 @@ lint.pydocstyle.convention = "google"
 
 [tool.codespell]
 ignore-words-list = "correspondant,correspondants,te"
-skip = "*.po,*.pot,./.git,./build,./dist,./.venv,./docs/_build,./docs/build,./assets"
+skip = """\
+  *.po,*.pot,./.git,./build,./dist,./.venv,./docs/_build,./docs/build,./assets,./findfmt_rs/target,./findfmt_rs/fuzz/ta\
+  rget\
+  """
 quiet-level = 3
 
 [tool.interrogate]
