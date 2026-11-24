@@ -91,14 +91,14 @@ fn should_delegate_colon_to_python(str_path: &str) -> bool {
 }
 
 fn has_url_scheme(str_path: &str) -> bool {
-    if let Some(colon_idx) = str_path.find(':') {
-        if colon_idx > 1 {
-            let scheme = &str_path[..colon_idx];
-            return scheme.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
-                && scheme
-                    .bytes()
-                    .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'-' | b'.'));
-        }
+    if let Some(colon_idx) = str_path.find(':')
+        && colon_idx > 1
+    {
+        let scheme = &str_path[..colon_idx];
+        return scheme.as_bytes().first().is_some_and(u8::is_ascii_alphabetic)
+            && scheme
+                .bytes()
+                .all(|b| b.is_ascii_alphanumeric() || matches!(b, b'+' | b'-' | b'.'));
     }
     false
 }
@@ -131,45 +131,45 @@ enum MimeUrlOutcome<'a> {
 
 fn parse_mime_url_or_path(str_path: &str) -> MimeUrlOutcome<'_> {
     let trimmed = str_path.trim_matches(|c: char| c <= ' ');
-    if has_url_scheme(trimmed) {
-        if let Some(colon_idx) = trimmed.find(':') {
-            let scheme_lower = trimmed[..colon_idx].to_ascii_lowercase();
-            let rest = &trimmed[colon_idx + 1..];
-            let end = rest.find(['?', '#']).unwrap_or(rest.len());
-            let mut path_part = match rest[..end].strip_prefix("//") {
-                Some(after_slashes) => match after_slashes.find('/') {
-                    Some(slash_idx) => &after_slashes[slash_idx..],
-                    None => "",
-                },
-                None => &rest[..end],
+    if has_url_scheme(trimmed)
+        && let Some(colon_idx) = trimmed.find(':')
+    {
+        let scheme_lower = trimmed[..colon_idx].to_ascii_lowercase();
+        let rest = &trimmed[colon_idx + 1..];
+        let end = rest.find(['?', '#']).unwrap_or(rest.len());
+        let mut path_part = match rest[..end].strip_prefix("//") {
+            Some(after_slashes) => match after_slashes.find('/') {
+                Some(slash_idx) => &after_slashes[slash_idx..],
+                None => "",
+            },
+            None => &rest[..end],
+        };
+        if scheme_lower == "data" {
+            let Some(comma_idx) = path_part.find(',') else {
+                return MimeUrlOutcome::DirectMime(None);
             };
-            if scheme_lower == "data" {
-                let Some(comma_idx) = path_part.find(',') else {
-                    return MimeUrlOutcome::DirectMime(None);
-                };
-                let before_comma = &path_part[..comma_idx];
-                let raw_type = match before_comma.find(';') {
-                    Some(semi_idx) => &before_comma[..semi_idx],
-                    None => before_comma,
-                };
-                let mime = if raw_type.contains('=') || !raw_type.contains('/') {
-                    "text/plain".to_owned()
-                } else {
-                    raw_type.to_owned()
-                };
-                return MimeUrlOutcome::DirectMime(Some(mime));
-            }
-            if scheme_uses_params(&scheme_lower) {
-                let last_seg_start = path_part.rfind('/').map_or(0, |idx| idx + 1);
-                if let Some(semi_rel) = path_part[last_seg_start..].find(';') {
-                    path_part = &path_part[..last_seg_start + semi_rel];
-                }
-            }
-            return MimeUrlOutcome::FilePath {
-                path: path_part,
-                posix_only: true,
+            let before_comma = &path_part[..comma_idx];
+            let raw_type = match before_comma.find(';') {
+                Some(semi_idx) => &before_comma[..semi_idx],
+                None => before_comma,
             };
+            let mime = if raw_type.contains('=') || !raw_type.contains('/') {
+                "text/plain".to_owned()
+            } else {
+                raw_type.to_owned()
+            };
+            return MimeUrlOutcome::DirectMime(Some(mime));
         }
+        if scheme_uses_params(&scheme_lower) {
+            let last_seg_start = path_part.rfind('/').map_or(0, |idx| idx + 1);
+            if let Some(semi_rel) = path_part[last_seg_start..].find(';') {
+                path_part = &path_part[..last_seg_start + semi_rel];
+            }
+        }
+        return MimeUrlOutcome::FilePath {
+            path: path_part,
+            posix_only: true,
+        };
     }
     MimeUrlOutcome::FilePath {
         path: str_path,

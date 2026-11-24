@@ -165,10 +165,10 @@ pub(crate) fn compile_gitignore_rule(raw_line: &str) -> Result<Option<CompiledRu
     if segs.is_empty() {
         return Err(format!("Invalid git pattern: {raw_line:?}"));
     }
-    if segs.last() == Some(&"") {
-        if let Some(last) = segs.last_mut() {
-            *last = "**";
-        }
+    if segs.last() == Some(&"")
+        && let Some(last) = segs.last_mut()
+    {
+        *last = "**";
     }
     for idx in (1..segs.len()).rev() {
         if segs[idx - 1] == "**" && segs[idx] == "**" {
