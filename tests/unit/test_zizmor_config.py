@@ -303,9 +303,11 @@ def test_sync_pre_commit_deps_modes(
     err = capsys.readouterr().err
     assert "Version mismatch for ruff" in err
     assert "Version mismatch for deptry" in err
+    assert "Version mismatch for pre-commit" not in err
 
     assert sync_pre_commit_deps.sync_deps(tmp_path, write=True) == 0
     updated = pre_commit_file.read_text(encoding="utf-8")
+    assert "rev: v1.187.0" in updated
     assert "rev: v0.17.3  # comment" in updated
     assert "rev: 0.25.1" in updated
     assert "- ruff==0.17.3  # keep in sync" in updated

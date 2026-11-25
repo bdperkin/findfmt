@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+from tools.quality_steps import QUALITY_STEPS
 
 
 def _repo_root() -> Path:
@@ -195,8 +196,16 @@ def test_stage8_security_secrets_and_semgrep_hooks() -> None:
     assert "--metrics=off" in semgrep_args
     assert "--disable-version-check" in semgrep_args
 
-    stage8_hook_ids = {h["id"] for r in stage8_slice for h in r["hooks"]}
-    assert stage8_hook_ids.isdisjoint(ci_skip)
+    assert "semgrep" in ci_skip
+    online_safe_ids = {h["id"] for r in (stage8_slice[0], stage8_slice[2]) for h in r["hooks"]}
+    assert online_safe_ids.isdisjoint(ci_skip)
+
+    semgrep_rev = stage8_slice[1]["rev"].lstrip("v")
+    quality_cmds = dict(QUALITY_STEPS)
+    semgrep_step = quality_cmds["Semgrep Hybrid Security & Boundary Audit"]
+    assert f"semgrep=={semgrep_rev}" in semgrep_step
+    assert ".semgrep.yml" in semgrep_step
+    assert "--error" in semgrep_step
 
     all_hook_ids = {h["id"] for r in repos for h in r["hooks"]}
     assert all_hook_ids.isdisjoint({"semgrep-ci", "semgrep-docker", "semgrep-docker-develop"})
