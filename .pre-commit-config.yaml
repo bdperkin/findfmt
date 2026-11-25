@@ -9,6 +9,9 @@ ci:
   autoupdate_schedule: weekly
   skip:
     - ty
+    - fmt
+    - cargo-check
+    - clippy
     - interrogate
     - deptry
     - vulture
@@ -165,6 +168,17 @@ repos:
           - --max-supported-python
           - '3.15'
 
+  # Format and lint Rust/Cargo TOML manifests
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+        files: ^findfmt_rs/.*\.toml$
+      - id: taplo-lint
+        files: ^findfmt_rs/.*\.toml$
+        args:
+          - --no-schema
+
   # Yamllint
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
@@ -262,6 +276,71 @@ repos:
         args:
           - --group
           - lint
+
+  # Rust Cargo formatter, compiler check, and Clippy linter
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: fmt
+        alias: cargo-fmt
+        name: cargo-fmt
+        files: ^findfmt_rs/
+        types:
+          - file
+        types_or:
+          - rust
+          - toml
+        pass_filenames: false
+        args:
+          - --manifest-path
+          - findfmt_rs/Cargo.toml
+      - id: cargo-check
+        name: cargo-check
+        files: ^findfmt_rs/
+        types:
+          - file
+        types_or:
+          - rust
+          - toml
+        args:
+          - --manifest-path
+          - findfmt_rs/Cargo.toml
+          - --locked
+      - id: clippy
+        alias: cargo-clippy
+        name: cargo-clippy (extension)
+        files: ^findfmt_rs/
+        types:
+          - file
+        types_or:
+          - rust
+          - toml
+        args:
+          - --manifest-path
+          - findfmt_rs/Cargo.toml
+          - --locked
+          - --lib
+          - --
+          - -D
+          - warnings
+      - id: clippy
+        alias: cargo-clippy-all-targets
+        name: cargo-clippy (all targets)
+        files: ^findfmt_rs/
+        types:
+          - file
+        types_or:
+          - rust
+          - toml
+        args:
+          - --manifest-path
+          - findfmt_rs/Cargo.toml
+          - --locked
+          - --no-default-features
+          - --all-targets
+          - --
+          - -D
+          - warnings
 
   # Interrogate docstring checker
   - repo: https://github.com/econchick/interrogate
