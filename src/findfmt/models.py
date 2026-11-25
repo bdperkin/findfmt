@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 from findfmt.exceptions import UnsupportedFormatError
 from findfmt.formatters.base import OutputFormat
+from findfmt.i18n import _
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -19,7 +20,7 @@ __all__ = ["FileInfo", "SortKey", "TraversalConfig"]
 def _validate_non_negative(name: str, value: int | None) -> None:
     """Validate that an optional integer setting is non-negative."""
     if value is not None and value < 0:
-        msg = f"{name} must be non-negative, got {value}"
+        msg = _("{field} must be non-negative, got {value}").format(field=name, value=value)
         raise ValueError(msg)
 
 

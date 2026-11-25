@@ -28,7 +28,10 @@ pub(crate) struct PyHandles {
     pub resolve_relative: Py<PyAny>,
     pub compute_relative_prefix: Py<PyAny>,
     pub find_global_gitignore_path: Py<PyAny>,
-    pub traversal_error_cls: Py<PyAny>,
+    pub i18n_gettext: Py<PyAny>,
+    pub make_negative_bound_error: Py<PyAny>,
+    pub make_overflow_bound_error: Py<PyAny>,
+    pub make_invalid_pattern_error: Py<PyAny>,
     pub ingest_from_file: Py<PyAny>,
     pub unicode_major: u8,
 }
@@ -46,6 +49,7 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
     let metadata = py.import("findfmt.metadata")?;
     let classifier = py.import("findfmt.classifier")?;
     let trav_ignore = py.import("findfmt.traversal.ignore")?;
+    let i18n = py.import("findfmt.i18n")?;
     let exceptions = py.import("findfmt.exceptions")?;
     let parsers = py.import("findfmt.parsers")?;
     let unicode_major = py
@@ -71,7 +75,10 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
         resolve_relative: classifier.getattr("_resolve_relative")?.unbind(),
         compute_relative_prefix: classifier.getattr("compute_relative_prefix")?.unbind(),
         find_global_gitignore_path: trav_ignore.getattr("find_global_gitignore_path")?.unbind(),
-        traversal_error_cls: exceptions.getattr("TraversalError")?.unbind(),
+        i18n_gettext: i18n.getattr("_")?.unbind(),
+        make_negative_bound_error: exceptions.getattr("make_negative_bound_error")?.unbind(),
+        make_overflow_bound_error: exceptions.getattr("make_overflow_bound_error")?.unbind(),
+        make_invalid_pattern_error: exceptions.getattr("make_invalid_pattern_error")?.unbind(),
         ingest_from_file: parsers.getattr("ingest_from_file")?.unbind(),
         unicode_major,
     };
@@ -259,6 +266,10 @@ pub(crate) fn compute_relative_py<'py>(
         .call1((path_obj, root_obj, prefix_arg))
 }
 
+fn fallback_io_reason<'py>(py: Python<'py>, handles: &PyHandles) -> PyResult<Bound<'py, PyAny>> {
+    handles.i18n_gettext.bind(py).call1(("I/O error",))
+}
+
 pub(crate) fn deliver_walk_os_error(
     py: Python<'_>,
     handles: &PyHandles,
@@ -269,38 +280,40 @@ pub(crate) fn deliver_walk_os_error(
     let py_err = if let Some(code) = err.raw_errno {
         #[cfg(windows)]
         {
-            let _ = handles;
-            let sys_msg = py
+            let win_msg = py
                 .import("_winapi")
                 .and_then(|m| m.call_method1("FormatMessage", (code,)))
+                .or_else(|_| {
+                    py.import("ctypes")
+                        .and_then(|m| m.call_method1("FormatError", (code,)))
+                })
                 .and_then(|v| v.extract::<String>())
-                .map_or_else(
-                    |_| {
-                        err.message
-                            .strip_suffix(&format!(" (os error {code})"))
-                            .unwrap_or(&err.message)
-                            .to_owned()
-                    },
-                    |s| s.trim_end_matches(['\r', '\n', ' ', '.']).to_owned(),
-                );
-            pyo3::exceptions::PyOSError::new_err((0_i32, sys_msg, filename_py.unbind(), code))
+                .map(|s| s.trim_end_matches(['\r', '\n', ' ', '.']).to_owned())
+                .ok()
+                .filter(|s| !s.is_empty());
+            if let Some(msg) = win_msg {
+                pyo3::exceptions::PyOSError::new_err((0_i32, msg, filename_py.unbind(), code))
+            } else {
+                let msg_py = fallback_io_reason(py, handles)?;
+                pyo3::exceptions::PyOSError::new_err((
+                    0_i32,
+                    msg_py.unbind(),
+                    filename_py.unbind(),
+                    code,
+                ))
+            }
         }
         #[cfg(not(windows))]
         {
-            let msg_py = handles
-                .os_strerror
-                .bind(py)
-                .call1((code,))
-                .unwrap_or_else(|_| {
-                    err.message
-                        .as_str()
-                        .into_pyobject(py)
-                        .map_or_else(|_| py.None().into_bound(py), Bound::into_any)
-                });
+            let msg_py = match handles.os_strerror.bind(py).call1((code,)) {
+                Ok(m) => m,
+                Err(_) => fallback_io_reason(py, handles)?,
+            };
             pyo3::exceptions::PyOSError::new_err((code, msg_py.unbind(), filename_py.unbind()))
         }
     } else {
-        let base = pyo3::exceptions::PyOSError::new_err(err.message.clone());
+        let msg_py = fallback_io_reason(py, handles)?;
+        let base = pyo3::exceptions::PyOSError::new_err(msg_py.unbind());
         let _ = base.value(py).setattr("filename", filename_py);
         base
     };

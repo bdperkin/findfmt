@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 
 import pathspec
 
+from findfmt.exceptions import make_invalid_pattern_error
+
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
@@ -60,6 +62,17 @@ def _apply_ignore_case(spec: pathspec.PathSpec[Any]) -> None:
             pat.regex = re.compile(reg.pattern, reg.flags | re.IGNORECASE)
 
 
+def _find_invalid_gitignore_line(lines: list[str]) -> str:
+    """Return the first line in ``lines`` rejected by ``pathspec``."""
+    for line in lines[:-1]:
+        try:
+            pathspec.PathSpec.from_lines("gitignore", [line])
+        except ValueError:
+            return line
+
+    return lines[-1]
+
+
 def compile_pattern_spec(
     patterns: Sequence[str] | tuple[str, ...],
     *,
@@ -76,7 +89,11 @@ def compile_pattern_spec(
     if not lines:
         return None
 
-    spec = pathspec.PathSpec.from_lines("gitignore", lines)
+    try:
+        spec = pathspec.PathSpec.from_lines("gitignore", lines)
+    except ValueError as err:
+        raise make_invalid_pattern_error(_find_invalid_gitignore_line(lines)) from err
+
     if ignore_case:
         _apply_ignore_case(spec)
 

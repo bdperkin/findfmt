@@ -79,7 +79,8 @@ def format_summary_panel(
     if tag_counter:
         body_lines.append("")
         body_lines.append(_("[bold]Top tags:[/]") or "[bold]Top tags:[/]")
-        for tag, count in tag_counter.most_common(10):
+        top_tags = sorted(tag_counter.items(), key=lambda item: (-item[1], item[0]))[:10]
+        for tag, count in top_tags:
             badge = format_tag_badge(tag)
             tag_count_str = format_integer(count, grouping=True)
             body_lines.append(f"  {badge}: [green]{tag_count_str}[/]")

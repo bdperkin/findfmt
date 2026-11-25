@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-11-23 23:09-0500\n"
+"POT-Creation-Date: 2026-11-24 21:22-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,26 +17,41 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: src/findfmt/exceptions.py:39
+#: src/findfmt/exceptions.py:52
 #, python-brace-format
 msgid "Unsupported output format: '{format}'. Expected one of: {valid_formats}"
 msgstr ""
 
-#: src/findfmt/exceptions.py:57
+#: src/findfmt/exceptions.py:70
 #, python-brace-format
 msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
 msgstr ""
 
-#: src/findfmt/exceptions.py:76
+#: src/findfmt/exceptions.py:89
 #, python-brace-format
 msgid "Unsupported table style: '{style}'. Expected one of: {valid_styles}"
 msgstr ""
 
-#: src/findfmt/exceptions.py:95
+#: src/findfmt/exceptions.py:108
 #, python-brace-format
 msgid ""
 "Invalid sort criteria '{criteria}'. Choose from: name, version, time, "
 "mtime, ctime, size, none."
+msgstr ""
+
+#: src/findfmt/exceptions.py:129 src/findfmt/models.py:23
+#, python-brace-format
+msgid "{field} must be non-negative, got {value}"
+msgstr ""
+
+#: src/findfmt/exceptions.py:136
+#, python-brace-format
+msgid "{field} exceeds platform limit"
+msgstr ""
+
+#: src/findfmt/exceptions.py:144
+#, python-brace-format
+msgid "Invalid glob pattern: '{pattern}'"
 msgstr ""
 
 #: src/findfmt/sizes.py:30 src/findfmt/sizes.py:55
@@ -193,15 +208,33 @@ msgstr ""
 msgid "Active configuration: {path}"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:88
+#: src/findfmt/cli/diagnostics.py:43 src/findfmt/cli/diagnostics.py:48
+msgid "I/O error"
+msgstr ""
+
+#: src/findfmt/cli/diagnostics.py:54
+msgid "<unknown>"
+msgstr ""
+
+#: src/findfmt/cli/diagnostics.py:57
+#, python-brace-format
+msgid "findfmt: cannot open '{path}': {reason}"
+msgstr ""
+
+#: src/findfmt/cli/diagnostics.py:71
+#, python-brace-format
+msgid "Error: {message}"
+msgstr ""
+
+#: src/findfmt/cli/diagnostics.py:130
 msgid "not installed"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:93
+#: src/findfmt/cli/diagnostics.py:135
 msgid "not found"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:104
+#: src/findfmt/cli/diagnostics.py:146
 msgid "none"
 msgstr ""
 
@@ -698,63 +731,63 @@ msgstr ""
 msgid "[bold]Top tags:[/]"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:89
+#: src/findfmt/formatters/visual.py:90
 msgid "--- findfmt summary ---"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:188
+#: src/findfmt/formatters/visual.py:189
 msgid "Inode"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:191
+#: src/findfmt/formatters/visual.py:192
 msgid "Device"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:194
+#: src/findfmt/formatters/visual.py:195
 msgid "Permissions"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:197
+#: src/findfmt/formatters/visual.py:198
 msgid "User"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:200
+#: src/findfmt/formatters/visual.py:201
 msgid "Group"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:203
+#: src/findfmt/formatters/visual.py:204
 msgid "Modified"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:205
+#: src/findfmt/formatters/visual.py:206
 msgid "Status Changed"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:207
+#: src/findfmt/formatters/visual.py:208
 msgid "Path"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:208
+#: src/findfmt/formatters/visual.py:209
 msgid "Tags"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:209
+#: src/findfmt/formatters/visual.py:210
 msgid "MIME Type"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:210
+#: src/findfmt/formatters/visual.py:211
 msgid "Size"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:211
+#: src/findfmt/formatters/visual.py:212
 msgid "Executable"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:212
+#: src/findfmt/formatters/visual.py:213
 msgid "Symlink"
 msgstr ""
 
-#: src/findfmt/formatters/visual.py:213
+#: src/findfmt/formatters/visual.py:214
 msgid "Shebang"
 msgstr ""
 

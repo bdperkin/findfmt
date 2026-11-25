@@ -3,6 +3,20 @@
 from __future__ import annotations
 
 from findfmt.i18n import _
+from findfmt.utils.strings import mask_control_characters, strip_ansi_escapes
+
+_SURROGATE_MIN = 0xD800
+_SURROGATE_MAX = 0xDFFF
+
+
+def _sanitize_diagnostic_text(text: str) -> str:
+    """Strip ANSI escapes and mask C0, C1, BiDi, and lone-surrogate code points."""
+    cleaned = mask_control_characters(strip_ansi_escapes(text))
+    if not any(_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX for c in cleaned):
+        return cleaned
+
+    return "".join("?" if _SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX else c for c in cleaned)
+
 
 __all__ = [
     "FindFmtError",
@@ -102,5 +116,31 @@ class TraversalError(FindFmtError):
     """Base exception for directory traversal errors."""
 
 
+class _InvalidPatternError(TraversalError, ValueError):
+    """Internal traversal and value error raised for malformed glob patterns."""
+
+
 class ParserError(FindFmtError, ValueError):
     """Base exception for external input parsing and outline ingestion errors."""
+
+
+def make_negative_bound_error(field: str, value: int) -> TraversalError:
+    """Construct a localized TraversalError for a negative traversal bound."""
+    return TraversalError(
+        _("{field} must be non-negative, got {value}").format(field=field, value=value),
+    )
+
+
+def make_overflow_bound_error(field: str) -> OverflowError:
+    """Construct a localized OverflowError when a bound exceeds platform usize."""
+    return OverflowError(
+        _("{field} exceeds platform limit").format(field=field),
+    )
+
+
+def make_invalid_pattern_error(pattern: str) -> TraversalError:
+    """Construct a localized, sanitized TraversalError/ValueError for an invalid glob pattern."""
+    safe_pattern = _sanitize_diagnostic_text(pattern)
+    return _InvalidPatternError(
+        _("Invalid glob pattern: '{pattern}'").format(pattern=safe_pattern),
+    )

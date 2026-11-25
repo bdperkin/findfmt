@@ -46,6 +46,24 @@ def strip_ansi(text: str) -> str:
     return _ANSI_REGEX.sub("", text)
 
 
+def _resolve_env_color_override(active_env: Mapping[str, str]) -> bool | None:
+    """Evaluate color environment variables before falling back to TTY detection."""
+    if active_env.get("NO_COLOR", "") != "":
+        return False
+
+    force_color_env = active_env.get("FORCE_COLOR", "")
+    if force_color_env != "":
+        return force_color_env != "0"
+
+    if active_env.get("CLICOLOR_FORCE", "") not in ("", "0"):
+        return True
+
+    if active_env.get("CLICOLOR") == "0" or active_env.get("TERM", "").strip().lower() == "dumb":
+        return False
+
+    return None
+
+
 def is_color_enabled(
     stream: TextIO | None = None,
     *,
@@ -57,9 +75,10 @@ def is_color_enabled(
     Precedence order:
     1. If force_color is explicitly set, its boolean value is honored.
     2. If NO_COLOR is present and non-empty, color is disabled.
-    3. If CLICOLOR_FORCE is set and non-zero, color is forced.
-    4. If CLICOLOR is set to "0", color is disabled.
-    5. Otherwise, color is enabled only if stream is an interactive TTY.
+    3. If FORCE_COLOR is "0", color is disabled; if non-empty, color is forced.
+    4. If CLICOLOR_FORCE is set and non-zero, color is forced.
+    5. If CLICOLOR is "0" or TERM is "dumb", color is disabled.
+    6. Otherwise, color is enabled only if stream is an interactive TTY.
 
     Args:
         stream: Target output text stream (defaults to sys.stdout).
@@ -73,17 +92,9 @@ def is_color_enabled(
         return force_color
 
     active_env = os.environ if env is None else env
-    no_color_val = active_env.get("NO_COLOR")
-    if no_color_val is not None and no_color_val != "":
-        return False
-
-    force_val = active_env.get("CLICOLOR_FORCE")
-    if force_val is not None and force_val not in ("", "0"):
-        return True
-
-    clicolor_val = active_env.get("CLICOLOR")
-    if clicolor_val == "0":
-        return False
+    env_decision = _resolve_env_color_override(active_env)
+    if env_decision is not None:
+        return env_decision
 
     target = stream if stream is not None else sys.stdout
     return bool(getattr(target, "isatty", lambda: False)())
@@ -129,7 +140,8 @@ def get_console(
     if callable(reconfigure) and getattr(target, "encoding", None) != "cp437":
         reconfigure(errors="surrogateescape")
 
-    color_on = force_color if force_color is not None else is_color_enabled(target, env=env)
+    active_env = os.environ if env is None else env
+    color_on = force_color if force_color is not None else is_color_enabled(target, env=active_env)
     is_tty = getattr(target, "isatty", lambda: False)()
 
     if not color_on:
@@ -141,7 +153,8 @@ def get_console(
             highlight=False,
         )
 
-    if is_tty:
+    is_dumb_term = active_env.get("TERM", "").strip().lower() in ("dumb", "unknown")
+    if is_tty and not is_dumb_term:
         return _PipeSafeConsole(
             file=target,
             no_color=False,
