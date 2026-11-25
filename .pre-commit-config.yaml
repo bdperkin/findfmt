@@ -367,6 +367,44 @@ repos:
     hooks:
       - id: pymarkdown
 
+  # Shell script formatter (prebuilt Python wheel)
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.14.1-1
+    hooks:
+      - id: shfmt
+        args:
+          - -i
+          - '2'
+          - -ci
+          - -bn
+          - -w
+
+  # Shell script static analysis linter (prebuilt Python wheel)
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+
+  # Dockerfile linter (prebuilt Python wheel)
+  - repo: https://github.com/AleksaC/hadolint-py
+    rev: v2.15.1
+    hooks:
+      - id: hadolint
+        args:
+          - --failure-threshold=warning
+
+  # GitHub Actions workflow syntax and expression linter
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
+  # Security: GitHub Actions, Dependabot, and pre-commit static analysis
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.33.1
+    hooks:
+      - id: zizmor
+
   # Codespell for typo detection
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.3
@@ -400,12 +438,6 @@ repos:
       - id: detect-secrets
         exclude: package\.lock\.json|uv\.lock|Cargo\.lock
 
-  # Security: GitHub Actions, Dependabot, and pre-commit static analysis
-  - repo: https://github.com/zizmorcore/zizmor-pre-commit
-    rev: v1.33.1
-    hooks:
-      - id: zizmor
-
   # Conventional Commits verification
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.5.0
@@ -432,21 +464,7 @@ repos:
           - --output=line
           - --minAlertLevel=error
       - id: vale-commit-msg
-        entry: >-
-          sh -c 'mode=$(git config --get commit.cleanup || printf default);
-          if [ "$mode" = default ]; then
-          if [ "${GIT_EDITOR:-}" = ":" ]; then mode=whitespace; else mode=strip; fi;
-          fi;
-          case "$mode" in
-          verbatim) filtered=$(cat "$1") ;;
-          whitespace) filtered=$(git stripspace < "$1") ;;
-          scissors) raw=$(sed -n -e "/------------------------ >8 ------------------------/q" -e "p" "$1") &&
-          filtered=$(printf "%s\n" "$raw" | git stripspace) ;;
-          *) raw=$(sed -n -e "/------------------------ >8 ------------------------/q" -e "p" "$1") &&
-          filtered=$(printf "%s\n" "$raw" | git stripspace --strip-comments) ;;
-          esac &&
-          printf "%s\n" "$filtered" | sed -e "/^[A-Za-z-]*-by: /d" |
-          vale --output=line --minAlertLevel=error --path=COMMIT_EDITMSG' --
+        entry: sh tools/vale_commit_msg.sh
         stages:
           - commit-msg
 

@@ -118,3 +118,40 @@ def test_stage6_documentation_markdown_and_rst_hooks() -> None:
         },
     )
     assert list((root / "docs").rglob("*.rst")) == []
+
+
+def test_stage7_shell_docker_and_ci_workflow_hooks() -> None:
+    """Verify Stage 7 shell, Docker, and workflow hooks and skipped non-hermetic variants (#722)."""
+    config = _load_pre_commit_config()
+    ci_skip = set(config["ci"]["skip"])
+    repos = config["repos"]
+
+    stage7_slice = repos[29:34]
+    stage7_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage7_slice]
+    assert stage7_pairs == [
+        ("https://github.com/scop/pre-commit-shfmt", ["shfmt"]),
+        ("https://github.com/shellcheck-py/shellcheck-py", ["shellcheck"]),
+        ("https://github.com/AleksaC/hadolint-py", ["hadolint"]),
+        ("https://github.com/rhysd/actionlint", ["actionlint"]),
+        ("https://github.com/zizmorcore/zizmor-pre-commit", ["zizmor"]),
+    ]
+
+    assert stage7_slice[0]["hooks"][0].get("args") == ["-i", "2", "-ci", "-bn", "-w"]
+    assert stage7_slice[2]["hooks"][0].get("args") == ["--failure-threshold=warning"]
+
+    stage7_hook_ids = {h["id"] for r in stage7_slice for h in r["hooks"]}
+    assert stage7_hook_ids.isdisjoint(ci_skip)
+
+    all_repo_urls = {r["repo"] for r in repos}
+    assert "https://github.com/hadolint/hadolint" not in all_repo_urls
+
+    all_hook_ids = {h["id"] for r in repos for h in r["hooks"]}
+    assert all_hook_ids.isdisjoint(
+        {
+            "shfmt-docker",
+            "shfmt-src",
+            "hadolint-docker",
+            "actionlint-docker",
+            "actionlint-system",
+        },
+    )

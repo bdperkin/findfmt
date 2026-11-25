@@ -7,34 +7,34 @@ on:
   workflow_dispatch:
     inputs:
       resolution:
-        description: Override uv --resolution mode (leave empty for full pruned matrix)
+        description: Override uv --resolution mode (matrix-default uses each cell's setting)
         required: false
-        default: ''
+        default: matrix-default
         type: choice
         options:
-          - ''
+          - matrix-default
           - highest
           - lowest
           - lowest-direct
       prerelease:
-        description: Override uv --prerelease mode (leave empty for full pruned matrix)
+        description: Override uv --prerelease mode (matrix-default uses each cell's setting)
         required: false
-        default: ''
+        default: matrix-default
         type: choice
         options:
-          - ''
+          - matrix-default
           - disallow
           - allow
           - if-necessary
           - explicit
           - if-necessary-or-explicit
       fork_strategy:
-        description: Override uv --fork-strategy mode (leave empty for full pruned matrix)
+        description: Override uv --fork-strategy mode (matrix-default uses each cell's setting)
         required: false
-        default: ''
+        default: matrix-default
         type: choice
         options:
-          - ''
+          - matrix-default
           - fewest
           - requires-python
 
@@ -80,9 +80,15 @@ jobs:
             fork-strategy: requires-python
     env:
       CELL_ID: ${{ matrix.cell }}
-      RESOLUTION: ${{ inputs.resolution || matrix.resolution }}
-      PRERELEASE: ${{ inputs.prerelease || matrix.prerelease }}
-      FORK_STRATEGY: ${{ inputs.fork_strategy || matrix.fork-strategy }}
+      RESOLUTION: >-
+        ${{ (inputs.resolution != '' && inputs.resolution != 'matrix-default'
+        && inputs.resolution) || matrix.resolution }}
+      PRERELEASE: >-
+        ${{ (inputs.prerelease != '' && inputs.prerelease != 'matrix-default'
+        && inputs.prerelease) || matrix.prerelease }}
+      FORK_STRATEGY: >-
+        ${{ (inputs.fork_strategy != '' && inputs.fork_strategy != 'matrix-default'
+        && inputs.fork_strategy) || matrix.fork-strategy }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1

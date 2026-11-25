@@ -40,16 +40,25 @@ def test_dependency_matrix_workflow_triggers_and_permissions() -> None:
     assert isinstance(dispatch, dict)
     inputs = dispatch.get("inputs", {})
     assert {"resolution", "prerelease", "fork_strategy"} <= set(inputs.keys())
-    assert set(inputs["resolution"]["options"]) == {"", "highest", "lowest", "lowest-direct"}
+    assert set(inputs["resolution"]["options"]) == {
+        "matrix-default",
+        "highest",
+        "lowest",
+        "lowest-direct",
+    }
     assert set(inputs["prerelease"]["options"]) == {
-        "",
+        "matrix-default",
         "disallow",
         "allow",
         "if-necessary",
         "explicit",
         "if-necessary-or-explicit",
     }
-    assert set(inputs["fork_strategy"]["options"]) == {"", "fewest", "requires-python"}
+    assert set(inputs["fork_strategy"]["options"]) == {
+        "matrix-default",
+        "fewest",
+        "requires-python",
+    }
 
 
 def test_dependency_matrix_workflow_pruned_cells_and_steps() -> None:

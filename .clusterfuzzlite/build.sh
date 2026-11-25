@@ -8,7 +8,7 @@ python3 -m pip install --no-deps --require-hashes -r "$SRC/findfmt/.clusterfuzzl
 # before compile_python_fuzzer configures ASan preloading for the Atheris binaries.
 env -u CFLAGS -u CXXFLAGS -u LDFLAGS -u RUSTFLAGS -u CARGO_ENCODED_RUSTFLAGS \
   maturin build --manifest-path "$SRC/findfmt/findfmt_rs/Cargo.toml" \
-    --locked --offline --compatibility off --out /tmp/findfmt-wheels
+  --locked --offline --compatibility off --out /tmp/findfmt-wheels
 python3 -m pip install --no-deps --force-reinstall /tmp/findfmt-wheels/findfmt-*.whl
 python3 -c "import findfmt._rust_ext as ext; assert ext.backend_name() == 'rust'"
 
