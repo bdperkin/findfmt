@@ -1,4 +1,4 @@
-"""Tests for Stage 1-2, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716, #717)."""
+"""Tests for Stage 1-3, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716-#718)."""
 
 from __future__ import annotations
 
@@ -218,3 +218,36 @@ def test_stage2_packaging_lockfiles_and_config_hooks() -> None:
     assert [h["id"] for h in pyroma_hooks] == ["pyroma"]
     assert "--min=10" in pyroma_hooks[0]["args"]
     assert "pyroma" in ci_skip
+
+
+def test_stage3_python_auto_formatters_and_code_modifiers() -> None:
+    """Verify Stage 3 mutator sequence, ruff-check migration, and skipped docformatter (#718)."""
+    config = _load_pre_commit_config()
+    ci_skip = set(config["ci"]["skip"])
+    repos = config["repos"]
+    stage3_slice = repos[9:15]
+    stage3_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage3_slice]
+    assert stage3_pairs == [
+        ("https://github.com/bwhmather/ssort", ["ssort"]),
+        ("https://github.com/marcogorelli/absolufy-imports", ["absolufy-imports"]),
+        ("https://github.com/asottile/add-trailing-comma", ["add-trailing-comma"]),
+        ("https://github.com/astral-sh/ruff-pre-commit", ["ruff-check"]),
+        ("https://github.com/jsh9/blank-line-after-blocks", ["blank-line-after-blocks"]),
+        ("https://github.com/astral-sh/ruff-pre-commit", ["ruff-format"]),
+    ]
+
+    ruff_check_entry = stage3_slice[3]["hooks"][0]
+    assert ruff_check_entry.get("args") == ["--fix", "--exit-non-zero-on-fix"]
+    assert stage3_slice[3]["rev"] == stage3_slice[5]["rev"]
+
+    all_hook_ids = {h["id"] for r in repos for h in r["hooks"]}
+    assert "ruff" not in all_hook_ids
+    assert "docformatter" not in all_hook_ids
+    assert {
+        "ssort",
+        "absolufy-imports",
+        "add-trailing-comma",
+        "ruff-check",
+        "blank-line-after-blocks",
+        "ruff-format",
+    }.isdisjoint(ci_skip)
