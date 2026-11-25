@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import configparser
 from pathlib import Path
 from typing import Any
 
@@ -229,3 +230,53 @@ def test_stage8_security_secrets_and_semgrep_hooks() -> None:
     } <= rule_ids
     rule_langs = {lang for r in rules for lang in r.get("languages", [])}
     assert {"python", "rust"} <= rule_langs
+
+
+def test_stage9_prose_editorconfig_and_commit_msg_hooks() -> None:
+    """Verify Stage 9 prose/EditorConfig/commit-msg order, .editorconfig rules, and skipped gitlint (#724)."""
+    root = _repo_root()
+    config = _load_pre_commit_config()
+    ci_skip = set(config["ci"]["skip"])
+    repos = config["repos"]
+
+    assert len(repos) == 43
+    assert repos[42]["repo"] == "local"
+
+    stage9_slice = repos[37:42]
+    stage9_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage9_slice]
+    assert stage9_pairs == [
+        ("https://github.com/codespell-project/codespell", ["codespell"]),
+        ("https://github.com/PrincetonUniversity/blocklint", ["blocklint"]),
+        ("https://github.com/editorconfig-checker/editorconfig-checker.python", ["editorconfig-checker"]),
+        ("https://github.com/vale-cli/vale", ["vale", "vale", "vale-commit-msg"]),
+        ("https://github.com/compilerla/conventional-pre-commit", ["conventional-pre-commit"]),
+    ]
+
+    assert stage9_slice[0]["hooks"][0].get("exclude") == r"\.(po|pot)$"
+    assert stage9_slice[2]["hooks"][0].get("args") == ["-disable-indent-size"]
+    assert stage9_slice[4]["hooks"][0].get("stages") == ["commit-msg"]
+
+    assert {"codespell", "blocklint", "editorconfig-checker", "conventional-pre-commit"}.isdisjoint(ci_skip)
+    assert {"vale", "vale-commit-msg"} <= ci_skip
+
+    all_repo_urls = {r["repo"] for r in repos}
+    assert "https://github.com/jorisroovers/gitlint" not in all_repo_urls
+
+    all_hook_ids = {h["id"] for r in repos for h in r["hooks"]}
+    assert all_hook_ids.isdisjoint({"gitlint", "gitlint-ci", "editorconfig-checker-system"})
+
+    editorconfig_path = root / ".editorconfig"
+    assert editorconfig_path.is_file()
+    parser = configparser.ConfigParser()
+    parser.read_string("[__root__]\n" + editorconfig_path.read_text(encoding="utf-8"))
+    assert parser["__root__"]["root"] == "true"
+    assert dict(parser["*"]) == {
+        "charset": "utf-8",
+        "end_of_line": "lf",
+        "insert_final_newline": "true",
+        "trim_trailing_whitespace": "true",
+    }
+    assert parser["*.{py,pyi,rs}"]["indent_size"] == "4"
+    assert parser["*.{toml,yml,yaml,json,jsonl,html,jinja,css,sh,svg,xml}"]["indent_size"] == "2"
+    assert parser["tests/unit/api_surface.json"]["indent_size"] == "1"
+    assert parser["{Makefile,*.mk}"]["indent_style"] == "tab"
