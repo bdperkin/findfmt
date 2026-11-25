@@ -12,10 +12,7 @@ ci:
     - fmt
     - cargo-check
     - clippy
-    - interrogate
     - deptry
-    - vulture
-    - xenon
     - sync-pre-commit-deps
     - pyroma
     - vale
@@ -181,6 +178,118 @@ repos:
     hooks:
       - id: ruff-format
 
+  # Astral Ty type checker
+  - repo: https://github.com/astral-sh/ty-pre-commit
+    rev: v0.0.108
+    hooks:
+      - id: ty
+        args:
+          - --group
+          - lint
+
+  # Deptry dependency checker
+  - repo: https://github.com/osprey-oss/deptry
+    rev: 0.25.1
+    hooks:
+      - id: deptry
+
+  # Vulture dead code checker
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: v2.16
+    hooks:
+      - id: vulture
+        args:
+          - src
+
+  # Xenon complexity checker
+  - repo: https://github.com/rubik/xenon
+    rev: v0.9.3
+    hooks:
+      - id: xenon
+        args:
+          - -b
+          - B
+          - -m
+          - B
+          - -a
+          - A
+          - src
+        pass_filenames: false
+
+  # Interrogate docstring checker
+  - repo: https://github.com/econchick/interrogate
+    rev: 1.7.0
+    hooks:
+      - id: interrogate
+        args:
+          - src
+        pass_filenames: false
+
+  # Rust Cargo formatter, compiler check, and Clippy linter
+  - repo: https://github.com/doublify/pre-commit-rust
+    rev: v1.0
+    hooks:
+      - id: fmt
+        alias: cargo-fmt
+        name: cargo-fmt
+        files: ^findfmt_rs/
+        types:
+          - file
+        types_or:
+          - rust
+          - toml
+        pass_filenames: false
+        args:
+          - --manifest-path
+          - findfmt_rs/Cargo.toml
+      - id: cargo-check
+        name: cargo-check
+        files: ^findfmt_rs/
+        types:
+          - file
+        types_or:
+          - rust
+          - toml
+        args:
+          - --manifest-path
+          - findfmt_rs/Cargo.toml
+          - --locked
+      - id: clippy
+        alias: cargo-clippy
+        name: cargo-clippy (extension)
+        files: ^findfmt_rs/
+        types:
+          - file
+        types_or:
+          - rust
+          - toml
+        args:
+          - --manifest-path
+          - findfmt_rs/Cargo.toml
+          - --locked
+          - --lib
+          - --
+          - -D
+          - warnings
+      - id: clippy
+        alias: cargo-clippy-all-targets
+        name: cargo-clippy (all targets)
+        files: ^findfmt_rs/
+        types:
+          - file
+        types_or:
+          - rust
+          - toml
+        args:
+          - --manifest-path
+          - findfmt_rs/Cargo.toml
+          - --locked
+          - --no-default-features
+          - --all-targets
+          - --
+          - -D
+          - warnings
+
   # Codespell for typo detection
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.3
@@ -289,118 +398,6 @@ repos:
       - id: conventional-pre-commit
         stages:
           - commit-msg
-
-  # Astral Ty type checker
-  - repo: https://github.com/astral-sh/ty-pre-commit
-    rev: v0.0.108
-    hooks:
-      - id: ty
-        args:
-          - --group
-          - lint
-
-  # Rust Cargo formatter, compiler check, and Clippy linter
-  - repo: https://github.com/doublify/pre-commit-rust
-    rev: v1.0
-    hooks:
-      - id: fmt
-        alias: cargo-fmt
-        name: cargo-fmt
-        files: ^findfmt_rs/
-        types:
-          - file
-        types_or:
-          - rust
-          - toml
-        pass_filenames: false
-        args:
-          - --manifest-path
-          - findfmt_rs/Cargo.toml
-      - id: cargo-check
-        name: cargo-check
-        files: ^findfmt_rs/
-        types:
-          - file
-        types_or:
-          - rust
-          - toml
-        args:
-          - --manifest-path
-          - findfmt_rs/Cargo.toml
-          - --locked
-      - id: clippy
-        alias: cargo-clippy
-        name: cargo-clippy (extension)
-        files: ^findfmt_rs/
-        types:
-          - file
-        types_or:
-          - rust
-          - toml
-        args:
-          - --manifest-path
-          - findfmt_rs/Cargo.toml
-          - --locked
-          - --lib
-          - --
-          - -D
-          - warnings
-      - id: clippy
-        alias: cargo-clippy-all-targets
-        name: cargo-clippy (all targets)
-        files: ^findfmt_rs/
-        types:
-          - file
-        types_or:
-          - rust
-          - toml
-        args:
-          - --manifest-path
-          - findfmt_rs/Cargo.toml
-          - --locked
-          - --no-default-features
-          - --all-targets
-          - --
-          - -D
-          - warnings
-
-  # Interrogate docstring checker
-  - repo: https://github.com/econchick/interrogate
-    rev: 1.7.0
-    hooks:
-      - id: interrogate
-        args:
-          - src
-        pass_filenames: false
-
-  # Deptry dependency checker
-  - repo: https://github.com/osprey-oss/deptry
-    rev: 0.25.1
-    hooks:
-      - id: deptry
-
-  # Vulture dead code checker
-  - repo: https://github.com/jendrikseipp/vulture
-    rev: v2.16
-    hooks:
-      - id: vulture
-        args:
-          - src
-
-  # Xenon complexity checker
-  - repo: https://github.com/rubik/xenon
-    rev: v0.9.3
-    hooks:
-      - id: xenon
-        args:
-          - -b
-          - B
-          - -m
-          - B
-          - -a
-          - A
-          - src
-        pass_filenames: false
 
   # Vale prose, code-comment, and commit-message linter
   - repo: https://github.com/vale-cli/vale
