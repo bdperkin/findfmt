@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 1.1.4\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-11-23 23:09-0500\n"
+"POT-Creation-Date: 2026-11-24 20:31-0500\n"
 "PO-Revision-Date: 2026-11-09 06:15-0500\n"
 "Last-Translator: Brandon Perkins <bdperkin@gmail.com>\n"
 "Language: de\n"
@@ -29,8 +29,8 @@ msgstr ""
 #, python-brace-format
 msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
 msgstr ""
-"Nicht unterstützter RST-Tabellenstil: '{style}'. Erwartet wird 'grid' oder "
-"'simple'."
+"Nicht unterstützter RST-Tabellenstil: '{style}'. Erwartet wird 'grid' "
+"oder 'simple'."
 
 #: src/findfmt/exceptions.py:76
 #, python-brace-format
@@ -42,11 +42,26 @@ msgstr ""
 #: src/findfmt/exceptions.py:95
 #, python-brace-format
 msgid ""
-"Invalid sort criteria '{criteria}'. Choose from: name, version, time, mtime, "
-"ctime, size, none."
-msgstr ""
-"Ungültiges Sortierkriterium '{criteria}'. Auswahl aus: name, version, time, "
+"Invalid sort criteria '{criteria}'. Choose from: name, version, time, "
 "mtime, ctime, size, none."
+msgstr ""
+"Ungültiges Sortierkriterium '{criteria}'. Auswahl aus: name, version, "
+"time, mtime, ctime, size, none."
+
+#: src/findfmt/exceptions.py:116
+#, python-brace-format
+msgid "{field} must be non-negative, got {value}"
+msgstr "{field} muss nicht-negativ sein, erhalten: {value}"
+
+#: src/findfmt/exceptions.py:123
+#, python-brace-format
+msgid "{field} exceeds platform limit"
+msgstr "{field} überschreitet das Plattformlimit"
+
+#: src/findfmt/exceptions.py:130
+#, python-brace-format
+msgid "Invalid glob pattern: '{pattern}'"
+msgstr "Ungültiges Glob-Muster: '{pattern}'"
 
 #: src/findfmt/sizes.py:30 src/findfmt/sizes.py:55
 msgid "B"
@@ -142,8 +157,7 @@ msgstr "nicht unterstütztes Format '{val}'. Gültige Optionen: {valid}"
 #: src/findfmt/cli/config_schema.py:208
 #, python-brace-format
 msgid "expected 'auto', 'always', 'never', or boolean, got '{val}'"
-msgstr ""
-"'auto', 'always', 'never' oder boolescher Wert erwartet, erhalten: '{val}'"
+msgstr "'auto', 'always', 'never' oder boolescher Wert erwartet, erhalten: '{val}'"
 
 #: src/findfmt/cli/config_schema.py:225
 #, python-brace-format
@@ -153,8 +167,7 @@ msgstr "boolescher Wert (true/false) erwartet, erhalten: {type_name}"
 #: src/findfmt/cli/config_schema.py:249
 #, python-brace-format
 msgid "expected string or list of strings, got {type_name}"
-msgstr ""
-"Zeichenkette oder Liste von Zeichenketten erwartet, erhalten: {type_name}"
+msgstr "Zeichenkette oder Liste von Zeichenketten erwartet, erhalten: {type_name}"
 
 #: src/findfmt/cli/config_schema.py:266
 #, python-brace-format
@@ -172,8 +185,8 @@ msgid ""
 "Warning: Configuration key '{key}' in '{path}' is deprecated and will be "
 "removed in v2.0.0; use 'format = \"{fmt}\"' instead."
 msgstr ""
-"Warnung: Konfigurationsschlüssel '{key}' in '{path}' ist veraltet und wird "
-"in v2.0.0 entfernt; verwenden Sie stattdessen 'format = \"{fmt}\"'."
+"Warnung: Konfigurationsschlüssel '{key}' in '{path}' ist veraltet und "
+"wird in v2.0.0 entfernt; verwenden Sie stattdessen 'format = \"{fmt}\"'."
 
 #: src/findfmt/cli/config_schema.py:316
 #, python-brace-format
@@ -181,8 +194,8 @@ msgid ""
 "Error: Unknown configuration key '{key}' in '{path}'. Did you mean "
 "'{suggestion}'?"
 msgstr ""
-"Fehler: Unbekannter Konfigurationsschlüssel '{key}' in '{path}'. Meinten Sie "
-"'{suggestion}'?"
+"Fehler: Unbekannter Konfigurationsschlüssel '{key}' in '{path}'. Meinten "
+"Sie '{suggestion}'?"
 
 #: src/findfmt/cli/config_schema.py:323
 #, python-brace-format
@@ -192,10 +205,11 @@ msgstr "Fehler: Unbekannter Konfigurationsschlüssel '{key}' in '{path}'."
 #: src/findfmt/cli/config_schema.py:387
 #, python-brace-format
 msgid ""
-"Error: Conflicting configuration keys '{first}' and '{second}' in '{path}'."
-msgstr ""
-"Fehler: Widersprüchliche Konfigurationsschlüssel '{first}' und '{second}' in "
+"Error: Conflicting configuration keys '{first}' and '{second}' in "
 "'{path}'."
+msgstr ""
+"Fehler: Widersprüchliche Konfigurationsschlüssel '{first}' und '{second}'"
+" in '{path}'."
 
 #: src/findfmt/cli/config_template.py:282
 msgid "(none)"
@@ -205,36 +219,56 @@ msgstr "(keine)"
 #, python-brace-format
 msgid "Active configuration: {path} (using built-in defaults)\n"
 msgstr ""
-"Aktive Konfiguration: {path} (integrierte Standardwerte werden verwendet)\n"
+"Aktive Konfiguration: {path} (integrierte Standardwerte werden verwendet)"
+"\n"
 
 #: src/findfmt/cli/config_template.py:290
 #, python-brace-format
 msgid "Active configuration: {path}"
 msgstr "Aktive Konfiguration: {path}"
 
-#: src/findfmt/cli/diagnostics.py:88
+#: src/findfmt/cli/diagnostics.py:49
+msgid "<unknown>"
+msgstr "<unbekannt>"
+
+#: src/findfmt/cli/diagnostics.py:57 src/findfmt/cli/diagnostics.py:61
+msgid "I/O error"
+msgstr "E/A-Fehler"
+
+#: src/findfmt/cli/diagnostics.py:64
+#, python-brace-format
+msgid "findfmt: cannot open '{path}': {reason}"
+msgstr "findfmt: '{path}' kann nicht geöffnet werden: {reason}"
+
+#: src/findfmt/cli/diagnostics.py:78
+#, python-brace-format
+msgid "Error: {message}"
+msgstr "Fehler: {message}"
+
+#: src/findfmt/cli/diagnostics.py:137
 msgid "not installed"
 msgstr "nicht installiert"
 
-#: src/findfmt/cli/diagnostics.py:93
+#: src/findfmt/cli/diagnostics.py:142
 msgid "not found"
 msgstr "nicht gefunden"
 
-#: src/findfmt/cli/diagnostics.py:104
+#: src/findfmt/cli/diagnostics.py:153
 msgid "none"
 msgstr "keine"
 
 #: src/findfmt/cli/entrypoints.py:237
 msgid ""
-"Find all files and directories, including hidden files respecting .gitignore."
+"Find all files and directories, including hidden files respecting "
+".gitignore."
 msgstr ""
-"Alle Dateien und Verzeichnisse finden, einschließlich versteckter Dateien "
-"unter Berücksichtigung von .gitignore."
+"Alle Dateien und Verzeichnisse finden, einschließlich versteckter Dateien"
+" unter Berücksichtigung von .gitignore."
 
 #: src/findfmt/cli/entrypoints.py:256
 msgid ""
-"Find files and list detected format and MIME tags, including hidden files "
-"respecting .gitignore."
+"Find files and list detected format and MIME tags, including hidden files"
+" respecting .gitignore."
 msgstr ""
 "Dateien finden und erkannte Format- sowie MIME-Tags auflisten, "
 "einschließlich versteckter Dateien unter Berücksichtigung von .gitignore."
@@ -243,8 +277,8 @@ msgstr ""
 msgid ""
 "Find files by format tag, including hidden files respecting .gitignore.\n"
 "\n"
-"Optionally provide TAG as the first positional argument (e.g. 'findfilefmt "
-"python')."
+"Optionally provide TAG as the first positional argument (e.g. "
+"'findfilefmt python')."
 msgstr ""
 "Dateien nach Format-Tag finden, einschließlich versteckter Dateien unter "
 "Berücksichtigung von .gitignore.\n"
@@ -260,24 +294,24 @@ msgid ""
 "Optionally provide INTERPRETER as the first positional argument (e.g. "
 "'findshebang bash')."
 msgstr ""
-"Dateien nach Shebang-Interpretermuster finden, einschließlich versteckter "
-"Dateien unter Berücksichtigung von .gitignore.\n"
+"Dateien nach Shebang-Interpretermuster finden, einschließlich versteckter"
+" Dateien unter Berücksichtigung von .gitignore.\n"
 "\n"
 "Optional INTERPRETER als erstes Positionsargument angeben (z. B. "
 "'findshebang bash')."
 
 #: src/findfmt/cli/entrypoints.py:336
 msgid ""
-"Find files and output NUL-delimited paths (--print0), including hidden files "
-"respecting .gitignore."
+"Find files and output NUL-delimited paths (--print0), including hidden "
+"files respecting .gitignore."
 msgstr ""
-"Dateien finden und NUL-getrennte Pfade ausgeben (--print0), einschließlich "
-"versteckter Dateien unter Berücksichtigung von .gitignore."
+"Dateien finden und NUL-getrennte Pfade ausgeben (--print0), "
+"einschließlich versteckter Dateien unter Berücksichtigung von .gitignore."
 
 #: src/findfmt/cli/entrypoints.py:356
 msgid ""
-"Find files and print summary statistics to stderr, including hidden files "
-"respecting .gitignore."
+"Find files and print summary statistics to stderr, including hidden files"
+" respecting .gitignore."
 msgstr ""
 "Dateien finden und Zusammenfassungsstatistiken auf stderr ausgeben, "
 "einschließlich versteckter Dateien unter Berücksichtigung von .gitignore."
@@ -302,16 +336,18 @@ msgid ""
 "A .gitignore-aware file discovery and classification suite that locates "
 "files by content format, shebang, and MIME tag."
 msgstr ""
-"Ein .gitignore-bewusstes Dateierkennungs- und Klassifizierungswerkzeug, das "
-"Dateien nach Inhaltsformat, Shebang und MIME-Tag findet."
+"Ein .gitignore-bewusstes Dateierkennungs- und Klassifizierungswerkzeug, "
+"das Dateien nach Inhaltsformat, Shebang und MIME-Tag findet."
 
 #: src/findfmt/cli/help.py:109
 msgid ""
 "Common Examples:\n"
 "  findfmt -t python                        # Find Python files\n"
-"  findfmt --shebang bash scripts/          # Find bash scripts in scripts/\n"
+"  findfmt --shebang bash scripts/          # Find bash scripts in "
+"scripts/\n"
 "  findfmt -t python -t executable --all-tags # Files matching both tags\n"
-"  findfiles --no-hidden                    # Wrapper: exclude hidden files\n"
+"  findfiles --no-hidden                    # Wrapper: exclude hidden "
+"files\n"
 "  findfmt -- -weird-name                   # Path starting with a dash\n"
 "\n"
 "Run 'findfmt --help-all' for the comprehensive manual, environment "
@@ -324,25 +360,27 @@ msgstr ""
 "  findfmt -t python -t executable --all-tags # Dateien mit beiden Tags\n"
 "  findfiles --no-hidden                    # Wrapper: versteckte Dateien "
 "ausschließen\n"
-"  findfmt -- -weird-name                   # Pfad mit führendem Bindestrich\n"
+"  findfmt -- -weird-name                   # Pfad mit führendem "
+"Bindestrich\n"
 "\n"
 "Führen Sie 'findfmt --help-all' für das vollständige Handbuch, "
 "Umgebungsvariablen und Exit-Codes aus."
 
 #: src/findfmt/cli/help.py:120
 msgid ""
-"One or more directory or file paths to inspect (default: current directory)."
+"One or more directory or file paths to inspect (default: current "
+"directory)."
 msgstr ""
-"Ein oder mehrere zu untersuchende Verzeichnis- oder Dateipfade (Standard: "
-"aktuelles Verzeichnis)."
+"Ein oder mehrere zu untersuchende Verzeichnis- oder Dateipfade (Standard:"
+" aktuelles Verzeichnis)."
 
 #: src/findfmt/cli/help.py:121
 msgid ""
 "Tag or comma-separated tags to match (e.g. 'python', 'yaml,json', "
 "'executable')."
 msgstr ""
-"Abzugleichendes Tag oder kommagetrennte Tags (z. B. 'python', 'yaml,json', "
-"'executable')."
+"Abzugleichendes Tag oder kommagetrennte Tags (z. B. 'python', "
+"'yaml,json', 'executable')."
 
 #: src/findfmt/cli/help.py:122
 msgid "Tag or comma-separated tags to exclude."
@@ -351,13 +389,14 @@ msgstr "Auszuschließendes Tag oder kommagetrennte Tags."
 #: src/findfmt/cli/help.py:123
 msgid "Require matching files to have ALL specified tags rather than ANY tag."
 msgstr ""
-"Verlangen, dass passende Dateien ALLE angegebenen Tags statt nur MINDESTENS "
-"EINES aufweisen."
+"Verlangen, dass passende Dateien ALLE angegebenen Tags statt nur "
+"MINDESTENS EINES aufweisen."
 
 #: src/findfmt/cli/help.py:124
 msgid "Filter files whose shebang contains this interpreter or pattern."
 msgstr ""
-"Dateien filtern, deren Shebang diesen Interpreter oder dieses Muster enthält."
+"Dateien filtern, deren Shebang diesen Interpreter oder dieses Muster "
+"enthält."
 
 #: src/findfmt/cli/help.py:125
 msgid "Do not respect .gitignore rules during traversal."
@@ -365,8 +404,7 @@ msgstr ".gitignore-Regeln beim Verzeichnisdurchlauf nicht beachten."
 
 #: src/findfmt/cli/help.py:126
 msgid "Load and enforce an external gitignore file across the traversal scope."
-msgstr ""
-"Eine externe gitignore-Datei laden und im gesamten Suchbereich anwenden."
+msgstr "Eine externe gitignore-Datei laden und im gesamten Suchbereich anwenden."
 
 #: src/findfmt/cli/help.py:128
 msgid ""
@@ -378,17 +416,17 @@ msgstr ""
 
 #: src/findfmt/cli/help.py:130
 msgid ""
-"Enforce offline extension- and filename-only identification without disk IO."
+"Enforce offline extension- and filename-only identification without disk "
+"IO."
 msgstr ""
-"Offline-Erkennung ausschließlich anhand von Dateiendung und Dateiname ohne "
-"Festplatten-E/A erzwingen."
+"Offline-Erkennung ausschließlich anhand von Dateiendung und Dateiname "
+"ohne Festplatten-E/A erzwingen."
 
 #: src/findfmt/cli/help.py:132
-msgid ""
-"Allow --from-file paths that resolve outside the traversal root directory."
+msgid "Allow --from-file paths that resolve outside the traversal root directory."
 msgstr ""
-"Pfade aus --from-file zulassen, die außerhalb des Suchstammverzeichnisses "
-"aufgelöst werden."
+"Pfade aus --from-file zulassen, die außerhalb des Suchstammverzeichnisses"
+" aufgelöst werden."
 
 #: src/findfmt/cli/help.py:134
 msgid "Include hidden files and directories."
@@ -422,16 +460,16 @@ msgstr "Leere Verzeichnisse und Verzeichnisse ohne passende Dateien auslassen."
 
 #: src/findfmt/cli/help.py:141
 msgid ""
-"Include files matching wildcard or glob pattern (supports multiple -P and "
-"'|')."
+"Include files matching wildcard or glob pattern (supports multiple -P and"
+" '|')."
 msgstr ""
 "Dateien einbeziehen, die dem Platzhalter- oder Glob-Muster entsprechen "
 "(unterstützt mehrere -P und '|')."
 
 #: src/findfmt/cli/help.py:143
 msgid ""
-"Exclude files matching wildcard or glob pattern (supports multiple -I and "
-"'|')."
+"Exclude files matching wildcard or glob pattern (supports multiple -I and"
+" '|')."
 msgstr ""
 "Dateien ausschließen, die dem Platzhalter- oder Glob-Muster entsprechen "
 "(unterstützt mehrere -I und '|')."
@@ -441,8 +479,7 @@ msgid "Apply case-insensitive matching across -P and -I patterns."
 msgstr "Groß-/Kleinschreibung bei -P- und -I-Mustern ignorieren."
 
 #: src/findfmt/cli/help.py:146
-msgid ""
-"Match directory names against patterns; matched dirs inherit to children."
+msgid "Match directory names against patterns; matched dirs inherit to children."
 msgstr ""
 "Verzeichnisnamen mit Mustern abgleichen; passende Verzeichnisse vererben "
 "sich auf untergeordnete Elemente."
@@ -450,8 +487,8 @@ msgstr ""
 #: src/findfmt/cli/help.py:147
 msgid "Sort files by criteria: name, version, time (mtime), ctime, size, none."
 msgstr ""
-"Dateien nach Kriterium sortieren: name, version, time (mtime), ctime, size, "
-"none."
+"Dateien nach Kriterium sortieren: name, version, time (mtime), ctime, "
+"size, none."
 
 #: src/findfmt/cli/help.py:148
 msgid "Invert the active sort order."
@@ -459,11 +496,11 @@ msgstr "Aktive Sortierreihenfolge umkehren."
 
 #: src/findfmt/cli/help.py:150
 msgid ""
-"Do not sort entries; yield files in raw filesystem order (equivalent to --"
-"sort=none)."
+"Do not sort entries; yield files in raw filesystem order (equivalent to "
+"--sort=none)."
 msgstr ""
-"Einträge nicht sortieren; Dateien in unveränderter Dateisystemreihenfolge "
-"ausgeben (entspricht --sort=none)."
+"Einträge nicht sortieren; Dateien in unveränderter Dateisystemreihenfolge"
+" ausgeben (entspricht --sort=none)."
 
 #: src/findfmt/cli/help.py:152
 msgid "List directories before files within each directory level."
@@ -483,8 +520,8 @@ msgstr ""
 
 #: src/findfmt/cli/help.py:159
 msgid ""
-"Output structured JSON representation of the file tree and classifications "
-"(equivalent to --format json)."
+"Output structured JSON representation of the file tree and "
+"classifications (equivalent to --format json)."
 msgstr ""
 "Strukturierte JSON-Darstellung des Dateibaums und der Klassifizierungen "
 "ausgeben (entspricht --format json)."
@@ -494,18 +531,16 @@ msgid "Output directory tree as an XML document (equivalent to --format xml)."
 msgstr "Verzeichnisbaum als XML-Dokument ausgeben (entspricht --format xml)."
 
 #: src/findfmt/cli/help.py:163
-msgid ""
-"Output directory tree as an HTML document with HTTP reference hyperlinks."
-msgstr ""
-"Verzeichnisbaum als HTML-Dokument mit HTTP-Referenz-Hyperlinks ausgeben."
+msgid "Output directory tree as an HTML document with HTTP reference hyperlinks."
+msgstr "Verzeichnisbaum als HTML-Dokument mit HTTP-Referenz-Hyperlinks ausgeben."
 
 #: src/findfmt/cli/help.py:165
 msgid ""
-"Read and insert contents of specified HTML fragment file prior to directory "
-"listing."
+"Read and insert contents of specified HTML fragment file prior to "
+"directory listing."
 msgstr ""
-"Inhalt der angegebenen HTML-Fragmentdatei lesen und vor der Verzeichnisliste "
-"einfügen."
+"Inhalt der angegebenen HTML-Fragmentdatei lesen und vor der "
+"Verzeichnisliste einfügen."
 
 #: src/findfmt/cli/help.py:167
 msgid ""
@@ -520,8 +555,8 @@ msgid ""
 "Set title and <h1> heading for HTML document output (default: 'Directory "
 "Tree')."
 msgstr ""
-"Titel und <h1>-Überschrift für die HTML-Dokumentausgabe festlegen (Standard: "
-"'Directory Tree')."
+"Titel und <h1>-Überschrift für die HTML-Dokumentausgabe festlegen "
+"(Standard: 'Directory Tree')."
 
 #: src/findfmt/cli/help.py:169
 msgid ""
@@ -533,23 +568,24 @@ msgstr ""
 
 #: src/findfmt/cli/help.py:170
 msgid ""
-"Wrap paths in standard OSC 8 clickable terminal hyperlink escape sequences."
+"Wrap paths in standard OSC 8 clickable terminal hyperlink escape "
+"sequences."
 msgstr ""
 "Pfade in anklickbare Standard-OSC-8-Terminal-Hyperlink-Escape-Sequenzen "
 "einbetten."
 
 #: src/findfmt/cli/help.py:172
 msgid ""
-"URI schema for terminal hyperlinks (defaults to 'file://', e.g. 'vscode://"
-"file/', 'cursor://file/', 'subl://')."
+"URI schema for terminal hyperlinks (defaults to 'file://', e.g. "
+"'vscode://file/', 'cursor://file/', 'subl://')."
 msgstr ""
-"URI-Schema für Terminal-Hyperlinks (Standard: 'file://', z. B. 'vscode://"
-"file/', 'cursor://file/', 'subl://')."
+"URI-Schema für Terminal-Hyperlinks (Standard: 'file://', z. B. "
+"'vscode://file/', 'cursor://file/', 'subl://')."
 
 #: src/findfmt/cli/help.py:176
 msgid ""
-"URI authority component for terminal hyperlinks (e.g. 'localhost' or remote "
-"hostname)."
+"URI authority component for terminal hyperlinks (e.g. 'localhost' or "
+"remote hostname)."
 msgstr ""
 "URI-Authority-Komponente für Terminal-Hyperlinks (z. B. 'localhost' oder "
 "entfernter Hostname)."
@@ -557,45 +593,47 @@ msgstr ""
 #: src/findfmt/cli/help.py:178
 msgid "Send command output directly to a file rather than standard output."
 msgstr ""
-"Befehlsausgabe direkt in eine Datei statt auf die Standardausgabe schreiben."
+"Befehlsausgabe direkt in eine Datei statt auf die Standardausgabe "
+"schreiben."
 
 #: src/findfmt/cli/help.py:179
 msgid ""
-"Render output in a hierarchical directory tree (equivalent to --format tree)."
-msgstr ""
-"Ausgabe als hierarchischen Verzeichnisbaum darstellen (entspricht --format "
+"Render output in a hierarchical directory tree (equivalent to --format "
 "tree)."
+msgstr ""
+"Ausgabe als hierarchischen Verzeichnisbaum darstellen (entspricht "
+"--format tree)."
 
 #: src/findfmt/cli/help.py:181
 msgid ""
 "Border style for table, csv-table, or rst output (e.g. rounded, simple, "
 "minimal, double, heavy, markdown, ascii, cp437, square, grid)."
 msgstr ""
-"Rahmenstil für table-, csv-table- oder rst-Ausgabe (z. B. rounded, simple, "
-"minimal, double, heavy, markdown, ascii, cp437, square, grid)."
+"Rahmenstil für table-, csv-table- oder rst-Ausgabe (z. B. rounded, "
+"simple, minimal, double, heavy, markdown, ascii, cp437, square, grid)."
 
 #: src/findfmt/cli/help.py:185
 msgid ""
 "Prefix formula trigger characters (=, +, -, @, TAB, CR) in CSV/TSV cells "
 "with a single quote to prevent spreadsheet formula injection."
 msgstr ""
-"Formel-Auslösezeichen (=, +, -, @, TAB, CR) in CSV/TSV-Zellen ein einfaches "
-"Anführungszeichen voranstellen, um Tabellenkalkulations-Formel-Injection zu "
-"verhindern."
+"Formel-Auslösezeichen (=, +, -, @, TAB, CR) in CSV/TSV-Zellen ein "
+"einfaches Anführungszeichen voranstellen, um Tabellenkalkulations-Formel-"
+"Injection zu verhindern."
 
 #: src/findfmt/cli/help.py:188
 msgid "Enable or disable interactive paging (defaults to auto-paging on TTY)."
 msgstr ""
-"Interaktive Seitenanzeige (Pager) aktivieren oder deaktivieren (Standard: "
-"automatisches Paging auf TTY)."
+"Interaktive Seitenanzeige (Pager) aktivieren oder deaktivieren (Standard:"
+" automatisches Paging auf TTY)."
 
 #: src/findfmt/cli/help.py:190
 msgid ""
 "Do not print indentation lines in tree format and strip extraneous "
 "whitespace in structured formats."
 msgstr ""
-"Keine Einrückungslinien im Baumformat ausgeben und überflüssige Leerzeichen "
-"in strukturierten Formaten entfernen."
+"Keine Einrückungslinien im Baumformat ausgeben und überflüssige "
+"Leerzeichen in strukturierten Formaten entfernen."
 
 #: src/findfmt/cli/help.py:193
 msgid ""
@@ -606,15 +644,13 @@ msgstr ""
 "verwenden."
 
 #: src/findfmt/cli/help.py:195
-msgid ""
-"Use CP437 (IBM-PC) console graphics characters for tree indentation lines."
-msgstr ""
-"CP437-(IBM-PC)-Konsolengrafikzeichen für Baumeinrückungslinien verwenden."
+msgid "Use CP437 (IBM-PC) console graphics characters for tree indentation lines."
+msgstr "CP437-(IBM-PC)-Konsolengrafikzeichen für Baumeinrückungslinien verwenden."
 
 #: src/findfmt/cli/help.py:197
 msgid ""
-"Force enable or disable ANSI color output (defaults to auto-detection with "
-"NO_COLOR compliance)."
+"Force enable or disable ANSI color output (defaults to auto-detection "
+"with NO_COLOR compliance)."
 msgstr ""
 "ANSI-Farbausgabe erzwingen oder deaktivieren (Standard: automatische "
 "Erkennung unter Beachtung von NO_COLOR)."
@@ -628,13 +664,14 @@ msgid ""
 "Prepend input search path prefix to relative output paths rather than "
 "stripping the root."
 msgstr ""
-"Präfix des Eingabesuchpfads relativen Ausgabepfaden voranstellen, anstatt "
-"das Wurzelverzeichnis zu entfernen."
+"Präfix des Eingabesuchpfads relativen Ausgabepfaden voranstellen, anstatt"
+" das Wurzelverzeichnis zu entfernen."
 
 #: src/findfmt/cli/help.py:203
 msgid "Delimit path outputs with a NUL (\\0) character instead of a newline."
 msgstr ""
-"Pfadausgaben mit einem NUL-Zeichen (\\0) statt einem Zeilenumbruch trennen."
+"Pfadausgaben mit einem NUL-Zeichen (\\0) statt einem Zeilenumbruch "
+"trennen."
 
 #: src/findfmt/cli/help.py:204
 msgid "Display identified tags alongside each matched path."
@@ -646,29 +683,29 @@ msgstr "Zusammenfassungsstatistiken der Treffer auf stderr ausgeben."
 
 #: src/findfmt/cli/help.py:206
 msgid "Exit with status code 1 if no matching files are found."
-msgstr ""
-"Mit Statuscode 1 beenden, wenn keine passenden Dateien gefunden werden."
+msgstr "Mit Statuscode 1 beenden, wenn keine passenden Dateien gefunden werden."
 
 #: src/findfmt/cli/help.py:207
 msgid ""
-"Print file type and permissions in standard ls -l format (e.g. -rw-r--r--)."
+"Print file type and permissions in standard ls -l format (e.g. -rw-r--"
+"r--)."
 msgstr ""
-"Dateityp und Berechtigungen im Standardformat von ls -l ausgeben (z. B. -rw-"
-"r--r--)."
+"Dateityp und Berechtigungen im Standardformat von ls -l ausgeben (z. B. "
+"-rw-r--r--)."
 
 #: src/findfmt/cli/help.py:208
-msgid ""
-"Print the username, or UID if username is unavailable, of the file owner."
+msgid "Print the username, or UID if username is unavailable, of the file owner."
 msgstr ""
 "Benutzernamen oder UID (falls kein Benutzername verfügbar ist) des "
 "Dateieigentümers ausgeben."
 
 #: src/findfmt/cli/help.py:209
 msgid ""
-"Print the group name, or GID if group name is unavailable, of the file group."
+"Print the group name, or GID if group name is unavailable, of the file "
+"group."
 msgstr ""
-"Gruppennamen oder GID (falls kein Gruppenname verfügbar ist) der Dateigruppe "
-"ausgeben."
+"Gruppennamen oder GID (falls kein Gruppenname verfügbar ist) der "
+"Dateigruppe ausgeben."
 
 #: src/findfmt/cli/help.py:210
 msgid "Print filesystem inode number (st_ino)."
@@ -684,17 +721,19 @@ msgstr "Dateigröße in Bytes ausgeben."
 
 #: src/findfmt/cli/help.py:214
 msgid ""
-"Print file sizes in human-readable binary format (e.g. 1KiB, 234MiB, 2GiB)."
-msgstr ""
-"Dateigrößen im menschenlesbaren Binärformat ausgeben (z. B. 1KiB, 234MiB, "
+"Print file sizes in human-readable binary format (e.g. 1KiB, 234MiB, "
 "2GiB)."
+msgstr ""
+"Dateigrößen im menschenlesbaren Binärformat ausgeben (z. B. 1KiB, 234MiB,"
+" 2GiB)."
 
 #: src/findfmt/cli/help.py:216
 msgid ""
-"Print file sizes in human-readable SI metric format (e.g. 1kB, 234MB, 2GB)."
+"Print file sizes in human-readable SI metric format (e.g. 1kB, 234MB, "
+"2GB)."
 msgstr ""
-"Dateigrößen im menschenlesbaren metrischen SI-Format ausgeben (z. B. 1kB, "
-"234MB, 2GB)."
+"Dateigrößen im menschenlesbaren metrischen SI-Format ausgeben (z. B. 1kB,"
+" 234MB, 2GB)."
 
 #: src/findfmt/cli/help.py:217
 msgid ""
@@ -722,8 +761,8 @@ msgstr ""
 
 #: src/findfmt/cli/help.py:224
 msgid ""
-"Append file type indicator to filenames (* for executable, / for directory, "
-"@ for symlink, = for socket, | for FIFO, > for door)."
+"Append file type indicator to filenames (* for executable, / for "
+"directory, @ for symlink, = for socket, | for FIFO, > for door)."
 msgstr ""
 "Dateityp-Indikator an Dateinamen anhängen (* für ausführbar, / für "
 "Verzeichnis, @ für Symlink, = für Socket, | für FIFO, > für Door)."
@@ -742,7 +781,8 @@ msgstr ""
 
 #: src/findfmt/cli/help.py:229
 msgid ""
-"Enclose filenames in double quotes, escaping embedded quotes and backslashes."
+"Enclose filenames in double quotes, escaping embedded quotes and "
+"backslashes."
 msgstr ""
 "Dateinamen in doppelte Anführungszeichen setzen und enthaltene "
 "Anführungszeichen sowie Backslashes maskieren."
@@ -767,11 +807,11 @@ msgstr "Version von findfmt anzeigen und beenden."
 
 #: src/findfmt/cli/help.py:235
 msgid ""
-"Display comprehensive help reference including environment variables, exit "
-"codes, and examples."
+"Display comprehensive help reference including environment variables, "
+"exit codes, and examples."
 msgstr ""
-"Umfassende Hilfereferenz einschließlich Umgebungsvariablen, Exit-Codes und "
-"Beispielen anzeigen."
+"Umfassende Hilfereferenz einschließlich Umgebungsvariablen, Exit-Codes "
+"und Beispielen anzeigen."
 
 #: src/findfmt/cli/help.py:237
 msgid "Path to custom configuration file overriding defaults."
@@ -789,15 +829,15 @@ msgstr "Aufgelöste Konfigurationseinstellungen anzeigen und beenden."
 
 #: src/findfmt/cli/help.py:240
 msgid "Output an annotated reference TOML configuration to stdout and exit."
-msgstr ""
-"Kommentierte TOML-Referenzkonfiguration auf stdout ausgeben und beenden."
+msgstr "Kommentierte TOML-Referenzkonfiguration auf stdout ausgeben und beenden."
 
 #: src/findfmt/cli/help.py:241
 msgid ""
-"Explicitly set locale for translations and display (e.g. 'en_US', 'es', 'C')."
+"Explicitly set locale for translations and display (e.g. 'en_US', 'es', "
+"'C')."
 msgstr ""
-"Gebietsschema (Locale) für Übersetzungen und Anzeige explizit festlegen (z. "
-"B. 'en_US', 'es', 'C')."
+"Gebietsschema (Locale) für Übersetzungen und Anzeige explizit festlegen "
+"(z. B. 'en_US', 'es', 'C')."
 
 #: src/findfmt/cli/help.py:338
 msgid "Comprehensive CLI Reference"

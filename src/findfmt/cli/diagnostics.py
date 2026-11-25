@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import platform
 import shutil
 import subprocess
@@ -14,6 +15,7 @@ import typer
 from findfmt import _FALLBACK_VERSION
 from findfmt.core import get_active_backend
 from findfmt.i18n import _
+from findfmt.utils.strings import mask_control_characters, strip_ansi_escapes
 
 if TYPE_CHECKING:
     from typer.core import _click
@@ -27,6 +29,59 @@ __all__ = [
     "show_config_callback",
     "version_callback",
 ]
+
+
+_SURROGATE_MIN = 0xD800
+_SURROGATE_MAX = 0xDFFF
+
+
+def sanitize_diagnostic_text(text: str) -> str:
+    """Strip ANSI escapes and mask C0, C1, BiDi, and lone-surrogate code points."""
+    cleaned = mask_control_characters(strip_ansi_escapes(text))
+    if not any(_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX for c in cleaned):
+        return cleaned
+
+    return "".join("?" if _SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX else c for c in cleaned)
+
+
+def _extract_os_error_reason(err: OSError) -> str:
+    """Resolve a human-readable, localized reason string from an OSError."""
+    if err.strerror is not None and err.strerror != "":
+        return str(err.strerror)
+
+    if err.errno is not None:
+        try:
+            return os.strerror(err.errno)
+        except (OverflowError, ValueError):
+            return _("I/O error")
+
+    if err.args and err.args[0]:
+        return str(err.args[0])
+
+    return _("I/O error")
+
+
+def format_traversal_error(err: OSError) -> str:
+    """Format a localized, sanitized traversal I/O diagnostic line."""
+    filename = err.filename
+    raw_path = str(filename) if filename is not None and str(filename) != "" else _("<unknown>")
+    safe_path = sanitize_diagnostic_text(raw_path)
+    safe_reason = sanitize_diagnostic_text(_extract_os_error_reason(err))
+    return _("findfmt: cannot open '{path}': {reason}").format(
+        path=safe_path,
+        reason=safe_reason,
+    )
+
+
+def emit_traversal_error(err: OSError) -> None:
+    """Write a localized, sanitized traversal I/O diagnostic to stderr."""
+    typer.echo(format_traversal_error(err), err=True)
+
+
+def emit_cli_error(message: object) -> None:
+    """Write a localized, sanitized CLI error diagnostic to stderr."""
+    safe_msg = sanitize_diagnostic_text(str(message))
+    typer.echo(_("Error: {message}").format(message=safe_msg), err=True)
 
 
 def get_version() -> str:
@@ -101,7 +156,7 @@ def get_diagnostics(ctx: typer.Context | None = None) -> str:
 
         config_path = get_active_config_path()
 
-    cfg_str = str(config_path) if config_path is not None else _("none")
+    cfg_str = sanitize_diagnostic_text(str(config_path)) if config_path is not None else _("none")
     lines.append(f"Configuration: {cfg_str}")
 
     return "\n".join(lines) + "\n"

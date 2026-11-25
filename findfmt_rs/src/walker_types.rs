@@ -150,7 +150,6 @@ pub struct WalkConfig {
 #[derive(Clone, Debug)]
 pub struct WalkOsError {
     pub raw_errno: Option<i32>,
-    pub message: String,
     pub path: PathBuf,
 }
 
@@ -158,7 +157,6 @@ impl WalkOsError {
     pub fn from_io(err: &io::Error, path: &Path) -> Self {
         Self {
             raw_errno: err.raw_os_error(),
-            message: err.to_string(),
             path: path.to_path_buf(),
         }
     }

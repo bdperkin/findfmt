@@ -102,5 +102,30 @@ class TraversalError(FindFmtError):
     """Base exception for directory traversal errors."""
 
 
+class _InvalidPatternError(TraversalError, ValueError):
+    """Internal traversal and value error raised for malformed glob patterns."""
+
+
 class ParserError(FindFmtError, ValueError):
     """Base exception for external input parsing and outline ingestion errors."""
+
+
+def make_negative_bound_error(field: str, value: int) -> TraversalError:
+    """Construct a localized TraversalError for a negative traversal bound."""
+    return TraversalError(
+        _("{field} must be non-negative, got {value}").format(field=field, value=value),
+    )
+
+
+def make_overflow_bound_error(field: str) -> OverflowError:
+    """Construct a localized OverflowError when a bound exceeds platform usize."""
+    return OverflowError(
+        _("{field} exceeds platform limit").format(field=field),
+    )
+
+
+def make_invalid_pattern_error(pattern: str) -> TraversalError:
+    """Construct a localized TraversalError/ValueError for an invalid glob pattern."""
+    return _InvalidPatternError(
+        _("Invalid glob pattern: '{pattern}'").format(pattern=pattern),
+    )

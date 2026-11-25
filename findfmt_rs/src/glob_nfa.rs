@@ -151,7 +151,7 @@ fn normalize_gitignore_segments<'a>(
     }
 
     if segs.is_empty() {
-        return Err(format!("Invalid git pattern: {raw_line:?}"));
+        return Err(raw_line.to_owned());
     }
     if segs.last() == Some(&"")
         && let Some(last) = segs.last_mut()
@@ -265,8 +265,7 @@ pub(crate) fn compile_gitignore_rule(raw_line: &str) -> Result<Option<CompiledRu
                 let pc_loop = prog.len();
                 prog.push(Inst::Split(pc_ns, pc_loop + 1));
             } else {
-                emit_segment_glob(&mut prog, seg)
-                    .map_err(|_| format!("Invalid git pattern: {raw_line:?}"))?;
+                emit_segment_glob(&mut prog, seg).map_err(|_| raw_line.to_owned())?;
             }
             if i == end {
                 emit_terminal_suffix(&mut prog, seg);

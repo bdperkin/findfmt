@@ -3,6 +3,7 @@
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 
+use pyo3::exceptions::PyOverflowError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
 
@@ -24,15 +25,24 @@ fn extract_optional_non_negative(
     if val_obj.is_none() {
         return Ok(None);
     }
-    let signed: i64 = val_obj.extract()?;
-    if signed < 0 {
-        let msg = format!("{attr_name} must be non-negative, got {signed}");
-        let err = handles.traversal_error_cls.bind(py).call1((msg,))?;
+    if val_obj.lt(0)? {
+        let err = handles
+            .make_negative_bound_error
+            .bind(py)
+            .call1((attr_name, &val_obj))?;
         return Err(PyErr::from_value(err));
     }
-    usize::try_from(signed).map(Some).map_err(|_| {
-        pyo3::exceptions::PyOverflowError::new_err(format!("{attr_name} exceeds platform usize"))
-    })
+    match val_obj.extract::<usize>() {
+        Ok(val) => Ok(Some(val)),
+        Err(err) if err.is_instance_of::<PyOverflowError>(py) => {
+            let localized = handles
+                .make_overflow_bound_error
+                .bind(py)
+                .call1((attr_name,))?;
+            Err(PyErr::from_value(localized))
+        }
+        Err(err) => Err(err),
+    }
 }
 
 fn extract_string_vec(obj: &Bound<'_, PyAny>) -> PyResult<Vec<String>> {
@@ -129,14 +139,22 @@ pub(crate) fn prepare_walk_from_py_config<'py>(
 
     let include_patterns = extract_string_vec(&config_obj.getattr("include_patterns")?)?;
     let exclude_patterns = extract_string_vec(&config_obj.getattr("exclude_patterns")?)?;
-    let matcher = PatternMatcher::try_new_for_unicode(
+    let matcher = match PatternMatcher::try_new_for_unicode(
         &include_patterns,
         &exclude_patterns,
         ignore_case,
         match_dirs,
         handles.unicode_major,
-    )
-    .map_err(pyo3::exceptions::PyValueError::new_err)?;
+    ) {
+        Ok(m) => m,
+        Err(bad_pat) => {
+            let err = handles
+                .make_invalid_pattern_error
+                .bind(py)
+                .call1((bad_pat,))?;
+            return Err(PyErr::from_value(err));
+        }
+    };
 
     let filter = FilterCriteria {
         include_tags: extract_tag_set(Some(&config_obj.getattr("include_tags")?))?,

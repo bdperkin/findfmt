@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.7.1.dev1+g6f1658aa7.d20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-24 16:14-0400\n"
+"POT-Creation-Date: 2026-11-24 20:31-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja\n"
@@ -19,18 +19,18 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: ../../source/accessibility.md:1 d5de4eb816d5465aa423711bf5c240c0
+#: ../../source/accessibility.md:1 56eff416c57a4a8a9e08a8a4194654c4
 msgid "Accessibility Statement"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:29 20ab77cda441460da2d335db5be19750
+#: ../../../ACCESSIBILITY.md:3 6dcb815681cd46b7b5166e84e0eaa1ce
 msgid ""
 "`findfmt` is committed to providing an accessible, inclusive experience "
 "for all users and contributors, regardless of ability or assistive "
 "technology."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:32 96d2ab1e0e524894b164d903bb3359bf
+#: ../../../ACCESSIBILITY.md:6 b69218394bc64183a6052a14f0f6bbea
 msgid ""
 "We strive to align our command-line tools, documentation, and community "
 "workflows with the [Web Content Accessibility Guidelines (WCAG) 2.1 Level"
@@ -38,21 +38,21 @@ msgid ""
 "wherever applicable."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:38 a14b6405a7aa469ab4747a40d5c1652d
+#: ../../../ACCESSIBILITY.md:12 7a786bf637084dfbb76ed214f8736d53
 msgid "1. Supported Environments & Assistive Technologies"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:40 49437744b8764149956e353721fb5d18
+#: ../../../ACCESSIBILITY.md:14 86c5f21652a3497b9ddc24b68cb191dd
 msgid "1.1. Command-Line Interface (CLI)"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:42 8ade8223bb724599b4237cbfacde52b1
+#: ../../../ACCESSIBILITY.md:16 99c90ac261294cd0bbc52afff1f40c75
 msgid ""
 "The `findfmt` CLI is designed from the ground up for compatibility with "
 "terminal screen readers and assistive tooling:"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:45 dae1040c56c24247bf78dffc3b2a77b2
+#: ../../../ACCESSIBILITY.md:19 811055d2840341439a281934a068de60
 msgid ""
 "**Screen Reader Compatibility**: Verified for predictable speech output "
 "on standard terminal emulators across Linux "
@@ -62,7 +62,7 @@ msgid ""
 "/jaws-screen-reader-software/))."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:49 2bae23f96ca948f49e166fd24f10ab9d
+#: ../../../ACCESSIBILITY.md:23 77841978f3ac451c98612d9c616f6415
 msgid ""
 "**Stream-Oriented Plain Text**: CLI output emits linear, deterministic "
 "text streams to `stdout` and error diagnostics to `stderr` without ANSI "
@@ -70,76 +70,91 @@ msgid ""
 "modes."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:52 0fe0cc4c574844f99a5c5f7b60cb650d
+#: ../../../ACCESSIBILITY.md:26 bbc5d9e120a14994a45d2e3235c45aee
 msgid ""
-"**Machine-Readable Delimiters**: Supports `-0` / `--null` NUL-separated "
-"streaming for unambiguous parsing and programmatic integration with "
+"**Machine-Readable Delimiters**: Supports `-0` / `--print0` NUL-separated"
+" streaming for unambiguous parsing and programmatic integration with "
 "`xargs -0` and automated scripts."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:54 5c9054c6d130471fb7f75d6e945dcde4
+#: ../../../ACCESSIBILITY.md:28 c2ae7525303d48b08c4caa2ed6ba6b10
 msgid ""
-"**Color Independence & `NO_COLOR` Support**: No critical information is "
-"communicated exclusively through color. When color styling is introduced,"
-" `findfmt` adheres to the [`NO_COLOR`](https://no-color.org/) standard, "
-"disabling ANSI styles whenever the `NO_COLOR` environment variable is set"
-" or when output is redirected to a non-TTY pipe or file."
+"**Color Independence, `NO_COLOR`, `FORCE_COLOR`, & `TERM=dumb` Support**:"
+" No critical information is communicated exclusively through color. "
+"`findfmt` honors explicit `--color` / `--no-color` flags first, followed "
+"by [`NO_COLOR`](https://no-color.org/) (disabling ANSI styles whenever "
+"`NO_COLOR` is non-empty), `FORCE_COLOR` / `CLICOLOR_FORCE`, `CLICOLOR=0`,"
+" and `TERM=dumb`, and disables ANSI styling whenever output is redirected"
+" to a non-TTY pipe or file (`src/findfmt/cli/terminal.py`). Behavior is "
+"identical across both the native Rust extension (`findfmt._rust_ext`) and"
+" pure-Python fallback (`findfmt._fallback`)."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:59 f873e78983c64a0dac4acaadadf4952c
+#: ../../../ACCESSIBILITY.md:34 bb58cb4152a84add8e82fbafae5f01bd
+msgid ""
+"**Localized, Sanitized Diagnostics Across Rust & Python**: Traversal I/O "
+"warnings and CLI diagnostics coming from either `findfmt._rust_ext` or "
+"`findfmt._fallback` are formatted through "
+"`src/findfmt/cli/diagnostics.py`, translated via GNU `gettext` "
+"(`findfmt.i18n`), and stripped of ANSI escape codes, C0/C1 control "
+"characters, Unicode bidirectional (`BiDi`) overrides, and invalid UTF-8 "
+"surrogates before reaching `stdout` or `stderr`."
+msgstr ""
+
+#: ../../../ACCESSIBILITY.md:39 6af1e45c3d944ecdb93a23c7f0ecd9f1
 msgid "1.2. Project Documentation & Web Systems"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:61 a7b33078b97f4531bfaffcf5d9d9fb38
+#: ../../../ACCESSIBILITY.md:41 47e60e4576f74ad68e2d8f3cdb80eb0e
 msgid ""
 "Our web documentation (hosted via Sphinx and GitHub Pages) is configured "
 "to adhere to WCAG 2.1 Level AA standards:"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:64 2f220fe5fa4f4f4699aaaffa0058b26d
+#: ../../../ACCESSIBILITY.md:44 ad1aeabcbefe465c9baea3846454ead7
 msgid ""
 "**Semantic Markup**: Uses structured HTML landmarks (`<nav>`, `<main>`, "
 "`<article>`, `<aside>`, `<header>`, `<footer>`) to facilitate smooth "
 "screen reader orientation."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:66 9ac876e78b8145db9dc48ca3bfa92835
+#: ../../../ACCESSIBILITY.md:46 c7834cb262d44caeb13004823e678823
 msgid ""
 "**Clear Heading Hierarchy**: Maintains sequential heading levels (`H1` "
 "through `H6`) to ensure reliable section jumping."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:68 60752a5d3ec84a2ebaebe6fa66d95d93
+#: ../../../ACCESSIBILITY.md:48 9f1810058b594736a359ebdfc622f0a4
 msgid ""
 "**Contrast Ratios**: Ensures text-to-background contrast ratios exceed "
 "the 4.5:1 minimum threshold for normal body text and 3:1 for large "
 "headings."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:70 f043cda17a8849729e5c356a0db123b2
+#: ../../../ACCESSIBILITY.md:50 0daf3dee929e484a97639838913629dd
 msgid ""
 "**Keyboard Navigation**: All interactive elements (search modals, "
 "navigation sidebars, code-copy buttons) are fully operable via keyboard "
 "focus indicators without mouse interaction."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:72 523d8e4301f54aaeb631a36115b75be5
+#: ../../../ACCESSIBILITY.md:52 63db2e41926a4a65b9e9ae196c74f848
 msgid ""
 "**Descriptive Alt Text**: Graphical assets, diagrams, and illustrations "
 "provide clear, contextual alternative text."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:77 8ec44eebe1f94d328b5d306c8d6d9e9a
+#: ../../../ACCESSIBILITY.md:57 89686410659d45309b36458dd7d61204
 msgid "2. Known Limitations & Workarounds"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:79 b653feb124bf446b8efc6d86682d71e9
+#: ../../../ACCESSIBILITY.md:59 4b0a3cf695f247dbb33f7279b25111d3
 msgid ""
 "While we actively work to identify and eliminate barriers, some external "
 "environments may present constraints:"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:82 7b6d01f098084909b74b7ec2696a1f5a
+#: ../../../ACCESSIBILITY.md:61 7a2494c6962b4f2194ea87939ed8dfcc
 msgid ""
 "**Terminal Emulator Color Schemes**: Highly customized terminal themes "
 "with non-standard contrast profiles may impact ANSI code readability. "
@@ -147,7 +162,7 @@ msgid ""
 "force monochrome output."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:85 268e882483804bffaba1f36bcc379dc9
+#: ../../../ACCESSIBILITY.md:64 96a30bc6c183470086d0a2aa22a52aaf
 msgid ""
 "**Wide Delimited Streams**: When inspecting verbose file lists with long "
 "absolute paths, terminal word-wrapping can impact speech cadence on "
@@ -155,71 +170,71 @@ msgid ""
 "default behavior) or pipe into a pager such as `less -R`."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:91 c89878c350954ab58217a6d42532d55f
+#: ../../../ACCESSIBILITY.md:70 f5b387b3e9b9442a902a850479bee454
 msgid "3. Reporting Accessibility Barriers & Feedback"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:93 c12103c8d9984d7bbc8f1bc8e1b921ba
+#: ../../../ACCESSIBILITY.md:72 ba7e9ef9ea764bda8208d16abc648600
 msgid ""
 "We actively welcome feedback and bug reports from users who encounter "
 "barriers while interacting with `findfmt`."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:96 55606a1be3b14b648ec1ef7d37ae0cbf
+#: ../../../ACCESSIBILITY.md:75 606d36a85e744679bac23c1dd7bfc52f
 msgid "3.1. Public Issue Tracker"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:98 11d4d6f5fbbc4116972a9fec34319f3c
+#: ../../../ACCESSIBILITY.md:77 480990d0790a4adb9382281602147875
 msgid ""
 "If you encounter an accessibility barrier in the CLI, website, or "
 "documentation:"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:100 ecac19c6cfe84ffa96058fcba39c1453
+#: ../../../ACCESSIBILITY.md:79 d0edc7c5f9874064af4b1660df85b9fe
 msgid "Visit our [GitHub Issues](https://github.com/bdperkin/findfmt/issues)."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:101 13d4e59cdfb7408eba3230723561dd3b
+#: ../../../ACCESSIBILITY.md:80 9f3af37d57964581ba678a0bd1b1a848
 msgid "Open a new issue detailing:"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:102 0c231943a86e465ea2029fa83fbff045
+#: ../../../ACCESSIBILITY.md:81 f6fe60edbff8422bb45d31410f7f1acd
 msgid ""
 "The assistive technology or environment used (screen reader, terminal "
 "emulator, operating system)."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:104 31d6193b9bf74c3da90f20371e2880c5
+#: ../../../ACCESSIBILITY.md:82 4a4645b6222b4ae4a640915a2ec3a7f1
 msgid "The specific command or documentation URL where the barrier occurred."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:105 25f88c36ceee423c824cb7032c86a3d8
+#: ../../../ACCESSIBILITY.md:83 2f9bfa9937fd4803831a72098b156851
 msgid "The expected versus actual behavior."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:106 74df8075434940eeb1ca52191719a78a
+#: ../../../ACCESSIBILITY.md:84 23c6a04a434d4b42bbbf74ed332a107c
 msgid "Label the issue with `accessibility`."
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:108 41bb58586f744ca5a7ac6d3d546e9c27
+#: ../../../ACCESSIBILITY.md:86 09e45c0af8f547708ebb1734eac47d7c
 msgid "3.2. Confidential or Direct Inquiries"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:110 a83a2fbf2fc945c1bc80fa1df177faa4
+#: ../../../ACCESSIBILITY.md:88 9ea789169d5b4b82a35f53e85e8812a9
 msgid ""
 "For sensitive inquiries, private barrier reports, or direct consultation,"
 " please contact the maintainer directly:"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:113 5b7e25987b04489eb2bfa124494c8b23
+#: ../../../ACCESSIBILITY.md:91 8f1c5792d5784ef1b5c8121edd42a2de
 msgid "**Contact**: Brandon Perkins"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:114 ae7b28a8a8e745e39352f1ee885e33f9
+#: ../../../ACCESSIBILITY.md:92 0d7943f120dc40048a2f2b9be17b7efb
 msgid "**Email**: [bdperkin@gmail.com](mailto:bdperkin@gmail.com)"
 msgstr ""
 
-#: ../../../ACCESSIBILITY.md:115 043f8d2aeb394435bf9fef59e3b89678
+#: ../../../ACCESSIBILITY.md:93 7d1a9a89a19f4a4cb1ccc842ef9f0350
 msgid ""
 "**Response Commitment**: We commit to acknowledging all accessibility "
 "reports within **48–72 hours** and prioritizing remediations in upcoming "

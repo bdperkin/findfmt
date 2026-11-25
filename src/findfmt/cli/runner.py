@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, TextIO
 import typer
 
 from findfmt.cli.config import build_traversal_config
+from findfmt.cli.diagnostics import emit_cli_error, emit_traversal_error
 from findfmt.cli.output_sink import OutputSink, open_output_sink, reconfigure_surrogateescape
 from findfmt.cli.signals import handle_broken_pipe, install_signal_handlers, trap_cli_signals
 from findfmt.cli.summary import write_summary
@@ -71,7 +72,7 @@ def _deliver_output(  # noqa: PLR0913 - wide CLI/config signature
     except BrokenPipeError:
         handle_broken_pipe(target_stream)
     except FindFmtError as err:
-        typer.echo(f"Error: {err}", err=True)
+        emit_cli_error(err)
         raise typer.Exit(code=2) from err
 
 
@@ -221,7 +222,7 @@ def _create_formatter(
         )
     except FindFmtError as err:
         sink.close()
-        typer.echo(f"Error: {err}", err=True)
+        emit_cli_error(err)
         raise typer.Exit(code=2) from err
 
 
@@ -421,9 +422,7 @@ def execute_findfmt(  # noqa: PLR0913 - wide CLI/config signature
         """Report missing or unreadable path to stderr and mark traversal failure."""
         nonlocal had_traversal_error
         had_traversal_error = True
-        bad_path = err.filename or "<unknown>"
-        reason = err.strerror or (str(err.args[0]) if err.args else str(err))
-        typer.echo(f"findfmt: cannot open '{bad_path}': {reason}", err=True)
+        emit_traversal_error(err)
 
     def _matched_files() -> Iterable[FileInfo]:
         """Yield matched files while accumulating frequency statistics."""

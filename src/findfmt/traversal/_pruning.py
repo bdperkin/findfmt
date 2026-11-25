@@ -8,7 +8,7 @@ from contextvars import ContextVar
 from typing import TYPE_CHECKING, Any, TypedDict
 
 from findfmt.classifier import _resolve_relative
-from findfmt.exceptions import TraversalError
+from findfmt.exceptions import make_negative_bound_error
 from findfmt.traversal.tags import INTERPRETER_TAGS, can_skip_file_by_tags
 
 if TYPE_CHECKING:
@@ -120,8 +120,8 @@ class _PruneFrame:
 def check_file_limit(count: int, file_limit: int | None) -> bool:
     """Verify whether directory entry count does not exceed filelimit threshold."""
     if file_limit is not None and file_limit < 0:
-        msg = f"file_limit must be non-negative, got {file_limit}"
-        raise TraversalError(msg)
+        field_name = "file_limit"
+        raise make_negative_bound_error(field_name, file_limit)
 
     return file_limit is None or count <= file_limit
 
@@ -129,8 +129,8 @@ def check_file_limit(count: int, file_limit: int | None) -> bool:
 def check_depth_limit(current_depth: int, max_depth: int | None) -> bool:
     """Determine whether traversal can descend further based on maximum depth."""
     if max_depth is not None and max_depth < 0:
-        msg = f"max_depth must be non-negative, got {max_depth}"
-        raise TraversalError(msg)
+        field_name = "max_depth"
+        raise make_negative_bound_error(field_name, max_depth)
 
     return max_depth is None or current_depth < max_depth
 
