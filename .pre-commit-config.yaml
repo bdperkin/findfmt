@@ -45,6 +45,12 @@ repos:
     hooks:
       - id: check-pre-commit-ci-config
 
+  # Sync pre-commit dependencies
+  - repo: https://github.com/pre-commit/sync-pre-commit-deps
+    rev: v0.0.5
+    hooks:
+      - id: sync-pre-commit-deps
+
   # Pre-commit standard hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -54,19 +60,30 @@ repos:
           - --maxkb=500
       - id: check-ast
       - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-illegal-windows-names
       - id: check-json
       - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+        exclude: ^findfmt_rs/fuzz/seed_corpus/
       - id: check-toml
+      - id: check-vcs-permalinks
       - id: check-yaml
         args:
           - --unsafe
       - id: debug-statements
+      - id: destroyed-symlinks
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: file-contents-sorter
         files: ^\.github/styles/config/vocabularies/findfmt/(accept|reject)\.txt$
         args:
           - --unique
+      - id: fix-byte-order-marker
+      - id: forbid-submodules
+      - id: mixed-line-ending
+        args:
+          - --fix=lf
       - id: trailing-whitespace
       - id: name-tests-test
         args:
@@ -379,12 +396,6 @@ repos:
           - A
           - src
         pass_filenames: false
-
-  # Sync pre-commit dependencies
-  - repo: https://github.com/pre-commit/sync-pre-commit-deps
-    rev: v0.0.5
-    hooks:
-      - id: sync-pre-commit-deps
 
   # Vale prose, code-comment, and commit-message linter
   - repo: https://github.com/vale-cli/vale
