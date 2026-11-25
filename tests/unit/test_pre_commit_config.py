@@ -1,4 +1,4 @@
-"""Tests for Stage 1 hygiene, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716)."""
+"""Tests for Stage 1-2, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716, #717)."""
 
 from __future__ import annotations
 
@@ -179,3 +179,42 @@ def test_stage1_meta_and_core_hygiene_hooks() -> None:
         "sort-simple-yaml",
     }
     assert set(hooks_by_id).isdisjoint(skipped_or_deferred)
+
+
+def test_stage2_packaging_lockfiles_and_config_hooks() -> None:
+    """Verify Stage 2 ordering, retained packaging/lockfile hooks, and skipped variants (#717)."""
+    config = _load_pre_commit_config()
+    ci_skip = set(config["ci"]["skip"])
+    repos = config["repos"]
+    stage2_repos = [r["repo"] for r in repos[4:9]]
+    assert stage2_repos == [
+        "https://github.com/tox-dev/pyproject-fmt",
+        "https://github.com/ComPWA/taplo-pre-commit",
+        "https://github.com/abravalheri/validate-pyproject",
+        "https://github.com/astral-sh/uv-pre-commit",
+        "https://github.com/regebro/pyroma",
+    ]
+
+    all_repo_urls = {r["repo"] for r in repos}
+    assert "https://github.com/tox-dev/tox-ini-fmt" not in all_repo_urls
+
+    pyproject_fmt = _find_repo_entry(config, "https://github.com/tox-dev/pyproject-fmt")
+    assert [h["id"] for h in pyproject_fmt["hooks"]] == ["pyproject-fmt"]
+    assert "pyproject-fmt" not in ci_skip
+
+    validate_pyproject = _find_repo_entry(config, "https://github.com/abravalheri/validate-pyproject")
+    assert [h["id"] for h in validate_pyproject["hooks"]] == ["validate-pyproject"]
+    assert "validate-pyproject" not in ci_skip
+
+    uv_repo = _find_repo_entry(config, "https://github.com/astral-sh/uv-pre-commit")
+    uv_hooks = {h["id"]: h for h in uv_repo["hooks"]}
+    assert set(uv_hooks) == {"uv-lock", "uv-export"}
+    assert set(uv_hooks).isdisjoint({"uv-sync", "pip-compile", "uv-audit"})
+    assert set(uv_hooks).isdisjoint(ci_skip)
+    assert "--output-file=.clusterfuzzlite/requirements.txt" in uv_hooks["uv-export"]["args"]
+
+    pyroma_repo = _find_repo_entry(config, "https://github.com/regebro/pyroma")
+    pyroma_hooks = pyroma_repo["hooks"]
+    assert [h["id"] for h in pyroma_hooks] == ["pyroma"]
+    assert "--min=10" in pyroma_hooks[0]["args"]
+    assert "pyroma" in ci_skip
