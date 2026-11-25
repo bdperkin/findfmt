@@ -1,4 +1,4 @@
-"""Tests for Stage 1-3, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716-#718)."""
+"""Tests for Stage 1-4, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716-#719)."""
 
 from __future__ import annotations
 
@@ -251,3 +251,36 @@ def test_stage3_python_auto_formatters_and_code_modifiers() -> None:
         "blank-line-after-blocks",
         "ruff-format",
     }.isdisjoint(ci_skip)
+
+
+def test_stage4_python_type_dependency_and_static_quality_hooks() -> None:
+    """Verify Stage 4 analyzer ordering, ci.skip policy, and QUALITY_STEPS parity (#719)."""
+    config = _load_pre_commit_config()
+    ci_skip = set(config["ci"]["skip"])
+    repos = config["repos"]
+    stage4_slice = repos[15:20]
+    stage4_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage4_slice]
+    assert stage4_pairs == [
+        ("https://github.com/astral-sh/ty-pre-commit", ["ty"]),
+        ("https://github.com/osprey-oss/deptry", ["deptry"]),
+        ("https://github.com/jendrikseipp/vulture", ["vulture"]),
+        ("https://github.com/rubik/xenon", ["xenon"]),
+        ("https://github.com/econchick/interrogate", ["interrogate"]),
+    ]
+
+    assert stage4_slice[0]["hooks"][0].get("args") == ["--group", "lint"]
+    assert stage4_slice[2]["hooks"][0].get("args") == ["src"]
+    assert stage4_slice[3]["hooks"][0].get("args") == ["-b", "B", "-m", "B", "-a", "A", "src"]
+    assert stage4_slice[3]["hooks"][0].get("pass_filenames") is False
+    assert stage4_slice[4]["hooks"][0].get("args") == ["src"]
+    assert stage4_slice[4]["hooks"][0].get("pass_filenames") is False
+
+    assert {"ty", "deptry"} <= ci_skip
+    assert {"vulture", "xenon", "interrogate"}.isdisjoint(ci_skip)
+
+    quality_cmds = {cmd for _, cmd in QUALITY_STEPS}
+    assert ("uv", "run", "ty", "check") in quality_cmds
+    assert ("uv", "run", "deptry", ".") in quality_cmds
+    assert ("uv", "run", "vulture", "src") in quality_cmds
+    assert ("uv", "run", "xenon", "-b", "B", "-m", "B", "-a", "A", "src") in quality_cmds
+    assert ("uv", "run", "interrogate", "src") in quality_cmds
