@@ -8,6 +8,11 @@ on:
   pull_request:
     branches:
       - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
   workflow_dispatch:
 
 concurrency:
@@ -91,10 +96,12 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+        os: >-
+          ${{ fromJSON((github.event_name == 'pull_request' && github.event.pull_request.draft == true &&
+          !(github.event.pull_request.user.login == 'mergify[bot]' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          startsWith(github.head_ref, 'mergify/merge-queue/'))) && '["ubuntu-latest"]' ||
+          '["ubuntu-latest", "macos-latest", "windows-latest"]') }}
         # The minimum and maximum supported Python (#496).
         python-version:
           - '3.11'
@@ -236,10 +243,12 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+        os: >-
+          ${{ fromJSON((github.event_name == 'pull_request' && github.event.pull_request.draft == true &&
+          !(github.event.pull_request.user.login == 'mergify[bot]' &&
+          github.event.pull_request.head.repo.full_name == github.repository &&
+          startsWith(github.head_ref, 'mergify/merge-queue/'))) && '["ubuntu-latest"]' ||
+          '["ubuntu-latest", "macos-latest", "windows-latest"]') }}
         python-version:
           - '3.11'
           - '3.12'

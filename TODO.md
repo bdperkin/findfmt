@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 259 Closed Issues | 88 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
+> **Tracking:** 260 Closed Issues | 87 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -32,7 +32,7 @@
 > Dependency Dashboard `#671` Rust crate updates and Cargo grouping; 2026-11-24 released v1.4.1 and closed its
 > milestone, added pre-commit pipeline evaluation epic `#715` and child issues `#716`-`#725` and `#727` under
 > `#587` in v1.4.2, added CI matrix/cache and draft fast-path issues `#729`-`#731` under `#587` in v1.4.2, and
-> closed `#727`, `#588`, and `#729`)
+> closed `#727`, `#588`, `#729`, and `#730`)
 
 ______________________________________________________________________
 
@@ -783,6 +783,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#729](https://github.com/bdperkin/findfmt/issues/729)** - ci(matrix): trim macOS/Windows test-matrix
   to Python 3.11/3.15 and add Swatinem/rust-cache (Closed: 2026-11-24 via PR
   [#733](https://github.com/bdperkin/findfmt/pull/733))
+- [x] **[#730](https://github.com/bdperkin/findfmt/issues/730)** - ci(workflows): add Linux-only Draft PR fast
+  path and enable CodeRabbit reviews on drafts (Closed: 2026-11-24 via PR
+  [#734](https://github.com/bdperkin/findfmt/pull/734))
 
 ______________________________________________________________________
 
@@ -796,12 +799,6 @@ when picking up work.
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#730](https://github.com/bdperkin/findfmt/issues/730)** - ci(workflows): add Linux-only Draft PR fast
-  path and enable CodeRabbit reviews on drafts *(Epic:
-  [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
-  | Milestone: v1.4.2)* - **Value:** High | **Effort:** S - **Rationale:** Enables rapid Linux + CodeRabbit
-  iteration on Draft PRs (`ready_for_review` re-triggers full OS matrix; Mergify queue drafts remain
-  cross-platform).
 - [ ] **[#589](https://github.com/bdperkin/findfmt/issues/589)** - feat(a11y): verify terminal output
   readability, NO_COLOR/TERM=dumb compliance, and localized diagnostics across Rust/Python boundaries *(Rank:
   15 | Epic:
@@ -1034,8 +1031,7 @@ when picking up work.
   | Milestone: v1.4.2)* - **Value:** Low | **Effort:** S - **Rationale:** Evaluates replacing hardcoded matrix
   check names in branch protection and `.mergify.yml` with a single `CI Gate` job and assesses two-tier queue
   trade-offs once [#729](https://github.com/bdperkin/findfmt/issues/729) and
-  [#730](https://github.com/bdperkin/findfmt/issues/730) land. Blocked by
-  [#730](https://github.com/bdperkin/findfmt/issues/730).
+  [#730](https://github.com/bdperkin/findfmt/issues/730) land.
 
 - [ ] **[#445](https://github.com/bdperkin/findfmt/issues/445)** - feat(cli): add --ignore-file /
   --ignore-type options and matching config keys *(Rank: 63 | Epic:
@@ -1333,11 +1329,10 @@ natively on GitHub.
 
 - [ ] **[#587](https://github.com/bdperkin/findfmt/issues/587)** - [Epic] Hybrid Quality Assurance: Unified
   Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation *(Milestone: v1.4.2 | Open
-  sub-issues: 6)* - [#589](https://github.com/bdperkin/findfmt/issues/589),
+  sub-issues: 5)* - [#589](https://github.com/bdperkin/findfmt/issues/589),
   [#590](https://github.com/bdperkin/findfmt/issues/590),
   [#591](https://github.com/bdperkin/findfmt/issues/591),
   [#715](https://github.com/bdperkin/findfmt/issues/715),
-  [#730](https://github.com/bdperkin/findfmt/issues/730),
   [#731](https://github.com/bdperkin/findfmt/issues/731)
 - [ ] **[#715](https://github.com/bdperkin/findfmt/issues/715)** - Epic: Evaluate Pre-Commit Hook Pipeline
   Candidates *(Parent: [#587](https://github.com/bdperkin/findfmt/issues/587) | Milestone: v1.4.2 | Open
@@ -1498,7 +1493,7 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 17          |
+| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 16          |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 3           |
 | v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 4           |
 | v1.5.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                         | 4           |

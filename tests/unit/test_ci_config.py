@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import fnmatch
+import json
 import re
 import tomllib
 from pathlib import Path
@@ -26,13 +27,7 @@ RUST_CI_WORKFLOW_JOBS: tuple[tuple[str, tuple[str, ...]], ...] = (
             "test-matrix",
         ),
     ),
-    (
-        ".github/workflows/perf-and-fuzz.yml",
-        (
-            "perf-tests",
-            "rust-proptest-fuzz",
-        ),
-    ),
+    (".github/workflows/perf-and-fuzz.yml", ("perf-tests", "rust-proptest-fuzz")),
 )
 
 
@@ -204,15 +199,49 @@ def test_ci_fail_fast_policy_across_gating_and_diagnostic_matrices() -> None:
     assert cflite_wf["jobs"]["fuzzing"]["strategy"]["fail-fast"] is False
 
 
-def _expand_test_matrix_cells(ci_jobs: dict[str, Any]) -> tuple[list[tuple[str, str, bool]], int]:
+EXPECTED_OS_MATRIX_EXPR = (
+    "${{ fromJSON((github.event_name == 'pull_request' && github.event.pull_request.draft == true && "
+    "!(github.event.pull_request.user.login == 'mergify[bot]' && "
+    "github.event.pull_request.head.repo.full_name == github.repository && "
+    "startsWith(github.head_ref, 'mergify/merge-queue/'))) && '[\"ubuntu-latest\"]' || "
+    '\'["ubuntu-latest", "macos-latest", "windows-latest"]\') }}'
+)
+
+
+def _eval_os_matrix(
+    os_expr: str,
+    *,
+    event_name: str = "push",
+    draft: bool = False,
+    actor_repo_ref: tuple[str, str, str] = ("bdperkin", "bdperkin/findfmt", "main"),
+) -> list[str]:
+    """Verify the ci.yml OS matrix expression and evaluate its JSON array (#730)."""
+    assert " ".join(os_expr.split()) == EXPECTED_OS_MATRIX_EXPR
+    fast_json, full_json = re.findall(r"'(\[[^']+\])'", os_expr)
+    user_login, head_repo, head_ref = actor_repo_ref
+    is_mergify_queue = (
+        user_login == "mergify[bot]"
+        and head_repo == "bdperkin/findfmt"
+        and head_ref.startswith("mergify/merge-queue/")
+    )
+    use_fast = event_name == "pull_request" and draft and not is_mergify_queue
+    return [str(item) for item in json.loads(fast_json if use_fast else full_json)]
+
+
+def _expand_test_matrix_cells(
+    ci_jobs: dict[str, Any],
+    *,
+    draft: bool = False,
+) -> tuple[list[tuple[str, str, bool]], int]:
     """Expand effective (os, python_version, experimental) cells and count total macOS jobs."""
     matrix = ci_jobs["test-matrix"]["strategy"]["matrix"]
+    test_oses = _eval_os_matrix(str(matrix["os"]), event_name="pull_request", draft=draft)
     excluded = {(str(e["os"]), str(e["python-version"])) for e in matrix.get("exclude", [])}
     cells = [
-        (str(os_name), str(py_ver), False)
-        for os_name in matrix["os"]
+        (os_name, str(py_ver), False)
+        for os_name in test_oses
         for py_ver in matrix["python-version"]
-        if (str(os_name), str(py_ver)) not in excluded
+        if (os_name, str(py_ver)) not in excluded
     ]
     cells.extend(
         (str(inc["os"]), str(inc["python-version"]), bool(inc.get("experimental", False)))
@@ -220,11 +249,43 @@ def _expand_test_matrix_cells(ci_jobs: dict[str, Any]) -> tuple[list[tuple[str, 
     )
 
     pkg_matrix = ci_jobs["packaging-smoke-test"]["strategy"]["matrix"]
-    pkg_macos = sum(1 for os_name in pkg_matrix["os"] if os_name == "macos-latest") * len(
+    pkg_oses = _eval_os_matrix(str(pkg_matrix["os"]), event_name="pull_request", draft=draft)
+    pkg_macos = sum(1 for os_name in pkg_oses if os_name == "macos-latest") * len(
         pkg_matrix["python-version"],
     )
     test_macos = sum(1 for os_name, _, _ in cells if os_name == "macos-latest")
     return cells, pkg_macos + test_macos
+
+
+def test_ci_draft_pr_fast_path_and_coderabbit_draft_reviews() -> None:
+    """Validate ready_for_review trigger, Draft PR Linux fast path, and CodeRabbit drafts (#730)."""
+    ci = _load_ci_workflow()
+    triggers = ci.get("on", ci.get(True, {}))
+    assert triggers["pull_request"]["types"] == ["opened", "synchronize", "reopened", "ready_for_review"]
+
+    ci_jobs = ci["jobs"]
+    draft_cells, draft_macos = _expand_test_matrix_cells(ci_jobs, draft=True)
+    assert draft_macos == 0
+    assert {os_name for os_name, _, _ in draft_cells} == {"ubuntu-latest"}
+
+    full_oses = ["ubuntu-latest", "macos-latest", "windows-latest"]
+    spoof_ref = ("contributor", "contributor/findfmt", "mergify/merge-queue/spoof")
+    queue_ref = ("mergify[bot]", "bdperkin/findfmt", "mergify/merge-queue/abc123")
+    for job_name in ("packaging-smoke-test", "test-matrix"):
+        expr = str(ci_jobs[job_name]["strategy"]["matrix"]["os"])
+        assert _eval_os_matrix(expr, event_name="pull_request", draft=True, actor_repo_ref=spoof_ref) == [
+            "ubuntu-latest",
+        ]
+        assert (
+            _eval_os_matrix(expr, event_name="pull_request", draft=True, actor_repo_ref=queue_ref)
+            == full_oses
+        )
+        assert _eval_os_matrix(expr, event_name="push") == full_oses
+
+    auto_review = _load_yaml_mapping(Path(".coderabbit.yaml"))["reviews"]["auto_review"]
+    assert auto_review["drafts"] is True
+    assert "mergify[bot]" in auto_review["ignore_usernames"]
+    assert "merge queue: checking" in auto_review["ignore_title_keywords"]
 
 
 def test_ci_test_matrix_trimmed_and_aligned_with_mergify() -> None:
@@ -235,15 +296,9 @@ def test_ci_test_matrix_trimmed_and_aligned_with_mergify() -> None:
 
     gating_cells = {(os_name, py_ver) for os_name, py_ver, exp in cells if not exp}
     expected_gating = {
-        ("ubuntu-latest", "3.11"),
-        ("ubuntu-latest", "3.12"),
-        ("ubuntu-latest", "3.13"),
-        ("ubuntu-latest", "3.14"),
-        ("ubuntu-latest", "3.15"),
-        ("macos-latest", "3.11"),
-        ("macos-latest", "3.15"),
-        ("windows-latest", "3.11"),
-        ("windows-latest", "3.15"),
+        *(("ubuntu-latest", ver) for ver in ("3.11", "3.12", "3.13", "3.14", "3.15")),
+        *(("macos-latest", ver) for ver in ("3.11", "3.15")),
+        *(("windows-latest", ver) for ver in ("3.11", "3.15")),
     }
     assert gating_cells == expected_gating
     assert ("ubuntu-latest", "3.16-dev", True) in cells

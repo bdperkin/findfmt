@@ -122,7 +122,10 @@ def test_pr_title_workflow_triggers_permissions_and_mergify_alignment() -> None:
     # Verify .mergify.yml requires title & CodeRabbit checks before queueing, not on queue draft PRs
     mergify = _load_yaml_mapping(".mergify.yml")
     coderabbit = _load_yaml_mapping(".coderabbit.yaml")
-    assert coderabbit["reviews"]["auto_review"]["drafts"] is False
+    auto_review = coderabbit["reviews"]["auto_review"]
+    assert auto_review["drafts"] is True
+    assert "mergify[bot]" in auto_review["ignore_usernames"]
+    assert "merge queue: checking" in auto_review["ignore_title_keywords"]
     queue_rule = mergify["queue_rules"][0]
     for pr_only_check in (
         "check-success = Validate Conventional Commit PR Title",

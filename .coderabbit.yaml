@@ -16,9 +16,13 @@ reviews:
   auto_review:
     enabled: true
     auto_incremental_review: true
-    drafts: false
+    drafts: true
     base_branches:
       - main
+    ignore_title_keywords:
+      - 'merge queue: checking'
+    ignore_usernames:
+      - mergify[bot]
 
   path_filters:
     - '!uv.lock'
