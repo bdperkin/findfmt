@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: findfmt 0.8.0\n"
 "Report-Msgid-Bugs-To: https://github.com/bdperkin/findfmt/issues\n"
-"POT-Creation-Date: 2026-11-24 20:48-0500\n"
+"POT-Creation-Date: 2026-11-24 21:22-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,39 +17,39 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.18.0\n"
 
-#: src/findfmt/exceptions.py:39
+#: src/findfmt/exceptions.py:52
 #, python-brace-format
 msgid "Unsupported output format: '{format}'. Expected one of: {valid_formats}"
 msgstr ""
 
-#: src/findfmt/exceptions.py:57
+#: src/findfmt/exceptions.py:70
 #, python-brace-format
 msgid "Unsupported RST table style: '{style}'. Expected 'grid' or 'simple'."
 msgstr ""
 
-#: src/findfmt/exceptions.py:76
+#: src/findfmt/exceptions.py:89
 #, python-brace-format
 msgid "Unsupported table style: '{style}'. Expected one of: {valid_styles}"
 msgstr ""
 
-#: src/findfmt/exceptions.py:95
+#: src/findfmt/exceptions.py:108
 #, python-brace-format
 msgid ""
 "Invalid sort criteria '{criteria}'. Choose from: name, version, time, "
 "mtime, ctime, size, none."
 msgstr ""
 
-#: src/findfmt/exceptions.py:116 src/findfmt/models.py:23
+#: src/findfmt/exceptions.py:129 src/findfmt/models.py:23
 #, python-brace-format
 msgid "{field} must be non-negative, got {value}"
 msgstr ""
 
-#: src/findfmt/exceptions.py:123
+#: src/findfmt/exceptions.py:136
 #, python-brace-format
 msgid "{field} exceeds platform limit"
 msgstr ""
 
-#: src/findfmt/exceptions.py:130
+#: src/findfmt/exceptions.py:144
 #, python-brace-format
 msgid "Invalid glob pattern: '{pattern}'"
 msgstr ""
@@ -208,33 +208,33 @@ msgstr ""
 msgid "Active configuration: {path}"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:56 src/findfmt/cli/diagnostics.py:61
+#: src/findfmt/cli/diagnostics.py:43 src/findfmt/cli/diagnostics.py:48
 msgid "I/O error"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:67
+#: src/findfmt/cli/diagnostics.py:54
 msgid "<unknown>"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:70
+#: src/findfmt/cli/diagnostics.py:57
 #, python-brace-format
 msgid "findfmt: cannot open '{path}': {reason}"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:84
+#: src/findfmt/cli/diagnostics.py:71
 #, python-brace-format
 msgid "Error: {message}"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:143
+#: src/findfmt/cli/diagnostics.py:130
 msgid "not installed"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:148
+#: src/findfmt/cli/diagnostics.py:135
 msgid "not found"
 msgstr ""
 
-#: src/findfmt/cli/diagnostics.py:159
+#: src/findfmt/cli/diagnostics.py:146
 msgid "none"
 msgstr ""
 

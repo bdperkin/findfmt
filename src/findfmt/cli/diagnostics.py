@@ -14,8 +14,8 @@ import typer
 
 from findfmt import _FALLBACK_VERSION
 from findfmt.core import get_active_backend
+from findfmt.exceptions import _sanitize_diagnostic_text as sanitize_diagnostic_text
 from findfmt.i18n import _
-from findfmt.utils.strings import mask_control_characters, strip_ansi_escapes
 
 if TYPE_CHECKING:
     from typer.core import _click
@@ -29,19 +29,6 @@ __all__ = [
     "show_config_callback",
     "version_callback",
 ]
-
-
-_SURROGATE_MIN = 0xD800
-_SURROGATE_MAX = 0xDFFF
-
-
-def sanitize_diagnostic_text(text: str) -> str:
-    """Strip ANSI escapes and mask C0, C1, BiDi, and lone-surrogate code points."""
-    cleaned = mask_control_characters(strip_ansi_escapes(text))
-    if not any(_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX for c in cleaned):
-        return cleaned
-
-    return "".join("?" if _SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX else c for c in cleaned)
 
 
 def _extract_os_error_reason(err: OSError) -> str:

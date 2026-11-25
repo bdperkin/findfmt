@@ -28,9 +28,10 @@ tooling:
 - **Color Independence, `NO_COLOR`, `FORCE_COLOR`, & `TERM=dumb` Support**: No critical information is
   communicated exclusively through color. `findfmt` honors explicit `--color` / `--no-color` flags first,
   followed by [`NO_COLOR`](https://no-color.org/) (disabling ANSI styles whenever `NO_COLOR` is non-empty),
-  `FORCE_COLOR` / `CLICOLOR_FORCE`, `CLICOLOR=0`, and `TERM=dumb`, and disables ANSI styling whenever output
-  is redirected to a non-TTY pipe or file (`src/findfmt/cli/terminal.py`). Behavior is identical across both
-  the native Rust extension (`findfmt._rust_ext`) and pure-Python fallback (`findfmt._fallback`).
+  `FORCE_COLOR` / `CLICOLOR_FORCE`, `CLICOLOR=0`, and `TERM=dumb` / `TERM=unknown`, and disables ANSI styling
+  by default whenever output is redirected to a non-TTY pipe or file unless enabled by a higher-precedence
+  setting such as `--color` or `FORCE_COLOR=1` (`src/findfmt/cli/terminal.py`). Behavior is identical across
+  both the native Rust extension (`findfmt._rust_ext`) and pure-Python fallback (`findfmt._fallback`).
 - **Localized, Sanitized Diagnostics Across Rust & Python**: Traversal I/O warnings and CLI diagnostics coming
   from either `findfmt._rust_ext` or `findfmt._fallback` are formatted through
   `src/findfmt/cli/diagnostics.py`, translated via GNU `gettext` (`findfmt.i18n`), and stripped of ANSI escape

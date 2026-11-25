@@ -280,18 +280,21 @@ pub(crate) fn deliver_walk_os_error(
     let py_err = if let Some(code) = err.raw_errno {
         #[cfg(windows)]
         {
-            let sys_msg = py
+            let win_msg = py
                 .import("_winapi")
                 .and_then(|m| m.call_method1("FormatMessage", (code,)))
+                .or_else(|_| {
+                    py.import("ctypes")
+                        .and_then(|m| m.call_method1("FormatError", (code,)))
+                })
                 .and_then(|v| v.extract::<String>())
-                .map(|s| s.trim_end_matches(['\r', '\n', ' ', '.']).to_owned());
-            if let Ok(msg) = sys_msg {
+                .map(|s| s.trim_end_matches(['\r', '\n', ' ', '.']).to_owned())
+                .ok()
+                .filter(|s| !s.is_empty());
+            if let Some(msg) = win_msg {
                 pyo3::exceptions::PyOSError::new_err((0_i32, msg, filename_py.unbind(), code))
             } else {
-                let msg_py = match handles.os_strerror.bind(py).call1((code,)) {
-                    Ok(m) => m,
-                    Err(_) => fallback_io_reason(py, handles)?,
-                };
+                let msg_py = fallback_io_reason(py, handles)?;
                 pyo3::exceptions::PyOSError::new_err((
                     0_i32,
                     msg_py.unbind(),

@@ -153,7 +153,7 @@ def get_console(
             highlight=False,
         )
 
-    is_dumb_term = active_env.get("TERM", "").strip().lower() == "dumb"
+    is_dumb_term = active_env.get("TERM", "").strip().lower() in ("dumb", "unknown")
     if is_tty and not is_dumb_term:
         return _PipeSafeConsole(
             file=target,

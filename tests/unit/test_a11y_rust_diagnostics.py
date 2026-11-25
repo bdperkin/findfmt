@@ -92,6 +92,10 @@ def test_color_precedence_no_color_force_color_and_term_dumb() -> None:
     assert dumb_forced.no_color is False
     assert dumb_forced.color_system == "standard"
 
+    unknown_forced = get_console(tty, env={"TERM": "unknown", "FORCE_COLOR": "1", "CLICOLOR": "0"})
+    assert unknown_forced.no_color is False
+    assert unknown_forced.color_system == "standard"
+
 
 @pytest.mark.parametrize(
     "env_case",
@@ -139,6 +143,7 @@ def test_cli_color_and_summary_backend_parity(
 
 
 def test_sanitize_and_format_traversal_error_branches(
+    tmp_path: Path,
     capsys: pytest.CaptureFixture[str],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -176,14 +181,16 @@ def test_sanitize_and_format_traversal_error_branches(
         assert "\u202e" not in err_out
         assert "Fehler: bad?_cli" in err_out
 
+    dirty_cfg = tmp_path / "\x1b[31mcfg\u202e.toml"
+    clean_cfg = tmp_path / "cfg?.toml"
     monkeypatch.setattr(
         "findfmt.cli.file_config.get_active_config_path",
-        lambda: Path("/tmp/\x1b[31mcfg\u202e.toml"),
+        lambda: dirty_cfg,
     )
     diag = get_diagnostics()
     assert "\x1b" not in diag
     assert "\u202e" not in diag
-    assert "Configuration: /tmp/cfg?.toml" in diag
+    assert f"Configuration: {clean_cfg}" in diag
 
 
 @pytest.mark.parametrize(
@@ -233,7 +240,10 @@ def test_localized_bound_overflow_and_pattern_errors_parity(tmp_path: Path) -> N
     with override_locale("fr"):
         assert "positif ou nul" in str(make_negative_bound_error("max_depth", -1))
         assert "plateforme" in str(make_overflow_bound_error("max_depth"))
-        assert "Motif glob" in str(make_invalid_pattern_error("bad\\"))
+        dirty_pat_err = str(make_invalid_pattern_error("bad\x1b[31m_\u202e\\"))
+        assert "Motif glob" in dirty_pat_err
+        assert "\x1b" not in dirty_pat_err
+        assert "\u202e" not in dirty_pat_err
 
         with pytest.raises(ValueError, match="positif ou nul"):
             TraversalConfig(root_paths=(tmp_path,), max_depth=-2)
