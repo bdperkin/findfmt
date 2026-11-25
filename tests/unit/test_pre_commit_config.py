@@ -1,4 +1,4 @@
-"""Tests for Rust and TOML hooks in .pre-commit-config.yaml and CI parity (#591)."""
+"""Tests for Stage 1 hygiene, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716)."""
 
 from __future__ import annotations
 
@@ -120,3 +120,62 @@ def test_rust_cargo_hooks_and_ci_skip_parity_with_quality_gate() -> None:
         "-D",
         "warnings",
     ) in quality_cmds
+
+
+def test_stage1_meta_and_core_hygiene_hooks() -> None:
+    """Verify Stage 1 ordering and adopted/deferred/skipped pre-commit-hooks (#716)."""
+    config = _load_pre_commit_config()
+    repos = config["repos"]
+    first_four_repos = [r["repo"] for r in repos[:4]]
+    assert first_four_repos == [
+        "meta",
+        "https://github.com/pre-commit-ci/pre-commit-ci-config",
+        "https://github.com/pre-commit/sync-pre-commit-deps",
+        "https://github.com/pre-commit/pre-commit-hooks",
+    ]
+
+    core_repo = repos[3]
+    hooks_by_id = {h["id"]: h for h in core_repo["hooks"]}
+    expected_adopted = {
+        "check-added-large-files",
+        "check-ast",
+        "check-case-conflict",
+        "check-executables-have-shebangs",
+        "check-illegal-windows-names",
+        "check-json",
+        "check-merge-conflict",
+        "check-shebang-scripts-are-executable",
+        "check-toml",
+        "check-vcs-permalinks",
+        "check-yaml",
+        "debug-statements",
+        "destroyed-symlinks",
+        "detect-private-key",
+        "end-of-file-fixer",
+        "file-contents-sorter",
+        "fix-byte-order-marker",
+        "forbid-submodules",
+        "mixed-line-ending",
+        "name-tests-test",
+        "trailing-whitespace",
+    }
+    assert set(hooks_by_id) == expected_adopted
+    assert hooks_by_id["mixed-line-ending"].get("args") == ["--fix=lf"]
+    assert (
+        hooks_by_id["check-shebang-scripts-are-executable"].get("exclude") == "^findfmt_rs/fuzz/seed_corpus/"
+    )
+
+    skipped_or_deferred = {
+        "check-builtin-literals",
+        "check-docstring-first",
+        "check-symlinks",
+        "check-xml",
+        "detect-aws-credentials",
+        "double-quote-string-fixer",
+        "forbid-new-submodules",
+        "no-commit-to-branch",
+        "pretty-format-json",
+        "requirements-txt-fixer",
+        "sort-simple-yaml",
+    }
+    assert set(hooks_by_id).isdisjoint(skipped_or_deferred)
