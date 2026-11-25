@@ -54,6 +54,8 @@ QUALITY_STEPS: tuple[tuple[str, tuple[str, ...]], ...] = (
         "Semgrep Hybrid Security & Boundary Audit",
         (
             "uvx",
+            "--python",
+            ">=3.11,<3.15",
             "--from",
             "semgrep==1.187.0",
             "semgrep",

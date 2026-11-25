@@ -47,10 +47,10 @@ rules:
       FINDFMT_NO_EXTENSIONS=1 and PanicException fallback are never bypassed.
     paths:
       include:
-        - src/findfmt/**
+        - /src/findfmt/**
       exclude:
-        - src/findfmt/core.py
-        - src/findfmt/_rust_ext.pyi
+        - /src/findfmt/core.py
+        - /src/findfmt/_rust_ext.pyi
     pattern-either:
       - pattern: import findfmt._rust_ext
       - pattern: from findfmt import _rust_ext
@@ -66,7 +66,7 @@ rules:
       process::exit or process::abort; return a PyResult error instead.
     paths:
       include:
-        - findfmt_rs/src/**
+        - /findfmt_rs/src/**
     pattern-either:
       - pattern: std::process::exit(...)
       - pattern: process::exit(...)
@@ -82,7 +82,7 @@ rules:
       diagnostics through Python so NO_COLOR and terminal sanitization apply.
     paths:
       include:
-        - findfmt_rs/src/**
+        - /findfmt_rs/src/**
     pattern-either:
       - pattern: println!(...)
       - pattern: eprintln!(...)
