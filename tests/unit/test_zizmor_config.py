@@ -274,7 +274,9 @@ def test_sync_pre_commit_deps_modes(
     lock_file = tmp_path / "uv.lock"
     pre_commit_file = tmp_path / ".pre-commit-config.yaml"
     lock_file.write_text(
-        '[[package]]\nname = "ruff"\nversion = "0.17.3"\n[[package]]\nname = "deptry"\nversion = "0.25.1"\n',
+        '[[package]]\nname = "pre-commit"\nversion = "4.7.0"\n'
+        '[[package]]\nname = "ruff"\nversion = "0.17.3"\n'
+        '[[package]]\nname = "deptry"\nversion = "0.25.1"\n',
         encoding="utf-8",
     )
     pre_commit_file.write_text("- invalid-root-list\n", encoding="utf-8")
@@ -283,6 +285,8 @@ def test_sync_pre_commit_deps_modes(
     pre_commit_file.write_text(
         "repos:\n"
         "  - repo: meta\n"
+        "  - repo: https://github.com/semgrep/pre-commit\n"
+        "    rev: v1.187.0\n"
         "  - repo: https://github.com/astral-sh/ruff-pre-commit\n"
         "    rev: v0.16.10  # comment\n"
         "  - repo: https://github.com/osprey-oss/deptry\n"

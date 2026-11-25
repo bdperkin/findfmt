@@ -405,14 +405,31 @@ repos:
     hooks:
       - id: zizmor
 
-  # Codespell for typo detection
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.3
+  # Security: Detect high-entropy secrets and credentials
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
     hooks:
-      - id: codespell
-        exclude: \.(po|pot)$
+      - id: detect-secrets
+        exclude: (^|/)(uv|Cargo)\.lock$
 
-  # Pygrep hooks
+  # Security & hybrid architecture: Offline multi-language Semgrep ruleset
+  - repo: https://github.com/semgrep/pre-commit
+    rev: v1.187.0
+    hooks:
+      - id: semgrep
+        types_or:
+          - python
+          - rust
+        args:
+          - --config
+          - .semgrep.yml
+          - --error
+          - --metrics=off
+          - --disable-version-check
+          - --quiet
+          - --skip-unknown-extensions
+
+  # Pygrep static regex hygiene and security checks
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -425,18 +442,18 @@ repos:
       - id: text-unicode-replacement-char
         exclude: ^(\.pre-commit-config\.yaml)$
 
+  # Codespell for typo detection
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        exclude: \.(po|pot)$
+
   # Blocklint for non-inclusive language
   - repo: https://github.com/PrincetonUniversity/blocklint
     rev: v0.3.0
     hooks:
       - id: blocklint
-
-  # Security: Detect secrets
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        exclude: package\.lock\.json|uv\.lock|Cargo\.lock
 
   # Conventional Commits verification
   - repo: https://github.com/compilerla/conventional-pre-commit

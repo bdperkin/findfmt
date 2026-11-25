@@ -1,0 +1,89 @@
+---
+# Offline multi-language Semgrep ruleset for findfmt hybrid Python/Rust QA (#723).
+rules:
+  - id: findfmt-python-no-shell-true
+    languages:
+      - python
+    severity: ERROR
+    message: >-
+      Avoid shell=True subprocess execution or os.system(); pass an explicit
+      argument sequence to subprocess.run/Popen instead.
+    pattern-either:
+      - pattern: subprocess.$FUNC(..., shell=True, ...)
+      - pattern: os.system(...)
+
+  - id: findfmt-python-no-unsafe-yaml-load
+    languages:
+      - python
+    severity: ERROR
+    message: >-
+      Use yaml.safe_load(...) instead of unsafe YAML deserialization functions.
+    pattern-either:
+      - pattern: yaml.unsafe_load(...)
+      - pattern: yaml.full_load(...)
+      - patterns:
+          - pattern: yaml.load(...)
+          - pattern-not: yaml.load(..., Loader=yaml.SafeLoader, ...)
+          - pattern-not: yaml.load(..., Loader=yaml.CSafeLoader, ...)
+
+  - id: findfmt-python-no-pickle-deserialization
+    languages:
+      - python
+    severity: ERROR
+    message: >-
+      Avoid untrusted binary deserialization via pickle or marshal.
+    pattern-either:
+      - pattern: pickle.load(...)
+      - pattern: pickle.loads(...)
+      - pattern: marshal.load(...)
+      - pattern: marshal.loads(...)
+
+  - id: findfmt-gateway-boundary-rust-ext
+    languages:
+      - python
+    severity: ERROR
+    message: >-
+      Import findfmt._rust_ext only inside src/findfmt/core.py so
+      FINDFMT_NO_EXTENSIONS=1 and PanicException fallback are never bypassed.
+    paths:
+      include:
+        - src/findfmt/**
+      exclude:
+        - src/findfmt/core.py
+        - src/findfmt/_rust_ext.pyi
+    pattern-either:
+      - pattern: import findfmt._rust_ext
+      - pattern: from findfmt import _rust_ext
+      - pattern: from findfmt._rust_ext import $SYM
+      - pattern: importlib.import_module("findfmt._rust_ext")
+
+  - id: findfmt-rust-no-process-exit-or-abort
+    languages:
+      - rust
+    severity: ERROR
+    message: >-
+      Never terminate the host Python interpreter from findfmt_rs via
+      process::exit or process::abort; return a PyResult error instead.
+    paths:
+      include:
+        - findfmt_rs/src/**
+    pattern-either:
+      - pattern: std::process::exit(...)
+      - pattern: process::exit(...)
+      - pattern: std::process::abort()
+      - pattern: process::abort()
+
+  - id: findfmt-rust-no-raw-stdio-macros
+    languages:
+      - rust
+    severity: ERROR
+    message: >-
+      Avoid raw println!/eprintln!/dbg! in findfmt_rs/src/; route output and
+      diagnostics through Python so NO_COLOR and terminal sanitization apply.
+    paths:
+      include:
+        - findfmt_rs/src/**
+    pattern-either:
+      - pattern: println!(...)
+      - pattern: eprintln!(...)
+      - pattern: dbg!(...)
