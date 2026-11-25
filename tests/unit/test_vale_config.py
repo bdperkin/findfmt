@@ -98,12 +98,13 @@ def test_vale_pre_commit_hooks_and_ci_parity() -> None:
     msg_hook = next((h for h in hooks if h.get("id") == "vale-commit-msg"), None)
     assert msg_hook is not None
     assert msg_hook.get("stages") == ["commit-msg"]
-    msg_entry = str(msg_hook.get("entry", ""))
-    assert "commit.cleanup" in msg_entry
-    assert "git stripspace --strip-comments" in msg_entry
-    assert "sed" in msg_entry
-    assert "--minAlertLevel=error" in msg_entry
-    assert "--path=COMMIT_EDITMSG" in msg_entry
+    assert msg_hook.get("entry") == "sh tools/vale_commit_msg.sh"
+    script_text = (root / "tools" / "vale_commit_msg.sh").read_text(encoding="utf-8")
+    assert "commit.cleanup" in script_text
+    assert "git stripspace --strip-comments" in script_text
+    assert "sed" in script_text
+    assert "--minAlertLevel=error" in script_text
+    assert "--path=COMMIT_EDITMSG" in script_text
 
     pc_hooks_repo = next(
         (
@@ -159,13 +160,14 @@ def test_vale_ini_sections_and_gitignore_entries() -> None:
 
 
 def _vale_commit_msg_argv(root: Path) -> list[str]:
-    """Return tokenized argv for the vale-commit-msg hook entry."""
+    """Return tokenized argv for the vale-commit-msg hook entry with script path resolved."""
     pc_data = _load_yaml(root / ".pre-commit-config.yaml")
     vale_repo = next(
         r for r in pc_data.get("repos", []) if r.get("repo") == "https://github.com/vale-cli/vale"
     )
     msg_hook = next(h for h in vale_repo["hooks"] if h.get("id") == "vale-commit-msg")
-    return shlex.split(str(msg_hook["entry"]))
+    tokens = shlex.split(str(msg_hook["entry"]))
+    return [str(root / tok) if tok.startswith("tools/") else tok for tok in tokens]
 
 
 def test_vale_commit_msg_filter_respects_comment_char_and_cleanup(tmp_path: Path) -> None:

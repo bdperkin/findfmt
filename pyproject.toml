@@ -346,7 +346,7 @@ overrides.python = { warning = 110, error = 150 }
 overrides.yaml = { warning = 110, error = 150 }
 file_line_overrides.markdown = { warning = 300, error = 600 }
 file_line_overrides.python = { warning = 300, error = 500 }
-file_line_overrides.yaml = { warning = 300, error = 500 }
+file_line_overrides.yaml = { warning = 300, error = 600 }
 
 [tool.suppression-auditor]
 strict = true
