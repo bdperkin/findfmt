@@ -90,6 +90,32 @@ repos:
           - --pytest-test-first
         exclude: ^tests/fuzz/
 
+  # Format pyproject.toml
+  - repo: https://github.com/tox-dev/pyproject-fmt
+    rev: v2.31.2
+    hooks:
+      - id: pyproject-fmt
+        args:
+          - --max-supported-python
+          - '3.15'
+
+  # Format and lint Rust/Cargo TOML manifests
+  - repo: https://github.com/ComPWA/taplo-pre-commit
+    rev: v0.9.3
+    hooks:
+      - id: taplo-format
+        files: ^findfmt_rs/.*\.toml$
+      - id: taplo-lint
+        files: ^findfmt_rs/.*\.toml$
+        args:
+          - --no-schema
+
+  # Validate pyproject.toml
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.27
+    hooks:
+      - id: validate-pyproject
+
   # UV dependency management
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.13.9
@@ -169,32 +195,6 @@ repos:
       - id: python-use-type-annotations
       - id: text-unicode-replacement-char
         exclude: ^(\.pre-commit-config\.yaml)$
-
-  # Validate pyproject.toml
-  - repo: https://github.com/abravalheri/validate-pyproject
-    rev: v0.27
-    hooks:
-      - id: validate-pyproject
-
-  # Format pyproject.toml
-  - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: v2.31.2
-    hooks:
-      - id: pyproject-fmt
-        args:
-          - --max-supported-python
-          - '3.15'
-
-  # Format and lint Rust/Cargo TOML manifests
-  - repo: https://github.com/ComPWA/taplo-pre-commit
-    rev: v0.9.3
-    hooks:
-      - id: taplo-format
-        files: ^findfmt_rs/.*\.toml$
-      - id: taplo-lint
-        files: ^findfmt_rs/.*\.toml$
-        args:
-          - --no-schema
 
   # Yamllint
   - repo: https://github.com/adrienverge/yamllint
