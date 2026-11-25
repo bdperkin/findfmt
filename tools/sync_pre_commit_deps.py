@@ -21,6 +21,18 @@ def _normalize_pkg_name(name: str) -> str:
     return name.strip().lower().replace("_", "-")
 
 
+def _repo_pkg_name(repo_url: str) -> str:
+    """Derive normalized PyPI package name from a pre-commit repository URL."""
+    prefix, _, repo_slug = repo_url.rstrip("/").rpartition("/")
+    slug = repo_slug.lower()
+    if slug == "pre-commit" and prefix:
+        owner_slug = prefix.rsplit("/", 1)[-1].lower()
+        if owner_slug and owner_slug != "pre-commit":
+            slug = owner_slug
+
+    return _normalize_pkg_name(slug.removesuffix("-pre-commit"))
+
+
 def _load_locked_versions(lock_file: Path) -> dict[str, str]:
     """Return mapping of normalized package name to version from uv.lock."""
     with lock_file.open("rb") as f:
@@ -84,8 +96,7 @@ def _find_mismatches(
         if not repo_url or not current_rev or repo_url in {"local", "meta"}:
             continue
 
-        slug = repo_url.rstrip("/").rsplit("/", 1)[-1].lower()
-        pkg_name = _normalize_pkg_name(slug.removesuffix("-pre-commit"))
+        pkg_name = _repo_pkg_name(repo_url)
         locked_ver = locked_versions.get(pkg_name)
         if locked_ver is not None:
             expected_rev = f"v{locked_ver}" if current_rev.startswith("v") else locked_ver

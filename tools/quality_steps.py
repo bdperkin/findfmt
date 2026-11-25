@@ -50,6 +50,26 @@ QUALITY_STEPS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("Codespell Spelling", ("uv", "run", "codespell")),
     ("Pre-Commit Dependency Sync", ("uv", "run", "python", "tools/sync_pre_commit_deps.py")),
     ("CLI & Markdown Docs SoT Sync", ("uv", "run", "python", "tools/sync_cli_docs.py")),
+    (
+        "Semgrep Hybrid Security & Boundary Audit",
+        (
+            "uvx",
+            "--python",
+            ">=3.11,<3.15",
+            "--from",
+            "semgrep==1.187.0",
+            "semgrep",
+            "--config",
+            ".semgrep.yml",
+            "--error",
+            "--metrics=off",
+            "--disable-version-check",
+            "--quiet",
+            "src",
+            "tools",
+            "findfmt_rs",
+        ),
+    ),
     ("UV Dependency Audit", ("uv", "audit", "--preview-features", "audit-command")),
 )
 
