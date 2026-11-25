@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 266 Closed Issues | 81 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
+> **Tracking:** 267 Closed Issues | 82 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -32,8 +32,8 @@
 > Dependency Dashboard `#671` Rust crate updates and Cargo grouping; 2026-11-24 released v1.4.1 and closed its
 > milestone, added pre-commit pipeline evaluation epic `#715` and child issues `#716`-`#725` and `#727` under
 > `#587` in v1.4.2, added CI matrix/cache and draft fast-path issues `#729`-`#731` under `#587` in v1.4.2, and
-> closed `#727`, `#588`, `#729`, `#730`, `#589`, and `#591`; 2026-11-25 closed `#716`, `#717`, `#718`, and
-> `#719`)
+> closed `#727`, `#588`, `#729`, `#730`, `#589`, and `#591`; 2026-11-25 added config sorting issues `#741` and
+> `#742` in v1.4.2, and closed `#716`, `#717`, `#718`, `#719`, and `#720`)
 
 ______________________________________________________________________
 
@@ -805,6 +805,8 @@ Note: Ordered chronologically by completion date.
 - [x] **[#719](https://github.com/bdperkin/findfmt/issues/719)** - Evaluate Pre-commit Stage 4: Python Type
   Checking, Dependencies & Static Quality Analysis (Closed: 2026-11-25 via PR
   [#740](https://github.com/bdperkin/findfmt/pull/740))
+- [x] **[#720](https://github.com/bdperkin/findfmt/issues/720)** - Evaluate Pre-commit Stage 5: YAML, JSON
+  Schemas & HTML Templates (Closed: 2026-11-25 via PR [#743](https://github.com/bdperkin/findfmt/pull/743))
 
 ______________________________________________________________________
 
@@ -818,12 +820,6 @@ when picking up work.
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#720](https://github.com/bdperkin/findfmt/issues/720)** - Evaluate Pre-commit Stage 5: YAML, JSON
-  Schemas & HTML Templates *(Epic:
-  [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
-  | Parent: [#715](https://github.com/bdperkin/findfmt/issues/715) | Milestone: v1.4.2)* - **Value:** Medium |
-  **Effort:** S - **Rationale:** Evaluates `yamlfix`, `yamllint`, `check-jsonschema`, and `djLint` hooks
-  against `findfmt`'s configuration and template footprint.
 - [ ] **[#721](https://github.com/bdperkin/findfmt/issues/721)** - Evaluate Pre-commit Stage 6: Documentation
   (Markdown & reStructuredText) *(Epic:
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
@@ -854,6 +850,11 @@ when picking up work.
   | Parent: [#715](https://github.com/bdperkin/findfmt/issues/715) | Milestone: v1.4.2)* - **Value:** Medium |
   **Effort:** S - **Rationale:** Evaluates an inline `repo: local` `uvx pylint` `similarities` (`R0801`) hook
   for cross-file duplicate-code detection across `findfmt`'s Python codebase.
+- [ ] **[#741](https://github.com/bdperkin/findfmt/issues/741)** - ci(pre-commit): standardize and enforce
+  sequence sorting and mapping key order in .pre-commit-config.yaml *(Milestone: v1.4.2)* - **Value:** Medium
+  | **Effort:** S - **Rationale:** Sorts order-independent sequences (`ci.skip`, `additional_dependencies`,
+  read-only hook blocks) and standardizes mapping key order in `.pre-commit-config.yaml` with unit-test
+  guardrails.
 - [ ] **[#597](https://github.com/bdperkin/findfmt/issues/597)** - sec(ci): integrate cargo-audit, cargo-deny,
   pip-audit, and Dependabot Cargo ecosystem updates into CI workflows *(Rank: 17 | Epic:
   [[Epic] Hybrid CI/CD & Release Pipeline: Dual Backend Matrix, Rust Supply-Chain Security & Multi-Platform Maturin Wheels](https://github.com/bdperkin/findfmt/issues/595)
@@ -882,6 +883,11 @@ when picking up work.
   Rust extension nor the pure-Python fallback regresses on any OS or Python version.
 
 ### 2.2. Medium Priority / Core Deliverables
+
+- [ ] **[#742](https://github.com/bdperkin/findfmt/issues/742)** - chore(config): evaluate schema-aware
+  auto-sorting fixers and unit-test enforcement across repository configs *(Milestone: v1.4.2)* - **Value:**
+  Medium | **Effort:** M - **Rationale:** Evaluates schema-aware TOML/YAML/JSON auto-sorters (`taplo`,
+  `tombi`, `google/keep-sorted`, `yamllint`) across repository configs with unit-test fallback where needed.
 
 - [ ] **[#593](https://github.com/bdperkin/findfmt/issues/593)** - build(docker): update multi-stage
   Dockerfile and container smoke tests for hybrid uv + rustup wheel builds *(Rank: 35 | Epic:
@@ -1318,8 +1324,7 @@ natively on GitHub.
   [#731](https://github.com/bdperkin/findfmt/issues/731)
 - [ ] **[#715](https://github.com/bdperkin/findfmt/issues/715)** - Epic: Evaluate Pre-Commit Hook Pipeline
   Candidates *(Parent: [#587](https://github.com/bdperkin/findfmt/issues/587) | Milestone: v1.4.2 | Open
-  sub-issues: 6)* - [#720](https://github.com/bdperkin/findfmt/issues/720),
-  [#721](https://github.com/bdperkin/findfmt/issues/721),
+  sub-issues: 5)* - [#721](https://github.com/bdperkin/findfmt/issues/721),
   [#722](https://github.com/bdperkin/findfmt/issues/722),
   [#723](https://github.com/bdperkin/findfmt/issues/723),
   [#724](https://github.com/bdperkin/findfmt/issues/724),
@@ -1471,7 +1476,7 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 10          |
+| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 11          |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 3           |
 | v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 4           |
 | v1.5.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                         | 4           |
