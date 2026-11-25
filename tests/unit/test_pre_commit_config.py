@@ -1,4 +1,4 @@
-"""Tests for Stage 1-4, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716-#719)."""
+"""Tests for Stage 1-5, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716-#720)."""
 
 from __future__ import annotations
 
@@ -284,3 +284,45 @@ def test_stage4_python_type_dependency_and_static_quality_hooks() -> None:
     assert ("uv", "run", "vulture", "src") in quality_cmds
     assert ("uv", "run", "xenon", "-b", "B", "-m", "B", "-a", "A", "src") in quality_cmds
     assert ("uv", "run", "interrogate", "src") in quality_cmds
+
+
+def test_stage5_yaml_json_schemas_and_html_template_hooks() -> None:
+    """Verify Stage 5 formatter-before-linter order, schema hooks, and djLint Jinja hooks (#720)."""
+    config = _load_pre_commit_config()
+    ci_skip = set(config["ci"]["skip"])
+    repos = config["repos"]
+    assert repos[20]["repo"] == "https://github.com/doublify/pre-commit-rust"
+
+    stage5_slice = repos[21:25]
+    assert [r["repo"] for r in stage5_slice] == [
+        "https://github.com/lyz-code/yamlfix",
+        "https://github.com/adrienverge/yamllint",
+        "https://github.com/python-jsonschema/check-jsonschema",
+        "https://github.com/djlint/djLint",
+    ]
+
+    assert [h["id"] for h in stage5_slice[0]["hooks"]] == ["yamlfix"]
+    assert [h["id"] for h in stage5_slice[1]["hooks"]] == ["yamllint"]
+    assert stage5_slice[1]["hooks"][0].get("args") == ["-c", ".yamllint.yaml"]
+
+    schema_hook_ids = {h["id"] for h in stage5_slice[2]["hooks"]}
+    assert schema_hook_ids == {
+        "check-codecov",
+        "check-dependabot",
+        "check-github-issue-config",
+        "check-github-issue-forms",
+        "check-github-workflows",
+        "check-github-workflows-require-timeout",
+        "check-mergify",
+        "check-readthedocs",
+        "check-renovate",
+    }
+
+    djlint_hooks = stage5_slice[3]["hooks"]
+    assert [h["id"] for h in djlint_hooks] == ["djlint-reformat-jinja", "djlint-jinja"]
+    for hook in djlint_hooks:
+        assert hook.get("files") == "^docs/source/_templates/"
+        assert hook.get("types_or") == ["html", "jinja"]
+
+    stage5_hook_ids = {h["id"] for r in stage5_slice for h in r["hooks"]}
+    assert stage5_hook_ids.isdisjoint(ci_skip)

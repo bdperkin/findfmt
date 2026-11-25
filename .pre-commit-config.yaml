@@ -290,6 +290,50 @@ repos:
           - -D
           - warnings
 
+  # Yamlfix formatter
+  - repo: https://github.com/lyz-code/yamlfix
+    rev: 1.19.1
+    hooks:
+      - id: yamlfix
+
+  # Yamllint
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        args:
+          - -c
+          - .yamllint.yaml
+
+  # JSON Schema validation for GitHub and service configuration files
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.39.0
+    hooks:
+      - id: check-github-workflows
+      - id: check-github-workflows-require-timeout
+      - id: check-dependabot
+      - id: check-github-issue-forms
+      - id: check-github-issue-config
+      - id: check-codecov
+      - id: check-renovate
+      - id: check-mergify
+      - id: check-readthedocs
+
+  # HTML & Jinja2 template formatter and linter (Sphinx sidebar templates)
+  - repo: https://github.com/djlint/djLint
+    rev: v1.54.0
+    hooks:
+      - id: djlint-reformat-jinja
+        files: ^docs/source/_templates/
+        types_or:
+          - html
+          - jinja
+      - id: djlint-jinja
+        files: ^docs/source/_templates/
+        types_or:
+          - html
+          - jinja
+
   # Codespell for typo detection
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.3
@@ -309,15 +353,6 @@ repos:
       - id: python-use-type-annotations
       - id: text-unicode-replacement-char
         exclude: ^(\.pre-commit-config\.yaml)$
-
-  # Yamllint
-  - repo: https://github.com/adrienverge/yamllint
-    rev: v1.38.0
-    hooks:
-      - id: yamllint
-        args:
-          - -c
-          - .yamllint.yaml
 
   # Blocklint for non-inclusive language
   - repo: https://github.com/PrincetonUniversity/blocklint
@@ -358,12 +393,6 @@ repos:
     hooks:
       - id: pymarkdown
 
-  # Yamlfix formatter
-  - repo: https://github.com/lyz-code/yamlfix
-    rev: 1.19.1
-    hooks:
-      - id: yamlfix
-
   # Security: Detect secrets
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
@@ -376,20 +405,6 @@ repos:
     rev: v1.33.1
     hooks:
       - id: zizmor
-
-  # JSON Schema validation for GitHub and service configuration files
-  - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.39.0
-    hooks:
-      - id: check-github-workflows
-      - id: check-github-workflows-require-timeout
-      - id: check-dependabot
-      - id: check-github-issue-forms
-      - id: check-github-issue-config
-      - id: check-codecov
-      - id: check-renovate
-      - id: check-mergify
-      - id: check-readthedocs
 
   # Conventional Commits verification
   - repo: https://github.com/compilerla/conventional-pre-commit
