@@ -97,17 +97,16 @@ def test_stage6_documentation_markdown_and_rst_hooks() -> None:
     stage6_hook_ids = {h["id"] for r in stage6_slice for h in r["hooks"]}
     assert stage6_hook_ids.isdisjoint(ci_skip)
 
-    prose_indices = [
-        idx
-        for idx, entry in enumerate(repos)
-        if entry["repo"]
-        in {
-            "https://github.com/codespell-project/codespell",
-            "https://github.com/PrincetonUniversity/blocklint",
-            "https://github.com/vale-cli/vale",
-        }
-    ]
-    assert all(idx > 28 for idx in prose_indices)
+    expected_prose_repos = {
+        "https://github.com/codespell-project/codespell",
+        "https://github.com/PrincetonUniversity/blocklint",
+        "https://github.com/vale-cli/vale",
+    }
+    prose_indices_by_repo = {
+        entry["repo"]: idx for idx, entry in enumerate(repos) if entry["repo"] in expected_prose_repos
+    }
+    assert set(prose_indices_by_repo) == expected_prose_repos
+    assert all(idx > 28 for idx in prose_indices_by_repo.values())
 
     all_repo_urls = {r["repo"] for r in repos}
     assert all_repo_urls.isdisjoint(
