@@ -334,32 +334,6 @@ repos:
           - html
           - jinja
 
-  # Codespell for typo detection
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.3
-    hooks:
-      - id: codespell
-        exclude: \.(po|pot)$
-
-  # Pygrep hooks
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.10.0
-    hooks:
-      - id: python-check-blanket-noqa
-      - id: python-check-blanket-type-ignore
-      - id: python-check-mock-methods
-      - id: python-no-eval
-      - id: python-no-log-warn
-      - id: python-use-type-annotations
-      - id: text-unicode-replacement-char
-        exclude: ^(\.pre-commit-config\.yaml)$
-
-  # Blocklint for non-inclusive language
-  - repo: https://github.com/PrincetonUniversity/blocklint
-    rev: v0.3.0
-    hooks:
-      - id: blocklint
-
   # Markdown heading numbering
   - repo: https://github.com/jsh9/markdown-heading-numbering
     rev: 0.1.1
@@ -392,6 +366,32 @@ repos:
     rev: v0.9.42  # zizmor: ignore[ref-confusion] -- upstream publishes matching branch and tag names
     hooks:
       - id: pymarkdown
+
+  # Codespell for typo detection
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        exclude: \.(po|pot)$
+
+  # Pygrep hooks
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: python-check-blanket-noqa
+      - id: python-check-blanket-type-ignore
+      - id: python-check-mock-methods
+      - id: python-no-eval
+      - id: python-no-log-warn
+      - id: python-use-type-annotations
+      - id: text-unicode-replacement-char
+        exclude: ^(\.pre-commit-config\.yaml)$
+
+  # Blocklint for non-inclusive language
+  - repo: https://github.com/PrincetonUniversity/blocklint
+    rev: v0.3.0
+    hooks:
+      - id: blocklint
 
   # Security: Detect secrets
   - repo: https://github.com/Yelp/detect-secrets
