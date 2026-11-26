@@ -85,13 +85,8 @@ fn extract_tag_map(obj: &Bound<'_, PyAny>) -> PyResult<HashMap<String, Vec<Strin
     let mut out = HashMap::with_capacity(dict.len());
     for (k, v) in dict.iter() {
         let key: String = k.extract()?;
-        let mut vals: Vec<String> = v
-            .try_iter()?
-            .map(|item| item?.extract())
-            .collect::<PyResult<_>>()?;
-        vals.sort();
-        vals.dedup();
-        out.insert(key, vals);
+        let vals: BTreeSet<String> = v.extract()?;
+        out.insert(key, vals.into_iter().collect());
     }
     Ok(out)
 }
@@ -107,20 +102,16 @@ impl TagRegistry {
             return Ok(reg);
         }
         let built = Self::load_from_python(py)?;
-        let _ = PYTHON_TAG_REGISTRY.set(built);
-        PYTHON_TAG_REGISTRY.get().ok_or_else(|| {
-            pyo3::exceptions::PyRuntimeError::new_err("failed to initialize TagRegistry")
-        })
+        Ok(PYTHON_TAG_REGISTRY.get_or_init(|| built))
     }
 
     fn load_from_python(py: Python<'_>) -> PyResult<Self> {
         let ext_mod = py.import("identify.extensions")?;
         let interp_mod = py.import("identify.interpreters")?;
+        let need_bin = ext_mod.getattr("EXTENSIONS_NEED_BINARY_CHECK")?;
         Ok(Self {
             extensions: extract_tag_map(&ext_mod.getattr("EXTENSIONS")?)?,
-            extensions_need_binary_check: extract_tag_map(
-                &ext_mod.getattr("EXTENSIONS_NEED_BINARY_CHECK")?,
-            )?,
+            extensions_need_binary_check: extract_tag_map(&need_bin)?,
             names: extract_tag_map(&ext_mod.getattr("NAMES")?)?,
             interpreters: extract_tag_map(&interp_mod.getattr("INTERPRETERS")?)?,
             mime_types_strict: HashMap::new(),
@@ -169,21 +160,13 @@ impl TagRegistry {
         }
     }
 
-    /// Alias preserved for internal `#[cfg(test)]` suites.
-    #[cfg(test)]
-    #[must_use]
-    pub fn builtin_for_tests() -> Self {
-        Self::sample_registry()
-    }
-
     /// Match `identify.identify.tags_from_filename(filename)`.
     #[must_use]
     pub fn tags_from_filename(&self, filename: &str) -> BTreeSet<String> {
-        let base_name = if cfg!(windows) {
-            filename.rsplit(['/', '\\']).next().unwrap_or(filename)
-        } else {
-            filename.rsplit('/').next().unwrap_or(filename)
-        };
+        #[cfg(windows)]
+        let base_name = filename.rsplit(['/', '\\']).next().unwrap_or(filename);
+        #[cfg(not(windows))]
+        let base_name = filename.rsplit('/').next().unwrap_or(filename);
         let mut ret = BTreeSet::new();
 
         if let Some(found) = self.names.get(base_name) {

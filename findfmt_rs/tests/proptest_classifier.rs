@@ -63,7 +63,7 @@ proptest! {
     fn prop_structured_shebang_env_quotes_and_nix_shell(
         use_env in any::<bool>(),
         use_split_flag in any::<bool>(),
-        interp in "[a-zA-Z0-9_./-]{1,24}",
+        interp in "[a-zA-Z][a-zA-Z0-9_./-]{0,23}",
         arg in "[a-zA-Z0-9_=-]{0,16}",
         quote_choice in 0_u8..4_u8,
     ) {

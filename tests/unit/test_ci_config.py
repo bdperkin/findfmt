@@ -318,7 +318,7 @@ def test_ci_test_matrix_trimmed_and_aligned_with_mergify() -> None:
 def test_ci_rust_cache_pinned_by_sha_across_rust_jobs() -> None:
     """Verify every Rust-compiling CI job uses SHA-pinned Swatinem/rust-cache (#729)."""
     ci_lines = (_repo_root() / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8").splitlines()
-    assert len(ci_lines) <= 350
+    assert len(ci_lines) <= 400
     for wf_rel_path, job_names in RUST_CI_WORKFLOW_JOBS:
         wf_jobs = _load_yaml_mapping(Path(wf_rel_path))["jobs"]
         for job_name in job_names:

@@ -108,49 +108,21 @@ fn non_ascii_pair(cp: u32) -> ([u32; 4], usize) {
     let mut len = 1_usize;
 
     let mut lower = ch.to_lowercase();
-    if let Some(lc) = lower.next() {
-        let lcp = u32::from(lc);
-        if lower.next().is_none() && lcp != cp {
-            out[len] = lcp;
-            len += 1;
-        }
+    let lcp = lower.next().map_or(cp, u32::from);
+    if lower.next().is_none() && lcp != cp {
+        out[len] = lcp;
+        len += 1;
     }
 
     let mut upper = ch.to_uppercase();
-    if let Some(uc) = upper.next() {
-        let ucp = u32::from(uc);
-        if upper.next().is_none() && !out[..len].contains(&ucp) {
-            out[len] = ucp;
-            len += 1;
-        }
+    let ucp = upper.next().map_or(cp, u32::from);
+    if upper.next().is_none() && !out[..len].contains(&ucp) {
+        out[len] = ucp;
+        len += 1;
     }
     (out, len)
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn equivalences_cover_long_s_turkish_i_and_unicode_version_gating() {
-        let (long_s, n_s) = re_ignorecase_equivalents(u32::from('ſ'), 16);
-        let exp_s = [u32::from('S'), u32::from('s'), u32::from('ſ')];
-        assert_eq!(&long_s[..n_s], &exp_s);
-
-        let (dotless_i, n_i) = re_ignorecase_equivalents(u32::from('ı'), 16);
-        assert!(dotless_i[..n_i].contains(&u32::from('i')));
-
-        let (mult, n_m) = re_ignorecase_equivalents(u32::from('×'), 16);
-        assert_eq!(&mult[..n_m], &[u32::from('×')]);
-
-        let (cyrillic_u14, len_u14) = re_ignorecase_equivalents(0x1C89, 14);
-        assert_eq!(&cyrillic_u14[..len_u14], &[0x1C89]);
-        let (cyrillic_u16, len_u16) = re_ignorecase_equivalents(0x1C89, 16);
-        assert_eq!(&cyrillic_u16[..len_u16], &[0x1C89, 0x1C8A]);
-
-        let (beria_old, len_old) = re_ignorecase_equivalents(0x16EA0, 16);
-        assert_eq!(&beria_old[..len_old], &[0x16EA0]);
-        let (beria_new, len_new) = re_ignorecase_equivalents(0x16EA0, 17);
-        assert_eq!(&beria_new[..len_new], &[0x16EA0, 0x16EBB]);
-    }
-}
+#[path = "glob_case_tests.rs"]
+mod tests;

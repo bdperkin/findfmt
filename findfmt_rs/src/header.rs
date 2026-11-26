@@ -54,13 +54,6 @@ where
     }
     #[cfg(not(unix))]
     {
-        let lst = fs::symlink_metadata(path).ok()?;
-        if !lst.file_type().is_file() && !lst.file_type().is_symlink() {
-            return Some(HeaderInspection {
-                buffer: Vec::new(),
-                opened_meta: Some(lst),
-            });
-        }
         let target_meta = fs::metadata(path).ok()?;
         if !target_meta.file_type().is_file() {
             return Some(HeaderInspection {
@@ -73,19 +66,14 @@ where
     }
 }
 
-fn inspect_open_file(mut file: File, max_bytes: usize) -> Option<HeaderInspection> {
-    let meta = file.metadata().ok()?;
-    if !meta.file_type().is_file() {
-        return Some(HeaderInspection {
-            buffer: Vec::new(),
-            opened_meta: Some(meta),
-        });
-    }
-
+pub(crate) fn read_bounded_nonblocking<R: Read>(
+    reader: &mut R,
+    max_bytes: usize,
+) -> Option<Vec<u8>> {
     let mut buffer = vec![0_u8; max_bytes];
     let mut total = 0_usize;
     while total < max_bytes {
-        match file.read(&mut buffer[total..]) {
+        match reader.read(&mut buffer[total..]) {
             Ok(0) => break,
             Ok(n) => total += n,
             Err(err) if err.kind() == io::ErrorKind::Interrupted => {}
@@ -94,6 +82,18 @@ fn inspect_open_file(mut file: File, max_bytes: usize) -> Option<HeaderInspectio
         }
     }
     buffer.truncate(total);
+    Some(buffer)
+}
+
+fn inspect_open_file(mut file: File, max_bytes: usize) -> Option<HeaderInspection> {
+    let meta = file.metadata().ok()?;
+    if !meta.file_type().is_file() {
+        return Some(HeaderInspection {
+            buffer: Vec::new(),
+            opened_meta: Some(meta),
+        });
+    }
+    let buffer = read_bounded_nonblocking(&mut file, max_bytes)?;
     Some(HeaderInspection {
         buffer,
         opened_meta: Some(meta),
@@ -112,79 +112,5 @@ pub fn is_text_buffer(buffer: &[u8]) -> bool {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use std::env;
-    use std::fs;
-    use std::time::{SystemTime, UNIX_EPOCH};
-
-    fn unique_temp_dir(label: &str) -> io::Result<std::path::PathBuf> {
-        let nanos = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .map_or(0, |d| d.as_nanos());
-        let dir = env::temp_dir().join(format!(
-            "findfmt_rs_hdr_{label}_{}_{nanos}",
-            std::process::id()
-        ));
-        fs::create_dir_all(&dir)?;
-        Ok(dir)
-    }
-
-    #[test]
-    fn text_vs_binary_detection_matches_identify() {
-        assert!(is_text_buffer(b""));
-        assert!(is_text_buffer(b"hello world\n\t\r\x1b[31mred\x1b[0m"));
-        assert!(is_text_buffer("héllo 世界\n".as_bytes()));
-        assert!(!is_text_buffer(b"hello\x00world"));
-        assert!(!is_text_buffer(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"));
-        assert!(!is_text_buffer(b"\x7fELF\x02\x01\x01\x00"));
-
-        let mut nul_past_1kb = vec![b'a'; 1024];
-        nul_past_1kb.push(0);
-        assert!(is_text_buffer(&nul_past_1kb));
-    }
-
-    #[test]
-    fn regular_and_missing_header_reads() -> Result<(), Box<dyn std::error::Error>> {
-        let dir = unique_temp_dir("reg")?;
-        let file_path = dir.join("sample.py");
-        fs::write(&file_path, b"#!/usr/bin/env python3\nprint(1)\n")?;
-
-        let res = read_header_nonblocking(&file_path, MAX_HEADER_BYTES).ok_or("header read")?;
-        assert!(res.opened_meta.as_ref().is_some_and(Metadata::is_file));
-        assert!(res.buffer.starts_with(b"#!/usr/bin/env python3"));
-
-        assert!(read_header_nonblocking(&dir.join("missing.py"), MAX_HEADER_BYTES).is_none());
-        let _ = fs::remove_dir_all(&dir);
-        Ok(())
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn fifo_swap_never_blocks_and_reports_non_regular() -> Result<(), Box<dyn std::error::Error>> {
-        use std::os::unix::fs::FileTypeExt;
-
-        let dir = unique_temp_dir("fifo")?;
-        let pipe_path = dir.join("swapped.pipe");
-        fs::write(&pipe_path, b"regular initial content\n")?;
-
-        let swap_target = pipe_path.clone();
-        let res = read_header_with_hook(&pipe_path, MAX_HEADER_BYTES, move || {
-            let removed = fs::remove_file(&swap_target);
-            assert!(removed.is_ok(), "unlink regular must succeed");
-            let rc = std::process::Command::new("mkfifo")
-                .arg(&swap_target)
-                .status()
-                .map_or(-1, |s| if s.success() { 0 } else { -1 });
-            assert_eq!(rc, 0, "mkfifo must succeed");
-        })
-        .ok_or("non-blocking open of FIFO")?;
-
-        assert_eq!(res.buffer, b"");
-        let meta = res.opened_meta.ok_or("fstat metadata present")?;
-        assert!(!meta.file_type().is_file());
-        assert!(meta.file_type().is_fifo());
-        let _ = fs::remove_dir_all(&dir);
-        Ok(())
-    }
-}
+#[path = "header_tests.rs"]
+mod tests;

@@ -63,10 +63,7 @@ fn posix_shlex_split(line: &str) -> Result<Vec<String>, ()> {
         match state {
             ShlexState::Whitespace => {
                 if is_shlex_whitespace(ch) {
-                    if !current.is_empty() || quoted {
-                        tokens.push(std::mem::take(&mut current));
-                        quoted = false;
-                    }
+                    // Remain in leading/inter-token whitespace.
                 } else if ch == '\\' {
                     state = ShlexState::Escape { prev_quote: None };
                 } else if ch == '\'' || ch == '"' {
@@ -79,10 +76,8 @@ fn posix_shlex_split(line: &str) -> Result<Vec<String>, ()> {
             ShlexState::Word => {
                 if is_shlex_whitespace(ch) {
                     state = ShlexState::Whitespace;
-                    if !current.is_empty() || quoted {
-                        tokens.push(std::mem::take(&mut current));
-                        quoted = false;
-                    }
+                    tokens.push(std::mem::take(&mut current));
+                    quoted = false;
                 } else if ch == '\'' || ch == '"' {
                     state = ShlexState::Quote(ch);
                 } else if ch == '\\' {
@@ -184,46 +179,5 @@ pub fn parse_shebang_tokens(buffer: &[u8]) -> Vec<String> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn extract_shebang_raw_line() {
-        assert_eq!(
-            extract_shebang_from_buffer(b"#!/usr/bin/env -S python3 -u\nprint(1)"),
-            Some("#!/usr/bin/env -S python3 -u".to_owned()),
-        );
-        assert_eq!(extract_shebang_from_buffer(b"plain text\n"), None);
-    }
-
-    #[test]
-    fn parse_shebang_env_quotes_and_nix_shell() {
-        assert_eq!(
-            parse_shebang_tokens(b"#!/usr/bin/env -S python3 -u\n"),
-            vec!["python3", "-u"],
-        );
-        assert_eq!(parse_shebang_tokens(b"#!/usr/bin/env node\n"), vec!["node"],);
-        assert_eq!(
-            parse_shebang_tokens(b"#!\"/opt/my python/bin/python3.12\" -O\n"),
-            vec!["/opt/my python/bin/python3.12", "-O"],
-        );
-        // Unclosed quote falls back to whitespace split
-        assert_eq!(
-            parse_shebang_tokens(b"#!/bin/sh 'unclosed\n"),
-            vec!["/bin/sh", "'unclosed"],
-        );
-        // Non-printable / invalid UTF-8 rejected by parse_shebang_tokens
-        assert_eq!(
-            parse_shebang_tokens(b"#!/usr/bin/python3 \xff\n"),
-            Vec::<String>::new(),
-        );
-        assert_eq!(
-            parse_shebang_tokens(b"#!/usr/bin/python3 \x01\n"),
-            Vec::<String>::new(),
-        );
-
-        // nix-shell multi-line shebang
-        let nix = b"#! /usr/bin/env nix-shell\n#! nix-shell -i bash -p bash\necho ok\n";
-        assert_eq!(parse_shebang_tokens(nix), vec!["bash"]);
-    }
-}
+#[path = "shebang_tests.rs"]
+mod tests;

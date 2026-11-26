@@ -85,9 +85,8 @@ pub(crate) fn advance_active_root(
 
     let top = state.stack.last_mut()?;
     if top.idx >= top.subdirs.len() {
-        if let Some(popped) = state.stack.pop() {
-            state.pending_batch = popped.deferred_batch;
-        }
+        let popped = state.stack.pop()?;
+        state.pending_batch = popped.deferred_batch;
         return has_work_remaining(&state).then_some(state);
     }
 

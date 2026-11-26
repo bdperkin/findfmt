@@ -3,6 +3,7 @@
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::fs;
+use std::io;
 use std::path::{Path, PathBuf};
 
 use crate::metadata::RawStat;
@@ -32,6 +33,32 @@ fn stat_sort_metrics(entry: &ScannedEntry, follow_symlinks: bool) -> (f64, f64, 
     (raw.mtime.unwrap_or(0.0), raw.ctime.unwrap_or(0.0), raw.size)
 }
 
+pub(crate) fn collect_scanned_entries<I>(
+    dir: &Path,
+    iter: I,
+    file_limit: Option<usize>,
+    events: &mut Vec<WalkEvent>,
+) -> Option<Vec<ScannedEntry>>
+where
+    I: IntoIterator<Item = io::Result<ScannedEntry>>,
+{
+    let mut entries = Vec::with_capacity(16);
+    for item_res in iter {
+        let ent = match item_res {
+            Ok(e) => e,
+            Err(err) => {
+                events.push(WalkEvent::Error(WalkOsError::from_io(&err, dir)));
+                return None;
+            }
+        };
+        entries.push(ent);
+        if file_limit.is_some_and(|lim| entries.len() > lim) {
+            return None;
+        }
+    }
+    Some(entries)
+}
+
 /// Read and sort directory entries honoring `file_limit` and `sort_by` (`sorting.py` parity).
 pub fn collect_and_sort_entries(
     dir: &Path,
@@ -48,28 +75,14 @@ pub fn collect_and_sort_entries(
             return None;
         }
     };
-    let mut entries = Vec::new();
-    for item_res in read_dir {
-        let ent = match item_res {
-            Ok(e) => e,
-            Err(err) => {
-                events.push(WalkEvent::Error(WalkOsError::from_io(&err, dir)));
-                return None;
-            }
-        };
-        entries.push(ScannedEntry {
+    let mapped = read_dir.map(|res| {
+        res.map(|ent| ScannedEntry {
             path: ent.path(),
             file_name: ent.file_name(),
             file_type: ent.file_type().ok(),
-        });
-        if config
-            .bounds
-            .file_limit
-            .is_some_and(|lim| entries.len() > lim)
-        {
-            return None;
-        }
-    }
+        })
+    });
+    let mut entries = collect_scanned_entries(dir, mapped, config.bounds.file_limit, events)?;
 
     match config.sort.sort_by {
         WalkSortKey::None => {}

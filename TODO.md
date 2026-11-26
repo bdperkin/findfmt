@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 275 Closed Issues | 80 Actionable Open Tasks | 24 Active Umbrella Epics **Last audit:**
+> **Tracking:** 276 Closed Issues | 79 Actionable Open Tasks | 24 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -35,7 +35,8 @@
 > closed `#727`, `#588`, `#729`, `#730`, `#589`, and `#591`; 2026-11-25 added config, pre-commit,
 > quality-parity, and workflow issues `#741`, `#742`, and `#748`-`#751`, closed `#716`, `#717`, `#718`,
 > `#719`, `#720`, `#721`, `#722`, `#723`, `#724`, `#725`, epic `#715`, `#741`, and `#748`, assigned `#671` to
-> Future Features, and rebalanced v1.4.2-v1.4.4 by shifting `#742` and `#751` to v1.4.3 and `#750` to v1.4.4)
+> Future Features, and rebalanced v1.4.2-v1.4.4 by shifting `#742` and `#751` to v1.4.3 and `#750` to v1.4.4;
+> 2026-11-26 closed `#590`)
 
 ______________________________________________________________________
 
@@ -831,6 +832,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#748](https://github.com/bdperkin/findfmt/issues/748)** - ci(pre-commit): enforce descriptive hook
   `name:` fields, repo header comments, and inline rationales in `.pre-commit-config.yaml` (Closed: 2026-11-25
   via PR [#755](https://github.com/bdperkin/findfmt/pull/755))
+- [x] **[#590](https://github.com/bdperkin/findfmt/issues/590)** - test(coverage): configure dual Python
+  (pytest-cov) and Rust (cargo-llvm-cov / cargo-tarpaulin) coverage reporting for Codecov (Closed: 2026-11-26
+  via PR [#756](https://github.com/bdperkin/findfmt/pull/756))
 
 ______________________________________________________________________
 
@@ -859,11 +863,6 @@ when picking up work.
   [[Epic] i18n Platform Infrastructure: RTL/BiDi Rendering & Multilingual Documentation Builds](https://github.com/bdperkin/findfmt/issues/276)
   | Parent: [#229](https://github.com/bdperkin/findfmt/issues/229) | Milestone: v1.6.1)* - **Value:** Medium |
   **Effort:** S - **Rationale:** Locks in RTL behaviour cheaply; guards the Urdu/Arabic releases.
-- [ ] **[#590](https://github.com/bdperkin/findfmt/issues/590)** - test(coverage): configure dual Python
-  (pytest-cov) and Rust (cargo-llvm-cov / cargo-tarpaulin) coverage reporting for Codecov *(Rank: 28 | Epic:
-  [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
-  | Milestone: v1.4.2)* - **Value:** High | **Effort:** M - **Rationale:** Measures and enforces test coverage
-  across both Python and Rust codebases.
 - [ ] **[#749](https://github.com/bdperkin/findfmt/issues/749)** - ci(quality): enforce parity between
   `.pre-commit-config.yaml` hooks and `tools/quality_steps.py` with mapping and allow/skip tests *(Milestone:
   v1.4.2)* - **Value:** High | **Effort:** M - **Rationale:** Closes `ci.skip` and first-party local-hook gaps
@@ -1328,8 +1327,7 @@ natively on GitHub.
 
 - [ ] **[#587](https://github.com/bdperkin/findfmt/issues/587)** - [Epic] Hybrid Quality Assurance: Unified
   Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation *(Milestone: v1.4.2 | Open
-  sub-issues: 2)* - [#590](https://github.com/bdperkin/findfmt/issues/590),
-  [#731](https://github.com/bdperkin/findfmt/issues/731)
+  sub-issues: 1)* - [#731](https://github.com/bdperkin/findfmt/issues/731)
 - [ ] **[#592](https://github.com/bdperkin/findfmt/issues/592)** - [Epic] Hybrid Containerization & Maintainer
   Tooling: Multi-Stage uv+Rust Dockerfile & Cross-Language Audit Scripts *(Milestone: v1.4.3 | Open
   sub-issues: 2)* - [#593](https://github.com/bdperkin/findfmt/issues/593),
@@ -1482,7 +1480,7 @@ consolidation and sorting (#742, #751) to v1.4.3 and dedicated GitHub Actions ev
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 4           |
+| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 3           |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 5           |
 | v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 5           |
 | v1.5.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                         | 4           |

@@ -15,6 +15,16 @@ coverage:
       default:
         target: 100%
         threshold: 0%
+      python:
+        target: 100%
+        threshold: 0%
+        paths:
+          - src/findfmt
+      rust:
+        target: 100%
+        threshold: 0%
+        paths:
+          - findfmt_rs/src
     patch:
       default:
         target: 100%
@@ -37,6 +47,18 @@ comment:
 
 component_management:
   individual_components:
+    - component_id: findfmt_rs
+      name: findfmt_rs
+      paths:
+        - findfmt_rs/src/**
+    - component_id: core
+      name: core
+      paths:
+        - src/findfmt/__init__.py
+        - src/findfmt/_fallback.py
+        - src/findfmt/core.py
+        - src/findfmt/exceptions.py
+        - src/findfmt/i18n.py
     - component_id: classifier
       name: classifier
       paths:
@@ -49,11 +71,19 @@ component_management:
       paths:
         - src/findfmt/traversal/**
         - src/findfmt/parsers/**
+    - component_id: formatters
+      name: formatters
+      paths:
+        - src/findfmt/formatters/**
     - component_id: cli
       name: cli
       paths:
         - src/findfmt/cli/**
         - src/findfmt/__main__.py
+        - src/findfmt/diagnostics.py
+        - src/findfmt/entrypoints.py
+        - src/findfmt/summary.py
+        - src/findfmt/terminal.py
     - component_id: models
       name: models
       paths:
@@ -63,9 +93,16 @@ ignore:
   - tests/**/*
   - docs/**/*
   - tools/**/*
+  - findfmt_rs/fuzz/**/*
+  - findfmt_rs/tests/**/*
+  - findfmt_rs/src/*_tests.rs
 
 flags:
   unittests:
     paths:
       - src/findfmt
+    carryforward: true
+  rust:
+    paths:
+      - findfmt_rs/src
     carryforward: true

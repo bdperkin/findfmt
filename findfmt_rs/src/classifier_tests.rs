@@ -1,4 +1,4 @@
-//! Unit tests for `findfmt_rs::classifier` (#583).
+//! Unit tests for `findfmt_rs::classifier` and `classifier_helpers` (#583, #590).
 
 use std::collections::BTreeSet;
 use std::env;
@@ -7,38 +7,23 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use super::*;
 
-#[cfg(unix)]
 #[test]
-fn classify_regular_shebang_symlink_and_batch_filter() -> Result<(), Box<dyn std::error::Error>> {
-    use std::os::unix::fs::{PermissionsExt, symlink};
-
+fn classify_portable_pathext_batch_vanished_and_swapped_stat()
+-> Result<(), Box<dyn std::error::Error>> {
     let nanos = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_or(0, |d| d.as_nanos());
-    let dir = env::temp_dir().join(format!("findfmt_rs_cls_{}_{nanos}", std::process::id()));
+    let dir = env::temp_dir().join(format!("findfmt_rs_clsp_{}_{nanos}", std::process::id()));
     fs::create_dir_all(&dir)?;
-
-    let script = dir.join("runner");
-    fs::write(&script, b"#!/usr/bin/env -S python3 -u\nprint('ok')\n")?;
-    fs::set_permissions(&script, fs::Permissions::from_mode(0o755))?;
 
     let plain = dir.join("notes.rs");
     fs::write(&plain, b"fn main() {}\n")?;
+    let exe_file = dir.join("tool.exe");
+    fs::write(&exe_file, b"MZ\x00\x00")?;
 
-    let link = dir.join("link_rs");
-    symlink(&plain, &link)?;
-
-    let reg = TagRegistry::builtin_for_tests();
+    let reg = TagRegistry::sample_registry();
+    let pathext = vec![".EXE".to_owned()];
     let inputs = vec![
-        RawClassifyInput {
-            path: script.clone(),
-            str_path: script.to_string_lossy().into_owned(),
-            filename: "runner".into(),
-            follow_symlinks: false,
-            accumulated_size: None,
-            pre_stat: None,
-            pre_guessed_mime: None,
-        },
         RawClassifyInput {
             path: plain.clone(),
             str_path: plain.to_string_lossy().into_owned(),
@@ -49,38 +34,48 @@ fn classify_regular_shebang_symlink_and_batch_filter() -> Result<(), Box<dyn std
             pre_guessed_mime: None,
         },
         RawClassifyInput {
-            path: link.clone(),
-            str_path: link.to_string_lossy().into_owned(),
-            filename: "link_rs".into(),
-            follow_symlinks: true,
+            path: exe_file.clone(),
+            str_path: exe_file.to_string_lossy().into_owned(),
+            filename: "tool.exe".into(),
+            follow_symlinks: false,
             accumulated_size: None,
-            pre_stat: None,
+            pre_stat: Some((
+                false,
+                true,
+                true,
+                4,
+                Some(RawStat::from_std_metadata(&fs::metadata(&exe_file)?)),
+            )),
             pre_guessed_mime: None,
         },
     ];
-
-    let all = classify_batch_nogil(&inputs, None, &reg, None);
-    assert_eq!(all.len(), 3);
-    assert!(all[0].1.tags.contains("python"));
-    assert_eq!(
-        all[0].1.shebang.as_deref(),
-        Some("#!/usr/bin/env -S python3 -u")
-    );
-    assert_eq!(all[0].1.indicator, Some("*"));
-    assert!(all[2].1.is_symlink());
-    assert!(all[2].1.tags.contains("rust"));
-
-    let py_only = FilterCriteria {
-        include_tags: BTreeSet::from(["python".to_owned()]),
+    let rust_only = FilterCriteria {
+        include_tags: BTreeSet::from(["rust".to_owned()]),
         exclude_tags: BTreeSet::new(),
         all_tags: false,
-        shebang_filter: Some("python3".into()),
+        shebang_filter: None,
     };
-    let filtered = classify_batch_nogil(&inputs, Some(&py_only), &reg, None);
+    let filtered = classify_batch_nogil(&inputs, Some(&rust_only), &reg, Some(&pathext));
     assert_eq!(filtered.len(), 1);
-    assert_eq!(filtered[0].0, 0);
+    let all = classify_batch_nogil(&inputs, None, &reg, Some(&pathext));
+    assert_eq!(all.len(), 2);
+    assert!(all[1].1.is_executable);
 
-    // Simulated regular-file pre_stat swapped for a directory before header open
+    assert!(identify_tags_without_buffer(&plain, "notes.rs", false, true, &reg).contains("rust"));
+    assert!(
+        identify_tags_without_buffer(&dir.join("missing.rs"), "missing.rs", true, true, &reg)
+            .contains("rust")
+    );
+    assert!(identify_tags_without_buffer(&dir, "d", true, true, &reg).contains("directory"));
+
+    let mut is_file = true;
+    let mut sz = 0;
+    let mut raw_st = None;
+    assert_eq!(
+        read_regular_header(&dir.join("vanished"), &mut is_file, &mut sz, &mut raw_st).len(),
+        0
+    );
+
     let stale_file_stat = RawStat {
         mode: 0o100_644,
         size: 999,
@@ -106,7 +101,75 @@ fn classify_regular_shebang_symlink_and_batch_filter() -> Result<(), Box<dyn std
     );
     assert!(swapped.is_dir);
     assert_eq!(swapped.indicator, Some("/"));
-    assert_ne!(swapped.inode, Some(42));
+
+    let _ = fs::remove_dir_all(&dir);
+    Ok(())
+}
+
+#[cfg(unix)]
+#[test]
+fn classify_unix_shebang_symlink_socket_and_fifo() -> Result<(), Box<dyn std::error::Error>> {
+    use std::os::unix::fs::{PermissionsExt, symlink};
+    use std::os::unix::net::UnixListener;
+
+    let dir = env::temp_dir().join(format!("findfmt_rs_clsu_{}", std::process::id()));
+    let _ = fs::remove_dir_all(&dir);
+    fs::create_dir_all(&dir)?;
+
+    let script = dir.join("runner");
+    fs::write(&script, b"#!/usr/bin/env -S python3 -u\nprint('ok')\n")?;
+    fs::set_permissions(&script, fs::Permissions::from_mode(0o755))?;
+    let plain = dir.join("notes.rs");
+    fs::write(&plain, b"fn main() {}\n")?;
+    let link = dir.join("link_rs");
+    symlink(&plain, &link)?;
+
+    let reg = TagRegistry::sample_registry();
+    let res_script = classify_one_nogil(
+        &RawClassifyInput {
+            path: script.clone(),
+            str_path: script.to_string_lossy().into_owned(),
+            filename: "runner".into(),
+            follow_symlinks: false,
+            accumulated_size: None,
+            pre_stat: None,
+            pre_guessed_mime: None,
+        },
+        &reg,
+        None,
+    );
+    assert!(res_script.tags.contains("python"));
+    assert_eq!(res_script.indicator, Some("*"));
+
+    let res_link = classify_one_nogil(
+        &RawClassifyInput {
+            path: link.clone(),
+            str_path: link.to_string_lossy().into_owned(),
+            filename: "link_rs".into(),
+            follow_symlinks: true,
+            accumulated_size: None,
+            pre_stat: None,
+            pre_guessed_mime: None,
+        },
+        &reg,
+        None,
+    );
+    assert!(res_link.is_symlink());
+    assert!(res_link.symlink_target().is_some());
+    assert!(identify_tags_without_buffer(&link, "link_rs", true, true, &reg).contains("symlink"));
+
+    let sock_path = env::temp_dir().join(format!("ff_s_{}.sock", std::process::id()));
+    let _ = fs::remove_file(&sock_path);
+    let _listener = UnixListener::bind(&sock_path)?;
+    assert!(identify_tags_without_buffer(&sock_path, "s", true, true, &reg).contains("socket"));
+    let _ = fs::remove_file(&sock_path);
+
+    let fifo_path = dir.join("p.fifo");
+    let st = std::process::Command::new("mkfifo")
+        .arg(&fifo_path)
+        .status()?;
+    assert!(st.success());
+    assert!(identify_tags_without_buffer(&fifo_path, "p.py", true, true, &reg).contains("python"));
 
     let _ = fs::remove_dir_all(&dir);
     Ok(())

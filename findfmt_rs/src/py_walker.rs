@@ -86,11 +86,11 @@ impl RustFileIterator {
     }
 
     fn __next__<'py>(&mut self, py: Python<'py>) -> PyResult<Option<Bound<'py, PyAny>>> {
-        if matches!(self.state, IterState::Uninitialized { .. }) {
-            let prev = std::mem::replace(&mut self.state, IterState::Exhausted);
-            if let IterState::Uninitialized { config, on_error } = prev {
-                self.initialize(py, config.bind(py), on_error)?;
-            }
+        if let IterState::Uninitialized { config, on_error } = &self.state {
+            let cfg_py = config.clone_ref(py);
+            let err_py = on_error.as_ref().map(|cb| cb.clone_ref(py));
+            self.state = IterState::Exhausted;
+            self.initialize(py, cfg_py.bind(py), err_py)?;
         }
 
         match &mut self.state {
@@ -171,6 +171,20 @@ fn step_native_driver<'py>(
                     }
                 }
                 WalkEvent::Item(item) => {
+                    #[cfg(unix)]
+                    {
+                        return materialize_yield_item(
+                            py,
+                            handles,
+                            &driver.walk_cfg,
+                            driver.registry,
+                            &mut driver.uid_cache,
+                            &mut driver.gid_cache,
+                            *item,
+                        )
+                        .map(Some);
+                    }
+                    #[cfg(not(unix))]
                     if let Some(info) = materialize_yield_item(
                         py,
                         handles,

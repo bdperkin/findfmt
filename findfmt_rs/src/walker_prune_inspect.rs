@@ -14,6 +14,7 @@ use crate::walker_filter::{
     resolve_relative_pathbuf, should_skip_dir,
 };
 use crate::walker_prune::{PruneFrame, PruneSearch, make_memo_key};
+use crate::walker_sort::collect_scanned_entries;
 use crate::walker_types::{
     DirKey, PruneCache, PruneMemoKey, ScannedEntry, WalkConfig, WalkEvent, WalkOsError,
     surrogateescape_codepoints,
@@ -21,12 +22,8 @@ use crate::walker_types::{
 
 fn scan_sorted_for_prune(
     directory: &Path,
-    follow_symlinks: bool,
     events: &mut Vec<WalkEvent>,
 ) -> Option<Vec<ScannedEntry>> {
-    if !is_valid_descent_dir(directory, follow_symlinks) {
-        return None;
-    }
     let rd = match fs::read_dir(directory) {
         Ok(r) => r,
         Err(err) => {
@@ -34,21 +31,14 @@ fn scan_sorted_for_prune(
             return None;
         }
     };
-    let mut entries = Vec::with_capacity(16);
-    for item_res in rd {
-        let ent = match item_res {
-            Ok(e) => e,
-            Err(err) => {
-                events.push(WalkEvent::Error(WalkOsError::from_io(&err, directory)));
-                return None;
-            }
-        };
-        entries.push(ScannedEntry {
+    let mapped = rd.map(|res| {
+        res.map(|ent| ScannedEntry {
             path: ent.path(),
             file_name: ent.file_name(),
             file_type: ent.file_type().ok(),
-        });
-    }
+        })
+    });
+    let mut entries = collect_scanned_entries(directory, mapped, None, events)?;
     entries.sort_by_key(|e| surrogateescape_codepoints(&e.file_name, false));
     Some(entries)
 }
@@ -157,18 +147,17 @@ pub(crate) fn inspect_prune_dir(
         return hit;
     }
 
-    let err_before = events.len();
-    let Some(entries) = scan_sorted_for_prune(directory, config.scope.follow_symlinks, events)
-    else {
-        if events.len() > err_before {
-            memo.insert(
-                memo_key,
-                PruneCache::Empty {
-                    searched_from_depth: 0,
-                    had_cycle_skip: false,
-                },
-            );
+    let Some(entries) = scan_sorted_for_prune(directory, events) else {
+        if let Some(parent) = search.frames.last_mut() {
+            parent.had_incomplete_child = true;
         }
+        memo.insert(
+            memo_key,
+            PruneCache::Empty {
+                searched_from_depth: 0,
+                had_cycle_skip: false,
+            },
+        );
         return false;
     };
 

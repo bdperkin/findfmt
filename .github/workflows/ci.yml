@@ -239,7 +239,7 @@ jobs:
     name: Test (${{ matrix.os }} - Python ${{ matrix.python-version }})
     needs: quality-gate
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: true
       matrix:
@@ -308,6 +308,17 @@ jobs:
         uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0  # v2.9.3
         with:
           workspaces: findfmt_rs
+          shared-key: llvm-cov
+        continue-on-error: ${{ matrix.experimental || false }}
+      - name: Install llvm-tools-preview
+        if: ${{ steps.setup-python.outcome == 'success' }}
+        run: rustup component add llvm-tools-preview
+        continue-on-error: ${{ matrix.experimental || false }}
+      - name: Install cargo-llvm-cov
+        if: ${{ steps.setup-python.outcome == 'success' }}
+        uses: taiki-e/install-action@893d6ee8d714b6c7dfe2bcd94e5759e9a7958a7e  # v2.90.10
+        with:
+          tool: cargo-llvm-cov
         continue-on-error: ${{ matrix.experimental || false }}
       - name: Install Dependencies
         if: ${{ steps.setup-python.outcome == 'success' }}
@@ -324,7 +335,7 @@ jobs:
         continue-on-error: ${{ matrix.experimental || false }}
       - name: Run Pytest with 100% Coverage Enforcement
         if: ${{ steps.setup-python.outcome == 'success' }}
-        run: uv run pytest
+        run: uv run python tools/rust_coverage.py --pytest-cov
         continue-on-error: ${{ matrix.experimental || false }}
       - name: Upload Coverage to Codecov
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
@@ -334,6 +345,15 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
           name: ${{ matrix.os }}-py${{ matrix.python-version }}
+        if: ${{ !matrix.experimental }}
+      - name: Upload Rust Coverage to Codecov
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1
+        with:
+          files: ./rust-lcov.info
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: rust
+          name: ${{ matrix.os }}-py${{ matrix.python-version }}-rust
         if: ${{ !matrix.experimental }}
       - name: Upload Test Results to Codecov (Test Analytics)
         uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5  # v7.1.1

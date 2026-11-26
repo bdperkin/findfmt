@@ -244,20 +244,22 @@ pub fn classify_batch_py<'py>(
     let mut gid_cache = HashMap::new();
     for (idx, raw_res) in matched {
         let (ref path_obj, is_abs, has_entry) = py_items[idx];
-        let info = build_py_file_info(
+        let root_arg = root_decoded.as_ref().map(|(o, p)| (*o, p.as_path()));
+        let pfx_arg = prefix_decoded.as_ref().map(|(o, p)| (*o, p.as_path()));
+        let info_res = build_py_file_info(
             py,
             handles,
             path_obj,
             &raw_inputs[idx],
             is_abs,
             has_entry,
-            root_decoded.as_ref().map(|(o, p)| (*o, p.as_path())),
-            prefix_decoded.as_ref().map(|(o, p)| (*o, p.as_path())),
+            root_arg,
+            pfx_arg,
             raw_res,
             &mut uid_cache,
             &mut gid_cache,
-        )?;
-        out.append(info)?;
+        );
+        out.append(info_res?)?;
     }
     Ok(out)
 }

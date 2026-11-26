@@ -45,6 +45,24 @@ fn add_epsilon_states(
     false
 }
 
+fn eval_step_inst(inst: &Inst, raw_cp: u32, eq_slice: &[u32]) -> bool {
+    match *inst {
+        Inst::AnyNonNewline => raw_cp != u32::from('\n'),
+        Inst::NonSlash => raw_cp != u32::from('/'),
+        Inst::Char(exp) => eq_slice.contains(&exp),
+        Inst::Class {
+            negated,
+            ref ranges,
+        } => {
+            ranges
+                .iter()
+                .any(|&(lo, hi)| eq_slice.iter().any(|&c| c >= lo && c <= hi))
+                != negated
+        }
+        Inst::Split(_, _) | Inst::End | Inst::Match => false,
+    }
+}
+
 fn eval_rule(kind: &RuleKind, text: &[u32], ignore_case: bool, unicode_major: u8) -> bool {
     match kind {
         RuleKind::AnyDot => text.iter().any(|&cp| cp != u32::from('\n')),
@@ -79,22 +97,7 @@ fn eval_rule(kind: &RuleKind, text: &[u32], ignore_case: bool, unicode_major: u8
                 next.clear();
                 visited.fill(false);
                 for &pc in &curr {
-                    let ok = match prog[pc] {
-                        Inst::AnyNonNewline => raw_cp != u32::from('\n'),
-                        Inst::NonSlash => raw_cp != u32::from('/'),
-                        Inst::Char(exp) => eq_slice.contains(&exp),
-                        Inst::Class {
-                            negated,
-                            ref ranges,
-                        } => {
-                            ranges
-                                .iter()
-                                .any(|&(lo, hi)| eq_slice.iter().any(|&c| c >= lo && c <= hi))
-                                != negated
-                        }
-                        Inst::Split(_, _) | Inst::End | Inst::Match => false,
-                    };
-                    if ok
+                    if eval_step_inst(&prog[pc], raw_cp, eq_slice)
                         && add_epsilon_states(
                             prog,
                             pc + 1,
@@ -252,33 +255,5 @@ pub fn path_to_u32_segments(
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn segs(s: &str) -> Vec<Vec<u32>> {
-        vec![s.chars().map(u32::from).collect()]
-    }
-
-    #[test]
-    fn ignore_case_equivalences_wide_ranges_unclosed_brackets_and_final_newline() {
-        let (case_fold_az, _) = GlobSpecU32::from_lines_lenient(["[a-z].txt"], true);
-        let (exact_case_az, _) = GlobSpecU32::from_lines_lenient(["[a-z].txt"], false);
-        assert!(case_fold_az.matches_segments(&segs("ſ.txt"), false));
-        assert!(case_fold_az.matches_segments(&segs("\u{212A}.txt"), false));
-        assert!(!exact_case_az.matches_segments(&segs("ſ.txt"), false));
-
-        let (wide, _) = GlobSpecU32::from_lines_lenient(["[À-Ա].txt"], true);
-        assert!(wide.matches_segments(&segs("×.txt"), false));
-        assert!(wide.matches_segments(&segs("à.txt"), false));
-        assert!(wide.matches_segments(&segs("ա.txt"), false));
-
-        let many_open = format!("{}tail", "[".repeat(512));
-        let (unclosed, errs) = GlobSpecU32::from_lines_lenient([many_open.as_str()], false);
-        assert_eq!(errs, 0);
-        assert!(unclosed.matches_segments(&segs(&many_open), false));
-
-        let (note, _) = GlobSpecU32::from_lines_lenient(["note"], false);
-        assert!(note.matches_segments(&segs("note\n"), false));
-        assert!(!note.matches_segments(&segs("note\nmore"), false));
-    }
-}
+#[path = "glob_u32_tests.rs"]
+mod tests;

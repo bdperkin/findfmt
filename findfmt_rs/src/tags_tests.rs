@@ -11,7 +11,7 @@ fn splitext_tag_and_data_uri_lookup_parity() {
         ("archive.tar".into(), ".gz".into())
     );
 
-    let reg = TagRegistry::builtin_for_tests();
+    let reg = TagRegistry::sample_registry();
     assert!(
         reg.tags_from_filename("Dockerfile.prod")
             .contains("dockerfile")
@@ -20,6 +20,11 @@ fn splitext_tag_and_data_uri_lookup_parity() {
     assert!(
         reg.tags_from_interpreter("/usr/bin/python3.12.1")
             .contains("python3")
+    );
+    assert_eq!(reg.guess_mime_type("https://example.com"), None);
+    assert_eq!(
+        reg.guess_mime_type("http://example.com/pkg/app.py;type=a"),
+        Some("text/x-python".into())
     );
     assert_eq!(
         reg.guess_mime_type("bundle.tgz"),
@@ -46,6 +51,12 @@ fn splitext_tag_and_data_uri_lookup_parity() {
         reg.guess_mime_type(" https:report.py?download=1"),
         Some("text/x-python".into())
     );
+    assert_eq!(
+        reg.guess_mime_type("file:///pkg/report.py"),
+        Some("text/x-python".into())
+    );
+    let _ = reg.guess_mime_type(r"C:\pkg\report.py");
+    let _ = reg.guess_mime_type(r"C:\pkg\report.py:ads");
 
     let mut case_reg = reg;
     case_reg

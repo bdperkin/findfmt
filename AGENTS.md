@@ -59,7 +59,7 @@ extension metadata, dispatched through `src/findfmt/core.py` with automatic fall
   POSIX metadata formatting, IEC/SI size formatting, domain exceptions, and GNU `gettext` internationalization
   (`src/findfmt/locale/`).
 - `tools/`: Maintainer and CI automation scripts (`verify_quality.py`, `quality_steps.py`, `dep_matrix.py`,
-  `line_linter.py`, `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_sync.py`,
+  `rust_coverage.py`, `line_linter.py`, `suppression_auditor.py`, `api_surface.py`, `i18n.py`, `i18n_sync.py`,
   `i18n_translate.py`, `i18n_validation.py`, `i18n_prompts.py`, `i18n_benchmark.py`, `hatch_build.py`,
   `smoke_wheel.py`, `release_notes.py`, `verify_release_version.py`, `sync_cli_docs.py`, `sync_labels.py`,
   `sync_pre_commit_deps.py`, `generate_assets.py`, `benchmark.py`, `benchmark_backends.py`,
@@ -119,6 +119,9 @@ uv run findfmt --diagnostics
 # Run Rust unit tests via the rlib target and capture Rust panic backtraces
 cargo test --manifest-path findfmt_rs/Cargo.toml --no-default-features
 RUST_BACKTRACE=1 uv run pytest
+
+# Collect unified 100% Python (pytest-cov) and Rust (cargo-llvm-cov) coverage
+uv run python tools/rust_coverage.py --pytest-cov
 
 # Run the full local quality verification suite
 uv run python tools/verify_quality.py
