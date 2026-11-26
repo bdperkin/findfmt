@@ -43,6 +43,7 @@ QUALITY_STEPS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ),
     ("Pytest & Coverage", ("uv", "run", "pytest")),
     ("Interrogate Docstrings", ("uv", "run", "interrogate", "src")),
+    ("Pylint Duplicate Code", ("uv", "run", "pylint", "src", "tools")),
     ("Radon Cyclomatic Complexity", ("uv", "run", "radon", "cc", "src", "-s", "-a")),
     ("Xenon Complexity Assertions", ("uv", "run", "xenon", "-b", "B", "-m", "B", "-a", "A", "src")),
     ("Deptry Dependencies", ("uv", "run", "deptry", ".")),

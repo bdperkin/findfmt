@@ -109,6 +109,7 @@ lint = [
   "mdformat-frontmatter>=2.1",
   "mdformat-gfm>=1",
   "mdformat-ruff>=0.1.3",
+  "pylint>=4.1",
   "pyroma>=4.2",
   "radon>=6.0.1",
   "ruff>=0.8",
@@ -196,8 +197,21 @@ lint.per-file-ignores."tests/**/*" = [
 lint.per-file-ignores."tools/**/*" = [ "INP001", "S", "T201" ]
 lint.pydocstyle.convention = "google"
 
+[tool.pylint]
+main.jobs = 1
+messages_control.disable = [ "all" ]
+messages_control.enable = [ "similarities" ]
+messages_control.fail-on = [ "duplicate-code" ]
+reports.reports = false
+reports.score = false
+similarities.ignore-comments = true
+similarities.ignore-docstrings = true
+similarities.ignore-imports = true
+similarities.ignore-signatures = true
+similarities.min-similarity-lines = 12
+
 [tool.codespell]
-ignore-words-list = "correspondant,correspondants,te"
+ignore-words-list = "astroid,correspondant,correspondants,te"
 skip = """\
   *.po,*.pot,./.git,./build,./dist,./.venv,./docs/_build,./docs/build,./assets,./findfmt_rs/target,./findfmt_rs/fuzz/ta\
   rget\

@@ -12,7 +12,7 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-from findfmt.formatters.base import Formatter, write_stream_safe
+from findfmt.formatters.base import _MetadataFormatterBase, write_stream_safe
 from findfmt.sizes import format_size
 from findfmt.utils.strings import format_display_path, format_timestamp, strip_ansi_escapes
 
@@ -101,7 +101,7 @@ def _ensure_dir_path(
     return curr, accum_path
 
 
-class XmlFormatter(Formatter):
+class XmlFormatter(_MetadataFormatterBase):
     """Hierarchical XML document serializer utilizing ElementTree."""
 
     def __init__(  # noqa: PLR0913 - wide CLI/config signature
@@ -150,22 +150,11 @@ class XmlFormatter(Formatter):
         """
         super().__init__(absolute=absolute)
         self.no_indent = no_indent
-        self.show_permissions = show_permissions
-        self.show_user = show_user
-        self.show_group = show_group
-        self.show_inodes = show_inodes
-        self.show_device = show_device
-        self.show_size = show_size
-        self.human_readable = human_readable
-        self.show_si = show_si
-        self.accumulate_size = accumulate_size
-        self.show_mtime = show_mtime
-        self.show_ctime = show_ctime
+        self._set_ownership_options(permissions=show_permissions, user=show_user, group=show_group)
+        self._set_stat_options(inodes=show_inodes, device=show_device, mtime=show_mtime, ctime=show_ctime)
         self.time_format = time_format
-        self.classify = classify
-        self.hide_control_chars = hide_control_chars
-        self.literal = literal
-        self.quote_name = quote_name
+        self._set_size_options(exact=show_size, human=human_readable, si=show_si, accum=accumulate_size)
+        self._set_path_options(classify=classify, ctrl=hide_control_chars, literal=literal, quote=quote_name)
 
     def _format_size_val(self, size_bytes: int) -> str:
         """Format size value according to unit preferences."""

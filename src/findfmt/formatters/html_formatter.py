@@ -14,8 +14,7 @@ else:
     from typing_extensions import override
 
 from findfmt.exceptions import FindFmtError
-from findfmt.formatters.base import Formatter, write_stream_safe
-from findfmt.metadata import format_metadata_parts
+from findfmt.formatters.base import _MetadataFormatterBase, write_stream_safe
 from findfmt.sizes import format_size
 from findfmt.utils.strings import format_display_path
 
@@ -181,7 +180,7 @@ def _read_utf8_fragment(path: Path) -> str:
         raise FindFmtError(msg) from err
 
 
-class HtmlFormatter(Formatter):
+class HtmlFormatter(_MetadataFormatterBase):
     """Semantic, accessible HTML5 document serializer with intro/outro templating."""
 
     def __init__(  # noqa: PLR0913 - wide CLI/config signature
@@ -255,22 +254,11 @@ class HtmlFormatter(Formatter):
 
         self.no_links = no_links
         self.no_indent = no_indent
-        self.show_permissions = show_permissions
-        self.show_user = show_user
-        self.show_group = show_group
-        self.show_inodes = show_inodes
-        self.show_device = show_device
-        self.show_size = show_size
-        self.human_readable = human_readable
-        self.show_si = show_si
-        self.accumulate_size = accumulate_size
-        self.show_mtime = show_mtime
-        self.show_ctime = show_ctime
+        self._set_ownership_options(permissions=show_permissions, user=show_user, group=show_group)
+        self._set_stat_options(inodes=show_inodes, device=show_device, mtime=show_mtime, ctime=show_ctime)
         self.time_format = time_format
-        self.classify = classify
-        self.hide_control_chars = hide_control_chars
-        self.literal = literal
-        self.quote_name = quote_name
+        self._set_size_options(exact=show_size, human=human_readable, si=show_si, accum=accumulate_size)
+        self._set_path_options(classify=classify, ctrl=hide_control_chars, literal=literal, quote=quote_name)
 
     def _format_size_val(self, size_bytes: int) -> str:
         """Format size value according to unit preferences."""
@@ -325,17 +313,7 @@ class HtmlFormatter(Formatter):
         if file_info is None:
             return ""
 
-        parts = format_metadata_parts(
-            file_info,
-            show_inodes=self.show_inodes,
-            show_device=self.show_device,
-            show_permissions=self.show_permissions,
-            show_user=self.show_user,
-            show_group=self.show_group,
-            show_mtime=self.show_mtime,
-            show_ctime=self.show_ctime,
-            time_format=self.time_format,
-        )
+        parts = self._format_stat_parts(file_info)
         if not parts:
             return ""
 

@@ -31,9 +31,9 @@ def test_stage5_yaml_json_schemas_and_html_template_hooks() -> None:
     config = _load_pre_commit_config()
     ci_skip = set(config["ci"]["skip"])
     repos = config["repos"]
-    assert repos[20]["repo"] == "https://github.com/doublify/pre-commit-rust"
+    assert repos[21]["repo"] == "https://github.com/doublify/pre-commit-rust"
 
-    stage5_slice = repos[21:25]
+    stage5_slice = repos[22:26]
     assert [r["repo"] for r in stage5_slice] == [
         "https://github.com/lyz-code/yamlfix",
         "https://github.com/adrienverge/yamllint",
@@ -75,7 +75,7 @@ def test_stage6_documentation_markdown_and_rst_hooks() -> None:
     ci_skip = set(config["ci"]["skip"])
     repos = config["repos"]
 
-    stage6_slice = repos[25:29]
+    stage6_slice = repos[26:30]
     stage6_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage6_slice]
     assert stage6_pairs == [
         ("https://github.com/jsh9/markdown-heading-numbering", ["markdown-heading-numbering"]),
@@ -108,7 +108,7 @@ def test_stage6_documentation_markdown_and_rst_hooks() -> None:
         entry["repo"]: idx for idx, entry in enumerate(repos) if entry["repo"] in expected_prose_repos
     }
     assert set(prose_indices_by_repo) == expected_prose_repos
-    assert all(idx > 28 for idx in prose_indices_by_repo.values())
+    assert all(idx > 29 for idx in prose_indices_by_repo.values())
 
     all_repo_urls = {r["repo"] for r in repos}
     assert all_repo_urls.isdisjoint(
@@ -128,7 +128,7 @@ def test_stage7_shell_docker_and_ci_workflow_hooks() -> None:
     ci_skip = set(config["ci"]["skip"])
     repos = config["repos"]
 
-    stage7_slice = repos[29:34]
+    stage7_slice = repos[30:35]
     stage7_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage7_slice]
     assert stage7_pairs == [
         ("https://github.com/scop/pre-commit-shfmt", ["shfmt"]),
@@ -166,7 +166,7 @@ def test_stage8_security_secrets_and_semgrep_hooks() -> None:
     ci_skip = set(config["ci"]["skip"])
     repos = config["repos"]
 
-    stage8_slice = repos[34:37]
+    stage8_slice = repos[35:38]
     stage8_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage8_slice]
     assert stage8_pairs == [
         ("https://github.com/Yelp/detect-secrets", ["detect-secrets"]),
@@ -239,10 +239,10 @@ def test_stage9_prose_editorconfig_and_commit_msg_hooks() -> None:
     ci_skip = set(config["ci"]["skip"])
     repos = config["repos"]
 
-    assert len(repos) == 43
-    assert repos[42]["repo"] == "local"
+    assert len(repos) == 44
+    assert repos[43]["repo"] == "local"
 
-    stage9_slice = repos[37:42]
+    stage9_slice = repos[38:43]
     stage9_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage9_slice]
     assert stage9_pairs == [
         ("https://github.com/codespell-project/codespell", ["codespell"]),

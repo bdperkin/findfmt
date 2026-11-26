@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 271 Closed Issues | 83 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
+> **Tracking:** 273 Closed Issues | 82 Actionable Open Tasks | 24 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -34,8 +34,8 @@
 > `#587` in v1.4.2, added CI matrix/cache and draft fast-path issues `#729`-`#731` under `#587` in v1.4.2, and
 > closed `#727`, `#588`, `#729`, `#730`, `#589`, and `#591`; 2026-11-25 added config, pre-commit,
 > quality-parity, and workflow issues `#741`, `#742`, and `#748`-`#751`, closed `#716`, `#717`, `#718`,
-> `#719`, `#720`, `#721`, `#722`, `#723`, and `#724`, assigned `#671` to Future Features, and rebalanced
-> v1.4.2-v1.4.4 by shifting `#742` and `#751` to v1.4.3 and `#750` to v1.4.4)
+> `#719`, `#720`, `#721`, `#722`, `#723`, `#724`, `#725`, and epic `#715`, assigned `#671` to Future Features,
+> and rebalanced v1.4.2-v1.4.4 by shifting `#742` and `#751` to v1.4.3 and `#750` to v1.4.4)
 
 ______________________________________________________________________
 
@@ -820,6 +820,11 @@ Note: Ordered chronologically by completion date.
 - [x] **[#724](https://github.com/bdperkin/findfmt/issues/724)** - Evaluate Pre-commit Stage 9: Spelling,
   Inclusive Language, EditorConfig & Commit Messages (Closed: 2026-11-25 via PR
   [#747](https://github.com/bdperkin/findfmt/pull/747))
+- [x] **[#725](https://github.com/bdperkin/findfmt/issues/725)** - Evaluate Pre-commit Stage 4 Candidate:
+  Local Pylint Duplicate Code Checker (R0801) (Closed: 2026-11-25 via PR
+  [#753](https://github.com/bdperkin/findfmt/pull/753))
+- [x] **[#715](https://github.com/bdperkin/findfmt/issues/715)** - Epic: Evaluate Pre-Commit Hook Pipeline
+  Candidates (Closed: 2026-11-25 via PR [#753](https://github.com/bdperkin/findfmt/pull/753))
 
 ______________________________________________________________________
 
@@ -833,12 +838,6 @@ when picking up work.
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#725](https://github.com/bdperkin/findfmt/issues/725)** - Evaluate Pre-commit Stage 4 Candidate:
-  Local Pylint Duplicate Code Checker (R0801) *(Epic:
-  [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
-  | Parent: [#715](https://github.com/bdperkin/findfmt/issues/715) | Milestone: v1.4.2)* - **Value:** Medium |
-  **Effort:** S - **Rationale:** Evaluates an inline `repo: local` `uvx pylint` `similarities` (`R0801`) hook
-  for cross-file duplicate-code detection across `findfmt`'s Python codebase.
 - [ ] **[#741](https://github.com/bdperkin/findfmt/issues/741)** - ci(pre-commit): standardize and enforce
   sequence sorting and mapping key order in .pre-commit-config.yaml *(Milestone: v1.4.2)* - **Value:** Medium
   | **Effort:** S - **Rationale:** Sorts order-independent sequences (`ci.skip`, `additional_dependencies`,
@@ -1333,12 +1332,8 @@ natively on GitHub.
 
 - [ ] **[#587](https://github.com/bdperkin/findfmt/issues/587)** - [Epic] Hybrid Quality Assurance: Unified
   Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation *(Milestone: v1.4.2 | Open
-  sub-issues: 3)* - [#590](https://github.com/bdperkin/findfmt/issues/590),
-  [#715](https://github.com/bdperkin/findfmt/issues/715),
+  sub-issues: 2)* - [#590](https://github.com/bdperkin/findfmt/issues/590),
   [#731](https://github.com/bdperkin/findfmt/issues/731)
-- [ ] **[#715](https://github.com/bdperkin/findfmt/issues/715)** - Epic: Evaluate Pre-Commit Hook Pipeline
-  Candidates *(Parent: [#587](https://github.com/bdperkin/findfmt/issues/587) | Milestone: v1.4.2 | Open
-  sub-issues: 1)* - [#725](https://github.com/bdperkin/findfmt/issues/725)
 - [ ] **[#592](https://github.com/bdperkin/findfmt/issues/592)** - [Epic] Hybrid Containerization & Maintainer
   Tooling: Multi-Stage uv+Rust Dockerfile & Cross-Language Audit Scripts *(Milestone: v1.4.3 | Open
   sub-issues: 2)* - [#593](https://github.com/bdperkin/findfmt/issues/593),
@@ -1491,7 +1486,7 @@ consolidation and sorting (#742, #751) to v1.4.3 and dedicated GitHub Actions ev
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 8           |
+| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 6           |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 5           |
 | v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 5           |
 | v1.5.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                         | 4           |

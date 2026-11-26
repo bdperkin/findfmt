@@ -17,7 +17,7 @@ from rich.tree import Tree
 
 from findfmt.cli.terminal import _reconfigure_cp437, get_console
 from findfmt.formatters.badges import format_tag_badge
-from findfmt.formatters.base import Formatter
+from findfmt.formatters.base import _MetadataFormatterBase
 from findfmt.formatters.glyphs import resolve_tree_guides
 from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
@@ -201,7 +201,7 @@ def _compute_tree_dir_sizes(
     return dir_sizes_formatted
 
 
-class RichTreeFormatter(Formatter):
+class RichTreeFormatter(_MetadataFormatterBase):
     """Hierarchical directory tree serializer using Rich."""
 
     def __init__(  # noqa: PLR0913 - wide CLI/config signature
@@ -268,25 +268,12 @@ class RichTreeFormatter(Formatter):
         self.no_indent = no_indent
         self.ansi_lines = ansi_lines
         self.cp437 = cp437
-        self.show_permissions = show_permissions
-        self.show_user = show_user
-        self.show_group = show_group
-        self.show_inodes = show_inodes
-        self.show_device = show_device
-        self.show_size = show_size
-        self.human_readable = human_readable
-        self.show_si = show_si
-        self.accumulate_size = accumulate_size
-        self.show_mtime = show_mtime
-        self.show_ctime = show_ctime
+        self._set_ownership_options(permissions=show_permissions, user=show_user, group=show_group)
+        self._set_stat_options(inodes=show_inodes, device=show_device, mtime=show_mtime, ctime=show_ctime)
         self.time_format = time_format
-        self.classify = classify
-        self.hide_control_chars = hide_control_chars
-        self.literal = literal
-        self.quote_name = quote_name
-        self.hyperlink = hyperlink
-        self.hyperlink_schema = hyperlink_schema
-        self.hyperlink_authority = hyperlink_authority
+        self._set_size_options(exact=show_size, human=human_readable, si=show_si, accum=accumulate_size)
+        self._set_path_options(classify=classify, ctrl=hide_control_chars, literal=literal, quote=quote_name)
+        self._set_hyperlink_options(link=hyperlink, schema=hyperlink_schema, authority=hyperlink_authority)
 
     def _init_tree_root(self) -> Tree:
         """Initialize the root Tree node with guides and styling."""
