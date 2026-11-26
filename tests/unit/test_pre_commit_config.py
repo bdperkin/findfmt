@@ -13,6 +13,8 @@ import pytest
 import yaml
 from tools.sync_pre_commit_deps import sync_deps
 
+from tests.unit.test_pre_commit_comments_and_names import assert_repo_comments_and_hook_names
+
 CANONICAL_HOOK_KEY_ORDER: tuple[str, ...] = (
     "id",
     "alias",
@@ -217,8 +219,16 @@ def test_pre_commit_config_sequence_sorting_and_mapping_key_order() -> None:
             ]
 
 
+def test_pre_commit_repo_header_comments_and_descriptive_hook_names() -> None:
+    """Enforce single-line repo header comments, ci.skip rationales, and descriptive hook names (#748)."""
+    cfg_path = _repo_root() / ".pre-commit-config.yaml"
+    raw_text = cfg_path.read_text(encoding="utf-8")
+    config = _load_pre_commit_config(cfg_path)
+    assert_repo_comments_and_hook_names(raw_text, config)
+
+
 def test_sync_pre_commit_deps_preserves_standardized_ordering(tmp_path: Path) -> None:
-    """Verify tools/sync_pre_commit_deps.py updates versions without disturbing key or list order (#741)."""
+    """Verify tools/sync_pre_commit_deps.py updates versions without disturbing order or comments."""
     root = _repo_root()
     config = _load_pre_commit_config()
     ruff_rev = str(
@@ -240,8 +250,11 @@ def test_sync_pre_commit_deps_preserves_standardized_ordering(tmp_path: Path) ->
     target_cfg.write_text(stale_cfg, encoding="utf-8")
 
     assert sync_deps(tmp_path, write=True) == 0
-    assert target_cfg.read_text(encoding="utf-8") == raw_cfg
-    _assert_standardized_ordering(_load_pre_commit_config(target_cfg))
+    synced_text = target_cfg.read_text(encoding="utf-8")
+    assert synced_text == raw_cfg
+    synced_cfg = _load_pre_commit_config(target_cfg)
+    _assert_standardized_ordering(synced_cfg)
+    assert_repo_comments_and_hook_names(synced_text, synced_cfg)
 
 
 @pytest.mark.parametrize(
