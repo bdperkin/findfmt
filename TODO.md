@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 271 Closed Issues | 78 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
+> **Tracking:** 271 Closed Issues | 83 Actionable Open Tasks | 25 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -32,8 +32,10 @@
 > Dependency Dashboard `#671` Rust crate updates and Cargo grouping; 2026-11-24 released v1.4.1 and closed its
 > milestone, added pre-commit pipeline evaluation epic `#715` and child issues `#716`-`#725` and `#727` under
 > `#587` in v1.4.2, added CI matrix/cache and draft fast-path issues `#729`-`#731` under `#587` in v1.4.2, and
-> closed `#727`, `#588`, `#729`, `#730`, `#589`, and `#591`; 2026-11-25 added config sorting issues `#741` and
-> `#742` in v1.4.2, and closed `#716`, `#717`, `#718`, `#719`, `#720`, `#721`, `#722`, `#723`, and `#724`)
+> closed `#727`, `#588`, `#729`, `#730`, `#589`, and `#591`; 2026-11-25 added config, pre-commit,
+> quality-parity, and workflow issues `#741`, `#742`, and `#748`-`#751`, closed `#716`, `#717`, `#718`,
+> `#719`, `#720`, `#721`, `#722`, `#723`, and `#724`, assigned `#671` to Future Features, and rebalanced
+> v1.4.2-v1.4.4 by shifting `#742` and `#751` to v1.4.3 and `#750` to v1.4.4)
 
 ______________________________________________________________________
 
@@ -842,6 +844,11 @@ when picking up work.
   | **Effort:** S - **Rationale:** Sorts order-independent sequences (`ci.skip`, `additional_dependencies`,
   read-only hook blocks) and standardizes mapping key order in `.pre-commit-config.yaml` with unit-test
   guardrails.
+- [ ] **[#748](https://github.com/bdperkin/findfmt/issues/748)** - ci(pre-commit): enforce descriptive hook
+  `name:` fields, repo header comments, and inline rationales in `.pre-commit-config.yaml` *(Milestone:
+  v1.4.2)* - **Value:** Medium | **Effort:** S - **Rationale:** Ensures every hook displays a descriptive
+  contextual `name:`, every `- repo:` block has an accurate single-line header comment, and non-obvious flags
+  or exclusions carry inline rationales enforced by unit tests.
 - [ ] **[#597](https://github.com/bdperkin/findfmt/issues/597)** - sec(ci): integrate cargo-audit, cargo-deny,
   pip-audit, and Dependabot Cargo ecosystem updates into CI workflows *(Rank: 17 | Epic:
   [[Epic] Hybrid CI/CD & Release Pipeline: Dual Backend Matrix, Rust Supply-Chain Security & Multi-Platform Maturin Wheels](https://github.com/bdperkin/findfmt/issues/595)
@@ -862,6 +869,11 @@ when picking up work.
   [[Epic] Hybrid Quality Assurance: Unified Python/Rust Static Analysis, Dual Code Coverage & Pre-Commit Automation](https://github.com/bdperkin/findfmt/issues/587)
   | Milestone: v1.4.2)* - **Value:** High | **Effort:** M - **Rationale:** Measures and enforces test coverage
   across both Python and Rust codebases.
+- [ ] **[#749](https://github.com/bdperkin/findfmt/issues/749)** - ci(quality): enforce parity between
+  `.pre-commit-config.yaml` hooks and `tools/quality_steps.py` with mapping and allow/skip tests *(Milestone:
+  v1.4.2)* - **Value:** High | **Effort:** M - **Rationale:** Closes `ci.skip` and first-party local-hook gaps
+  in `QUALITY_STEPS` (`pyroma`, `line_linter.py`, `suppression_auditor.py`, and `i18n validate`) and enforces
+  bidirectional pre-commit/quality-suite parity via unit tests.
 - [ ] **[#596](https://github.com/bdperkin/findfmt/issues/596)** - ci(matrix): update .github/workflows/ci.yml
   to test both compiled Rust extension and pure-Python fallback (HATCH_MATURIN_DISABLE=1) across OS matrix
   *(Rank: 29 | Epic:
@@ -870,11 +882,6 @@ when picking up work.
   Rust extension nor the pure-Python fallback regresses on any OS or Python version.
 
 ### 2.2. Medium Priority / Core Deliverables
-
-- [ ] **[#742](https://github.com/bdperkin/findfmt/issues/742)** - chore(config): evaluate schema-aware
-  auto-sorting fixers and unit-test enforcement across repository configs *(Milestone: v1.4.2)* - **Value:**
-  Medium | **Effort:** M - **Rationale:** Evaluates schema-aware TOML/YAML/JSON auto-sorters (`taplo`,
-  `tombi`, `google/keep-sorted`, `yamllint`) across repository configs with unit-test fallback where needed.
 
 - [ ] **[#593](https://github.com/bdperkin/findfmt/issues/593)** - build(docker): update multi-stage
   Dockerfile and container smoke tests for hybrid uv + rustup wheel builds *(Rank: 35 | Epic:
@@ -888,6 +895,22 @@ when picking up work.
   [[Epic] Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+Rust Dockerfile & Cross-Language Audit Scripts](https://github.com/bdperkin/findfmt/issues/592)
   | Milestone: v1.4.3)* - **Value:** Medium | **Effort:** M - **Rationale:** Extends repository-wide
   line-count and zero-unjustified-suppression governance to `findfmt_rs/`.
+
+- [ ] **[#742](https://github.com/bdperkin/findfmt/issues/742)** - chore(config): evaluate schema-aware
+  auto-sorting fixers and unit-test enforcement across repository configs *(Milestone: v1.4.3)* - **Value:**
+  Medium | **Effort:** M - **Rationale:** Evaluates schema-aware TOML/YAML/JSON auto-sorters (`taplo`,
+  `tombi`, `google/keep-sorted`, `yamllint`) across repository configs with unit-test fallback where needed.
+
+- [ ] **[#751](https://github.com/bdperkin/findfmt/issues/751)** - chore(config): evaluate consolidating
+  standalone tool configs into `pyproject.toml` and `Cargo.toml` *(Milestone: v1.4.3)* - **Value:** Medium |
+  **Effort:** M - **Rationale:** Audits standalone configuration files (`cliff.toml`, `rustfmt.toml`,
+  `.mdformat.toml`, `docs/Makefile`, root bot configs) for native or plugin-assisted consolidation into
+  `pyproject.toml` and `findfmt_rs/Cargo.toml`.
+
+- [ ] **[#750](https://github.com/bdperkin/findfmt/issues/750)** - Evaluate dedicated GitHub Actions
+  counterparts for implemented pre-commit hooks *(Milestone: v1.4.4)* - **Value:** Medium | **Effort:** M -
+  **Rationale:** Assesses all 43 pre-commit hook repositories for official first-party GitHub Actions, SARIF
+  or native annotation value, runner overhead, and version-sync trade-offs alongside the v1.4.4 CI overhaul.
 
 - [ ] **[#216](https://github.com/bdperkin/findfmt/issues/216)** - feat(i18n): add language support for
   Chinese - China / Mandarin (zh_CN) (~1.14 billion) *(Rank: 37 | Epic:
@@ -1275,6 +1298,10 @@ when picking up work.
   [[Epic] v2.0 Breaking CLI Cleanups (-h, --nolinks, -v/-V, top-level re-exports, wrapper parsing)](https://github.com/bdperkin/findfmt/issues/350)
   | Milestone: v1.8.1)* - **Value:** Low | **Effort:** L - **Rationale:** v2.0 redesign of wrapper entry
   points.
+- [ ] **[#671](https://github.com/bdperkin/findfmt/issues/671)** - Dependency Dashboard *(Milestone: Future
+  Features)* - **Value:** Low | **Effort:** XL - **Rationale:** Standing Renovate dependency dashboard
+  tracking scheduled and rate-limited updates across GitHub Actions, Python (`uv`), and Rust (`Cargo`);
+  remains open continuously.
 
 ______________________________________________________________________
 
@@ -1457,11 +1484,16 @@ traversal/classification lands before pure-Python extension/ignore pluggability,
 feature, localization, packaging, and v2.0-prep milestones by one minor version (v1.4.x → v1.5.x, v1.5.x →
 v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 
+Re-audited on 2026-11-25 across all 110 open issues: assigned standing Renovate Dependency Dashboard #671 to
+Future Features so zero open issues lack a milestone, added follow-up QA/config/CI issues #748-#751, and
+rebalanced v1.4.2-v1.4.4 within the 3-8 issues-per-release band by shifting repository-wide config
+consolidation and sorting (#742, #751) to v1.4.3 and dedicated GitHub Actions evaluation (#750) to v1.4.4.
+
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 7           |
-| v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 3           |
-| v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 4           |
+| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 8           |
+| v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 5           |
+| v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 5           |
 | v1.5.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                         | 4           |
 | v1.5.1          | Extended Ignore File Formats (.dockerignore, eslint/prettier/npm/stylelint presets)                                | 6           |
 | v1.6.0          | Tier 1 Localizations (zh_CN, hi) & BiDi Rendering Strategy                                                         | 3           |
@@ -1470,4 +1502,4 @@ v1.6.x, v1.6.0 → v1.7.0, v1.7.0 → v1.8.0, v1.7.1 → v1.8.1).
 | v1.7.0          | Tier 3 Localizations (pa, pt_BR, it, ko, tr, vi)                                                                   | 7           |
 | v1.8.0          | Native Standalone Binary Distribution Evaluation (BeeWare Briefcase) — gated on #300 decision                      | 6           |
 | v1.8.1          | v2.0 Transition Prep: Deprecation Warnings & Breaking CLI Cleanups                                                 | 7           |
-| Future Features | Future feature enhancements and unplanned capabilities deferred beyond the scheduled roadmap.                      | 48          |
+| Future Features | Future feature enhancements and unplanned capabilities deferred beyond the scheduled roadmap.                      | 49          |
