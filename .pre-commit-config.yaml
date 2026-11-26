@@ -226,6 +226,18 @@ repos:
           - src
         pass_filenames: false
 
+  # Pylint cross-file duplicate-code checker (R0801 similarities only)
+  - repo: https://github.com/pylint-dev/pylint
+    rev: v4.1.4
+    hooks:
+      - id: pylint
+        name: pylint (duplicate code)
+        files: ^(src|tools)/.*\.py$
+        pass_filenames: false
+        args:
+          - src
+          - tools
+
   # Rust Cargo formatter, compiler check, and Clippy linter
   - repo: https://github.com/doublify/pre-commit-rust
     rev: v1.0

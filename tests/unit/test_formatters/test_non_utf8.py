@@ -21,13 +21,15 @@ from typer.testing import CliRunner
 from findfmt.cli import app
 from findfmt.cli.runner import _reconfigure_surrogateescape
 from findfmt.formatters import OutputFormat
+from findfmt.formatters._xml_sanitize import (
+    is_valid_xml_char as _is_valid_xml_char,
+)
+from findfmt.formatters._xml_sanitize import (
+    sanitize_xml_text as _sanitize_xml_text,
+)
 from findfmt.formatters.base import write_stream_safe
 from findfmt.formatters.structured import escape_surrogates
-from findfmt.formatters.xml_formatter import (
-    XmlFormatter,
-    _is_valid_xml_char,
-    _sanitize_xml_text,
-)
+from findfmt.formatters.xml_formatter import XmlFormatter
 from findfmt.models import FileInfo
 
 if TYPE_CHECKING:

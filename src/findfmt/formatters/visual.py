@@ -19,14 +19,11 @@ from rich.table import Table
 from findfmt.cli.terminal import _reconfigure_cp437, get_console
 from findfmt.exceptions import UnsupportedBoxStyleError
 from findfmt.formatters.badges import format_tag_badge
-from findfmt.formatters.base import Formatter
+from findfmt.formatters.base import _MetadataFormatterBase
 from findfmt.formatters.glyphs import CP437_BOX
 from findfmt.formatters.tree import RichTreeFormatter
 from findfmt.i18n import _, format_integer, ngettext
-from findfmt.metadata import format_metadata_parts
 from findfmt.sizes import format_size
-from findfmt.utils.hyperlinks import build_file_uri
-from findfmt.utils.strings import format_display_path
 
 if TYPE_CHECKING:
     from collections import Counter
@@ -93,7 +90,7 @@ def format_summary_panel(
     )
 
 
-class RichTableFormatter(Formatter):
+class RichTableFormatter(_MetadataFormatterBase):
     """Rich visual table serializer supporting customizable borders and tag badges."""
 
     def __init__(  # noqa: PLR0913 - wide CLI/config signature
@@ -163,25 +160,12 @@ class RichTableFormatter(Formatter):
         self.box_style = RICH_BOX_STYLES[normalized]
         self.console_width = console_width
         self.force_color = force_color
-        self.show_permissions = show_permissions
-        self.show_user = show_user
-        self.show_group = show_group
-        self.show_inodes = show_inodes
-        self.show_device = show_device
-        self.show_size = show_size
-        self.human_readable = human_readable
-        self.show_si = show_si
-        self.accumulate_size = accumulate_size
-        self.show_mtime = show_mtime
-        self.show_ctime = show_ctime
+        self._set_ownership_options(permissions=show_permissions, user=show_user, group=show_group)
+        self._set_stat_options(inodes=show_inodes, device=show_device, mtime=show_mtime, ctime=show_ctime)
         self.time_format = time_format
-        self.classify = classify
-        self.hide_control_chars = hide_control_chars
-        self.literal = literal
-        self.quote_name = quote_name
-        self.hyperlink = hyperlink
-        self.hyperlink_schema = hyperlink_schema
-        self.hyperlink_authority = hyperlink_authority
+        self._set_size_options(exact=show_size, human=human_readable, si=show_si, accum=accumulate_size)
+        self._set_path_options(classify=classify, ctrl=hide_control_chars, literal=literal, quote=quote_name)
+        self._set_hyperlink_options(link=hyperlink, schema=hyperlink_schema, authority=hyperlink_authority)
 
     def _setup_columns(self, table: Table) -> None:
         """Configure table columns including optional metadata columns."""
@@ -215,44 +199,14 @@ class RichTableFormatter(Formatter):
 
     def _format_row(self, file_info: FileInfo) -> list[str]:
         """Format an individual file record as a table row sequence."""
-        row = format_metadata_parts(
-            file_info,
-            show_inodes=self.show_inodes,
-            show_device=self.show_device,
-            show_permissions=self.show_permissions,
-            show_user=self.show_user,
-            show_group=self.show_group,
-            show_mtime=self.show_mtime,
-            show_ctime=self.show_ctime,
-            time_format=self.time_format,
-        )
+        row = self._format_stat_parts(file_info)
         formatted_sz = format_size(
             file_info.size_bytes,
             human_readable=self.human_readable,
             si=self.show_si,
             exact=self.show_size,
         )
-        raw_path = str(file_info.path if self.absolute else file_info.relative_path)
-        indicator = file_info.indicator if self.classify else None
-        uri = (
-            build_file_uri(
-                file_info.path,
-                schema=self.hyperlink_schema,
-                authority=self.hyperlink_authority,
-            )
-            if self.hyperlink
-            else None
-        )
-        display_path = format_display_path(
-            raw_path,
-            quote_name=self.quote_name,
-            hide_control_chars=self.hide_control_chars,
-            literal=self.literal,
-            indicator=indicator,
-            hyperlink=self.hyperlink,
-            uri=uri,
-            escape_markup=True,
-        )
+        display_path = self._format_file_display_path(file_info, escape_markup=True)
         row = [rich.markup.escape(c) for c in row]
         mime_val = rich.markup.escape(file_info.mime_type or "")
         shebang_val = rich.markup.escape(file_info.shebang or "")

@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import html
 import sys
-import urllib.parse
-from pathlib import Path
 from typing import TYPE_CHECKING, TextIO
 
 if sys.version_info >= (3, 12):
@@ -13,175 +11,31 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-from findfmt.exceptions import FindFmtError
-from findfmt.formatters.base import Formatter, write_stream_safe
-from findfmt.metadata import format_metadata_parts
+from findfmt.formatters._hierarchy import (
+    HierarchyNode,
+    build_hierarchy_tree,
+    compute_accumulated_dir_sizes,
+)
+from findfmt.formatters._html_template import (
+    DEFAULT_TITLE,
+    HTML_TEMPLATE,
+    build_href,
+    read_utf8_fragment,
+)
+from findfmt.formatters.base import _MetadataFormatterBase, write_stream_safe
 from findfmt.sizes import format_size
 from findfmt.utils.strings import format_display_path
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
+    from pathlib import Path
 
     from findfmt.models import FileInfo
 
 __all__ = ["HtmlFormatter"]
 
-DEFAULT_TITLE = "Directory Tree"
 
-HTML_TEMPLATE = """<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{title}</title>
-  <style>
-    body {{
-      font-family:
-        ui-monospace,
-        SFMono-Regular,
-        Menlo,
-        Monaco,
-        Consolas,
-        "Liberation Mono",
-        "Courier New",
-        monospace;
-      margin: 2rem;
-      background: #ffffff;
-      color: #24292f;
-    }}
-    h1 {{
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }}
-    .tree {{
-      line-height: 1.6;
-      font-size: 0.95rem;
-    }}
-    .tree a {{
-      text-decoration: none;
-      color: #0969da;
-    }}
-    .tree a:hover {{
-      text-decoration: underline;
-    }}
-    .tree .dir {{
-      font-weight: bold;
-      color: #0969da;
-    }}
-    .tree .file {{
-      color: #24292f;
-    }}
-    .tree .symlink {{
-      color: #8250df;
-    }}
-    .tree .meta {{
-      color: #57606a;
-      margin-right: 0.5rem;
-    }}
-    .tree .size {{
-      color: #1a7f37;
-      margin-left: 0.5rem;
-    }}
-    .tree .mime {{
-      color: #6e7781;
-      margin-left: 0.5rem;
-      font-style: italic;
-    }}
-    .tree .badge {{
-      display: inline-block;
-      padding: 0.1em 0.4em;
-      font-size: 0.8em;
-      font-weight: 500;
-      border-radius: 4px;
-      background-color: #f6f8fa;
-      border: 1px solid #d0d7de;
-      color: #24292f;
-      margin-left: 0.25rem;
-    }}
-  </style>
-</head>
-<body>
-  <h1>{title}</h1>
-{intro}  <pre class="tree"><code>{listing}</code></pre>
-{outro}</body>
-</html>
-"""
-
-
-class _HtmlNode:
-    """Hierarchical node for HTML directory tree formatting."""
-
-    __slots__ = ("children", "file_info", "is_dir", "name", "path")
-
-    def __init__(
-        self,
-        name: str,
-        path: Path,
-        *,
-        is_dir: bool,
-        file_info: FileInfo | None = None,
-    ) -> None:
-        self.name = name
-        self.path = path
-        self.is_dir = is_dir
-        self.file_info = file_info
-        self.children: dict[str, _HtmlNode] = {}
-
-
-def _build_href(base_href: str | None, target_path: Path) -> str:
-    """Format and URL-encode path with optional base HREF prefix."""
-    posix_path = target_path.as_posix()
-    if posix_path in {".", ""}:
-        return base_href or "."
-
-    quoted_segments = [
-        urllib.parse.quote_from_bytes(
-            seg.encode("utf-8", errors="surrogateescape"),
-        )
-        for seg in posix_path.split("/")
-        if seg
-    ]
-    quoted_path = "/".join(quoted_segments)
-
-    if base_href is None or not base_href:
-        return quoted_path
-
-    if base_href.endswith("/"):
-        return f"{base_href}{quoted_path}"
-
-    return f"{base_href}/{quoted_path}"
-
-
-def _ensure_dir_path(
-    root_node: _HtmlNode,
-    dir_parts: tuple[str, ...],
-    *,
-    is_abs: bool,
-) -> tuple[_HtmlNode, Path]:
-    """Descend or create directory nodes along path parts."""
-    curr = root_node
-    accum_path = Path(dir_parts[0]) if (is_abs and dir_parts) else Path()
-    for part in dir_parts:
-        accum_path = accum_path / part
-        if part not in curr.children:
-            curr.children[part] = _HtmlNode(part, accum_path, is_dir=True)
-
-        curr = curr.children[part]
-
-    return curr, accum_path
-
-
-def _read_utf8_fragment(path: Path) -> str:
-    """Read an HTML template fragment as UTF-8, raising FindFmtError on failure."""
-    try:
-        return path.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError) as err:
-        msg = f"Cannot read '{path}' as UTF-8: {err}"
-        raise FindFmtError(msg) from err
-
-
-class HtmlFormatter(Formatter):
+class HtmlFormatter(_MetadataFormatterBase):
     """Semantic, accessible HTML5 document serializer with intro/outro templating."""
 
     def __init__(  # noqa: PLR0913 - wide CLI/config signature
@@ -247,30 +101,19 @@ class HtmlFormatter(Formatter):
         self.title = title if title is not None else DEFAULT_TITLE
         self.intro = intro
         if self.intro is None and intro_file is not None:
-            self.intro = _read_utf8_fragment(intro_file)
+            self.intro = read_utf8_fragment(intro_file)
 
         self.outro = outro
         if self.outro is None and outro_file is not None:
-            self.outro = _read_utf8_fragment(outro_file)
+            self.outro = read_utf8_fragment(outro_file)
 
         self.no_links = no_links
         self.no_indent = no_indent
-        self.show_permissions = show_permissions
-        self.show_user = show_user
-        self.show_group = show_group
-        self.show_inodes = show_inodes
-        self.show_device = show_device
-        self.show_size = show_size
-        self.human_readable = human_readable
-        self.show_si = show_si
-        self.accumulate_size = accumulate_size
-        self.show_mtime = show_mtime
-        self.show_ctime = show_ctime
+        self._set_ownership_options(permissions=show_permissions, user=show_user, group=show_group)
+        self._set_stat_options(inodes=show_inodes, device=show_device, mtime=show_mtime, ctime=show_ctime)
         self.time_format = time_format
-        self.classify = classify
-        self.hide_control_chars = hide_control_chars
-        self.literal = literal
-        self.quote_name = quote_name
+        self._set_size_options(exact=show_size, human=human_readable, si=show_si, accum=accumulate_size)
+        self._set_path_options(classify=classify, ctrl=hide_control_chars, literal=literal, quote=quote_name)
 
     def _format_size_val(self, size_bytes: int) -> str:
         """Format size value according to unit preferences."""
@@ -281,61 +124,12 @@ class HtmlFormatter(Formatter):
             exact=self.show_size,
         )
 
-    def _build_node_tree(self, sorted_files: list[FileInfo]) -> _HtmlNode:
-        """Construct hierarchical node tree from classified files."""
-        root_name = "/" if self.absolute else "."
-        root_node = _HtmlNode(root_name, Path(root_name), is_dir=True)
-
-        for file_info in sorted_files:
-            target_path = file_info.path if self.absolute else file_info.relative_path
-            is_abs = target_path.is_absolute()
-            parts = target_path.parts
-            dir_parts = tuple(parts[1:-1] if is_abs else parts[:-1])
-
-            curr, accum_path = _ensure_dir_path(root_node, dir_parts, is_abs=is_abs)
-            filename = parts[-1] if parts else str(target_path)
-            leaf_path = accum_path / filename if len(parts) > 1 else target_path
-            is_dir = file_info.indicator == "/" or "directory" in file_info.tags
-            if filename in curr.children:
-                curr.children[filename].file_info = file_info
-                curr.children[filename].is_dir = is_dir
-            else:
-                curr.children[filename] = _HtmlNode(
-                    filename,
-                    leaf_path,
-                    is_dir=is_dir,
-                    file_info=file_info,
-                )
-
-        return root_node
-
-    def _calculate_node_sizes(self, node: _HtmlNode) -> int:
-        """Compute accumulated size for a node and all descendants."""
-        size = 0
-        if node.file_info and not node.is_dir:
-            size += node.file_info.size_bytes
-
-        for child in node.children.values():
-            size += self._calculate_node_sizes(child)
-
-        return size
-
     def _format_metadata(self, file_info: FileInfo | None) -> str:
         """Render metadata prefix badges if active."""
         if file_info is None:
             return ""
 
-        parts = format_metadata_parts(
-            file_info,
-            show_inodes=self.show_inodes,
-            show_device=self.show_device,
-            show_permissions=self.show_permissions,
-            show_user=self.show_user,
-            show_group=self.show_group,
-            show_mtime=self.show_mtime,
-            show_ctime=self.show_ctime,
-            time_format=self.time_format,
-        )
+        parts = self._format_stat_parts(file_info)
         if not parts:
             return ""
 
@@ -344,7 +138,7 @@ class HtmlFormatter(Formatter):
 
     def _format_link_or_text(
         self,
-        node: _HtmlNode,
+        node: HierarchyNode,
         display_name: str,
     ) -> str:
         """Render clickable hyperlink or plain text span."""
@@ -359,12 +153,12 @@ class HtmlFormatter(Formatter):
         if self.no_links:
             return f'<span class="{cls}">{escaped_name}</span>'
 
-        href = _build_href(self.base_href, node.path)
+        href = build_href(self.base_href, node.path)
         return f'<a href="{html.escape(href)}" class="{cls}">{escaped_name}</a>'
 
     def _format_size_part(
         self,
-        node: _HtmlNode,
+        node: HierarchyNode,
         dir_sizes: dict[int, int] | None,
     ) -> str:
         """Render formatted size string with span markup."""
@@ -398,7 +192,7 @@ class HtmlFormatter(Formatter):
 
     def _format_entry(
         self,
-        node: _HtmlNode,
+        node: HierarchyNode,
         dir_sizes: dict[int, int] | None,
     ) -> str:
         """Render single directory or file entry line."""
@@ -425,7 +219,7 @@ class HtmlFormatter(Formatter):
 
     def _render_tree_lines(
         self,
-        node: _HtmlNode,
+        node: HierarchyNode,
         dir_sizes: dict[int, int] | None,
         lines: list[str],
         prefix: str = "",
@@ -456,20 +250,8 @@ class HtmlFormatter(Formatter):
 
         listing = ""
         if sorted_files:
-            root_node = self._build_node_tree(sorted_files)
-            dir_sizes: dict[int, int] = {}
-            if self.accumulate_size:
-                dir_sizes[id(root_node)] = self._calculate_node_sizes(root_node)
-
-                def _compute_sizes(n: _HtmlNode) -> None:
-                    """Recursively compute directory node sizes."""
-                    for c in n.children.values():
-                        if c.is_dir:
-                            dir_sizes[id(c)] = self._calculate_node_sizes(c)
-                            _compute_sizes(c)
-
-                _compute_sizes(root_node)
-
+            root_node = build_hierarchy_tree(sorted_files, absolute=self.absolute)
+            dir_sizes = compute_accumulated_dir_sizes(root_node) if self.accumulate_size else {}
             lines = [self._format_entry(root_node, dir_sizes)]
             self._render_tree_lines(root_node, dir_sizes, lines)
             listing = "\n".join(lines)

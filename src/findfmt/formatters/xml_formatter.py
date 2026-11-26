@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sys
 import xml.etree.ElementTree as ET
-from pathlib import Path
 from typing import TYPE_CHECKING, TextIO, cast
 
 if sys.version_info >= (3, 12):
@@ -12,9 +11,15 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-from findfmt.formatters.base import Formatter, write_stream_safe
+from findfmt.formatters._hierarchy import (
+    HierarchyNode,
+    build_hierarchy_tree,
+    compute_accumulated_dir_sizes,
+)
+from findfmt.formatters._xml_sanitize import clean_xml_text
+from findfmt.formatters.base import _MetadataFormatterBase, write_stream_safe
 from findfmt.sizes import format_size
-from findfmt.utils.strings import format_display_path, format_timestamp, strip_ansi_escapes
+from findfmt.utils.strings import format_display_path, format_timestamp
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -24,84 +29,7 @@ if TYPE_CHECKING:
 __all__ = ["XmlFormatter"]
 
 
-_MIN_PRINTABLE_ASCII = 0x20
-_DEL_ASCII = 0x7F
-_VALID_UNICODE_MIN = 0xA0
-_XML_CHAR_TAB = 0x9
-_XML_CHAR_LF = 0xA
-_XML_CHAR_CR = 0xD
-_XML_PRE_SURROGATE_MAX = 0xD7FF
-_XML_POST_SURROGATE_MIN = 0xE000
-_XML_BMP_MAX = 0xFFFD
-_XML_SUPP_MIN = 0x10000
-_XML_UNICODE_MAX = 0x10FFFF
-_SURROGATE_MIN = 0xD800
-_SURROGATE_MAX = 0xDFFF
-_NONCHAR_FFFE = "\ufffe"
-_NONCHAR_FFFF = "\uffff"
-
-
-def _is_valid_xml_char(c: str) -> bool:
-    """Check if character is legal in XML 1.0 (excluding surrogates and U+FFFE/FFFF)."""
-    cp = ord(c)
-    return (
-        cp in (_XML_CHAR_TAB, _XML_CHAR_LF, _XML_CHAR_CR)
-        or (_MIN_PRINTABLE_ASCII <= cp < _DEL_ASCII)
-        or (_VALID_UNICODE_MIN <= cp <= _XML_PRE_SURROGATE_MAX)
-        or (_XML_POST_SURROGATE_MIN <= cp <= _XML_BMP_MAX)
-        or (_XML_SUPP_MIN <= cp <= _XML_UNICODE_MAX)
-    )
-
-
-def _sanitize_xml_text(text: str) -> str:
-    """Sanitize string for XML 1.0 validity.
-
-    Strips ANSI escapes and masks invalid control characters, surrogates, and noncharacters.
-    """
-    clean = strip_ansi_escapes(text)
-    return "".join(c if _is_valid_xml_char(c) else "?" for c in clean)
-
-
-class _XmlNode:
-    """Internal hierarchical node for XML document building."""
-
-    __slots__ = ("children", "file_info", "is_dir", "name", "path")
-
-    def __init__(
-        self,
-        name: str,
-        path: Path,
-        *,
-        is_dir: bool,
-        file_info: FileInfo | None = None,
-    ) -> None:
-        self.name = name
-        self.path = path
-        self.is_dir = is_dir
-        self.file_info = file_info
-        self.children: dict[str, _XmlNode] = {}
-
-
-def _ensure_dir_path(
-    root_node: _XmlNode,
-    dir_parts: tuple[str, ...],
-    *,
-    is_abs: bool,
-) -> tuple[_XmlNode, Path]:
-    """Descend or create directory nodes along path parts."""
-    curr = root_node
-    accum_path = Path(dir_parts[0]) if (is_abs and dir_parts) else Path()
-    for part in dir_parts:
-        accum_path = accum_path / part
-        if part not in curr.children:
-            curr.children[part] = _XmlNode(part, accum_path, is_dir=True)
-
-        curr = curr.children[part]
-
-    return curr, accum_path
-
-
-class XmlFormatter(Formatter):
+class XmlFormatter(_MetadataFormatterBase):
     """Hierarchical XML document serializer utilizing ElementTree."""
 
     def __init__(  # noqa: PLR0913 - wide CLI/config signature
@@ -150,22 +78,11 @@ class XmlFormatter(Formatter):
         """
         super().__init__(absolute=absolute)
         self.no_indent = no_indent
-        self.show_permissions = show_permissions
-        self.show_user = show_user
-        self.show_group = show_group
-        self.show_inodes = show_inodes
-        self.show_device = show_device
-        self.show_size = show_size
-        self.human_readable = human_readable
-        self.show_si = show_si
-        self.accumulate_size = accumulate_size
-        self.show_mtime = show_mtime
-        self.show_ctime = show_ctime
+        self._set_ownership_options(permissions=show_permissions, user=show_user, group=show_group)
+        self._set_stat_options(inodes=show_inodes, device=show_device, mtime=show_mtime, ctime=show_ctime)
         self.time_format = time_format
-        self.classify = classify
-        self.hide_control_chars = hide_control_chars
-        self.literal = literal
-        self.quote_name = quote_name
+        self._set_size_options(exact=show_size, human=human_readable, si=show_si, accum=accumulate_size)
+        self._set_path_options(classify=classify, ctrl=hide_control_chars, literal=literal, quote=quote_name)
 
     def _format_size_val(self, size_bytes: int) -> str:
         """Format size value according to unit preferences."""
@@ -181,25 +98,7 @@ class XmlFormatter(Formatter):
 
     def _clean_val(self, val: str | None) -> str | None:
         """Sanitize text for XML compatibility unless literal output is active."""
-        if val is None:
-            return None
-
-        if self.literal:
-            has_invalid = any(
-                (_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX) or c in (_NONCHAR_FFFE, _NONCHAR_FFFF)
-                for c in val
-            )
-            if has_invalid:
-                return "".join(
-                    "?"
-                    if (_SURROGATE_MIN <= ord(c) <= _SURROGATE_MAX) or c in (_NONCHAR_FFFE, _NONCHAR_FFFF)
-                    else c
-                    for c in val
-                )
-
-            return val
-
-        return _sanitize_xml_text(val)
+        return clean_xml_text(val, literal=self.literal)
 
     def _apply_metadata_attrs(self, file_info: FileInfo, elem: ET.Element) -> None:
         """Populate optional metadata attributes on target XML element."""
@@ -249,59 +148,9 @@ class XmlFormatter(Formatter):
             shebang_elem = ET.SubElement(elem, "shebang")
             shebang_elem.text = self._clean_val(file_info.shebang)
 
-    def _add_leaf_to_tree(
-        self,
-        curr: _XmlNode,
-        parts: tuple[str, ...],
-        accum_path: Path,
-        file_info: FileInfo,
-        target_path: Path,
-    ) -> None:
-        """Add file or directory leaf to parent directory node."""
-        filename = parts[-1] if parts else str(target_path)
-        leaf_path = accum_path / filename if len(parts) > 1 else target_path
-        is_dir = file_info.indicator == "/" or "directory" in file_info.tags
-        if filename in curr.children:
-            curr.children[filename].file_info = file_info
-            curr.children[filename].is_dir = is_dir
-        else:
-            curr.children[filename] = _XmlNode(
-                filename,
-                leaf_path,
-                is_dir=is_dir,
-                file_info=file_info,
-            )
-
-    def _build_node_tree(self, sorted_files: list[FileInfo]) -> _XmlNode:
-        """Construct hierarchical node tree from classified files."""
-        root_name = "/" if self.absolute else "."
-        root_node = _XmlNode(root_name, Path(root_name), is_dir=True)
-
-        for file_info in sorted_files:
-            target_path = file_info.path if self.absolute else file_info.relative_path
-            is_abs = target_path.is_absolute()
-            parts = target_path.parts
-            dir_parts = tuple(parts[1:-1] if is_abs else parts[:-1])
-
-            curr, accum_path = _ensure_dir_path(root_node, dir_parts, is_abs=is_abs)
-            self._add_leaf_to_tree(curr, parts, accum_path, file_info, target_path)
-
-        return root_node
-
-    def _calculate_node_sizes(self, node: _XmlNode) -> int:
-        """Compute accumulated size for a node and all descendants."""
-        size = 0
-        if node.file_info and not node.is_dir:
-            size += node.file_info.size_bytes
-
-        for child in node.children.values():
-            size += self._calculate_node_sizes(child)
-
-        return size
-
     def _convert_dir_node(
         self,
-        node: _XmlNode,
+        node: HierarchyNode,
         parent: ET.Element,
         dir_sizes: dict[int, int] | None,
         display_name: str,
@@ -328,7 +177,7 @@ class XmlFormatter(Formatter):
 
     def _convert_file_node(
         self,
-        node: _XmlNode,
+        node: HierarchyNode,
         parent: ET.Element,
         display_name: str,
     ) -> None:
@@ -345,11 +194,11 @@ class XmlFormatter(Formatter):
 
     def _convert_node_to_xml(
         self,
-        node: _XmlNode,
+        node: HierarchyNode,
         parent: ET.Element,
         dir_sizes: dict[int, int] | None = None,
     ) -> None:
-        """Recursively serialize _XmlNode hierarchy into ElementTree elements."""
+        """Recursively serialize HierarchyNode hierarchy into ElementTree elements."""
         indicator = node.file_info.indicator if (self.classify and node.file_info) else None
         display_name = format_display_path(
             node.name,
@@ -378,20 +227,8 @@ class XmlFormatter(Formatter):
 
         root = ET.Element("tree")
         if sorted_files:
-            root_node = self._build_node_tree(sorted_files)
-            dir_sizes: dict[int, int] = {}
-            if self.accumulate_size:
-                dir_sizes[id(root_node)] = self._calculate_node_sizes(root_node)
-
-                def _compute_sizes(n: _XmlNode) -> None:
-                    """Recursively compute directory node sizes."""
-                    for c in n.children.values():
-                        if c.is_dir:
-                            dir_sizes[id(c)] = self._calculate_node_sizes(c)
-                            _compute_sizes(c)
-
-                _compute_sizes(root_node)
-
+            root_node = build_hierarchy_tree(sorted_files, absolute=self.absolute)
+            dir_sizes = compute_accumulated_dir_sizes(root_node) if self.accumulate_size else {}
             self._convert_node_to_xml(root_node, root, dir_sizes)
 
         if not self.no_indent:

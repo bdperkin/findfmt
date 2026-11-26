@@ -10,11 +10,8 @@ if sys.version_info >= (3, 12):
 else:
     from typing_extensions import override
 
-from findfmt.formatters.base import Formatter, write_stream_safe
-from findfmt.metadata import format_metadata_parts
-from findfmt.utils.hyperlinks import build_file_uri
+from findfmt.formatters.base import _MetadataFormatterBase, write_stream_safe
 from findfmt.utils.strings import (
-    format_display_path,
     mask_control_characters,
     strip_ansi_escapes,
 )
@@ -27,7 +24,7 @@ if TYPE_CHECKING:
 __all__ = ["TextFormatter"]
 
 
-class TextFormatter(Formatter):
+class TextFormatter(_MetadataFormatterBase):
     """Standard line-oriented or NUL-delimited plain text formatter."""
 
     def __init__(  # noqa: PLR0913 - wide CLI/config signature
@@ -88,24 +85,12 @@ class TextFormatter(Formatter):
 
         self.show_tags = show_tags
         self.delimiter = delimiter
-        self.show_permissions = show_permissions
-        self.show_user = show_user
-        self.show_group = show_group
-        self.show_inodes = show_inodes
-        self.show_device = show_device
-        self.show_size = show_size
-        self.human_readable = human_readable
-        self.show_si = show_si
-        self.show_mtime = show_mtime
-        self.show_ctime = show_ctime
+        self._set_ownership_options(permissions=show_permissions, user=show_user, group=show_group)
+        self._set_stat_options(inodes=show_inodes, device=show_device, mtime=show_mtime, ctime=show_ctime)
         self.time_format = time_format
-        self.classify = classify
-        self.hide_control_chars = hide_control_chars
-        self.literal = literal
-        self.quote_name = quote_name
-        self.hyperlink = hyperlink
-        self.hyperlink_schema = hyperlink_schema
-        self.hyperlink_authority = hyperlink_authority
+        self._set_size_options(exact=show_size, human=human_readable, si=show_si)
+        self._set_path_options(classify=classify, ctrl=hide_control_chars, literal=literal, quote=quote_name)
+        self._set_hyperlink_options(link=hyperlink, schema=hyperlink_schema, authority=hyperlink_authority)
 
     def format_item(self, file_info: FileInfo) -> str:
         """Format an individual file record as a text line.
@@ -116,40 +101,8 @@ class TextFormatter(Formatter):
         Returns:
             Formatted line string including trailing delimiter.
         """
-        meta_parts = format_metadata_parts(
-            file_info,
-            show_inodes=self.show_inodes,
-            show_device=self.show_device,
-            show_permissions=self.show_permissions,
-            show_user=self.show_user,
-            show_group=self.show_group,
-            show_size=self.show_size,
-            human_readable=self.human_readable,
-            show_si=self.show_si,
-            show_mtime=self.show_mtime,
-            show_ctime=self.show_ctime,
-            time_format=self.time_format,
-        )
-        raw_path = str(file_info.path if self.absolute else file_info.relative_path)
-        indicator = file_info.indicator if self.classify else None
-        uri = (
-            build_file_uri(
-                file_info.path,
-                schema=self.hyperlink_schema,
-                authority=self.hyperlink_authority,
-            )
-            if self.hyperlink
-            else None
-        )
-        display_path = format_display_path(
-            raw_path,
-            quote_name=self.quote_name,
-            hide_control_chars=self.hide_control_chars,
-            literal=self.literal,
-            indicator=indicator,
-            hyperlink=self.hyperlink,
-            uri=uri,
-        )
+        meta_parts = self._format_stat_parts(file_info, include_size=True)
+        display_path = self._format_file_display_path(file_info)
         if not self.literal and meta_parts:
             meta_parts = [mask_control_characters(strip_ansi_escapes(p)) for p in meta_parts]
 

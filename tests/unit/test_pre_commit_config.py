@@ -1,7 +1,8 @@
-"""Tests for Stage 1-4, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716-#719)."""
+"""Tests for Stage 1-4, Rust, and TOML hooks in .pre-commit-config.yaml (#591, #716-#719, #725)."""
 
 from __future__ import annotations
 
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -254,11 +255,11 @@ def test_stage3_python_auto_formatters_and_code_modifiers() -> None:
 
 
 def test_stage4_python_type_dependency_and_static_quality_hooks() -> None:
-    """Verify Stage 4 analyzer ordering, ci.skip policy, and QUALITY_STEPS parity (#719)."""
+    """Verify Stage 4 analyzer order, pylint R0801 config, ci.skip, and QUALITY_STEPS parity (#719, #725)."""
     config = _load_pre_commit_config()
     ci_skip = set(config["ci"]["skip"])
     repos = config["repos"]
-    stage4_slice = repos[15:20]
+    stage4_slice = repos[15:21]
     stage4_pairs = [(r["repo"], [h["id"] for h in r["hooks"]]) for r in stage4_slice]
     assert stage4_pairs == [
         ("https://github.com/astral-sh/ty-pre-commit", ["ty"]),
@@ -266,6 +267,7 @@ def test_stage4_python_type_dependency_and_static_quality_hooks() -> None:
         ("https://github.com/jendrikseipp/vulture", ["vulture"]),
         ("https://github.com/rubik/xenon", ["xenon"]),
         ("https://github.com/econchick/interrogate", ["interrogate"]),
+        ("https://github.com/pylint-dev/pylint", ["pylint"]),
     ]
 
     assert stage4_slice[0]["hooks"][0].get("args") == ["--group", "lint"]
@@ -274,9 +276,14 @@ def test_stage4_python_type_dependency_and_static_quality_hooks() -> None:
     assert stage4_slice[3]["hooks"][0].get("pass_filenames") is False
     assert stage4_slice[4]["hooks"][0].get("args") == ["src"]
     assert stage4_slice[4]["hooks"][0].get("pass_filenames") is False
+    pylint_hook = stage4_slice[5]["hooks"][0]
+    assert pylint_hook.get("name") == "pylint (duplicate code)"
+    assert pylint_hook.get("files") == r"^(src|tools)/.*\.py$"
+    assert pylint_hook.get("pass_filenames") is False
+    assert pylint_hook.get("args") == ["src", "tools"]
 
     assert {"ty", "deptry"} <= ci_skip
-    assert {"vulture", "xenon", "interrogate"}.isdisjoint(ci_skip)
+    assert {"vulture", "xenon", "interrogate", "pylint"}.isdisjoint(ci_skip)
 
     quality_cmds = {cmd for _, cmd in QUALITY_STEPS}
     assert ("uv", "run", "ty", "check") in quality_cmds
@@ -284,3 +291,13 @@ def test_stage4_python_type_dependency_and_static_quality_hooks() -> None:
     assert ("uv", "run", "vulture", "src") in quality_cmds
     assert ("uv", "run", "xenon", "-b", "B", "-m", "B", "-a", "A", "src") in quality_cmds
     assert ("uv", "run", "interrogate", "src") in quality_cmds
+    assert ("uv", "run", "pylint", "src", "tools") in quality_cmds
+
+    pyproject = tomllib.loads((_repo_root() / "pyproject.toml").read_text(encoding="utf-8"))
+    pylint_cfg = pyproject["tool"]["pylint"]
+    assert pylint_cfg["messages_control"] == {
+        "disable": ["all"],
+        "enable": ["similarities"],
+        "fail-on": ["duplicate-code"],
+    }
+    assert pylint_cfg["similarities"]["min-similarity-lines"] == 12
