@@ -7,17 +7,17 @@ ci:
   autoupdate_branch: main
   autoupdate_commit_msg: 'chore(deps): update pre-commit hooks'
   autoupdate_schedule: weekly
-  skip:
-    - cargo-check
-    - clippy
-    - deptry
-    - fmt
-    - pyroma
-    - semgrep
-    - sync-pre-commit-deps
-    - ty
-    - vale
-    - vale-commit-msg
+  skip:  # Hooks needing Rust, project venv, oversized wheels, or gitignored assets
+    - cargo-check  # Requires rustup + Cargo.lock workspace; enforced in CI & verify_quality.py
+    - clippy  # Requires rustup + clippy component; enforced in CI & verify_quality.py
+    - deptry  # Inspects project .venv against pyproject.toml; enforced in verify_quality.py
+    - fmt  # Requires rustfmt component; enforced in CI & verify_quality.py
+    - pyroma  # Audits local build metadata in project env; enforced in CI packaging checks
+    - semgrep  # ~280 MB OCaml wheel exceeds pre-commit.ci limits; run in verify_quality.py
+    - sync-pre-commit-deps  # Local rev-sync helper; verified by tools/sync_pre_commit_deps.py
+    - ty  # Resolves imports against project .venv (--group lint); run in verify_quality.py
+    - vale  # Needs gitignored .github/styles/Google assets; run in .github/workflows/vale.yml
+    - vale-commit-msg  # commit-msg stage hook needing local Vale styles; not run in CI PRs
   submodules: false
 
 default_install_hook_types:
@@ -28,34 +28,36 @@ default_stages:
   - pre-commit
 
 repos:
-  # Meta pre-commit hooks
+  # Built-in pre-commit meta hooks (config applicability, exclude hygiene, manual file dump)
   - repo: meta
     hooks:
       - id: check-hooks-apply
       - id: check-useless-excludes
       - id: identity
+        name: identity (print matched files)
         stages:
-          - manual
+          - manual  # Diagnostic helper; invoke explicitly with --hook-stage manual
 
-  # Pre-commit CI configuration validator
+  # Validate pre-commit.ci top-level ci: configuration schema
   - repo: https://github.com/pre-commit-ci/pre-commit-ci-config
     rev: v1.6.1
     hooks:
       - id: check-pre-commit-ci-config
 
-  # Sync pre-commit dependencies
+  # Synchronize shared hook additional_dependencies (e.g., ruff) across repos
   - repo: https://github.com/pre-commit/sync-pre-commit-deps
     rev: v0.0.5
     hooks:
       - id: sync-pre-commit-deps
+        name: sync-pre-commit-deps (shared additional_dependencies)
 
-  # Pre-commit standard hooks
+  # Core repository hygiene, file syntax checks, and whitespace/newline fixers
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
         args:
-          - --maxkb=500
+          - --maxkb=500  # Reject accidental binary or fixture blobs larger than 500 KB
       - id: check-ast
       - id: check-case-conflict
       - id: check-executables-have-shebangs
@@ -63,65 +65,70 @@ repos:
       - id: check-json
       - id: check-merge-conflict
       - id: check-shebang-scripts-are-executable
-        exclude: ^findfmt_rs/fuzz/seed_corpus/
+        exclude: ^findfmt_rs/fuzz/seed_corpus/  # Fuzz seed inputs intentionally contain shebangs
       - id: check-toml
       - id: check-vcs-permalinks
       - id: check-yaml
         args:
-          - --unsafe
+          - --unsafe  # Allow custom YAML tags via syntax-only parse without instantiating objects
       - id: debug-statements
       - id: destroyed-symlinks
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: file-contents-sorter
-        files: ^\.github/styles/config/vocabularies/findfmt/(accept|reject)\.txt$
+        name: file-contents-sorter (Vale vocabularies)
+        files: ^\.github/styles/config/vocabularies/findfmt/(accept|reject)\.txt$  # Vale wordlists
         args:
-          - --unique
+          - --unique  # Deduplicate vocabulary entries in place
       - id: fix-byte-order-marker
       - id: forbid-submodules
       - id: mixed-line-ending
         args:
-          - --fix=lf
+          - --fix=lf  # Normalize all text line endings to LF across platforms
       - id: name-tests-test
-        exclude: ^tests/fuzz/
+        exclude: ^tests/fuzz/  # Fuzz harnesses are standalone entry points, not pytest modules
         args:
-          - --pytest-test-first
+          - --pytest-test-first  # Enforce test_*.py prefix convention instead of *_test.py
       - id: trailing-whitespace
 
-  # Format pyproject.toml
+  # Canonicalize and format pyproject.toml tables and PEP 621 metadata
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: v2.31.2
     hooks:
       - id: pyproject-fmt
+        name: pyproject-fmt (format pyproject.toml)
         args:
           - --max-supported-python
-          - '3.15'
+          - '3.15'  # Generate Trove Python version classifiers through 3.15
 
-  # Format and lint Rust/Cargo TOML manifests
+  # Format and lint Rust/Cargo TOML manifests under findfmt_rs/
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3
     hooks:
       - id: taplo-format
-        files: ^findfmt_rs/.*\.toml$
+        name: taplo-format (Rust TOML)
+        files: ^findfmt_rs/.*\.toml$  # Scope to Rust TOML to avoid conflicting with pyproject-fmt
       - id: taplo-lint
-        files: ^findfmt_rs/.*\.toml$
+        name: taplo-lint (Rust TOML)
+        files: ^findfmt_rs/.*\.toml$  # Scope to Rust TOML manifests
         args:
-          - --no-schema
+          - --no-schema  # Disable remote SchemaStore fetches for offline pre-commit.ci runs
 
-  # Validate pyproject.toml
+  # Validate pyproject.toml against PEP 621 and tool JSON schemas
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.27
     hooks:
       - id: validate-pyproject
 
-  # UV dependency management
+  # Verify uv.lock consistency and export hashed ClusterFuzzLite requirements
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.13.9
     hooks:
       - id: uv-lock
+        name: uv-lock (sync uv.lock)
       - id: uv-export
         name: uv-export (ClusterFuzzLite)
-        files: ^(uv\.lock|pyproject\.toml)$
+        files: ^(uv\.lock|pyproject\.toml)$  # Regenerate pinned fuzz requirements when deps change
         args:
           - --frozen
           - --no-dev
@@ -130,85 +137,93 @@ repos:
           - --hashes
           - --output-file=.clusterfuzzlite/requirements.txt
 
-  # PyPI packaging compliance
+  # Audit Python package metadata completeness and PyPI compliance score
   - repo: https://github.com/regebro/pyroma
     rev: 5.0.1
     hooks:
       - id: pyroma
         args:
           - -d
-          - --min=10
+          - --min=10  # Require a perfect 10/10 packaging metadata score
           - .
 
-  # Python code structure: ssort
+  # Topologically sort top-level Python class and function definitions
   - repo: https://github.com/bwhmather/ssort
     rev: 0.19.0
     hooks:
       - id: ssort
+        name: ssort (top-level statement order)
 
-  # Python code structure: absolufy-imports
+  # Rewrite relative Python imports as explicit absolute package imports
   - repo: https://github.com/marcogorelli/absolufy-imports  # zizmor: ignore[archived-uses] -- AST normalizer
     rev: v0.3.1
     hooks:
       - id: absolufy-imports
+        name: absolufy-imports (absolute Python imports)
 
-  # Python code structure: add-trailing-comma
+  # Enforce trailing commas on multi-line Python literals, calls, and signatures
   - repo: https://github.com/asottile/add-trailing-comma
     rev: v4.0.0
     hooks:
       - id: add-trailing-comma
 
-  # Astral Ruff Linter (auto-fixes before final block/whitespace formatting)
+  # Ruff Python linter pass with safe AST auto-fixes (runs before blank-line-after-blocks)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.6
     hooks:
       - id: ruff-check
+        name: ruff-check (Python lint & auto-fix)
         args:
           - --fix
-          - --exit-non-zero-on-fix
+          - --exit-non-zero-on-fix  # Fail run when files change so pre-commit re-stages fixes
 
-  # Python code structure: blank-line-after-blocks
+  # Insert blank lines after compound Python control blocks before final formatting
   - repo: https://github.com/jsh9/blank-line-after-blocks
     rev: 0.1.4
     hooks:
       - id: blank-line-after-blocks
 
-  # Astral Ruff Formatter (runs last among Python mutators)
+  # Ruff Python code formatter (final Stage 3 pass normalizing prior AST edits)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.6
     hooks:
       - id: ruff-format
+        name: ruff-format (Python code formatter)
 
-  # Astral Ty type checker
+  # Astral ty static Python type checker across src/, tools/, and tests/
   - repo: https://github.com/astral-sh/ty-pre-commit
     rev: v0.0.108
     hooks:
       - id: ty
-        args:
+        name: ty (Python static type check)
+        args:  # Activate lint dependency group for test and tool type stubs
           - --group
           - lint
 
-  # Deptry dependency checker
+  # Detect missing, unused, or transitive Python dependencies against pyproject.toml
   - repo: https://github.com/osprey-oss/deptry
     rev: 0.25.1
     hooks:
       - id: deptry
+        name: deptry (Python dependency hygiene)
 
-  # Vulture dead code checker
+  # Detect unreachable and unused dead Python code under src/
   - repo: https://github.com/jendrikseipp/vulture
     rev: v2.16
     hooks:
       - id: vulture
+        name: vulture (Python dead code)
         args:
-          - src
+          - src  # Scan runtime package; tests and tools use dynamic pytest fixtures
 
-  # Xenon complexity checker
+  # Enforce cyclomatic complexity thresholds across src/ (block B, module B, average A)
   - repo: https://github.com/rubik/xenon
     rev: v0.9.3
     hooks:
       - id: xenon
-        pass_filenames: false
-        args:
+        name: xenon (cyclomatic complexity)
+        pass_filenames: false  # Evaluate aggregate average complexity across all of src/
+        args:  # Thresholds: max block=B, max module=B, max average=A
           - -b
           - B
           - -m
@@ -217,46 +232,47 @@ repos:
           - A
           - src
 
-  # Interrogate docstring checker
+  # Enforce 100% Python docstring coverage across src/
   - repo: https://github.com/econchick/interrogate
     rev: 1.7.0
     hooks:
       - id: interrogate
-        pass_filenames: false
+        name: interrogate (docstring coverage)
+        pass_filenames: false  # Compute package-wide 100% docstring coverage across src/
         args:
           - src
 
-  # Pylint cross-file duplicate-code checker (R0801 similarities only)
+  # Detect cross-file duplicate Python code blocks (Pylint R0801 similarities only)
   - repo: https://github.com/pylint-dev/pylint
     rev: v4.1.4
     hooks:
       - id: pylint
         name: pylint (duplicate code)
-        files: ^(src|tools)/.*\.py$
-        pass_filenames: false
+        files: ^(src|tools)/.*\.py$  # Trigger cross-file R0801 check when src/ or tools/ change
+        pass_filenames: false  # Scan full src/ and tools/ trees together for cross-file clones
         args:
           - src
           - tools
 
-  # Rust Cargo formatter, compiler check, and Clippy linter
+  # Rust Cargo formatter, locked compiler check, and dual-target Clippy lints
   - repo: https://github.com/doublify/pre-commit-rust
     rev: v1.0
     hooks:
       - id: fmt
         alias: cargo-fmt
-        name: cargo-fmt
+        name: cargo-fmt (Rust formatter)
         files: ^findfmt_rs/
-        types:
+        types:  # Override upstream types:[rust] so Cargo.toml/deny.toml edits also trigger
           - file
-        types_or:
+        types_or:  # Match both .rs sources and Rust .toml manifests under findfmt_rs/
           - rust
           - toml
-        pass_filenames: false
+        pass_filenames: false  # cargo fmt formats the entire crate via --manifest-path
         args:
           - --manifest-path
           - findfmt_rs/Cargo.toml
       - id: cargo-check
-        name: cargo-check
+        name: cargo-check (Rust compiler check)
         files: ^findfmt_rs/
         types:
           - file
@@ -280,7 +296,7 @@ repos:
           - --manifest-path
           - findfmt_rs/Cargo.toml
           - --locked
-          - --lib
+          - --lib  # Lint PyO3 cdylib/extension-module target with default features
           - --
           - -D
           - warnings
@@ -297,28 +313,30 @@ repos:
           - --manifest-path
           - findfmt_rs/Cargo.toml
           - --locked
-          - --no-default-features
+          - --no-default-features  # Disable extension-module so unit/proptest test binaries link
           - --all-targets
           - --
           - -D
           - warnings
 
-  # Yamlfix formatter
+  # Auto-format YAML configuration and workflow files (runs before yamllint)
   - repo: https://github.com/lyz-code/yamlfix
     rev: 1.19.1
     hooks:
       - id: yamlfix
+        name: yamlfix (YAML formatter)
 
-  # Yamllint
+  # Lint YAML syntax, indentation, truthy values, and line lengths (.yamllint.yaml)
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.38.0
     hooks:
       - id: yamllint
+        name: yamllint (YAML linter)
         args:
           - -c
           - .yamllint.yaml
 
-  # JSON Schema validation for GitHub and service configuration files
+  # Offline JSON Schema validation for GitHub Actions and service config files
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.39.0
     hooks:
@@ -332,12 +350,12 @@ repos:
       - id: check-readthedocs
       - id: check-renovate
 
-  # HTML & Jinja2 template formatter and linter (Sphinx sidebar templates)
+  # Format and lint Sphinx HTML/Jinja2 sidebar templates under docs/source/_templates/
   - repo: https://github.com/djlint/djLint
     rev: v1.54.0
     hooks:
       - id: djlint-reformat-jinja
-        files: ^docs/source/_templates/
+        files: ^docs/source/_templates/  # Restrict to Sphinx Jinja2 templates (not test fixtures)
         types_or:
           - html
           - jinja
@@ -347,102 +365,110 @@ repos:
           - html
           - jinja
 
-  # Markdown heading numbering
+  # Renumber Markdown section headings before TOC generation and mdformat
   - repo: https://github.com/jsh9/markdown-heading-numbering
     rev: 0.1.1
     hooks:
       - id: markdown-heading-numbering
-        exclude: ^(CHANGELOG|THIRD_PARTY_LICENSES)\.md$
+        exclude: ^(CHANGELOG|THIRD_PARTY_LICENSES)\.md$  # Preserve release and license headings
 
-  # Markdown TOC creator
+  # Refresh existing Markdown table-of-contents blocks before mdformat
   - repo: https://github.com/jsh9/markdown-toc-creator
     rev: 0.1.3
     hooks:
       - id: markdown-toc-creator
+        name: markdown-toc-creator (table of contents)
         args:
           - --proactive
-          - 'False'
+          - 'False'  # Only update files that already contain explicit TOC markers
 
-  # Markdown format
+  # Format Markdown prose, GFM tables, frontmatter, and embedded Python code fences
   - repo: https://github.com/hukkin/mdformat
     rev: 1.0.0
     hooks:
       - id: mdformat
+        name: mdformat (Markdown & code-fence formatter)
         additional_dependencies:
           - mdformat-frontmatter==2.2.0
           - mdformat-gfm==1.0.0  # also provides table support (mdformat-tables is archived and merged here)
           - mdformat-ruff==0.1.3
           - ruff==0.17.6  # keep in sync with the ruff-pre-commit rev
 
-  # PyMarkdown linter
+  # Lint formatted Markdown structure and CommonMark/GFM rules (after Stage 6 mutators)
   - repo: https://github.com/jackdewinter/pymarkdown
     rev: v0.9.42  # zizmor: ignore[ref-confusion] -- upstream publishes matching branch and tag names
     hooks:
       - id: pymarkdown
+        name: pymarkdown (Markdown linter)
 
-  # Shell script formatter (prebuilt Python wheel)
+  # Format POSIX/Bash shell scripts (prebuilt Python wheel; runs before shellcheck)
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: v3.14.1-1
     hooks:
       - id: shfmt
-        args:
+        name: shfmt (shell formatter)
+        args:  # 2-space indent (-i 2), indent cases (-ci), binary ops newline (-bn), write (-w)
           - -i
           - '2'
           - -ci
           - -bn
           - -w
 
-  # Shell script static analysis linter (prebuilt Python wheel)
+  # Static analysis linter for POSIX/Bash shell scripts (prebuilt Python wheel)
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
       - id: shellcheck
+        name: shellcheck (shell static analysis)
 
-  # Dockerfile linter (prebuilt Python wheel)
+  # Lint Dockerfile instructions and best practices (prebuilt Python wheel)
   - repo: https://github.com/AleksaC/hadolint-py
     rev: v2.15.1
     hooks:
       - id: hadolint
+        name: hadolint (Dockerfile linter)
         args:
-          - --failure-threshold=warning
+          - --failure-threshold=warning  # Fail on warning-and-above Dockerfile findings
 
-  # GitHub Actions workflow syntax and expression linter
+  # Validate GitHub Actions workflow syntax, expressions, and runner matrices
   - repo: https://github.com/rhysd/actionlint
     rev: v1.7.12
     hooks:
       - id: actionlint
 
-  # Security: GitHub Actions, Dependabot, and pre-commit static analysis
+  # Static security analysis for GitHub Actions, Dependabot, and pre-commit configs
   - repo: https://github.com/zizmorcore/zizmor-pre-commit
     rev: v1.33.1
     hooks:
       - id: zizmor
+        name: zizmor (workflow & pre-commit security)
 
-  # Security: Detect high-entropy secrets and credentials
+  # Scan tracked files for high-entropy secrets and leaked credentials
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
-        exclude: (^|/)(uv|Cargo)\.lock$
+        exclude: (^|/)(uv|Cargo)\.lock$  # Ignore deterministic SHA-256 package hashes in lockfiles
 
-  # Security & hybrid architecture: Offline multi-language Semgrep ruleset
+  # Offline multi-language Semgrep security and Python/Rust gateway boundary ruleset
   - repo: https://github.com/semgrep/pre-commit
     rev: v1.187.0
     hooks:
       - id: semgrep
+        name: semgrep (hybrid security & boundaries)
         types_or:
           - python
           - rust
         args:
           - --config
-          - .semgrep.yml
+          - .semgrep.yml  # Offline local ruleset (no Semgrep Registry network fetches)
           - --error
-          - --metrics=off
-          - --disable-version-check
+          - --metrics=off  # Disable telemetry and network calls
+          - --disable-version-check  # Prevent PyPI/registry version pings
           - --quiet
-          - --skip-unknown-extensions
+          - --skip-unknown-extensions  # Ignore non-Python/Rust files cleanly
 
-  # Pygrep static regex hygiene and security checks
+  # Fast regex hygiene checks for blanket suppressions, eval(), mocks, and Unicode
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
@@ -451,54 +477,59 @@ repos:
       - id: python-check-mock-methods
       - id: python-no-eval
       - id: python-no-log-warn
+        name: python-no-log-warn (forbid logger.warn)
       - id: python-use-type-annotations
       - id: text-unicode-replacement-char
-        exclude: ^(\.pre-commit-config\.yaml)$
+        exclude: ^(\.pre-commit-config\.yaml)$  # Self-exclude config pattern definitions
 
-  # Codespell for typo detection
+  # Detect common spelling typos across source, docs, and config files
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.3
     hooks:
       - id: codespell
-        exclude: \.(po|pot)$
+        name: codespell (spelling & typo check)
+        exclude: \.(po|pot)$  # Skip non-English gettext translation catalogs
 
-  # Blocklint for non-inclusive language
+  # Check source and documentation for non-inclusive terminology
   - repo: https://github.com/PrincetonUniversity/blocklint
     rev: v0.3.0
     hooks:
       - id: blocklint
+        name: blocklint (inclusive language check)
 
-  # EditorConfig rules verification (run after all formatters)
+  # Verify .editorconfig newline, charset, and whitespace rules after all formatters
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: 3.11.1
     hooks:
       - id: editorconfig-checker
         args:
-          - -disable-indent-size
+          - -disable-indent-size  # Defer block/continuation indentation to ruff, rustfmt, yamlfix
 
-  # Vale prose, code-comment, and commit-message linter
+  # Vale prose, code-comment, and commit-message style linter (after Stage 1-7 formatters)
   - repo: https://github.com/vale-cli/vale
     rev: v3.28.1
     hooks:
       - id: vale
         alias: vale-sync
-        name: vale sync
+        name: vale-sync (download prose styles & grammars)
         entry: sh -c 'VALE_GRAMMARS_URL=https://github.com/vale-cli/vale/releases/download/v3.28.1 vale "$@"' --
-        stages:
+        stages:  # Manual bootstrap for gitignored .github/styles/Google & grammar assets
           - manual
         pass_filenames: false
         args:
           - sync
       - id: vale
+        name: vale (prose & code-comment linter)
         args:
           - --output=line
           - --minAlertLevel=error
       - id: vale-commit-msg
+        name: vale-commit-msg (commit message prose)
         entry: sh tools/vale_commit_msg.sh
         stages:
           - commit-msg
 
-  # Conventional Commits verification
+  # Validate git commit messages against the Conventional Commits specification
   - repo: https://github.com/compilerla/conventional-pre-commit
     rev: v4.5.0
     hooks:
@@ -506,7 +537,7 @@ repos:
         stages:
           - commit-msg
 
-  # Repository-local quality and localization hooks
+  # Repository-local invariants: locale path hygiene, line limits, gettext, and suppressions
   - repo: local
     hooks:
       - id: check-no-absolute-locale-paths
@@ -532,7 +563,7 @@ repos:
         entry: python -m tools.i18n validate
         language: python
         files: ^src/findfmt/.*\.(py|po|pot)$
-        pass_filenames: false
+        pass_filenames: false  # Validate all locale .po/.pot catalogs as a complete set
         additional_dependencies:
           - identify
           - pathspec

@@ -3,7 +3,7 @@
 # Project TODO & Implementation Roadmap
 
 > **Repository:** [bdperkin/findfmt](https://github.com/bdperkin/findfmt) **Generated:** 2026-10-22
-> **Tracking:** 274 Closed Issues | 81 Actionable Open Tasks | 24 Active Umbrella Epics **Last audit:**
+> **Tracking:** 275 Closed Issues | 80 Actionable Open Tasks | 24 Active Umbrella Epics **Last audit:**
 > 2026-10-21 (full open-issue triage: closures, corrections, decomposition, epic and milestone re-balancing);
 > 2026-10-22 (triaged `#468`-`#476` and added milestone v1.2.2); 2026-10-24 (renumbered milestones for the
 > 1.1.0 release); 2026-10-24 (released v1.1.0 and closed its milestone); 2026-10-26 (closed `#351`, `#454`,
@@ -34,8 +34,8 @@
 > `#587` in v1.4.2, added CI matrix/cache and draft fast-path issues `#729`-`#731` under `#587` in v1.4.2, and
 > closed `#727`, `#588`, `#729`, `#730`, `#589`, and `#591`; 2026-11-25 added config, pre-commit,
 > quality-parity, and workflow issues `#741`, `#742`, and `#748`-`#751`, closed `#716`, `#717`, `#718`,
-> `#719`, `#720`, `#721`, `#722`, `#723`, `#724`, `#725`, epic `#715`, and `#741`, assigned `#671` to Future
-> Features, and rebalanced v1.4.2-v1.4.4 by shifting `#742` and `#751` to v1.4.3 and `#750` to v1.4.4)
+> `#719`, `#720`, `#721`, `#722`, `#723`, `#724`, `#725`, epic `#715`, `#741`, and `#748`, assigned `#671` to
+> Future Features, and rebalanced v1.4.2-v1.4.4 by shifting `#742` and `#751` to v1.4.3 and `#750` to v1.4.4)
 
 ______________________________________________________________________
 
@@ -828,6 +828,9 @@ Note: Ordered chronologically by completion date.
 - [x] **[#741](https://github.com/bdperkin/findfmt/issues/741)** - ci(pre-commit): standardize and enforce
   sequence sorting and mapping key order in .pre-commit-config.yaml (Closed: 2026-11-25 via PR
   [#754](https://github.com/bdperkin/findfmt/pull/754))
+- [x] **[#748](https://github.com/bdperkin/findfmt/issues/748)** - ci(pre-commit): enforce descriptive hook
+  `name:` fields, repo header comments, and inline rationales in `.pre-commit-config.yaml` (Closed: 2026-11-25
+  via PR [#755](https://github.com/bdperkin/findfmt/pull/755))
 
 ______________________________________________________________________
 
@@ -841,11 +844,6 @@ when picking up work.
 
 ### 2.1. High Priority / Quick Wins
 
-- [ ] **[#748](https://github.com/bdperkin/findfmt/issues/748)** - ci(pre-commit): enforce descriptive hook
-  `name:` fields, repo header comments, and inline rationales in `.pre-commit-config.yaml` *(Milestone:
-  v1.4.2)* - **Value:** Medium | **Effort:** S - **Rationale:** Ensures every hook displays a descriptive
-  contextual `name:`, every `- repo:` block has an accurate single-line header comment, and non-obvious flags
-  or exclusions carry inline rationales enforced by unit tests.
 - [ ] **[#597](https://github.com/bdperkin/findfmt/issues/597)** - sec(ci): integrate cargo-audit, cargo-deny,
   pip-audit, and Dependabot Cargo ecosystem updates into CI workflows *(Rank: 17 | Epic:
   [[Epic] Hybrid CI/CD & Release Pipeline: Dual Backend Matrix, Rust Supply-Chain Security & Multi-Platform Maturin Wheels](https://github.com/bdperkin/findfmt/issues/595)
@@ -1484,7 +1482,7 @@ consolidation and sorting (#742, #751) to v1.4.3 and dedicated GitHub Actions ev
 
 | Milestone       | Theme                                                                                                              | Open Issues |
 | --------------- | ------------------------------------------------------------------------------------------------------------------ | ----------- |
-| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 5           |
+| v1.4.2          | Hybrid Quality Assurance: Dual Python/Rust Linters, Coverage & Pre-Commit                                          | 4           |
 | v1.4.3          | Hybrid Containerization & Maintainer Tooling: Multi-Stage uv+rustup Dockerfile & Rust Auditing                     | 5           |
 | v1.4.4          | Hybrid CI/CD & Multi-Platform Wheel Publishing: Rust vs. Pure-Python Matrix, cargo-audit & maturin-action Releases | 5           |
 | v1.5.0          | Pluggable Content Classification Backends (mimetypes, filetype, puremagic)                                         | 4           |
