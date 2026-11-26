@@ -59,8 +59,7 @@ fn sanitize_temp_filename(raw: &str) -> String {
     }
 }
 
-fn create_private_scratch_dir() -> Option<PathBuf> {
-    let base = std::env::temp_dir();
+pub(crate) fn create_private_scratch_dir_in(base: &Path) -> Option<PathBuf> {
     let pid = std::process::id();
     for attempt in 0_u32..16_u32 {
         let nanos = SystemTime::now()
@@ -95,15 +94,12 @@ fn write_exclusive_sample(dir: &Path, safe_name: &str, payload: &[u8]) -> Option
 
 #[cfg(not(unix))]
 fn build_non_unix_pre_stat(file_path: Option<&Path>) -> (bool, bool, bool, u64, Option<RawStat>) {
-    let Some(path) = file_path else {
-        return (false, false, false, 0, None);
-    };
-    match fs::metadata(path) {
-        Ok(meta) => {
+    match file_path.and_then(|p| fs::metadata(p).ok()) {
+        Some(meta) => {
             let raw = RawStat::from_std_metadata(&meta);
             (false, true, raw.is_reg(), raw.size, Some(raw))
         }
-        Err(_) => (false, false, false, 0, None),
+        None => (false, false, false, 0, None),
     }
 }
 
@@ -112,6 +108,13 @@ fn build_non_unix_pre_stat(file_path: Option<&Path>) -> (bool, bool, bool, u64, 
 /// Returns `(split_reconstructed, mode_len, tags)` for caller invariant checks.
 #[must_use]
 pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<String>) {
+    fuzz_classifier_and_tags_in(data, &std::env::temp_dir())
+}
+
+pub(crate) fn fuzz_classifier_and_tags_in(
+    data: &[u8],
+    scratch_base: &Path,
+) -> (bool, usize, BTreeSet<String>) {
     let registry = shared_registry();
     let mid = (data.len() / 3).min(64);
     let (meta_slice, payload) = data.split_at(mid);
@@ -147,7 +150,7 @@ pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<Str
     );
 
     let safe_name = sanitize_temp_filename(&raw_name);
-    let scratch_dir = create_private_scratch_dir();
+    let scratch_dir = create_private_scratch_dir_in(scratch_base);
     let written_path = scratch_dir
         .as_deref()
         .and_then(|dir| write_exclusive_sample(dir, &safe_name, payload));
@@ -195,6 +198,10 @@ pub fn fuzz_classifier_and_tags_bytes(data: &[u8]) -> (bool, usize, BTreeSet<Str
 /// Returns sorted `NaturalSortKey` sequence for caller monotonicity verification.
 #[must_use]
 pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
+    fuzz_sort_and_gitignore_in(data, &std::env::temp_dir())
+}
+
+pub(crate) fn fuzz_sort_and_gitignore_in(data: &[u8], scratch_base: &Path) -> Vec<NaturalSortKey> {
     let split_at = data.len() / 2;
     let (gi_bytes, paths_bytes) = data.split_at(split_at);
 
@@ -217,7 +224,7 @@ pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
         let _ = matcher.is_ignored(&joined, is_dir);
     }
 
-    if let Some(dir) = create_private_scratch_dir() {
+    if let Some(dir) = create_private_scratch_dir_in(scratch_base) {
         let _ = write_exclusive_sample(&dir, ".gitignore", gi_bytes);
         let _ = write_exclusive_sample(&dir, "fuzz_a.py", paths_bytes);
         let first_byte = data.first().copied().unwrap_or(0);
@@ -266,3 +273,7 @@ pub fn fuzz_sort_and_gitignore_bytes(data: &[u8]) -> Vec<NaturalSortKey> {
         .map(|s| natural_sort_key(s, ignore_case))
         .collect()
 }
+
+#[cfg(test)]
+#[path = "fuzz_entrypoints_tests.rs"]
+mod tests;

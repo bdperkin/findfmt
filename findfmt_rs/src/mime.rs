@@ -67,9 +67,15 @@ pub fn py_splitext(path: &str) -> (String, String) {
 }
 
 pub(crate) fn py_splitext_mode(path: &str, posix_only: bool) -> (String, String) {
-    let sep_idx = if cfg!(windows) && !posix_only {
-        path.rfind(['/', '\\'])
+    #[cfg(windows)]
+    let sep_idx = if posix_only {
+        path.rfind('/')
     } else {
+        path.rfind(['/', '\\'])
+    };
+    #[cfg(not(windows))]
+    let sep_idx = {
+        let _ = posix_only;
         path.rfind('/')
     };
     let name_start = sep_idx.map_or(0, |i| i + 1);
@@ -87,16 +93,21 @@ pub(crate) fn py_splitext_mode(path: &str, posix_only: bool) -> (String, String)
     }
 }
 
+#[cfg(windows)]
 fn should_delegate_colon_to_python(str_path: &str) -> bool {
     if !str_path.contains(':') {
         return false;
     }
     let bytes = str_path.as_bytes();
-    !(cfg!(windows)
-        && bytes.len() >= 2
+    !(bytes.len() >= 2
         && bytes[0].is_ascii_alphabetic()
         && bytes[1] == b':'
         && !str_path[2..].contains(':'))
+}
+
+#[cfg(not(windows))]
+fn should_delegate_colon_to_python(str_path: &str) -> bool {
+    str_path.contains(':')
 }
 
 fn has_url_scheme(str_path: &str) -> bool {

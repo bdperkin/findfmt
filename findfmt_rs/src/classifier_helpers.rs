@@ -206,8 +206,7 @@ pub(crate) fn augment_symlink_and_mime_tags(
     }
     if let Some(mt) = mime_type {
         tags.insert(format!("mime:{mt}"));
-        if let Some(primary) = mt.split('/').next() {
-            tags.insert(primary.to_owned());
-        }
+        let primary = mt.split('/').next().unwrap_or(mt);
+        tags.insert(primary.to_owned());
     }
 }

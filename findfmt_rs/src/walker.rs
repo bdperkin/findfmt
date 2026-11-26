@@ -209,3 +209,7 @@ impl NativeWalker {
         self.active_root = Some(root_state);
     }
 }
+
+#[cfg(test)]
+#[path = "walker_tests.rs"]
+mod tests;

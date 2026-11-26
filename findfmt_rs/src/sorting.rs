@@ -46,10 +46,7 @@ pub fn decimal_digit_value_for_unicode(ch: char, unicode_major: u8) -> Option<u8
     }
     let cp = u32::from(ch);
     let idx = DECIMAL_ZERO_BASES.partition_point(|&base| base <= cp);
-    if idx == 0 {
-        return None;
-    }
-    let base = DECIMAL_ZERO_BASES.get(idx - 1).copied()?;
+    let base = DECIMAL_ZERO_BASES.get(idx.checked_sub(1)?).copied()?;
     if block_min_unicode_major(base) > unicode_major {
         return None;
     }
@@ -257,37 +254,5 @@ pub fn compare_natural(lhs: &str, rhs: &str, ignore_case: bool) -> Ordering {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn natural_sort_handles_ascii_leading_zeros_unicode_digits_surrogates_and_sigma() {
-        assert_eq!(
-            compare_natural("item2.py", "item10.py", false),
-            Ordering::Less
-        );
-        assert_eq!(
-            compare_natural("item02.py", "item2.py", false),
-            Ordering::Less
-        );
-        assert_eq!(compare_natural("000", "0", false), Ordering::Greater);
-        assert_eq!(
-            compare_natural("1_first", "a_second", false),
-            Ordering::Less
-        );
-        assert_eq!(
-            compare_natural("uni_\u{0662}.txt", "uni_\u{0661}\u{0660}.txt", false),
-            Ordering::Less,
-        );
-        assert_eq!(compare_natural("ΟΣ", "Οςa", true), Ordering::Less);
-        #[cfg(unix)]
-        {
-            use std::os::unix::ffi::OsStrExt;
-            let k_ff = natural_sort_key_osstr(OsStr::from_bytes(b"\xff_v2"), false, 16);
-            let k_pua = natural_sort_key_osstr(OsStr::new("\u{e000}_v2"), false, 16);
-            assert!(k_ff < k_pua);
-        }
-        assert_eq!(decimal_digit_value_for_unicode('\u{11F52}', 14), None);
-        assert_eq!(decimal_digit_value_for_unicode('\u{11F52}', 15), Some(2));
-    }
-}
+#[path = "sorting_tests.rs"]
+mod tests;

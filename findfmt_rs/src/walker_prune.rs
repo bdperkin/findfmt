@@ -93,37 +93,33 @@ impl PruneSearch {
             }
         }
 
-        while let Some(top) = self.frames.last_mut() {
+        while let Some(mut top) = self.frames.pop() {
             if top.idx >= top.subdirs.len() {
-                if let Some(popped) = self.frames.pop() {
-                    self.visited.remove(&popped.dir_key);
-                    if let Some(parent) = self
-                        .frames
-                        .last_mut()
-                        .filter(|_| popped.had_incomplete_child)
-                    {
-                        parent.had_incomplete_child = true;
-                    }
-                    if !popped.had_incomplete_child && config.bounds.max_depth.is_none() {
-                        memo.insert(
-                            popped.memo_key,
-                            PruneCache::Empty {
-                                searched_from_depth: popped.depth,
-                                had_cycle_skip: false,
-                            },
-                        );
-                    }
+                self.visited.remove(&top.dir_key);
+                if let Some(parent) = self.frames.last_mut().filter(|_| top.had_incomplete_child) {
+                    parent.had_incomplete_child = true;
+                }
+                if !top.had_incomplete_child && config.bounds.max_depth.is_none() {
+                    memo.insert(
+                        top.memo_key,
+                        PruneCache::Empty {
+                            searched_from_depth: top.depth,
+                            had_cycle_skip: false,
+                        },
+                    );
                 }
                 continue;
             }
             let subdir = top.subdirs[top.idx].clone();
             top.idx += 1;
             if !is_valid_descent_dir(&subdir, config.scope.follow_symlinks) {
+                self.frames.push(top);
                 continue;
             }
             let parent_specs = Arc::clone(&top.specs);
             let child_depth = top.depth + 1;
             let parent_inh = top.inherited_match;
+            self.frames.push(top);
             let child_specs = load_child_specs(&subdir, &parent_specs, config.respect_gitignore);
             let child_inh =
                 config
@@ -159,12 +155,13 @@ impl PruneSearch {
                 return PrunePoll::Matched;
             }
             if events.len() > err_before {
-                if let Some(parent) = self.frames.last_mut() {
-                    parent.had_incomplete_child = true;
-                }
                 return PrunePoll::YieldedError;
             }
         }
         PrunePoll::Empty
     }
 }
+
+#[cfg(test)]
+#[path = "walker_prune_tests.rs"]
+pub(crate) mod tests;

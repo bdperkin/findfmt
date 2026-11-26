@@ -78,9 +78,7 @@ fn resolve_global_gitignore_py(
         return Ok(GlobalIgnoreResolution::Unresolved);
     };
     let base_dir = find_git_repo_root(rpb).unwrap_or_else(|| rpb.to_path_buf());
-    let Ok(bp) = pathbuf_to_py_path(py, handles, &base_dir) else {
-        return Ok(GlobalIgnoreResolution::Unresolved);
-    };
+    let bp = pathbuf_to_py_path(py, handles, &base_dir)?;
     match handles.find_global_gitignore_path.bind(py).call1((bp,)) {
         Ok(res) if res.is_none() => Ok(GlobalIgnoreResolution::ResolvedNone),
         Ok(res) => match py_path_to_pathbuf(py, handles, &res) {

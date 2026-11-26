@@ -68,12 +68,7 @@ pub fn resolve_device_id(path: &Path, is_symlink: bool, follow_symlinks: bool) -
         } else {
             fs::symlink_metadata(path).ok()?
         };
-        let dev = meta.dev();
-        if dev != 0 {
-            Some(dev)
-        } else {
-            fs::metadata(path).ok().map(|m| m.dev())
-        }
+        Some(meta.dev())
     }
     #[cfg(windows)]
     {
@@ -170,16 +165,6 @@ pub fn filter_entry_nogil(
     Some((entry.path.clone(), is_dir, is_candidate_file, is_symlink))
 }
 
-#[cfg(any(windows, test))]
-fn has_windows_exec_suffix(filename: &str) -> bool {
-    const WIN_EXEC_SUFFIXES: [&[u8]; 4] = [b".exe", b".bat", b".cmd", b".com"];
-    let bytes = filename.as_bytes();
-    bytes.len() >= 4
-        && WIN_EXEC_SUFFIXES
-            .iter()
-            .any(|sfx| bytes[bytes.len() - 4..].eq_ignore_ascii_case(sfx))
-}
-
 /// Compute `(st_mode & 0o111) != 0` hint for early interpreter-tag skipping (`_pruning.py` parity).
 pub fn executable_hint_for_skip(
     entry_path: &Path,
@@ -208,7 +193,7 @@ pub fn executable_hint_for_skip(
         if meta.is_dir() {
             return Some(true);
         }
-        Some(has_windows_exec_suffix(filename))
+        Some(crate::metadata::has_windows_exec_suffix(filename))
     }
     #[cfg(not(any(unix, windows)))]
     {
@@ -268,17 +253,5 @@ pub fn build_raw_classify_input(
 }
 
 #[cfg(test)]
-mod tests {
-    use super::has_windows_exec_suffix;
-
-    #[test]
-    fn windows_exec_suffix_preserves_leading_dot_and_case_insensitivity() {
-        assert!(has_windows_exec_suffix(".exe"));
-        assert!(has_windows_exec_suffix(".CMD"));
-        assert!(has_windows_exec_suffix("tool.EXE"));
-        assert!(has_windows_exec_suffix("é.bat"));
-        assert!(has_windows_exec_suffix("legacy.CoM"));
-        assert!(!has_windows_exec_suffix("exe"));
-        assert!(!has_windows_exec_suffix("script.py"));
-    }
-}
+#[path = "walker_filter_tests.rs"]
+mod tests;

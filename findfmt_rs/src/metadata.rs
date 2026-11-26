@@ -1,7 +1,6 @@
 //! POSIX mode formatting, classification indicators, and raw filesystem metadata (#583).
 
 use std::fs::Metadata;
-#[cfg(any(not(unix), test))]
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const S_IFMT: u32 = 0o170_000;
@@ -80,7 +79,6 @@ impl RawStat {
     }
 
     /// Build a consistent `RawStat` snapshot from portable `std::fs::Metadata` fields.
-    #[cfg(any(not(unix), test))]
     #[must_use]
     pub fn from_portable_metadata(meta: &Metadata) -> Self {
         let readonly = meta.permissions().readonly();
@@ -231,53 +229,48 @@ pub fn classification_indicator(
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn filemode_matches_python_stat_filemode() {
-        assert_eq!(format_filemode(S_IFREG | 0o644), "-rw-r--r--");
-        assert_eq!(format_filemode(S_IFREG | 0o755), "-rwxr-xr-x");
-        assert_eq!(format_filemode(S_IFDIR | 0o755), "drwxr-xr-x");
-        assert_eq!(format_filemode(S_IFLNK | 0o777), "lrwxrwxrwx");
-        assert_eq!(format_filemode(S_IFIFO | 0o640), "prw-r-----");
-        assert_eq!(format_filemode(S_IFSOCK | 0o660), "srw-rw----");
-        assert_eq!(format_filemode(S_IFREG | S_ISUID | 0o755), "-rwsr-xr-x");
-        assert_eq!(format_filemode(S_IFREG | S_ISUID | 0o644), "-rwSr--r--");
-        assert_eq!(format_filemode(S_IFDIR | S_ISGID | 0o775), "drwxrwsr-x");
-        assert_eq!(format_filemode(S_IFDIR | S_ISVTX | 0o777), "drwxrwxrwt");
-        assert_eq!(format_filemode(S_IFDIR | S_ISVTX | 0o776), "drwxrwxrwT");
-    }
-
-    #[test]
-    fn indicator_matches_posix_symbols() -> Result<(), Box<dyn std::error::Error>> {
-        let fifo_stat = RawStat {
-            mode: S_IFIFO | 0o644,
-            size: 0,
-            uid: None,
-            gid: None,
-            ino: None,
-            dev: None,
-            mtime: None,
-            ctime: None,
-        };
-        assert_eq!(classification_indicator(true, false, true, None), Some("/"));
-        assert_eq!(classification_indicator(false, true, true, None), Some("@"));
-        assert_eq!(
-            classification_indicator(false, false, false, Some(&fifo_stat)),
-            Some("|")
-        );
-        assert_eq!(
-            classification_indicator(false, false, true, None),
-            Some("*")
-        );
-        assert_eq!(classification_indicator(false, false, false, None), None);
-
-        let cur_dir_meta = std::fs::metadata(".")?;
-        let portable_dir = RawStat::from_portable_metadata(&cur_dir_meta);
-        assert!(portable_dir.is_dir());
-        assert!(!portable_dir.is_reg());
-        Ok(())
-    }
+/// Return `true` when `filename` ends with an ASCII case-insensitive Windows executable suffix.
+#[must_use]
+pub fn has_windows_exec_suffix(filename: &str) -> bool {
+    const WIN_EXEC_SUFFIXES: [&[u8]; 4] = [b".exe", b".bat", b".cmd", b".com"];
+    let bytes = filename.as_bytes();
+    bytes.len() >= 4
+        && WIN_EXEC_SUFFIXES
+            .iter()
+            .any(|sfx| bytes[bytes.len() - 4..].eq_ignore_ascii_case(sfx))
 }
+
+/// Normalize a `;`-delimited Windows `PATHEXT` string into uppercase dot-prefixed extensions.
+#[must_use]
+pub fn parse_pathext_upper(raw: &str) -> Vec<String> {
+    raw.split(';')
+        .map(str::trim)
+        .filter(|e| !e.is_empty())
+        .map(|e| {
+            let up = e.to_uppercase();
+            if up.starts_with('.') {
+                up
+            } else {
+                format!(".{up}")
+            }
+        })
+        .collect()
+}
+
+/// Strip Windows `\\?\` or `\\?\UNC\` verbatim prefixes when `ref_lossy` is non-verbatim.
+#[must_use]
+pub fn normalize_windows_verbatim(cand_lossy: &str, ref_lossy: &str) -> Option<std::path::PathBuf> {
+    if ref_lossy.starts_with(r"\\?\") {
+        return None;
+    }
+    if let Some(unc_tail) = cand_lossy.strip_prefix(r"\\?\UNC\") {
+        return Some(std::path::PathBuf::from(format!(r"\\{unc_tail}")));
+    }
+    cand_lossy
+        .strip_prefix(r"\\?\")
+        .map(std::path::PathBuf::from)
+}
+
+#[cfg(test)]
+#[path = "metadata_tests.rs"]
+mod tests;

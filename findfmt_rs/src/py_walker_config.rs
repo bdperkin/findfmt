@@ -79,24 +79,18 @@ fn snapshot_live_mime_db(py: Python<'_>) -> PyResult<MimeSnapshot> {
     let suffix_py = db.getattr("suffix_map")?.cast_into::<PyDict>()?;
     let enc_py = db.getattr("encodings_map")?.cast_into::<PyDict>()?;
 
-    let mut strict = HashMap::with_capacity(strict_py.len());
-    for (k, v) in strict_py.iter() {
-        if let (Ok(ks), Ok(vs)) = (k.extract::<String>(), v.extract::<String>()) {
-            strict.insert(ks, vs);
-        }
-    }
-    let mut suffixes = HashMap::with_capacity(suffix_py.len());
-    for (k, v) in suffix_py.iter() {
-        if let (Ok(ks), Ok(vs)) = (k.extract::<String>(), v.extract::<String>()) {
-            suffixes.insert(ks, vs);
-        }
-    }
-    let mut encodings = HashSet::with_capacity(enc_py.len());
-    for (k, _) in enc_py.iter() {
-        if let Ok(ks) = k.extract::<String>() {
-            encodings.insert(ks);
-        }
-    }
+    let strict: HashMap<String, String> = strict_py
+        .iter()
+        .filter_map(|(k, v)| Some((k.extract().ok()?, v.extract().ok()?)))
+        .collect();
+    let suffixes: HashMap<String, String> = suffix_py
+        .iter()
+        .filter_map(|(k, v)| Some((k.extract().ok()?, v.extract().ok()?)))
+        .collect();
+    let encodings: HashSet<String> = enc_py
+        .iter()
+        .filter_map(|(k, _)| k.extract().ok())
+        .collect();
     Ok(MimeSnapshot {
         strict,
         suffixes,

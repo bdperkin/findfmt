@@ -38,9 +38,12 @@ env/
 .coverage.*
 htmlcov/
 coverage.xml
+rust-lcov.info
 junit.xml
 *.cover
 *.py,cover
+*.profraw
+*.profdata
 .hypothesis/
 
 # Type Checking and Tool Caches

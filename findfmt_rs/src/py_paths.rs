@@ -82,10 +82,7 @@ pub(crate) fn get_handles(py: Python<'_>) -> PyResult<&'static PyHandles> {
         ingest_from_file: parsers.getattr("ingest_from_file")?.unbind(),
         unicode_major,
     };
-    let _ = PY_HANDLES.set(built);
-    PY_HANDLES
-        .get()
-        .ok_or_else(|| pyo3::exceptions::PyRuntimeError::new_err("failed to initialize PyHandles"))
+    Ok(PY_HANDLES.get_or_init(|| built))
 }
 
 pub(crate) fn py_path_to_pathbuf(
@@ -168,12 +165,12 @@ pub(crate) fn fetch_windows_pre_stat(
         };
         (sym, stat_res)
     } else {
-        let Ok(os_mod) = py.import("os") else {
-            return (false, false, false, 0, None);
-        };
         let kwargs_no_follow = PyDict::new(py);
         let _ = kwargs_no_follow.set_item("follow_symlinks", false);
-        let Ok(lst) = os_mod.call_method("stat", (path_obj,), Some(&kwargs_no_follow)) else {
+        let Ok((os_mod, lst)) = py.import("os").and_then(|m| {
+            let st = m.call_method("stat", (path_obj,), Some(&kwargs_no_follow))?;
+            Ok((m, st))
+        }) else {
             return (false, false, false, 0, None);
         };
         let lmode: u32 = lst
@@ -212,26 +209,16 @@ pub(crate) fn fetch_windows_pre_stat(
     (is_symlink, true, is_file, size, Some(raw))
 }
 
+#[cfg(windows)]
 pub(crate) fn windows_pathext_upper() -> Option<Vec<String>> {
-    if !cfg!(windows) {
-        return None;
-    }
     let raw = std::env::var("PATHEXT")
         .unwrap_or_else(|_| ".COM;.EXE;.BAT;.CMD;.VBS;.JS;.WS;.MSC".to_owned());
-    let exts = raw
-        .split(';')
-        .map(str::trim)
-        .filter(|e| !e.is_empty())
-        .map(|e| {
-            let up = e.to_uppercase();
-            if up.starts_with('.') {
-                up
-            } else {
-                format!(".{up}")
-            }
-        })
-        .collect();
-    Some(exts)
+    Some(crate::metadata::parse_pathext_upper(&raw))
+}
+
+#[cfg(not(windows))]
+pub(crate) const fn windows_pathext_upper() -> Option<Vec<String>> {
+    None
 }
 
 pub(crate) fn compute_relative_py<'py>(
@@ -320,3 +307,7 @@ pub(crate) fn deliver_walk_os_error(
     cb.bind(py).call1((py_err.value(py),))?;
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "py_paths_tests.rs"]
+mod tests;

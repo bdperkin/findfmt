@@ -12,17 +12,9 @@ use crate::walker_types::GlobalIgnoreResolution;
 fn align_path_form(candidate: PathBuf, reference: &Path) -> PathBuf {
     #[cfg(windows)]
     {
+        let cand_lossy = candidate.as_os_str().to_string_lossy();
         let ref_lossy = reference.as_os_str().to_string_lossy();
-        if !ref_lossy.starts_with(r"\\?\") {
-            let cand_lossy = candidate.as_os_str().to_string_lossy();
-            if let Some(unc_tail) = cand_lossy.strip_prefix(r"\\?\UNC\") {
-                return PathBuf::from(format!(r"\\{unc_tail}"));
-            }
-            if let Some(dos_tail) = cand_lossy.strip_prefix(r"\\?\") {
-                return PathBuf::from(dos_tail);
-            }
-        }
-        candidate
+        crate::metadata::normalize_windows_verbatim(&cand_lossy, &ref_lossy).unwrap_or(candidate)
     }
     #[cfg(not(windows))]
     {
@@ -154,7 +146,11 @@ fn parse_core_excludes_from_ini(config_path: &Path) -> Option<String> {
     found.filter(|s| !s.is_empty())
 }
 
-fn find_git_config_excludes_file(base_dir: &Path, home_dir: Option<&Path>) -> Option<PathBuf> {
+fn find_git_config_excludes_with_xdg(
+    base_dir: &Path,
+    home_dir: Option<&Path>,
+    xdg_override: Option<&std::ffi::OsStr>,
+) -> Option<PathBuf> {
     let repo_val = resolve_repo_git_dir(base_dir).and_then(|git_dir| {
         let common = resolve_common_git_dir(&git_dir);
         parse_core_excludes_from_ini(&common.join("config"))
@@ -162,7 +158,7 @@ fn find_git_config_excludes_file(base_dir: &Path, home_dir: Option<&Path>) -> Op
     });
     let val = repo_val
         .or_else(|| {
-            let xdg = std::env::var_os("XDG_CONFIG_HOME").filter(|v| !v.is_empty())?;
+            let xdg = xdg_override.filter(|v| !v.is_empty())?;
             parse_core_excludes_from_ini(&PathBuf::from(xdg).join("git").join("config"))
         })
         .or_else(|| {
@@ -178,14 +174,27 @@ fn find_git_config_excludes_file(base_dir: &Path, home_dir: Option<&Path>) -> Op
     configured.is_file().then_some(configured)
 }
 
-fn find_standard_global_gitignore(home_dir: Option<&Path>) -> Option<PathBuf> {
-    if let Some(xdg_os) = std::env::var_os("XDG_CONFIG_HOME").filter(|v| !v.is_empty()) {
+fn find_git_config_excludes_file(base_dir: &Path, home_dir: Option<&Path>) -> Option<PathBuf> {
+    let xdg = std::env::var_os("XDG_CONFIG_HOME");
+    find_git_config_excludes_with_xdg(base_dir, home_dir, xdg.as_deref())
+}
+
+fn find_standard_global_gitignore_with_xdg(
+    xdg_override: Option<&std::ffi::OsStr>,
+    home_dir: Option<&Path>,
+) -> Option<PathBuf> {
+    if let Some(xdg_os) = xdg_override.filter(|v| !v.is_empty()) {
         let xdg_path = PathBuf::from(xdg_os).join("git").join("ignore");
         return xdg_path.is_file().then_some(xdg_path);
     }
     let home = home_dir?;
     let fallback = home.join(".config").join("git").join("ignore");
     fallback.is_file().then_some(fallback)
+}
+
+fn find_standard_global_gitignore(home_dir: Option<&Path>) -> Option<PathBuf> {
+    let xdg = std::env::var_os("XDG_CONFIG_HOME");
+    find_standard_global_gitignore_with_xdg(xdg.as_deref(), home_dir)
 }
 
 /// Resolve the user's global gitignore path without spawning blocking child processes (`#323`, `#582`).

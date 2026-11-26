@@ -131,24 +131,6 @@ impl PatternMatcher {
         })
     }
 
-    /// Construct a `PatternMatcher` from raw include and exclude pattern lists in unit tests.
-    #[cfg(test)]
-    pub fn new(
-        include_patterns: &[String],
-        exclude_patterns: &[String],
-        ignore_case: bool,
-        match_dirs: bool,
-    ) -> Self {
-        Self::try_new_for_unicode(
-            include_patterns,
-            exclude_patterns,
-            ignore_case,
-            match_dirs,
-            16,
-        )
-        .unwrap_or_default()
-    }
-
     pub fn is_active(&self) -> bool {
         self.include_spec.is_some() || self.exclude_spec.is_some()
     }
@@ -278,9 +260,8 @@ pub fn can_skip_entry_by_tags(
     let mut possible: BTreeSet<String> = name_tags;
     if let Some(mt) = guessed_mime {
         possible.insert(format!("mime:{mt}"));
-        if let Some(primary) = mt.split('/').next() {
-            possible.insert(primary.to_owned());
-        }
+        let primary = mt.split('/').next().unwrap_or(mt);
+        possible.insert(primary.to_owned());
     }
     if allow_interp {
         for &it in &INTERPRETER_TAGS {
@@ -296,43 +277,5 @@ pub fn can_skip_entry_by_tags(
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn alternations_unicode_question_colon_dir_and_surrogate_lossless_matching() {
-        assert_eq!(
-            split_pattern_alternations("  *.py | [a|b].txt | *.rs "),
-            vec!["*.py", "[a|b].txt", "*.rs"]
-        );
-        let matcher = PatternMatcher::new(
-            &[
-                "*.py|docs/*.rst".into(),
-                "src/**/*.ts".into(),
-                "[!a-z].dat".into(),
-                "?.txt".into(),
-                "/C:/report.md".into(),
-            ],
-            &["test_*.py".into(), "build/".into(), "\u{fffd}.txt".into()],
-            false,
-            false,
-        );
-        assert!(matcher.matches_file(Path::new("main.py"), None, false));
-        assert!(!matcher.matches_file(Path::new("test_main.py"), None, false));
-        assert!(matcher.matches_file(Path::new("é.txt"), None, false));
-        assert!(matcher.matches_file(Path::new("🚀.txt"), None, false));
-        assert!(!matcher.matches_file(Path::new("ab.txt"), None, false));
-        #[cfg(unix)]
-        {
-            use std::ffi::OsStr;
-            use std::os::unix::ffi::OsStrExt;
-            assert!(matcher.matches_file(Path::new("C:/report.md"), None, false));
-            let raw_ff = Path::new(OsStr::from_bytes(b"\xff.txt"));
-            assert!(matcher.matches_file(raw_ff, None, false));
-            assert!(!matcher.should_exclude(raw_ff, false, None));
-            assert!(matcher.should_exclude(Path::new("\u{fffd}.txt"), false, None));
-        }
-        assert!(matcher.should_exclude(Path::new("build"), true, None));
-        assert!(!matcher.should_exclude(Path::new("build"), false, None));
-    }
-}
+#[path = "patterns_tests.rs"]
+mod tests;
