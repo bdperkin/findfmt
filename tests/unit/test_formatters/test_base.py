@@ -240,3 +240,38 @@ def test_text_formatter_with_metadata() -> None:
     lines_no_tags = output_no_tags.strip().split("\n")
     assert lines_no_tags[0] == "[-rwxr-xr-x alice] main.py"
     assert lines_no_tags[1] == "[- -] data.json"
+
+
+def test_stat_parts_excludes_all_size_formats_when_include_size_false(
+    sample_files: list[FileInfo],
+) -> None:
+    """Verify RichTableFormatter and HtmlFormatter exclude binary/SI size from stat prefixes."""
+    file_with_perms = FileInfo(
+        path=sample_files[0].path,
+        relative_path=sample_files[0].relative_path,
+        tags=sample_files[0].tags,
+        size_bytes=2048,
+        permissions_str="-rw-r--r--",
+    )
+
+    html_out = HtmlFormatter(
+        show_permissions=True,
+        human_readable=True,
+        show_si=True,
+    ).format([file_with_perms])
+    assert '<span class="meta">[-rw-r--r--]</span>' in html_out
+    assert '<span class="size">2.0 kB</span>' in html_out
+
+    table_fmt = RichTableFormatter(
+        show_permissions=True,
+        human_readable=True,
+        show_si=True,
+    )
+    row = table_fmt._format_row(file_with_perms)  # noqa: SLF001 - white-box row column alignment check
+    assert len(row) == 8
+    assert row[0] == "-rw-r--r--"
+    assert row[1] == "main.py"
+    assert row[4] == "2.0 kB"
+
+    text_out = TextFormatter(show_permissions=True, human_readable=True).format([file_with_perms])
+    assert text_out == "[-rw-r--r-- 2.0 KiB] main.py\n"
