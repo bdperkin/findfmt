@@ -8,21 +8,21 @@ ci:
   autoupdate_commit_msg: 'chore(deps): update pre-commit hooks'
   autoupdate_schedule: weekly
   skip:
-    - ty
-    - fmt
     - cargo-check
     - clippy
     - deptry
-    - sync-pre-commit-deps
+    - fmt
     - pyroma
     - semgrep
+    - sync-pre-commit-deps
+    - ty
     - vale
     - vale-commit-msg
   submodules: false
 
 default_install_hook_types:
-  - pre-commit
   - commit-msg
+  - pre-commit
 
 default_stages:
   - pre-commit
@@ -82,11 +82,11 @@ repos:
       - id: mixed-line-ending
         args:
           - --fix=lf
-      - id: trailing-whitespace
       - id: name-tests-test
+        exclude: ^tests/fuzz/
         args:
           - --pytest-test-first
-        exclude: ^tests/fuzz/
+      - id: trailing-whitespace
 
   # Format pyproject.toml
   - repo: https://github.com/tox-dev/pyproject-fmt
@@ -207,6 +207,7 @@ repos:
     rev: v0.9.3
     hooks:
       - id: xenon
+        pass_filenames: false
         args:
           - -b
           - B
@@ -215,16 +216,15 @@ repos:
           - -a
           - A
           - src
-        pass_filenames: false
 
   # Interrogate docstring checker
   - repo: https://github.com/econchick/interrogate
     rev: 1.7.0
     hooks:
       - id: interrogate
+        pass_filenames: false
         args:
           - src
-        pass_filenames: false
 
   # Pylint cross-file duplicate-code checker (R0801 similarities only)
   - repo: https://github.com/pylint-dev/pylint
@@ -322,15 +322,15 @@ repos:
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.39.0
     hooks:
+      - id: check-codecov
+      - id: check-dependabot
+      - id: check-github-issue-config
+      - id: check-github-issue-forms
       - id: check-github-workflows
       - id: check-github-workflows-require-timeout
-      - id: check-dependabot
-      - id: check-github-issue-forms
-      - id: check-github-issue-config
-      - id: check-codecov
-      - id: check-renovate
       - id: check-mergify
       - id: check-readthedocs
+      - id: check-renovate
 
   # HTML & Jinja2 template formatter and linter (Sphinx sidebar templates)
   - repo: https://github.com/djlint/djLint
@@ -484,11 +484,11 @@ repos:
         alias: vale-sync
         name: vale sync
         entry: sh -c 'VALE_GRAMMARS_URL=https://github.com/vale-cli/vale/releases/download/v3.28.1 vale "$@"' --
+        stages:
+          - manual
         pass_filenames: false
         args:
           - sync
-        stages:
-          - manual
       - id: vale
         args:
           - --output=line
@@ -506,49 +506,49 @@ repos:
         stages:
           - commit-msg
 
-  # File Line Length Enforcement
+  # Repository-local quality and localization hooks
   - repo: local
     hooks:
+      - id: check-no-absolute-locale-paths
+        name: Check no absolute paths in message catalogs
+        entry: '^#: (\S+\s+)*(/|[A-Za-z]:[\\/])'
+        language: pygrep
+        files: ^src/findfmt/locale/.*\.(po|pot)$
       - id: file-line-length-check
         name: File Line Length Check
         entry: python tools/line_linter.py
         language: python
         types:
           - text
+        pass_filenames: true
         additional_dependencies:
-          - pathspec
           - identify
-          - typer
+          - pathspec
           - pyyaml
           - rich
-        pass_filenames: true
+          - typer
+      - id: i18n-catalog-check
+        name: Validate gettext catalogs and completeness
+        entry: python -m tools.i18n validate
+        language: python
+        files: ^src/findfmt/.*\.(py|po|pot)$
+        pass_filenames: false
+        additional_dependencies:
+          - identify
+          - pathspec
+          - pyyaml
+          - rich
+          - typer
       - id: suppression-audit
         name: Suppression Audit Check
         entry: python tools/suppression_auditor.py
         language: python
         types:
           - python
-        additional_dependencies:
-          - pathspec
-          - identify
-          - typer
-          - pyyaml
-          - rich
         pass_filenames: true
-      - id: check-no-absolute-locale-paths
-        name: Check no absolute paths in message catalogs
-        entry: '^#: (\S+\s+)*(/|[A-Za-z]:[\\/])'
-        language: pygrep
-        files: ^src/findfmt/locale/.*\.(po|pot)$
-      - id: i18n-catalog-check
-        name: Validate gettext catalogs and completeness
-        entry: python -m tools.i18n validate
-        language: python
         additional_dependencies:
-          - pathspec
           - identify
-          - typer
+          - pathspec
           - pyyaml
           - rich
-        files: ^src/findfmt/.*\.(py|po|pot)$
-        pass_filenames: false
+          - typer
